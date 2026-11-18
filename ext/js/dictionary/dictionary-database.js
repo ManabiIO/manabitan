@@ -108,6 +108,7 @@ const TERM_CONTENT_META_SLOT_PENDING = 2;
 const TERM_CONTENT_META_PREALLOC_MAX_ENTRIES = 1024 * 1024;
 const TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE = 4096;
 const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 48 * 1024 * 1024;
+const HIGH_MEMORY_TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 96 * 1024 * 1024;
 const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES = 512;
 const TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT = 64;
 const BULK_IMPORT_STATE_IDLE = 'idle';
@@ -614,6 +615,8 @@ export class DictionaryDatabase {
         this._recentTermContentSourceBatches = new Map();
         /** @type {number} */
         this._recentTermContentSourceBatchBytes = 0;
+        /** @type {number} */
+        this._recentTermContentSourceCacheMaxBytes = this._computeRecentTermContentSourceCacheMaxBytes();
         /** @type {number} */
         this._nextRecentTermContentSourceBatchId = 1;
         /** @type {boolean} */
@@ -6478,9 +6481,10 @@ null;
             return 0;
         }
         const byteLength = maximumEnd - minimumOffset;
-        if (byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES) { return 0; }
+        const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
+        if (byteLength > cacheMaxBytes) { return 0; }
         while (
-            this._recentTermContentSourceBatchBytes + byteLength > TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES &&
+            this._recentTermContentSourceBatchBytes + byteLength > cacheMaxBytes &&
             this._recentTermContentSourceBatches.size > 0
         ) {
             const first = this._recentTermContentSourceBatches.entries().next();
@@ -11536,6 +11540,16 @@ null :
     _computeTermExactPresenceCacheMaxEntries() {
         const memoryGiB = this._getApproximateDeviceMemoryGiB();
         return memoryGiB !== null && memoryGiB <= 4 ? LOW_MEMORY_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES : DEFAULT_TERM_EXACT_PRESENCE_CACHE_MAX_ENTRIES;
+    }
+
+    /** @returns {number} */
+    _computeRecentTermContentSourceCacheMaxBytes() {
+        const memoryGiB = this._getApproximateDeviceMemoryGiB();
+        // Retaining short definitions can avoid loading and decoding whole
+        // OPFS blocks for exact comparisons later in the import.
+        return memoryGiB !== null && memoryGiB >= 8 ?
+            HIGH_MEMORY_TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES :
+            TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES;
     }
 
     /**

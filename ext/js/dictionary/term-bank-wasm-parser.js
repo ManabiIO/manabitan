@@ -38,6 +38,10 @@ const CONTENT_META_U32_FIELDS = 4;
 const CONTENT_SIGNATURE_U32_FIELDS = 3;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const INITIAL_META_ROWS_PER_SOURCE = 10_000;
+const SPARSE_STRUCTURED_BANK_ROWS_PER_SOURCE = 2500;
+const SPARSE_STRUCTURED_BANK_MIN_BYTES = 1024 * 1024;
+const SPARSE_STRUCTURED_BANK_SAMPLE_BYTES = 512;
+const SPACED_STRUCTURED_GLOSSARY_MARKER = new TextEncoder().encode('"type": "structured-content"');
 const OVERLAPPED_SOURCE_GROUP_COUNT = 1;
 const DEFAULT_PARALLEL_SOURCE_WORKER_COUNT = 2;
 const HIGH_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 5;
@@ -660,6 +664,42 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
 }
 
 /**
+ * Use the current Jitendex bank shape only as an allocation hint. Each bank
+ * is still parsed and validated. An underestimated group takes the existing
+ * uncapped-by-estimate fallback.
+ * @param {PreloadedTermBankSource|null} source
+ * @param {number} defaultCapacity
+ * @returns {number}
+ */
+function estimateFusedTermBankMetaCapacity(source, defaultCapacity) {
+    const bankSpanCount = source?.bankSpanCount ?? 0;
+    if (source === null || bankSpanCount < 4) { return defaultCapacity; }
+    const capacity = Math.max(8192, bankSpanCount * SPARSE_STRUCTURED_BANK_ROWS_PER_SOURCE);
+    if (capacity >= defaultCapacity) { return defaultCapacity; }
+    const {wasm, bankSpansPtr, jsonPtr, jsonLength} = source;
+    const spans = new Uint32Array(wasm.memory.buffer, bankSpansPtr, bankSpanCount * 2);
+    const marker = SPACED_STRUCTURED_GLOSSARY_MARKER;
+    for (let i = 0; i < spans.length; i += 2) {
+        if (spans[i + 1] < SPARSE_STRUCTURED_BANK_MIN_BYTES || spans[i + 1] > jsonLength - spans[i]) {
+            return defaultCapacity;
+        }
+        const sample = new Uint8Array(wasm.memory.buffer, jsonPtr + spans[i], SPARSE_STRUCTURED_BANK_SAMPLE_BYTES);
+        let match = false;
+        for (let start = sample.indexOf(U8_QUOTE); start >= 0 && start <= sample.length - marker.length;
+            start = sample.indexOf(U8_QUOTE, start + 1)) {
+            let length = 1;
+            while (length < marker.length && sample[start + length] === marker[length]) { ++length; }
+            if (length === marker.length) {
+                match = true;
+                break;
+            }
+        }
+        if (!match) { return defaultCapacity; }
+    }
+    return capacity;
+}
+
+/**
  * @param {Uint8Array|Uint8Array[]} contentBytes
  * @param {boolean} includeContentMetadata
  * @param {number} initialContentBytesPerRow
@@ -775,36 +815,37 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
     );
     if (useFusedParse) {
         tStart = Date.now();
-        const outPtr = wasm.wasm_alloc(initialMetaCapacity * META_U32_FIELDS * 4);
-        const contentMetaPtr = wasm.wasm_alloc(initialMetaCapacity * CONTENT_META_U32_FIELDS * 4);
+        const fusedMetaCapacity = estimateFusedTermBankMetaCapacity(preloadedSource, initialMetaCapacity);
+        const outPtr = wasm.wasm_alloc(fusedMetaCapacity * META_U32_FIELDS * 4);
+        const contentMetaPtr = wasm.wasm_alloc(fusedMetaCapacity * CONTENT_META_U32_FIELDS * 4);
         let contentHashTableSize = 1;
-        while (contentHashTableSize < initialMetaCapacity * 2) { contentHashTableSize *= 2; }
+        while (contentHashTableSize < fusedMetaCapacity * 2) { contentHashTableSize *= 2; }
         const contentHashTablePtr = wasm.wasm_alloc(contentHashTableSize * 4);
         const rawContentHashTablePtr = experiments.experimentalGlobalExactContentReuse ?
             wasm.wasm_alloc(contentHashTableSize * 4) :
             0;
         const rawContentHashesPtr = experiments.experimentalGlobalExactContentReuse ?
-            wasm.wasm_alloc(initialMetaCapacity * 4) :
+            wasm.wasm_alloc(fusedMetaCapacity * 4) :
             0;
-        const contentUniqueIndexesPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
+        const contentUniqueIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const contentUniqueCountPtr = wasm.wasm_alloc(4);
-        const contentUniqueSignaturesPtr = wasm.wasm_alloc(initialMetaCapacity * CONTENT_SIGNATURE_U32_FIELDS * 4);
+        const contentUniqueSignaturesPtr = wasm.wasm_alloc(fusedMetaCapacity * CONTENT_SIGNATURE_U32_FIELDS * 4);
         const rowCountPtr = wasm.wasm_alloc(4);
-        const stringsCapacity = Math.max(1024 * 1024, Math.min(jsonLength, initialMetaCapacity * 64));
+        const stringsCapacity = Math.max(1024 * 1024, Math.min(jsonLength, fusedMetaCapacity * 64));
         const stringsPtr = wasm.wasm_alloc(stringsCapacity);
-        const stringLengthsPtr = wasm.wasm_alloc(initialMetaCapacity * 2 * 2);
-        const stringOffsetsPtr = wasm.wasm_alloc(initialMetaCapacity * 2 * 4);
-        const stringHashesPtr = wasm.wasm_alloc(initialMetaCapacity * 2 * 4);
-        const expressionIndexesPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
-        const readingIndexesPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
+        const stringLengthsPtr = wasm.wasm_alloc(fusedMetaCapacity * 2 * 2);
+        const stringOffsetsPtr = wasm.wasm_alloc(fusedMetaCapacity * 2 * 4);
+        const stringHashesPtr = wasm.wasm_alloc(fusedMetaCapacity * 2 * 4);
+        const expressionIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
+        const readingIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         let stringHashTableSize = 1;
-        while (stringHashTableSize < initialMetaCapacity * 4) { stringHashTableSize *= 2; }
+        while (stringHashTableSize < fusedMetaCapacity * 4) { stringHashTableSize *= 2; }
         const stringHashTablePtr = wasm.wasm_alloc(stringHashTableSize * 4);
         const stringUniqueCountPtr = wasm.wasm_alloc(4);
         const stringBytesCountPtr = wasm.wasm_alloc(4);
-        const readingEqualsPtr = wasm.wasm_alloc(initialMetaCapacity);
-        const scoresPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
-        const sequencesPtr = wasm.wasm_alloc(initialMetaCapacity * 4);
+        const readingEqualsPtr = wasm.wasm_alloc(fusedMetaCapacity);
+        const scoresPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
+        const sequencesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const recentContentHitsPtr = wasm.wasm_alloc(4);
         const normalizedInitialContentBytesPerRow = Number.isFinite(initialContentBytesPerRow) ? Math.max(16, Math.min(512, Math.trunc(initialContentBytesPerRow))) : 48;
         const contentOutCapacity = Math.min(
@@ -849,7 +890,7 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             jsonPtr,
             jsonLength,
             outPtr,
-            initialMetaCapacity,
+            fusedMetaCapacity,
             contentOutPtr,
             contentOutCapacity,
             contentMetaPtr,
@@ -955,7 +996,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             metasPtr: outPtr,
             retiredLookupScratch: (experiments.experimentalLookupScratchReuse || experiments.experimentalNativeSegmentedLookup) ?
 [
-    {pointer: outPtr, byteLength: initialMetaCapacity * META_U32_FIELDS * 4},
+    {pointer: outPtr, byteLength: fusedMetaCapacity * META_U32_FIELDS * 4},
     {pointer: stringHashTablePtr, byteLength: stringHashTableSize * 4},
     {pointer: contentHashTablePtr, byteLength: contentHashTableSize * 4},
 ] :
@@ -975,7 +1016,7 @@ void 0,
             contentUniqueIndexes: new Uint32Array(wasm.memory.buffer, contentUniqueIndexesPtr, rowCount),
             contentUniqueCount,
             rowCount,
-            metaCapacity: initialMetaCapacity,
+            metaCapacity: fusedMetaCapacity,
             encodedContentBytes,
             contentCapacity,
             initialContentBytesPerRow: normalizedInitialContentBytesPerRow,
