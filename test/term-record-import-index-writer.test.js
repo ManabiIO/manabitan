@@ -124,6 +124,7 @@ describe('fresh import index writer', () => {
         const second = new Uint8Array(blockBytes + 7).fill(31);
         const file = memoryFile({shortWrite: blockBytes / 2});
         const write = file.access.write;
+        /** @type {boolean[]} */
         const direct = [];
         file.access.write = (view, position) => {
             direct.push(view.buffer === first.buffer || view.buffer === second.buffer);

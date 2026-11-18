@@ -385,6 +385,18 @@ describe('TermRecordOpfsStore', () => {
         expect(largeLength.byteLength).toBe(8 * 12);
     });
 
+    test('preserves compact score keys across the inline table and map', () => {
+        const store = new TermRecordOpfsStore();
+        const values = [-256, 255, 256, -257, -2147483648, 2147483647, 0];
+        const scores = Int32Array.from({length: 128}, (_, i) => values[i % values.length]);
+        const offsets = Uint32Array.from(scores, (_, i) => i * 8);
+        const lengths = new Uint32Array(scores.length).fill(8);
+        const compact = store._encodeArtifactRecordFields({rowCount: scores.length, scoreList: scores}, offsets, lengths, 0);
+        const expected = store._encodeArtifactRecordFields({rowCount: scores.length, scoreList: [...scores]}, offsets, lengths, 0);
+        expect(compact.byteLength).toBe(16 + (values.length * 4) + (scores.length * 8));
+        expect(compact).toEqual(expected);
+    });
+
     test('round-trips non-int32 scores through ordinary record persistence', async () => {
         const dictionaryName = 'Float scores ordinary';
         const scores = [1.5, -2.25, 0.1, 2 ** 40 + 0.5, -0];

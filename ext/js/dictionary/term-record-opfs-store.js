@@ -98,6 +98,8 @@ const FLOAT64_SCORE_RECORD_FIELDS_BYTES = 16;
 const COMPACT_RECORD_FIELDS_MAGIC = 0x3246524d;
 const COMPACT_RECORD_FIELDS_HEADER_BYTES = 16;
 const COMPACT_RECORD_FIELDS_BYTES_PER_ROW = 8;
+const COMPACT_SCORE_TABLE_RADIUS = 256;
+const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
@@ -5390,6 +5392,11 @@ export class TermRecordOpfsStore {
             }
             return output;
         }
+        // Common integer scores use a bounded table. Store the key plus one
+        // so zero can mark an unseen score without initializing the table.
+        const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+            new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
+            null;
         let compact = true;
         for (let i = 0; i < count; ++i) {
             const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
@@ -5401,14 +5408,20 @@ export class TermRecordOpfsStore {
             offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
             lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
             const score = chunk.scoreList[i] ?? 0;
-            let scoreIndex = scoreIndexes.get(score);
-            if (typeof scoreIndex !== 'number') {
+            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+            if (scoreIndex < 0) {
                 scoreIndex = scores.length;
                 if (scoreIndex >= U16_NULL) {
                     compact = false;
                     break;
                 }
-                scoreIndexes.set(score, scoreIndex);
+                if (useInlineScore) {
+                    inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+                } else {
+                    scoreIndexes.set(score, scoreIndex);
+                }
                 scores.push(score);
             }
             scoreKeys[i] = scoreIndex;
