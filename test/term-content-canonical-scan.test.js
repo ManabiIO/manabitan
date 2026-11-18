@@ -304,7 +304,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         collect(controller);
         checks.push(`${candidates} candidate await ordering, mixed misses, arena growth`);
     }
-    for (const fault of ['late-source', 'late-identity', 'late-row', 'trap', 'output-copy', 'exact-read']) {
+    for (const fault of ['late-source', 'late-identity', 'late-row', 'trap', 'output-view', 'exact-read']) {
         const a = fixture(40, {existing: true}),
             b = fixture(40, {existing: true});
         const priorA = metadata(a),
@@ -314,8 +314,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             get trapAfter() {
                 return fault === 'trap' && fail ? 2 : 0;
             },
-            beforeOutputCopy() {
-                if (fault === 'output-copy' && fail) {
+            beforeOutputView() {
+                if (fault === 'output-view' && fail) {
                     throw new Error('copy fault');
                 }
             },
@@ -457,7 +457,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
                 before = metadata(f);
                 counts = [f.db._termEntryContentMetaDenseCount, f.db._termEntryContentMetaHashPairPendingCount];
             },
-            beforeOutputCopy() {
+            beforeOutputView() {
                 if (fault === 'copy') {
                     throw new Error('copy fault');
                 }
@@ -715,7 +715,14 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
     // descriptor, or failed-exact append. Maximum rows prove the exact prefix bound.
     {
         const f = fixture(layout.MAX);
-        const c = useProductionScanner(f.db, wasm);
+        const c = useProductionScanner(f.db, wasm, {
+            afterPendingCopy() {
+                // Simulate immediate reuse of the scanner scratch. The pending
+                // owner must have copied every column before this point.
+                const {buffer} = f.db._termContentMetadataArena.memory;
+                new Uint32Array(buffer, layout.OUT, layout.MAX * 6).fill(0xffffffff);
+            },
+        });
         const r = await f.db._resolveArtifactTermContentDedup(f.chunk, true);
         assert.ok(r.pendingPlanUniqueIndexes instanceof Uint32Array);
         assert.equal(r.pendingContentCount, layout.MAX);
@@ -726,11 +733,15 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         assert.equal(c.stats.inserted, layout.MAX);
         assert.equal(c.stats.copiedTableBytes, 0);
         assert.equal(c.stats.copiedGlossaryBytes, 0);
+        assert.equal(c.stats.copiedOutputBytes, 0);
         for (let i = 0; i < layout.MAX; ++i) {
             assert.equal(r.pendingPlanUniqueIndexes[i], i);
             assert.equal(f.plan.pendingIndexes[i], 91);
             assert.equal(f.plan.pendingEpochs[i], 87);
             assert.equal(r.pendingContentSpans.offsets[i], i * 4);
+            assert.equal(r.pendingContentSpans.lengths[i], 4);
+            assert.equal(r.pendingContentHash1s[i], i + 1);
+            assert.equal(r.pendingContentHash2s[i], (i ^ 0x9e3779b9) >>> 0);
             assert.equal(r.stagedContentMetadata.indexes[i], i);
         }
         collect(c);
@@ -741,8 +752,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
     // Actual partial typed-set failures: a prefix has already been modified when
     // the throw occurs. Test pending offsets/hashes, staged IDs and descriptor publication.
     for (const fault of [
-        'copy-first',
-        'copy-second',
+        'view-first',
+        'view-second',
         'column-partial',
         'staged-partial',
         'hash1-partial',
@@ -755,21 +766,17 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         const epochs = f.plan.pendingEpochs.slice(),
             indexes = f.plan.pendingIndexes.slice();
         const uSet = Uint32Array.prototype.set,
-            iSet = Int32Array.prototype.set,
-            uSlice = Uint32Array.prototype.slice;
+            iSet = Int32Array.prototype.set;
         let fired = false;
         const c = useProductionScanner(f.db, wasm, {
             beforeNative() {
                 before = metadata(f);
                 counts = [f.db._termEntryContentMetaDenseCount, f.db._termEntryContentMetaHashPairPendingCount];
             },
-            beforeOutputCopy({column}) {
-                if ((fault === 'copy-first' && column === 0) || (fault === 'copy-second' && column === 1)) {
-                    Uint32Array.prototype.slice = function injectedSlice() {
-                        Uint32Array.prototype.slice = uSlice;
-                        fired = true;
-                        throw new Error(fault);
-                    };
+            beforeOutputView({column}) {
+                if ((fault === 'view-first' && column === 0) || (fault === 'view-second' && column === 1)) {
+                    fired = true;
+                    throw new Error(fault);
                 }
             },
             beforeAdopt({columns}) {
@@ -813,7 +820,6 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         } finally {
             Uint32Array.prototype.set = uSet;
             Int32Array.prototype.set = iSet;
-            Uint32Array.prototype.slice = uSlice;
         }
         assert.ok(fired, fault);
         assert.deepEqual(metadata(f), before, fault);
@@ -842,7 +848,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         'late-identity',
         'late-row',
         'trap',
-        'copy-second',
+        'view-second',
         'after-pending-copy',
         'exact-descriptor',
     ]) {
@@ -886,8 +892,8 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             get trapAfter() {
                 return fault === 'trap' && wave === 1 ? 1 : 0;
             },
-            beforeOutputCopy({column}) {
-                if (fault === 'copy-second' && wave === 1 && column === 1) {
+            beforeOutputView({column}) {
+                if (fault === 'view-second' && wave === 1 && column === 1) {
                     fired = true;
                     throw new Error(fault);
                 }
@@ -917,7 +923,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         assert.equal(f.db._termEntryContentMetaHashPairPendingCount, 0);
         assert.equal(f.db._termEntryContentMetaFreeIndexes.length, 1);
         assert.equal(f.db._getTermEntryContentMetaByHashPair(2, f.chunk.contentMetaList[7]).offset, 104);
-        if (['copy-second', 'after-pending-copy', 'exact-descriptor'].includes(fault)) {
+        if (['view-second', 'after-pending-copy', 'exact-descriptor'].includes(fault)) {
             assert.ok(fired);
         }
         collect(c);
