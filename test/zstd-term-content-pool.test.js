@@ -97,19 +97,27 @@ describe('TermContentCompressionPool', () => {
             blockLengths,
             'jmdict',
         );
+        const originalOffsets = new Uint32Array(sourceOffsets);
+        const originalLengths = new Uint32Array(sourceLengths);
+        sourceOffsets.fill(0);
+        sourceLengths.fill(0);
         await expect(operation.sourceConsumed).resolves.toBeUndefined();
         const result = await operation.completion;
 
         expect(result.chunks.map((bytes) => bytes[0])).toStrictEqual([...blockLengths]);
         expect(workers.map(({calls}) => calls.length)).toStrictEqual([3, 2]);
-        for (const worker of workers) {
-            for (const {message, transfer} of worker.calls) {
-                expect(message.source).toBe(source);
-                expect(transfer).toHaveLength(2);
-                expect(/** @type {Uint32Array} */ (message.sourceOffsets).length).toBe(
-                    /** @type {Uint32Array} */ (message.sourceLengths).length,
-                );
-            }
+        const metadata = /** @type {Uint32Array} */ (workers[0].calls[0].message.sourceOffsets).buffer;
+        expect(metadata).toBeInstanceOf(SharedArrayBuffer);
+        for (let block = 0; block < blockLengths.length; ++block) {
+            const {message, transfer} = workers[block % workers.length].calls[Math.floor(block / workers.length)];
+            const offsets = /** @type {Uint32Array} */ (message.sourceOffsets);
+            const lengths = /** @type {Uint32Array} */ (message.sourceLengths);
+            expect(message.source).toBe(source);
+            expect(transfer).toHaveLength(0);
+            expect(offsets.buffer).toBe(metadata);
+            expect(lengths.buffer).toBe(metadata);
+            expect(offsets).toStrictEqual(originalOffsets.subarray(blockStarts[block], blockStarts[block + 1]));
+            expect(lengths).toStrictEqual(originalLengths.subarray(blockStarts[block], blockStarts[block + 1]));
         }
 
         pool.close();
