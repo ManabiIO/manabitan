@@ -365,15 +365,14 @@ describe('TermContentBlockStore', () => {
         ], null, true)).resolves.not.toBeNull();
     });
 
-    test.each([5, 6])('rejects an invalid later entry offset in a cached block (%s)', async (entryOffset) => {
+    test.each([1, 3])('rejects an inconsistent final entry length in a cached block (%s)', async (entryLength) => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore);
         const append = vi.spyOn(contentStore, '_appendBatchInternal');
         await expect(blockStore._tryAppendPacked(() => ({
             packedChunks: [Uint8Array.of(1, 2, 3, 4, 5)],
-            sourceChunkIndices: Uint32Array.of(0, 0),
-            sourceChunkLocalOffsets: Uint32Array.of(0, entryOffset),
-        }), Uint32Array.of(3, 2), null, true)).rejects.toThrow(RangeError);
+            blockStartIndexes: Uint32Array.of(0, 2),
+        }), Uint32Array.of(3, entryLength), null, true)).rejects.toThrow(RangeError);
         expect(append).not.toHaveBeenCalled();
     });
 
