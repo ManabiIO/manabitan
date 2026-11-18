@@ -17,9 +17,19 @@ jobs:
       - name: Require GPL contribution grant
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR_ID: ${{ github.event.pull_request.user.id }}
+          PR_HEAD_REPOSITORY_ID: ${{ github.event.pull_request.head.repo.id }}
+          PR_BASE_REPOSITORY_ID: ${{ github.event.pull_request.base.repo.id }}
+          REPOSITORY_ID: ${{ github.repository_id }}
         run: |
           node <<'NODE'
           const body = process.env.PR_BODY ?? ''
+          const repositoryId = '1165902460'
+          const ownerSameRepositoryPullRequest =
+            process.env.PR_AUTHOR_ID === '71601' &&
+            process.env.REPOSITORY_ID === repositoryId &&
+            process.env.PR_HEAD_REPOSITORY_ID === repositoryId &&
+            process.env.PR_BASE_REPOSITORY_ID === repositoryId
           const acknowledgement =
             "I agree that the copyrightable portions of this contribution that I own are licensed under GPL-3.0-or-later, as described in CONTRIBUTING.md."
           const checked = body
@@ -28,7 +38,7 @@ jobs:
           const provenance = body
             .split(/\r?\n/)
             .some((line) => /^\s*-\s*\[[xX]\]\s*/.test(line) && line.includes('I identified any copied, adapted, ported, translated, mechanically rewritten, or otherwise third-party-derived material and its license.'))
-          if (!checked || !provenance) {
+          if (!ownerSameRepositoryPullRequest && (!checked || !provenance)) {
             console.error('Check the GPL contribution acknowledgement and third-party provenance confirmation in the pull request body.')
             process.exit(1)
           }
