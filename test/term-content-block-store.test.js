@@ -452,6 +452,19 @@ describe('TermContentBlockStore', () => {
         }
     });
 
+    test('keeps empty-only appends out of the compressed block store', async () => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {minInputBytes: 0});
+        const append = vi.spyOn(contentStore, 'appendBatchWithDerivedChunks');
+        const source = new Uint8Array(new SharedArrayBuffer(1));
+        const offsets = Uint32Array.of(0, 1);
+        const lengths = Uint32Array.of(0, 0);
+        expect(await blockStore.tryAppend([new Uint8Array(0)], 'jmdict', true)).toBeNull();
+        expect(await blockStore.tryAppendSpans(source, offsets, lengths, 'jmdict', true)).toBeNull();
+        expect(blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true)).toBeNull();
+        expect(append).not.toHaveBeenCalled();
+    });
+
     test('compresses shared parser spans without a main-thread packing copy', async () => {
         vi.mocked(compressWrappedTermContentZstdSpansBatch).mockClear();
         const contentStore = new TermContentOpfsStore();
@@ -462,12 +475,15 @@ describe('TermContentBlockStore', () => {
         });
         const source = new Uint8Array(new SharedArrayBuffer(12));
         source.set([99, 1, 2, 3, 88, 4, 5, 77, 6, 7, 8, 9]);
-        const offsets = new Uint32Array([1, 5, 8]);
-        const lengths = new Uint32Array([3, 2, 4]);
+        const offsets = new Uint32Array([1, 5, 12, 4, 6, 7, 3]);
+        const lengths = new Uint32Array([3, 2, 0, 6, 0, 2, 1]);
 
         const result = await blockStore.tryAppendSpans(source, offsets, lengths, 'jmdict', true);
 
-        expect(compressWrappedTermContentZstdSpansBatch).toHaveBeenCalledOnce();
+        const compress = vi.mocked(compressWrappedTermContentZstdSpansBatch);
+        expect(compress).toHaveBeenCalledOnce();
+        expect(compress.mock.calls[0][3]).toStrictEqual(Uint32Array.of(0, 3, 5, 7));
+        expect(compress.mock.calls[0][4]).toStrictEqual(Uint32Array.of(5, 6, 3));
         expect(result).not.toBeNull();
         if (result === null) { throw new Error('Expected appended content'); }
         for (let i = 0; i < lengths.length; ++i) {
@@ -475,7 +491,7 @@ describe('TermContentBlockStore', () => {
                 result.contentOffsets[i],
                 result.contentLengths[i],
                 result.contentDictName,
-            )).toStrictEqual(source.slice(offsets[i], offsets[i] + lengths[i]));
+            )).toStrictEqual(lengths[i] === 0 ? null : source.slice(offsets[i], offsets[i] + lengths[i]));
         }
     });
 

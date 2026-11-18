@@ -6164,6 +6164,8 @@ null;
      * @returns {Promise<{id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number, tableIndex?: number}|undefined>}
      */
     async _findMatchingPersistedTermEntryContentMeta(candidates, contentBytes) {
+        // An empty span has no payload to read or compare.
+        if (contentBytes.byteLength === 0) { return candidates.find(({length}) => length === 0); }
         for (const meta of candidates) {
             const recentSource = this._findRecentTermContentSource(meta);
             if (typeof recentSource !== 'undefined') {
@@ -6230,6 +6232,11 @@ null;
             candidateLists[i] = candidates;
             if (candidates === null) {
                 results[i] = {existingMeta: void 0, exactFallback: false};
+                completed[i] = 1;
+                --remaining;
+            } else if (contentBytes.byteLength === 0) {
+                // Candidate selection already required the same length.
+                results[i] = {existingMeta: candidates[0], exactFallback: true};
                 completed[i] = 1;
                 --remaining;
             }
