@@ -755,10 +755,13 @@ static int parse_composite_span_impl(
             const int common_key_kind = object_key ?
                 parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
             if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
-                if (media_hint != 0 && *media_hint == 0u && is_media_marker_at(src, len, i)) {
+                if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+                // A validated token can match these markers only with a literal or escaped i.
+                const uint8_t first = src[i + 1u];
+                if ((first == 'i' || first == '\\') && media_hint != 0 && *media_hint == 0u &&
+                    is_media_marker_at(src, s_end, i)) {
                     *media_hint = 1u;
                 }
-                if (!parse_string_span(src, len, i, &s_end)) { return 0; }
             }
             if (object_key) {
                 if (common_key_kind == COMMON_STRUCTURED_KEY_TAG) {
@@ -781,6 +784,7 @@ static int parse_composite_span_impl(
                 }
                 if (
                     common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
+                    (src[i + 1u] == 't' || src[i + 1u] == '\\') &&
                     (
                         (normalization_hint != 0 && *normalization_hint == 0u) ||
                         (text_normalization_hint != 0 && *text_normalization_hint == 0u)

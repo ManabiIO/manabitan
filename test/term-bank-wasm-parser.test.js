@@ -2762,6 +2762,17 @@ describe('term-bank WASM parser', () => {
         expect(rows[3].glossaryMayContainMedia).toBe(false);
     });
 
+    maybeTest('recognizes escaped glossary markers after checking their first byte', async () => {
+        const rows = await parseRowsJson(String.raw`[
+            ["escaped-first","", "", "", 0, [{"type":"\u0069mage","path":"one.png"}], 1, ""],
+            ["escaped-later","", "", "", 0, [{"tag":"i\u006dg","path":"two.png"}], 2, ""],
+            ["plain","", "", "", 0, ["", "other", "im\u0061gery"], 3, ""],
+            ["text","", "", "", 0, [{"\u0074ype":"t\u0065xt","text":"wrapped"}], 4, ""]
+        ]`);
+        expect(rows.map(({glossaryMayContainMedia}) => glossaryMayContainMedia)).toStrictEqual([true, true, false, false]);
+        expect(JSON.parse(getContentString(rows[3])).glossary).toStrictEqual(['wrapped']);
+    });
+
     maybeTest('does not dispatch partial chunks when parsing malformed term-bank JSON', async () => {
         let chunkCount = 0;
         await expect(parseTermBankWithWasmChunks(
