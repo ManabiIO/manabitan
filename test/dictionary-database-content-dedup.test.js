@@ -2490,6 +2490,28 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(0);
     });
 
+    test.each(['raw', 'raw-block-v2:jmdict'])('matches persisted empty %s spans without reading storage', async (dictName) => {
+        const database = new DictionaryDatabase();
+        const contentBytes = new Uint8Array(0);
+        const meta = {id: 1, offset: 1234, length: 0, dictName};
+        const read = vi.fn(() => { throw new Error('Expected no storage read'); });
+        Reflect.set(database, '_readTermEntryContentBytesDetailed', read);
+        const find = Reflect.get(database, '_findMatchingPersistedTermEntryContentMeta').bind(database);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+        const nonempty = {...meta, length: 1};
+
+        await expect(find([nonempty, meta], contentBytes)).resolves.toBe(meta);
+        await expect(find([nonempty], contentBytes)).resolves.toBeUndefined();
+        await expect(findBatch([
+            {hash1: 10, hash2: 20, contentBytes, primary: meta},
+            {hash1: 10, hash2: 20, contentBytes, primary: nonempty},
+        ])).resolves.toStrictEqual([
+            {existingMeta: meta, exactFallback: true},
+            {existingMeta: undefined, exactFallback: false},
+        ]);
+        expect(read).not.toHaveBeenCalled();
+    });
+
     test('bounds persisted signatures for short slab content', async () => {
         const database = new DictionaryDatabase();
         const contentBytes = new Uint8Array([1, 2, 3]);

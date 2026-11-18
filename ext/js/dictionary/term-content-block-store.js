@@ -700,7 +700,7 @@ export class TermContentBlockStore {
      */
     async tryAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
-        if (sourceOffsets.length === 0) { return null; }
+        if (uncompressedBytes === 0) { return null; }
         if (
             (compressionDictName === 'jmdict' || this._compressionExperiments.experimentalGenericSpanCompression === true) &&
             typeof SharedArrayBuffer === 'function' &&
@@ -737,7 +737,7 @@ export class TermContentBlockStore {
     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
         if (
-            sourceOffsets.length === 0 ||
+            uncompressedBytes === 0 ||
             compressionDictName !== 'jmdict' ||
             typeof SharedArrayBuffer !== 'function' ||
             !(sourceBytes.buffer instanceof SharedArrayBuffer)
@@ -1021,7 +1021,7 @@ export class TermContentBlockStore {
         const compressionExperiments = this._compressionExperiments;
         let uncompressedBytes = 0;
         for (const length of sourceLengths) { uncompressedBytes += length; }
-        if (!force && uncompressedBytes < this._minInputBytes) { return null; }
+        if (uncompressedBytes === 0 || (!force && uncompressedBytes < this._minInputBytes)) { return null; }
 
         let phaseStart = safePerformance.now();
         let packed = pack();
@@ -1331,11 +1331,19 @@ function createTermContentReferenceSlabs(
                 blockStoredLength = blockPrefix.getUint32(8, true);
                 previousBlockIndex = blockIndex;
             }
-            const entryOffset = packed.sourceChunkLocalOffsets[contentIndex];
+            let entryOffset = packed.sourceChunkLocalOffsets[contentIndex];
             // Packed offsets are Uint32, and the newly allocated slab bounds
             // every fixed-stride destination; only the entry bound varies.
-            if (!Number.isSafeInteger(entryOffset) || entryOffset < 0 || entryOffset >= blockUncompressedLength) {
+            if (!Number.isSafeInteger(entryOffset) || entryOffset < 0) {
                 throw new RangeError('Invalid compact term-content block reference');
+            }
+            if (entryOffset >= blockUncompressedLength) {
+                if (entryOffset !== blockUncompressedLength || sourceLengths[contentIndex] !== 0) {
+                    throw new RangeError('Invalid compact term-content block reference');
+                }
+                // Zero-length entries are never decoded. Keep their slot in
+                // the slab and encode an in-block offset for the placeholder.
+                entryOffset = 0;
             }
             const offset = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
             view.setUint32(offset, blockOffsetLow, true);
@@ -1392,7 +1400,7 @@ function packContentChunksIntoSlabs(chunks, targetBytes) {
         let endIndex = startIndex;
         while (endIndex < chunks.length) {
             const nextBytes = chunks[endIndex].byteLength;
-            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes) {
+            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
                 break;
             }
             totalBytes += nextBytes;
@@ -1429,25 +1437,21 @@ function planContentSpansIntoSlabs(sourceLengths, targetBytes) {
     const sourceChunkLocalOffsets = new Uint32Array(sourceLengths.length);
     let startIndex = 0;
     while (startIndex < sourceLengths.length) {
+        const packedIndex = packedChunkLengths.length;
         let totalBytes = 0;
         let endIndex = startIndex;
         while (endIndex < sourceLengths.length) {
             const nextBytes = sourceLengths[endIndex];
-            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes) {
+            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
                 break;
             }
+            sourceChunkIndices[endIndex] = packedIndex;
+            sourceChunkLocalOffsets[endIndex] = totalBytes;
             totalBytes += nextBytes;
             ++endIndex;
         }
         if (totalBytes > 0xffffffff) {
             throw new RangeError('Packed term content block exceeds the 32-bit storage format');
-        }
-        const packedIndex = packedChunkLengths.length;
-        let localOffset = 0;
-        for (let i = startIndex; i < endIndex; ++i) {
-            sourceChunkIndices[i] = packedIndex;
-            sourceChunkLocalOffsets[i] = localOffset;
-            localOffset += sourceLengths[i];
         }
         packedChunkLengths.push(totalBytes);
         blockStartIndexes.push(endIndex);
@@ -1518,7 +1522,7 @@ function packContentSpansIntoSlabs(sourceBytes, sourceOffsets, sourceLengths, ta
         let endIndex = startIndex;
         while (endIndex < sourceLengths.length) {
             const nextBytes = sourceLengths[endIndex];
-            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes) {
+            if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
                 break;
             }
             totalBytes += nextBytes;

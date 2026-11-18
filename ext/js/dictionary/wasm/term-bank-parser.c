@@ -386,13 +386,25 @@ static int ensure_memory(uint32_t required_bytes) {
     return rc >= 0;
 }
 
+static inline uint32_t read_u32_le(const uint8_t* src) {
+    return ((uint32_t)src[0]) |
+        ((uint32_t)src[1] << 8u) |
+        ((uint32_t)src[2] << 16u) |
+        ((uint32_t)src[3] << 24u);
+}
+
 static uint32_t read_content_signature(
     const uint8_t* bytes,
     uint32_t length,
     uint32_t offset
 ) {
+    if (offset >= length) { return 0u; }
+    const uint32_t remaining = length - offset;
+    if (remaining >= 4u) {
+        return read_u32_le(bytes + offset);
+    }
     uint32_t result = 0u;
-    for (uint32_t i = 0u; i < 4u && offset + i < length; ++i) {
+    for (uint32_t i = 0u; i < remaining; ++i) {
         result |= (uint32_t)bytes[offset + i] << (i * 8u);
     }
     return result;
@@ -1195,13 +1207,6 @@ static int is_null_token(const uint8_t* src, uint32_t start, uint32_t length) {
 
 static inline uint32_t rotl32(uint32_t value, uint32_t amount) {
     return (uint32_t)((value << amount) | (value >> (32u - amount)));
-}
-
-static inline uint32_t read_u32_le(const uint8_t* src) {
-    return ((uint32_t)src[0]) |
-        ((uint32_t)src[1] << 8u) |
-        ((uint32_t)src[2] << 16u) |
-        ((uint32_t)src[3] << 24u);
 }
 
 static inline uint32_t xxh32_round(uint32_t acc, uint32_t input) {
@@ -2014,15 +2019,11 @@ static uint32_t raw_term_content_quick_signature(
     const TermRowMeta* row
 ) {
     const uint32_t length = row->glossary_length;
-    uint32_t first = 0u;
-    uint32_t middle = 0u;
-    uint32_t last = 0u;
-    if (length > 0u) {
-        const uint32_t sample_length = length < 4u ? length : 4u;
-        __builtin_memcpy(&first, src + row->glossary_start, sample_length);
-        __builtin_memcpy(&middle, src + row->glossary_start + ((length - sample_length) / 2u), sample_length);
-        __builtin_memcpy(&last, src + row->glossary_start + length - sample_length, sample_length);
-    }
+    const uint8_t* glossary = src + row->glossary_start;
+    const uint32_t last_offset = length > 4u ? length - 4u : 0u;
+    const uint32_t first = read_content_signature(glossary, length, 0u);
+    const uint32_t middle = last_offset == 0u ? first : read_content_signature(glossary, length, last_offset / 2u);
+    const uint32_t last = last_offset == 0u ? first : read_content_signature(glossary, length, last_offset);
     uint32_t signature = length * 0x9e3779b1u;
     signature ^= row->rules_length * 0x85ebca6bu;
     signature ^= row->definition_tags_length * 0xc2b2ae35u;
