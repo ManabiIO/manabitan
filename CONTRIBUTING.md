@@ -8,7 +8,7 @@ If your contribution copies, adapts, ports, translates, mechanically rewrites, o
 
 This GPL-3.0-or-later contribution policy is prospective and does not change the terms of earlier contributions. Normal development targets `develop`. The default `main` branch must carry the same trusted acknowledgement workflow because GitHub runs `pull_request_target` from the default-branch context.
 
-Human pull requests must affirm the GPL-3.0-or-later contribution terms and identify third-party-derived material in the pull-request checklist. The `Contribution license acknowledgement / acknowledgement` check reports failure when either confirmation is missing; dependency/update bots are exempt. Repository administrators configure that check as required on `develop` and other contribution branches. The workflow deliberately performs no checkout and executes no pull-request code.
+Human pull requests must affirm the GPL-3.0-or-later contribution terms and identify third-party-derived material in the pull-request checklist. The repository owner (GitHub user ID `71601`) is exempt from this paperwork only on pull requests authored by that account when both the head and base repositories are this repository. Other contributors and owner-authored pull requests from forks must complete the checklist. The `Contribution license acknowledgement / acknowledgement` check reports failure when either confirmation is missing; dependency/update bots are exempt. Repository administrators configure that check as required on `develop` and other contribution branches. The workflow deliberately performs no checkout and executes no pull-request code.
 
 # Issues and Features
 
