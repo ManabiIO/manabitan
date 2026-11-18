@@ -174,31 +174,38 @@ export class TermContentCompressionPool {
      * @param {string|null} dictName
      * @param {import('dictionary-importer').ImportExperiments} [options]
      * @returns {{sourceConsumed: Promise<void>, completion: Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}}
-     * @throws {Error} If the pool or block plan is invalid.
+     * @throws {Error} If the pool, shared source, or block plan is invalid.
      */
     beginCompressWrappedSpans(source, sourceOffsets, sourceLengths, blockStartIndexes, blockLengths, dictName, options = {}) {
         if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
+        if (typeof SharedArrayBuffer !== 'function' || !(source.buffer instanceof SharedArrayBuffer)) {
+            throw new TypeError('Parallel span compression requires shared source bytes');
+        }
         validateTermContentCompressionBlockPlan(sourceOffsets, sourceLengths, blockStartIndexes, blockLengths);
         const compressionExperiments = snapshotTermBankExperiments(options);
         const envelopeMsByWorker = new Float64Array(this._workers.length);
+        // Snapshot both columns before dispatch. The caller owns its scratch
+        // arrays and each worker receives views of this batch's immutable copy.
+        const metadata = new SharedArrayBuffer(sourceOffsets.byteLength + sourceLengths.byteLength);
+        const offsets = new Uint32Array(metadata, 0, sourceOffsets.length);
+        const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length);
+        offsets.set(sourceOffsets);
+        lengths.set(sourceLengths);
         const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
             const workerIndex = blockIndex % this._workers.length;
             const start = blockStartIndexes[blockIndex];
             const end = blockStartIndexes[blockIndex + 1];
-            const blockOffsets = sourceOffsets.slice(start, end);
-            const blockSourceLengths = sourceLengths.slice(start, end);
             return this._dispatchWithSourceConsumed(
                 workerIndex,
                 {
                     source,
-                    sourceOffsets: blockOffsets,
-                    sourceLengths: blockSourceLengths,
+                    sourceOffsets: offsets.subarray(start, end),
+                    sourceLengths: lengths.subarray(start, end),
                     contentBytes,
                     dictName,
                     wrap: true,
                     compressionExperiments,
                 },
-                [blockOffsets.buffer, blockSourceLengths.buffer],
             );
         });
         // A failed job does not stop other workers from reading the borrowed
@@ -292,11 +299,10 @@ export class TermContentCompressionPool {
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
-     * @param {Transferable[]} transfer
      * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
      */
-    _dispatchWithSourceConsumed(workerIndex, message, transfer) {
-        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, transfer, true);
+    _dispatchWithSourceConsumed(workerIndex, message) {
+        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, [], true);
         return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
     }
 

@@ -8165,12 +8165,6 @@ this._readTermContentSignature(
                     if (earlyContentPersistence !== null) {
                         const metadataPublishedAt = safePerformance.now();
                         let contentCompletedAt = metadataPublishedAt;
-                        const measuredContentCompletion = earlyContentPersistence.completion
-                            .then((blockProfile) => {
-                                contentCompletedAt = safePerformance.now();
-                                return blockProfile;
-                            })
-                            .finally(releaseInFlightContentSources);
                         const recordChunk = this._createResolvedArtifactTermRecordChunk(
                             chunk,
                             preparedLookupIndexes,
@@ -8185,6 +8179,14 @@ this._readTermContentSignature(
                             resolvedContentDictNames,
                             importMetrics,
                         );
+                        // Prepare the record append before creating the derived
+                        // promise so both operations can be joined immediately.
+                        const measuredContentCompletion = earlyContentPersistence.completion
+                            .then((blockProfile) => {
+                                contentCompletedAt = safePerformance.now();
+                                return blockProfile;
+                            })
+                            .finally(releaseInFlightContentSources);
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,

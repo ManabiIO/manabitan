@@ -2597,6 +2597,26 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
+    test('drains failed reserved content when record preparation throws', async () => {
+        const harness = createArtifactOverlapHarness();
+        const failure = new Error('injected record preparation failure');
+        const prepareRecords = vi.fn(() => { throw failure; });
+        Reflect.set(harness.database, '_createResolvedArtifactTermRecordChunk', prepareRecords);
+        const importing = harness.run();
+        const rejected = expect(importing).rejects.toBe(failure);
+
+        await vi.waitFor(() => expect(prepareRecords).toHaveBeenCalledOnce());
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+        harness.rejectContent(new Error('injected reserved content failure'));
+
+        await rejected;
+        expect(harness.appendRecords).not.toHaveBeenCalled();
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+    });
+
     test('reports source-driven initial content reservation', async () => {
         const harness = createArtifactOverlapHarness();
         const importing = harness.run();
