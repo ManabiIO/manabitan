@@ -37,6 +37,10 @@
         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
+        {"path": "dev/perf/jmdict-cache-copy-20261119/baseline-control.json", "ignore": true},
+        {"path": "dev/perf/jmdict-cache-copy-20261119/cache-copy-screen.json", "ignore": true},
+        {"path": "dev/perf/jmdict-cache-copy-20261119/cache-copy-replication.json", "ignore": true},
+        {"path": "dev/perf/jmdict-cache-copy-20261119/files.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",
