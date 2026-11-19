@@ -25,18 +25,27 @@ import path from 'node:path'
 import {parseArgs} from 'node:util'
 import {parseJson} from '../../ext/js/core/json.js'
 import {safePerformance} from '../../ext/js/core/safe-performance.js'
+import {getHostEnvironment} from './host-environment.js'
+import {loadDictionaryWasm} from '../dictionary-wasm.js'
 import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} from '@zip.js/zip.js'
 
 /** @typedef {import('dictionary-importer').ImportExperiments} Flags */
 /** @typedef {Parameters<Parameters<typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunks>[2]>[0] & {preparedLookupIndexes?: Map<string, import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>}} Chunk */
+/** @typedef {import('../../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan} StringPlan */
+/** @typedef {{uniqueCount: number, sourceRowCount: number, uniqueRowIndexes: Uint32Array, uniqueSignatures?: Uint32Array}} ContentPlan */
 /** @typedef {{cacheFile: string, sha256: string, termRows: number}} Lock */
-/** @typedef {{elapsedMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
-/** @typedef {Measurement & {flags: Flags, validateGlossaryTypes: boolean, dictionary: string, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */
+/** @typedef {{fusedParseAttempts: number, fusedParseFallbacks: number, discardedFusedRows: number, escapedKeyDecodeCount: number, validatedGlossaryReuseCount: number, globalExactContentReuseCount: number}} ExecutedPathCounts */
+/** @typedef {ExecutedPathCounts & {elapsedMs: number, cpuMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
+/** @typedef {Measurement & {flags: Flags, dictionary: string, scope: string, validateGlossaryTypes: boolean, measuredPasses: number, measurements: Measurement[], hostBefore: Record<string, unknown>, hostAfter: Record<string, unknown>, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */
 /** @typedef {{pair: number, arm: string, result: ScreenResult}} Observation */
 const root = fileURLToPath(new URL('../../', import.meta.url))
 /** @type {Record<string, number>} */
 const filesPerGroup = {jmdict: 7, jmnedict: 9, jitendex: 10}
-const sourceFiles = ['ext/js/dictionary/term-bank-wasm-parser.js',
+const executedPathFields = /** @type {const} */ (['fusedParseAttempts', 'fusedParseFallbacks', 'discardedFusedRows', 'escapedKeyDecodeCount', 'validatedGlossaryReuseCount', 'globalExactContentReuseCount'])
+const sourceFiles = ['package-lock.json',
+    'dev/data/dictionary-wasm/manifest.json',
+    'ext/lib/term-bank-parser.wasm',
+    'ext/js/dictionary/term-bank-wasm-parser.js',
     'ext/js/dictionary/term-bank-experiments.js',
     'ext/js/dictionary/term-lookup-scratch.js',
     'ext/js/dictionary/term-lookup-index-preparation.js',
@@ -50,9 +59,136 @@ const sourceFiles = ['ext/js/dictionary/term-bank-wasm-parser.js',
 function sha256(bytes) { return createHash('sha256').update(bytes).digest('hex') }
 /**
  * @param {import('node:crypto').Hash} hash
- * @param {ArrayBufferView} view
+ * @param {string} label
+ * @param {ArrayBufferView|undefined} view
  */
-function updateView(hash, view) { hash.update(new Uint8Array(view.buffer, view.byteOffset, view.byteLength)) }
+function updateView(hash, label, view) {
+    hash.update(JSON.stringify([label, typeof view === 'undefined' ? 'absent' : view.constructor.name, view?.byteLength ?? 0]) + '\n')
+    if (view) { hash.update(new Uint8Array(view.buffer, view.byteOffset, view.byteLength)) }
+}
+
+/**
+ * @param {import('node:crypto').Hash} hash
+ * @param {string} label
+ * @param {unknown} value
+ */
+function updateValue(hash, label, value) { updateView(hash, label, Buffer.from(JSON.stringify(value) ?? 'undefined')) }
+
+/**
+ * Validate and hash the original complete arena as well as compacted sidecars.
+ * @param {import('node:crypto').Hash} hash
+ * @param {string} label
+ * @param {StringPlan} plan
+ * @param {number} rowCount
+ * @throws {Error} If a key arena or row reference is incomplete or out of bounds.
+ */
+function digestStringPlan(hash, label, plan, rowCount) {
+    if (!plan || !(plan.stringLengths instanceof Uint16Array) || !(plan.stringsBuffer instanceof Uint8Array) ||
+    !(plan.expressionIndexes instanceof Uint32Array) || !(plan.readingIndexes instanceof Uint32Array) ||
+    plan.expressionIndexes.length !== rowCount || plan.readingIndexes.length !== rowCount) {
+        throw new Error(`Incomplete ${label} key plan`)
+    }
+    const count = plan.stringLengths.length
+    if ((typeof plan.stringOffsets !== 'undefined' && (!(plan.stringOffsets instanceof Uint32Array) || plan.stringOffsets.length !== count)) ||
+    (typeof plan.stringHashes !== 'undefined' && (!(plan.stringHashes instanceof Uint32Array) || plan.stringHashes.length !== count))) {
+        throw new Error(`Invalid ${label} key metadata`)
+    }
+    let cursor = 0
+    for (let index = 0; index < count; ++index) {
+        if ((plan.stringOffsets && plan.stringOffsets[index] !== cursor) || plan.stringLengths[index] > plan.stringsBuffer.length - cursor) {
+            throw new Error(`Out-of-bounds ${label} key span`)
+        }
+        cursor += plan.stringLengths[index]
+    }
+    if (cursor !== plan.stringsBuffer.length) { throw new Error(`Incomplete ${label} key arena`) }
+    for (let row = 0; row < rowCount; ++row) {
+        if (plan.expressionIndexes[row] >= count || plan.readingIndexes[row] >= count) { throw new Error(`Out-of-bounds ${label} key reference`) }
+    }
+    updateValue(hash, `${label}.shape`, {rowCount, stringCount: count})
+    for (const field of /** @type {const} */ (['stringLengths', 'stringOffsets', 'stringHashes', 'stringsBuffer', 'expressionIndexes', 'readingIndexes'])) {
+        updateView(hash, `${label}.${field}`, plan[field])
+    }
+}
+
+/**
+ * Includes mappings consumed by persistence, not only the bytes lookup uses.
+ * Borrowed views are checked before another parser call can reuse their arena.
+ * @param {import('node:crypto').Hash} hash
+ * @param {Chunk} chunk
+ * @throws {Error} If a canonical mapping, source span or row column is invalid.
+ */
+function digestChunkColumns(hash, chunk) {
+    const count = chunk.rowCount
+    digestStringPlan(hash, 'sourceKeys', chunk.termRecordPreinternedPlan, count)
+    if (!(chunk.readingEqualsExpressionList instanceof Uint8Array) || chunk.readingEqualsExpressionList.length !== count ||
+    (!(chunk.scoreList instanceof Int32Array) && !(chunk.scoreList instanceof Float64Array)) || chunk.scoreList.length !== count ||
+    (!(chunk.sequenceList instanceof Int32Array) && !(chunk.sequenceList instanceof Float64Array)) || chunk.sequenceList.length !== count) {
+        throw new Error('Incomplete source row columns')
+    }
+    updateView(hash, 'readingEqualsExpression', chunk.readingEqualsExpressionList)
+    updateView(hash, 'scores', chunk.scoreList)
+    updateView(hash, 'sequences', chunk.sequenceList)
+    updateValue(hash, 'mediaRows', chunk.mediaRows)
+    const {contentMetaList: meta, contentBytesBuffer: buffer, contentBytesBaseOffset: base, contentBytesLength: extent, contentUniqueIndexList: indexes} = chunk
+    /** @type {unknown} */
+    const contentPlan = chunk.contentDedupPlan
+    const plan = /** @type {ContentPlan|null} */ (contentPlan)
+    if (!(buffer instanceof Uint8Array) || !(meta instanceof Uint32Array) || meta.length !== count * 4 ||
+    typeof base !== 'number' || !Number.isSafeInteger(base) || base < 0 || base > buffer.length ||
+    !(indexes instanceof Uint32Array) || indexes.length !== count || !plan ||
+    !Number.isSafeInteger(plan.uniqueCount) || plan.uniqueCount < 1 || plan.uniqueCount > count || plan.sourceRowCount !== count ||
+    !(plan.uniqueRowIndexes instanceof Uint32Array) || plan.uniqueRowIndexes.length !== plan.uniqueCount ||
+    (typeof plan.uniqueSignatures !== 'undefined' && (!(plan.uniqueSignatures instanceof Uint32Array) || plan.uniqueSignatures.length !== plan.uniqueCount * 3)) ||
+    (chunk.contentRowStart ?? 0) !== 0 || chunk.useResolvedContentReferences !== true) {
+        throw new Error('Incomplete canonical content plan')
+    }
+    if (typeof extent !== 'undefined' && (!Number.isSafeInteger(extent) || extent < 0 || extent > buffer.length - base)) {
+        throw new Error('Canonical content extent is out of bounds')
+    }
+    const available = typeof extent === 'number' ? extent : buffer.length - base
+    let usedExtent = 0
+    let previousRepresentative = -1
+    for (let unique = 0; unique < plan.uniqueCount; ++unique) {
+        const row = plan.uniqueRowIndexes[unique]
+        if (row >= count || indexes[row] !== unique) { throw new Error('Canonical representative does not map to its unique ID') }
+        if (row <= previousRepresentative) { throw new Error('Canonical representatives are not in first-occurrence order') }
+        const at = row * 4
+        const length = meta[at + 1]
+        if (meta[at] !== usedExtent || length > available - usedExtent) {
+            throw new Error('Canonical representatives do not cover a contiguous content slab')
+        }
+        usedExtent += length
+        previousRepresentative = row
+    }
+    // Complete native groups declare encoded bytes, not reserved capacity.
+    // If that optional extent is absent, the checked representatives define it.
+    if (typeof extent === 'number' && usedExtent !== extent) { throw new Error('Canonical representatives do not cover the declared extent') }
+    const limit = base + usedExtent
+    updateValue(hash, 'contentPlan.shape', {uniqueCount: plan.uniqueCount, sourceRowCount: plan.sourceRowCount, extent})
+    updateView(hash, 'contentPlan.rowToUnique', indexes)
+    updateView(hash, 'contentPlan.uniqueRows', plan.uniqueRowIndexes)
+    updateView(hash, 'contentPlan.signatures', plan.uniqueSignatures)
+    updateView(hash, 'contentPlan.metadata', meta)
+    updateValue(hash, 'contentRows.count', count)
+    for (let row = 0; row < count; ++row) {
+        if (chunk.readingEqualsExpressionList[row] > 1) { throw new Error('Invalid reading-equality flag') }
+        const unique = indexes[row]
+        if (unique >= plan.uniqueCount) { throw new Error('Content row references an invalid unique ID') }
+        const representative = plan.uniqueRowIndexes[unique]
+        if (representative > row) { throw new Error('Content representative is not the first occurrence') }
+        const at = row * 4
+        const other = representative * 4
+        for (let field = 0; field < 4; ++field) {
+            if (meta[at + field] !== meta[other + field]) { throw new Error('Content row differs from its canonical representative span or hashes') }
+        }
+        const offset = base + meta[at]
+        const length = meta[at + 1]
+        if (offset > limit || length > limit - offset) { throw new Error('Content row span is out of bounds') }
+    }
+    // Row mappings and metadata bind every occurrence to these canonical bytes.
+    // Hash the complete used slab once before the next parse reuses its arena.
+    updateView(hash, 'contentPlan.canonicalSlab', buffer.subarray(base, limit))
+}
 
 
 /**
@@ -70,16 +206,21 @@ async function sourceHash(filename) {
 
 /**
  * Sequential parser + completed lookup construction, not end-to-end import.
- * Fixture I/O, compilation, warmups, explicit GC and digest verification are outside time.
+ * Fixture I/O, compilation, warmups, GC and digest verification are outside time.
  * Grouping is fixed component-fixture grouping, not a production planner override.
  * @param {string} dictionary
  * @param {string} cache
  * @param {string} sourceRoot
  * @param {Flags} flags
+ * @param {number} measuredPasses
  * @returns {Promise<ScreenResult>}
  * @throws {Error} If the fixture, output or source identity is invalid.
  */
-async function measure(dictionary, cache, sourceRoot, flags) {
+async function measure(dictionary, cache, sourceRoot, flags, measuredPasses) {
+    const hostBefore = getHostEnvironment()
+    /** @type {Record<string, string>} */
+    const sourceHashes = {}
+    for (const file of sourceFiles) { sourceHashes[file] = await sourceHash(path.join(sourceRoot, file)) }
     // Explicit caller-selected local worktree; no dictionary-controlled path.
     // eslint-disable-next-line no-unsanitized/method, @typescript-eslint/no-unsafe-assignment
     const parser = /** @type {typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js')} */ (await import(pathToFileURL(path.join(sourceRoot, 'ext/js/dictionary/term-bank-wasm-parser.js')).href))
@@ -107,10 +248,9 @@ async function measure(dictionary, cache, sourceRoot, flags) {
         }
     } finally { await reader.close() }
     const wasmBytes = await readFile(path.join(sourceRoot, 'ext/lib/term-bank-parser.wasm'))
+    const pinnedWasm = loadDictionaryWasm(sourceRoot).get('term-bank-parser.wasm')
+    if (!pinnedWasm || !wasmBytes.equals(pinnedWasm)) { throw new Error('Built parser WASM differs from the verified source manifest') }
     parser.setTermBankWasmModule(await WebAssembly.compile(wasmBytes))
-    /** @type {Record<string, string>} */
-    const sourceHashes = {}
-    for (const file of sourceFiles) { sourceHashes[file] = await sourceHash(path.join(sourceRoot, file)) }
     const options = {...flags,
         singleChunk: true,
         emitTermByteLists: false,
@@ -118,8 +258,6 @@ async function measure(dictionary, cache, sourceRoot, flags) {
         emitContentSlab: true,
         emitTokenBinaryContent: true,
         mediaHintFastScan: true,
-        // Match the production importer: supported glossary types and their
-        // required fields are part of the native parser workload.
         validateGlossaryTypes: true,
         prepareLookupIndexes: true}
     /**
@@ -129,6 +267,7 @@ async function measure(dictionary, cache, sourceRoot, flags) {
      */
     const execute = async (verify) => {
         let elapsedMs = 0
+        let cpuMs = 0
         let lookupMs = 0
         let rows = 0
         let nativeSegments = 0
@@ -138,13 +277,17 @@ async function measure(dictionary, cache, sourceRoot, flags) {
         let maxWasmHeapBytes = 0
         let directArenaSegments = 0
         let validationPasses = 0
+        const executedPaths = {fusedParseAttempts: 0, fusedParseFallbacks: 0, discardedFusedRows: 0, escapedKeyDecodeCount: 0, validatedGlossaryReuseCount: 0, globalExactContentReuseCount: 0}
         const digest = createHash('sha256')
         for (let start = 0; start < sources.length; start += filesPerGroup[dictionary]) {
             /** @type {Chunk|null} */
             let resultChunk = null
+            let callbackCount = 0
             const group = sources.slice(start, start + filesPerGroup[dictionary])
             const before = safePerformance.now()
+            const cpuBefore = process.cpuUsage()
             await parser.parseTermBankWithWasmColumnChunks(group, 3, (/** @type {Chunk} */ chunk) => {
+                if (++callbackCount !== 1) { throw new Error('singleChunk parser delivered multiple chunks') }
                 resultChunk = chunk
                 if (!chunk.preparedLookupIndexes) {
                     const result = prep.prepareTermLookupIndexesFromPreinternedPlan(chunk, null, flags)
@@ -156,8 +299,10 @@ async function measure(dictionary, cache, sourceRoot, flags) {
                 }
             }, 2048, options)
             elapsedMs += safePerformance.now() - before
+            const cpu = process.cpuUsage(cpuBefore)
+            cpuMs += (cpu.user + cpu.system) / 1000
             const profile = parser.consumeLastTermBankWasmParseProfile()
-            if (resultChunk === null || !profile) { throw new Error('Missing parser results') }
+            if (callbackCount !== 1 || resultChunk === null || !profile) { throw new Error('Missing parser results') }
             const chunk = /** @type {Chunk} */ (resultChunk)
             const indexes = chunk.preparedLookupIndexes
             if (!indexes || !prep.hasCompletePreparedTermLookupIndexes(indexes, chunk.rowCount)) { throw new Error('Incomplete indexes') }
@@ -167,36 +312,24 @@ async function measure(dictionary, cache, sourceRoot, flags) {
             scratchReuseMisses += profile.nativeLookupScratchReuseMisses ?? 0
             lookupMs += profile.lookupIndexPrepareMs ?? 0
             maxWasmHeapBytes = Math.max(maxWasmHeapBytes, profile.maxWasmHeapBytes ?? 0)
+            for (const field of executedPathFields) { executedPaths[field] += profile[field] ?? 0 }
             if (!verify) { continue }
             // Digest all rows and index bytes before the next parse reuses memory.
+            updateValue(digest, 'group', {start, sourceCount: group.length, rowCount: chunk.rowCount})
+            digestChunkColumns(digest, chunk)
             for (const [key, entry] of indexes) {
-                digest.update(key)
-                digest.update(entry.bytes)
+                updateValue(digest, 'lookup.range', key)
+                updateView(digest, 'lookup.bytes', entry.bytes)
                 indexBytes += entry.bytes.byteLength
-                for (const view of [entry.preinternedPlan.stringLengths,
-                    entry.preinternedPlan.stringOffsets,
-                    entry.preinternedPlan.stringHashes,
-                    entry.preinternedPlan.stringsBuffer,
-                    entry.preinternedPlan.expressionIndexes,
-                    entry.preinternedPlan.readingIndexes]) {
-                    if (view) { updateView(digest, view) }
-                }
-            }
-            updateView(digest, chunk.readingEqualsExpressionList)
-            updateView(digest, chunk.scoreList)
-            updateView(digest, chunk.sequenceList)
-            const {contentMetaList, contentBytesBuffer, contentBytesBaseOffset} = chunk
-            if (!contentBytesBuffer || !contentMetaList || typeof contentBytesBaseOffset !== 'number') { throw new Error('Missing content slab') }
-            for (let row = 0; row < chunk.rowCount; ++row) {
-                const offset = contentBytesBaseOffset + contentMetaList[row * 4]
-                digest.update(contentBytesBuffer.subarray(offset, offset + contentMetaList[row * 4 + 1]))
-                updateView(digest, contentMetaList.subarray(row * 4 + 1, row * 4 + 4))
+                digestStringPlan(digest, `lookupKeys:${key}`, entry.preinternedPlan, Number(key.split(':')[1]))
             }
         }
         if (rows !== spec.termRows) { throw new Error('Dictionary row count differs from lock') }
-        return {scratchReusedBytes,
+        return {...executedPaths,
+            scratchReusedBytes,
             scratchReuseMisses,
             elapsedMs,
+            cpuMs,
             lookupMs,
             rows,
             nativeSegments,
@@ -208,14 +341,34 @@ async function measure(dictionary, cache, sourceRoot, flags) {
     }
     for (let warmup = 0; warmup < 2; ++warmup) { await execute(false) }
     globalThis.gc?.()
-    const result = await execute(true)
+    /** @type {Measurement[]} */
+    const measurements = []
+    for (let pass = 0; pass < measuredPasses; ++pass) { measurements.push(await execute(true)) }
+    const result = {...measurements[0]}
+    const countFields = /** @type {const} */ (['rows', 'scratchReusedBytes', 'scratchReuseMisses', 'nativeSegments', 'indexBytes', 'directArenaSegments', 'validationPasses', 'digest', ...executedPathFields])
+    for (const measurement of measurements) {
+        for (const field of countFields) {
+            if (measurement[field] !== result[field]) { throw new Error(`Output or executed-path counts changed between passes: ${field}`) }
+        }
+    }
+    // Retain every pass and average equal work; do not drop slow observations.
+    for (const field of /** @type {const} */ (['elapsedMs', 'cpuMs', 'lookupMs'])) {
+        result[field] = measurements.reduce((sum, measurement) => sum + measurement[field], 0) / measuredPasses
+    }
+    result.maxWasmHeapBytes = Math.max(...measurements.map((measurement) => measurement.maxWasmHeapBytes))
     for (const file of sourceFiles) {
         if (sourceHashes[file] !== await sourceHash(path.join(sourceRoot, file))) { throw new Error('Source changed during measurement') }
     }
+    loadDictionaryWasm(sourceRoot)
     return {...result,
         flags,
-        validateGlossaryTypes: options.validateGlossaryTypes,
         dictionary,
+        scope: 'sequential parser and completed lookup construction; not whole import',
+        validateGlossaryTypes: true,
+        measuredPasses,
+        measurements,
+        hostBefore,
+        hostAfter: getHostEnvironment(),
         filesPerGroup: filesPerGroup[dictionary],
         node: process.version,
         sourceRoot,
@@ -232,6 +385,7 @@ const {values, positionals} = parseArgs({allowPositionals: true,
     options: {
         'child': {type: 'boolean', default: false},
         'pairs': {type: 'string', default: '8'},
+        'passes': {type: 'string', default: '1'},
         'flags': {type: 'string', default: '{"experimentalNativeSegmentedLookup":true}'},
         'cache-dir': {type: 'string', default: path.join(root, 'builds/e2e-dictionary-cache')},
         'out': {type: 'string', default: path.join(root, 'builds/perf/lookup-construction.json')},
@@ -241,6 +395,8 @@ const {values, positionals} = parseArgs({allowPositionals: true,
     }})
 const dictionary = positionals[0]
 if (!dictionary || !filesPerGroup[dictionary]) { throw new Error('Provide jmdict, jmnedict or jitendex') }
+const measuredPasses = Number(values.passes)
+if (!Number.isSafeInteger(measuredPasses) || measuredPasses < 1 || measuredPasses > 20) { throw new Error('Pass count must be an integer from 1 to 20') }
 /** @type {Flags} */
 const flags = parseJson(values.flags)
 const {snapshotTermBankExperiments} = await import('../../ext/js/dictionary/term-bank-experiments.js')
@@ -250,7 +406,7 @@ for (const [key, value] of Object.entries(flags)) {
     if (!(key in effective) || typeof value !== 'boolean') { throw new Error(`Unknown or non-boolean flag: ${key}`) }
 }
 if (values.child) {
-    console.log(JSON.stringify(await measure(dictionary, values['cache-dir'], values['source-root'], flags)))
+    console.log(JSON.stringify(await measure(dictionary, values['cache-dir'], values['source-root'], flags, measuredPasses)))
 } else {
     const pairs = Number(values.pairs)
     if (!Number.isInteger(pairs) || pairs < 2 || !['AB', 'BA'].includes(values['initial-order'])) { throw new Error('Invalid fixed run plan') }
@@ -260,6 +416,7 @@ if (values.child) {
     const plan = {
         dictionary,
         pairs,
+        measuredPasses,
         flags,
         validateGlossaryTypes: true,
         initialOrder: values['initial-order'],
@@ -282,6 +439,8 @@ if (values.child) {
                     values['cache-dir'],
                     '--source-root',
                     expectedSourceRoot,
+                    '--passes',
+                    String(measuredPasses),
                     '--flags',
                     JSON.stringify(arm === 'A' ? {} : flags)]
                 const child = spawnSync(process.execPath, ['--expose-gc', ...args], {encoding: 'utf8', timeout: 180000, maxBuffer: 4 * 1024 * 1024})
@@ -290,7 +449,7 @@ if (values.child) {
                 if (path.resolve(result.sourceRoot) !== expectedSourceRoot || result.wasmSha256 !== expectedWasmHashes.get(expectedSourceRoot)) {
                     throw new Error(`Child ${arm} did not measure the requested source root and WASM`)
                 }
-                if (result.dictionary !== dictionary || result.validateGlossaryTypes !== plan.validateGlossaryTypes) {
+                if (result.dictionary !== dictionary || result.validateGlossaryTypes !== plan.validateGlossaryTypes || result.measuredPasses !== measuredPasses) {
                     throw new Error(`Child ${arm} did not use the requested production workload`)
                 }
                 observations.push({pair, arm, result})
@@ -308,7 +467,7 @@ if (values.child) {
         }
         for (const arm of ['A', 'B']) {
             const runs = observations.filter((x) => x.arm === arm)
-            const identity = (/** @type {Observation} */ x) => JSON.stringify([x.result.sourceHashes, x.result.wasmSha256, x.result.runnerSha256])
+            const identity = (/** @type {Observation} */ x) => JSON.stringify([x.result.sourceHashes, x.result.wasmSha256, x.result.runnerSha256, x.result.lockSha256, x.result.archiveSha256])
             if (runs.some((x) => identity(x) !== identity(runs[0]))) { throw new Error('Source identity changed across cohort') }
         }
         ratios.sort((a, b) => a - b)

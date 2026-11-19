@@ -231,3 +231,165 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-19: JMdict source-candidate screening
+
+**Decision: retain four reproducible experiments; promote no runtime change.** This roughly two-hour round completed 28 fixed eight-pair cohorts (448 successful child observations), plus an interrupted two-observation A/A attempt retained separately. Neither whole-import speed nor a reliable component improvement was established. The deliverable strengthens the screening tools and preserves the exact candidate patches and evidence.
+
+This section describes the November source comparison. Earlier instructions about historical experimental defaults apply to their original round; this work preserves the current source defaults. It does not alter worker counts, cache capacities, compression settings, scheduling, storage formats or production flags.
+
+### Exact sources, fixtures and delivery
+
+All four independent runtime candidates start from `develop` commit `d829f5b6e6a75ee8859d38d537d224ec33c4930e`:
+
+| Candidate                     | Tested local commit                        | Expected reconstructed tree                | Work removed                                                                                                                                                                                |
+| ----------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Numeric token ends            | `dfabe18acf18b36aef4d84a652fde29cfc6ea734` | `c8e7c830f00b2dc72a9a302cf5349c71fa3c73b3` | Carries validated score/sequence token ends into fused conversion, avoiding a repeated boundary scan while preserving numeric fallback.                                                     |
+| Previous same-field key reuse | `604c3050130d28b3fdabbd822b2adfac02423a8b` | `49ef9adaa33f6e0ba68def569064dd0530fcfd82` | Reuses an immediately preceding expression/reading ID only after complete raw-token equality; misses retain the existing decode/hash/probe path.                                            |
+| Escape witness                | `eb751ca9ef13dc2a17b46343ab70d436fd40b330` | `02d7b2128a1ca1d9a28788800a1b774672f05160` | Carries the grammar scanner's escape observation into fused key interning; the generic parser ABI remains unchanged.                                                                        |
+| Recent-source preflight       | `5bdaf01c47fdddf27211a461afb9e67df17dacbf` | `74f1a63e80c49b306262958fb46987db44cd134c` | Checks the primary eligible owned recent source before allocating candidate-wave bookkeeping; signatures and full bytes remain required, with collision order and storage errors preserved. |
+
+The standalone binary patches and per-file identities are in [candidates/source-manifest.json](../../builds/perf/20261119/candidates/source-manifest.json). Each patch was applied to a fresh temporary index at the recorded base; all four resulting Git trees exactly matched the tested trees. Patches include changed tests and source-bound native artifacts. None is applied to this tooling branch's runtime.
+
+The tooling follow-up is based on [PR #757](https://github.com/ManabiIO/manabitan/pull/757), head `323e3f1369e5dce86fe8cd86e44c2a739f67a2ff`. It preserves that PR's production glossary validation, arm-root handling and predeclared binary-hash checks. The final merged lookup runner has SHA-256 `0f29a684249e012292f7e4a75966141a5393e97ad649f175a0bc6eb7785697ba`. It is functionally checked separately; historical timing does not silently inherit this later runner identity.
+
+Measurements used Node `v24.22.3` / V8 `13.6.233.17-node.63`. Native artifacts were regenerated with manifest-pinned Clang and LLD **21.1.8**, extracted from verified LLVM Debian packages. Normal reproduction can use the checked-in, source-verified WASM without installing a compiler; intentional regeneration follows `dev/data/dictionary-wasm/README.md`.
+
+| Locked dictionary | Revision              | Term rows | Archive SHA-256                                                    |
+| ----------------- | --------------------- | --------: | ------------------------------------------------------------------ |
+| JMdict            | `JMdict.2026-09-06`   |   526,942 | `7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a` |
+| JMnedict          | `JMnedict.2026-09-06` |   667,942 | `d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12` |
+| Jitendex          | `2026.08.11.0`        |   435,448 | `8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc` |
+
+`test/perf/dictionaries.lock.json` remains authoritative. The lookup runner checks locked archive hashes, ZIP CRCs and complete term counts. The dedup runner additionally checks archive size, title and revision. Reports record fixture, runner, source, manifest and built-WASM identities. Source or identity drift fails a cohort.
+
+### Scope and oracle corrections
+
+Chromium startup in this workspace failed with socket `EPERM`; automatic approval review rejected the unsandboxed retry. That local block is retained in the evidence. It is not a claim that browser qualification is unavailable elsewhere. All measurements here are **Node component screens**, excluding ZIP inflation, worker transport/scheduling, compression, actual OPFS/disk latency and UI completion.
+
+The lookup oracle now checks original and compacted key plans, scores, sequences, reading flags, media references, every canonical row mapping, representative, signature and metadata field, all canonical content bytes and every prepared lookup byte. It verifies bounds, callback counts and ownership spans before borrowed memory can be reused. Fused attempts, fallbacks and other executed-path counts are retained. Earlier observations retain their earlier guarantees.
+
+The first complete oracle created one temporary content view/hash update per JMdict row between timed groups. Excluding verification's duration does not prevent its allocations from affecting later groups. The revised oracle proves first-use order and contiguous canonical coverage, then hashes one used slab per group while retaining all row checks. This removes 526,934 temporary content views per eight-group JMdict pass. It is a benchmark allocation correction, not an import optimization.
+
+A separate diagnostic recorded 201 versus 56 GC events, but total observed pauses increased from 354.45 to 447.42 ms. Those single processes include startup, warmups, explicit GC and verification; they establish neither lower pause time nor the cause of all timing variation.
+
+The new dedup screen executes the production parser, `DictionaryDatabase` resolver, `NativeCanonicalScanner` and publication path against exact-byte virtual storage. It checks all row references, content bytes and counters, including publication-return mappings. Review removed a mapping overwrite that could have hidden errors and added the production `dictionaryTotalRows` capacity hint; retained final observations use one native arena instance. Virtual writes do not supply production's `metadataValidated` witness, so publication still includes generic validation. The nested exact timer overlaps the resolver timer; **do not add them**. Ownership copies are preserved because borrowed parser buffers can be reused. Parsing and group assembly are outside the dedup timers. The harness retains parsed fixture and verification data, so its memory footprint is not production-import memory. Its fixed 7/9/10-bank grouping determines the reported cross-group checks and cache-hit counts.
+
+The synthetic key screen checks 20,000 rows in two banks across repeated runs, unique keys, common prefixes and escaped runs. Its untimed oracle includes key/content/dedup/lookup output. These controls explicitly enable fused-single-bank and escaped-key paths; they do not establish browser performance.
+
+### Protocols and all retained attempts
+
+[summary.json](../../builds/perf/20261119/summary.json) and [summary.csv](../../builds/perf/20261119/summary.csv) retain separate results for every cohort. Each A/B pair is one comparison; measured passes within a child are averaged, never treated as independent pairs. All slow tails remain. Descriptive 95% intervals use 10,000 paired bootstrap resamples with seed `20261119`; eight pairs on a shared host do not establish independent samples or qualification.
+
+| Stage                             | Frozen protocol                                                                                          | Evidence paths within the campaign                                                |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Initial parser screen             | Unrestricted CPU, two warmups, one measured pass; earlier oracle (`ad1140fe…`)                           | `numeric-screen-jmdict.json`, `parser-aa-jmdict.json`                             |
+| Complete parser oracle            | Unrestricted CPU, two warmups, three measured passes (`c37cfd1c…`)                                       | `parser-aa3-jmdict.json`, `keys-screen-jmdict.json`, `escapes-screen-jmdict.json` |
+| First affinity protocol           | Logical CPU 0, same three-pass oracle, reversed candidate initial orders                                 | `parser-aa3-affinity0-jmdict.json`, `affinity0/`                                  |
+| First key controls                | CPU 0, two warmups, three measured passes                                                                | Four `affinity0/keys-control-*.json` files                                        |
+| Final bulk-oracle parser protocol | CPU 0, two warmups, three measured passes; measured runner from `8744fd6`, SHA `57d4064a…`               | Four parser reports in `bulk-affinity0/`                                          |
+| Final synthetic controls          | CPU 0, ten warmups, ten measured passes, fixed before execution                                          | Six key reports in `bulk-affinity0/`                                              |
+| Dedup retry                       | CPU 0, two warmups, one measured pass, unchanged runner `f0e7bed4…`, eight pairs in each of five cohorts | `dedup-retry-affinity0/`                                                          |
+
+Do not pool these protocols or subtract A/A variation as a correction. Immutable runner snapshots, plans, commands, child profiles and logs are preserved. Conditional additional-corpus parser screens were not started after the JMdict signals failed qualification; they are not missing successful results.
+
+The initial `bulk-affinity0/dedup-aa-jmdict.json` stopped with two observations when its execution session became unavailable. Its exit code and cause are unknown; OOM was not established. Original bytes remain untouched with a hash-bearing interruption sidecar. The complete retry uses a new output directory and does not salvage or append those samples. Single-child smokes and final delivery checks are functional evidence, outside the 28 timing cohorts.
+
+### Final parser results
+
+Negative changes are faster. All rows below use the final bulk-oracle protocol, eight pairs each, on JMdict. “Total” compares the sums of equal-work child times; it is distinct from the median paired percentage.
+
+| Comparison                    | Paired median wall | Equal-work wall total | Faster pairs | Paired median CPU | Descriptive wall 95% interval |
+| ----------------------------- | -----------------: | --------------------: | -----------: | ----------------: | ----------------------------- |
+| Identical-source A/A          |             −2.83% |                +2.71% |          5/8 |            −1.99% | −21.73% to +23.86%            |
+| Previous same-field key reuse |             +2.08% |                +2.31% |          4/8 |            +2.27% | −11.79% to +17.40%            |
+| Escape witness                |             +0.74% |                −3.00% |          4/8 |            +1.66% | −28.96% to +13.82%            |
+| Numeric token ends            |             +1.90% |                −2.81% |          3/8 |            −0.31% | −25.11% to +21.12%            |
+
+All final bulk-oracle JMdict parser comparisons passed the full output oracle. Every arm had the same maximum individual WASM heap, **61,603,840 bytes**. The final path records contain eight fused groups, zero fallbacks/discarded rows, zero escaped decodes, 54,877 validated glossary reuses and 21 native lookup segments. These are component counters, not process-tree memory or production grouping claims. **Hold all three candidates.**
+
+Final synthetic controls also failed to provide reliable attribution:
+
+| Lane                     | Paired median wall | Equal-work total |
+| ------------------------ | -----------------: | ---------------: |
+| Repeated-key A/A         |             −7.91% |           −1.61% |
+| Unique-key A/A           |            −20.25% |          −15.91% |
+| Key reuse: repeated runs |             −9.77% |          +41.45% |
+| Key reuse: unique        |             +6.72% |          +16.60% |
+| Key reuse: shared prefix |            +26.19% |          +22.04% |
+| Key reuse: escaped runs  |            −30.21% |          −16.81% |
+
+The common-prefix slowdown is an adverse lead to retain, not a qualified estimate independent of the failed controls. Favorable escaped-run timings do not override the real JMdict result or same-code variation.
+
+### Final dedup results
+
+Each cell below shows **paired median / equal-work total** wall-time change. All five cohorts have eight complete pairs. All 80 observations passed; output digests and work counters matched between arms within each cohort, verified separately in `dedup-retry-affinity0/verification.json`.
+
+| Comparison                 |           Resolver | Nested exact equality |       Publication |
+| -------------------------- | -----------------: | --------------------: | ----------------: |
+| JMdict 48 MiB A/A          |    +6.09% / +9.56% |      +2.12% / +23.68% | −14.33% / −28.03% |
+| Preflight, JMdict 48 MiB   |   −9.95% / −33.33% |      −8.88% / −57.66% |  −9.80% / +17.21% |
+| Preflight, JMdict 96 MiB   |   −8.57% / −28.04% |     −33.36% / −38.69% |  −6.60% / −18.53% |
+| Preflight, JMnedict 48 MiB |    −2.04% / +9.84% |      +2.32% / −12.86% | +17.59% / +46.07% |
+| Preflight, Jitendex 48 MiB | −14.63% / +135.32% |     −1.78% / +149.93% | +27.63% / +43.96% |
+
+The strongest lead is JMdict's fully cached exact phase: six of eight pairs faster, paired median −33.36%, descriptive interval **−72.02% to +11.42%**. It still includes slower outcomes. Resolver intervals for 48/96 MiB are −46.90% to +17.73% and −38.64% to +15.42%. Unchanged-code controls are noisy; Jitendex has a large retained candidate tail. **Hold the preflight candidate. No dedup or complete-import speedup is qualified.**
+
+JMdict performs 3,750 exact descriptor checks: at the unchanged 48 MiB policy, 2,915 hit the recent-source cache and 835 read virtual storage; at the existing 96 MiB policy all 3,750 hit. JMnedict has 75,804 cached exact checks; Jitendex has 32 exact checks and no cache hits. `--device-memory-gib 8` selects the runtime's existing 100,663,296-byte policy, separately from the default 50,331,648-byte policy. It does not simulate a constrained physical machine or authorize a cache-size change.
+
+### Reproduction and evidence verification
+
+The historical checkout was `/workspace/scratch/f34c9c9fae89/manabitan`, with sibling worktrees named `manabitan-baseline`, `manabitan-parser`, `manabitan-keys`, `manabitan-escapes` and `manabitan-storage`. Those absolute paths in reports are provenance; adapt local paths when reproducing. The delivered checkout is `manabitan-tooling`.
+
+From a clean checkout of this tooling follow-up, reconstruct one candidate without requiring the original local commit to be present on the remote:
+
+```sh
+git worktree add --detach ../jmdict-baseline d829f5b6e6a75ee8859d38d537d224ec33c4930e
+git worktree add --detach ../jmdict-keys d829f5b6e6a75ee8859d38d537d224ec33c4930e
+git -C ../jmdict-keys apply --index --binary \
+  "$(pwd)/builds/perf/20261119/candidates/keys.patch"
+git -C ../jmdict-keys write-tree
+```
+
+The last command must print `49ef9adaa33f6e0ba68def569064dd0530fcfd82`. Use the corresponding patch and expected tree above for each independent candidate. Inspect the staged diff, then make a local commit if a clean commit identity is desired; the reconstructed tree is the byte-level identity. In each worktree run `npm ci` and `npm run build:libs` so it uses its own source-verified WASM. Prepare the locked archives with `node dev/perf/prepare-dictionaries.js` in the tooling checkout, or pass an already verified cache.
+
+Run new cohorts sequentially with no concurrent builds, tests or profilers:
+
+```sh
+taskset -c 0 node dev/perf/import-lookup-screen.js jmdict \
+  --baseline-root ../jmdict-baseline --source-root ../jmdict-keys \
+  --cache-dir ./builds/e2e-dictionary-cache \
+  --flags '{}' --pairs 8 --initial-order BA --passes 3 \
+  --out builds/perf/review-keys-jmdict.json
+taskset -c 0 node dev/perf/term-key-reuse-screen.js runs \
+  --baseline-root ../jmdict-baseline --source-root ../jmdict-keys \
+  --pairs 8 --initial-order BA --warmups 10 --passes 10 \
+  --out builds/perf/review-keys-runs.json
+taskset -c 0 node dev/perf/import-dedup-screen.js jmdict \
+  --baseline-root ../jmdict-baseline --source-root ../jmdict-storage \
+  --cache-dir ./builds/e2e-dictionary-cache \
+  --pairs 8 --initial-order BA --device-memory-gib 8 \
+  --out builds/perf/review-dedup-high-memory.json
+```
+
+Create `../jmdict-storage` with `recent-source-preflight.patch` before the last command. For A/A, use the baseline root for both arms. CPU 0 must be allowed on the host; a different affinity is a separately declared protocol. Freeze all sources and generated artifacts throughout a cohort.
+
+Those commands use the delivered tools. To reproduce an earlier runner exactly, copy its SHA-named snapshot from `builds/perf/20261119/runners/` to its original `dev/perf/` filename in a separate tooling checkout before running; snapshots cannot run directly from the evidence directory because their relative imports expect `dev/perf/`. Do not overwrite the runner during a cohort.
+
+The candidate patches, summaries and runner snapshots are individually committed. `evidence.tar.gz` contains raw observations, command receipts, diagnostic logs and plans. Final validation receipts are committed separately under `validation/`. `evidence-manifest.json` records every archive member's byte length and SHA-256 and the archive hash. Extract the archive at the repository root to restore its `builds/perf/20261119/` paths; then run `python builds/perf/20261119/summarize-results.py` to regenerate the campaign summary. Final delivery functional checks under `validation/` are excluded from campaign aggregation. An archive is not required to construct the candidate source or run a fresh screen.
+
+### Validation and next decision
+
+Focused source validation passed: numeric bounds **469 tests** (17 new), previous-key reuse **218 tests** (19 new), escape witnesses **470 tests**, and recent-source preflight **137 tests** (8 new). These suite counts overlap and must not be added as distinct tests. Pinned native rebuild checks and relevant scoped lint passed for the native candidates. The storage candidate passed main TypeScript checking. The merged three tooling files passed scoped ESLint and the full dev TypeScript project.
+
+The final tooling commit is `18c990a857a589d0e3c7ae3f2d1b5040189286ae`, directly atop PR #757. All seven dry-build targets passed. A separate two-pair AB/BA JMdict smoke passed in all four observations: requested baseline/key roots and pinned WASM, production glossary validation, 526,942 rows, 19,446,728 lookup-index bytes, eight fused attempts and zero fallbacks/discarded rows. The complete digest was identical throughout. These smoke timings are excluded from the campaign. Exact commands, source hashes and outcomes are in [tooling-validation.json](../../builds/perf/20261119/validation/tooling-validation.json).
+
+The storage candidate also passed all seven dry-build targets. Its first full-unit attempt passed 614 test files and 13,654 tests, but two suites failed setup because this invocation omitted the pinned compiler environment. A first focused retry still could not find the versioned `wasm-ld-21` executable. Adding the extracted compiler's `usr/bin` and LLVM bin directories to `PATH` fixed resolution; both suites then passed all 20 tests without a repository change. Every failed attempt is retained. The final full-suite retry passed **616/616 test files: 13,674 tests passed and 47 skipped (13,721 total)**, exit 0, in 515.57 seconds, completed at 20:39:29 UTC. The measured source hashes remained unchanged. All commands, environment corrections, failures and final outcomes are in [validation-summary.json](../../builds/perf/20261119/validation/validation-summary.json).
+
+The published tooling code revision `18372138792a47b0839815cad9086af497d2410a` also passed [CI](https://github.com/ManabiIO/manabitan/actions/runs/44610162381), including JavaScript, all four TypeScript projects, unit/options tests, all-target build, the Chromium Anki matrix and full Chromium/Firefox extension tests. The exact check snapshot is [tooling-ci-1837213.json](../../builds/perf/20261119/validation/tooling-ci-1837213.json). Subsequent receipt-only updates preserve the three validated tool hashes; their own CI status is separate. Those browser checks exercise the unchanged runtime in this tooling branch, not the unapplied candidate patches.
+
+These checks qualify only their named source checkout; they do not retroactively establish browser, persistence or performance behavior for every candidate.
+
+Concurrent [PR #758](https://github.com/ManabiIO/manabitan/pull/758), [PR #759](https://github.com/ManabiIO/manabitan/pull/759) and [PR #760](https://github.com/ManabiIO/manabitan/pull/760) cover related but different cache-copy, publication and escape-witness implementations. Their source trees, binaries and protocols differ. This round neither modifies those branches nor borrows their measurements or tests to qualify these patches.
+
+A next performance decision requires a quiet supported browser host, same-source controls, reversed-order replication, complete file-input-to-UI import timing and exact persistence/reopen equality. Keep cancellation/recovery, process-tree memory, stored size and subsequent lookup latency as separate gates. Full browser performance, OPFS persistence/reopen equivalence, recovery and lookup-latency qualification for the runtime candidates were not completed here. The current evidence supports retaining the experiments and the improved screening tools, with no runtime promotion.

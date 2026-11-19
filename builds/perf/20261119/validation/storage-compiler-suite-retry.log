@@ -1,0 +1,45 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1
+
+
+ RUN  v4.1.12 /workspace/scratch/f34c9c9fae89/manabitan-storage
+
+ ❯ test/term-bank-crc.test.js (3 tests | 3 skipped) 220ms
+ ❯ test/term-bank-memory-page.test.js (17 tests | 17 skipped) 211ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-crc.test.js [ test/term-bank-crc.test.js ]
+Error: No supported wasm compiler found; set MANABITAN_CLANG or CLANG
+ ❯ findCompiler test/util/wasm-compiler.js:48:11
+     46|         } catch { /* Try the next repository-supported compiler. */ }
+     47|     }
+     48|     throw new Error('No supported wasm compiler found; set MANABITAN_C…
+       |           ^
+     49| }
+     50|
+ ❯ test/term-bank-crc.test.js:38:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/term-bank-memory-page.test.js [ test/term-bank-memory-page.test.js ]
+Error: No supported wasm compiler found; set MANABITAN_CLANG or CLANG
+ ❯ findCompiler test/util/wasm-compiler.js:48:11
+     46|         } catch { /* Try the next repository-supported compiler. */ }
+     47|     }
+     48|     throw new Error('No supported wasm compiler found; set MANABITAN_C…
+       |           ^
+     49| }
+     50|
+ ❯ test/term-bank-memory-page.test.js:22:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  20 skipped (20)
+   Start at  15:25:33
+   Duration  859ms (transform 43ms, setup 30ms, import 49ms, tests 431ms, environment 0ms)
+

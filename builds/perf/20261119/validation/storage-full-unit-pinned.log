@@ -1,0 +1,184 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:unit
+> vitest run --maxWorkers=1
+
+
+ RUN  v4.1.12 /workspace/scratch/f34c9c9fae89/manabitan-storage
+
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: invalid XML: no element found: line 1, column 0.
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: invalid XML: no element found: line 1, column 27.
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: unexpected XML root 'preferences'; expected 'map'.
+Unexpected ownership or mode for /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: 10002 10001 600; expected app UID 10001.
+Failed to restore org.mozilla.firefox to its default enabled state.
+Failed to restore org.mozilla.firefox to its default enabled state.
+Unexpected ownership or mode for /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: 10002 10001 600; expected app UID 10001.
+Failed to restore org.mozilla.firefox to its default enabled state.
+Firefox process remained alive after disabling org.mozilla.firefox; refusing to edit cached preferences.
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: no element found: line 1, column 0
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: no element found: line 1, column 13
+Unexpected authoritative Fenix preferences XML root at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: 'preferences'
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: no element found: line 1, column 0
+Fenix did not retain pref_key_remote_debugging=true after the Firefox Android install ACK.
+Sourcemap for "/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/lib/linkedom.js" points to missing source files
+Sourcemap for "/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/lib/parse5.js" points to missing source files
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdx.js.
+Error: An error occurred while trying to read the map file at mdx.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdx.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdict.js.
+Error: An error occurred while trying to read the map file at mdict.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdict.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdict-base.js.
+Error: An error occurred while trying to read the map file at mdict-base.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdict-base.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/lzo1x-wrapper.js.
+Error: An error occurred while trying to read the map file at lzo1x-wrapper.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/lzo1x-wrapper.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/lzo1x.js.
+Error: An error occurred while trying to read the map file at lzo1x.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/lzo1x.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/utils.js.
+Error: An error occurred while trying to read the map file at utils.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/utils.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/ripemd128.js.
+Error: An error occurred while trying to read the map file at ripemd128.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/ripemd128.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+3:33:24 PM [vite] (ssr) Failed to load source map for /workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdd.js.
+Error: An error occurred while trying to read the map file at mdd.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/f34c9c9fae89/manabitan-storage/ext/js/dictionary/mdx/vendor/js-mdict/mdd.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/f34c9c9fae89/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+
+
+
+
+
+START missing segment 0 cannot shift surviving content addresses
+PASS missing segment 0 cannot shift surviving content addresses
+START missing segment 1 cannot shift surviving content addresses
+PASS missing segment 1 cannot shift surviving content addresses
+START unreadable segment 0 cannot disappear from the content map
+PASS unreadable segment 0 cannot disappear from the content map
+START unreadable segment 1 cannot disappear from the content map
+PASS unreadable segment 1 cannot disappear from the content map
+START unreadable segment 2 cannot disappear from the content map
+PASS unreadable segment 2 cannot disappear from the content map
+START ambiguous numeric segment 0 is not admitted
+PASS ambiguous numeric segment 0 is not admitted
+START ambiguous numeric segment 01 is not admitted
+PASS ambiguous numeric segment 01 is not admitted
+START ambiguous numeric segment 9007199254740992 is not admitted
+PASS ambiguous numeric segment 9007199254740992 is not admitted
+START contiguous legacy short segments and unrelated files remain readable
+PASS contiguous legacy short segments and unrelated files remain readable
+START rollback can remove a gapped interrupted-only segment
+PASS rollback can remove a gapped interrupted-only segment
+START direct-batch: write failure remains fatal until rollback
+PASS direct-batch: write failure remains fatal until rollback
+START blob: write failure remains fatal until rollback
+PASS blob: write failure remains fatal until rollback
+START outside-import: write failure remains fatal until rollback
+PASS outside-import: write failure remains fatal until rollback
+START failed close cannot make subsequent finalization report success
+PASS failed close cannot make subsequent finalization report success
+START out-of-range snapshot refresh cannot rewind batch append cursors
+PASS out-of-range snapshot refresh cannot rewind batch append cursors
+START out-of-range snapshot refresh cannot rewind blob append cursors
+PASS out-of-range snapshot refresh cannot rewind blob append cursors
+START out-of-range snapshot refresh cannot rewind derived-prefix append cursors
+PASS out-of-range snapshot refresh cannot rewind derived-prefix append cursors
+START NotReadable snapshot recovery cannot discard active append accounting
+PASS NotReadable snapshot recovery cannot discard active append accounting
+START failed import create remains fatal until rollback
+PASS failed import create remains fatal until rollback
+START failed import seek remains fatal until rollback
+PASS failed import seek remains fatal until rollback
+START snapshot refresh rejects shorter-tail instead of rebasing existing addresses
+PASS snapshot refresh rejects shorter-tail instead of rebasing existing addresses
+START snapshot refresh rejects changed-prefix instead of rebasing existing addresses
+PASS snapshot refresh rejects changed-prefix instead of rebasing existing addresses
+START snapshot refresh rejects missing-tail instead of rebasing existing addresses
+PASS snapshot refresh rejects missing-tail instead of rebasing existing addresses
+START external tail growth remains readable and preserves the next append cursor
+PASS external tail growth remains readable and preserves the next append cursor
+START snapshot publication and append reservation share ownership (queued=false)
+PASS snapshot publication and append reservation share ownership (queued=false)
+START snapshot publication and append reservation share ownership (queued=true)
+PASS snapshot publication and append reservation share ownership (queued=true)
+START reset can remove gapped interrupted segments without publishing them
+PASS reset can remove gapped interrupted segments without publishing them
+START successful finalization remains idempotent and snapshots permit next import
+PASS successful finalization remains idempotent and snapshots permit next import
+START failed rollback cannot re-enable admission over unverified content
+PASS failed rollback cannot re-enable admission over unverified content
+Version: 26.11.16.0...
+Building firefox-android...
+
+Version: 26.11.16.0...
+Building firefox-android...
+
+Version: 26.11.16.0...
+Building firefox-android...
+
+
+Version: 26.11.16.0...
+Building firefox-android...
+Version: 26.11.16.0...
+Building firefox-android...
+Version: 26.11.16.0...
+Building firefox-android...
+
+Version: 26.11.16.0...
+Building firefox-android...
+Version: 26.11.16.0...
+Building firefox-android...
+
+ Test Files  616 passed (616)
+      Tests  13674 passed | 47 skipped (13721)
+   Start at  15:30:54
+   Duration  514.83s (transform 11.65s, setup 4.82s, import 106.94s, tests 297.76s, environment 352ms)
+

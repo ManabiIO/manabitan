@@ -1,0 +1,28 @@
+{
+  "name": "storage-full-unit-pinned",
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+  "command": [
+    "npm",
+    "run",
+    "test:unit",
+    "--",
+    "--maxWorkers=1"
+  ],
+  "environmentOverrides": {
+    "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+    "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+    "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+  },
+  "pathPrefixes": [
+    "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin",
+    "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin"
+  ],
+  "compilerVersion": "Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)",
+  "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+  "startedAt": "2026-11-19T20:30:54.253256+00:00",
+  "heartbeatScope": "Live descendant process CPU counters and summed RSS within this exec namespace; diagnostic only, shared RSS pages can be counted more than once",
+  "exitCode": 0,
+  "durationSeconds": 515.5672359319979,
+  "completedAt": "2026-11-19T20:39:29.821448+00:00",
+  "maxSampledProcessRssBytes": 1408724992
+}

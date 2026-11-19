@@ -1,0 +1,17 @@
+{
+  "name": "storage-main-types",
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+  "command": [
+    "node",
+    "--max-old-space-size=2048",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--project",
+    "jsconfig.json"
+  ],
+  "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+  "startedAt": "2026-11-19T20:13:07.896330+00:00",
+  "exitCode": 0,
+  "durationSeconds": 12.734882636999828,
+  "completedAt": "2026-11-19T20:13:20.631617+00:00"
+}

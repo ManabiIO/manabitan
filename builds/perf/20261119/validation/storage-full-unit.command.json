@@ -1,0 +1,16 @@
+{
+  "name": "storage-full-unit",
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+  "command": [
+    "npm",
+    "run",
+    "test:unit",
+    "--",
+    "--maxWorkers=1"
+  ],
+  "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+  "startedAt": "2026-11-19T20:14:18.112341+00:00",
+  "exitCode": 1,
+  "durationSeconds": 602.8907181780014,
+  "completedAt": "2026-11-19T20:24:21.003644+00:00"
+}

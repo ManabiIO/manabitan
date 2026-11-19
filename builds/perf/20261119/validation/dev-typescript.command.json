@@ -1,0 +1,19 @@
+{
+  "name": "dev-typescript",
+  "command": [
+    "node",
+    "--max-old-space-size=2048",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--project",
+    "dev/jsconfig.json"
+  ],
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+  "environmentOverrides": {},
+  "startedAt": null,
+  "completedAt": null,
+  "timestampNote": "Exact timestamps were not captured for this earlier completed check. Exit status was observed directly.",
+  "exitCode": 0,
+  "combinedOutput": "tooling-dev-tsc.log",
+  "outputNote": "No diagnostics."
+}

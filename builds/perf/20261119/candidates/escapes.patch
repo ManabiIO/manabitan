@@ -1,0 +1,343 @@
+From eb751ca9ef13dc2a17b46343ab70d436fd40b330 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 19 Nov 2026 13:59:07 -0500
+Subject: [PATCH] Reuse parsed escape witnesses in fused term key interning
+
+---
+ dev/data/dictionary-wasm/manifest.json        |   4 +-
+ .../dictionary-wasm/term-bank-parser.wasm     | Bin 52930 -> 53559 bytes
+ ext/js/dictionary/wasm/term-bank-parser.c     |  34 ++++++++--
+ test/term-bank-experiments.test.js            |  64 ++++++++++++++++++
+ test/term-bank-parser-string-scan.test.js     |  13 ++++
+ 5 files changed, 106 insertions(+), 9 deletions(-)
+
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index ecea9ec..133b7c4 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "3a935860d179e7308db8aa26db2dd2199667b0fedda2c846830bc60e1d8be72b",
++    "sourceDigest": "267bd6e95f5b92c9be4665f06963fee63b273bc7f269d630fb7226a82faf61ac",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -57,7 +57,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5"
++            "sha256": "8a87f8aa3fd57e60e9b91ece9e97b2a1ccaed2d164ea949101898ed6e3dce62a"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index 8a347f00a90af6ecd692f971b867d7c08bc2a753..9f28b4baf1a612e04a6124148e8d2dfa4095f796 100644
+GIT binary patch
+delta 2943
+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
+
+delta 2365
+zcmZuyO^6&t6t1f7-I>|$-t8o_+0D%C%&Y2|aiXhPjcimBnOfbQ-Hb6Hh({G~wTiBa
+zKZuSHW5hoqErJKZAM~InnS+QP#Gjie9=xbQJO~OZsOU}N_o^ov#2uD;uimToz5jma
+z)!@UIf>_*o&mB?-A-|WqpNp@2?#6euR8ys?sdA}QnTg^kiGpNyE{$eXq^6Ty(bRM_
+zJ|O>;>Z7N|7X(+e)Y+NwZRQI#UhO<4$M1KOp!w-+phohcg;Dk>{)A1pP1G((q2v6=
+z{mY}|uSf|Bh|d)YEV(sth;MA_{3Vk;x5lsTDg+-0XJ)NfRl*7?QDxgys6wS-UC%-H
+z3TIN>hjqOR++nA8ldvPF_mHyEX@$!br>j=z`Jk^Z?~@|AmB5saV-=Ag<#a{$gT5!t
+z-iw7Wp}pUk*e(ncX(h$^cNgjrYpXs<Qp0~<gAeT)F-QbWc{un;K~IHN3}|MZ=52Z7
+z?i~*V)tPnZ&D+wkf8JBXVa2Ln{2+XI$A)Z9>5zT$fT5`jlKk{V^D@rQoWAJF7?2x@
+zqS*e$XG9eaGz1Sl5rHQ)fae_HR0N|_6E2@w?u_OD&rxja1uE%9k1<V)NSRr*AB)?a
+z+1FD&Q^N%<9EWa5f^gL~b!QsL4!c*Un$t^Eqna)A|5n{Jw{;8d)@*5Lh$G!gEw^6?
+zyk4T_Hj_6bG8#drY0EoCQ**-@=z-YQ8Jvd6HfzH&s?ny*0S%A+IY7V};xw5Lv1R3b
+zI)kkVROX=?(4F8w#KxPXx4qSjv~xNOMt#aqa<-gNozHWY;X|9V&}IN6FQW!t)^wdJ
+zdWj3<Q<d4WGfk>-7Bi}CB`OXgVqo1u3^)j8${b4FKH%_ri8-VI25G+-32J#4F@aHp
+zIG5O!_Qa1iSF(*KIF?`l?$mv}DVN|1Zm-=;9cF5lsXkL>TI3@_Z`T|eip#!8b7<6v
+zdp5M+${qW)uN?4Ed^BF{Xcvsl(oFg~4{H+etAC~G3;tHcVFbe!wkrQeE|4idNKsG4
+zJV@N(0Oka$z7^bz+a{)%D#JPkYosuI#8YMschVlJa1pH8&>4LF?~mqZ%R;IkoSH5P
+zjs@lSh-mYG6r#2v@Jr{5W+tMtjUk#oPlQa|g7K;p_`e__Adzc!;ExICd&B-T;Q}x7
+z+{9{XtA4J|^QAlyE!qaQ+|QRTToCgBBXi!>>4~^)dp=co85UEXf3|w*^~i!9>Ci5p
+z6Jq+QlD@&|#~ks!x26hf;d$|JZK_2UF4r-`#QB?-t?lK4Ff@`ck0%l(K|jss>R?v=
+zzx9-F9z52J3AjF5ztE812rIeR-V~3=2TxsBeobS)tB11j+M}PVaI~tH^Tvs8wCr@3
+zo1<fw^J6F0tLam|bvUdpPe-Q*#kWq}c&JAmI?_{R(^^&Sf({Kjm<l>J-Bs0q;})i{
+z7#EA9njd=Xhb7QGrzH+@x`|`a>2)jh2K2l6H7CsoGf?G~E_+JwE<&E0AWhTyp2Of3
+zoyKhkhMLZg`@fe>`-szh!ftW8Q5;=A^j&Im*9tx0a0GSPkuIxsNpkaigLaw2u+gFQ
+zBw*u?n)#b24|E%p=s`q%d-iNF#0ncw!<jYkpS<_m6Az>>a-z&;e)i<vqgx2%D0_{i
+zP^B%a?se>acRi7+4>at8A+7MI>tUpImfK(#4WVWvE7B&%)u%Zc<~Kk7`jIWTM;Gqs
+zEjkLy9Hn{4;o%Cc9*2(;1k=S+uzfn<jHKCN62R^tx2G<aoB5rmS~m?z>I2l$D-o^J
+zkOxj8>J2M*u<$yzUDTve)TGKa5qg7K9&0yU!v0<BxCQ)*+Cv3X9e;o7OSzc>3=Oet
+zq#bR*eP4F&#KYK99qg#|<zfsZ?r?)0V@D9AE`8;k0GH`lJ-Mu~W&Haxj0!qJAwJ3-
+zOft}U+jX#q$H$)DC-+Ynd|D`dzA(d?fuXYL+qZu|^Xr4Rd#wEFXWo`u<Ex+jO5)ge
+Hx@rFgAGV0{
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 6a01b0e..34b604b 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -518,9 +518,13 @@ static int is_hex_digit(uint8_t value) {
+         (value >= 'A' && value <= 'F');
+ }
+ 
+-static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
++/* A successful string is 1 without escapes or 3 with escapes. Boolean-only
++ * callers discard the witness through the wrapper below, so their inlined
++ * scanners do not need to retain it. This is JSON syntax, not UTF-8 validation. */
++static __attribute__((always_inline)) inline int parse_string_span_flags(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+     if (start >= len || src[start] != '"') { return 0; }
+     uint32_t i = start + 1u;
++    int flags = 1;
+     while (i < len) {
+         while (i + 8u <= len) {
+             uint64_t word;
+@@ -540,6 +544,7 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
+         if (i >= len) { break; }
+         uint8_t c = src[i];
+         if (c == '\\') {
++            flags = 3;
+             if (i + 1u >= len) { return 0; }
+             const uint8_t escape = src[i + 1u];
+             if (escape == 'u') {
+@@ -561,13 +566,17 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
+         if (c < 0x20u) { return 0; }
+         if (c == '"') {
+             *out_end = i + 1u;
+-            return 1;
++            return flags;
+         }
+         ++i;
+     }
+     return 0;
+ }
+ 
++static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
++    return parse_string_span_flags(src, len, start, out_end) != 0;
++}
++
+ static uint32_t key_hex4(const uint8_t* p);
+ 
+ /* Compare a short ASCII keyword without allocating or decoding an arbitrary
+@@ -1144,18 +1153,23 @@ static int parse_row_single_pass(
+     uint32_t prior_count,
+     uint32_t* glossary_witness,
+     uint32_t glossary_lookback,
+-    int validate_glossary_types
++    int validate_glossary_types,
++    uint32_t* out_unescaped_key_mask
+ ) {
+     if (row_start >= len || src[row_start] != '[') { return 0; }
+     clear_term_row_meta(out_meta);
+ 
+     uint32_t i = row_start + 1u;
+     uint32_t field_index = 0u;
++    // Missing fields remain unwitnessed, preserving the permissive parser's
++    // established exceptional-key fallback without changing TermRowMeta.
++    uint32_t unescaped_key_mask = 0u;
+     while (i < len) {
+         i = skip_ws(src, len, i);
+         if (i >= len) { return 0; }
+         if (src[i] == ']') {
+             *out_next = i + 1u;
++            if (out_unescaped_key_mask != 0) { *out_unescaped_key_mask = unescaped_key_mask; }
+             return out_meta->expression_length > 0u && (!validate_glossary_types || field_index == 8u);
+         }
+         // Source validation is format 3-specific. Generic parser callers can
+@@ -1181,6 +1195,10 @@ static int parse_row_single_pass(
+                     &out_meta->glossary_requires_text_normalization,
+                     validate_glossary_types
+                 )) { return 0; }
++        } else if (field_index < 2u && out_unescaped_key_mask != 0 && src[i] == '"') {
++            const int string_flags = parse_string_span_flags(src, len, i, &value_end);
++            if (string_flags == 0) { return 0; }
++            unescaped_key_mask |= (uint32_t)(string_flags == 1) << field_index;
+         } else if (!parse_value_span(src, len, i, &value_end)) {
+             return 0;
+         }
+@@ -1192,6 +1210,7 @@ static int parse_row_single_pass(
+         if (i >= len) { return 0; }
+         if (src[i] == ']') {
+             *out_next = i + 1u;
++            if (out_unescaped_key_mask != 0) { *out_unescaped_key_mask = unescaped_key_mask; }
+             return out_meta->expression_length > 0u && (!validate_glossary_types || field_index == 8u);
+         }
+         if (src[i] != ',') { return 0; }
+@@ -1777,7 +1796,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len,
+             }
+         }
+         uint32_t row_end = 0u;
+-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
++        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+             return -1;
+         }
+         ++row_count;
+@@ -1815,7 +1834,7 @@ static int32_t parse_term_bank_impl(
+     while (status > 0) {
+         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
+         uint32_t row_end = 0u;
+-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
++        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+             return -1;
+         }
+         ++row_count;
+@@ -2855,6 +2874,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+             return -4;
+         }
+         uint32_t row_end = 0u;
++        uint32_t unescaped_key_mask = 0u;
+         uint32_t glossary_witness = 0xffffffffu;
+         uint32_t glossary_lookback = 0u;
+         if (validated_glossary_reuse_enabled && row_count > 0u) {
+@@ -2867,7 +2887,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+             }
+         }
+         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u)) {
++                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &unescaped_key_mask)) {
+             return -1;
+         }
+         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
+@@ -2917,7 +2937,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+             const uint8_t* value_source = src;
+             uint32_t value_start = token_start + 1u;
+             uint32_t value_length = token_length - 2u;
+-            if (json_string_token_has_escape(src, token_start, token_length)) {
++            if ((unescaped_key_mask & (1u << field)) == 0u) {
+                 if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+                 const int32_t decoded_length = decode_escaped_key(
+                     src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
+diff --git a/test/term-bank-experiments.test.js b/test/term-bank-experiments.test.js
+index 9a8e549..46e340f 100644
+--- a/test/term-bank-experiments.test.js
++++ b/test/term-bank-experiments.test.js
+@@ -276,6 +276,70 @@ describe('term-bank experiment defaults', () => {
+ })
+ 
+ describe('native exceptional keys', () => {
++    test.each([false, true])('keeps string escape witnesses local to each field, row and bank (native escapes=%s)', async (nativeEscapes) => {
++        const tokens = [
++            ['"plain-0"', '"reading-0"'],
++            [String.raw`"x\u65e5"`, '"plain-reading"'],
++            ['"plain-2"', String.raw`"y\u65e5"`],
++            ['"plain-3"', '"reading-3"'],
++            [String.raw`"\u0061"`, String.raw`"\u0061"`],
++            ['"a"', String.raw`"\u0061"`],
++            [String.raw`"\u0061"`, '"a"'],
++            ['"plain-4"', '""'],
++            ['"plain-5"', '"reading-5"'],
++            [String.raw`"q\"uote"`, String.raw`"r\\ead"`],
++            ['"plain-6"', '"reading-6"'],
++            [String.raw`"\uD800"`, String.raw`"\uDC00"`],
++            ['"plain-final"', '"reading-final"'],
++        ]
++        for (const padding of [0, 7, 8, 15, 16]) {
++            const prefix = 'p'.repeat(padding)
++            const padded = tokens.map((pair) => pair.map((token) => (token === '""' ? token : `"${prefix}${token.slice(1)}`)))
++            const rows = padded.map(([expression, reading], i) => `[${expression},${reading},"noun","",${i},["definition"],${i},""]`)
++            const sources = [rows.slice(0, 4), rows.slice(4, 8), rows.slice(8)].map((bank) => `[${bank.join(',')}]`)
++            const baseline = await parse(sources, {experimentalSkipFusedParse: true})
++            const result = await parse(sources, flags(nativeEscapes ? 11 : 9), true)
++            expect(result.rows).toEqual(baseline.rows)
++            const expected = padded.map(([expression, reading]) => {
++                const decodedExpression = /** @type {string} */ (JSON.parse(expression))
++                const decodedReading = /** @type {string} */ (JSON.parse(reading))
++                return {
++                    expression: [...encoder.encode(decodedExpression)],
++                    reading: [...encoder.encode(reading === '""' ? decodedExpression : decodedReading)],
++                    readingEqualsExpression: reading === '""' || reading === expression ? 1 : 0,
++                }
++            })
++            expect(result.rows.map(({expression, reading, readingEqualsExpression}) => ({expression, reading, readingEqualsExpression}))).toEqual(expected)
++            expect(result.profile.fusedParseAttempts).toBe(1)
++            expect(result.profile.fusedParseFallbacks).toBe(nativeEscapes ? 0 : 1)
++            expect(result.profile.escapedKeyDecodeCount).toBe(nativeEscapes ? 9 : 0)
++            if (!nativeEscapes) { expect(result.profile.discardedFusedRows).toBe(1) }
++        }
++    })
++
++    test('does not treat escapes in other fields as key escapes', async () => {
++        const sources = [
++            JSON.stringify([['literal', 'reading', 'tag"', 'rule\\', 0, ['line\nbreak'], 1, 'term\ttag']]),
++            JSON.stringify([['next', '', 'tag\\', '', 1, ['quote"', {type: 'text', text: 'other\ntext'}], 2, '']]),
++        ]
++        const baseline = await parse(sources, {experimentalSkipFusedParse: true})
++        const result = await parse(sources, flags(9), true)
++        expect(result.rows).toEqual(baseline.rows)
++        expect(result.profile.fusedParseAttempts).toBe(1)
++        expect(result.profile.fusedParseFallbacks).toBe(0)
++        expect(result.profile.escapedKeyDecodeCount).toBe(0)
++    })
++
++    test.each([0, 1])('retains generic rejection of non-string key field %i', async (field) => {
++        for (const token of ['null', 'true', '17', '[]', '{"text":"value"}', '["nested"]']) {
++            const fields = ['"expression"', '"reading"', '""', '""', '0', '[]', '1', '""']
++            fields[field] = token
++            const sources = [`[[${fields.join(',')}]]`, '[]']
++            await expect(parse(sources, {experimentalSkipFusedParse: true})).rejects.toThrow(/term-bank parser failed/)
++            await expect(parse(sources, flags(11), true)).rejects.toThrow(/term-bank parser failed/)
++        }
++    })
++
+     const tokens = [
+         String.raw`"\u65e5本語"`,
+         String.raw`"a\"b"`,
+diff --git a/test/term-bank-parser-string-scan.test.js b/test/term-bank-parser-string-scan.test.js
+index ecf73f3..c156352 100644
+--- a/test/term-bank-parser-string-scan.test.js
++++ b/test/term-bank-parser-string-scan.test.js
+@@ -142,6 +142,19 @@ const differentialAlignments = Array.from({length: 16}, (_, index) => index)
+ const specialPositions = Array.from({length: 16}, (_, index) => index)
+ 
+ describe('term-bank string scanning', () => {
++    test('preserves the generic metadata ABI and permissive missing-key spans', () => {
++        for (const token of ['"literal"', String.raw`"\u0061"`]) {
++            const source = `[[${token}]]`
++            const result = parse(source)
++            expect(result.count).toBe(1)
++            expect(result.spans).toHaveLength(17)
++            expect(readSpan(result, 0)).toBe(JSON.parse(token))
++            expect(result.spans.slice(2, 11)).toEqual(new Array(9).fill(0))
++            expect(result.spans[11]).toBe(0xffffffff)
++            expect(result.spans.slice(12)).toEqual(new Array(5).fill(0))
++        }
++    })
++
+     test.each(alignments)('preserves string spans at byte alignment %i', (padding) => {
+         const values = [
+             '',
+-- 
+2.52.0
+
