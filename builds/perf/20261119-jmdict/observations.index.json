@@ -1,0 +1,261 @@
+{
+  "archive": {
+    "byteLength": 10457752,
+    "compression": "gzip, level 9, empty filename, mtime 0",
+    "path": "observations.json.gz",
+    "sha256": "d0bc67e55b553a18c6f1a2f22e5470f86f2ef21f166877ed828f334c1c63fdba",
+    "uncompressedByteLength": 98504019,
+    "uncompressedSha256": "90e0760a08c1a5e71aa70cf68af200d517572e84466de04131b5647dc100b120"
+  },
+  "baseCommit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+  "categories": {
+    "bundle-builder": {
+      "fileCount": 1,
+      "originalByteLength": 31077
+    },
+    "engine-token-screen": {
+      "fileCount": 13,
+      "originalByteLength": 1464763
+    },
+    "local-report-log-or-runner": {
+      "fileCount": 79,
+      "originalByteLength": 1845498
+    },
+    "native-token-cohort": {
+      "fileCount": 73,
+      "originalByteLength": 4052815
+    },
+    "prototype-artifact-manifest": {
+      "fileCount": 7,
+      "originalByteLength": 17351
+    },
+    "prototype-source-diff": {
+      "fileCount": 7,
+      "originalByteLength": 113569
+    },
+    "prototype-source-provenance": {
+      "fileCount": 7,
+      "originalByteLength": 6601
+    },
+    "remote-qualification": {
+      "fileCount": 1450,
+      "originalByteLength": 79249027
+    },
+    "source-or-toolchain-provenance": {
+      "fileCount": 9,
+      "originalByteLength": 1217507
+    },
+    "storage-component-screen": {
+      "fileCount": 10,
+      "originalByteLength": 1700256
+    }
+  },
+  "credentialScreen": {
+    "normalization": "Scan original text, HTML/JSON query delimiters, and up to two percent-decode passes without modifying captured bytes.",
+    "potentialMatches": [],
+    "rules": [
+      "authorization-value",
+      "github-token",
+      "private-key-marker",
+      "signed-query-value"
+    ],
+    "scope": "Heuristic pre-write credential/transport-URL screen; public artifact identifiers, digests, and ordinary URLs remain verbatim.",
+    "status": "passed",
+    "textFilesScanned": 1656,
+    "transportLinesOmitted": []
+  },
+  "evidenceCoverage": {
+    "browserObservations": 396,
+    "nativeTokenChildren": 36,
+    "negativeControlObservations": 74,
+    "originalReportHashesChecked": 864,
+    "problems": [],
+    "referencedFilesChecked": 1012
+  },
+  "exclusions": [
+    "Raw dictionary archives, extracted bank JSON, and captured content bytes (.bin).",
+    "Downloaded ZIP duplicates; the selected original extracted reports are retained.",
+    "Browser HTML, screenshots, videos, and other rendered presentation files.",
+    "Dependencies, Git internals, Python caches, toolchain binaries, and binary WASM artifacts.",
+    "Generated admission-audit and cache-copy-capture module copies; their generating runners are retained.",
+    "Unrelated worktree/build files; prototype changes are captured as source-only diffs plus artifact manifests.",
+    "No observation is excluded because it failed, was slow, or disagreed with a candidate benefit."
+  ],
+  "failedOrIncompleteJsonPreserved": [
+    {
+      "path": "remote-qualification-audit/KEY-ABC/_temp/jmdict-key-negative-evidence/001-round-1-A.json",
+      "sha256": "b6a515c445ce9c033c390b7a885ffd1bf652791e28cea153120bed0a6509f835",
+      "state": {
+        "complete": false,
+        "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(chunk.preparedLookupIndexes instanceof Map)\n\n    at parser.parseTermBankWithWasmColumnChunks.singleChunk (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:243:21)\n    at invokeColumnChunk (file:///home/runner/work/_temp/manabitan-baseline/ext/js/dictionary/term-bank-wasm-parser.js:2424:32)\n    at Module.parseTermBankWithWasmColumnChunks (file:///home/runner/work/_temp/manabitan-baseline/ext/js/dictionary/term-bank-wasm-parser.js:2428:62)\n    at async runFixture (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:239:13)\n    at async runChild (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:285:26)\n    at async file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:455:1",
+        "jsonStatus": "valid",
+        "kind": "native-key-negative-sample"
+      }
+    },
+    {
+      "path": "remote-qualification-audit/KEY-ABC/_temp/jmdict-key-negative-evidence/cohort.json",
+      "sha256": "61b2273b0d75b74ce60cfdeb15f92ce18e7759a7652378f7cc223a8d88e0bc4d",
+      "state": {
+        "complete": false,
+        "error": "Error: Observation 001-round-1-A failed: 1 null\n    at ChildProcess.<anonymous> (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:384:94)\n    at ChildProcess.emit (node:events:519:28)\n    at maybeClose (node:internal/child_process:1101:16)\n    at ChildProcess._handle.onexit (node:internal/child_process:304:5)",
+        "jsonStatus": "valid",
+        "kind": "native-key-negative-cohort"
+      }
+    },
+    {
+      "path": "remote-qualification-audit/KEY-CBA/_temp/jmdict-key-negative-evidence/001-round-1-C.json",
+      "sha256": "450d08018d1e4a0bcc232a895436893317f7f1f78acfe353231ad45985c3dd40",
+      "state": {
+        "complete": false,
+        "error": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(chunk.preparedLookupIndexes instanceof Map)\n\n    at parser.parseTermBankWithWasmColumnChunks.singleChunk (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:243:21)\n    at invokeColumnChunk (file:///home/runner/work/_temp/manabitan-baseline/ext/js/dictionary/term-bank-wasm-parser.js:2424:32)\n    at Module.parseTermBankWithWasmColumnChunks (file:///home/runner/work/_temp/manabitan-baseline/ext/js/dictionary/term-bank-wasm-parser.js:2428:62)\n    at async runFixture (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:239:13)\n    at async runChild (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:285:26)\n    at async file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:455:1",
+        "jsonStatus": "valid",
+        "kind": "native-key-negative-sample"
+      }
+    },
+    {
+      "path": "remote-qualification-audit/KEY-CBA/_temp/jmdict-key-negative-evidence/cohort.json",
+      "sha256": "e8edde5f1e92c68392d944b35ce05b09d35ab275b1e54ed33ff18c47c27c1634",
+      "state": {
+        "complete": false,
+        "error": "Error: Observation 001-round-1-C failed: 1 null\n    at ChildProcess.<anonymous> (file:///home/runner/work/manabitan/manabitan/test/perf/import-key-negative-cohort.mjs:384:94)\n    at ChildProcess.emit (node:events:519:28)\n    at maybeClose (node:internal/child_process:1101:16)\n    at ChildProcess._handle.onexit (node:internal/child_process:304:5)",
+        "jsonStatus": "valid",
+        "kind": "native-key-negative-cohort"
+      }
+    }
+  ],
+  "failedRequiredCohorts": [],
+  "fileCount": 1656,
+  "fileManifest": {
+    "content": "UTF-8 text is encoded back to UTF-8 to recover exact bytes; base64 is used only for non-UTF-8 files.",
+    "fields": [
+      "path",
+      "category",
+      "origin",
+      "byteLength",
+      "sha256",
+      "encoding",
+      "text or base64"
+    ],
+    "location": "observations.json.gz:files",
+    "paths": "Workspace-relative POSIX paths; generated/prototypes contains source-only patches and their provenance."
+  },
+  "invalidJsonPreserved": [],
+  "kind": "manabitan-jmdict-import-investigation-evidence",
+  "originalByteLength": 89698464,
+  "pendingCohorts": [],
+  "rebuild": {
+    "builder": "build-import-evidence.py",
+    "command": "python3 build-import-evidence.py --snapshot final",
+    "determinism": "Identical source bytes, prototype state, snapshot mode, and Python/zlib implementation produce identical gzip bytes. No wall-clock capture timestamp is added.",
+    "finalRequirement": "Final means terminal evidence capture, not successful qualification. All required cohorts must be terminal; failed terminal runs remain explicitly failed rather than being dropped.",
+    "verify": "python3 build-import-evidence.py --verify-only"
+  },
+  "requiredCohorts": [
+    {
+      "complete": true,
+      "expectedObservations": 42,
+      "expectedRounds": 12,
+      "name": "ABC",
+      "observedObservations": 42,
+      "observedRounds": 12,
+      "path": "remote-qualification-audit/ABC/_temp/jmdict-source-evidence/cohort.json",
+      "sha256": "1edd18eb35e99f397996e0043172ba55c41144a68da73a46339daa2070027946",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 42,
+      "expectedRounds": 12,
+      "name": "CBA",
+      "observedObservations": 42,
+      "observedRounds": 12,
+      "path": "remote-qualification-audit/CBA/_temp/jmdict-source-evidence/cohort.json",
+      "sha256": "5f358c84fbc7b49a1b1fe3639a58994097668456fbe0ef1ff9a22e6e588ee7a4",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 42,
+      "expectedRounds": 12,
+      "name": "KEY-ABC",
+      "observedObservations": 42,
+      "observedRounds": 12,
+      "path": "remote-qualification-audit/KEY-ABC/_temp/jmdict-source-evidence/cohort.json",
+      "sha256": "2375dff88785bc84baeb0d4db50677a334e9aa0177b2c58708a23c112e5b1125",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 42,
+      "expectedRounds": 12,
+      "name": "KEY-CBA",
+      "observedObservations": 42,
+      "observedRounds": 12,
+      "path": "remote-qualification-audit/KEY-CBA/_temp/jmdict-source-evidence/cohort.json",
+      "sha256": "5dfa592dce80588fa0cf2a9a5640c2e619535edc8d82825030373f342b9d207c",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 36,
+      "expectedRounds": 12,
+      "name": "NEGATIVE-ABC",
+      "observedObservations": 36,
+      "observedRounds": 12,
+      "path": "remote-qualification-audit/NEGATIVE-ABC/_temp/jmdict-key-negative-corrected/cohort.json",
+      "sha256": "17625f635c4d3fb866556861d2933175092ad70b43391185abb0662dd2550f84",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 36,
+      "expectedRounds": 12,
+      "name": "NEGATIVE-CBA",
+      "observedObservations": 36,
+      "observedRounds": 12,
+      "path": "remote-qualification-audit/NEGATIVE-CBA/_temp/jmdict-key-negative-corrected/cohort.json",
+      "sha256": "1a2925342a43e62631359c6f4201ffbd1d597f0b62b46ca23188ee4784494b1e",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 114,
+      "expectedRounds": 36,
+      "name": "FINAL-ABC",
+      "observedObservations": 114,
+      "observedRounds": 36,
+      "path": "remote-qualification-audit/FINAL-ABC/jmdict-source-evidence/cohort.json",
+      "sha256": "1b5b5abc83023ca2135a8426091e0e9b3a3edf7197dec1ac48e99ec4065ec195",
+      "state": "complete",
+      "terminal": true
+    },
+    {
+      "complete": true,
+      "expectedObservations": 114,
+      "expectedRounds": 36,
+      "name": "FINAL-CBA",
+      "observedObservations": 114,
+      "observedRounds": 36,
+      "path": "remote-qualification-audit/FINAL-CBA/jmdict-source-evidence/cohort.json",
+      "sha256": "5c93d748631a874859a4294410721ce4dc4ffe5390ef94f05605e73d93396a7d",
+      "state": "complete",
+      "terminal": true
+    }
+  ],
+  "schemaVersion": 1,
+  "snapshotStatus": "final",
+  "timingBoundaries": {
+    "analysis": "Bootstrap analysis and its source are retained. Hosts and fixed cohorts must be interpreted separately with their same-code controls. No outlier removal, failed-run replacement, or pooling of incompatible timing boundaries is performed by this builder.",
+    "copyPrimitive": "The bounded copy-only screen includes allocation and copying of the actual admitted JMdict cache intervals. Exact byte verification is outside timing. SharedArrayBuffer and ordinary ArrayBuffer cells, all warmups, all 12 balanced triplets, and identical A/C controls are retained. It is not an import measurement or a cache-method timer.",
+    "engineAndStorageScreens": "Node component screens retain their original per-stage wall/CPU observations. The engine screen simulates sequential worker jobs; admission diagnostics use a resident raw-byte sink instead of terminal compression/OPFS. Neither is browser import evidence. Identical-source controls exposed substantial local host/JIT drift.",
+    "nativeOnly": "Native parser cohorts and corrected unique-key controls time only the synchronous fused parse/content encoding/key interning export. Source inflation/CRC, setup, WASM compilation, output verification/copying, lookup preparation, compression, storage, transport, and UI are outside that timer. CPU counters are process-wide, including runtime threads. These are not whole-import measurements.",
+    "remoteBrowser": "Primary totalImportMs is browser monotonic file-input change to current-operation post-UI import completion. Worker and automation-observed times are distinct diagnostics. Startup, package construction, later validation, and restart checks are outside that primary timer. Each cohort's exact plan and raw reports are retained.",
+    "tracesAndOpportunityCounts": "Traces and instrumented aggregates are diagnostic and may include nested/concurrent work. The recent-content cache timer includes scans and map updates as well as copying; record finalization includes more than one close/flush. Opportunity counters measure algorithmic operations/bytes, not elapsed time or a demonstrated speedup."
+  }
+}

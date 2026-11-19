@@ -1,5 +1,155 @@
 # Codex instructions: import optimization experiments
 
+## 2026-11-19: JMdict source optimization round
+
+This round starts from `develop` commit `d829f5b6e6a75ee8859d38d537d224ec33c4930e`, tree `841406cd33f6871ab24aee771c1a7881d9e465f0`. The later sections retain the September flag-experiment handoff. Use the November identities below to reproduce this source comparison.
+
+The target is complete JMdict import with current production defaults (`--flags '{}'`). Worker counts, group planning, cache budgets, compression settings, persistence formats, and dictionary fixtures are unchanged. All remote qualification uses Ubuntu; no macOS runner is involved.
+
+**Outcome: retain the parser work in [draft PR #761](https://github.com/ManabiIO/manabitan/pull/761), without merging or claiming a reproducible complete-import speedup.** Row-token reuse improves the measured native-call interval, but its initial complete-import results disagree across hosts. The separate adjacent-key experiment has favorable final point estimates and a material unique-key regression on one host. It remains separate from the PR. The investigation retained all 396 browser observations: 360 measured imports and 36 warmups, across six independently audited cohorts. Neither hosts nor experiment stages are pooled.
+
+### Candidates and exact artifacts
+
+| Candidate                                   | Product commit                             | Parser WASM bytes | Parser WASM SHA-256                                                |
+| ------------------------------------------- | ------------------------------------------ | ----------------: | ------------------------------------------------------------------ |
+| Original baseline                           | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` |            52,930 | `f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5` |
+| Row token facts plus constant integer bound | `45cc145f5273c100042b218eb4a0b5ce40bf5523` |            53,165 | `14dc09dcff3d42597be31ffbd7fdcc64f071a80cabc6cd4ba38df9e531cce446` |
+| Incremental previous-row key reuse          | `97aa1167f5cbcd44e37d8cd39da48b8e693ba16b` |            53,391 | `2b0ee40a732c70b9ebe05bb37793141e91bf78ade202605e1d638b61d7c74a7b` |
+
+The first candidate retains escape flags and bounded integer values from the existing row grammar scan, eliminating later scans of those same tokens. The witness is a 16-byte stack value reset for every row. It does not change `TermRowMeta`, exports, persistent formats, or parser admission. Negative-zero scores, fractions, exponents, overflow, malformed JSON, and omitted/null sequences preserve existing behavior. The overflow guard uses the exact constant quotient `214748364` and sign-dependent final digit instead of division in each digit iteration.
+
+The second candidate adds 13 C lines. After existing escaped-key decoding and size admission, complete raw-token equality with the preceding row's same field permits reuse of its interned key ID. Current-row reading-equality metadata remains independent. The witness ends with the synchronous parse. The 20-group opportunity count found 393,110 matches, avoiding hashes of 5,185,253 key payload bytes plus table probes; these counts are not timing results. Opposite-field probing was rejected: 14 extra matches required 481,995 additional attempts.
+
+Pinned dictionary WASM is part of the current source/build contract. These candidates include the rebuilt parser WASM and `dev/data/dictionary-wasm/manifest.json`, produced with Clang/LLD 21.1.8. The canonical scanner is unchanged (`40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af`). A clean pinned baseline rebuild matched byte-for-byte before experimentation.
+
+### Qualification protocol and evidence
+
+The first research commit is `3462f2336f586222eae2312ce699de90155128d2`; its [Actions run](https://github.com/ManabiIO/manabitan/actions/runs/44597837976) compares the first candidate with the original baseline. The incremental key research commit is `b57f1f930e350cf98ab4e41cc4f69e97e3a37f52`; its [Actions run](https://github.com/ManabiIO/manabitan/actions/runs/44600383900) uses `45cc145` as the baseline. Runtime sources remain frozen during each complete cohort.
+
+Each comparison uses two independent Ubuntu 26.04 jobs, Node 22.22.0, release Chrome packages, and the pinned dictionary lock. Each host runs two excluded warmup triplets followed by twelve measured triplets. A and C are identical baseline packages; B is the candidate. All six arm permutations occur twice, with reversed starting order on the second host. Every observation creates a fresh browser profile and OPFS store. The timing boundary is the browser's file-input change through completion of the current operation's post-UI work. Tracing, phase profiling, screenshots, and process sampling are disabled during authoritative timing.
+
+The runner checks clean Git commit/tree identity, runtime source hashes, unchanged browser helpers and dependency/fixture locks, exact packaged WASM, package SHA, browser version, production flags, successful OPFS persistence, exact dictionary identity and row count, and twelve readability probes. It rechecks source/package identity at completion. Failed observations abort the cohort and remain preserved; there are no retries, omitted tails, or stopping at favorable results.
+
+Before browser timing, the existing full-output oracle compares every row and prepared index byte for JMdict (526,942 rows), JMnedict (667,942), and Jitendex (435,448). This oracle is component-level correctness evidence; its timing is not a complete-import result. After timing, one host runs the full release Chromium lifecycle and the other captures a separate diagnostic trace.
+
+The key comparison additionally runs a native-only negative control: 20,000 rows with 20,000 unique expressions and 20,000 unique readings (40,000 distinct keys total), with common prefixes and two banks in one fused group. Twelve balanced triplets use fresh Node children; each child has three complete warmups, explicit GC, ten measured fixture repetitions, and a final untimed full-output fingerprint. Only the native fused export contributes timing. Allocation/setup, lookup construction, transport, compression, persistence, and UI are excluded. Every invocation must emit all rows with zero fallback. Runner SHA-256: `3c3ade3d3b28f5366575ddc4fbda252eb4952a9e9afa82f83df72ee2fbb5b066`.
+
+The reusable browser runner is `test/perf/import-source-cohort.mjs` on the research commits, SHA-256 `969ab7216c250c466667a680394b2c44bd4d22eda2ec44cb2b3a4eb855a05de7`. Workflow files capture the complete build and execution commands. The first browser host reports Chrome 153.0.8010.12 and four available CPUs on an AMD EPYC 9V45 runner.
+
+### First browser comparison: hold
+
+Both hosts completed all 42 observations, all three dictionary byte oracles, and their post-timing gates. The parser change did not show a reproducible complete-import improvement. Negative percentages mean faster; positive percentages mean slower. Each row is a separate host, and absolute times are not pooled.
+
+| Host / initial order | Median A / B / C (ms) | B/A equal-work | C/A identical-code control | B/C equal-work | B/geometric-controls equal-work (95% interval) | B/geometric-controls paired median |
+| -------------------- | --------------------- | -------------: | -------------------------: | -------------: | ---------------------------------------------- | ---------------------------------: |
+| EPYC 9V45 / CBA      | 814.7 / 772.7 / 811.3 |         -2.66% |                     -1.03% |         -1.65% | -2.13% [-6.47%, +4.56%]                        |                             -5.11% |
+| EPYC 9V74 / ABC      | 953.2 / 980.0 / 942.5 |         +2.37% |                     +1.56% |         +0.80% | +1.65% [-1.18%, +4.42%]                        |                             +1.67% |
+
+The intervals are descriptive paired percentile bootstraps of all twelve complete triplets (200,000 resamples, fixed NumPy seed 20261119). They do not establish absence of rare regressions or hidden host effects. CBA's worst candidate/geometric-control pair was +31.12%; it remains included. ABC's candidate was faster than geometric controls in only four of twelve rounds. **Decision: hold the source optimization as an experiment; do not promote it as a demonstrated import speedup.**
+
+All oracle runs preserved native heap high-water marks and prepared index sizes: JMdict 61,603,840 / 19,446,728 bytes, JMnedict 46,989,312 / 26,292,164, and Jitendex 89,128,960 / 20,031,116. These are component heap/index observations, not whole-process peak memory or actual OPFS file-size measurements.
+
+The release Chromium lifecycle passed 91 phases with OPFS SAH-pool storage, no skipped verification, and the exact package used by ABC timing. Coverage included initial JMdict/Jitendex imports, concurrent lookups during import/update, dictionary update, restart persistence, JMdict/JMnedict batch import, hover/Reader flows, and deletion. The four recorded import flows reported zero errors and no fallback storage.
+
+The ordinary untraced reports support a narrower mechanism observation: the aggregate `parserParseBankMs` interval fell 10.97% on CBA and 4.92% on ABC against geometric controls, while identical-code C/A changes were -0.76% and -1.33%. Independent source and raw-report review confirmed one profile per group, twelve groups and twelve successful fused calls per observation. This is summed `Date.now()` elapsed time around native calls across three workers, including descheduling and overlapping intervals. It includes row validation, key interning, integer extraction, fused content encoding/hashing and within-group deduplication. It excludes inflation, JavaScript setup/copies, lookup preparation, transport, cross-group matching, compression, storage, and UI. Encoding is included in this fused interval even though the separate encode counter is zero. This is exploratory phase evidence, not CPU time or a complete-import gain.
+
+### Incremental key reuse: hold
+
+The two incremental browser cohorts compare the additional key reuse with the first parser candidate, not with the original source. Both completed all 42 observations and three full-row dictionary oracles before the later synthetic-control harness failure described below.
+
+| Host / initial order | Median A / B / C (ms)    | B/A equal-work | C/A identical-code control | B/C equal-work | B/geometric-controls equal-work (95% interval) | Faster paired rounds |
+| -------------------- | ------------------------ | -------------: | -------------------------: | -------------: | ---------------------------------------------- | -------------------: |
+| KEY-CBA              | 944.95 / 918.2 / 914.85  |         -2.02% |                     -0.53% |         -1.49% | -1.71% [-3.49%, +0.03%]                        |                 8/12 |
+| KEY-ABC              | 989.1 / 1004.4 / 1006.05 |         +2.87% |                     +2.88% |         -0.01% | +1.46% [-1.84%, +5.33%]                        |                 3/12 |
+
+The worst candidate/geometric-control pairs were +2.85% and +18.03%, respectively, and remain included. These results do not replicate an incremental complete-import benefit.
+
+The original unique-key control failed in its **untimed output checker**, after its first baseline child had completed three warmups and ten native measurements. The checker incorrectly required native prepared lookup indexes for this fixture; the normal parser can validly leave their construction to JavaScript. Both failed jobs, partial child reports, and timings remain in the evidence. Their browser results were already complete and were not rerun or discarded. Those partial synthetic timings are not qualified performance results.
+
+The corrected runner prepares missing indexes with the production helper after taking a stable snapshot and before any subsequent native parse, outside timing, and requires the complete output fingerprint. Native timing, exact row counts, zero fallback, and clean-source checks remain intact. Runner SHA-256 is `15b3258e97898d3a8ddfa29ce539d79f70dddd9913e4e55a25e13d2860162ddf`; research commit `05fe95754c9a3efccc711a4ea08333ab5e4b98a5` and [run 44603297727](https://github.com/ManabiIO/manabitan/actions/runs/44603297727) contain the correction. The product remains unchanged at `97aa116`.
+
+Both corrected cohorts completed: 72 fresh children, 216 warmup calls, 720 measured native calls, and 72 untimed verifications. Each emitted all 20,000 rows with zero fallback; all full-output fingerprints matched `1a2f70e79595f42118044def6035297c59ccf195d6a599d52f3eb4a3be2fae9e`.
+
+| Native-only unique-key control | B/A equal-work | C/A identical-code control | B/C equal-work | B/geometric-controls equal-work |
+| ------------------------------ | -------------: | -------------------------: | -------------: | ------------------------------: |
+| ABC process CPU                |         -4.57% |                     -0.38% |         -4.20% |                          -3.98% |
+| ABC elapsed wall               |         +0.02% |                     +4.66% |         -4.43% |                          -2.03% |
+| CBA process CPU                |        +20.19% |                     +3.57% |        +16.05% |                         +20.64% |
+| CBA elapsed wall               |        +10.22% |                     +1.84% |         +8.23% |                          +9.86% |
+
+The CBA regression concern is not cleared by the favorable ABC result. These are native-only Node measurements, not browser import results or proof of a universal regression. They prevent promotion of the extra key comparison on the present evidence.
+
+### Longer direct comparison: possible small gain, still hold
+
+The final fixed comparison tests the full combined candidate `97aa116` directly against original baseline `d829f5b`. Research commit `73b5648e29387c4375158787c35a6f3922f68eda`, [run 44603681425](https://github.com/ManabiIO/manabitan/actions/runs/44603681425), and `.github/workflows/jmdict-final-source-qualification.yml` preserve its exact commands. Each host completed two warmup triplets and **36 measured triplets**; all six permutations occur six times. Runtime source, pinned WASM, browser runner, production settings, fresh profiles, and timer boundary remain frozen. Both hosts also passed all three full-row dictionary oracles and 386 focused tests. This phase does not repeat full unit/lifecycle coverage already obtained for the same product.
+
+| Final host / initial order | Median A / B / C (ms)       | B/A equal-work | C/A identical-code control | B/C equal-work | B/geometric-controls equal-work (95% interval) | Faster paired rounds |
+| -------------------------- | --------------------------- | -------------: | -------------------------: | -------------: | ---------------------------------------------- | -------------------: |
+| EPYC 9V74 / CBA            | 936.30 / 925.65 / 950.60    |         -1.15% |                     +0.56% |         -1.70% | -1.38% [-3.10%, +0.40%]                        |                23/36 |
+| EPYC 7763 / ABC            | 1049.55 / 1025.60 / 1047.25 |         -2.70% |                     +0.42% |         -3.11% | -2.87% [-4.33%, -1.32%]                        |                30/36 |
+
+Candidate/geometric paired medians were -1.47% and -1.82%; the worst pairs were +11.85% and +14.28%. All observations are retained. For each triplet, the geometric control is `sqrt(A * C)`; the equal-work estimate compares total B time with the sum of those controls. The descriptive 95% intervals resample complete triplets 200,000 times with fixed seed 20261119, separately for each host. They do not account for every host effect or all exploratory selection.
+
+Both final point estimates favor the combined candidate, and ABC's interval is below zero. CBA still includes no effect, the earlier incremental cohorts disagree, and the synthetic unique-key regression remains. **Decision: preserve this as a promising but unqualified combined experiment. Do not fold key reuse into the primary PR or promote either source change as a general 2–3% import speedup.**
+
+### Local evidence and rejected directions
+
+Local component timing was inconclusive. In the strongest token-only screen, 36 fresh children performed 2,160 timed native calls with identical complete output fingerprints and zero fallback. Candidate equal-work CPU changed by -6.30%, while source-identical controls changed by -12.61%; paired medians were -10.42% and -13.22%, respectively. The control drift exceeded the apparent improvement. These measurements do not establish a speedup and are not pooled with browser results.
+
+| Direction                                               | Observation                                                                                                                                                        | Decision                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| Hoist native key validation across segmented compaction | About 0.7 ms component difference across eligible groups, requiring a new trusted ABI/witness; no eligible groups in either the 12-group or 20-group configuration | Reject complexity for this payoff   |
+| Direct two-pass storage field construction              | Component screen was 43% slower                                                                                                                                    | Reject                              |
+| Combine three storage scratch allocations               | Approximately 0.15 ms / 1.18% difference, unresolved against noise                                                                                                 | Reject as unproven                  |
+| Remove global key-plan copies                           | Global plans remain needed for storage splitting, mixed fallback, and materialization                                                                              | Defer without an ownership redesign |
+| Cheap-field-first exact content comparison              | About 249 KB of glossary comparisons avoided at the cost of 81 KB of extra tag work                                                                                | Reject low opportunity              |
+| Specialized glossary normalization                      | Every JMdict row already had normalization hints zero                                                                                                              | No opportunity on this fixture      |
+| CDict/compression changes                               | Dictionary use depends on block size; sticky dictionary mode changes frames/output                                                                                 | Hold outside this source-only round |
+| Share recent-content cache views                        | Parser and compressor arenas are mutable and reused after completion; retaining leases can stall later groups                                                      | Reject ownership violation          |
+| Pack holes out of recent-content snapshots              | At most 916,307 bytes saved out of 100,795,188 copied (0.91%), adding gather/remap work and changing allocation accounting                                         | Reject                              |
+
+The production cache already makes one owned contiguous interval copy per admitted group, not one allocation per unique entry. The worker returns a borrowed shared WASM content view; publication precedes storage completion; completion releases the worker lease; the next job resets and reuses that arena. Compressor input is also reusable native context memory. A cache optimization must retain the existing owned snapshot, exact admission/eviction, and charged allocation size.
+
+In the first separate browser trace, all twelve groups used the fused parser with zero fallback. Recent-source caching copied 100,724,405 bytes and accounted for 151.9 ms inside 225.6 ms of metadata publication. There were 4,010 cross-group exact hits. Compression's 409.9 ms is nested inside concurrent content-store work, and worker parsing/inflation overlap importer storage. These diagnostic intervals locate work; do not add nested/parallel phase sums or treat them as projected import savings.
+
+Later screens and audits reached these additional decisions:
+
+| Direction                                                                 | Observation                                                                                                                                               | Decision                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| Replace shared-source cache `.slice()` with allocation plus byte `.set()` | Fixed copy-only screen: +5.67% median CPU / +6.60% median wall against geometric controls; shared and ordinary equal-work totals also regressed           | Reject                            |
+| Aligned word-copy cache snapshot                                          | Shared-source median -2.54% CPU / +1.42% wall, much smaller than identical-code scatter                                                                   | Reject as unsupported             |
+| Suffix-first previous-key equality                                        | Saves 216,006 modeled source-load bytes on JMdict (1.48% of this comparison work), with added ordering/address/branch costs unmeasured                    | Defer; frozen candidate unchanged |
+| Remove record-finalization barriers                                       | No duplicate physical write, flush, close, snapshot or reserialization found; independent sealing already overlaps and failure settlement precedes COMMIT | Reject                            |
+
+The copy screen retained all 144 measured and 36 warmup observations across four cells (two methods, shared and ordinary source buffers), plus 512 alignment/bounds/ownership cases. It used the exact twenty admitted cache intervals and 100,795,188 payload bytes per pass, included exact-size destination allocation, and compared every output byte outside timing. Source-identical paired CPU ranges reached -39% to +42% for shared byte-set and -34% to +20% for shared word-set. No additional variants or timing reruns followed. These local Node data neither establish browser performance nor isolate the entire cache method's scan/mapping cost.
+
+The 104.6 ms record close/finalization trace interval includes descriptor and lookup-container sealing plus bookkeeping. It does not isolate one syscall. The report records one 45-byte descriptor write, five lookup batches totaling 23,693,336 bytes, and 0.1 ms lookup-queue wait. The final forty-byte header is the incomplete-to-complete format boundary. The writer caches its close promise, flushes/closes once, and retains sticky failures. Store sealing already uses concurrent settlement before publication; successful cleanup skips already-sealed stores. Removing these operations has no source-level safety proof.
+
+### Validation status
+
+The first candidate passed 381 focused tests. The independent Linux full suite passed all 616 test files: 13,720 tests passed and 47 were skipped. The local full suite initially passed 13,700 tests with two native test files blocked by task-private linker discovery; after correcting `PATH`, all twenty tests in those files passed. No test assertion was weakened. All build targets pass. Main, dev, test, and bench TypeScript checks pass after adding a test-only `string[]` annotation to break an inference cycle; that annotation does not affect the measured runtime.
+
+The key candidate passed 386 focused tests, the test TypeScript project, changed-file lint, pinned artifact checks, and untimed full-output parity against the combined baseline for both complete JMdict and the unique-key control. Its ordinary JMdict output fingerprint is `b8fb2ede709f7e5e0ae603304a10d9a8c190c755c48547df38287ae2660447ea`; the unique-key fingerprint is `098c43594368e4355336e6c9e543928e98fb125e760d7e1b65bbafd245bd2a65`. Fingerprints from different oracle layouts/grouping are not interchangeable.
+
+Local browser launch was unavailable in this environment. Browser behavior and timing are qualified by the independent Linux CI runs above. Whole-process memory, complete persisted database equality, and all-browser performance are separate gates; component parity and readability probes do not establish them.
+
+The combined key candidate's full Linux suite also passed all 616 files: **13,725 tests passed, 47 skipped**. Its corrected release lifecycle passed 91 phases with verified package identity and OPFS storage, including imports, updates, restart persistence, concurrent lookup, hover/Reader usage, and deletion. The separate concurrency-pressure test produced 99 intentional busy rejections in 180 attempts; retained error samples were `DICTIONARY_IMPORT_IN_PROGRESS`, with no `SQLITE_CANTOPEN` or suspension errors. These expected rejections are not counted as successful imports.
+
+The primary draft PR head is `b9c9850a25eff3bb0684b8283cbb9b3c7ef49042`. Its only change after measured product `45cc145` is the test-only type annotation. Runtime source and WASM are identical. [Core PR CI](https://github.com/ManabiIO/manabitan/actions/runs/44606333570), [static web acceptance](https://github.com/ManabiIO/manabitan/actions/runs/44606333606), CodeQL, actionlint, dependency review, and the Chromium restart-interruption workflow passed. Core CI covers lint, four TypeScript projects, unit/options tests, package builds, Chromium extension E2E and the Anki matrix. Its Firefox job permits existing unsupported-runtime skips, so that job's success is not asserted as complete Firefox functional qualification. No merge, release, or change to production defaults was performed.
+
+### Durable evidence and reproduction
+
+The evidence branch `evidence/jmdict-import-20261119-3d067` contains this report and two machine-readable artifacts:
+
+- `builds/perf/20261119-jmdict/observations.index.json`: archive SHA-256, file inventory, sizes, hashes, observation counts, and explicit exclusions.
+- `builds/perf/20261119-jmdict/observations.json.gz`: deterministic compressed evidence containing the exact original report/log bytes, cohort plans, identities, all retained observations including failed controls, bootstrap analyses, native phase audits, source-copy screens, rejected prototype patches, runner source, and toolchain provenance.
+
+The archive deliberately excludes dictionary payloads, dependency trees, duplicate downloaded ZIPs, generated HTML/screenshots, and repeated generated admission modules. It contains neither authentication credentials nor live signed download URLs. Downloaded artifact ZIP hashes and extracted-file hashes are retained. The exact release extension ZIP is identified and verified by CI but is not duplicated in this offline bundle. Raw phase reports and full-row oracles remain available without the binary dictionary payloads.
+
+For a new qualification, start from the exact product/research commits above, use the checked-in `test/perf/dictionaries.lock.json`, reproduce Clang/LLD 21.1.8 and Node/Chrome identities, and follow the corresponding workflow's build and runner arguments. The final workflow is the complete source of the 36-triplet plan; the corrected negative workflow supplies the unique-key control. Verify pinned artifacts and source/package identity before timing. Use fresh profiles and keep tracing/sampling off for the primary endpoint. Run diagnostics separately. Reuse neither an old output directory nor a prior measurement as a replacement for an unsuccessful observation. The archived `analyze-import-cohort.py` computes the displayed estimates from each retained `cohort.json` independently.
+
+The next useful qualification is a fixed comparison on representative user hardware with whole-process memory and persisted-size measurements, especially for unique-key dictionaries. Further changes to cache ownership, worker concurrency, compression, or publication barriers need their own design and controls; none is justified by treating overlapping trace intervals as removable time.
+
 ## Goal, baseline and rules
 
 Qualify the implemented default-off experiments in `ManabiIO/manabitan`. Optimize full dictionary import completion time first and lookup latency second. Memory, extension package size and stored dictionary size are non-regression gates, not resources to spend freely for throughput. Do not tune worker counts, batch sizes, cache capacities, compression levels or dictionary-specific thresholds.
