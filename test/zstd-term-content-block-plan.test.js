@@ -46,6 +46,12 @@ class CodecWorker {
      * @param {Transferable[]} transfer
      */
     postMessage(message, transfer) {
+        /* eslint-disable @stylistic/semi */
+        if (Array.isArray(message.jobs)) {
+            for (const job of message.jobs) { this.postMessage(job, transfer) }
+            return
+        }
+        /* eslint-enable @stylistic/semi */
         ++this.callCount;
         const data = structuredClone(message, {transfer});
         const result = compressWrappedTermContentZstdSpans(
@@ -114,13 +120,22 @@ describe('shared span block-plan validation', () => {
         } finally { pool.close(); }
     });
 
-    test.each([1, 2])('valid %i-block plans preserve packed frames and source acknowledgement', async (blockCount) => {
+    test.each([1, 2, 4])('valid %i-block plans preserve packed frames and source acknowledgement', async (blockCount) => {
         const source = new Uint8Array(new SharedArrayBuffer(1024), 7, 512);
         for (let i = 0; i < source.length; ++i) { source[i] = (i % 79) + 32; }
         const offsets = Uint32Array.of(3, 23, 110, 219);
         const lengths = Uint32Array.of(13, 67, 101, 203);
-        const starts = blockCount === 1 ? Uint32Array.of(0, 4) : Uint32Array.of(0, 2, 4);
-        const blockLengths = blockCount === 1 ? Uint32Array.of(384) : Uint32Array.of(80, 304);
+        /* eslint-disable @stylistic/semi */
+        let starts = Uint32Array.of(0, 1, 2, 3, 4)
+        let blockLengths = new Uint32Array(lengths)
+        if (blockCount === 1) {
+            starts = Uint32Array.of(0, 4)
+            blockLengths = Uint32Array.of(384)
+        } else if (blockCount === 2) {
+            starts = Uint32Array.of(0, 2, 4)
+            blockLengths = Uint32Array.of(80, 304)
+        }
+        /* eslint-enable @stylistic/semi */
         const expected = Array.from(blockLengths, (size, block) => {
             const packed = new Uint8Array(size);
             let cursor = 0;

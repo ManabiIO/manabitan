@@ -28,7 +28,9 @@ class ControlledWorker {
 
     /** @param {Record<string, unknown>} message */
     postMessage(message) {
-        this.calls.push(message);
+        /* eslint-disable @stylistic/semi */
+        this.calls.push(...(Array.isArray(message.jobs) ? message.jobs : [message]))
+        /* eslint-enable @stylistic/semi */
         if (this.throwOnDispatch) { throw new Error('injected dispatch failure'); }
     }
 

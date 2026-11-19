@@ -9343,17 +9343,7 @@ null :
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        /* eslint-disable @stylistic/semi */
-        const publishedContiguous = metadataValidated && this._tryPublishContiguousArtifactTermContentMetadata(
-            stagedContentMetadata,
-            pendingContentHash1s,
-            pendingContentHash2s,
-            pendingOffsets,
-            pendingLengths,
-            uniformPendingDictNameId,
-        )
-        /* eslint-enable @stylistic/semi */
-        for (let i = publishedContiguous ? pendingOffsets.length : 0; i < pendingOffsets.length; ++i) {
+        for (let i = 0; i < pendingOffsets.length; ++i) {
             const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
@@ -9433,75 +9423,6 @@ null :
         }
         return resolvedContentDictNames;
     }
-
-    /* eslint-disable @stylistic/semi */
-    /**
-     * Publishes a contiguous reservation after checking every pending witness.
-     * A failed preflight leaves the ordinary publication loop untouched.
-     * @param {{indexes: Int32Array, active: boolean}|null} staged
-     * @param {number[]|Uint32Array} hash1s
-     * @param {number[]|Uint32Array} hash2s
-     * @param {number[]|Float64Array} offsets
-     * @param {number[]|Uint32Array} lengths
-     * @param {number} dictNameId
-     * @returns {boolean}
-     */
-    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId) {
-        if (
-            staged === null || !staged.active || dictNameId < 0 ||
-            !(staged.indexes instanceof Int32Array) ||
-            !(hash1s instanceof Uint32Array) || !(hash2s instanceof Uint32Array) ||
-            !(offsets instanceof Float64Array) || !(lengths instanceof Uint32Array)
-        ) {
-            return false
-        }
-        const count = offsets.length
-        if (count === 0) { return true }
-        const {indexes} = staged
-        const start = indexes[0]
-        const end = start + count
-        const stateTable = this._termEntryContentMetaStateTable
-        const hash1Table = this._termEntryContentMetaHash1Table
-        const hash2Table = this._termEntryContentMetaHash2Table
-        const lengthTable = this._termEntryContentMetaLengthTable
-        const idTable = this._termEntryContentMetaIdTable
-        const offsetTable = this._termEntryContentMetaOffsetTable
-        const dictNameIdTable = this._termEntryContentMetaDictNameIdTable
-        if (
-            indexes.length < count || hash1s.length < count || hash2s.length < count || lengths.length < count ||
-            start < 0 || end > stateTable.length || end > hash1Table.length || end > hash2Table.length ||
-            end > lengthTable.length || end > idTable.length || end > offsetTable.length || end > dictNameIdTable.length
-        ) {
-            return false
-        }
-        // Aliased inputs retain the ordinary loop's sequential read/write behavior.
-        for (const {buffer} of [indexes, hash1s, hash2s, offsets, lengths]) {
-            if (
-                buffer === idTable.buffer || buffer === offsetTable.buffer ||
-                buffer === dictNameIdTable.buffer || buffer === stateTable.buffer
-            ) {
-                return false
-            }
-        }
-        for (let i = 0; i < count; ++i) {
-            const index = start + i
-            if (
-                indexes[i] !== index || stateTable[index] !== TERM_CONTENT_META_SLOT_PENDING ||
-                hash1Table[index] !== hash1s[i] || hash2Table[index] !== hash2s[i] ||
-                lengthTable[index] !== lengths[i]
-            ) {
-                return false
-            }
-        }
-        idTable.fill(0, start, end)
-        offsetTable.set(offsets, start)
-        dictNameIdTable.fill(dictNameId, start, end)
-        stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, start, end)
-        this._termEntryContentMetaHashPairPendingCount -= count
-        this._termEntryContentMetaHashPairCount += count
-        return true
-    }
-    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {string|(string|null)[]} contentDictNames

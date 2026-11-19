@@ -28,12 +28,21 @@ void initialization.then(
 );
 
 self.addEventListener('message', (event) => {
-    void compressContent(event);
+    /* eslint-disable @stylistic/semi */
+    const rawData = /** @type {unknown} */ (event.data)
+    const data = /** @type {{jobs?: unknown}|null} */ (rawData)
+    if (Array.isArray(data?.jobs)) {
+        // Each handler keeps its existing per-block acknowledgments and result.
+        // Jobs enter the shared initialization promises in worker order.
+        for (const job of data.jobs) { void compressContent(job) }
+    } else {
+        void compressContent(rawData)
+    }
+    /* eslint-enable @stylistic/semi */
 });
 
-/** @param {MessageEvent} event */
-async function compressContent(event) {
-    const rawData = /** @type {unknown} */ (event.data);
+/** @param {unknown} rawData */
+async function compressContent(rawData) {
     const data = /** @type {{id?: unknown, content?: unknown, source?: unknown, sourceOffsets?: unknown, sourceLengths?: unknown, contentBytes?: unknown, dictName?: unknown, wrap?: unknown, compressionExperiments?: import('dictionary-importer').ImportExperiments}} */ (rawData);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
