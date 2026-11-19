@@ -1,0 +1,5 @@
+jmdict pair 1/2 A: 522.77ms
+jmdict pair 1/2 B: 500.85ms
+jmdict pair 2/2 B: 915.53ms
+jmdict pair 2/2 A: 522.67ms
+{"medianPairedChangePercent":35.48438232651632,"equalWorkTotalChangePercent":35.48074980262361,"fasterPairs":1}

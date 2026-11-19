@@ -1,0 +1,14 @@
+{
+  "name": "storage-build",
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+  "command": [
+    "npm",
+    "run",
+    "test:build"
+  ],
+  "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+  "startedAt": "2026-11-19T20:26:49.533322+00:00",
+  "exitCode": 0,
+  "durationSeconds": 1.7174947439998505,
+  "completedAt": "2026-11-19T20:26:51.251452+00:00"
+}

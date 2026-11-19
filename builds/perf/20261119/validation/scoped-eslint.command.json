@@ -1,0 +1,19 @@
+{
+  "name": "scoped-eslint",
+  "command": [
+    "node",
+    "--max-old-space-size=1536",
+    "node_modules/eslint/bin/eslint.js",
+    "dev/perf/import-lookup-screen.js",
+    "dev/perf/import-dedup-screen.js",
+    "dev/perf/term-key-reuse-screen.js"
+  ],
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+  "environmentOverrides": {},
+  "startedAt": null,
+  "completedAt": null,
+  "timestampNote": "Exact timestamps were not captured for this earlier completed check. Exit status was observed directly.",
+  "exitCode": 0,
+  "combinedOutput": "tooling-eslint.log",
+  "outputNote": "Existing vendor pako-inflate.js CommonJS-in-ESM esbuild warning; no ESLint errors."
+}

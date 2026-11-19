@@ -1,0 +1,18 @@
+{
+  "command": [
+    "npm",
+    "run",
+    "test:build"
+  ],
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+  "environmentOverrides": {
+    "NODE_OPTIONS": "--max-old-space-size=2048",
+    "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu",
+    "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+    "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21"
+  },
+  "startedAt": "2026-11-19T20:27:54.641687+00:00",
+  "completedAt": "2026-11-19T20:27:55.694620+00:00",
+  "exitCode": 0,
+  "combinedOutput": "tooling-build.log"
+}

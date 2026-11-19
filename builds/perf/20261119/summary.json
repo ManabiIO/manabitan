@@ -1,0 +1,3741 @@
+{
+  "method": "Each A/B pair is one observation. All measured passes within a child are averaged; no samples are dropped. Bootstrap resamples complete paired ratios with replacement, 10000 replicates, deterministic seed20261119. Intervals are descriptive: shared-host dependence and eight-pair cohorts do not establish production or whole-import qualification.",
+  "cohorts": [
+    {
+      "path": "affinity0/escapes-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 754.8496430000002,
+          "candidateMedianMs": 889.1857059999993,
+          "equalWorkChangePercent": 9.649311631723844,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -58.21375433333378,
+            129.9772373333335,
+            -53.459891000000994,
+            -229.986760666667,
+            155.23717599999964,
+            178.2994466666663,
+            285.83673599999804,
+            183.0499030000003
+          ],
+          "pairedChangesPercent": [
+            -6.09492210360596,
+            16.690286680814026,
+            -8.219400447357849,
+            -31.138702255416597,
+            21.375786636958516,
+            23.12240547212174,
+            34.52441672500524,
+            27.16070352531872
+          ],
+          "medianPairedChangePercent": 19.03303665888627,
+          "pairedRangePercent": [
+            -31.138702255416597,
+            34.52441672500524
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -8.219400447357849,
+            27.16070352531872
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 747.2538333333332,
+          "candidateMedianMs": 865.5450000000001,
+          "equalWorkChangePercent": 7.458606819945057,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -57.65733333333321,
+            107.48500000000013,
+            -52.197333333333404,
+            -222.20633333333325,
+            151.06466666666677,
+            146.70833333333337,
+            200.6339999999999,
+            176.4799999999998
+          ],
+          "pairedChangesPercent": [
+            -6.215318389001768,
+            14.063422018672744,
+            -8.079569769307737,
+            -30.43005304337505,
+            21.27618420762303,
+            19.048849451657148,
+            24.331590902384104,
+            26.558900723166158
+          ],
+          "medianPairedChangePercent": 16.556135735164947,
+          "pairedRangePercent": [
+            -30.43005304337505,
+            26.558900723166158
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -8.079569769307737,
+            24.331590902384104
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 34.790294499998865,
+          "candidateMedianMs": 35.74306166666611,
+          "equalWorkChangePercent": 21.523745200038213,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -62.777296333334256,
+            106.88625366666929,
+            3.5898856666675165,
+            -5.7857526666659105,
+            2.092609333332497,
+            -0.46486166666757356,
+            35.02789366666639,
+            -4.981104999999239
+          ],
+          "pairedChangesPercent": [
+            -62.267774494033354,
+            310.8217288395052,
+            12.109738459214858,
+            -17.57580611876204,
+            6.345461802621477,
+            -1.2604596408726132,
+            99.53281550550889,
+            -12.749267975549339
+          ],
+          "medianPairedChangePercent": 2.542501080874432,
+          "pairedRangePercent": [
+            -62.267774494033354,
+            310.8217288395052
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -17.57580611876204,
+            99.53281550550889
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "affinity0/keys-control-escaped-runs.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 16.271030000000007,
+          "candidateMedianMs": 11.6509665,
+          "equalWorkChangePercent": -29.15753082237683,
+          "fasterPairs": 7,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -5.613888666666677,
+            -4.216111333333325,
+            -4.929677666666652,
+            -2.5261990000000285,
+            -16.363503666666666,
+            -3.079063999999997,
+            -6.36233233333334,
+            2.7115146666666767
+          ],
+          "pairedChangesPercent": [
+            -31.29812330560383,
+            -26.86308911080507,
+            -37.12234610896603,
+            -17.071639395005324,
+            -58.05391467343599,
+            -21.21890849603102,
+            -36.91985245596751,
+            16.094703815523314
+          ],
+          "medianPairedChangePercent": -29.08060620820445,
+          "pairedRangePercent": [
+            -58.05391467343599,
+            16.094703815523314
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -37.12234610896603,
+            -17.071639395005324
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 16.297833333333333,
+          "candidateMedianMs": 11.670333333333334,
+          "equalWorkChangePercent": -29.279115059530103,
+          "fasterPairs": 7,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -5.628666666666668,
+            -4.2236666666666665,
+            -4.942333333333334,
+            -2.545333333333332,
+            -16.626333333333335,
+            -3.08,
+            -6.371333333333336,
+            2.7263333333333364
+          ],
+          "pairedChangesPercent": [
+            -31.32954840624884,
+            -26.864121101617656,
+            -37.13062205749774,
+            -17.158779380701983,
+            -58.40290381125226,
+            -21.18780096308186,
+            -36.90103865014094,
+            16.157645199525895
+          ],
+          "medianPairedChangePercent": -29.096834753933248,
+          "pairedRangePercent": [
+            -58.40290381125226,
+            16.157645199525895
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -37.13062205749774,
+            -17.158779380701983
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "escaped-runs"
+    },
+    {
+      "path": "affinity0/keys-control-runs.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 12.661067999999997,
+          "candidateMedianMs": 13.297604166666673,
+          "equalWorkChangePercent": 3.430005814732251,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            4.2081590000000215,
+            2.9080286666666844,
+            7.352121333333342,
+            -13.185542000000016,
+            -1.846761666666671,
+            -0.2815200000000093,
+            3.028205000000014,
+            1.646194333333332
+          ],
+          "pairedChangesPercent": [
+            32.64416428227281,
+            27.24582525242132,
+            50.435959953283074,
+            -53.94876963742126,
+            -13.964455433283817,
+            -2.264636030869871,
+            25.186244018498872,
+            14.481350293064633
+          ],
+          "medianPairedChangePercent": 19.833797155781753,
+          "pairedRangePercent": [
+            -53.94876963742126,
+            50.435959953283074
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -13.964455433283817,
+            32.64416428227281
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 12.686166666666667,
+          "candidateMedianMs": 13.263000000000002,
+          "equalWorkChangePercent": 3.568075396353776,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            4.215333333333332,
+            2.7763333333333335,
+            7.338333333333331,
+            -13.50666666666667,
+            -1.8473333333333333,
+            -0.283333333333335,
+            3.6656666666666666,
+            1.6446666666666676
+          ],
+          "pairedChangesPercent": [
+            32.62052776846285,
+            25.915554310961753,
+            50.22471653776832,
+            -54.48433508135001,
+            -13.945997634565543,
+            -2.275769745649281,
+            30.38348897607337,
+            14.437031835205993
+          ],
+          "medianPairedChangePercent": 20.176293073083873,
+          "pairedRangePercent": [
+            -54.48433508135001,
+            50.22471653776832
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -13.945997634565543,
+            32.62052776846285
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "runs"
+    },
+    {
+      "path": "affinity0/keys-control-shared-prefix.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 20.22158349999998,
+          "candidateMedianMs": 17.920726166666665,
+          "equalWorkChangePercent": -9.65991211781052,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            0.4395146666666676,
+            6.273872333333351,
+            -3.296484999999997,
+            -1.9023919999999812,
+            -0.7862026666666502,
+            -5.518624999999965,
+            -7.977771999999968,
+            -2.7203603333333515
+          ],
+          "pairedChangesPercent": [
+            2.5241879392677635,
+            36.22771013115398,
+            -13.203618765285452,
+            -9.563503297983,
+            -3.8256252636129306,
+            -24.00756931487541,
+            -35.31741500535725,
+            -18.60471748580349
+          ],
+          "medianPairedChangePercent": -11.383561031634226,
+          "pairedRangePercent": [
+            -35.31741500535725,
+            36.22771013115398
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -24.00756931487541,
+            2.5241879392677635
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 20.240666666666666,
+          "candidateMedianMs": 17.912666666666667,
+          "equalWorkChangePercent": -9.688629442256646,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            0.4306666666666672,
+            6.280666666666669,
+            -3.2989999999999995,
+            -1.9623333333333335,
+            -0.7740000000000009,
+            -5.5313333333333325,
+            -7.997333333333334,
+            -2.7043333333333326
+          ],
+          "pairedChangesPercent": [
+            2.469466159521394,
+            36.21024310560201,
+            -13.198287703201883,
+            -9.85238987816307,
+            -3.763859171367445,
+            -24.025945820724804,
+            -35.327551426089265,
+            -18.46213362461314
+          ],
+          "medianPairedChangePercent": -11.525338790682476,
+          "pairedRangePercent": [
+            -35.327551426089265,
+            36.21024310560201
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -24.025945820724804,
+            2.469466159521394
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "shared-prefix"
+    },
+    {
+      "path": "affinity0/keys-control-unique.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 20.20136500000001,
+          "candidateMedianMs": 14.58617949999998,
+          "equalWorkChangePercent": -18.35747533593286,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -3.6384096666666785,
+            -2.7059893333333402,
+            1.1901963333333185,
+            3.7446849999999934,
+            -6.248377666666707,
+            -1.825408333333364,
+            -9.692322666666675,
+            -6.734004333333351
+          ],
+          "pairedChangesPercent": [
+            -17.721824242255344,
+            -22.862477375760303,
+            8.132473680584207,
+            34.54757384284797,
+            -29.98716679946849,
+            -9.185804328634251,
+            -45.472944952012796,
+            -31.652063854402044
+          ],
+          "medianPairedChangePercent": -20.292150809007822,
+          "pairedRangePercent": [
+            -45.472944952012796,
+            34.54757384284797
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -31.652063854402044,
+            8.132473680584207
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 20.227,
+          "candidateMedianMs": 14.614666666666666,
+          "equalWorkChangePercent": -18.366567490722897,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -3.6563333333333325,
+            -2.7173333333333343,
+            1.1889999999999983,
+            3.753333333333334,
+            -6.2509999999999994,
+            -1.8243333333333318,
+            -9.719999999999999,
+            -6.741333333333333
+          ],
+          "pairedChangesPercent": [
+            -17.78256922378574,
+            -22.90402337603956,
+            8.108292416803042,
+            34.55577719809728,
+            -29.95878330883762,
+            -9.170883742752768,
+            -45.48787146088449,
+            -31.634600344126397
+          ],
+          "medianPairedChangePercent": -20.34329629991265,
+          "pairedRangePercent": [
+            -45.48787146088449,
+            34.55577719809728
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -31.634600344126397,
+            8.108292416803042
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "unique"
+    },
+    {
+      "path": "affinity0/keys-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 1692.8590416666673,
+          "candidateMedianMs": 1139.849723833333,
+          "equalWorkChangePercent": -7.023162725863297,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -1153.2408616666673,
+            233.10832033333236,
+            1169.9873630000002,
+            -988.3405419999976,
+            -139.5013066666661,
+            -153.32211566666956,
+            69.07165933333124,
+            8.245504666666761
+          ],
+          "pairedChangesPercent": [
+            -45.55093104163509,
+            8.90127811979653,
+            49.959417640594,
+            -40.92730069324853,
+            -13.691706793248182,
+            -14.688241168390338,
+            8.30081149633488,
+            1.0552744266608238
+          ],
+          "medianPairedChangePercent": -6.3182161832936785,
+          "pairedRangePercent": [
+            -45.55093104163509,
+            49.959417640594
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -40.92730069324853,
+            8.90127811979653
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 889.9305,
+          "candidateMedianMs": 880.2556666666666,
+          "equalWorkChangePercent": -4.853355348418276,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -112.93133333333333,
+            74.7786666666666,
+            195.3463333333333,
+            -311.3323333333335,
+            -109.47933333333344,
+            -156.7500000000001,
+            59.26333333333332,
+            4.181666666666729
+          ],
+          "pairedChangesPercent": [
+            -13.997178204834238,
+            8.7623206463469,
+            21.085484797153864,
+            -27.357064735693015,
+            -11.073663711109283,
+            -15.067363370014075,
+            7.208937963964646,
+            0.5372232090704143
+          ],
+          "medianPairedChangePercent": -5.268220251019434,
+          "pairedRangePercent": [
+            -27.357064735693015,
+            21.085484797153864
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -15.067363370014075,
+            8.7623206463469
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 59.43345099999897,
+          "candidateMedianMs": 65.61798299999964,
+          "equalWorkChangePercent": 8.693796001490806,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -164.58848433333515,
+            6.8957883333338685,
+            143.50295033333413,
+            -2.1675803333315997,
+            -9.252452666667224,
+            26.013672333333794,
+            33.61121800000152,
+            22.781129333333105
+          ],
+          "pairedChangesPercent": [
+            -74.9117331862876,
+            6.864045805189356,
+            141.50259605416187,
+            -3.2720965979075034,
+            -17.58268806929347,
+            53.4689389080051,
+            100.1886156472049,
+            74.34254355961653
+          ],
+          "medianPairedChangePercent": 30.166492356597228,
+          "pairedRangePercent": [
+            -74.9117331862876,
+            141.50259605416187
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -17.58268806929347,
+            100.1886156472049
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "affinity0/numeric-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 667.1720034999996,
+          "candidateMedianMs": 627.9018993333336,
+          "equalWorkChangePercent": -0.02235996273523,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            149.9816763333339,
+            12.736817333333647,
+            -211.77255833333368,
+            -162.15630933333375,
+            304.6377076666664,
+            -149.65842266666664,
+            23.13992800000085,
+            31.893861333334257
+          ],
+          "pairedChangesPercent": [
+            21.808343521117912,
+            1.9697595340078644,
+            -26.45989836357342,
+            -20.577249701228595,
+            51.93949242522007,
+            -20.762264416724108,
+            4.394615116122269,
+            5.333159413976674
+          ],
+          "medianPairedChangePercent": 3.1821873250650667,
+          "pairedRangePercent": [
+            -26.45989836357342,
+            51.93949242522007
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -20.762264416724108,
+            21.808343521117912
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 661.3646666666667,
+          "candidateMedianMs": 624.3485,
+          "equalWorkChangePercent": -0.4264953615020328,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            122.41599999999994,
+            12.263333333333321,
+            -194.3183333333335,
+            -158.091,
+            283.2596666666665,
+            -143.07933333333312,
+            21.328333333333376,
+            33.62033333333329
+          ],
+          "pairedChangesPercent": [
+            17.997068507825386,
+            1.9086018855679177,
+            -24.824331937584354,
+            -20.29201109000359,
+            48.69592773249467,
+            -20.08476781031773,
+            4.050978319019705,
+            5.659153559267049
+          ],
+          "medianPairedChangePercent": 2.979790102293811,
+          "pairedRangePercent": [
+            -24.824331937584354,
+            48.69592773249467
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -20.29201109000359,
+            17.997068507825386
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 31.381503999999644,
+          "candidateMedianMs": 31.75957333333372,
+          "equalWorkChangePercent": -10.318187827450942,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -3.2037786666664942,
+            2.9373553333325617,
+            -76.35882133333325,
+            -0.39201633333293273,
+            39.31651233333437,
+            -1.8580709999990468,
+            7.808270999999269,
+            -1.455028333334969
+          ],
+          "pairedChangesPercent": [
+            -9.366355323631259,
+            9.538430967348809,
+            -72.88603152229533,
+            -1.0061595186606764,
+            135.51571866720843,
+            -5.812274159310348,
+            31.600311642935775,
+            -5.3104249105207835
+          ],
+          "medianPairedChangePercent": -3.15829221459073,
+          "pairedRangePercent": [
+            -72.88603152229533,
+            135.51571866720843
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -9.366355323631259,
+            31.600311642935775
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "bulk-affinity0/dedup-aa-jmdict.json",
+      "complete": false,
+      "observationCount": 2,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {}
+    },
+    {
+      "path": "bulk-affinity0/escapes-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 753.6367663333336,
+          "candidateMedianMs": 777.5486101666665,
+          "equalWorkChangePercent": -3.0029162499023543,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            84.16366066666728,
+            -322.5580096666673,
+            -57.92674133333003,
+            -31.74914233333402,
+            -256.99763266666616,
+            88.5570433333346,
+            260.12808700000005,
+            40.90436366666631
+          ],
+          "pairedChangesPercent": [
+            12.070052620693051,
+            -29.195686104270578,
+            -5.710081932281874,
+            -4.0991093781764025,
+            -28.96193571990009,
+            13.82055710006842,
+            39.55441269336395,
+            5.5824152183139075
+          ],
+          "medianPairedChangePercent": 0.7416529200687525,
+          "pairedRangePercent": [
+            -29.195686104270578,
+            39.55441269336395
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -28.96193571990009,
+            13.82055710006842
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 742.7048333333332,
+          "candidateMedianMs": 769.3743333333333,
+          "equalWorkChangePercent": -2.5614670126853922,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            78.39733333333334,
+            -292.2553333333334,
+            -55.37333333333345,
+            -16.409666666666567,
+            -247.85233333333338,
+            85.71866666666654,
+            244.1356666666669,
+            39.763333333333435
+          ],
+          "pairedChangesPercent": [
+            11.24509205797921,
+            -27.4429748987829,
+            -5.614267512479354,
+            -2.161658262242605,
+            -28.337197084865217,
+            13.568934276496902,
+            37.130033976394,
+            5.474888898170027
+          ],
+          "medianPairedChangePercent": 1.656615317963711,
+          "pairedRangePercent": [
+            -28.337197084865217,
+            37.130033976394
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -27.4429748987829,
+            13.568934276496902
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 39.284033833333226,
+          "candidateMedianMs": 43.20053233333207,
+          "equalWorkChangePercent": 15.684928156741762,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            6.1150413333334654,
+            5.900109333332992,
+            47.54138000000027,
+            1.1493259999994407,
+            -14.175709000000403,
+            -23.209123999999363,
+            46.67202566666492,
+            -14.207669333333492
+          ],
+          "pairedChangesPercent": [
+            17.604509840931737,
+            15.796778725242099,
+            119.50027411287154,
+            2.9633583218441784,
+            -24.727984263451308,
+            -39.518245830837486,
+            154.21258535070987,
+            -24.209202595318413
+          ],
+          "medianPairedChangePercent": 9.38006852354314,
+          "pairedRangePercent": [
+            -39.518245830837486,
+            154.21258535070987
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -24.727984263451308,
+            85.9085475958208
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "bulk-affinity0/keys-aa-runs.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 11.582338450000009,
+          "candidateMedianMs": 13.165751750000005,
+          "equalWorkChangePercent": -1.6072908995921953,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -6.255163899999991,
+            3.2198336000000083,
+            0.3751327,
+            5.621150900000014,
+            6.06277669999999,
+            -2.053444800000017,
+            -4.0615848999999855,
+            -4.4989501999999835
+          ],
+          "pairedChangesPercent": [
+            -52.10194261355026,
+            30.218223733758,
+            2.5779790971952377,
+            82.23770107188966,
+            68.66144903485032,
+            -18.401606487748502,
+            -25.45948137873275,
+            -23.74109009295129
+          ],
+          "medianPairedChangePercent": -7.911813695276632,
+          "pairedRangePercent": [
+            -52.10194261355026,
+            82.23770107188966
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -25.45948137873275,
+            68.66144903485032
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 11.5932,
+          "candidateMedianMs": 13.10375,
+          "equalWorkChangePercent": -1.7572949654236392,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -6.255299999999999,
+            3.059099999999999,
+            0.37650000000000006,
+            5.6347,
+            6.0761,
+            -2.049899999999999,
+            -4.054400000000001,
+            -4.527000000000001
+          ],
+          "pairedChangesPercent": [
+            -52.06025550330822,
+            28.671177926070325,
+            2.5851591949958452,
+            82.32930553323298,
+            68.80421243347298,
+            -18.350356730433525,
+            -25.391576640050108,
+            -23.870664972290633
+          ],
+          "medianPairedChangePercent": -7.882598767718839,
+          "pairedRangePercent": [
+            -52.06025550330822,
+            82.32930553323298
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -25.391576640050108,
+            68.80421243347298
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "runs"
+    },
+    {
+      "path": "bulk-affinity0/keys-aa-unique.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 10.1859845,
+          "candidateMedianMs": 9.555624400000003,
+          "equalWorkChangePercent": -15.907656078408472,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -12.479923999999993,
+            -2.724104700000005,
+            4.8871720999999,
+            -3.1136616999999998,
+            -2.2802722000000184,
+            0.3054553999999996,
+            6.273550100000005,
+            -6.647176200000008
+          ],
+          "pairedChangesPercent": [
+            -55.736479891155966,
+            -16.114231907597098,
+            71.26970240018923,
+            -28.254427749784593,
+            -24.383022507045816,
+            3.4700719734392926,
+            78.26432581582227,
+            -41.94488750681897
+          ],
+          "medianPairedChangePercent": -20.248627207321455,
+          "pairedRangePercent": [
+            -55.736479891155966,
+            78.26432581582227
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -41.94488750681897,
+            71.26970240018923
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 10.1979,
+          "candidateMedianMs": 9.58555,
+          "equalWorkChangePercent": -15.153876634526487,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -11.587300000000003,
+            -2.7414000000000005,
+            4.869800000000001,
+            -3.112799999999999,
+            -2.2859,
+            0.3118999999999996,
+            6.2806,
+            -6.649799999999999
+          ],
+          "pairedChangesPercent": [
+            -53.77062112810043,
+            -16.19839398720153,
+            70.94180202491079,
+            -28.219168147369178,
+            -24.40896956753871,
+            3.5417423691860517,
+            78.2707310386082,
+            -41.931558072225336
+          ],
+          "medianPairedChangePercent": -20.30368177737012,
+          "pairedRangePercent": [
+            -53.77062112810043,
+            78.2707310386082
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -41.931558072225336,
+            70.94180202491079
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "unique"
+    },
+    {
+      "path": "bulk-affinity0/keys-control-escaped-runs.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 14.612622749999996,
+          "candidateMedianMs": 9.679972500000009,
+          "equalWorkChangePercent": -16.805235420669263,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -15.804829199999993,
+            0.41548610000001496,
+            -3.8483338999999948,
+            -10.471043899999994,
+            -4.291234599999996,
+            -4.517532699999988,
+            -5.337405300000041,
+            22.13409210000001
+          ],
+          "pairedChangesPercent": [
+            -68.74052766060214,
+            3.0524393266431193,
+            -27.407908834504692,
+            -61.88157116620921,
+            -22.512640804646633,
+            -33.01119584049221,
+            -38.80636145084871,
+            145.76974425814404
+          ],
+          "medianPairedChangePercent": -30.20955233749845,
+          "pairedRangePercent": [
+            -68.74052766060214,
+            145.76974425814404
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -61.88157116620921,
+            3.0524393266431193
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 14.62475,
+          "candidateMedianMs": 9.686350000000001,
+          "equalWorkChangePercent": -15.955654371935458,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -14.582999999999998,
+            0.40880000000000116,
+            -3.850200000000001,
+            -10.4695,
+            -4.2982,
+            -4.523199999999999,
+            -5.344700000000001,
+            22.214600000000004
+          ],
+          "pairedChangesPercent": [
+            -66.95223403669219,
+            2.9984963509003704,
+            -27.40355871886122,
+            -61.83518099614324,
+            -22.52985145037688,
+            -33.0254598024255,
+            -38.81549802098843,
+            146.15349189118066
+          ],
+          "medianPairedChangePercent": -30.21450926064336,
+          "pairedRangePercent": [
+            -66.95223403669219,
+            146.15349189118066
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -61.83518099614324,
+            2.9984963509003704
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "escaped-runs"
+    },
+    {
+      "path": "bulk-affinity0/keys-control-runs.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 11.536849650000004,
+          "candidateMedianMs": 10.864995299999983,
+          "equalWorkChangePercent": 41.45033615144123,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -2.3968851999999963,
+            -1.5697459000000382,
+            -6.733131600000013,
+            23.785594299999996,
+            8.364529800000003,
+            17.66545160000002,
+            -1.5014448000000193,
+            -0.5729887000000016
+          ],
+          "pairedChangesPercent": [
+            -20.239546035553456,
+            -11.567710305428559,
+            -49.93624446183359,
+            141.95599492014938,
+            137.07913357053317,
+            192.27036721591224,
+            -13.368616857337257,
+            -7.9685166459754875
+          ],
+          "medianPairedChangePercent": -9.768113475702023,
+          "pairedRangePercent": [
+            -49.93624446183359,
+            192.27036721591224
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -20.239546035553456,
+            141.95599492014938
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 11.810949999999998,
+          "candidateMedianMs": 10.8744,
+          "equalWorkChangePercent": 35.626610463035234,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -2.3976999999999986,
+            -1.5701,
+            -6.7396,
+            20.718300000000003,
+            8.8918,
+            15.750500000000002,
+            -2.0290999999999997,
+            -0.5748999999999995
+          ],
+          "pairedChangesPercent": [
+            -20.224197847430737,
+            -11.560408490836938,
+            -49.935169337689956,
+            123.63081953909133,
+            145.5381694382611,
+            171.4302817897842,
+            -17.245013300697753,
+            -7.981618259565715
+          ],
+          "medianPairedChangePercent": -9.771013375201326,
+          "pairedRangePercent": [
+            -49.935169337689956,
+            171.4302817897842
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -20.224197847430737,
+            145.5381694382611
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "runs"
+    },
+    {
+      "path": "bulk-affinity0/keys-control-shared-prefix.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 14.529395900000008,
+          "candidateMedianMs": 17.40523865000001,
+          "equalWorkChangePercent": 22.039527050565134,
+          "fasterPairs": 1,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            0.70740330000001,
+            -4.333627300000002,
+            8.6303203,
+            3.7467790999999693,
+            5.771514700000017,
+            0.8338833000000143,
+            3.4466862000000162,
+            5.910278900000009
+          ],
+          "pairedChangesPercent": [
+            6.571119895579791,
+            -27.104180480782457,
+            62.073051343361655,
+            24.72256293723083,
+            64.99072036447629,
+            4.414076722286997,
+            27.65821245766613,
+            36.74439837408929
+          ],
+          "medianPairedChangePercent": 26.19038769744848,
+          "pairedRangePercent": [
+            -27.104180480782457,
+            64.99072036447629
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            4.414076722286997,
+            62.073051343361655
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 14.539950000000001,
+          "candidateMedianMs": 17.19555,
+          "equalWorkChangePercent": 22.07724732869327,
+          "fasterPairs": 1,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            0.7065999999999999,
+            -4.332399999999998,
+            8.623199999999999,
+            3.305299999999999,
+            5.7814,
+            0.8433000000000028,
+            3.446999999999999,
+            6.398700000000002
+          ],
+          "pairedChangesPercent": [
+            6.555582357634582,
+            -27.076484631826293,
+            61.9678634050993,
+            21.796588039012676,
+            65.08679891022899,
+            4.463038231931926,
+            27.632370034871133,
+            39.74446570101122
+          ],
+          "medianPairedChangePercent": 24.714479036941903,
+          "pairedRangePercent": [
+            -27.076484631826293,
+            65.08679891022899
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            4.463038231931926,
+            61.9678634050993
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "shared-prefix"
+    },
+    {
+      "path": "bulk-affinity0/keys-control-unique.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 11.541729850000005,
+          "candidateMedianMs": 11.3980245,
+          "equalWorkChangePercent": 16.602834154832035,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -1.1957452000000224,
+            3.9609339999999973,
+            1.3863023000000112,
+            0.18043690000000723,
+            7.402074199999982,
+            -6.928573500000004,
+            12.676315700000004,
+            -2.5468347000000406
+          ],
+          "pairedChangesPercent": [
+            -11.073262815944585,
+            55.534445291378674,
+            11.883013600966486,
+            1.565981690075513,
+            90.32481231034994,
+            -41.20280477959598,
+            103.37336246678123,
+            -22.029206724958073
+          ],
+          "medianPairedChangePercent": 6.724497645521,
+          "pairedRangePercent": [
+            -41.20280477959598,
+            103.37336246678123
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -22.029206724958073,
+            79.45390387907995
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 11.5536,
+          "candidateMedianMs": 11.40595,
+          "equalWorkChangePercent": 15.239585496601137,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -1.1969999999999992,
+            3.9543,
+            1.387500000000001,
+            0.18210000000000015,
+            7.406299999999998,
+            -6.931900000000001,
+            11.467899999999998,
+            -2.5467000000000013
+          ],
+          "pairedChangesPercent": [
+            -11.072773188533148,
+            55.36141795119494,
+            11.883757579910249,
+            1.578974750277462,
+            90.26239138118042,
+            -41.189962624263934,
+            93.42560835526153,
+            -22.002868399225882
+          ],
+          "medianPairedChangePercent": 6.731366165093855,
+          "pairedRangePercent": [
+            -41.189962624263934,
+            93.42560835526153
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -22.002868399225882,
+            90.26239138118042
+          ]
+        }
+      },
+      "scope": "Node parser component; oracle and lookup construction excluded; no browser import claim",
+      "lane": "unique"
+    },
+    {
+      "path": "bulk-affinity0/keys-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 736.3132006666666,
+          "candidateMedianMs": 776.8463211666669,
+          "equalWorkChangePercent": 2.3139183396629237,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -26.842070666666586,
+            299.08267999999896,
+            -71.82763299999965,
+            55.1884196666673,
+            115.49455966666721,
+            -273.0908743333324,
+            128.827173999999,
+            -84.50707333333526
+          ],
+          "pairedChangesPercent": [
+            -3.3839140131819656,
+            43.201756609168626,
+            -8.741670300886973,
+            7.538158213055746,
+            15.8890442929982,
+            -29.44882418592393,
+            17.39718960555221,
+            -11.789598994331453
+          ],
+          "medianPairedChangePercent": 2.07712209993689,
+          "pairedRangePercent": [
+            -29.44882418592393,
+            43.201756609168626
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -11.789598994331453,
+            17.39718960555221
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 729.8606666666667,
+          "candidateMedianMs": 763.2258333333333,
+          "equalWorkChangePercent": 2.557297443939688,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -13.10366666666664,
+            287.6496666666668,
+            -59.858999999999924,
+            45.49566666666669,
+            105.61599999999976,
+            -261.0776666666668,
+            134.94199999999978,
+            -84.62866666666673
+          ],
+          "pairedChangesPercent": [
+            -1.7100274397829796,
+            42.33034730595322,
+            -7.396047714736276,
+            6.251331110731462,
+            14.67132731782732,
+            -28.528245670587694,
+            18.436067886641826,
+            -11.877457550601278
+          ],
+          "medianPairedChangePercent": 2.270651835474241,
+          "pairedRangePercent": [
+            -28.528245670587694,
+            42.33034730595322
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -11.877457550601278,
+            18.436067886641826
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 42.912303500000085,
+          "candidateMedianMs": 38.989285333332795,
+          "equalWorkChangePercent": -14.160602870503903,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            6.234475333333343,
+            14.35249500000176,
+            -0.9905056666663512,
+            -5.402755666666508,
+            -15.25192800000059,
+            -44.564892666666005,
+            9.073074333333047,
+            -16.39757133333236
+          ],
+          "pairedChangesPercent": [
+            19.39798179502077,
+            39.77286152636701,
+            -2.5336721309222376,
+            -11.56141334009586,
+            -28.86261659551498,
+            -52.946810245703425,
+            27.01171629425474,
+            -33.29082394851978
+          ],
+          "medianPairedChangePercent": -7.047542735509049,
+          "pairedRangePercent": [
+            -52.946810245703425,
+            39.77286152636701
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -33.29082394851978,
+            27.01171629425474
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "bulk-affinity0/numeric-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 906.5634973333333,
+          "candidateMedianMs": 851.0361083333336,
+          "equalWorkChangePercent": -2.8091724865225265,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            278.40196033333245,
+            75.15374066666641,
+            5.753216666667868,
+            157.80574799999704,
+            -94.74133366666558,
+            31.337415666664697,
+            -383.82741133333263,
+            -274.09015333333616
+          ],
+          "pairedChangesPercent": [
+            29.804090340153543,
+            10.501300744815456,
+            0.6545031697635428,
+            21.123352059738387,
+            -10.974272595579437,
+            3.144547703174716,
+            -36.82945820562228,
+            -25.113889387498666
+          ],
+          "medianPairedChangePercent": 1.8995254364691294,
+          "pairedRangePercent": [
+            -36.82945820562228,
+            29.804090340153543
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -25.113889387498666,
+            21.123352059738387
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 896.7161666666668,
+          "candidateMedianMs": 841.7369999999999,
+          "equalWorkChangePercent": -2.8122384202247774,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            295.4896666666665,
+            75.13999999999999,
+            7.548666666666577,
+            157.61766666666665,
+            -95.62099999999975,
+            -14.483666666666863,
+            -378.16933333333327,
+            -249.50599999999997
+          ],
+          "pairedChangesPercent": [
+            32.2403479242527,
+            10.502011231589336,
+            0.8608247207147146,
+            21.101266246443906,
+            -11.082201211356967,
+            -1.4795960063745617,
+            -36.49575066356173,
+            -23.796009678400765
+          ],
+          "medianPairedChangePercent": -0.30938564282992354,
+          "pairedRangePercent": [
+            -36.49575066356173,
+            32.2403479242527
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -23.796009678400765,
+            21.101266246443906
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 43.32299483333388,
+          "candidateMedianMs": 38.739924833333134,
+          "equalWorkChangePercent": 22.64701219093603,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            70.47456866666653,
+            -5.1862893333336615,
+            3.2074169999999285,
+            22.510127333334218,
+            -3.979850666667822,
+            150.3449196666667,
+            -124.61695400000067,
+            -10.348452999999303
+          ],
+          "pairedChangesPercent": [
+            191.6348512042424,
+            -12.321755726418871,
+            9.655753858836636,
+            59.10432311763189,
+            -8.932347579126743,
+            291.3059916559649,
+            -77.95931555327952,
+            -22.498046345003196
+          ],
+          "medianPairedChangePercent": 0.3617031398549466,
+          "pairedRangePercent": [
+            -77.95931555327952,
+            291.3059916559649
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -22.498046345003196,
+            191.6348512042424
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "bulk-affinity0/parser-aa3-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 731.0657884999996,
+          "candidateMedianMs": 764.2077691666666,
+          "equalWorkChangePercent": 2.709487457885218,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            172.57045066666683,
+            -313.0015346666669,
+            105.92056166666737,
+            467.70990066666684,
+            -37.626593000000526,
+            -41.1995620000007,
+            -5.981233666666412,
+            -184.3606289999983
+          ],
+          "pairedChangesPercent": [
+            23.862252634636285,
+            -31.6261571916709,
+            15.361070521173126,
+            81.3659351199726,
+            -5.86710570403024,
+            -4.858574393691251,
+            -0.8094372614215861,
+            -21.728167808353728
+          ],
+          "medianPairedChangePercent": -2.8340058275564184,
+          "pairedRangePercent": [
+            -31.6261571916709,
+            81.3659351199726
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -21.728167808353728,
+            23.862252634636285
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 726.5091666666666,
+          "candidateMedianMs": 757.217,
+          "equalWorkChangePercent": 2.7825416145980553,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            172.6930000000001,
+            -291.7413333333333,
+            97.59833333333324,
+            436.5816666666668,
+            -38.53333333333353,
+            -36.2803333333336,
+            2.693666666666786,
+            -176.65766666666673
+          ],
+          "pairedChangesPercent": [
+            23.890505940358487,
+            -30.167384409211827,
+            14.269269813204843,
+            76.60631136643725,
+            -6.041831845784884,
+            -4.352536196820522,
+            0.36891137590111533,
+            -21.202354781474607
+          ],
+          "medianPairedChangePercent": -1.9918124104597035,
+          "pairedRangePercent": [
+            -30.167384409211827,
+            76.60631136643725
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -21.202354781474607,
+            23.890505940358487
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 38.5758028333333,
+          "candidateMedianMs": 40.04438000000103,
+          "equalWorkChangePercent": -0.7556916937853653,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            6.4318160000011595,
+            -10.913847666666548,
+            12.165306333333625,
+            8.332943999999468,
+            -4.5756886666674035,
+            3.4110303333339616,
+            10.50166600000042,
+            -27.815055333334538
+          ],
+          "pairedChangesPercent": [
+            21.351307541091778,
+            -20.04488900723921,
+            30.70536132986137,
+            30.159533167485474,
+            -12.442161155750476,
+            8.444293914236734,
+            27.98047670440278,
+            -46.945648327369874
+          ],
+          "medianPairedChangePercent": 14.897800727664256,
+          "pairedRangePercent": [
+            -46.945648327369874,
+            30.70536132986137
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -20.04488900723921,
+            30.159533167485474
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "dedup-retry-affinity0/dedup-aa-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "resolver.wallMs": {
+          "baselineMedianMs": 114.82390850000002,
+          "candidateMedianMs": 120.2863629999988,
+          "equalWorkChangePercent": 9.56386959228741,
+          "fasterPairs": 2,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -2.957497999997031,
+            29.436824999998862,
+            34.58512100000189,
+            31.76671399999941,
+            7.1209039999976085,
+            5.905016000000614,
+            -21.5833599999969,
+            3.804004999999961
+          ],
+          "pairedChangesPercent": [
+            -2.506431957917299,
+            26.96690734875982,
+            28.716291521758343,
+            29.055235811240408,
+            6.230324200745074,
+            5.957377295410793,
+            -15.958282464058327,
+            3.2976924678687514
+          ],
+          "medianPairedChangePercent": 6.093850748077934,
+          "pairedRangePercent": [
+            -15.958282464058327,
+            29.055235811240408
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -2.506431957917299,
+            28.716291521758343
+          ]
+        },
+        "resolver.cpuMs": {
+          "baselineMedianMs": 111.77700000000002,
+          "candidateMedianMs": 120.24350000000001,
+          "equalWorkChangePercent": 9.626759239201554,
+          "fasterPairs": 2,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -3.0549999999999926,
+            18.92700000000002,
+            44.661,
+            31.767999999999986,
+            7.125,
+            5.902000000000001,
+            -21.574000000000012,
+            3.792999999999992
+          ],
+          "pairedChangesPercent": [
+            -2.589882925423237,
+            17.345283589475734,
+            40.90846637904977,
+            29.064427000420846,
+            6.236214683331576,
+            5.955900903173728,
+            -15.957572709251766,
+            3.2891941344294295
+          ],
+          "medianPairedChangePercent": 6.096057793252651,
+          "pairedRangePercent": [
+            -15.957572709251766,
+            40.90846637904977
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -2.589882925423237,
+            29.064427000420846
+          ]
+        },
+        "exact.wallMs": {
+          "baselineMedianMs": 16.82868849999886,
+          "candidateMedianMs": 25.783906000000115,
+          "equalWorkChangePercent": 23.67559209089243,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -21.084552000000258,
+            25.079866999998558,
+            19.357003999999506,
+            35.930395000001226,
+            0.037863999999899534,
+            0.5835180000003675,
+            -14.072018999999273,
+            -2.0311479999991207
+          ],
+          "pairedChangesPercent": [
+            -63.66395491004768,
+            118.4905312901543,
+            118.6234486097363,
+            212.8171936396128,
+            0.23881547423798555,
+            3.999490603305933,
+            -27.976289927489994,
+            -12.108793306270837
+          ],
+          "medianPairedChangePercent": 2.1191530387719593,
+          "pairedRangePercent": [
+            -63.66395491004768,
+            212.8171936396128
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -27.976289927489994,
+            118.6234486097363
+          ]
+        },
+        "exact.cpuMs": {
+          "baselineMedianMs": 16.7165,
+          "candidateMedianMs": 21.461,
+          "equalWorkChangePercent": 27.87647015493406,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -11.578999999999999,
+            24.676,
+            14.012,
+            35.17399999999999,
+            0.2120000000000033,
+            -3.2659999999999982,
+            -11.805000000000007,
+            -2.0109999999999992
+          ],
+          "pairedChangesPercent": [
+            -49.24719292276284,
+            117.09215146626173,
+            88.203449578245,
+            209.5561513255883,
+            1.3686249193028077,
+            -22.542794036443947,
+            -30.249839846252414,
+            -12.079529072561268
+          ],
+          "medianPairedChangePercent": -5.355452076629231,
+          "pairedRangePercent": [
+            -49.24719292276284,
+            209.5561513255883
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -30.249839846252414,
+            117.09215146626173
+          ]
+        },
+        "publication.wallMs": {
+          "baselineMedianMs": 209.96628850000025,
+          "candidateMedianMs": 206.1828169999999,
+          "equalWorkChangePercent": -28.03160570900004,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            58.33364900000197,
+            -305.07946600000105,
+            -345.9231979999995,
+            -69.57355200000075,
+            28.777382000001126,
+            -64.16706400000021,
+            -3.108244999998533,
+            81.33954100000028
+          ],
+          "pairedChangesPercent": [
+            39.029770170786215,
+            -59.860339626201586,
+            -61.096495190060615,
+            -35.77489689750683,
+            12.764040580940673,
+            -26.6742895078509,
+            -1.9821852326229683,
+            48.691809106127735
+          ],
+          "medianPairedChangePercent": -14.328237370236934,
+          "pairedRangePercent": [
+            -61.096495190060615,
+            48.691809106127735
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -59.860339626201586,
+            39.029770170786215
+          ]
+        },
+        "publication.cpuMs": {
+          "baselineMedianMs": 206.90449999999998,
+          "candidateMedianMs": 195.1295,
+          "equalWorkChangePercent": -27.06764445663341,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            50.39699999999999,
+            -288.0,
+            -313.122,
+            -74.95799999999997,
+            33.52600000000001,
+            -57.670000000000016,
+            -3.584000000000003,
+            77.025
+          ],
+          "pairedChangesPercent": [
+            33.7709070440656,
+            -60.171740175083045,
+            -59.00847845710548,
+            -38.638343496615946,
+            15.25226331832037,
+            -24.6642716619622,
+            -2.2891158417801982,
+            46.19716789319321
+          ],
+          "medianPairedChangePercent": -13.476693751871199,
+          "pairedRangePercent": [
+            -60.171740175083045,
+            46.19716789319321
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -59.00847845710548,
+            33.7709070440656
+          ]
+        }
+      },
+      "scope": "canonical-dedup-component-with-virtual-exact-byte-storage",
+      "dictionary": "jmdict",
+      "cacheBudgetBytes": 50331648,
+      "counters": {
+        "rows": 526942,
+        "pendingHits": 162333,
+        "persistedHits": 3750,
+        "uniqueContent": 360859,
+        "exactFallbacks": 3750,
+        "recentSourceHits": 2915,
+        "exactCalls": 7,
+        "exactDescriptors": 3750,
+        "storageReadCalls": 4,
+        "storageReadEntries": 835,
+        "peakRecentSourceBytes": 50209402
+      }
+    },
+    {
+      "path": "dedup-retry-affinity0/dedup-high-memory-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "resolver.wallMs": {
+          "baselineMedianMs": 120.9761599999988,
+          "candidateMedianMs": 112.85741199999939,
+          "equalWorkChangePercent": -28.03716788455779,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            25.772382999999536,
+            1.768882999998823,
+            -6.9741099999992,
+            -13.279810000000907,
+            17.294308000002275,
+            -19.793256000000838,
+            -83.40898899999684,
+            -290.7679499999995
+          ],
+          "pairedChangesPercent": [
+            21.246269406903238,
+            1.7800882460876188,
+            -6.123449194439923,
+            -11.006958668992494,
+            15.418953152504077,
+            -15.819228257027195,
+            -38.636077318466356,
+            -71.07270918225336
+          ],
+          "medianPairedChangePercent": -8.565203931716209,
+          "pairedRangePercent": [
+            -71.07270918225336,
+            21.246269406903238
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -38.636077318466356,
+            15.418953152504077
+          ]
+        },
+        "resolver.cpuMs": {
+          "baselineMedianMs": 120.94800000000001,
+          "candidateMedianMs": 107.108,
+          "equalWorkChangePercent": -27.992262594772,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            25.756000000000014,
+            1.766999999999996,
+            -6.939000000000036,
+            -13.295999999999992,
+            13.259999999999991,
+            -19.788999999999987,
+            -80.00800000000004,
+            -282.24
+          ],
+          "pairedChangesPercent": [
+            21.237507833371815,
+            1.7786501585384196,
+            -6.095878978485681,
+            -11.023047587464763,
+            11.891630121875751,
+            -15.820821541069051,
+            -37.68256554933333,
+            -72.85361389959397
+          ],
+          "medianPairedChangePercent": -8.559463282975223,
+          "pairedRangePercent": [
+            -72.85361389959397,
+            21.237507833371815
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -37.68256554933333,
+            11.891630121875751
+          ]
+        },
+        "exact.wallMs": {
+          "baselineMedianMs": 26.695099999999456,
+          "candidateMedianMs": 14.487219999999525,
+          "equalWorkChangePercent": -38.693885497597456,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -28.123438000000533,
+            12.620550000000549,
+            -3.179865000000973,
+            -17.4136950000011,
+            2.0977620000012394,
+            -7.645678999999291,
+            -10.043824000000313,
+            -27.21357700000226
+          ],
+          "pairedChangesPercent": [
+            -72.02368049898733,
+            113.08210666547427,
+            -21.231453904897414,
+            -56.60087125394002,
+            11.419006245409413,
+            -27.577822157274046,
+            -39.13251313878602,
+            -75.17389101180125
+          ],
+          "medianPairedChangePercent": -33.35516764803003,
+          "pairedRangePercent": [
+            -75.17389101180125,
+            113.08210666547427
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -72.02368049898733,
+            11.419006245409413
+          ]
+        },
+        "exact.cpuMs": {
+          "baselineMedianMs": 21.2035,
+          "candidateMedianMs": 13.275500000000001,
+          "equalWorkChangePercent": -34.371129150271074,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -21.58,
+            12.598999999999998,
+            -3.708,
+            -8.899000000000001,
+            6.888999999999999,
+            -7.871000000000002,
+            -9.995999999999997,
+            -27.093000000000007
+          ],
+          "pairedChangesPercent": [
+            -66.60288262707941,
+            113.5658914728682,
+            -25.113443955299697,
+            -52.60388957853047,
+            73.03084914661295,
+            -28.533623346021397,
+            -39.215378579835225,
+            -75.49320106999555
+          ],
+          "medianPairedChangePercent": -33.87450096292831,
+          "pairedRangePercent": [
+            -75.49320106999555,
+            113.5658914728682
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -66.60288262707941,
+            73.03084914661295
+          ]
+        },
+        "publication.wallMs": {
+          "baselineMedianMs": 183.81386400000156,
+          "candidateMedianMs": 157.82719150000048,
+          "equalWorkChangePercent": -18.527565054926278,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            17.780012000003808,
+            31.15736199999992,
+            -65.4705150000027,
+            -343.00668100000166,
+            87.6679009999998,
+            -42.79161700000168,
+            11.124789000000419,
+            -32.01154200000201
+          ],
+          "pairedChangesPercent": [
+            13.66842486977291,
+            24.135572031586804,
+            -26.58881143250066,
+            -72.2002152791672,
+            48.64701812414203,
+            -24.330909632662944,
+            3.8748670416472786,
+            -17.080524851295465
+          ],
+          "medianPairedChangePercent": -6.602828904824094,
+          "pairedRangePercent": [
+            -72.2002152791672,
+            48.64701812414203
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -26.58881143250066,
+            24.135572031586804
+          ]
+        },
+        "publication.cpuMs": {
+          "baselineMedianMs": 177.216,
+          "candidateMedianMs": 157.43699999999998,
+          "equalWorkChangePercent": -16.08727396389167,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            17.548000000000002,
+            32.64399999999998,
+            -66.42099999999999,
+            -301.749,
+            93.41900000000001,
+            -41.96900000000002,
+            11.120000000000005,
+            -24.641999999999996
+          ],
+          "pairedChangesPercent": [
+            13.564090870442369,
+            25.649809850080118,
+            -27.489632566570922,
+            -69.5894726403498,
+            55.70502614741537,
+            -24.005880064978157,
+            3.8771582382639336,
+            -13.720184405692526
+          ],
+          "medianPairedChangePercent": -4.921513083714297,
+          "pairedRangePercent": [
+            -69.5894726403498,
+            55.70502614741537
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -27.489632566570922,
+            25.649809850080118
+          ]
+        }
+      },
+      "scope": "canonical-dedup-component-with-virtual-exact-byte-storage",
+      "dictionary": "jmdict",
+      "cacheBudgetBytes": 100663296,
+      "counters": {
+        "rows": 526942,
+        "pendingHits": 162333,
+        "persistedHits": 3750,
+        "uniqueContent": 360859,
+        "exactFallbacks": 3750,
+        "recentSourceHits": 3750,
+        "exactCalls": 7,
+        "exactDescriptors": 3750,
+        "storageReadCalls": 0,
+        "storageReadEntries": 0,
+        "peakRecentSourceBytes": 93264120
+      }
+    },
+    {
+      "path": "dedup-retry-affinity0/dedup-screen-jitendex.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "resolver.wallMs": {
+          "baselineMedianMs": 65.94703649999701,
+          "candidateMedianMs": 62.31502350000119,
+          "equalWorkChangePercent": 135.32107159538293,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -11.402855999996973,
+            -12.478129999990415,
+            -16.55572299999949,
+            -13.779922999994596,
+            -1.8504199999970297,
+            -9.167691000002378,
+            1.623622000006435,
+            781.6657630000082
+          ],
+          "pairedChangesPercent": [
+            -16.963108529261696,
+            -16.464348913881533,
+            -25.599295392190434,
+            -17.88814542472974,
+            -3.1384111181813057,
+            -12.804558118217146,
+            2.6802603350096987,
+            1426.9411777292833
+          ],
+          "medianPairedChangePercent": -14.63445351604934,
+          "pairedRangePercent": [
+            -25.599295392190434,
+            1426.9411777292833
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -17.88814542472974,
+            2.6802603350096987
+          ]
+        },
+        "resolver.cpuMs": {
+          "baselineMedianMs": 64.57900000000001,
+          "candidateMedianMs": 58.9975,
+          "equalWorkChangePercent": 130.74081581645606,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -11.405999999999992,
+            -11.582999999999984,
+            -14.010000000000012,
+            -6.321999999999974,
+            7.29099999999999,
+            -11.044999999999995,
+            -2.1569999999999965,
+            713.5640000000001
+          ],
+          "pairedChangesPercent": [
+            -16.988635517359498,
+            -15.522232049529617,
+            -22.58985149712187,
+            -9.095486785503581,
+            14.655570966250565,
+            -15.626326363147614,
+            -3.564405519292735,
+            1323.9646727029838
+          ],
+          "medianPairedChangePercent": -12.308859417516599,
+          "pairedRangePercent": [
+            -22.58985149712187,
+            1323.9646727029838
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -16.988635517359498,
+            14.655570966250565
+          ]
+        },
+        "exact.wallMs": {
+          "baselineMedianMs": 1.2417975000007573,
+          "candidateMedianMs": 1.4321295000017926,
+          "equalWorkChangePercent": 149.9256958544258,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -3.443046999995204,
+            6.3900680000042485,
+            -0.11102800000116986,
+            -0.9149969999962195,
+            -0.16629000000102678,
+            0.08609200000137207,
+            0.3674310000042169,
+            19.417799999991985
+          ],
+          "pairedChangesPercent": [
+            -67.83321256301112,
+            506.77902924730375,
+            -9.575704887505132,
+            -40.43050900619111,
+            -13.600484837844629,
+            6.020297490562143,
+            38.751758658807844,
+            1824.3930762820146
+          ],
+          "medianPairedChangePercent": -1.7777036984714947,
+          "pairedRangePercent": [
+            -67.83321256301112,
+            1824.3930762820146
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -40.43050900619111,
+            506.77902924730375
+          ]
+        },
+        "exact.cpuMs": {
+          "baselineMedianMs": 1.1680000000000001,
+          "candidateMedianMs": 1.3665000000000003,
+          "equalWorkChangePercent": 157.29382205143364,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -3.446999999999999,
+            6.388999999999999,
+            -0.026000000000000023,
+            -0.6419999999999999,
+            -0.41700000000000015,
+            0.07900000000000018,
+            0.369,
+            18.98
+          ],
+          "pairedChangesPercent": [
+            -68.89866080351788,
+            530.2074688796679,
+            -2.529182879377434,
+            -32.939969214982035,
+            -36.87002652519895,
+            5.864884929472924,
+            42.560553633218,
+            1894.2115768463073
+          ],
+          "medianPairedChangePercent": 1.6678510250477452,
+          "pairedRangePercent": [
+            -68.89866080351788,
+            1894.2115768463073
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -36.87002652519895,
+            530.2074688796679
+          ]
+        },
+        "publication.wallMs": {
+          "baselineMedianMs": 23.1155275000001,
+          "candidateMedianMs": 28.779425500002617,
+          "equalWorkChangePercent": 43.96075272963267,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            9.987861000005068,
+            -19.834835000001476,
+            3.234997999999905,
+            -3.948330999999598,
+            12.324773000002097,
+            -9.209983999997348,
+            25.451984000001175,
+            63.91698599999836
+          ],
+          "pairedChangesPercent": [
+            42.18298463047589,
+            -58.67560933582303,
+            13.067217566356714,
+            -17.506440548642498,
+            71.47909529983887,
+            -33.60179303272761,
+            136.16487108894404,
+            350.8011068098103
+          ],
+          "medianPairedChangePercent": 27.6251010984163,
+          "pairedRangePercent": [
+            -58.67560933582303,
+            350.8011068098103
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -33.60179303272761,
+            136.16487108894404
+          ]
+        },
+        "publication.cpuMs": {
+          "baselineMedianMs": 18.311999999999998,
+          "candidateMedianMs": 21.677,
+          "equalWorkChangePercent": 43.186657849555,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            15.122000000000014,
+            -10.640000000000008,
+            -9.601999999999999,
+            -0.0189999999999948,
+            7.925999999999998,
+            -12.830999999999994,
+            26.19000000000001,
+            55.03899999999998
+          ],
+          "pairedChangesPercent": [
+            83.13358988455204,
+            -43.61549497847922,
+            -39.347621194115476,
+            -0.1030704133665794,
+            46.58790336801268,
+            -47.66521787584976,
+            149.04393353061693,
+            307.39458251884946
+          ],
+          "medianPairedChangePercent": 23.24241647732305,
+          "pairedRangePercent": [
+            -47.66521787584976,
+            307.39458251884946
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -43.61549497847922,
+            149.04393353061693
+          ]
+        }
+      },
+      "scope": "canonical-dedup-component-with-virtual-exact-byte-storage",
+      "dictionary": "jitendex",
+      "cacheBudgetBytes": 50331648,
+      "counters": {
+        "rows": 435448,
+        "pendingHits": 73262,
+        "persistedHits": 32,
+        "uniqueContent": 362154,
+        "exactFallbacks": 32,
+        "recentSourceHits": 0,
+        "exactCalls": 11,
+        "exactDescriptors": 32,
+        "storageReadCalls": 11,
+        "storageReadEntries": 32,
+        "peakRecentSourceBytes": 0
+      }
+    },
+    {
+      "path": "dedup-retry-affinity0/dedup-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "resolver.wallMs": {
+          "baselineMedianMs": 120.07300749999968,
+          "candidateMedianMs": 118.57931249999956,
+          "equalWorkChangePercent": -33.329711584489544,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -10.950804999999491,
+            31.771448000001328,
+            -18.52250500000082,
+            -11.48294800000076,
+            -409.00463299999865,
+            17.59154899999976,
+            22.300328000002082,
+            -103.9952710000016
+          ],
+          "pairedChangesPercent": [
+            -9.577809278727633,
+            33.13204111122585,
+            -13.441912704886738,
+            -10.331932306291701,
+            -77.62632033568124,
+            15.508027650873114,
+            17.725283449345252,
+            -46.90069158575281
+          ],
+          "medianPairedChangePercent": -9.954870792509666,
+          "pairedRangePercent": [
+            -77.62632033568124,
+            33.13204111122585
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -46.90069158575281,
+            17.725283449345252
+          ]
+        },
+        "resolver.cpuMs": {
+          "baselineMedianMs": 120.02550000000001,
+          "candidateMedianMs": 118.54499999999999,
+          "equalWorkChangePercent": -32.02203658432944,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -10.958000000000013,
+            31.358999999999995,
+            -18.50500000000001,
+            -11.47699999999999,
+            -362.592,
+            17.587000000000003,
+            10.134999999999991,
+            -103.92699999999999
+          ],
+          "pairedChangesPercent": [
+            -9.586548387661198,
+            32.7150383391581,
+            -13.43541489693828,
+            -10.329310329310326,
+            -75.4686192642792,
+            15.507724322799099,
+            8.05996262276829,
+            -46.89740754946865
+          ],
+          "medianPairedChangePercent": -9.957929358485762,
+          "pairedRangePercent": [
+            -75.4686192642792,
+            32.7150383391581
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -46.89740754946865,
+            15.507724322799099
+          ]
+        },
+        "exact.wallMs": {
+          "baselineMedianMs": 23.809696999999233,
+          "candidateMedianMs": 19.463419499999873,
+          "equalWorkChangePercent": -57.660307105288254,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            1.6746670000011363,
+            14.677961999997933,
+            -18.917706000002,
+            2.0051479999992807,
+            -262.897156,
+            -19.93395900000087,
+            27.384226000000126,
+            -7.605032999998912
+          ],
+          "pairedChangesPercent": [
+            10.738655400492835,
+            91.50922722506402,
+            -48.80704295698203,
+            13.077929248075716,
+            -92.06679574671448,
+            -52.06889114531248,
+            130.83711892582167,
+            -28.494602403852642
+          ],
+          "medianPairedChangePercent": -8.877973501679904,
+          "pairedRangePercent": [
+            -92.06679574671448,
+            130.83711892582167
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -52.06889114531248,
+            91.50922722506402
+          ]
+        },
+        "exact.cpuMs": {
+          "baselineMedianMs": 21.1885,
+          "candidateMedianMs": 18.386,
+          "equalWorkChangePercent": -56.82909632376143,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            1.2689999999999984,
+            20.172,
+            -18.181,
+            1.1950000000000003,
+            -228.29100000000003,
+            -19.150000000000002,
+            19.284999999999997,
+            -6.816000000000001
+          ],
+          "pairedChangesPercent": [
+            8.191853334194032,
+            193.6635944700461,
+            -47.97224201166258,
+            7.84326594906799,
+            -92.49965559436309,
+            -51.18815321696828,
+            92.68515403469983,
+            -31.59944367176635
+          ],
+          "medianPairedChangePercent": -11.878088861349179,
+          "pairedRangePercent": [
+            -92.49965559436309,
+            193.6635944700461
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -51.18815321696828,
+            92.68515403469983
+          ]
+        },
+        "publication.wallMs": {
+          "baselineMedianMs": 197.02745249999998,
+          "candidateMedianMs": 204.28651599999966,
+          "equalWorkChangePercent": 17.205102830644094,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -24.601960999997573,
+            -4.365653000001657,
+            135.77685300000212,
+            -68.53221900000062,
+            -79.63634899999943,
+            -14.023566000001665,
+            539.5183129999996,
+            -185.33992599999965
+          ],
+          "pairedChangesPercent": [
+            -9.692134199356738,
+            -2.5461403008930406,
+            95.175755906173,
+            -27.648127601777105,
+            -35.77661530793319,
+            -9.903417435163863,
+            383.0010148578947,
+            -44.576725554875885
+          ],
+          "medianPairedChangePercent": -9.797775817260302,
+          "pairedRangePercent": [
+            -44.576725554875885,
+            383.0010148578947
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -35.77661530793319,
+            95.175755906173
+          ]
+        },
+        "publication.cpuMs": {
+          "baselineMedianMs": 195.911,
+          "candidateMedianMs": 201.64600000000002,
+          "equalWorkChangePercent": 19.556033471119893,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -25.852000000000004,
+            -4.346000000000032,
+            135.759,
+            -68.50200000000001,
+            -77.88399999999999,
+            -13.576000000000022,
+            510.38700000000006,
+            -129.35799999999995
+          ],
+          "pairedChangesPercent": [
+            -10.201367706191778,
+            -2.5383734784945156,
+            95.3417326816113,
+            -27.667179605239244,
+            -35.303930012238794,
+            -9.633356276653881,
+            363.2492562595192,
+            -36.587387112193426
+          ],
+          "medianPairedChangePercent": -9.91736199142283,
+          "pairedRangePercent": [
+            -36.587387112193426,
+            363.2492562595192
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -35.303930012238794,
+            95.3417326816113
+          ]
+        }
+      },
+      "scope": "canonical-dedup-component-with-virtual-exact-byte-storage",
+      "dictionary": "jmdict",
+      "cacheBudgetBytes": 50331648,
+      "counters": {
+        "rows": 526942,
+        "pendingHits": 162333,
+        "persistedHits": 3750,
+        "uniqueContent": 360859,
+        "exactFallbacks": 3750,
+        "recentSourceHits": 2915,
+        "exactCalls": 7,
+        "exactDescriptors": 3750,
+        "storageReadCalls": 4,
+        "storageReadEntries": 835,
+        "peakRecentSourceBytes": 50209402
+      }
+    },
+    {
+      "path": "dedup-retry-affinity0/dedup-screen-jmnedict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "resolver.wallMs": {
+          "baselineMedianMs": 307.18190600000025,
+          "candidateMedianMs": 287.6207854999998,
+          "equalWorkChangePercent": 9.836742765217888,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            1.1547910000026604,
+            446.1123109999953,
+            -39.73233099999925,
+            108.87957099999949,
+            32.49662999999782,
+            -252.76150199999938,
+            -13.545645000002878,
+            -30.767533000001094
+          ],
+          "pairedChangesPercent": [
+            0.36940536603116136,
+            168.43393998913507,
+            -13.478943817324673,
+            35.19230136025917,
+            13.254467517534984,
+            -49.19407568196533,
+            -4.441498225143725,
+            -9.780649333712354
+          ],
+          "medianPairedChangePercent": -2.036046429556282,
+          "pairedRangePercent": [
+            -49.19407568196533,
+            168.43393998913507
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -13.478943817324673,
+            35.19230136025917
+          ]
+        },
+        "resolver.cpuMs": {
+          "baselineMedianMs": 306.5875,
+          "candidateMedianMs": 287.51099999999997,
+          "equalWorkChangePercent": 9.294050887833905,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            2.76299999999992,
+            419.4040000000001,
+            -39.72699999999995,
+            95.858,
+            32.53299999999993,
+            -236.99099999999993,
+            -13.550999999999988,
+            -24.601999999999975
+          ],
+          "pairedChangesPercent": [
+            0.8889246360491931,
+            158.38818708812482,
+            -13.478979279551307,
+            30.99472309164748,
+            13.273303658491775,
+            -47.58950982951464,
+            -4.444203939471459,
+            -7.980899302863476
+          ],
+          "medianPairedChangePercent": -1.7776396517111328,
+          "pairedRangePercent": [
+            -47.58950982951464,
+            158.38818708812482
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -13.478979279551307,
+            30.99472309164748
+          ]
+        },
+        "exact.wallMs": {
+          "baselineMedianMs": 119.77410350000082,
+          "candidateMedianMs": 116.02791200000001,
+          "equalWorkChangePercent": -12.862289059785748,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            9.084885999993276,
+            34.20431799999733,
+            -67.31783099999939,
+            149.04563000000053,
+            13.28896099999929,
+            -230.35102799999822,
+            -3.209106000000247,
+            -50.48897900000247
+          ],
+          "pairedChangesPercent": [
+            7.347185400687906,
+            32.44022320380508,
+            -49.282051866213685,
+            153.6716808338334,
+            12.85546843378711,
+            -70.33445240082436,
+            -2.705733480767658,
+            -41.7456505551673
+          ],
+          "medianPairedChangePercent": 2.3207259599601238,
+          "pairedRangePercent": [
+            -70.33445240082436,
+            153.6716808338334
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -49.282051866213685,
+            32.44022320380508
+          ]
+        },
+        "exact.cpuMs": {
+          "baselineMedianMs": 112.29150000000001,
+          "candidateMedianMs": 114.22800000000001,
+          "equalWorkChangePercent": -10.385518325946762,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            13.15300000000002,
+            39.89299999999996,
+            -65.69200000000001,
+            146.44799999999998,
+            11.108999999999966,
+            -212.08399999999983,
+            1.1890000000000214,
+            -44.434000000000026
+          ],
+          "pairedChangesPercent": [
+            11.134626292041627,
+            40.74830696315661,
+            -49.63843404538276,
+            183.4268537074148,
+            10.851176056888301,
+            -68.8530763836584,
+            1.0449807526673904,
+            -40.10252615048603
+          ],
+          "medianPairedChangePercent": 5.948078404777846,
+          "pairedRangePercent": [
+            -68.8530763836584,
+            183.4268537074148
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -49.63843404538276,
+            40.74830696315661
+          ]
+        },
+        "publication.wallMs": {
+          "baselineMedianMs": 58.52630050000016,
+          "candidateMedianMs": 61.01588700000002,
+          "equalWorkChangePercent": 46.07176284344252,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            8.442019999999502,
+            175.01812099999825,
+            -3.3014530000018567,
+            12.695496999999705,
+            -3.704944999998588,
+            -10.302687999999762,
+            26.305366000001413,
+            14.672560000001795
+          ],
+          "pairedChangesPercent": [
+            10.015831549155706,
+            309.62611422679277,
+            -5.454515745777733,
+            25.154813444186843,
+            -5.921112857157329,
+            -15.49043568564371,
+            48.42573628692528,
+            34.99856738432139
+          ],
+          "medianPairedChangePercent": 17.585322496671274,
+          "pairedRangePercent": [
+            -15.49043568564371,
+            309.62611422679277
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -5.921112857157329,
+            48.42573628692528
+          ]
+        },
+        "publication.cpuMs": {
+          "baselineMedianMs": 57.1665,
+          "candidateMedianMs": 59.306,
+          "equalWorkChangePercent": 48.688663004265486,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            20.233999999999995,
+            169.35000000000002,
+            -3.931999999999988,
+            13.827999999999996,
+            -8.794000000000011,
+            -10.890000000000008,
+            28.209000000000017,
+            14.007999999999996
+          ],
+          "pairedChangesPercent": [
+            28.511040031563063,
+            303.6959991392142,
+            -6.7133344715724625,
+            28.165227309760454,
+            -14.126680695892457,
+            -16.57534246575344,
+            54.294018015243694,
+            33.608445297504794
+          ],
+          "medianPairedChangePercent": 28.338133670661758,
+          "pairedRangePercent": [
+            -16.57534246575344,
+            303.6959991392142
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -14.126680695892457,
+            54.294018015243694
+          ]
+        }
+      },
+      "scope": "canonical-dedup-component-with-virtual-exact-byte-storage",
+      "dictionary": "jmnedict",
+      "cacheBudgetBytes": 50331648,
+      "counters": {
+        "rows": 667942,
+        "pendingHits": 114672,
+        "persistedHits": 75804,
+        "uniqueContent": 477466,
+        "exactFallbacks": 75804,
+        "recentSourceHits": 75804,
+        "exactCalls": 22,
+        "exactDescriptors": 75804,
+        "storageReadCalls": 0,
+        "storageReadEntries": 0,
+        "peakRecentSourceBytes": 22385796
+      }
+    },
+    {
+      "path": "escapes-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 730.3818744999996,
+          "candidateMedianMs": 835.4944284999996,
+          "equalWorkChangePercent": 5.285098880244865,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            126.21283733333473,
+            306.57655199999965,
+            49.55154833333188,
+            -245.48465266666585,
+            102.12026066666601,
+            135.91024433333268,
+            -13.064730999999483,
+            -134.73738000000037
+          ],
+          "pairedChangesPercent": [
+            19.131463541082105,
+            41.00522783613083,
+            6.321610109345355,
+            -22.55937545240936,
+            12.871939744104699,
+            19.369172602290142,
+            -1.8320743614875123,
+            -19.21312352182436
+          ],
+          "medianPairedChangePercent": 9.596774926725027,
+          "pairedRangePercent": [
+            -22.55937545240936,
+            41.00522783613083
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -19.21312352182436,
+            19.369172602290142
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 718.6383333333333,
+          "candidateMedianMs": 837.1370000000001,
+          "equalWorkChangePercent": 6.503019347047045,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            124.15166666666653,
+            343.2366666666668,
+            33.53200000000004,
+            -240.07733333333329,
+            114.77499999999986,
+            164.91500000000008,
+            -17.012000000000057,
+            -120.89633333333325
+          ],
+          "pairedChangesPercent": [
+            18.571900137423714,
+            47.95618830014499,
+            4.202591338975448,
+            -21.849007676845634,
+            14.296711413826714,
+            24.325958850731276,
+            -2.3577119716387207,
+            -17.07225685888246
+          ],
+          "medianPairedChangePercent": 9.249651376401081,
+          "pairedRangePercent": [
+            -21.849007676845634,
+            47.95618830014499
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -17.07225685888246,
+            24.325958850731276
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 34.483366333332995,
+          "candidateMedianMs": 36.473118333333176,
+          "equalWorkChangePercent": 28.548355866636534,
+          "fasterPairs": 2,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            5.6841313333322105,
+            60.77337666666563,
+            1.474570666666601,
+            17.016246666666873,
+            5.464622666666699,
+            0.19193833333383736,
+            -9.224092666667577,
+            -1.8855326666656183
+          ],
+          "pairedChangesPercent": [
+            19.4876834732044,
+            198.73354760831825,
+            4.354635205568247,
+            43.59341656724671,
+            16.999941763790737,
+            0.482792913932939,
+            -23.768141804094046,
+            -5.371178107171448
+          ],
+          "medianPairedChangePercent": 10.677288484679492,
+          "pairedRangePercent": [
+            -23.768141804094046,
+            198.73354760831825
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -5.371178107171448,
+            43.59341656724671
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "keys-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 732.3679691666665,
+          "candidateMedianMs": 734.8766315,
+          "equalWorkChangePercent": 0.43246955182425495,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -76.31483133333336,
+            28.369578333334744,
+            -13.804786999999806,
+            -37.4681786666672,
+            196.86803666666765,
+            -81.8719930000002,
+            10.869833999999628,
+            -1.0631190000009383
+          ],
+          "pairedChangesPercent": [
+            -10.262148087984436,
+            4.0941540092853,
+            -2.1521803366059467,
+            -4.313333800907026,
+            29.495039699725247,
+            -11.259282997496722,
+            1.4737061415608599,
+            -0.1270085722361869
+          ],
+          "medianPairedChangePercent": -1.1395944544210668,
+          "pairedRangePercent": [
+            -11.259282997496722,
+            29.495039699725247
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -10.262148087984436,
+            4.0941540092853
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 745.4998333333334,
+          "candidateMedianMs": 747.0736666666667,
+          "equalWorkChangePercent": 0.3255892530432236,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -83.66500000000019,
+            35.898000000000025,
+            -20.491999999999962,
+            -18.219999999999914,
+            196.7539999999999,
+            -86.39633333333347,
+            3.3659999999999854,
+            -7.625333333333401
+          ],
+          "pairedChangesPercent": [
+            -11.143610255344738,
+            5.14864492736995,
+            -3.0608251621376925,
+            -2.0841650356721586,
+            29.12387398611258,
+            -11.671857381141958,
+            0.44426767985625837,
+            -0.8860179504231236
+          ],
+          "medianPairedChangePercent": -1.485091493047641,
+          "pairedRangePercent": [
+            -11.671857381141958,
+            29.12387398611258
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -11.143610255344738,
+            5.14864492736995
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 36.425018666666645,
+          "candidateMedianMs": 34.700428166666825,
+          "equalWorkChangePercent": 4.285115884754287,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -10.4148613333338,
+            15.089474666667229,
+            1.5134783333339001,
+            4.547001333335171,
+            -2.6733296666669304,
+            24.44875800000061,
+            2.397292666666395,
+            -21.990834666666913
+          ],
+          "pairedChangesPercent": [
+            -24.77083363856385,
+            39.597639338706415,
+            5.222993556089683,
+            14.429966456400356,
+            -7.422542470097793,
+            74.6290260589325,
+            6.5084262110490565,
+            -39.847172174304255
+          ],
+          "medianPairedChangePercent": 5.8657098835693695,
+          "pairedRangePercent": [
+            -39.847172174304255,
+            74.6290260589325
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -24.77083363856385,
+            39.597639338706415
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "numeric-screen-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 854.3805045000004,
+          "candidateMedianMs": 1018.4151760000013,
+          "equalWorkChangePercent": 21.195470967603146,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -201.41144499999973,
+            389.5535329999984,
+            191.66650500000014,
+            -260.36784199999875,
+            -151.68997099999888,
+            588.0287710000002,
+            1439.2839459999987,
+            -458.17073899999923
+          ],
+          "pairedChangesPercent": [
+            -23.2626623932912,
+            51.90220315706109,
+            28.873173118792693,
+            -22.11168278323913,
+            -11.931168916836265,
+            93.71029729410535,
+            170.74434699501865,
+            -43.57212810199448
+          ],
+          "medianPairedChangePercent": 8.471002100978215,
+          "pairedRangePercent": [
+            -43.57212810199448,
+            170.74434699501865
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -23.2626623932912,
+            93.71029729410535
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 843.5245,
+          "candidateMedianMs": 917.1020000000001,
+          "equalWorkChangePercent": 2.2724448212234627,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -178.43299999999988,
+            321.33100000000013,
+            225.837,
+            -254.9090000000001,
+            -158.65999999999997,
+            457.12700000000007,
+            197.78500000000008,
+            -454.4720000000001
+          ],
+          "pairedChangesPercent": [
+            -20.786042377511414,
+            45.09478393641031,
+            35.9451075391185,
+            -26.393532415062737,
+            -13.93289448725965,
+            70.23311839058739,
+            23.869146607258806,
+            -42.70554661299249
+          ],
+          "medianPairedChangePercent": 4.968126059999578,
+          "pairedRangePercent": [
+            -42.70554661299249,
+            70.23311839058739
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -26.393532415062737,
+            45.09478393641031
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 32.49212599999828,
+          "candidateMedianMs": 41.09469900000022,
+          "equalWorkChangePercent": 63.744578259320406,
+          "fasterPairs": 1,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -1.3976959999990868,
+            9.729645000002165,
+            12.398577000000842,
+            7.692143000004762,
+            30.904507999999623,
+            6.164229999998497,
+            99.50661399999808,
+            0.7522760000001654
+          ],
+          "pairedChangesPercent": [
+            -4.024866529950232,
+            32.15589442356395,
+            41.6011580139001,
+            20.11133766304123,
+            84.79276474770619,
+            21.571102212443115,
+            285.74824421526984,
+            2.771786112242225
+          ],
+          "medianPairedChangePercent": 26.863498318003533,
+          "pairedRangePercent": [
+            -4.024866529950232,
+            285.74824421526984
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            2.771786112242225,
+            84.79276474770619
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "parser-aa-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 833.0312960000001,
+          "candidateMedianMs": 854.2076400000001,
+          "equalWorkChangePercent": 11.089899610636467,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            44.508180999998785,
+            -159.61967199999935,
+            149.97654000000057,
+            -385.835355000002,
+            811.580098000004,
+            403.7901600000009,
+            -98.22405500000059,
+            33.05867099999796
+          ],
+          "pairedChangesPercent": [
+            6.260493982361459,
+            -17.794377811857697,
+            18.67718324687062,
+            -25.370001272210786,
+            86.38163916598585,
+            47.73536440886013,
+            -11.97606805848972,
+            4.937877045350847
+          ],
+          "medianPairedChangePercent": 5.599185513856153,
+          "pairedRangePercent": [
+            -25.370001272210786,
+            86.38163916598585
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -17.794377811857697,
+            47.73536440886013
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 821.2245,
+          "candidateMedianMs": 882.4635000000001,
+          "equalWorkChangePercent": 14.748400757589476,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            94.543,
+            -157.27199999999982,
+            152.654,
+            -297.2049999999999,
+            829.387,
+            428.2689999999998,
+            -42.81700000000012,
+            35.27800000000002
+          ],
+          "pairedChangesPercent": [
+            13.07390101266277,
+            -17.0731998571371,
+            19.211741445555997,
+            -20.83711636548472,
+            90.17173559936766,
+            50.51163986592155,
+            -5.664141303902093,
+            5.172340484802462
+          ],
+          "medianPairedChangePercent": 9.123120748732616,
+          "pairedRangePercent": [
+            -20.83711636548472,
+            90.17173559936766
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -17.0731998571371,
+            50.51163986592155
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 40.47336499999983,
+          "candidateMedianMs": 37.123318499999186,
+          "equalWorkChangePercent": 13.231965153049629,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            61.943181999999524,
+            -14.780159000001277,
+            3.825050999997984,
+            7.270878999997876,
+            -11.07488899999953,
+            1.467210999998315,
+            -4.707718000001478,
+            2.0125429999993685
+          ],
+          "pairedChangesPercent": [
+            143.82304887668528,
+            -31.438073245458142,
+            11.894155924048299,
+            15.435963029579902,
+            -15.536006504341682,
+            3.9874961190644376,
+            -12.428730176305047,
+            6.287673882489875
+          ],
+          "medianPairedChangePercent": 5.137585000777156,
+          "pairedRangePercent": [
+            -31.438073245458142,
+            143.82304887668528
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -15.536006504341682,
+            15.435963029579902
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "parser-aa3-affinity0-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 673.8308955000007,
+          "candidateMedianMs": 670.2291473333335,
+          "equalWorkChangePercent": -1.0878943397876317,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            24.70538099999851,
+            3.9335283333326743,
+            52.77491633333216,
+            96.21145766666689,
+            -109.09697799999935,
+            -10.94552566666573,
+            -52.599950666666814,
+            -65.40264233333255
+          ],
+          "pairedChangesPercent": [
+            3.6753514385129638,
+            0.4664422640119126,
+            8.108511344209024,
+            16.17547328955673,
+            -14.643235206816563,
+            -1.6651651057216,
+            -7.787153807620706,
+            -9.149128397029793
+          ],
+          "medianPairedChangePercent": -0.5993614208548437,
+          "pairedRangePercent": [
+            -14.643235206816563,
+            16.17547328955673
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -9.149128397029793,
+            8.108511344209024
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 663.684,
+          "candidateMedianMs": 662.6279999999999,
+          "equalWorkChangePercent": -0.9410934085551492,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            23.482666666666773,
+            2.285999999999831,
+            45.20533333333333,
+            100.18166666666662,
+            -99.9426666666667,
+            -9.640333333333388,
+            -48.62699999999995,
+            -64.41499999999996
+          ],
+          "pairedChangesPercent": [
+            3.5438188410754856,
+            0.276734899426323,
+            7.057426414454149,
+            16.96830535440663,
+            -13.655670582019741,
+            -1.4850580189846752,
+            -7.31529361265113,
+            -9.15378905619032
+          ],
+          "medianPairedChangePercent": -0.6041615597791761,
+          "pairedRangePercent": [
+            -13.655670582019741,
+            16.96830535440663
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -9.15378905619032,
+            7.057426414454149
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 32.2252406666668,
+          "candidateMedianMs": 34.403621499999716,
+          "equalWorkChangePercent": 60.08821536526161,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            26.537433666666704,
+            154.72781733333312,
+            -53.07607666666688,
+            -0.2912803333335141,
+            -3.053846999999525,
+            55.057208666667364,
+            3.2018776666664053,
+            -0.04800233333450521
+          ],
+          "pairedChangesPercent": [
+            98.6713428169348,
+            412.63326854054367,
+            -62.73585207478916,
+            -0.9233179332373442,
+            -9.281265049758613,
+            202.06254193105707,
+            9.395462700396795,
+            -0.16069331151794541
+          ],
+          "medianPairedChangePercent": 4.617384694439425,
+          "pairedRangePercent": [
+            -62.73585207478916,
+            412.63326854054367
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -9.281265049758613,
+            202.06254193105707
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    },
+    {
+      "path": "parser-aa3-jmdict.json",
+      "complete": true,
+      "observationCount": 16,
+      "plannedPairs": 8,
+      "error": null,
+      "failures": [],
+      "metrics": {
+        "elapsedMs": {
+          "baselineMedianMs": 673.3813453333339,
+          "candidateMedianMs": 715.8761478333329,
+          "equalWorkChangePercent": 3.2035415941719547,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            11.742986999999289,
+            -238.30407300000172,
+            234.95644700000014,
+            165.7547050000005,
+            31.159538999998972,
+            -74.74212966666789,
+            71.88412966666567,
+            -22.039544333331605
+          ],
+          "pairedChangesPercent": [
+            2.0164507891501815,
+            -28.887661049811786,
+            40.357642494146106,
+            25.04196421804874,
+            5.340562097129142,
+            -10.913571119150834,
+            8.515249858368446,
+            -2.5397880837058517
+          ],
+          "medianPairedChangePercent": 3.678506443139662,
+          "pairedRangePercent": [
+            -28.887661049811786,
+            40.357642494146106
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -10.913571119150834,
+            25.04196421804874
+          ]
+        },
+        "cpuMs": {
+          "baselineMedianMs": 681.4090000000001,
+          "candidateMedianMs": 734.0723333333333,
+          "equalWorkChangePercent": 4.0146573722464,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            19.04433333333327,
+            -249.26299999999992,
+            251.18766666666647,
+            190.06999999999994,
+            34.01566666666656,
+            -73.79266666666672,
+            73.08133333333342,
+            -15.716999999999757
+          ],
+          "pairedChangesPercent": [
+            3.254703491743749,
+            -29.82371127606521,
+            42.633144597726094,
+            28.356721499309234,
+            5.728883629226744,
+            -10.655426817763514,
+            8.60643735951594,
+            -1.7881291976532654
+          ],
+          "medianPairedChangePercent": 4.491793560485247,
+          "pairedRangePercent": [
+            -29.82371127606521,
+            42.633144597726094
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -10.655426817763514,
+            28.356721499309234
+          ]
+        },
+        "lookupMs": {
+          "baselineMedianMs": 33.27728516666616,
+          "candidateMedianMs": 32.60447316666705,
+          "equalWorkChangePercent": 8.909132900968132,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedDifferenceMs": [
+            -4.040809333333527,
+            0.23774100000036924,
+            3.9945010000002803,
+            -6.770033333333075,
+            -0.34584266666630725,
+            -3.623784666666932,
+            35.74551299999863,
+            -0.9983309999988705
+          ],
+          "pairedChangesPercent": [
+            -9.8321544545949,
+            0.7155193161424211,
+            14.412878749155977,
+            -17.07487394563647,
+            -1.3197099860693284,
+            -11.689989592474404,
+            90.72866522386829,
+            -2.9954530716339134
+          ],
+          "medianPairedChangePercent": -2.1575815288516207,
+          "pairedRangePercent": [
+            -17.07487394563647,
+            90.72866522386829
+          ],
+          "descriptivePairedBootstrap95Percent": [
+            -11.689989592474404,
+            14.412878749155977
+          ]
+        }
+      },
+      "scope": "sequential parser and completed lookup construction; not whole import",
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "maxWasmHeapBytes": {
+        "A": [
+          61603840
+        ],
+        "B": [
+          61603840
+        ]
+      }
+    }
+  ]
+}

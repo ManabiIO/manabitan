@@ -1,0 +1,368 @@
+From dfabe18acf18b36aef4d84a652fde29cfc6ea734 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 19 Nov 2026 13:45:39 -0500
+Subject: [PATCH] Reuse validated numeric token bounds in fused term parsing
+
+---
+ dev/data/dictionary-wasm/manifest.json        |   4 +-
+ .../dictionary-wasm/term-bank-parser.wasm     | Bin 52930 -> 52603 bytes
+ ext/js/dictionary/wasm/term-bank-parser.c     |  21 +--
+ test/term-bank-fused-number-bounds.test.js    | 132 ++++++++++++++++++
+ 4 files changed, 145 insertions(+), 12 deletions(-)
+ create mode 100644 test/term-bank-fused-number-bounds.test.js
+
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index ecea9ec..857c08f 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "3a935860d179e7308db8aa26db2dd2199667b0fedda2c846830bc60e1d8be72b",
++    "sourceDigest": "8552e76f8c457200de545174dc6a8b181d5488d5c7ee445e1bde183abddf5d68",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -57,7 +57,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5"
++            "sha256": "914c75cb06134d3801f51f8c2fc7e691271c5bc9ee726e7831cec8c1c804569c"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index 8a347f00a90af6ecd692f971b867d7c08bc2a753..49de38061ae2d02be5b89de3cb3bc6e4156e2964 100644
+GIT binary patch
+delta 4172
+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
+UMonIO;n^D{`K|tQzlewa3#N(U*8l(j
+
+delta 4172
+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
+A*#H0l
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 6a01b0e..0739025 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1144,7 +1144,8 @@ static int parse_row_single_pass(
+     uint32_t prior_count,
+     uint32_t* glossary_witness,
+     uint32_t glossary_lookback,
+-    int validate_glossary_types
++    int validate_glossary_types,
++    uint32_t* numeric_ends
+ ) {
+     if (row_start >= len || src[row_start] != '[') { return 0; }
+     clear_term_row_meta(out_meta);
+@@ -1164,6 +1165,7 @@ static int parse_row_single_pass(
+         uint32_t value_end = 0u;
+         if (field_index == 4u || field_index == 6u) {
+             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
++            if (numeric_ends != 0) { numeric_ends[field_index == 4u ? 0u : 1u] = value_end; }
+         } else if (field_index == 5u) {
+             if (validate_glossary_types && src[i] != '[') { return 0; }
+             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
+@@ -1777,7 +1779,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len,
+             }
+         }
+         uint32_t row_end = 0u;
+-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
++        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+             return -1;
+         }
+         ++row_count;
+@@ -1815,7 +1817,7 @@ static int32_t parse_term_bank_impl(
+     while (status > 0) {
+         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
+         uint32_t row_end = 0u;
+-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
++        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+             return -1;
+         }
+         ++row_count;
+@@ -2855,6 +2857,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+             return -4;
+         }
+         uint32_t row_end = 0u;
++        // Retain the already-validated token bounds only for this fused row.
++        // The public metadata layout and generic parser remain unchanged.
++        uint32_t numeric_ends[2] = {0u, 0u};
+         uint32_t glossary_witness = 0xffffffffu;
+         uint32_t glossary_lookback = 0u;
+         if (validated_glossary_reuse_enabled && row_count > 0u) {
+@@ -2867,7 +2872,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+             }
+         }
+         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
+-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u)) {
++                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, numeric_ends)) {
+             return -1;
+         }
+         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
+@@ -2983,11 +2988,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+         reading_indexes[row_count] = string_indexes[1];
+         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
+         // The row parser already validated the JSON grammar of both numbers.
+-        uint32_t score_end = 0u;
+         int32_t score = 0;
+         if (
+-            !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
+-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
++            !parse_int32_token(src, parsed_row->score_start, numeric_ends[0], 0, &score) ||
+             // Integer storage cannot preserve a negative zero score. Use the
+             // ordinary number-preserving path, even in otherwise integer banks.
+             (score == 0 && src[parsed_row->score_start] == '-')
+@@ -2998,10 +3001,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
+         scores[row_count] = score;
+         int32_t sequence = -1;
+         if (parsed_row->sequence_start != 0xffffffffu) {
+-            uint32_t sequence_end = 0u;
+             if (
+-                !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
+-                !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)
++                !parse_int32_token(src, parsed_row->sequence_start, numeric_ends[1], -1, &sequence)
+             ) {
+                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+                 return -5;
+diff --git a/test/term-bank-fused-number-bounds.test.js b/test/term-bank-fused-number-bounds.test.js
+new file mode 100644
+index 0000000..d5a5741
+--- /dev/null
++++ b/test/term-bank-fused-number-bounds.test.js
+@@ -0,0 +1,132 @@
++/*
++ * Copyright (C) 2026  Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {readFile} from 'node:fs/promises'
++import {fileURLToPath} from 'node:url'
++import {crc32, deflateRawSync} from 'node:zlib'
++import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest'
++import {
++    consumeLastTermBankWasmParseProfile,
++    inflateCompressedTermBankSourcesWasm,
++    parseTermBankWithWasmColumnChunks,
++} from '../ext/js/dictionary/term-bank-wasm-parser.js'
++
++const textEncoder = new TextEncoder()
++const nativeFetch = globalThis.fetch
++/** @typedef {{scores: number[], sequences: number[], content: number[], contentMetadata: number[], uniqueIndexes: number[]}} NumericSnapshot */
++
++beforeAll(() => {
++    vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
++        const url = resource instanceof URL ? resource : new URL(String(resource))
++        return url.protocol === 'file:' ?
++            new Response(await readFile(fileURLToPath(url))) :
++            await nativeFetch(resource)
++    })
++})
++
++afterAll(() => { vi.unstubAllGlobals() })
++
++/**
++ * Compare values and canonical content after independently inflating every
++ * source bank. The snapshots own their arrays before the next heap reset.
++ * @param {string[]} banks
++ * @param {boolean} [skipFused]
++ * @returns {Promise<{snapshot: NumericSnapshot, profile: ReturnType<typeof consumeLastTermBankWasmParseProfile>}>}
++ */
++async function parseBanks(banks, skipFused = false) {
++    const sources = banks.map((bank) => {
++        const source = textEncoder.encode(bank)
++        const bytes = Uint8Array.from(deflateRawSync(source))
++        return {
++            bytes,
++            compressionMethod: /** @type {const} */ (8),
++            compressedSize: bytes.byteLength,
++            uncompressedSize: source.byteLength,
++            signature: crc32(source),
++        }
++    })
++    const preloadedSource = await inflateCompressedTermBankSourcesWasm(sources)
++    /** @type {NumericSnapshot|undefined} */
++    let snapshot
++    await parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
++        expect(snapshot).toBeUndefined()
++        const base = chunk.contentBytesBaseOffset ?? 0
++        const length = chunk.contentBytesLength ?? chunk.contentMetaList?.reduce(
++            (maximum, value, index, values) => (index % 4 === 0 ? Math.max(maximum, value + values[index + 1]) : maximum),
++            0,
++        ) ?? 0
++        snapshot = {
++            scores: [...chunk.scoreList],
++            sequences: [...chunk.sequenceList],
++            content: [...(chunk.contentBytesBuffer?.subarray(base, base + length) ?? [])],
++            contentMetadata: [...(chunk.contentMetaList ?? [])],
++            uniqueIndexes: [...(chunk.contentUniqueIndexList ?? [])],
++        }
++    }, 2048, {
++        computeContentHashes: true,
++        emitContentSlab: true,
++        emitTokenBinaryContent: true,
++        useNativeStringPlan: true,
++        singleChunk: true,
++        experimentalSkipFusedParse: skipFused,
++        preloadedSource,
++    })
++    const profile = consumeLastTermBankWasmParseProfile()
++    if (typeof snapshot === 'undefined') { throw new Error('No parsed term-bank snapshot') }
++    return {snapshot, profile}
++}
++
++describe('fused numeric token bounds', () => {
++    test.each(['', ' ', '\t\r\n'])('preserves per-row numeric bounds across banks with whitespace %j', async (space) => {
++        const banks = [
++            `[["first","","","",${space}2147483647${space},["first"],${space}123456789${space},""],` +
++            `["second","","","",${space}-2147483648${space},["second"],${space}null${space},""]]`,
++            ' \n [] \r ',
++            `[["third","","","",${space}0${space},["third"]],` +
++            `["fourth","","","",${space}9${space},["fourth"],${space}-0${space},""],` +
++            `["fifth","","","",${space}-1${space},["fifth"],${space}2147483647${space},""]]`,
++        ]
++        const fused = await parseBanks(banks)
++        const generic = await parseBanks(banks, true)
++        expect(fused.snapshot).toStrictEqual(generic.snapshot)
++        expect(fused.snapshot.scores).toStrictEqual([2147483647, -2147483648, 0, 9, -1])
++        expect(fused.snapshot.sequences).toStrictEqual([123456789, -1, -1, 0, 2147483647])
++        expect(fused.profile?.fusedParseAttempts).toBe(1)
++        expect(fused.profile?.fusedParseFallbacks).toBe(0)
++    })
++
++    test.each([
++        ['-0', '4', -0, 4],
++        ['2147483648', '4', 2147483648, 4],
++        ['-2147483649', '4', -2147483649, 4],
++        ['1.0', '1e0', 1, 1],
++        ['2.5', '9007199254740991', 2.5, 9007199254740991],
++        ['1e2', '-2147483649', 100, -1],
++    ])('preserves late fallback for score %s and sequence %s', async (score, sequence, expectedScore, expectedSequence) => {
++        const banks = [
++            '[["before","","","",12345,["before"],987654321,""]]',
++            `[["fallback","","","", ${score}\t,["fallback"],\r${sequence}\n,""]]`,
++        ]
++        const fused = await parseBanks(banks)
++        const generic = await parseBanks(banks, true)
++        expect(fused.snapshot).toStrictEqual(generic.snapshot)
++        expect(fused.snapshot.scores).toStrictEqual([12345, expectedScore])
++        expect(fused.snapshot.sequences).toStrictEqual([987654321, expectedSequence])
++        expect(fused.profile?.fusedParseAttempts).toBe(1)
++        expect(fused.profile?.fusedParseFallbacks).toBe(1)
++    })
++
++    test.each(['01', '-01', '1e+', '1.', '+1', 'true', '1x', '-'])('rejects malformed numeric token %s after a valid bank', async (token) => {
++        for (const [score, sequence] of [[token, '2'], ['2', token]]) {
++            const banks = [
++                '[["before","","","",12345,["before"],987654321,""]]',
++                `[["invalid","","","", ${score} ,["invalid"], ${sequence} ,""]]`,
++            ]
++            await expect(parseBanks(banks)).rejects.toThrow(/parser failed/)
++            await expect(parseBanks(banks, true)).rejects.toThrow(/parser failed/)
++        }
++    })
++})
+-- 
+2.52.0
+

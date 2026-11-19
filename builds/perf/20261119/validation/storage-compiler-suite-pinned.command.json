@@ -1,0 +1,28 @@
+{
+  "name": "storage-compiler-suite-pinned",
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+  "command": [
+    "npm",
+    "run",
+    "test:unit",
+    "--",
+    "test/term-bank-crc.test.js",
+    "test/term-bank-memory-page.test.js",
+    "--maxWorkers=1"
+  ],
+  "environmentOverrides": {
+    "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+    "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+    "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+  },
+  "pathPrefixes": [
+    "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin",
+    "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin"
+  ],
+  "compilerVersion": "Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)",
+  "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+  "startedAt": "2026-11-19T20:26:33.759446+00:00",
+  "exitCode": 0,
+  "durationSeconds": 5.1437533240023185,
+  "completedAt": "2026-11-19T20:26:38.904466+00:00"
+}

@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1
+
+
+ RUN  v4.1.12 /workspace/scratch/f34c9c9fae89/manabitan-storage
+
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  15:26:34
+   Duration  4.48s (transform 387ms, setup 476ms, import 73ms, tests 3.45s, environment 0ms)
+

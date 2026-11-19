@@ -1,0 +1,158 @@
+[
+  {
+    "candidate": "numeric",
+    "testedLocalCommit": "dfabe18acf18b36aef4d84a652fde29cfc6ea734",
+    "baseCommit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "expectedTree": "c8e7c830f00b2dc72a9a302cf5349c71fa3c73b3",
+    "patch": "numeric.patch",
+    "patchSha256": "742974eae982523c262145c6d9956586406d51b27d5fc079aa26a4caea5e2774",
+    "status": "unqualified experiment; not applied to runtime deliverable",
+    "files": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "blobSha": "857c08f4b0adf044993bdceed97ee0f3f87f330a",
+        "sha256": "4f5a70d3733ed230f6d951d1f707c4415fcac91eb390f3a7b61c3d61c86a5917",
+        "bytes": 2460
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "mode": "100644",
+        "blobSha": "49de38061ae2d02be5b89de3cb3bc6e4156e2964",
+        "sha256": "914c75cb06134d3801f51f8c2fc7e691271c5bc9ee726e7831cec8c1c804569c",
+        "bytes": 52603
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "mode": "100644",
+        "blobSha": "0739025008b26ddc4dd13da058f8ffecd8db9adc",
+        "sha256": "c0ddd1eb42ef5dc531527925d65720ef0d71c85fc3ce3b64215dee370e18f642",
+        "bytes": 133923
+      },
+      {
+        "path": "test/term-bank-fused-number-bounds.test.js",
+        "mode": "100644",
+        "blobSha": "d5a57411498e621161a6ccdcfbcceb01f2193f1a",
+        "sha256": "78ca861f9b21ae8433494c4f0fa8bf6b4cd56b5b657f3babb5b5282e0508a501",
+        "bytes": 6019
+      }
+    ]
+  },
+  {
+    "candidate": "keys",
+    "testedLocalCommit": "604c3050130d28b3fdabbd822b2adfac02423a8b",
+    "baseCommit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "expectedTree": "49ef9adaa33f6e0ba68def569064dd0530fcfd82",
+    "patch": "keys.patch",
+    "patchSha256": "261a5ace9ee03e1b03b1845674c8af3e8f8457f8d6118101f187a89734482cb3",
+    "status": "unqualified experiment; not applied to runtime deliverable",
+    "files": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "blobSha": "7ef8294584d86fbab44f6cacb94738dc0ea45693",
+        "sha256": "251fbe316d273caba27fcd1fa42986df57c034799eea23552f8de01031e63f74",
+        "bytes": 2460
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "mode": "100644",
+        "blobSha": "6455c8dd6a2eaa11686d466a1e28b9253c76dc41",
+        "sha256": "1e1251dfe6d60e95a0ff04c08b2e14cadb29ce3ff8084c5a870d42da3b9d2bdd",
+        "bytes": 53158
+      },
+      {
+        "path": "dev/perf/term-key-reuse-screen.js",
+        "mode": "100644",
+        "blobSha": "7a80eaaba82aa3aeb82a60e598e550aa21ea1580",
+        "sha256": "538c5fa098efecfc70ccda196f6f6a142aba1985bccfa4fe64d1becf5e69320c",
+        "bytes": 20762
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "mode": "100644",
+        "blobSha": "1a8fb59628c096a680988337698d0a342caa2b00",
+        "sha256": "68541f6f1d27bf6f7b35bccbc546dcf239ceaa748f2d475e48a03d8da4323b0d",
+        "bytes": 134810
+      },
+      {
+        "path": "test/term-bank-recent-key-intern.test.js",
+        "mode": "100644",
+        "blobSha": "8e47db75ac58fe492d42d165b237228e6304bafe",
+        "sha256": "b19c6e5c89d02d8e575d76d18711d18d177e2bd5f141e64d6c937324b5756c86",
+        "bytes": 10448
+      }
+    ]
+  },
+  {
+    "candidate": "escapes",
+    "testedLocalCommit": "eb751ca9ef13dc2a17b46343ab70d436fd40b330",
+    "baseCommit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "expectedTree": "02d7b2128a1ca1d9a28788800a1b774672f05160",
+    "patch": "escapes.patch",
+    "patchSha256": "3188d4002ed3fc6ec724b18cd2374f3d58849f3d0a64976259063c94e86ef55b",
+    "status": "unqualified experiment; not applied to runtime deliverable",
+    "files": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "mode": "100644",
+        "blobSha": "133b7c4b74d55c5a4be2530e4e17ab0b28d9dc56",
+        "sha256": "7505256266504d5f9637d4bff6ab43b51d33f34a90ba1e938598501380fffce8",
+        "bytes": 2460
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "mode": "100644",
+        "blobSha": "9f28b4baf1a612e04a6124148e8d2dfa4095f796",
+        "sha256": "8a87f8aa3fd57e60e9b91ece9e97b2a1ccaed2d164ea949101898ed6e3dce62a",
+        "bytes": 53559
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "mode": "100644",
+        "blobSha": "34b604bf2680d8c6bf105e6b35cda511df7ba638",
+        "sha256": "ebe8d4f716c439e17cf4b126752ba6261b8cfdff223b6fdac8773fa2e7838735",
+        "bytes": 135097
+      },
+      {
+        "path": "test/term-bank-experiments.test.js",
+        "mode": "100644",
+        "blobSha": "46e340f88e12234fbd774a442439ef96ae207956",
+        "sha256": "bbce761d4f3e082d4852012baebf1a5a210e02fc3d448fe1d6225da07d26c1ae",
+        "bytes": 41388
+      },
+      {
+        "path": "test/term-bank-parser-string-scan.test.js",
+        "mode": "100644",
+        "blobSha": "c156352fac789c513491a7def7978cc3c5426db9",
+        "sha256": "d79061a8e86da4a76ebc01ec6df68733796b85f6ba3335b458979bcb1c9bb6f1",
+        "bytes": 19922
+      }
+    ]
+  },
+  {
+    "candidate": "recent-source-preflight",
+    "testedLocalCommit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+    "baseCommit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "expectedTree": "74f1a63e80c49b306262958fb46987db44cd134c",
+    "patch": "recent-source-preflight.patch",
+    "patchSha256": "6c395596a71fa4c3d63a64cf3167c9b5b49ab856dacf72da573cd190e2fb7e5b",
+    "status": "unqualified experiment; not applied to runtime deliverable",
+    "files": [
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "mode": "100644",
+        "blobSha": "d1f692b906a09d6bf8fa65747dd4492549c6c1c6",
+        "sha256": "20db081c3676cbce1c123a88e52641f39766a6fe73dd41c59072acf84ed6b09d",
+        "bytes": 577042
+      },
+      {
+        "path": "test/dictionary-database-content-dedup.test.js",
+        "mode": "100644",
+        "blobSha": "c52b3caafac233118b32dec40fcded9dff05317f",
+        "sha256": "762453b4e1c4a9f941ef0e9915156ef1889613b5fd3eb334ce7483663df0012e",
+        "bytes": 156050
+      }
+    ]
+  }
+]

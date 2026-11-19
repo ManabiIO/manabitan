@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-19T20:31:13.731853+00:00",
+  "status": "passed",
+  "checkout": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+  "branch": "perf/jmdict-screen-oracles-20261119-f34c9c9",
+  "baseCommit": "323e3f1369e5dce86fe8cd86e44c2a739f67a2ff",
+  "toolingCommit": "18c990a857a589d0e3c7ae3f2d1b5040189286ae",
+  "changedFiles": [
+    "dev/perf/import-dedup-screen.js",
+    "dev/perf/import-lookup-screen.js",
+    "dev/perf/term-key-reuse-screen.js"
+  ],
+  "toolSha256": {
+    "dev/perf/import-lookup-screen.js": "0f29a684249e012292f7e4a75966141a5393e97ad649f175a0bc6eb7785697ba",
+    "dev/perf/import-dedup-screen.js": "f0e7bed4b8a2e118e76cc311163ead5b032246f423d782ffbdb6b8d831773eaa",
+    "dev/perf/term-key-reuse-screen.js": "4511ff1ab4f0640f4657b4d869c2727dc75b471460b1229a04a6d3593799e318"
+  },
+  "nodeVersion": "v24.22.3",
+  "scope": "Validation of the three tooling files only. No runtime parser, C, WASM, manifest, or dictionary importer changes are included in this commit.",
+  "validationChecks": [
+    {
+      "name": "scoped-eslint",
+      "command": [
+        "node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "dev/perf/import-lookup-screen.js",
+        "dev/perf/import-dedup-screen.js",
+        "dev/perf/term-key-reuse-screen.js"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+      "environmentOverrides": {},
+      "startedAt": null,
+      "completedAt": null,
+      "timestampNote": "Exact timestamps were not captured for this earlier completed check. Exit status was observed directly.",
+      "exitCode": 0,
+      "combinedOutput": "tooling-eslint.log",
+      "outputNote": "Existing vendor pako-inflate.js CommonJS-in-ESM esbuild warning; no ESLint errors."
+    },
+    {
+      "name": "dev-typescript",
+      "command": [
+        "node",
+        "--max-old-space-size=2048",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "dev/jsconfig.json"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+      "environmentOverrides": {},
+      "startedAt": null,
+      "completedAt": null,
+      "timestampNote": "Exact timestamps were not captured for this earlier completed check. Exit status was observed directly.",
+      "exitCode": 0,
+      "combinedOutput": "tooling-dev-tsc.log",
+      "outputNote": "No diagnostics."
+    },
+    {
+      "name": "all-target-dry-build",
+      "command": [
+        "npm",
+        "run",
+        "test:build"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+      "environmentOverrides": {
+        "NODE_OPTIONS": "--max-old-space-size=2048",
+        "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu",
+        "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+        "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21"
+      },
+      "startedAt": "2026-11-19T20:27:54.641687+00:00",
+      "completedAt": "2026-11-19T20:27:55.694620+00:00",
+      "exitCode": 0,
+      "combinedOutput": "tooling-build.log"
+    },
+    {
+      "name": "merged-runner-functional-smoke",
+      "command": [
+        "node",
+        "dev/perf/import-lookup-screen.js",
+        "jmdict",
+        "--baseline-root",
+        "/workspace/scratch/f34c9c9fae89/manabitan-baseline",
+        "--source-root",
+        "/workspace/scratch/f34c9c9fae89/manabitan-keys",
+        "--cache-dir",
+        "/workspace/scratch/f34c9c9fae89/manabitan/builds/e2e-dictionary-cache",
+        "--flags",
+        "{}",
+        "--pairs",
+        "2",
+        "--initial-order",
+        "AB",
+        "--passes",
+        "1",
+        "--out",
+        "builds/perf/20261119/validation/tooling-functional-smoke-jmdict.json"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+      "environmentOverrides": {
+        "NODE_OPTIONS": "--max-old-space-size=2048"
+      },
+      "startedAt": "2026-11-19T20:29:41.804194+00:00",
+      "completedAt": "2026-11-19T20:29:58.161587+00:00",
+      "exitCode": 0,
+      "combinedOutput": "tooling-functional-smoke.log",
+      "classification": "functional smoke; timings are not authoritative performance evidence"
+    }
+  ],
+  "outputSha256": {
+    "tooling-eslint.log": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+    "tooling-dev-tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tooling-build.log": "f58f7fe0ac48e0d52ba8236ca6f5ee90074a08899acfa572dc9103cc9469d0b8",
+    "tooling-functional-smoke.log": "6b0a619d4f5433c6acb9a3a7804e510f8268cebbc3e169ba20e09e52dbae6741"
+  },
+  "buildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "smokeReport": "tooling-functional-smoke-jmdict.json",
+  "smokeAssertions": {
+    "status": "passed",
+    "classification": "functional smoke only; timing observations are not performance qualification",
+    "observationCount": 4,
+    "assertions": [
+      "complete cohort",
+      "AB then BA order",
+      "exact requested source roots",
+      "predeclared parser artifact hashes",
+      "locked JMdict archive",
+      "production glossary validation enabled",
+      "one measured pass per observation",
+      "526942 rows and 19446728 index bytes",
+      "8 fused attempts with 0 fallbacks and 0 discarded rows",
+      "complete key/content/lookup byte digest equal across both arms and pairs",
+      "merged runner hash matches validated source"
+    ],
+    "observations": [
+      {
+        "pair": 0,
+        "arm": "A",
+        "sourceRoot": "/workspace/scratch/f34c9c9fae89/manabitan-baseline",
+        "wasmSha256": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5",
+        "dictionary": "jmdict",
+        "validateGlossaryTypes": true,
+        "measuredPasses": 1,
+        "rows": 526942,
+        "indexBytes": 19446728,
+        "fusedParseAttempts": 8,
+        "fusedParseFallbacks": 0,
+        "discardedFusedRows": 0,
+        "digest": "110d78ae3f9c637fdaa2057070bbff634e641c55e664c6c94f2987eccdd499fa",
+        "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "runnerSha256": "0f29a684249e012292f7e4a75966141a5393e97ad649f175a0bc6eb7785697ba",
+        "node": "v24.22.3"
+      },
+      {
+        "pair": 0,
+        "arm": "B",
+        "sourceRoot": "/workspace/scratch/f34c9c9fae89/manabitan-keys",
+        "wasmSha256": "1e1251dfe6d60e95a0ff04c08b2e14cadb29ce3ff8084c5a870d42da3b9d2bdd",
+        "dictionary": "jmdict",
+        "validateGlossaryTypes": true,
+        "measuredPasses": 1,
+        "rows": 526942,
+        "indexBytes": 19446728,
+        "fusedParseAttempts": 8,
+        "fusedParseFallbacks": 0,
+        "discardedFusedRows": 0,
+        "digest": "110d78ae3f9c637fdaa2057070bbff634e641c55e664c6c94f2987eccdd499fa",
+        "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "runnerSha256": "0f29a684249e012292f7e4a75966141a5393e97ad649f175a0bc6eb7785697ba",
+        "node": "v24.22.3"
+      },
+      {
+        "pair": 1,
+        "arm": "B",
+        "sourceRoot": "/workspace/scratch/f34c9c9fae89/manabitan-keys",
+        "wasmSha256": "1e1251dfe6d60e95a0ff04c08b2e14cadb29ce3ff8084c5a870d42da3b9d2bdd",
+        "dictionary": "jmdict",
+        "validateGlossaryTypes": true,
+        "measuredPasses": 1,
+        "rows": 526942,
+        "indexBytes": 19446728,
+        "fusedParseAttempts": 8,
+        "fusedParseFallbacks": 0,
+        "discardedFusedRows": 0,
+        "digest": "110d78ae3f9c637fdaa2057070bbff634e641c55e664c6c94f2987eccdd499fa",
+        "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "runnerSha256": "0f29a684249e012292f7e4a75966141a5393e97ad649f175a0bc6eb7785697ba",
+        "node": "v24.22.3"
+      },
+      {
+        "pair": 1,
+        "arm": "A",
+        "sourceRoot": "/workspace/scratch/f34c9c9fae89/manabitan-baseline",
+        "wasmSha256": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5",
+        "dictionary": "jmdict",
+        "validateGlossaryTypes": true,
+        "measuredPasses": 1,
+        "rows": 526942,
+        "indexBytes": 19446728,
+        "fusedParseAttempts": 8,
+        "fusedParseFallbacks": 0,
+        "discardedFusedRows": 0,
+        "digest": "110d78ae3f9c637fdaa2057070bbff634e641c55e664c6c94f2987eccdd499fa",
+        "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "runnerSha256": "0f29a684249e012292f7e4a75966141a5393e97ad649f175a0bc6eb7785697ba",
+        "node": "v24.22.3"
+      }
+    ]
+  },
+  "performanceClassification": "Functional smoke only. Its two pairs and one measured pass are not performance qualification; no candidate speedup or regression is established by this smoke.",
+  "gitChecks": {
+    "diffCheckExitCode": 0,
+    "cachedDiffCheckExitCode": 0,
+    "commitFilesExactlyMatchThreeTools": true,
+    "workingFilesEqualCommittedFiles": true
+  },
+  "remainingWork": "Root owns documentation and evidence publication. No further tooling code changes or validation jobs are planned."
+}

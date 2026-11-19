@@ -1,0 +1,32 @@
+{
+  "command": [
+    "node",
+    "dev/perf/import-lookup-screen.js",
+    "jmdict",
+    "--baseline-root",
+    "/workspace/scratch/f34c9c9fae89/manabitan-baseline",
+    "--source-root",
+    "/workspace/scratch/f34c9c9fae89/manabitan-keys",
+    "--cache-dir",
+    "/workspace/scratch/f34c9c9fae89/manabitan/builds/e2e-dictionary-cache",
+    "--flags",
+    "{}",
+    "--pairs",
+    "2",
+    "--initial-order",
+    "AB",
+    "--passes",
+    "1",
+    "--out",
+    "builds/perf/20261119/validation/tooling-functional-smoke-jmdict.json"
+  ],
+  "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-tooling",
+  "environmentOverrides": {
+    "NODE_OPTIONS": "--max-old-space-size=2048"
+  },
+  "startedAt": "2026-11-19T20:29:41.804194+00:00",
+  "completedAt": "2026-11-19T20:29:58.161587+00:00",
+  "exitCode": 0,
+  "combinedOutput": "tooling-functional-smoke.log",
+  "classification": "functional smoke; timings are not authoritative performance evidence"
+}

@@ -1,0 +1,253 @@
+From 5bdaf01c47fdddf27211a461afb9e67df17dacbf Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 19 Nov 2026 13:42:25 -0500
+Subject: [PATCH] Prototype recent-source exact dedup preflight
+
+---
+ ext/js/dictionary/dictionary-database.js      |  65 +++++++--
+ .../dictionary-database-content-dedup.test.js | 124 ++++++++++++++++++
+ 2 files changed, 179 insertions(+), 10 deletions(-)
+
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 4d92342..d1f692b 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -6209,6 +6209,7 @@ null;
+         return void 0;
+     }
+ 
++    /* eslint-disable @stylistic/semi -- Use automatic semicolon insertion in the recent-source preflight. */
+     /**
+      * Resolves an import verification wave in storage batches. Colliding hash
+      * candidates remain ordered and are still compared byte-for-byte.
+@@ -6219,31 +6220,74 @@ null;
+         const count = descriptors.length;
+         /** @type {ExactTermContentResult[]} */
+         const results = new Array(count);
+-        /** @type {Array<TermContentMeta[]|null>} */
+-        const candidateLists = new Array(count);
+-        const nextCandidateIndexes = new Uint32Array(count);
+-        const completed = new Uint8Array(count);
+-        let remaining = count;
++        /** @type {Array<TermContentMeta[]|null>|null} */
++        let candidateLists = null
++        /** @type {Uint32Array|null} */
++        let nextCandidateIndexes = null
++        /** @type {Uint8Array|null} */
++        let completed = null
++        let remaining = 0
+         for (let i = 0; i < count; ++i) {
+             const {hash1, hash2, contentBytes, primary} = descriptors[i];
++            let recentPrimaryMismatch = false
++            if (
++                typeof primary !== 'undefined' &&
++                contentBytes.byteLength > 0 &&
++                primary.length === contentBytes.byteLength &&
++                this._canExactlyComparePersistedTermContent(primary.dictName)
++            ) {
++                const recentSource = this._findRecentTermContentSource(primary)
++                const lastOffset = Math.max(0, contentBytes.byteLength - 4)
++                if (
++                    typeof recentSource !== 'undefined' &&
++                    (
++                        typeof primary.signature1 !== 'number' ||
++                        (
++                            primary.signature1 === this._readTermContentSignature(contentBytes, 0) &&
++                            primary.signature2 === this._readTermContentSignature(contentBytes, Math.floor(lastOffset / 2)) &&
++                            primary.signature3 === this._readTermContentSignature(contentBytes, lastOffset)
++                        )
++                    )
++                ) {
++                    // Owned recent bytes can finish the primary candidate before
++                    // allocating collision lists or storage-wave bookkeeping.
++                    if (this._termContentBytesEqualSpan(contentBytes, recentSource.buffer, recentSource.offset, recentSource.length)) {
++                        results[i] = {existingMeta: primary, exactFallback: true, recentSourceHit: true}
++                        continue
++                    }
++                    recentPrimaryMismatch = true
++                }
++            }
+             const candidates = this._getMatchingPersistedTermEntryContentMetaCandidates(
+                 hash1,
+                 hash2,
+                 contentBytes,
+                 primary,
+             );
+-            candidateLists[i] = candidates;
+             if (candidates === null) {
+                 results[i] = {existingMeta: void 0, exactFallback: false};
+-                completed[i] = 1;
+-                --remaining;
++                continue
+             } else if (contentBytes.byteLength === 0) {
+                 // Candidate selection already required the same length.
+                 results[i] = {existingMeta: candidates[0], exactFallback: true};
+-                completed[i] = 1;
+-                --remaining;
++                continue
++            }
++            // A recent primary mismatch already had its complete byte check.
++            // Preserve the remaining collision order without comparing it again.
++            const nextCandidateIndex = recentPrimaryMismatch && candidates[0] === primary ? 1 : 0
++            if (nextCandidateIndex === candidates.length) {
++                results[i] = {existingMeta: void 0, exactFallback: true}
++                continue
+             }
++            candidateLists ??= new Array(count)
++            nextCandidateIndexes ??= new Uint32Array(count)
++            completed ??= new Uint8Array(count).fill(1)
++            candidateLists[i] = candidates
++            nextCandidateIndexes[i] = nextCandidateIndex
++            completed[i] = 0
++            ++remaining
+         }
++        if (candidateLists === null || nextCandidateIndexes === null || completed === null) { return results }
+ 
+         /** @type {Error[]} */
+         const errors = [];
+@@ -6337,6 +6381,7 @@ null;
+         }
+         return results;
+     }
++    /* eslint-enable @stylistic/semi */
+ 
+     /**
+      * @param {{offset: number, length: number, dictName: string}} meta
+diff --git a/test/dictionary-database-content-dedup.test.js b/test/dictionary-database-content-dedup.test.js
+index 2b22be1..c52b3ca 100644
+--- a/test/dictionary-database-content-dedup.test.js
++++ b/test/dictionary-database-content-dedup.test.js
+@@ -372,6 +372,130 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
+         expect(readStorage).not.toHaveBeenCalled();
+     });
+ 
++    /* eslint-disable @stylistic/semi -- These regression cases use automatic semicolon insertion. */
++    test('preserves descriptor order and metrics when recent hits surround storage reads', async () => {
++        const database = new DictionaryDatabase()
++        const recentBytes = Uint8Array.of(1, 2, 3, 4)
++        const storedBytes = Uint8Array.of(5, 6, 7, 8)
++        const {meta: recent} = publishSlabMeta(database, recentBytes, 0, recentBytes.length, 10, 20)
++        cacheMeta(database, null, 2000, storedBytes.length, 'raw', 30, 40)
++        const stored = getMeta(database, 30, 40)
++        const readStorage = vi.fn(async () => [{status: 'ok', bytes: storedBytes}])
++        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
++        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
++
++        const results = await findBatch([
++            {hash1: 10, hash2: 20, contentBytes: recentBytes, primary: recent},
++            {hash1: 30, hash2: 40, contentBytes: storedBytes, primary: stored},
++            {hash1: 10, hash2: 20, contentBytes: recentBytes, primary: recent},
++            {hash1: 50, hash2: 60, contentBytes: recentBytes, primary: void 0},
++        ])
++
++        expect(results).toStrictEqual([
++            {existingMeta: recent, exactFallback: true, recentSourceHit: true},
++            {existingMeta: stored, exactFallback: true},
++            {existingMeta: recent, exactFallback: true, recentSourceHit: true},
++            {existingMeta: void 0, exactFallback: false},
++        ])
++        expect(readStorage).toHaveBeenCalledExactlyOnceWith([
++            {contentOffset: 2000, contentLength: storedBytes.length, contentDictName: 'raw'},
++        ])
++    })
++
++    test.each(['signature1', 'signature2', 'signature3'])(
++        'retains the %s rejection even when recent bytes are equal',
++        async (signature) => {
++            const database = new DictionaryDatabase()
++            const source = Uint8Array.of(1, 2, 3, 4)
++            const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20)
++            Reflect.set(meta, signature, Reflect.get(meta, signature) ^ 1)
++            const readStorage = vi.fn()
++            Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
++            const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
++
++            await expect(findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary: meta}])).resolves.toStrictEqual([
++                {existingMeta: void 0, exactFallback: false},
++            ])
++            expect(readStorage).not.toHaveBeenCalled()
++        },
++    )
++
++    test('does not reuse recent bytes through an unsupported content representation', async () => {
++        const database = new DictionaryDatabase()
++        const source = Uint8Array.of(1, 2, 3, 4)
++        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20)
++        const primary = {...meta, dictName: 'unsupported-content-format'}
++        const readStorage = vi.fn()
++        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
++        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
++
++        await expect(findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary}])).resolves.toStrictEqual([
++            {existingMeta: void 0, exactFallback: false},
++        ])
++        expect(readStorage).not.toHaveBeenCalled()
++    })
++
++    test('checks ordered collision candidates after a byte-exact recent primary mismatch', async () => {
++        const database = new DictionaryDatabase()
++        const source = Uint8Array.from({length: 20}, (_, i) => i)
++        const contentBytes = Uint8Array.from(source)
++        contentBytes[6] = 99
++        const {meta: primary} = publishSlabMeta(database, source, 0, source.length, 10, 20)
++        const firstCollision = {id: 1, offset: 2000, length: source.length, dictName: 'raw'}
++        const matchingCollision = {id: 2, offset: 3000, length: source.length, dictName: 'raw'}
++        Reflect.get(database, '_termEntryContentMetaCollisionsByHashPair').set('10:20', [firstCollision, matchingCollision])
++        const readStorage = vi.fn()
++            .mockResolvedValueOnce([{status: 'ok', bytes: source}])
++            .mockResolvedValueOnce([{status: 'ok', bytes: contentBytes}])
++        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
++        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
++
++        await expect(findBatch([{hash1: 10, hash2: 20, contentBytes, primary}])).resolves.toStrictEqual([
++            {existingMeta: matchingCollision, exactFallback: true},
++        ])
++        expect(readStorage).toHaveBeenNthCalledWith(1, [
++            {contentOffset: 2000, contentLength: source.length, contentDictName: 'raw'},
++        ])
++        expect(readStorage).toHaveBeenNthCalledWith(2, [
++            {contentOffset: 3000, contentLength: source.length, contentDictName: 'raw'},
++        ])
++        expect(readStorage).toHaveBeenCalledTimes(2)
++    })
++
++    test('prefers a matching recent primary over equal collision entries', async () => {
++        const database = new DictionaryDatabase()
++        const source = Uint8Array.of(1, 2, 3, 4)
++        const {meta: primary} = publishSlabMeta(database, source, 0, source.length, 10, 20)
++        const collision = {id: 1, offset: 2000, length: source.length, dictName: 'raw'}
++        Reflect.get(database, '_termEntryContentMetaCollisionsByHashPair').set('10:20', [collision])
++        const readStorage = vi.fn(async () => [{status: 'ok', bytes: source}])
++        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
++        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
++
++        await expect(findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary}])).resolves.toStrictEqual([
++            {existingMeta: primary, exactFallback: true, recentSourceHit: true},
++        ])
++        expect(readStorage).not.toHaveBeenCalled()
++    })
++
++    test('does not hide an earlier storage failure behind a recent collision hit', async () => {
++        const database = new DictionaryDatabase()
++        const source = Uint8Array.of(1, 2, 3, 4)
++        cacheMeta(database, null, 2000, source.length, 'raw', 10, 20)
++        const primary = getMeta(database, 10, 20)
++        const {meta: collision} = publishSlabMeta(database, source, 0, source.length, 30, 40)
++        Reflect.get(database, '_termEntryContentMetaCollisionsByHashPair').set('10:20', [collision])
++        const readStorage = vi.fn(async () => [{status: 'temporarilyUnavailable', reason: 'storage busy'}])
++        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
++        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
++
++        await expect(findBatch([{hash1: 10, hash2: 20, contentBytes: source, primary}])).rejects.toThrow('storage busy')
++        expect(readStorage).toHaveBeenCalledExactlyOnceWith([
++            {contentOffset: 2000, contentLength: source.length, contentDictName: 'raw'},
++        ])
++    })
++    /* eslint-enable @stylistic/semi */
++
+     test('falls back to validated storage after a recent source batch is evicted', async () => {
+         const database = new DictionaryDatabase();
+         const source = new Uint8Array([1, 2, 3, 4]);
+-- 
+2.52.0
+

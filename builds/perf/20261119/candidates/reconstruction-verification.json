@@ -1,0 +1,26 @@
+[
+  {
+    "candidate": "numeric",
+    "patchSha256": "742974eae982523c262145c6d9956586406d51b27d5fc079aa26a4caea5e2774",
+    "reconstructedTree": "c8e7c830f00b2dc72a9a302cf5349c71fa3c73b3",
+    "matchesTestedTree": true
+  },
+  {
+    "candidate": "keys",
+    "patchSha256": "261a5ace9ee03e1b03b1845674c8af3e8f8457f8d6118101f187a89734482cb3",
+    "reconstructedTree": "49ef9adaa33f6e0ba68def569064dd0530fcfd82",
+    "matchesTestedTree": true
+  },
+  {
+    "candidate": "escapes",
+    "patchSha256": "3188d4002ed3fc6ec724b18cd2374f3d58849f3d0a64976259063c94e86ef55b",
+    "reconstructedTree": "02d7b2128a1ca1d9a28788800a1b774672f05160",
+    "matchesTestedTree": true
+  },
+  {
+    "candidate": "recent-source-preflight",
+    "patchSha256": "6c395596a71fa4c3d63a64cf3167c9b5b49ab856dacf72da573cd190e2fb7e5b",
+    "reconstructedTree": "74f1a63e80c49b306262958fb46987db44cd134c",
+    "matchesTestedTree": true
+  }
+]
