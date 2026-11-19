@@ -1349,6 +1349,126 @@ static void hash_content_xxh32_pair(const uint8_t* src, uint32_t length, uint32_
     *out2 = xxh32_finalize(h2);
 }
 
+/* The prefix already exists in out. Copy the one crossing block and the
+ * short tail first, then copy each remaining full glossary block from the
+ * same load used by both hashes. This never runs before row validation or
+ * the existing exact raw-content reuse checks. */
+static void copy_hash_content_xxh32_pair(
+    uint8_t* out, uint32_t prefix_length, const uint8_t* glossary,
+    uint32_t glossary_length, uint32_t seed1, uint32_t seed2,
+    uint32_t* out1, uint32_t* out2
+) {
+    const uint32_t length = prefix_length + glossary_length;
+    uint32_t crossing = (16u - (prefix_length & 15u)) & 15u;
+    if (crossing > glossary_length) { crossing = glossary_length; }
+    __builtin_memcpy(out + prefix_length, glossary, crossing);
+    const uint32_t copy_start = prefix_length + crossing;
+    const uint32_t tail_start = length & ~15u;
+    if (tail_start >= copy_start) {
+        __builtin_memcpy(out + tail_start, glossary + (tail_start - prefix_length), length - tail_start);
+    }
+    uint32_t position = 0u;
+    uint32_t h1;
+    uint32_t h2;
+#if defined(__wasm_simd128__)
+    // Keep the same total-record-length admission and arithmetic as above.
+    if (length >= 64u && length <= 512u) {
+        const uint32_t limit = length - 16u;
+        const v128_t prime1 = wasm_i32x4_splat((int32_t)2654435761u);
+        const v128_t prime2 = wasm_i32x4_splat((int32_t)2246822519u);
+        v128_t first = wasm_u32x4_make(seed1 + 2654435761u + 2246822519u, seed1 + 2246822519u, seed1, seed1 - 2654435761u);
+        v128_t second = wasm_u32x4_make(seed2 + 2654435761u + 2246822519u, seed2 + 2246822519u, seed2, seed2 - 2654435761u);
+        for (; position <= limit && position < copy_start; position += 16u) {
+            const v128_t input = wasm_i32x4_mul(wasm_v128_load(out + position), prime2);
+            first = wasm_i32x4_add(first, input);
+            second = wasm_i32x4_add(second, input);
+            first = wasm_v128_or(wasm_i32x4_shl(first, 13), wasm_u32x4_shr(first, 19));
+            second = wasm_v128_or(wasm_i32x4_shl(second, 13), wasm_u32x4_shr(second, 19));
+            first = wasm_i32x4_mul(first, prime1);
+            second = wasm_i32x4_mul(second, prime1);
+        }
+        for (; position <= limit; position += 16u) {
+            const v128_t block = wasm_v128_load(glossary + (position - prefix_length));
+            wasm_v128_store(out + position, block);
+            const v128_t input = wasm_i32x4_mul(block, prime2);
+            first = wasm_i32x4_add(first, input);
+            second = wasm_i32x4_add(second, input);
+            first = wasm_v128_or(wasm_i32x4_shl(first, 13), wasm_u32x4_shr(first, 19));
+            second = wasm_v128_or(wasm_i32x4_shl(second, 13), wasm_u32x4_shr(second, 19));
+            first = wasm_i32x4_mul(first, prime1);
+            second = wasm_i32x4_mul(second, prime1);
+        }
+        h1 = rotl32(wasm_u32x4_extract_lane(first, 0), 1u) + rotl32(wasm_u32x4_extract_lane(first, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(first, 2), 12u) + rotl32(wasm_u32x4_extract_lane(first, 3), 18u);
+        h2 = rotl32(wasm_u32x4_extract_lane(second, 0), 1u) + rotl32(wasm_u32x4_extract_lane(second, 1), 7u) +
+            rotl32(wasm_u32x4_extract_lane(second, 2), 12u) + rotl32(wasm_u32x4_extract_lane(second, 3), 18u);
+    } else
+#endif
+    if (length >= 16u) {
+        const uint32_t limit = length - 16u;
+        uint32_t a1 = seed1 + 2654435761u + 2246822519u;
+        uint32_t b1 = seed1 + 2246822519u;
+        uint32_t c1 = seed1;
+        uint32_t d1 = seed1 - 2654435761u;
+        uint32_t a2 = seed2 + 2654435761u + 2246822519u;
+        uint32_t b2 = seed2 + 2246822519u;
+        uint32_t c2 = seed2;
+        uint32_t d2 = seed2 - 2654435761u;
+        for (; position <= limit && position < copy_start; position += 16u) {
+            uint32_t value = read_u32_le(out + position);
+            a1 = xxh32_round(a1, value); a2 = xxh32_round(a2, value);
+            value = read_u32_le(out + position + 4u);
+            b1 = xxh32_round(b1, value); b2 = xxh32_round(b2, value);
+            value = read_u32_le(out + position + 8u);
+            c1 = xxh32_round(c1, value); c2 = xxh32_round(c2, value);
+            value = read_u32_le(out + position + 12u);
+            d1 = xxh32_round(d1, value); d2 = xxh32_round(d2, value);
+        }
+        for (; position <= limit; position += 16u) {
+            const uint8_t* source = glossary + (position - prefix_length);
+            uint32_t value = read_u32_le(source);
+            __builtin_memcpy(out + position, &value, sizeof(value));
+            a1 = xxh32_round(a1, value); a2 = xxh32_round(a2, value);
+            value = read_u32_le(source + 4u);
+            __builtin_memcpy(out + position + 4u, &value, sizeof(value));
+            b1 = xxh32_round(b1, value); b2 = xxh32_round(b2, value);
+            value = read_u32_le(source + 8u);
+            __builtin_memcpy(out + position + 8u, &value, sizeof(value));
+            c1 = xxh32_round(c1, value); c2 = xxh32_round(c2, value);
+            value = read_u32_le(source + 12u);
+            __builtin_memcpy(out + position + 12u, &value, sizeof(value));
+            d1 = xxh32_round(d1, value); d2 = xxh32_round(d2, value);
+        }
+        h1 = rotl32(a1, 1u) + rotl32(b1, 7u) + rotl32(c1, 12u) + rotl32(d1, 18u);
+        h2 = rotl32(a2, 1u) + rotl32(b2, 7u) + rotl32(c2, 12u) + rotl32(d2, 18u);
+    } else {
+        h1 = seed1 + 374761393u;
+        h2 = seed2 + 374761393u;
+    }
+    h1 += length;
+    h2 += length;
+    const uint8_t* p = out + position;
+    const uint8_t* const end = out + length;
+    while ((p + 4u) <= end) {
+        const uint32_t value = read_u32_le(p);
+        h1 += value * 3266489917u;
+        h1 = rotl32(h1, 17u) * 668265263u;
+        h2 += value * 3266489917u;
+        h2 = rotl32(h2, 17u) * 668265263u;
+        p += 4u;
+    }
+    while (p < end) {
+        const uint32_t value = (uint32_t)(*p);
+        h1 += value * 374761393u;
+        h1 = rotl32(h1, 11u) * 2654435761u;
+        h2 += value * 374761393u;
+        h2 = rotl32(h2, 11u) * 2654435761u;
+        ++p;
+    }
+    *out1 = xxh32_finalize(h1);
+    *out2 = xxh32_finalize(h2);
+}
+
 static inline int write_content_byte(
     uint8_t* out,
     uint32_t out_capacity,
@@ -1700,14 +1820,19 @@ static int encode_term_content_token_binary_row(
         if (!write_content_byte(out, out_capacity, cursor, 0u)) { return 0; }
     }
 
+    uint32_t h1 = 0u;
+    uint32_t h2 = 0u;
+    int content_hashed = 0;
     if (row->glossary_length > 0u && row->glossary_requires_text_normalization == 0u) {
-        if (!write_content_bytes(
-                out,
-                out_capacity,
-                cursor,
-                src + row->glossary_start,
-                row->glossary_length
-            )) { return 0; }
+        // Prefix writers already proved cursor <= capacity. Reserve the full
+        // remaining span before the helper performs any glossary stores.
+        if (row->glossary_length > out_capacity - *cursor) { return 0; }
+        copy_hash_content_xxh32_pair(
+            out + row_start, *cursor - row_start, src + row->glossary_start,
+            row->glossary_length, FNV1A_OFFSET, MIX_OFFSET, &h1, &h2
+        );
+        *cursor += row->glossary_length;
+        content_hashed = 1;
     } else if (row->glossary_length > 0u) {
         int normalized = 0;
         if ((experiment_mask & EXPERIMENT_FAST_GLOSSARY_NORMALIZATION) != 0u) {
@@ -1740,9 +1865,9 @@ static int encode_term_content_token_binary_row(
     }
 
     const uint32_t row_length = *cursor - row_start;
-    uint32_t h1 = 0u;
-    uint32_t h2 = 0u;
-    hash_content_xxh32_pair(out + row_start, row_length, FNV1A_OFFSET, MIX_OFFSET, &h1, &h2);
+    if (!content_hashed) {
+        hash_content_xxh32_pair(out + row_start, row_length, FNV1A_OFFSET, MIX_OFFSET, &h1, &h2);
+    }
     if ((h1 | h2) == 0u) {
         h1 = 1u;
     }
