@@ -29,16 +29,19 @@ const fixtureFile = 'test/fixtures/key-reuse/inputs.mjs'
 const runner = fileURLToPath(import.meta.url)
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
 const runnerSha256 = sha(await readFile(runner))
+const supersedesRunnerSha256 = '3c3ade3d3b28f5366575ddc4fbda252eb4952a9e9afa82f83df72ee2fbb5b066'
 const {values} = parseArgs({options: {
     baseline: {type: 'string'},
     candidate: {type: 'string'},
     output: {type: 'string'},
     'initial-order': {type: 'string', default: 'ABC'},
     child: {type: 'boolean', default: false},
+    'verify-only': {type: 'boolean', default: false},
     'source-root': {type: 'string'},
     'fixture-root': {type: 'string'},
 }})
 assert(values.output, 'Provide --output')
+assert(!values['verify-only'] || values.child, '--verify-only requires --child')
 assert(plan.permutations.includes(values['initial-order']), 'Invalid initial order')
 const output = path.resolve(values.output)
 const load = (root, file) => {
@@ -60,7 +63,7 @@ async function requireNewOutput(file) {
     }
 }
 
-async function identity(root) {
+async function identity(root, allowDirty = false) {
     const runtime = createHash('sha256')
     const shared = createHash('sha256')
     async function walk(directory) {
@@ -84,13 +87,15 @@ async function identity(root) {
         files[file] = sha(await readFile(path.join(root, file)))
     }
     const git = (...args) => execFileSync('git', args, {cwd: root, encoding: 'utf8'}).trim()
-    assert.equal(git('status', '--porcelain'), '', 'Use immutable clean source checkouts')
+    const dirty = git('status', '--porcelain').length > 0
+    if (!allowDirty) { assert.equal(dirty, false, 'Use immutable clean source checkouts') }
     const {loadDictionaryWasm} = await load(root, 'dev/dictionary-wasm.js')
     const wasm = Object.fromEntries([...loadDictionaryWasm(root)].map(([name, bytes]) => [name, sha(bytes)]))
     const manifest = JSON.parse(await readFile(path.join(root, 'dev/data/dictionary-wasm/manifest.json'), 'utf8'))
     return {root,
         gitSha: git('rev-parse', 'HEAD'),
         tree: git('rev-parse', 'HEAD^{tree}'),
+        dirty,
         runtimeSha256: runtime.digest('hex'),
         sharedJsSha256: shared.digest('hex'),
         files,
@@ -134,7 +139,7 @@ async function fixture(root) {
             groups: [banks.map((bank, index) => `term_bank_${index + 1}.json`)]}}
 }
 
-// Hash borrowed views synchronously while the final callback owns the arena.
+// Hash the owned output after untimed lookup preparation has completed.
 // Physical heap addresses and timing fields are deliberately not output data.
 function fingerprint(hash, chunk) {
     const add = (name, bytes) => {
@@ -175,14 +180,17 @@ async function runChild() {
     assert(values['source-root'] && values['fixture-root'], 'Child requires source and fixture roots')
     const root = path.resolve(values['source-root'])
     const fixtureRoot = path.resolve(values['fixture-root'])
+    const verifyOnly = values['verify-only']
     await requireNewOutput(output)
     await mkdir(path.dirname(output), {recursive: true})
-    const report = {schemaVersion: 1,
+    const report = {schemaVersion: 2,
         complete: false,
-        kind: 'native-key-negative-sample',
-        plan,
-        limitation,
+        kind: verifyOnly ? 'native-key-negative-verification' : 'native-key-negative-sample',
+        mode: verifyOnly ? 'verify-only' : 'timed',
+        plan: verifyOnly ? {...plan, warmupsPerChild: 0, measuredRepetitionsPerChild: 0} : plan,
+        limitation: verifyOnly ? 'Untimed complete-fixture smoke check only. No native CPU or wall timers, warmups, measured repetitions, or performance claims. Dirty local snapshots are identified by exact runtime/WASM hashes; timed cohorts still require clean checkouts.' : limitation,
         runnerSha256,
+        supersedesRunnerSha256,
         node: process.version,
         v8: process.versions.v8,
         startedAt: new Date().toISOString(),
@@ -192,7 +200,7 @@ async function runChild() {
     const save = () => writeFile(output, JSON.stringify(report, null, 2) + '\n')
     await writeFile(output, JSON.stringify(report, null, 2) + '\n', {flag: 'wx'})
     try {
-        report.source = await identity(root)
+        report.source = await identity(root, verifyOnly)
         const {banks, provenance} = await fixture(fixtureRoot)
         report.fixture = provenance
         const {loadDictionaryWasm} = await load(root, 'dev/dictionary-wasm.js')
@@ -214,7 +222,7 @@ async function runChild() {
         assert(wasm && typeof wasm.parse_and_encode_term_bank_token_binary_dedup === 'function')
         const nativeExport = wasm.parse_and_encode_term_bank_token_binary_dedup
         let calls = []
-        let timed = true
+        let timed = false
         wasm.parse_and_encode_term_bank_token_binary_dedup = (...args) => {
             const cpuStart = timed ? process.cpuUsage() : null
             const wallStart = timed ? performance.now() : 0
@@ -234,16 +242,15 @@ async function runChild() {
             calls = []
             report.lastAttemptNativeCalls = calls
             timed = hash === null
+            assert(!verifyOnly || !timed, 'Verification-only mode must never enable native timing')
             let callbackCount = 0
             let rows = 0
+            let stable = null
             await parser.parseTermBankWithWasmColumnChunks(banks, 3, (chunk) => {
                 ++callbackCount
                 rows += chunk.rowCount
                 if (hash !== null) {
-                    assert(chunk.preparedLookupIndexes instanceof Map)
-                    assert.equal(chunk.preparedLookupIndexes.size, 1)
-                    assert(preparation.hasCompletePreparedTermLookupIndexes(chunk.preparedLookupIndexes, chunk.rowCount))
-                    fingerprint(hash, chunk)
+                    stable = parser.copyWasmBackedColumnChunk(chunk, true)
                 }
             }, 2048, {singleChunk: true,
                 maxPendingChunks: 1,
@@ -266,31 +273,54 @@ async function runChild() {
             assert.deepEqual(profile.experiments, flags)
             assert.equal(profile.fusedParseAttempts, 1)
             assert.equal(profile.fusedParseFallbacks, 0)
+            let lookupPreparation = null
+            let preparedLookupIndexCount = null
+            if (hash !== null) {
+                assert(stable)
+                // Native fused success does not imply native lookup eligibility.
+                // Complete missing indexes outside every native timing window.
+                lookupPreparation = 'native'
+                if (!(stable.preparedLookupIndexes instanceof Map)) {
+                    const prepared = preparation.prepareTermLookupIndexesFromPreinternedPlan(stable, null, flags)
+                    assert(prepared, 'Lookup preparation did not produce indexes')
+                    stable.preparedLookupIndexes = prepared.indexes
+                    lookupPreparation = 'js-after-timing'
+                }
+                assert(preparation.hasCompletePreparedTermLookupIndexes(stable.preparedLookupIndexes, rows))
+                preparedLookupIndexCount = stable.preparedLookupIndexes.size
+                fingerprint(hash, stable)
+            }
             return {...native,
                 fusedParseAttempts: profile.fusedParseAttempts,
                 fusedParseFallbacks: profile.fusedParseFallbacks,
-                maxWasmHeapBytes: profile.maxWasmHeapBytes}
+                maxWasmHeapBytes: profile.maxWasmHeapBytes,
+                lookupPreparation,
+                preparedLookupIndexCount}
         }
-        for (let repetition = 1; repetition <= plan.warmupsPerChild; ++repetition) {
-            report.warmups.push({repetition, ...await runFixture()})
-            await save()
-        }
-        assert.equal(typeof globalThis.gc, 'function', 'Child must run with --expose-gc')
-        globalThis.gc()
-        for (let repetition = 1; repetition <= plan.measuredRepetitionsPerChild; ++repetition) {
-            report.measurements.push({repetition, ...await runFixture()})
-            await save()
+        if (!verifyOnly) {
+            for (let repetition = 1; repetition <= plan.warmupsPerChild; ++repetition) {
+                report.warmups.push({repetition, ...await runFixture()})
+                await save()
+            }
+            assert.equal(typeof globalThis.gc, 'function', 'Child must run with --expose-gc')
+            globalThis.gc()
+            for (let repetition = 1; repetition <= plan.measuredRepetitionsPerChild; ++repetition) {
+                report.measurements.push({repetition, ...await runFixture()})
+                await save()
+            }
         }
         const hash = createHash('sha256')
         const verified = await runFixture(hash)
         report.verification = {...verified, digest: hash.digest('hex')}
-        report.measured = {fixtureRepetitions: plan.measuredRepetitionsPerChild,
-            rows: report.measurements.reduce((sum, sample) => sum + sample.rows, 0),
-            cpuMs: report.measurements.reduce((sum, sample) => sum + sample.cpuMs, 0),
-            wallMs: report.measurements.reduce((sum, sample) => sum + sample.wallMs, 0),
-            medianFixtureCpuMs: median(report.measurements.map((sample) => sample.cpuMs)),
-            medianFixtureWallMs: median(report.measurements.map((sample) => sample.wallMs))}
-        assert.deepEqual(await identity(root), report.source, 'Source or WASM changed during observation')
+        report.measured = verifyOnly ?
+    null :
+    {fixtureRepetitions: plan.measuredRepetitionsPerChild,
+        rows: report.measurements.reduce((sum, sample) => sum + sample.rows, 0),
+        cpuMs: report.measurements.reduce((sum, sample) => sum + sample.cpuMs, 0),
+        wallMs: report.measurements.reduce((sum, sample) => sum + sample.wallMs, 0),
+        medianFixtureCpuMs: median(report.measurements.map((sample) => sample.cpuMs)),
+        medianFixtureWallMs: median(report.measurements.map((sample) => sample.wallMs))}
+        assert.deepEqual(await identity(root, verifyOnly), report.source, 'Source or WASM changed during observation')
         assert.equal(sha(await readFile(path.join(fixtureRoot, fixtureFile))), provenance.generatorSha256, 'Fixture generator changed')
         assert.equal(sha(await readFile(runner)), runnerSha256, 'Runner changed during observation')
         report.complete = true
@@ -324,12 +354,13 @@ async function runCohort() {
     await mkdir(path.dirname(output), {recursive: true})
     await mkdir(output)
     const startOrder = plan.permutations.indexOf(values['initial-order'])
-    const report = {schemaVersion: 1,
+    const report = {schemaVersion: 2,
         complete: false,
         kind: 'native-key-negative-cohort',
         plan,
         limitation,
         runnerSha256,
+        supersedesRunnerSha256,
         node: process.version,
         v8: process.versions.v8,
         startOrder,
@@ -388,9 +419,10 @@ async function runCohort() {
                 }
                 const bytes = await readFile(file)
                 const sample = JSON.parse(bytes)
-                assert.equal(sample.schemaVersion, 1)
+                assert.equal(sample.schemaVersion, 2)
                 assert.equal(sample.complete, true)
                 assert.equal(sample.kind, 'native-key-negative-sample')
+                assert.equal(sample.mode, 'timed')
                 assert.equal(sample.runnerSha256, runnerSha256)
                 assert.equal(sample.node, process.version)
                 assert.equal(sample.v8, process.versions.v8)
