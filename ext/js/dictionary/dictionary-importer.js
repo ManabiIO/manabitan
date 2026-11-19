@@ -145,6 +145,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   dictionary: string,
  *   rowCount: number,
  *   dictionaryTotalRows?: number,
+ *   isFinalTermChunk?: boolean,
  *   expressionBytesList: Uint8Array[],
  *   readingBytesList: Uint8Array[],
  *   readingEqualsExpressionList: boolean[]|Uint8Array,
@@ -2230,6 +2231,15 @@ export class DictionaryImporter {
                             termContentStorageMode,
                             async (termListChunk, requirementsChunk, streamProgress) => {
                                 ++streamedFastPathChunkCount;
+                                if (!Array.isArray(termListChunk)) {
+                                    const directChunk = /** @type {DirectTermChunk} */ (/** @type {unknown} */ (termListChunk));
+                                    directChunk.isFinalTermChunk = this._isFinalSourceTermChunk(
+                                        termFileIndex,
+                                        sourceTermFileBatchCount,
+                                        activeTermFiles.length,
+                                        streamProgress,
+                                    );
+                                }
                                 const tChunkWorkStart = Date.now();
                                 const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance);
                                 addTermImportMetrics(artifactMetrics, chunkMetrics);
@@ -4829,6 +4839,28 @@ export class DictionaryImporter {
             result[i] = entry;
         }
         return {termList: result, requirements};
+    }
+
+    /**
+     * Source batches and parser chunks have separate lifetimes. Both must end
+     * before a chunk can omit its cache copy; row totals may be estimates.
+     * All native/parallel parser callbacks use one-based chunk ordinals.
+     * @param {number} sourceStartIndex
+     * @param {number} sourceFileCount
+     * @param {number} totalSourceFiles
+     * @param {{chunkIndex: number, chunkCount: number}} progress
+     * @returns {boolean}
+     */
+    _isFinalSourceTermChunk(sourceStartIndex, sourceFileCount, totalSourceFiles, {chunkIndex, chunkCount}) {
+        return (
+            Number.isSafeInteger(sourceStartIndex) && sourceStartIndex >= 0 &&
+            Number.isSafeInteger(sourceFileCount) && sourceFileCount > 0 &&
+            Number.isSafeInteger(totalSourceFiles) && totalSourceFiles > 0 &&
+            sourceStartIndex + sourceFileCount === totalSourceFiles &&
+            Number.isSafeInteger(chunkIndex) && chunkIndex > 0 &&
+            Number.isSafeInteger(chunkCount) && chunkCount > 0 &&
+            chunkIndex === chunkCount
+        );
     }
 
     /**

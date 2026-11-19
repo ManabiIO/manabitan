@@ -75,9 +75,10 @@ function cacheMeta(database, contentHash, offset, length, dictName, hash1, hash2
  * @param {number} hash1
  * @param {number} hash2
  * @param {{indexes: Int32Array, active: boolean}|null} [stagedMetadata]
+ * @param {boolean} [isFinalTermChunk]
  * @returns {{staged: {indexes: Int32Array, active: boolean}, meta: TermContentMeta}}
  */
-function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, stagedMetadata = null) {
+function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, stagedMetadata = null, isFinalTermChunk = false) {
     const spans = {
         buffer: source,
         offsets: new Uint32Array([sourceOffset]),
@@ -100,6 +101,7 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, s
         pendingResolvedDictNames: 'raw',
         pendingContentSpans: spans,
         stagedContentMetadata: staged,
+        isFinalTermChunk,
     });
     const meta = getMeta(database, hash1, hash2);
     if (typeof meta === 'undefined') { throw new Error('Expected published term content metadata'); }
@@ -222,6 +224,61 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
         run: async () => await bulkAdd(chunk),
     };
 }
+
+describe('final term chunk recent-source publication', () => {
+    test.each([false, true])('preserves canonical metadata and skips the owned copy only for final=%s', (isFinalTermChunk) => {
+        const database = new DictionaryDatabase();
+        const cache = vi.spyOn(database, '_cacheRecentPublishedTermContentSources');
+        const source = Uint8Array.of(1, 2, 3);
+        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20, null, isFinalTermChunk);
+
+        expect(getMeta(database, 10, 20)).toEqual(meta);
+        expect(cache).toHaveBeenCalledTimes(isFinalTermChunk ? 0 : 1);
+        const recent = database._findRecentTermContentSource(meta);
+        expect(recent === void 0).toBe(isFinalTermChunk);
+        if (recent) {
+            expect(recent.buffer).not.toBe(source);
+            expect(recent.buffer).toEqual(source);
+        }
+    });
+
+    test('keeps earlier sources and exactly reads a later duplicate of uncached final content', async () => {
+        const database = new DictionaryDatabase();
+        const earlier = publishSlabMeta(database, Uint8Array.of(1, 2, 3), 0, 3, 10, 20);
+        const source = Uint8Array.of(4, 5, 6);
+        const final = publishSlabMeta(database, source, 0, 3, 11, 21, null, true);
+        expect(database._findRecentTermContentSource(earlier.meta)?.buffer).toEqual(Uint8Array.of(1, 2, 3));
+        expect(database._findRecentTermContentSource(final.meta)).toBeUndefined();
+
+        const read = vi.spyOn(database, '_readTermEntryContentBytesDetailedBatch')
+            .mockResolvedValueOnce([{status: 'ok', bytes: Uint8Array.from(source)}])
+            .mockResolvedValueOnce([{status: 'ok', bytes: Uint8Array.of(4, 5, 9)}]);
+        const compare = vi.spyOn(database, '_termContentBytesEqual');
+        const descriptor = {hash1: 11, hash2: 21, contentBytes: source, primary: final.meta};
+        const matched = await database._findMatchingPersistedTermEntryContentMetaBatch([descriptor]);
+        expect(matched[0].existingMeta?.offset).toBe(final.meta.offset);
+        expect(matched[0].recentSourceHit).not.toBe(true);
+        const unmatched = await database._findMatchingPersistedTermEntryContentMetaBatch([descriptor]);
+        expect(unmatched[0].existingMeta).toBeUndefined();
+        expect(read).toHaveBeenCalledTimes(2);
+        expect(compare).toHaveBeenCalledTimes(2);
+        expect(database._findRecentTermContentSource(earlier.meta)?.buffer).toEqual(Uint8Array.of(1, 2, 3));
+    });
+
+    test('threads finality through the sink while draining content and releasing borrowed ownership', async () => {
+        const harness = createArtifactOverlapHarness();
+        harness.chunk.isFinalTermChunk = true;
+        const cache = vi.spyOn(harness.database, '_cacheRecentPublishedTermContentSources');
+        const pending = harness.run();
+        harness.resolveContent();
+        harness.resolveRecords();
+        await pending;
+        expect(cache).not.toHaveBeenCalled();
+        expect(harness.appendRecords).toHaveBeenCalledOnce();
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(getMeta(harness.database, 10, 20)).toBeDefined();
+    });
+});
 
 describe('DictionaryDatabase term content hash validation', () => {
     test.each([
@@ -369,6 +426,73 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: collision, primary: meta}]);
 
         expect(result).toStrictEqual({existingMeta: void 0, exactFallback: true});
+        expect(readStorage).not.toHaveBeenCalled();
+    });
+
+    test('preserves descriptor and collision order across cached and persisted matches', async () => {
+        const database = new DictionaryDatabase();
+        const firstBytes = new Uint8Array(300).fill(1);
+        const collisionBytes = Uint8Array.from(firstBytes);
+        collisionBytes[99] = 2;
+        const persistedBytes = new Uint8Array(300).fill(3);
+        const first = publishSlabMeta(database, firstBytes, 0, firstBytes.length, 10, 20).meta;
+        const collision = publishSlabMeta(database, collisionBytes, 0, collisionBytes.length, 30, 40).meta;
+        const persisted = publishSlabMeta(database, persistedBytes, 0, persistedBytes.length, 50, 60).meta;
+        Reflect.get(database, '_termEntryContentMetaCollisionsByHashPair').set('10:20', [collision]);
+        const batchId = Reflect.get(database, '_termEntryContentMetaRecentSourceBatchIdTable')[Reflect.get(persisted, 'tableIndex')];
+        Reflect.get(database, '_recentTermContentSourceBatches').delete(batchId);
+        const readStorage = vi.fn(async (requests) => {
+            expect(requests).toEqual([{contentOffset: persisted.offset, contentLength: persisted.length, contentDictName: persisted.dictName}]);
+            return [{status: 'ok', bytes: persistedBytes}];
+        });
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+
+        const result = await findBatch([
+            {hash1: 10, hash2: 20, contentBytes: firstBytes, primary: first},
+            {hash1: 50, hash2: 60, contentBytes: persistedBytes, primary: persisted},
+            {hash1: 10, hash2: 20, contentBytes: collisionBytes, primary: first},
+            {hash1: 70, hash2: 80, contentBytes: firstBytes, primary: void 0},
+            {hash1: 10, hash2: 20, contentBytes: firstBytes, primary: first},
+        ]);
+
+        expect(result).toEqual([
+            {existingMeta: first, exactFallback: true, recentSourceHit: true},
+            {existingMeta: persisted, exactFallback: true},
+            {existingMeta: collision, exactFallback: true, recentSourceHit: true},
+            {existingMeta: void 0, exactFallback: false},
+            {existingMeta: first, exactFallback: true, recentSourceHit: true},
+        ]);
+        expect(readStorage).toHaveBeenCalledOnce();
+    });
+
+    test('reports a persisted read failure in a batch containing a cached match', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        const cached = publishSlabMeta(database, source, 0, source.length, 10, 20).meta;
+        const persisted = {id: 2, offset: 9999, length: source.length, dictName: 'raw'};
+        const readStorage = vi.fn(async () => [{status: 'corrupt', reason: 'injected persisted read failure'}]);
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+
+        await expect(findBatch([
+            {hash1: 10, hash2: 20, contentBytes: source, primary: cached},
+            {hash1: 30, hash2: 40, contentBytes: source, primary: persisted},
+        ])).rejects.toThrow('injected persisted read failure');
+        expect(readStorage).toHaveBeenCalledOnce();
+    });
+
+    test('does not reuse a cached source through an unsupported storage format', async () => {
+        const database = new DictionaryDatabase();
+        const source = new Uint8Array([1, 2, 3, 4]);
+        const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
+        const readStorage = vi.fn();
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database);
+
+        await expect(findBatch([
+            {hash1: 10, hash2: 20, contentBytes: source, primary: {...meta, dictName: 'unknown-format'}},
+        ])).resolves.toEqual([{existingMeta: void 0, exactFallback: false}]);
         expect(readStorage).not.toHaveBeenCalled();
     });
 

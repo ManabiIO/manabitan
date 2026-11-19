@@ -5367,6 +5367,7 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
      * @returns {Uint8Array}
+     * @throws {RangeError} If resolved content references contain an invalid unique index.
      */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
@@ -5397,10 +5398,32 @@ export class TermRecordOpfsStore {
         const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
             null;
+        // The common parser path resolves both fields through the same unique
+        // index. Capture its shape only within this synchronous call; fixed
+        // lengths retain their independent precedence on the generic path.
+        const resolvedReferences = (
+            !useFixedContentSpan &&
+            typeof chunk.fixedContentLength !== 'number' &&
+            typeof chunk.resolvedContentReferences === 'object' &&
+            chunk.resolvedContentReferences !== null
+        ) ?
+            chunk.resolvedContentReferences :
+            null;
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            let contentOffset;
+            let contentLength;
+            if (resolvedReferences !== null) {
+                const uniqueIndex = resolvedReferences.uniqueIndexList[i];
+                if (uniqueIndex >= resolvedReferences.offsets.length || uniqueIndex >= resolvedReferences.lengths.length) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+                }
+                contentOffset = resolvedReferences.offsets[uniqueIndex];
+                contentLength = resolvedReferences.lengths[uniqueIndex];
+            } else {
+                contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+                contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            }
             if (contentLength >= U16_NULL) {
                 compact = false;
                 break;

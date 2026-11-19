@@ -399,6 +399,76 @@ describe('TermRecordOpfsStore', () => {
         expect(compact).toEqual(expected);
     });
 
+    test.each(['compact', 'legacy', 'float64'])('preserves artifact field bytes with repeated resolved references (%s)', (format) => {
+        const store = new TermRecordOpfsStore();
+        const count = 128;
+        const uniqueIndexList = Uint32Array.from({length: count}, (_, index) => (index * 7) % 11);
+        const offsets = Float64Array.from({length: 11}, (_, index) => 0x100000000 + index * 70000);
+        const lengths = Uint32Array.from({length: 11}, (_, index) => (index === 7 && format === 'legacy' ? 70000 : index * 8));
+        const scoreValues = [-256, 255, 256, -257, -2147483648, 2147483647, 0];
+        const scoreList = format === 'float64' ?
+            Float64Array.from({length: count}, (_, index) => (index % 2 === 0 ? -0 : 0.5)) :
+            Int32Array.from({length: count}, (_, index) => scoreValues[index % scoreValues.length]);
+        const expected = store._encodeArtifactRecordFields(
+            {rowCount: count, scoreList},
+            Float64Array.from(uniqueIndexList, (index) => offsets[index]),
+            Uint32Array.from(uniqueIndexList, (index) => lengths[index]),
+            0x100000000,
+        );
+        const actual = store._encodeArtifactRecordFields(
+            {rowCount: count, scoreList, resolvedContentReferences: {uniqueIndexList, offsets, lengths}},
+            new Float64Array(0),
+            new Uint32Array(0),
+            0x100000000,
+        );
+        expect(actual).toEqual(expected);
+    });
+
+    test.each(['offsets', 'lengths'])('rejects resolved indexes outside the %s column while encoding fields', (column) => {
+        const store = new TermRecordOpfsStore();
+        const references = {
+            uniqueIndexList: new Uint32Array([0, 1, 2]),
+            offsets: new Float64Array(column === 'offsets' ? 2 : 3),
+            lengths: new Uint32Array(column === 'lengths' ? 2 : 3),
+        };
+        expect(() => store._encodeArtifactRecordFields(
+            {rowCount: 3, scoreList: new Int32Array(3), resolvedContentReferences: references},
+            new Float64Array(0),
+            new Uint32Array(0),
+            0,
+        )).toThrow('Invalid resolved term content reference index: 2');
+    });
+
+    test('reselects fixed-length precedence when resolved artifact fields change between calls', () => {
+        const store = new TermRecordOpfsStore();
+        const count = 16;
+        const chunk = {
+            rowCount: count,
+            scoreList: new Int32Array(count),
+            fixedContentLength: /** @type {number|undefined} */ (void 0),
+            resolvedContentReferences: {
+                uniqueIndexList: new Uint32Array(count),
+                offsets: new Float64Array([32]),
+                lengths: new Uint32Array([7]),
+            },
+        };
+        const encode = () => store._encodeArtifactRecordFields(chunk, new Float64Array(0), new Uint32Array(0), 0);
+        const initial = encode();
+        chunk.fixedContentLength = 11;
+        chunk.resolvedContentReferences.lengths = new Uint32Array(0);
+        const fixed = encode();
+        const expected = store._encodeArtifactRecordFields(
+            {rowCount: count, scoreList: chunk.scoreList},
+            new Float64Array(count).fill(32),
+            new Uint32Array(count).fill(11),
+            0,
+        );
+        expect(fixed).toEqual(expected);
+        expect(fixed).not.toEqual(initial);
+        chunk.fixedContentLength = void 0;
+        expect(encode).toThrow('Invalid resolved term content reference index: 0');
+    });
+
     test('round-trips non-int32 scores through ordinary record persistence', async () => {
         const dictionaryName = 'Float scores ordinary';
         const scores = [1.5, -2.25, 0.1, 2 ** 40 + 0.5, -0];

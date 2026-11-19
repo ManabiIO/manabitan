@@ -162,6 +162,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
  * @property {boolean} [useResolvedContentReferences]
+ * @property {boolean} [isFinalTermChunk] The importer proved both source exhaustion and the final parser chunk.
  * @property {(string|null)[]|null} contentDictNameList
  * @property {string|null} [uniformContentDictName]
  * @property {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>} [preparedLookupIndexes]
@@ -199,7 +200,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {number} hash1
  * @property {number} hash2
  * @property {Uint8Array} contentBytes
- * @property {TermContentMeta} primary
+ * @property {TermContentMeta|undefined} primary
  */
 
 /**
@@ -4827,7 +4828,7 @@ null;
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number, isFinalTermChunk?: boolean}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -6219,32 +6220,47 @@ null;
         const count = descriptors.length;
         /** @type {ExactTermContentResult[]} */
         const results = new Array(count);
-        /** @type {Array<TermContentMeta[]|null>} */
-        const candidateLists = new Array(count);
-        const nextCandidateIndexes = new Uint32Array(count);
-        const completed = new Uint8Array(count);
-        let remaining = count;
+        /** @type {Array<TermContentMeta[]>|null} */
+        let candidateLists = null;
+        let remaining = 0;
         for (let i = 0; i < count; ++i) {
             const {hash1, hash2, contentBytes, primary} = descriptors[i];
+            // A complete comparison of the owned source proves the match without
+            // constructing a collision list or sampling rejection signatures.
+            // Misses still use the ordered storage/collision path below.
+            if (
+                typeof primary !== 'undefined' && primary.length === contentBytes.byteLength &&
+                contentBytes.byteLength !== 0 && this._canExactlyComparePersistedTermContent(primary.dictName)
+            ) {
+                const recentSource = this._findRecentTermContentSource(primary);
+                if (
+                    typeof recentSource !== 'undefined' &&
+                    this._termContentBytesEqualSpan(contentBytes, recentSource.buffer, recentSource.offset, recentSource.length)
+                ) {
+                    results[i] = {existingMeta: primary, exactFallback: true, recentSourceHit: true};
+                    continue;
+                }
+            }
             const candidates = this._getMatchingPersistedTermEntryContentMetaCandidates(
                 hash1,
                 hash2,
                 contentBytes,
                 primary,
             );
-            candidateLists[i] = candidates;
             if (candidates === null) {
                 results[i] = {existingMeta: void 0, exactFallback: false};
-                completed[i] = 1;
-                --remaining;
             } else if (contentBytes.byteLength === 0) {
                 // Candidate selection already required the same length.
                 results[i] = {existingMeta: candidates[0], exactFallback: true};
-                completed[i] = 1;
-                --remaining;
+            } else {
+                if (candidateLists === null) { candidateLists = new Array(count); }
+                candidateLists[i] = candidates;
+                ++remaining;
             }
         }
+        if (candidateLists === null) { return results; }
 
+        const nextCandidateIndexes = new Uint32Array(count);
         /** @type {Error[]} */
         const errors = [];
         while (remaining > 0) {
@@ -6253,7 +6269,7 @@ null;
             /** @type {Array<{descriptorIndex: number, meta: TermContentMeta}>} */
             const requestOwners = [];
             for (let i = 0; i < count; ++i) {
-                if (completed[i] === 1) { continue; }
+                if (typeof results[i] !== 'undefined') { continue; }
                 const candidates = candidateLists[i];
                 const contentBytes = descriptors[i].contentBytes;
                 let queued = false;
@@ -6270,7 +6286,6 @@ null;
                             )
                         ) {
                             results[i] = {existingMeta: meta, exactFallback: true, recentSourceHit: true};
-                            completed[i] = 1;
                             --remaining;
                             break;
                         }
@@ -6287,7 +6302,6 @@ null;
                             )
                         ) {
                             results[i] = {existingMeta: meta, exactFallback: true};
-                            completed[i] = 1;
                             --remaining;
                             break;
                         }
@@ -6302,9 +6316,8 @@ null;
                     queued = true;
                     break;
                 }
-                if (!queued && completed[i] === 0 && nextCandidateIndexes[i] >= candidates.length) {
+                if (!queued && typeof results[i] === 'undefined' && nextCandidateIndexes[i] >= candidates.length) {
                     results[i] = {existingMeta: void 0, exactFallback: true};
-                    completed[i] = 1;
                     --remaining;
                 }
             }
@@ -6318,7 +6331,7 @@ null;
                 const {descriptorIndex, meta} = requestOwners[i];
                 if (readResult.status !== 'ok') {
                     errors.push(this._createExactDedupeReadError(meta, readResult));
-                    completed[descriptorIndex] = 1;
+                    results[descriptorIndex] = {existingMeta: void 0, exactFallback: true};
                     --remaining;
                     continue;
                 }
@@ -6326,7 +6339,6 @@ null;
                 this._setTermContentSignatures(meta, existingBytes);
                 if (this._termContentBytesEqual(existingBytes, descriptors[descriptorIndex].contentBytes)) {
                     results[descriptorIndex] = {existingMeta: meta, exactFallback: true};
-                    completed[descriptorIndex] = 1;
                     --remaining;
                 }
             }
@@ -8158,6 +8170,7 @@ this._readTermContentSignature(
                         importMetrics,
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
                         useResolvedContentReferences,
+                        isFinalTermChunk: chunk.isFinalTermChunk === true,
                     });
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
@@ -9256,7 +9269,7 @@ null :
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, isFinalTermChunk?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -9279,6 +9292,7 @@ null :
             importMetrics = null,
             metadataValidated = false,
             useResolvedContentReferences = false,
+            isFinalTermChunk = false,
         } = state;
         let {resolvedContentDictNames} = state;
         /**
@@ -9412,10 +9426,14 @@ null :
             );
         }
         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
-        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
-            stagedContentMetadata,
-            pendingContentSpans,
-        );
+        // Canonical metadata above remains available to every later reader.
+        // Only the final chunk's speculative owned source copy is unnecessary.
+        const recentSourceCacheBytes = isFinalTermChunk ?
+            0 :
+            this._cacheRecentPublishedTermContentSources(
+                stagedContentMetadata,
+                pendingContentSpans,
+            );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;

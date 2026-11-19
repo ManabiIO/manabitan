@@ -7,6 +7,7 @@ import {beforeAll, describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 beforeAll(async () => {
@@ -33,8 +34,11 @@ async function archive(format, banks, imageFile) {
 function database() {
     /** @type {Array<{bytes: Uint8Array, dictName: string}>} */
     const payloads = [];
+    /** @type {boolean[]} */
+    const finalChunks = [];
     return {
         payloads,
+        finalChunks,
         isPrepared: () => true,
         setImportOptimizationFlags() {},
         setTermEntryContentDedupEnabled() {},
@@ -55,6 +59,7 @@ function database() {
             }
         }),
         bulkAddArtifactTermsChunk: vi.fn(async (/** @type {Parameters<DictionaryDatabase['bulkAddArtifactTermsChunk']>[0]} */ chunk) => {
+            finalChunks.push(chunk.isFinalTermChunk === true);
             for (let i = 0; i < chunk.rowCount; ++i) {
                 let bytes = chunk.contentBytesList[i];
                 if (chunk.contentBytesBuffer instanceof Uint8Array && chunk.contentMetaList instanceof Uint32Array) {
@@ -104,6 +109,93 @@ const malformedRows = [
     {name: 'unsafe positive sequence', row: ['term', '', '', '', 0, ['definition'], Number.MAX_SAFE_INTEGER + 1, '']},
     {name: 'unsafe negative sequence', row: ['term', '', '', '', 0, ['definition'], Number.MIN_SAFE_INTEGER - 1, '']},
 ];
+
+describe('final source term chunk propagation', () => {
+    test.each([
+        [0, 4, 4, 1, 2, false],
+        [0, 4, 4, 2, 2, true],
+        [0, 80, 81, 1, 1, false],
+        [80, 1, 81, 1, 1, true],
+        [0, 1, 1, 0, 0, false],
+        [0, 1, 1, -1, -1, false],
+        [0, 1, 1, 1.5, 1.5, false],
+        [0, 1, 1, Infinity, Infinity, false],
+        [0, 0, 0, 1, 1, false],
+        [0, 2, 1, 1, 1, false],
+    ])('requires both source exhaustion and valid final parser ordinals (%s,%s,%s,%s,%s)', (start, count, total, chunkIndex, chunkCount, expected) => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        expect(importer._isFinalSourceTermChunk(
+            /** @type {number} */ (start),
+            /** @type {number} */ (count),
+            /** @type {number} */ (total),
+            {chunkIndex: /** @type {number} */ (chunkIndex), chunkCount: /** @type {number} */ (chunkCount)},
+        )).toBe(expected);
+    });
+
+    test.each([
+        {bankCount: 4, separateSources: false},
+        {bankCount: 4, separateSources: true},
+        {bankCount: 81, separateSources: false},
+    ])('marks only source exhaustion across $bankCount native banks (separate sources=$separateSources)', async ({bankCount, separateSources}) => {
+        vi.stubGlobal('navigator', {deviceMemory: 4, hardwareConcurrency: 8});
+        const db = database();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const admission = separateSources ? vi.spyOn(TermBankSourcePipeline.prototype, 'canPrefetch').mockReturnValue(false) : null;
+        const banks = Array.from({length: bankCount}, (_, i) => [[`term${i}`, '', '', '', 0, ['definition'], i, '']]);
+        try {
+            const result = await importer.importDictionary(
+                /** @type {DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+                new Blob([await archive(3, banks, false)]),
+                /** @type {import('dictionary-importer').ImportDetails} */ ({skipImageMetadata: true, zipUseWebWorkers: false}),
+            );
+            expect(result.errors).toEqual([]);
+            expect(result.result?.counts?.terms.total).toBe(bankCount);
+            expect(db.finalChunks.length).toBeGreaterThan(0);
+            expect(db.finalChunks.at(-1)).toBe(true);
+            expect(db.finalChunks.slice(0, -1).every((value) => value === false)).toBe(true);
+            if (separateSources) { expect(db.finalChunks).toEqual([false, false, false, true]); }
+        } finally {
+            admission?.mockRestore();
+            vi.unstubAllGlobals();
+        }
+    });
+
+    test('waits for the final parser callback within the final source batch', async () => {
+        const db = database();
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const parse = vi.spyOn(importer, '_readTermBankFileFast').mockImplementation(async (_file, _version, title, _prefix, _media, _dedup, _mode, onChunk) => {
+            expect(onChunk).toBeTypeOf('function');
+            for (let chunkIndex = 1; chunkIndex <= 2; ++chunkIndex) {
+                const chunk = {
+                    dictionary: title,
+                    rowCount: 1,
+                    expressionBytesList: [],
+                    readingBytesList: [],
+                    readingEqualsExpressionList: new Uint8Array(1),
+                    scoreList: new Int32Array(1),
+                    sequenceList: new Int32Array(1),
+                    contentBytesList: [Uint8Array.of(1)],
+                    contentHash1List: new Uint32Array(1),
+                    contentHash2List: new Uint32Array(1),
+                    contentDictNameList: null,
+                };
+                await onChunk?.(/** @type {import('dictionary-database').DatabaseTermEntry[]} */ (/** @type {unknown} */ (chunk)), null, {processedRows: chunkIndex, totalRows: 2, chunkIndex, chunkCount: 2});
+            }
+            return {termList: [], requirements: null};
+        });
+        try {
+            const result = await importer.importDictionary(
+                /** @type {DictionaryDatabase} */ (/** @type {unknown} */ (db)),
+                new Blob([await archive(3, [[['term', '', '', '', 0, ['definition'], 1, '']]], false)]),
+                /** @type {import('dictionary-importer').ImportDetails} */ ({skipImageMetadata: true, zipUseWebWorkers: false}),
+            );
+            expect(result.errors).toEqual([]);
+            expect(db.finalChunks).toEqual([false, true]);
+        } finally {
+            parse.mockRestore();
+        }
+    });
+});
 
 describe('source ZIP term-row contract', () => {
     for (const slow of [false, true]) {
