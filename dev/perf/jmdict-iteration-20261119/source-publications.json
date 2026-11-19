@@ -1,0 +1,147 @@
+{
+  "baseline": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+  "baselineTree": "841406cd33f6871ab24aee771c1a7881d9e465f0",
+  "cohorts": {
+    "control": {
+      "label": "control",
+      "parent": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+      "tree": "9a7d64dde5fead018429429e224f454f617a04af",
+      "branch": "perf/jmdict-qualify-20261119-ccf816-control",
+      "sha": "373e86f5d48bb27828015e8ef641872de21144bc",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "branch": "perf/jmdict-qualify-20261119-ccf816-control"
+        },
+        "isError": false
+      }
+    },
+    "adjacent": {
+      "label": "adjacent",
+      "parent": "1937d0a8acb624f4daba7596633395848512f622",
+      "tree": "974792f28302bceb17407f7c504ea86181353686",
+      "branch": "perf/jmdict-qualify-20261119-ccf816-adjacent",
+      "sha": "e8b19b7ce6f95833d19d7ec398e8d492f384ab03",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "branch": "perf/jmdict-qualify-20261119-ccf816-adjacent"
+        },
+        "isError": false
+      }
+    },
+    "references": {
+      "parent": "10881e563b26e6cfa8ee6741e6d7ccfbe88c7c21",
+      "sha": "8f11eb43a877840da5f56f391ad23a7f1404b671",
+      "tree": "f82079b4e7f7aaf50161969f48f25f0ff409eaa2",
+      "branch": "perf/jmdict-qualify-20261119-ccf816-references"
+    },
+    "numeric": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-numeric",
+      "parent": "990ed1620c7eeacbf31f83225c5bcf872f676896",
+      "sha": "b7bd826863f4b445ffd2763fded63dad58bb93f6",
+      "tree": "420602f6f28a88c1ef70c2897728dcad18d9d7c6"
+    },
+    "cache": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-cache",
+      "parent": "e93f74dc949f0144d0730018f43d1ae6620ee190",
+      "sha": "b3668ca5d8292ed541d63c75bfe20dd1d989d648",
+      "tree": "3b92b81d1bca59d5b72cabb60e04817b2e5b5808"
+    },
+    "control-twelve": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-control-twelve",
+      "parent": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+      "sha": "20c4a48648a3d4b83065f303448291bf011f376a",
+      "tree": "5b8b71a9ee4c40c33647fc9f041656be14bd6628"
+    },
+    "escape": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-escape",
+      "parent": "cdd0274ee93452c9ae5a896c3a3b4d07a8f5e8bc",
+      "sha": "f23602500ea1be596d2d26451262465bd2b66701",
+      "tree": "97c39d54a1fc092c201a2c5fb2f0c935ce5e8f17"
+    },
+    "copy": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-copy",
+      "parent": "a651ddfa0da71565ee46bc4f831adfbfff542aaf",
+      "sha": "eaaa293819da186d16f3da68e0c63be37008665d",
+      "tree": "c9430080f431e216a42fae558382604c697ab60e"
+    },
+    "publication": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-publication",
+      "parent": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "sha": "b4343076da6b3de82d832d9821d5f12d548754be",
+      "tree": "836c5b38b3d5c3c4c61a6c0608cbe1e7010c6960"
+    },
+    "keys": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-keys",
+      "parent": "9abff9bdc8dc92c4017b9b4a08566659da152658",
+      "sha": "8be0334e85b27c6af197f12bb993a559fe55789f",
+      "tree": "f30302bd1787bb43a6cd3660d9b5aae0f84117ea"
+    },
+    "aligned": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-aligned",
+      "parent": "e1ae33f04bbd9db633c56b7848c79b68faf1e962",
+      "sha": "fcb46c5cc29a6b4a0388bba5c62ef4be750cc1b5",
+      "tree": "d2e8fb5d858482b2a6ce07a62b4f0c9b1222926d"
+    },
+    "publication-twelve": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-publication-twelve",
+      "parent": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "sha": "e3f804a290a3103c93bf8f71e63f92787d1d4ff3",
+      "tree": "4f0f89666c2f7219fb84d4b3f02550019256047f"
+    },
+    "keys-twelve": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-keys-twelve",
+      "parent": "9abff9bdc8dc92c4017b9b4a08566659da152658",
+      "sha": "896aedbc58b1274dd49f60ee790c34727c384494",
+      "tree": "30f0c652c2092319a79a793647cf85aee02b7268"
+    },
+    "metadata": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-metadata",
+      "parent": "c8acce2669112ef1493da3f80f4b7001a1f331dd",
+      "sha": "16f3a6d6d1d1da9eb2916871f2c33961a2b1b887",
+      "tree": "89731823bf8483e8019be916e72b75dabdb24534"
+    },
+    "publication-final": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-publication-final",
+      "parent": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "sha": "8a1472978f860149547b6ac2ff34569e6caa696f",
+      "tree": "572aaedf214a51700fffe19728e2c3180011c9e9"
+    },
+    "copy-hash": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-copy-hash",
+      "parent": "7ac62861701ad726331f46b39eace466437c77ac",
+      "sha": "00295b598611b15c35681487249b6deb92ee70e7",
+      "tree": "cc6e009d5afb5864399aa8e388a7ead7604c2b86"
+    },
+    "terminal-cache": {
+      "branch": "perf/jmdict-qualify-20261119-ccf816-terminal-cache",
+      "parent": "19ff052517df786e9589ad36602436aebfc45a65",
+      "sha": "36a338ddf978302435239b0a341758a52d0848f1",
+      "tree": "1c5b6e2f51bd240a8752d67bdef15e8986ae6383"
+    }
+  },
+  "adjacentDisposition": {
+    "pr": 756,
+    "state": "closed",
+    "reason": "No distinguishable JMdict gain; Jitendex slower in 4/4 pairs"
+  },
+  "publicationDisposition": {
+    "pr": 759,
+    "state": "open",
+    "draft": false,
+    "merged": false,
+    "source": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+    "validationReceipt": "remote/pr759/validation-receipt.json"
+  }
+}

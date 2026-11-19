@@ -1,0 +1,2241 @@
+{
+  "schemaVersion": 1,
+  "verifiedAtUtc": "2026-11-19T20:07:25.786911+00:00",
+  "repository": "ManabiIO/manabitan",
+  "pullRequest": {
+    "number": 759,
+    "url": "https://github.com/ManabiIO/manabitan/pull/759",
+    "state": "open",
+    "draft": true,
+    "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+    "headRef": "perf/jmdict-plan-publication-runs-20261119",
+    "baseSha": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "baseRef": "develop",
+    "mergeSha": "a15742271a055c3277b84e61c568e895cfcaa252"
+  },
+  "measuredProductSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+  "measuredProductTreeSha": "a2083156b2df443d2c576b23d122e1870db38133",
+  "ciMergeCommit": {
+    "sha": "a15742271a055c3277b84e61c568e895cfcaa252",
+    "treeSha": "a2083156b2df443d2c576b23d122e1870db38133",
+    "parents": [
+      "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+      "e6ff4894016eac1a728dc65b7f3ac98212cb0881"
+    ],
+    "url": "https://github.com/ManabiIO/manabitan/commit/a15742271a055c3277b84e61c568e895cfcaa252"
+  },
+  "ciTreeMatchesMeasuredProduct": true,
+  "scope": "Functional qualification from existing PR workflows. Chromium full E2E uses chrome-dev; restart/interruption uses the recorded test-only observer. These results are separate from release-Chrome timing evidence.",
+  "timingRerunForThisReceipt": false,
+  "workflowRuns": [
+    {
+      "id": 44602926771,
+      "name": "Chromium Restart Interruption",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926771",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:10Z",
+      "updatedAt": "2026-11-19T19:56:26Z",
+      "jobs": [
+        {
+          "id": 135838872968,
+          "name": "Restart and interruption recovery (Chromium)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926771,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Build stable-key Chromium package",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Install Playwright Chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Test owned process-tree selection",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Create fresh evidence directory",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run witnessed interruption recovery campaign",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Enforce recovery report",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Upload restart interruption evidence",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 19
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44602926523,
+      "name": "CI",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926523",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:10Z",
+      "updatedAt": "2026-11-19T19:56:29Z",
+      "jobs": [
+        {
+          "id": 135838871388,
+          "name": "Full Extension E2E (Firefox)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Build Firefox test package",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Retain tested Firefox release package",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 5
+            },
+            {
+              "name": "Install Firefox Developer Edition",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Restore Firefox E2E dictionary cache",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run Firefox extension E2E",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Enforce Firefox extension E2E success",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Upload Firefox extension E2E JSON",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Upload Firefox extension E2E report",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 11
+            },
+            {
+              "name": "Post Restore Firefox E2E dictionary cache",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 20
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 21
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            }
+          ]
+        },
+        {
+          "id": 135838871732,
+          "name": "Test Build",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install pinned dictionary WASM toolchain",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Verify pinned dictionary WASM rebuild",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Build",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Retain versioned release packages",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 7
+            },
+            {
+              "name": "Validate manifest.json of the extension",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 16
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 17
+            }
+          ]
+        },
+        {
+          "id": 135838871753,
+          "name": "Full Extension E2E (Chromium)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Build Chromium test package",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Retain tested Chromium release package",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 5
+            },
+            {
+              "name": "Install Playwright Chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Restore Chromium E2E dictionary cache",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run Chromium extension E2E",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Enforce Chromium extension E2E success",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Summarize Chromium extension E2E",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Upload Chromium extension E2E JSON",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Upload Chromium extension E2E report",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 12
+            },
+            {
+              "name": "Post Restore Chromium E2E dictionary cache",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        },
+        {
+          "id": 135838871940,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Install Playwright Chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run Chromium Anki deduplication matrix",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Enforce Chromium Anki matrix success",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Upload Chromium Anki deduplication report",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 13
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        },
+        {
+          "id": 135838872079,
+          "name": "TypeScript (dev)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run TypeScript (dev) tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872152,
+          "name": "Unit Tests (options)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run Unit Tests (options) tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872310,
+          "name": "HTML",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run HTML tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872436,
+          "name": "JSON",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run JSON tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872492,
+          "name": "CSS",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run CSS tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872496,
+          "name": "TypeScript (main)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run TypeScript (main) tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872544,
+          "name": "Unit Tests",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run Unit Tests tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872571,
+          "name": "JavaScript",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run JavaScript tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872572,
+          "name": "TypeScript (test)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run TypeScript (test) tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838872676,
+          "name": "Markdown",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run Markdown tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838873021,
+          "name": "TypeScript (bench)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run TypeScript (bench) tests",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Post Run ./.github/actions/setup",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            }
+          ]
+        },
+        {
+          "id": 135838873744,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 135838874218,
+          "name": "Full Extension E2E (Edge)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 135838874790,
+          "name": "Published release upgrade and reimport",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": null
+        },
+        {
+          "id": 135838979230,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "run_id": 44602926523,
+          "logs_url": null,
+          "steps": null
+        }
+      ]
+    },
+    {
+      "id": 44602926664,
+      "name": "Auto-Approve Safe PRs",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926664",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:10Z",
+      "updatedAt": "2026-11-19T19:53:41Z",
+      "jobs": [
+        {
+          "id": 135838872763,
+          "name": "auto-approve",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926664,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Save the PR number in an artifact",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Upload the PR number",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44602926511,
+      "name": "Lint GitHub Actions workflows",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926511",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:10Z",
+      "updatedAt": "2026-11-19T19:53:20Z",
+      "jobs": [
+        {
+          "id": 135838871067,
+          "name": "actionlint",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926511,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Check workflow files",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44602926516,
+      "name": "CodeQL",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926516",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:10Z",
+      "updatedAt": "2026-11-19T19:55:06Z",
+      "jobs": [
+        {
+          "id": 135838870387,
+          "name": "Analyze (javascript)",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926516,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Initialize CodeQL",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Autobuild",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Perform CodeQL Analysis",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Post Perform CodeQL Analysis",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Post Initialize CodeQL",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Post Checkout repository",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44602926531,
+      "name": "ManabiTan static web acceptance",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926531",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:10Z",
+      "updatedAt": "2026-11-19T19:58:45Z",
+      "jobs": [
+        {
+          "id": 135838871493,
+          "name": "chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926531,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm run build:libs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run node web/build.mjs",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Run npm run test:ts:main && npm run test:ts:test && npx tsc -p web/tsconfig.json",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/term-content-opfs-store.test.js test/term-content-queued-cursor.test.js",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Prepare independently verified real dictionary fixtures",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run real no-extension browser acceptance",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 11
+            },
+            {
+              "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 12
+            },
+            {
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 22
+            },
+            {
+              "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 23
+            },
+            {
+              "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 24
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44602926461,
+      "name": "Contribution license acknowledgement",
+      "event": "pull_request_target",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926461",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:09Z",
+      "updatedAt": "2026-11-19T19:53:15Z",
+      "jobs": [
+        {
+          "id": 135838870771,
+          "name": "acknowledgement",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926461,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Require GPL contribution grant",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44602926448,
+      "name": "Dependency Review",
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "success",
+      "headSha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881",
+      "headBranch": "perf/jmdict-plan-publication-runs-20261119",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926448",
+      "runAttempt": 1,
+      "createdAt": "2026-11-19T19:53:09Z",
+      "updatedAt": "2026-11-19T19:53:33Z",
+      "jobs": [
+        {
+          "id": 135838870379,
+          "name": "dependency-review",
+          "status": "completed",
+          "conclusion": "success",
+          "run_id": 44602926448,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Pre Harden Runner",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Check dependency graph availability",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Dependency review unavailable",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Harden Runner",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 5
+            },
+            {
+              "name": "Checkout Repository",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 6
+            },
+            {
+              "name": "Dependency Review",
+              "status": "completed",
+              "conclusion": "skipped",
+              "number": 7
+            },
+            {
+              "name": "Post Harden Runner",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 14
+            },
+            {
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 15
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "mainCiJobConclusions": {
+    "success": 15,
+    "skipped": 4
+  },
+  "allPrJobConclusions": {
+    "success": 22,
+    "skipped": 4
+  },
+  "conditionalSkippedJobs": [
+    {
+      "runId": 44602926523,
+      "jobId": 135838873744,
+      "name": "Firefox Android Installation Smoke (blocking)"
+    },
+    {
+      "runId": 44602926523,
+      "jobId": 135838874218,
+      "name": "Full Extension E2E (Edge)"
+    },
+    {
+      "runId": 44602926523,
+      "jobId": 135838874790,
+      "name": "Published release upgrade and reimport"
+    },
+    {
+      "runId": 44602926523,
+      "jobId": 135838979230,
+      "name": "Firefox Android Gecko RDP Capability Probe (manual)"
+    }
+  ],
+  "checkoutLogEvidence": [
+    {
+      "jobId": 135838871732,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926523/job/135838871732",
+      "checkoutLines": [
+        "2026-11-19T19:53:14.6902073Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a15742271a055c3277b84e61c568e895cfcaa252:refs/remotes/pull/759/merge",
+        "2026-11-19T19:53:15.5513151Z  * [new ref]         a15742271a055c3277b84e61c568e895cfcaa252 -> pull/759/merge",
+        "2026-11-19T19:53:15.8397702Z HEAD is now at a157422 Merge e6ff4894016eac1a728dc65b7f3ac98212cb0881 into d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "2026-11-19T19:53:15.8421385Z a15742271a055c3277b84e61c568e895cfcaa252",
+        "2026-11-19T19:53:32.9125988Z ##[group]Run npm run build:dictionary-wasm -- --check",
+        "2026-11-19T19:53:32.9126412Z \u001b[36;1mnpm run build:dictionary-wasm -- --check\u001b[0m"
+      ]
+    },
+    {
+      "jobId": 135838871753,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926523/job/135838871753",
+      "checkoutLines": [
+        "2026-11-19T19:53:15.1132147Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a15742271a055c3277b84e61c568e895cfcaa252:refs/remotes/pull/759/merge",
+        "2026-11-19T19:53:17.5976074Z  * [new ref]         a15742271a055c3277b84e61c568e895cfcaa252 -> pull/759/merge",
+        "2026-11-19T19:53:17.8800406Z HEAD is now at a157422 Merge e6ff4894016eac1a728dc65b7f3ac98212cb0881 into d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "2026-11-19T19:53:17.8882285Z a15742271a055c3277b84e61c568e895cfcaa252"
+      ]
+    },
+    {
+      "jobId": 135838871388,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44602926523/job/135838871388",
+      "checkoutLines": [
+        "2026-11-19T19:53:13.9553304Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a15742271a055c3277b84e61c568e895cfcaa252:refs/remotes/pull/759/merge",
+        "2026-11-19T19:53:15.4044293Z  * [new ref]         a15742271a055c3277b84e61c568e895cfcaa252 -> pull/759/merge",
+        "2026-11-19T19:53:15.6349215Z HEAD is now at a157422 Merge e6ff4894016eac1a728dc65b7f3ac98212cb0881 into d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "2026-11-19T19:53:15.6404329Z a15742271a055c3277b84e61c568e895cfcaa252"
+      ]
+    }
+  ],
+  "browserReports": {
+    "chromium": {
+      "report": "chromium-extension-e2e-report/chromium-e2e-import-report.json",
+      "reportSha256": "e5f64c840e596a08b7f7cf5e9adadd6cb97df1d1e551e1d89f46289e9fa326ab",
+      "status": "success",
+      "skippedVerification": false,
+      "failureReason": "",
+      "skipReason": "",
+      "buildTarget": "chrome-dev",
+      "packageSha256": "481639babc8ef7d4f06cbffcbb4d461ca3c741387665864cb9fc9db3db8d62cd",
+      "browserVersion": "153.0.8010.12",
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+      "phaseCount": 90,
+      "phaseNames": [
+        "Open settings page",
+        "Anonymous request rules match literal URLs",
+        "Anki screenshots retain their source tab",
+        "Cancelled navigation preserves import controller",
+        "Runtime diagnostics",
+        "Backend OPFS probe",
+        "Reset dictionary settings",
+        "Configure functional import mode",
+        "Warmup real dictionary cache",
+        "Import JMdict via file input",
+        "Import progress: Importing dictionary - Step 4 of 5: Importing data...",
+        "Import progress: Importing dictionary - Step 5 of 5: Finalizing import...",
+        "JMdict: total import",
+        "Reload settings page after JMdict import",
+        "Enable JMdict before concurrent import verification",
+        "Wait for JMdict backend term index after import",
+        "Verify JMdict backend content integrity after import",
+        "Discover JMdict warmup term for concurrent search tab",
+        "Open dedicated concurrent lookup tab",
+        "Warm up dedicated concurrent lookup tab after enabling JMdict",
+        "Discover JMdict probe term for concurrent verification",
+        "Wait for JMdict lookup backend readiness before concurrent import",
+        "Verify baseline JMdict lookup backend from search tab before concurrent Jitendex import",
+        "Import Jitendex via file input",
+        "Import progress: Importing dictionary - Step 4 of 5: Importing data...",
+        "Import progress: Importing dictionary - Step 5 of 5: Finalizing import...",
+        "Verify JMdict lookup backend during Jitendex import",
+        "Jitendex: total import",
+        "Verify Jitendex backend content integrity after import",
+        "Concurrent DB-open pressure during JMdict import",
+        "Post-import backend diagnostics",
+        "Enable imported dictionaries in profile options",
+        "Discover overlap lookup term",
+        "Wait for backend dictionary readiness",
+        "Restore concurrent lookup tab after orderly update-trigger restart",
+        "Verify persistence after orderly restart following JMdict update trigger",
+        "Trigger slow JMdict update",
+        "Verify JMdict lookup backend during JMdict update download",
+        "Import progress: Importing dictionary - Step 3 of 6: Downloading dictionary...",
+        "Import progress: Importing dictionary - Step 5 of 6: Importing data...",
+        "Import progress: Importing dictionary - Step 6 of 6: Finalizing import...",
+        "JMdict update: total import",
+        "Verify JMdict lookup backend during active JMdict update import step",
+        "Wait for backend dictionary readiness after update",
+        "Refresh enabled dictionaries after update",
+        "Verify JMdict backend content integrity after update",
+        "Reload settings page for modal verification",
+        "Verify installed dictionaries list",
+        "Configure restart profile matrix",
+        "Verify restart persistence after update",
+        "Open search page",
+        "Verify search results include both dictionaries",
+        "Anki saves retain their destination across changes and restart",
+        "Restore scanner results after search reload",
+        "Profile lookup: 暗",
+        "Profile lookup: 名",
+        "Profile lookup: 日",
+        "Profile lookup: 学",
+        "Profile lookup: 食",
+        "Profile lookup: 見",
+        "Profile lookup: 言",
+        "Profile lookup: 行",
+        "Profile lookup: 水",
+        "Profile lookup: 猫",
+        "Lookup aggregate coverage",
+        "Delete JMdict before batch import",
+        "Trigger multi-file dictionary import stress",
+        "Import progress: Importing dictionary (1 of 2) - Step 4 of 5: Importing data...",
+        "Import progress: Importing dictionary (2 of 2) - Step 2 of 5: Initializing import...",
+        "Import progress: Importing dictionary (2 of 2) - Step 4 of 5: Importing data...",
+        "Import progress: Importing dictionary (2 of 2) - Step 5 of 5: Finalizing import...",
+        "JMdict + JMnedict batch import: total import",
+        "Verify installed dictionaries after multi-file import",
+        "Verify JMdict backend content integrity after multi-file import",
+        "Verify JMnedict backend content integrity after multi-file import",
+        "Verify existing dictionary lookup continuity after multi-file import",
+        "Enable JMnedict for extended lookup stress",
+        "Verify restart persistence after multi-file import",
+        "Refresh enabled dictionaries before hover stress",
+        "Enable text scanning for hover stress",
+        "Wait for backend readiness before hover stress",
+        "Verify hover lookup responsiveness at varying speeds",
+        "Verify repeated hover scanning remains responsive",
+        "Verify search remains responsive after hover stress",
+        "Verify installed Reader trusted-click lookup bridge (round 1/3)",
+        "Verify installed Reader trusted-click lookup bridge (round 2/3)",
+        "Verify installed Reader trusted-click lookup bridge (round 3/3)",
+        "Reload settings page for deletion profiling",
+        "Delete dictionary: Jitendex",
+        "Post-delete backend verification (lookup + metadata)"
+      ],
+      "openStorageMode": "opfs-sahpool",
+      "opfsSahpoolInstallResult": "installed",
+      "isDedicatedWorkerGlobalScope": true,
+      "hasCreateSyncAccessHandle": true
+    },
+    "firefox": {
+      "report": "firefox-extension-e2e-report/firefox-e2e-import-report.json",
+      "reportSha256": "3f1094ea7d3337507e7fe48ba8559c21591686afb2c9b06259b4e270165131b6",
+      "status": "success",
+      "skippedVerification": false,
+      "failureReason": "",
+      "skipReason": "",
+      "buildTarget": null,
+      "packageSha256": null,
+      "browserVersion": null,
+      "browserUserAgent": "Mozilla/5.0 (X11; Linux x86_64; rv:161.0) Gecko/20100101 Firefox/161.0",
+      "phaseCount": 63,
+      "phaseNames": [
+        "Install extension and discover base URL",
+        "Firefox process detection",
+        "Open settings page",
+        "Reset dictionary settings",
+        "Runtime diagnostics",
+        "Backend API preflight",
+        "Warmup real dictionary cache",
+        "Install mocked recommended dictionary feed",
+        "Click Jitendex download",
+        "Jitendex: Importing dictionary - Step 3 of 6: Downloading dictionary...",
+        "Jitendex: Importing dictionary - Step 5 of 6: Importing data...",
+        "Jitendex: Importing dictionary - Step 6 of 6: Finalizing import...",
+        "Jitendex: total import",
+        "Jitendex import resource profile",
+        "Verify Jitendex backend content integrity after import",
+        "Jitendex: settle after progress clear",
+        "Open dedicated search tab",
+        "Verify baseline Jitendex search before concurrent import",
+        "Verify baseline Jitendex 食う lookup after import",
+        "Click JMdict download",
+        "Verify Jitendex search during JMdict import",
+        "JMdict: Importing dictionary - Step 3 of 6: Downloading dictionary...",
+        "JMdict: Importing dictionary - Step 5 of 6: Importing data...",
+        "JMdict: Importing dictionary - Step 6 of 6: Finalizing import...",
+        "JMdict: total import",
+        "JMdict import resource profile",
+        "JMdict: settle after progress clear",
+        "Post-import backend diagnostics",
+        "Verify JMdict backend content integrity after import",
+        "Verify installed dictionaries list",
+        "Trigger slow Jitendex update",
+        "Verify search during Jitendex update download",
+        "Verify search during active Jitendex update import step",
+        "Jitendex: total import",
+        "Jitendex update resource profile",
+        "Verify Jitendex backend content integrity after update",
+        "Open search page from action popup",
+        "Backend lookup diagnostics",
+        "Verify search results include both dictionaries",
+        "Profile lookup: 暗",
+        "Profile lookup: 食",
+        "Profile lookup: 名",
+        "Profile lookup: 日",
+        "Profile lookup: 学",
+        "Profile lookup: 食",
+        "Profile lookup: 見",
+        "Profile lookup: 言",
+        "Profile lookup: 行",
+        "Profile lookup: 水",
+        "Profile lookup: 猫",
+        "CPU/memory drilldown summary",
+        "Return to settings for multi-file import stress",
+        "Delete JMdict before batch import",
+        "Trigger multi-file dictionary import stress",
+        "JMdict + JMnedict batch import: total import",
+        "Multi-file import resource profile",
+        "Verify backend content integrity after multi-file import",
+        "Verify existing dictionary lookup continuity after multi-file import",
+        "Verify installed dictionaries after multi-file import",
+        "Enable text scanning for hover stress",
+        "Verify hover lookup responsiveness at varying speeds",
+        "Verify repeated hover lookup on Wagahai page",
+        "Verify search remains responsive after hover stress"
+      ],
+      "openStorageMode": "opfs-sahpool",
+      "opfsSahpoolInstallResult": "installed",
+      "isDedicatedWorkerGlobalScope": true,
+      "hasCreateSyncAccessHandle": true
+    }
+  },
+  "restartInterruption": {
+    "runId": 44602926771,
+    "jobId": 135838872968,
+    "report": "chromium-restart-interruption-evidence/restart-interruption-campaign.json",
+    "reportSha256": "41e89342323961c0f98da7ce94a963058646cc04bd0854783008c3be8deed28c",
+    "status": "success",
+    "sourceHead": "a15742271a055c3277b84e61c568e895cfcaa252",
+    "sourceTree": "a2083156b2df443d2c576b23d122e1870db38133",
+    "sourceStatus": "",
+    "browserVersion": "153.0.8010.12",
+    "packageSha256": "83fc698b5721687350dd474a2b600c2d6bfc197a6935233f76e5683b9a507cce",
+    "harnessSha256": "29332614fff8d4ca1eae19f53852a41a2c6f0a744129afac940e5a639041d009",
+    "fixtureHashes": {
+      "revisionOneSha256": "b2036249adc0fa750d3dcf2d490e4d6673859e7b1c6156b16841e68d5ab197b6",
+      "revisionTwoSha256": "193a41bb088dad7bcc706ba56f3f8cf2eb600b9d2c3a1a45224af0bf493041b7"
+    },
+    "testOnlyPackageObserver": {
+      "sourcePath": "js/dictionary/term-record-opfs-store.js",
+      "originalSha256": "83027e33f96027eaf7ff0b891e22ab8b63b76a00a0bc971a4e86ef3e14a7a471",
+      "instrumentedSha256": "8bfdca80c6b33c42700f54ca74f7610a074a2fa07068515444ae97d4cb6ba19c",
+      "originalPackageZipSha256": "83fc698b5721687350dd474a2b600c2d6bfc197a6935233f76e5683b9a507cce",
+      "instrumentedExtractedPackageTreeSha256": "5b3c1c6f1bf386924fc095f556e3303b929ea4795e56fc226b4900685c3dc458",
+      "replacements": 1,
+      "hook": "await loopback observer POST after the awaited authoritative lookup-index payload write (sync or async) to the .mbtr.mbti term container, with descriptor and physical file names, decoded dictionary name, current persisted import-journal session ID, bytes, and record count"
+    },
+    "phases": [
+      {
+        "name": "completed import baseline",
+        "status": "passed",
+        "revision": "revision-one-71d3",
+        "generationId": "cfbbecb7-9eac-4003-b9cd-0dcc09a309db",
+        "inventory": {
+          "terms": 3,
+          "kanji": 0,
+          "kanjiMeta": 0,
+          "termMeta": 0,
+          "tagMeta": 0,
+          "media": 0
+        },
+        "exactContent": "RESTART_CAMPAIGN_REVISION_ONE_CONTENT_71D3",
+        "missCount": 0
+      },
+      {
+        "name": "controlled authoritative term-container payload interruption boundary",
+        "status": "observed",
+        "observedAtIso": "2026-11-19T19:56:13.061Z",
+        "label": "Importing dictionary - Step 5 of 6: Importing data...",
+        "journal": {
+          "version": 1,
+          "sessionId": "8b292e5c-28a8-4fda-8866-1b7d8cda2dcd",
+          "contentCheckpoint": {
+            "segments": [
+              {
+                "fileName": "manabitan-term-content.bin",
+                "fileLength": 157
+              }
+            ]
+          },
+          "recordCheckpoint": {
+            "shards": [
+              {
+                "fileName": "dict-28|Restart%20Campaign%20Fixtureraw-v6.mbtr.mbti",
+                "fileLength": 400
+              },
+              {
+                "fileName": "dict-28|Restart%20Campaign%20Fixtureraw-v6.mbtr",
+                "fileLength": 26
+              }
+            ]
+          },
+          "createdAt": 1795118172521
+        },
+        "observedWrite": {
+          "fileName": "dict-62|Restart%20Campaign%20Fixture%20%5Bupdate-staging%20kxmv9121%5Draw-block-v2.mbtr.mbti",
+          "descriptorFileName": "dict-62|Restart%20Campaign%20Fixture%20%5Bupdate-staging%20kxmv9121%5Draw-block-v2.mbtr",
+          "dictionaryName": "Restart Campaign Fixture [update-staging kxmv9121]",
+          "sessionId": "8b292e5c-28a8-4fda-8866-1b7d8cda2dcd",
+          "bytes": 2514264,
+          "recordCount": 48000,
+          "observedAtIso": "2026-11-19T19:56:13.047Z",
+          "held": true
+        },
+        "checkpointEntry": null,
+        "preUpdateFilesAbsent": true,
+        "observerEventCount": 1,
+        "journalParseRetryCount": 0,
+        "lastJournalParseError": null,
+        "observerMechanism": "controlled test-only pause: instrumented extracted package awaits a held loopback response after the awaited authoritative lookup-index payload write (sync or async) to the .mbtr.mbti term container; the packaged store decoder reports the dictionary name, and active session journal plus new staging container and descriptor are validated; Chromium is SIGKILLed while held and the response is released only after all captured process identities exit; UI phase was Importing dictionary - Step 5 of 6: Importing data..."
+      },
+      {
+        "name": "captured owned Chromium process tree before SIGKILL",
+        "status": "observed",
+        "processes": [
+          {
+            "pid": 3111,
+            "ppid": 3092,
+            "startedAt": "Thu Nov 19 19:56:08 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --disable-extensions-except=/home/runner/work/_temp/manabitan-restart.EHfTUj/unpacked-extension --load-extension=/home/runner/work/_temp/manabitan-restart.EHfTUj/unpacked-extension --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --remote-debugging-pipe about:blank"
+          },
+          {
+            "pid": 3118,
+            "ppid": 3111,
+            "startedAt": "Thu Nov 19 19:56:08 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=zygote --no-zygote-sandbox --no-sandbox --headless --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --no-first-run --ozone-platform=headless --ozone-override-screen-size=800,600 --use-angle=swiftshader-webgl"
+          },
+          {
+            "pid": 3119,
+            "ppid": 3111,
+            "startedAt": "Thu Nov 19 19:56:08 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=zygote --no-sandbox --headless --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --no-first-run --ozone-platform=headless --ozone-override-screen-size=800,600 --use-angle=swiftshader-webgl"
+          },
+          {
+            "pid": 3138,
+            "ppid": 3118,
+            "startedAt": "Thu Nov 19 19:56:08 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=gpu-process --no-sandbox --disable-dev-shm-usage --disable-breakpad --headless --ozone-platform=headless --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --gpu-preferences=YAAAAAAAAAAgAAAEAAAAAAAAAAAAAGAASAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAMAAAAAQAAAAAAAAAAAAAACAAAAAAAAAAIAAAAAAAAAA== --shared-files --field-trial-handle=3,i,15944353820054562572,1259442633317228150,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,6703440371271263048,11007232803498633800,4 --trace-process-track-uuid=3190708988185955192"
+          },
+          {
+            "pid": 3152,
+            "ppid": 3111,
+            "startedAt": "Thu Nov 19 19:56:10 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=utility --utility-sub-type=network.mojom.NetworkService --lang=en-US --service-sandbox-type=none --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --mute-audio --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15944353820054562572,1259442633317228150,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,6703440371271263048,11007232803498633800,4 --trace-process-track-uuid=3190708989122997041"
+          },
+          {
+            "pid": 3153,
+            "ppid": 3119,
+            "startedAt": "Thu Nov 19 19:56:10 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=utility --utility-sub-type=storage.mojom.StorageService --lang=en-US --service-sandbox-type=utility --no-sandbox --disable-dev-shm-usage --use-angle=swiftshader-webgl --mute-audio --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15944353820054562572,1259442633317228150,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,6703440371271263048,11007232803498633800,4 --trace-process-track-uuid=3190708990060038890"
+          },
+          {
+            "pid": 3182,
+            "ppid": 3119,
+            "startedAt": "Thu Nov 19 19:56:10 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=renderer --top-chrome-webui --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --no-sandbox --disable-dev-shm-usage --disable-back-forward-cache --disable-background-timer-throttling --disable-breakpad --force-color-profile=srgb --remote-debugging-pipe --allow-pre-commit-input --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --ozone-platform=headless --disable-gpu-compositing --lang=en-US --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=5 --launch-time-ticks=406346051 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15944353820054562572,1259442633317228150,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,6703440371271263048,11007232803498633800,4 --trace-process-track-uuid=3190708990997080739"
+          },
+          {
+            "pid": 3213,
+            "ppid": 3119,
+            "startedAt": "Thu Nov 19 19:56:10 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=renderer --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --extension-process --change-stack-guard-on-fork=enable --no-sandbox --disable-dev-shm-usage --disable-back-forward-cache --disable-background-timer-throttling --disable-breakpad --force-color-profile=srgb --remote-debugging-pipe --allow-pre-commit-input --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --ozone-platform=headless --disable-gpu-compositing --lang=en-US --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=8 --launch-time-ticks=406452800 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15944353820054562572,1259442633317228150,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,6703440371271263048,11007232803498633800,4 --trace-process-track-uuid=3190708993808206286"
+          },
+          {
+            "pid": 3227,
+            "ppid": 3119,
+            "startedAt": "Thu Nov 19 19:56:11 2026",
+            "command": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome --type=renderer --crashpad-handler-pid=3113 --enable-crash-reporter=, --noerrdialogs --user-data-dir=/home/runner/work/_temp/manabitan-restart.EHfTUj/profiles/chromium-restart-campaign --change-stack-guard-on-fork=enable --no-sandbox --disable-dev-shm-usage --disable-back-forward-cache --disable-background-timer-throttling --disable-breakpad --force-color-profile=srgb --remote-debugging-pipe --allow-pre-commit-input --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --ozone-platform=headless --disable-gpu-compositing --lang=en-US --num-raster-threads=2 --enable-main-frame-before-activation --renderer-client-id=9 --launch-time-ticks=407008630 --shared-files=v8_context_snapshot_data:100 --field-trial-handle=3,i,15944353820054562572,1259442633317228150,262144 --enable-features=CDPScreenshotNewSurface --disable-features=AutoDeElevate,AvoidUnnecessaryBeforeUnloadCheckSync,BlockOriginHeaderModificationOnRedirect,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,OptimizationHints,PaintHolding,ThirdPartyStoragePartitioning,Translate,msEdgeUpdateLaunchServicesPreferredVersion,msForceBrowserSignIn --variations-seed-version --pseudonymization-salt-handle=7,i,6703440371271263048,11007232803498633800,4 --trace-process-track-uuid=3190708994745248135"
+          }
+        ]
+      },
+      {
+        "name": "SIGKILL active Chromium process tree after successful authoritative term-container payload write before publication (test-only gate)",
+        "status": "passed",
+        "rootPid": 3111,
+        "signalledPids": [3227, 3213, 3182, 3153, 3152, 3138, 3119, 3118, 3111],
+        "alreadyExitedPids": [],
+        "exitedPids": [3111, 3118, 3119, 3138, 3152, 3153, 3182, 3213, 3227]
+      },
+      {
+        "name": "restart recovery all-or-nothing generation oracle",
+        "status": "passed",
+        "revision": "revision-one-71d3",
+        "generationId": "cfbbecb7-9eac-4003-b9cd-0dcc09a309db",
+        "inventory": {
+          "terms": 3,
+          "kanji": 0,
+          "kanjiMeta": 0,
+          "termMeta": 0,
+          "tagMeta": 0,
+          "media": 0
+        },
+        "exactExpression": "再起動証拠旧",
+        "exactContent": "RESTART_CAMPAIGN_REVISION_ONE_CONTENT_71D3",
+        "absentExpression": "再起動証拠新",
+        "missCount": 0,
+        "noTransientRows": true,
+        "strictOpfs": true
+      },
+      {
+        "name": "completed full large update publication oracle",
+        "status": "passed",
+        "revision": "revision-two-c92a",
+        "previousGenerationId": "cfbbecb7-9eac-4003-b9cd-0dcc09a309db",
+        "generationId": "0dfdd2bd-9d54-4228-9f6e-72c39e3f1690",
+        "inventory": {
+          "terms": 350001,
+          "kanji": 0,
+          "kanjiMeta": 0,
+          "termMeta": 0,
+          "tagMeta": 0,
+          "media": 0
+        },
+        "exactExpression": "再起動証拠新",
+        "exactContent": "RESTART_CAMPAIGN_REVISION_TWO_CONTENT_C92A",
+        "absentExpression": "再起動証拠旧",
+        "missCount": 0,
+        "noTransientRows": true,
+        "strictOpfs": true
+      }
+    ],
+    "interruptionObservation": {
+      "polls": 42,
+      "lastProgressLabel": "Importing dictionary - Step 5 of 6: Importing data...",
+      "lastJournalByteLength": 380,
+      "journalParseRetryCount": 0,
+      "lastJournalParseError": null,
+      "lastUpdateUiError": ""
+    },
+    "finalShutdown": {
+      "exitedPids": [3279, 3286, 3287, 3305, 3308, 3328, 3346, 3377, 3395]
+    }
+  },
+  "ankiDeduplication": {
+    "status": "success",
+    "report": "chromium-anki-deduplication-e2e-report/chromium-e2e-anki-dedupe-report.json",
+    "reportSha256": "14175685ff52607ad97575ecd38f8be8fb8af084018f32c06af5593bd8ffdd1f",
+    "sourceIdentity": {
+      "commit": "a15742271a055c3277b84e61c568e895cfcaa252",
+      "tree": "a2083156b2df443d2c576b23d122e1870db38133",
+      "workingTreeDirty": false,
+      "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "nodeVersion": "v22.22.0"
+    },
+    "packageIdentity": {
+      "path": "/home/runner/work/manabitan/manabitan/builds/manabitan-chrome-playwright.zip",
+      "sha256": "6c39b091ab150202b917c5bd4c234b9f2870a87053446a24a8f23db5fe1ee635",
+      "extractedPath": "/tmp/manabitan-chromium-anki-extension-hRBuSe"
+    },
+    "browserVersion": "153.0.8010.12",
+    "scenarioCount": 10
+  },
+  "staticWebAcceptance": {
+    "runId": 44602926531,
+    "jobId": 135838871493,
+    "report": "manabitan-static-web-results/results.json",
+    "reportSha256": "6ed1ecba9fb667ca05dc679fe9bf8145d6bb929b6bfd9243163a773f98e34e5f",
+    "passedCount": 24,
+    "errors": [],
+    "tests": [
+      {
+        "name": "no-extension host and persistent OPFS initialize without cross-origin isolation",
+        "status": "passed"
+      },
+      {
+        "name": "full official JMdict imports via a real file input using the shared importer",
+        "status": "passed"
+      },
+      {
+        "name": "real core translation 猫",
+        "status": "passed"
+      },
+      {
+        "name": "real core translation 学校",
+        "status": "passed"
+      },
+      {
+        "name": "real core translation 食べました",
+        "status": "passed"
+      },
+      {
+        "name": "real ManabiTan scanner renders the requested headword",
+        "status": "passed"
+      },
+      {
+        "name": "popup dismissal permits rescanning the same word and never enables a stopped scanner",
+        "status": "passed"
+      },
+      {
+        "name": "second independent tab cannot open the same SQLite pool",
+        "status": "passed"
+      },
+      {
+        "name": "frequency dictionary uses the same importer and appears in results",
+        "status": "passed"
+      },
+      {
+        "name": "failed custom ZIP does not erase the committed dictionary",
+        "status": "passed"
+      },
+      {
+        "name": "search RPC returns bounded previews for kana, romaji and inflected words",
+        "status": "passed"
+      },
+      {
+        "name": "English definition search is indexed, bounded and lower priority than Japanese lookup",
+        "status": "passed"
+      },
+      {
+        "name": "recommendations reuse the existing ManabiTan Japanese catalog",
+        "status": "passed"
+      },
+      {
+        "name": "pre-aborted import is rejected without changing storage",
+        "status": "passed"
+      },
+      {
+        "name": "in-flight custom import cancellation rolls back and allows retry",
+        "status": "passed"
+      },
+      {
+        "name": "abrupt tab death during import recovers both SQL and sidecar storage",
+        "status": "passed"
+      },
+      {
+        "name": "real structured-content media remains image-only and links are constrained",
+        "status": "passed"
+      },
+      {
+        "name": "default archive size mismatch fails before import",
+        "status": "passed"
+      },
+      {
+        "name": "full Jitendex static archive is checksum-verified and imported locally",
+        "status": "passed"
+      },
+      {
+        "name": "disable and re-enable persists explicit choice without reimport",
+        "status": "passed"
+      },
+      {
+        "name": "default choice, dictionary and lookup survive full browser restart",
+        "status": "passed"
+      },
+      {
+        "name": "already-open worker performs dictionary lookup while offline",
+        "status": "passed"
+      },
+      {
+        "name": "deletion removes dictionary and retains its no-reinstall choice across restart",
+        "status": "passed"
+      },
+      {
+        "name": "no uncaught browser exceptions",
+        "status": "passed"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 14569535687,
+      "name": "chromium-anki-deduplication-e2e-report",
+      "size_in_bytes": 9086,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14569535687",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14569535687/zip",
+      "expired": false,
+      "created_at": "2026-11-19T19:54:13Z",
+      "expires_at": "2027-02-17T19:53:10Z",
+      "updated_at": "2026-11-19T19:54:13Z",
+      "digest": "sha256:ecbf9496207578aa4f94b3694bebde17a844ab2f15edf4c74a365788453a78e1",
+      "workflow_run": {
+        "id": 44602926523,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/jmdict-plan-publication-runs-20261119",
+        "head_sha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881"
+      },
+      "downloadedSha256": "ecbf9496207578aa4f94b3694bebde17a844ab2f15edf4c74a365788453a78e1",
+      "downloadedSizeBytes": 9086
+    },
+    {
+      "id": 14569511021,
+      "name": "chromium-extension-e2e-report",
+      "size_in_bytes": 156154,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14569511021",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14569511021/zip",
+      "expired": false,
+      "created_at": "2026-11-19T19:56:25Z",
+      "expires_at": "2026-11-26T19:56:24Z",
+      "updated_at": "2026-11-19T19:56:25Z",
+      "digest": "sha256:7484fc8ee3825a371badad1eda8ee96e1221a8649534cc0c11b99c369edfbb58",
+      "workflow_run": {
+        "id": 44602926523,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/jmdict-plan-publication-runs-20261119",
+        "head_sha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881"
+      },
+      "downloadedSha256": "7484fc8ee3825a371badad1eda8ee96e1221a8649534cc0c11b99c369edfbb58",
+      "downloadedSizeBytes": 156154
+    },
+    {
+      "id": 14570465135,
+      "name": "chromium-restart-interruption-evidence",
+      "size_in_bytes": 34298125,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14570465135",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14570465135/zip",
+      "expired": false,
+      "created_at": "2026-11-19T19:56:22Z",
+      "expires_at": "2027-02-17T19:53:10Z",
+      "updated_at": "2026-11-19T19:56:22Z",
+      "digest": "sha256:14bf08c16b4949ff9c4fc9b24511368b172072d75f116162b940e8c31365376c",
+      "workflow_run": {
+        "id": 44602926771,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/jmdict-plan-publication-runs-20261119",
+        "head_sha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881"
+      },
+      "downloadedSha256": "14bf08c16b4949ff9c4fc9b24511368b172072d75f116162b940e8c31365376c",
+      "downloadedSizeBytes": 34298125
+    },
+    {
+      "id": 14567968429,
+      "name": "firefox-extension-e2e-report",
+      "size_in_bytes": 40402,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14567968429",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14567968429/zip",
+      "expired": false,
+      "created_at": "2026-11-19T19:54:58Z",
+      "expires_at": "2026-11-26T19:54:57Z",
+      "updated_at": "2026-11-19T19:54:58Z",
+      "digest": "sha256:77b6e75be6d4ec8fbc8fef313264e0bd5007ed32bfb6baef049f4986042569b5",
+      "workflow_run": {
+        "id": 44602926523,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/jmdict-plan-publication-runs-20261119",
+        "head_sha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881"
+      },
+      "downloadedSha256": "77b6e75be6d4ec8fbc8fef313264e0bd5007ed32bfb6baef049f4986042569b5",
+      "downloadedSizeBytes": 40402
+    },
+    {
+      "id": 14569426304,
+      "name": "manabitan-static-web-results",
+      "size_in_bytes": 1387,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14569426304",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14569426304/zip",
+      "expired": false,
+      "created_at": "2026-11-19T19:58:39Z",
+      "expires_at": "2026-11-26T19:58:38Z",
+      "updated_at": "2026-11-19T19:58:39Z",
+      "digest": "sha256:7eac777c440be656d67c3a2be0d73fa59b4be9316cd17b9fa801f57e021dc7b1",
+      "workflow_run": {
+        "id": 44602926531,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/jmdict-plan-publication-runs-20261119",
+        "head_sha": "e6ff4894016eac1a728dc65b7f3ac98212cb0881"
+      },
+      "downloadedSha256": "7eac777c440be656d67c3a2be0d73fa59b4be9316cd17b9fa801f57e021dc7b1",
+      "downloadedSizeBytes": 1387
+    }
+  ],
+  "allRequiredChecksPassed": true,
+  "limitations": [
+    "Conditional Edge, Android and published-release upgrade jobs were skipped by existing workflow conditions.",
+    "Firefox report does not record a top-level package hash or browser version; its runtime user agent and source-linked artifact are retained."
+  ]
+}

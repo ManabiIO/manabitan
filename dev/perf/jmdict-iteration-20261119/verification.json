@@ -1,0 +1,14 @@
+{
+  "purpose": "Independent portable receipt, identity, order, and arithmetic verification",
+  "baseline": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+  "dictionaryJobs": 51,
+  "observations": 600,
+  "pairs": 300,
+  "pendingDictionaryJobs": 0,
+  "allRetainedChecksPassed": true,
+  "limitation": "Checks retained evidence; does not re-execute imports or prove exhaustive persisted-byte equality",
+  "evidenceSha256": "88b3cac5c3f954f4fbe67fe2d1fd330bb9eb3f580782cc0078ccc504005e908b",
+  "csvObservationsVerified": 600,
+  "csvPairsVerified": 300,
+  "verifiedAtUtc": "2026-11-19T20:39:29.759480+00:00"
+}
