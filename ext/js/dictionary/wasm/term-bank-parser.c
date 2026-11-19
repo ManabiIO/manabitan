@@ -522,24 +522,6 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
     while (i < len) {
-#if defined(__wasm_simd128__)
-        while (len - i >= 16u) {
-            const v128_t bytes = wasm_v128_load(src + i);
-            const v128_t special = wasm_v128_or(
-                wasm_v128_or(
-                    wasm_i8x16_eq(bytes, wasm_i8x16_splat('"')),
-                    wasm_i8x16_eq(bytes, wasm_i8x16_splat('\\'))
-                ),
-                wasm_u8x16_lt(bytes, wasm_i8x16_splat(0x20))
-            );
-            const uint32_t mask = wasm_i8x16_bitmask(special);
-            if (mask != 0u) {
-                i += (uint32_t)__builtin_ctz(mask);
-                goto string_special;
-            }
-            i += 16u;
-        }
-#endif
         while (i + 8u <= len) {
             uint64_t word;
             __builtin_memcpy(&word, src + i, sizeof(word));
@@ -555,9 +537,6 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
             }
             i += 8u;
         }
-#if defined(__wasm_simd128__)
-string_special:
-#endif
         if (i >= len) { break; }
         uint8_t c = src[i];
         if (c == '\\') {

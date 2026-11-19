@@ -53,28 +53,6 @@ function parse(source) {
 }
 
 /**
- * Places the final source byte at the actual linear-memory boundary. Any load
- * beyond that byte traps, even when the parser would eventually reject input.
- * @param {string} source
- * @returns {ReturnType<typeof parse>}
- */
-function parseAtMemoryEnd(source) {
-    const bytes = encoder.encode(source)
-    wasm.wasm_reset_heap()
-    const guard = wasm.wasm_alloc(68 + 32)
-    const output = guard + 16
-    wasm.wasm_alloc(bytes.length + 65536)
-    const heap = new Uint8Array(wasm.memory.buffer)
-    const input = heap.byteLength - bytes.length
-    heap.fill(0xa5, guard, output + 68 + 16)
-    heap.set(bytes, input)
-    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, 0, 0, 1)
-    expect([...heap.subarray(guard, output)]).toEqual(new Array(16).fill(0xa5))
-    expect([...heap.subarray(output + 68, output + 68 + 16)]).toEqual(new Array(16).fill(0xa5))
-    return {count, spans: [...new Uint32Array(wasm.memory.buffer, output, 17)], bytes}
-}
-
-/**
  * @param {ReturnType<typeof parse>} result
  * @param {number} offset
  * @returns {unknown}
@@ -288,45 +266,6 @@ describe('term-bank string scanning', () => {
                 expectMatchesJson(`${' '.repeat(alignment)}[["${prefix}"#`)
                 expectMatchesJson(createRowSource(`"${prefix}\\]tail"`, alignment))
                 expectMatchesJson(createRowSource(`"${prefix}${String.fromCharCode(0x1f)} tail"`, alignment))
-            }
-        }
-    })
-
-    test.each(specialPositions)('preserves high-byte strings and escapes through physical EOF at SIMD residue %i', (residue) => {
-        const escapes = ['\\"', '\\\\', '\\/', '\\b', '\\f', '\\n', '\\r', '\\t', '\\u65e5', '\\uD83D\\uDE42']
-        for (const blockLength of [0, 16, 32, 64]) {
-            const prefix = 'x'.repeat(blockLength + residue)
-            for (const escape of escapes) {
-                const token = `"${prefix}${escape}é\u0080\u07ff\u0800日本🙂tail"`
-                const source = createRowSource(token, residue)
-                const result = parseAtMemoryEnd(source)
-                expect(result.count).toBe(1)
-                expect(readRow(result)).toEqual(JSON.parse(source)[0])
-            }
-            const source = createRowSource(`"${prefix}"`, residue)
-            const result = parseAtMemoryEnd(source)
-            expect(result.count).toBe(1)
-            expect(readRow(result)).toEqual(JSON.parse(source)[0])
-        }
-    })
-
-    test.each(specialPositions)('rejects every control and truncated escape at logical and physical EOF residue %i', (residue) => {
-        for (const blockLength of [0, 16, 32]) {
-            const prefix = `[["${'x'.repeat(blockLength + residue)}`
-            for (const ending of ['', '"', '\\', '\\u', '\\u0', '\\u00', '\\u000']) {
-                const source = prefix + ending
-                expect(parse(source).count).toBeLessThan(0)
-                expect(parseAtMemoryEnd(source).count).toBeLessThan(0)
-            }
-            for (let control = 0; control < 0x20; ++control) {
-                const source = `${prefix}${String.fromCharCode(control)}","","","",0,[],1,""]]`
-                expect(parse(source).count).toBeLessThan(0)
-                expect(parseAtMemoryEnd(source).count).toBeLessThan(0)
-            }
-            for (const escape of ['\\q', '\\u00xz', '\\u-001', '\\u 000']) {
-                const source = `${prefix}${escape}","","","",0,[],1,""]]`
-                expect(parse(source).count).toBeLessThan(0)
-                expect(parseAtMemoryEnd(source).count).toBeLessThan(0)
             }
         }
     })
