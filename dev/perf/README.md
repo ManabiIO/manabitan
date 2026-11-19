@@ -84,3 +84,26 @@ Repeat with `--browser firefox` and a separate output path. The driver can live 
 There are four independent cells: ArrayBuffer or memory-backed Blob input, each through `read` or `readBatch`. Each cell has two excluded complete warmups per source arm, four alternating ABBA/BAAB comparison blocks and two same-code control blocks. Each observation reads all banks four times through fresh readers. The final report must contain all 120 observations, `completed: true`, an empty error field and 212 verified independently owned payloads per observation. Byte equality, payload digests, metadata, source mutation and transfer-ownership checks run outside timing. Failed or incomplete observations remain in the output.
 
 The boundary includes fresh-reader Blob materialization, but excludes input creation, module loading, inflation, parsing and storage. All four passes retain their output until verification, unlike the production streaming importer. The batch cell invokes the API directly and falls back to `read` for a bank exceeding its unchanged budget; it does not demonstrate automatic importer dispatch. Treat any result as a reader-component measurement and qualify full imports separately.
+
+### Complete Firefox JMdict source comparison
+
+Status on 2026-11-19: the pinned Playwright Firefox/Selenium combination can crash during extension reload on both source arms. The full cohorts are incomplete and provide no comparative speed result. The preserved runs and failure analysis are in `import-experiments-20260914.md`; resolve that runtime issue before treating this driver as a stable qualification gate.
+
+`test/firefox/jmdict-import-ab-benchmark.js` qualifies the raw ZIP copy change using two prebuilt Firefox release packages. It requires Linux, the repository-pinned Playwright Firefox 155.0 binary and geckodriver 0.37.1. Build each clean source checkout with its locked dependencies before running. Its package oracle permits exactly one differing shipped file, `js/dictionary/term-bank-source-pipeline.js`; the manifest and all other packaged files, including WASM, must agree.
+
+```sh
+node test/firefox/jmdict-import-ab-benchmark.js \
+  --baseline-package /path/to/baseline/builds/manabitan-firefox.zip \
+  --candidate-package /path/to/candidate/builds/manabitan-firefox.zip \
+  --zip builds/e2e-dictionary-cache/JMdict.zip \
+  --geckodriver /path/to/geckodriver \
+  --output builds/perf/firefox-jmdict/smoke --mode smoke
+```
+
+Run `--mode prepare` for package/fixture preflight without a browser. After the separate smoke passes, repeat with `--mode cohort` and a new output directory. Each cohort uses 40 fresh Selenium profiles: four excluded complete warmups, twelve adjacent counterbalanced A/B pairs and six interleaved same-code A/A pairs. `--reverse-order` reverses the fixed schedule for an independent confirmation; preserve its output separately. Do not pool incomplete cohorts, change the schedule after observing timings or subtract control drift from the candidate effect.
+
+The unchanged shared `test/e2e/import-timing.js` observer measures the current settings-page file-input change through post-UI import completion. No trace, screenshot or process sampler runs in that interval. The driver asserts production experiment options, OPFS storage without fallback, 526,942 imported rows, the expected 15,574,114 compressed/transferred source bytes, zero fused-parser and native canonical-dedup fallbacks, successful final publication and identical disjoint work/storage counters. It verifies twelve archive-derived expression/reading/glossary probes through actual lookup responses and checks persisted offset bounds and raw-content samples. It reloads the extension, verifies a new background time origin and repeats those checks outside timing. This is an extension reload, not a browser-process restart; sampled probes do not prove exhaustive persisted database equality.
+
+The browser is the pinned headless Playwright Firefox build, with temporary extension installation and explicit shared-memory capability preferences recorded in the driver source. It is a controlled Linux qualification environment, not a claim about every Firefox distribution or device. Reports preserve package manifests/hashes, fixture and executable identities, timing receipts, failed observations and geckodriver logs. Initial and final hashes must match. The isolated CI workflow additionally records source commits/trees and checks the geckodriver archive SHA-256 before extraction.
+
+The driver's syntax and scoped ESLint are checked directly. The existing `test/jsconfig.typecheck.json` excludes `firefox/**/*.js`; running that project does not establish strict type coverage for this driver.
