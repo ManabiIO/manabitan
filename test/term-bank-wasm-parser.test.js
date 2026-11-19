@@ -1599,9 +1599,11 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('does not reuse borrowed worker memory before the ordered sink consumes it', async () => {
+    maybeTest.each([false, true])('does not reuse borrowed worker memory before sink and copy consumption (copy=%s)', async (copyPending) => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let parseCount = 0;
+        /** @type {() => void} */
+        let replyToCopy = () => {};
         const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
         /** @implements {WorkerMock} */
         class BorrowingWorker {
@@ -1622,6 +1624,17 @@ describe('term-bank WASM parser', () => {
                 const respond = () => {
                     if (message.type === 'initialize') {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
+                        return;
+                    }
+                    if (message.type === 'copy-content-range') {
+                        replyToCopy = () => {
+                            emitWorkerMessage(this.listeners, {
+                                type: 'content-copy-result',
+                                id: message.id,
+                                requestId: message.requestId,
+                                bytes: sharedContent.slice(0, 1).buffer,
+                            });
+                        };
                         return;
                     }
                     ++parseCount;
@@ -1653,10 +1666,13 @@ describe('term-bank WASM parser', () => {
             const parsing = parseTermBankWithWasmColumnChunksParallel(
                 sourceBanks,
                 3,
-                async (_chunk, progress) => {
+                async (chunk, progress) => {
                     if (progress.chunkIndex !== 1) { return; }
+                    const copying = copyPending ? chunk.copyBorrowedContentRange?.(sharedContent, 0, 1) : null;
+                    if (copyPending) { chunk.releaseBorrowedContent?.(); }
                     firstSinkStarted();
                     await firstSinkGate;
+                    await copying;
                 },
                 {emitContentSlab: true},
             );
@@ -1664,9 +1680,15 @@ describe('term-bank WASM parser', () => {
             await new Promise((resolve) => { setTimeout(resolve, 10); });
             expect(parseCount).toBe(workerCount);
             releaseFirstSink();
+            if (copyPending) {
+                await new Promise((resolve) => { setTimeout(resolve, 10); });
+                expect(parseCount).toBe(workerCount);
+                replyToCopy();
+            }
             await expect(parsing).resolves.toBe(true);
             expect(parseCount).toBe(workerCount * 4);
         } finally {
+            replyToCopy();
             releaseFirstSink();
             await disposeParallelTermBankParser();
             vi.stubGlobal('Worker', void 0);

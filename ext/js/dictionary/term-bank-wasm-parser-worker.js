@@ -26,28 +26,32 @@ import {
 import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
+import {copyTermBankSourceRange} from './term-bank-source-copy.js';
 
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
 /** @typedef {{type: 'initialize', module: unknown}} InitializeRequest */
+/** @typedef {{type: 'copy-content-range', id: unknown, requestId: unknown, offset: unknown, length: unknown}} ContentCopyRequest */
 /** @typedef {{type: 'parse', id: unknown, sourceBuffers: unknown, sourceMetadata?: unknown, sourceSentEpochMs?: unknown, version: unknown, chunkSize?: unknown, options?: unknown}} ParseRequest */
 
 Reflect.set(globalThis, '__manabitanTermBankParserWorker', true);
 
 /** @type {Promise<void>|null} */
 let initialization = null;
+/** @type {{id: number, source: Uint8Array}|null} */
+let borrowedContent = null;
 
 self.addEventListener('message', onMessage);
 
 /** @param {MessageEvent<unknown>} event */
 function onMessage(event) {
-    const data = /** @type {InitializeRequest|ParseRequest|null} */ (
+    const data = /** @type {InitializeRequest|ParseRequest|ContentCopyRequest|null} */ (
         typeof event.data === 'object' ? event.data : null
     );
-    if (data?.type === 'initialize') {
-        void initialize(data);
-    } else if (data?.type === 'parse') {
-        void parse(data);
+    switch (data?.type) {
+        case 'initialize': void initialize(data); break;
+        case 'parse': void parse(data); break;
+        case 'copy-content-range': copyContentRange(data); break;
     }
 }
 
@@ -68,6 +72,7 @@ async function initialize(data) {
 
 /** @param {ParseRequest} data */
 async function parse(data) {
+    borrowedContent = null;
     const id = typeof data.id === 'number' && Number.isSafeInteger(data.id) ? data.id : -1;
     const sourceDeliveryMs = Number.isSafeInteger(data.sourceSentEpochMs) && /** @type {number} */ (data.sourceSentEpochMs) >= 0 ?
         Math.max(0, Date.now() - /** @type {number} */ (data.sourceSentEpochMs)) :
@@ -178,6 +183,12 @@ async function parse(data) {
                 }
             }
         }
+        if (
+            typeof SharedArrayBuffer === 'function' &&
+            stableResultChunk?.contentBytesBuffer?.buffer instanceof SharedArrayBuffer
+        ) {
+            borrowedContent = {id, source: stableResultChunk.contentBytesBuffer};
+        }
         const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);
         self.postMessage({
             type: 'result',
@@ -190,6 +201,21 @@ async function parse(data) {
         }, transfer);
     } catch (error) {
         self.postMessage({type: 'parse-error', id, error: serializeError(error)});
+    }
+}
+
+/** @param {ContentCopyRequest} data */
+function copyContentRange(data) {
+    const {id, requestId} = data;
+    try {
+        if (borrowedContent === null || borrowedContent.id !== id) {
+            throw new Error('Parser content copy no longer owns its source');
+        }
+        const bytes = copyTermBankSourceRange(borrowedContent.source, data.offset, data.length);
+        const buffer = /** @type {ArrayBuffer} */ (bytes.buffer);
+        self.postMessage({type: 'content-copy-result', id, requestId, bytes: buffer}, [buffer]);
+    } catch (error) {
+        self.postMessage({type: 'content-copy-result', id, requestId, error: String(error)});
     }
 }
 

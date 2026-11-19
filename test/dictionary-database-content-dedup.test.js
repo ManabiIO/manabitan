@@ -2347,6 +2347,153 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
+    test('overlaps the exact cache copy with records and joins publication before returning', async () => {
+        const harness = createArtifactOverlapHarness();
+        const source = /** @type {Uint8Array} */ (harness.chunk.contentBytesBuffer);
+        const slice = vi.spyOn(source, 'slice');
+        /** @type {(bytes: Uint8Array) => void} */
+        let resolveCopy = () => {};
+        const copying = new Promise((resolve) => { resolveCopy = resolve; });
+        const copy = vi.fn(() => copying);
+        Reflect.set(harness.chunk, 'copyBorrowedContentRange', copy);
+        let settled = false;
+        const importing = harness.run().finally(() => { settled = true; });
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(copy).toHaveBeenCalledWith(source, 0, 3);
+        expect(slice).not.toHaveBeenCalled();
+        const meta = getMeta(harness.database, 10, 20);
+        expect(meta).toBeDefined();
+        if (typeof meta === 'undefined') { throw new Error('Expected published metadata'); }
+        const findRecent = Reflect.get(harness.database, '_findRecentTermContentSource').bind(harness.database);
+        expect(findRecent(meta)).toBeUndefined();
+        harness.resolveContent();
+        harness.resolveRecords();
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
+        expect(settled).toBe(false);
+        const owned = source.slice(0, 3);
+        resolveCopy(owned);
+        source.fill(99);
+        await importing;
+
+        expect(slice).toHaveBeenCalledOnce();
+        expect(findRecent(meta)).toEqual({buffer: Uint8Array.of(1, 2, 3), offset: 0, length: 3});
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            dedupRecentSourceCacheBytes: 3,
+            dedupRecentSourceCacheWorkerCopyCount: 1,
+            dedupRecentSourceCacheWorkerCopyBytes: 3,
+        });
+    });
+
+    test.each(['copy', 'content', 'record'])('drains cache-copy peers before rolling back a %s failure', async (failureKind) => {
+        const harness = createArtifactOverlapHarness();
+        /** @type {(bytes: Uint8Array) => void} */
+        let resolveCopy = () => {};
+        /** @type {(error: Error) => void} */
+        let rejectCopy = () => {};
+        const copying = new Promise((resolve, reject) => {
+            resolveCopy = resolve;
+            rejectCopy = reject;
+        });
+        Reflect.set(harness.chunk, 'copyBorrowedContentRange', () => copying);
+        let settled = false;
+        const importing = harness.run().then(() => null, (error) => error).finally(() => { settled = true; });
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        const error = new Error(`${failureKind} copy overlap failure`);
+        if (failureKind === 'copy') {
+            rejectCopy(error);
+            harness.resolveRecords();
+        } else if (failureKind === 'content') {
+            harness.rejectContent(error);
+            harness.resolveRecords();
+        } else {
+            harness.rejectRecords(error);
+            harness.resolveContent();
+        }
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        if (failureKind === 'copy') {
+            harness.resolveContent();
+        } else {
+            resolveCopy(Uint8Array.of(1, 2, 3));
+        }
+        expect(await importing).toBe(error);
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+    });
+
+    test('rejects delayed cache publication after its metadata arena changes', async () => {
+        const harness = createArtifactOverlapHarness();
+        /** @type {(bytes: Uint8Array) => void} */
+        let resolveCopy = () => {};
+        const copying = new Promise((resolve) => { resolveCopy = resolve; });
+        Reflect.set(harness.chunk, 'copyBorrowedContentRange', () => copying);
+        const importing = harness.run().then(() => null, (error) => error);
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        const previousState = Reflect.get(harness.database, '_termEntryContentMetaStateTable');
+        Reflect.set(harness.database, '_termEntryContentMetaStateTable', new Uint8Array(previousState));
+        resolveCopy(Uint8Array.of(1, 2, 3));
+        harness.resolveContent();
+        harness.resolveRecords();
+        expect(await importing).toMatchObject({message: 'Term content cache publication owner changed'});
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').size).toBe(0);
+    });
+
+    test('drains content when cache-copy setup throws synchronously', async () => {
+        const harness = createArtifactOverlapHarness();
+        const error = new Error('cache copy setup failure');
+        const copy = vi.fn(() => { throw error; });
+        Reflect.set(harness.chunk, 'copyBorrowedContentRange', copy);
+        let settled = false;
+        const importing = harness.run().then(() => null, (reason) => reason).finally(() => { settled = true; });
+        await vi.waitFor(() => expect(copy).toHaveBeenCalledOnce());
+        expect(settled).toBe(false);
+        expect(harness.appendRecords).not.toHaveBeenCalled();
+        harness.resolveContent();
+        expect(await importing).toBe(error);
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+    });
+
+    test('does not dispatch a copy for definitions excluded by the existing cache policy', async () => {
+        const harness = createArtifactOverlapHarness(new Array(513).fill(1));
+        const copy = vi.fn(() => new Promise(() => {}));
+        Reflect.set(harness.chunk, 'copyBorrowedContentRange', copy);
+        const importing = harness.run();
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+        expect(copy).not.toHaveBeenCalled();
+        expect(harness.database.getLastBulkAddTermsMetrics()?.dedupRecentSourceCacheBytes).toBe(0);
+    });
+
+    test('keeps synchronous ownership when the parser copy capability declines a source', async () => {
+        const harness = createArtifactOverlapHarness();
+        const copy = vi.fn(() => null);
+        Reflect.set(harness.chunk, 'copyBorrowedContentRange', copy);
+        const importing = harness.run();
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        const meta = getMeta(harness.database, 10, 20);
+        if (typeof meta === 'undefined') { throw new Error('Expected published metadata'); }
+        const cached = Reflect.get(harness.database, '_findRecentTermContentSource').call(harness.database, meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected owned cache bytes'); }
+        /** @type {Uint8Array} */ (harness.chunk.contentBytesBuffer).fill(99);
+        expect(cached.buffer).toEqual(Uint8Array.of(1, 2, 3));
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+        expect(copy).toHaveBeenCalledOnce();
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            dedupRecentSourceCacheBytes: 3,
+            dedupRecentSourceCacheWorkerCopyCount: 0,
+        });
+    });
+
     test('retains parser content until reserved content is durable', async () => {
         const harness = createArtifactOverlapHarness();
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));

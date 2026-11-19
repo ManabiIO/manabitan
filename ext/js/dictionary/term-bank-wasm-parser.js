@@ -23,6 +23,7 @@ import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-
 import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
+import {createTermBankSourceLease} from './term-bank-source-copy.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -63,7 +64,7 @@ const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, copyBorrowedContentRange?: import('./term-bank-source-copy.js').BorrowedContentRangeCopy, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -2793,6 +2794,7 @@ class ParallelTermBankPipelineRun {
                     } finally {
                         result.consume?.();
                         delete chunk.releaseBorrowedContent;
+                        delete chunk.copyBorrowedContentRange;
                     }
                 }
                 this._throwIfStopped();
@@ -2884,19 +2886,20 @@ class ParallelTermBankPipelineRun {
                 /** @type {Promise<void>|null} */
                 let consumed = null;
                 if (result.borrowsWorkerMemory) {
-                    /** @type {(value?: void|PromiseLike<void>) => void} */
-                    let resolveConsumed = () => {};
-                    consumed = new Promise((resolve) => { resolveConsumed = resolve; });
-                    let pending = true;
-                    const consumeResult = () => {
-                        if (!pending) { return; }
-                        pending = false;
-                        this._pendingResultConsumers.delete(consumeResult);
-                        resolveConsumed();
-                    };
-                    consume = consumeResult;
+                    const chunk = /** @type {TermBankColumnChunk} */ (result.chunk);
+                    const lease = createTermBankSourceLease(
+                        worker,
+                        groupIndex + 1,
+                        chunk.contentBytesBuffer ?? EMPTY_UINT8_ARRAY,
+                        () => this._pipelineShouldCancel(),
+                        (error) => { this._fail(error); },
+                    );
+                    consumed = lease.consumed;
+                    consume = lease.release;
+                    chunk.copyBorrowedContentRange = lease.copyRange;
                     this._pendingResultConsumers.add(consume);
-                    if (this._failed) { consumeResult(); }
+                    void consumed.then(() => { this._pendingResultConsumers.delete(lease.release); });
+                    if (this._failed) { consume(); }
                 }
                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, consume});
                 if (consumed !== null) { await consumed; }

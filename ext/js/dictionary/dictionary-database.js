@@ -158,6 +158,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint8Array} [contentBytesBuffer]
  * @property {number} [contentBytesBaseOffset]
  * @property {() => void} [releaseBorrowedContent]
+ * @property {import('./term-bank-source-copy.js').BorrowedContentRangeCopy} [copyBorrowedContentRange]
  * @property {Uint32Array} [contentMetaList]
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
@@ -6429,9 +6430,10 @@ null;
      * duplicates without reading recently written OPFS blocks.
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
-     * @returns {number} Number of owned source bytes retained.
+     * @param {{copy: import('./term-bank-source-copy.js').BorrowedContentRangeCopy, pending: Promise<void>|null, metrics: Record<string, number>}|null} [sourceCopy=null]
+     * @returns {number} Number of synchronously retained source bytes.
      */
-    _cacheRecentPublishedTermContentSources(staged, spans) {
+    _cacheRecentPublishedTermContentSources(staged, spans, sourceCopy = null) {
         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
         if (
             !(spans.buffer instanceof Uint8Array) ||
@@ -6499,38 +6501,70 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
-        this._recentTermContentSourceBatches.set(batchId, owned);
-        this._recentTermContentSourceBatchBytes += owned.byteLength;
-        const firstIndex = staged.indexes[0];
-        const endIndex = firstIndex + staged.indexes.length;
-        let contiguousPublished = (
-            minimumOffset === 0 && publishedCount === staged.indexes.length &&
-            firstIndex >= 0 && spans.offsets instanceof Uint32Array &&
-            endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
-            endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
-        );
-        if (contiguousPublished) {
-            for (let i = 1; i < staged.indexes.length; ++i) {
-                if (staged.indexes[i] !== firstIndex + i) {
-                    contiguousPublished = false;
-                    break;
+        // The synchronous path remains the ownership fence for all callers
+        // without an active parser lease. Cache selection and eviction above
+        // are identical for both paths.
+        /**
+         * @param {Uint8Array} owned
+         * @returns {number}
+         */
+        const publishOwned = (owned) => {
+            this._recentTermContentSourceBatches.set(batchId, owned);
+            this._recentTermContentSourceBatchBytes += owned.byteLength;
+            const firstIndex = staged.indexes[0];
+            const endIndex = firstIndex + staged.indexes.length;
+            let contiguousPublished = (
+                minimumOffset === 0 && publishedCount === staged.indexes.length &&
+                firstIndex >= 0 && spans.offsets instanceof Uint32Array &&
+                endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
+                endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
+            );
+            if (contiguousPublished) {
+                for (let i = 1; i < staged.indexes.length; ++i) {
+                    if (staged.indexes[i] !== firstIndex + i) {
+                        contiguousPublished = false;
+                        break;
+                    }
                 }
             }
-        }
-        // This per-call witness stays within the same synchronous publication.
-        if (contiguousPublished) {
-            this._termEntryContentMetaRecentSourceBatchIdTable.fill(batchId, firstIndex, endIndex);
-            this._termEntryContentMetaRecentSourceOffsetTable.set(spans.offsets.subarray(0, staged.indexes.length), firstIndex);
-        } else {
-            for (let i = 0; i < staged.indexes.length; ++i) {
-                const index = staged.indexes[i];
-                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
-                this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
-                this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+            // The selected metadata stays owned by this joined import operation.
+            if (contiguousPublished) {
+                this._termEntryContentMetaRecentSourceBatchIdTable.fill(batchId, firstIndex, endIndex);
+                this._termEntryContentMetaRecentSourceOffsetTable.set(spans.offsets.subarray(0, staged.indexes.length), firstIndex);
+            } else {
+                for (let i = 0; i < staged.indexes.length; ++i) {
+                    const index = staged.indexes[i];
+                    if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+                    this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
+                    this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+                }
             }
+            return owned.byteLength;
+        };
+        const pendingOwned = sourceCopy?.copy(spans.buffer, minimumOffset, maximumEnd) ?? null;
+        if (sourceCopy !== null && pendingOwned !== null) {
+            const stateTable = this._termEntryContentMetaStateTable;
+            const startedAt = safePerformance.now();
+            sourceCopy.pending = pendingOwned.then((owned) => {
+                if (!staged.active || stateTable !== this._termEntryContentMetaStateTable) {
+                    throw new Error('Term content cache publication owner changed');
+                }
+                if (!(owned.buffer instanceof ArrayBuffer) || owned.byteLength !== byteLength) {
+                    throw new Error('Term content cache copy returned invalid owned bytes');
+                }
+                const retainedBytes = publishOwned(owned);
+                sourceCopy.metrics.dedupRecentSourceCacheBytes += retainedBytes;
+                sourceCopy.metrics.dedupRecentSourceCacheWorkerCopyCount += 1;
+                sourceCopy.metrics.dedupRecentSourceCacheWorkerCopyBytes += retainedBytes;
+            }).finally(() => {
+                const elapsed = safePerformance.now() - startedAt;
+                sourceCopy.metrics.dedupRecentSourceCacheMs += elapsed;
+                sourceCopy.metrics.dedupRecentSourceCacheWorkerWaitMs += elapsed;
+            });
+            void sourceCopy.pending.catch(() => {});
+            return 0;
         }
-        return owned.byteLength;
+        return publishOwned(spans.buffer.slice(minimumOffset, maximumEnd));
     }
 
     /**
@@ -8049,6 +8083,10 @@ this._readTermContentSignature(
                     null;
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
+                /** @type {{copy: import('./term-bank-source-copy.js').BorrowedContentRangeCopy, pending: Promise<void>|null, metrics: Record<string, number>}|null} */
+                const recentSourceCopy = earlyContentPersistence !== null && typeof chunk.copyBorrowedContentRange === 'function' ?
+                    {copy: chunk.copyBorrowedContentRange, pending: null, metrics: importMetrics} :
+                    null;
                 /** @type {(() => void)|null} */
                 let unregisterInFlightContentSources = null;
                 let borrowedContentReleased = false;
@@ -8158,6 +8196,7 @@ this._readTermContentSignature(
                         importMetrics,
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
                         useResolvedContentReferences,
+                        recentSourceCopy,
                     });
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
@@ -8190,6 +8229,7 @@ this._readTermContentSignature(
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,
+                            recentSourceCopy?.pending ?? Promise.resolve(),
                         ]);
                         const concurrentErrors = concurrentResults
                             .filter((result) => result.status === 'rejected')
@@ -8200,7 +8240,7 @@ this._readTermContentSignature(
                         if (concurrentErrors.length > 1) {
                             throw new AggregateError(
                                 concurrentErrors,
-                                'Term content and record persistence both failed',
+                                'Multiple term import operations failed',
                             );
                         }
                         this._addTermContentBlockProfile(
@@ -8222,6 +8262,9 @@ this._readTermContentSignature(
                     }
                     if (pendingRecordAppend !== null) {
                         pendingOperations.push(pendingRecordAppend);
+                    }
+                    if (recentSourceCopy?.pending !== null && typeof recentSourceCopy?.pending !== 'undefined') {
+                        pendingOperations.push(recentSourceCopy.pending);
                     }
                     await Promise.allSettled(pendingOperations);
                     throw error;
@@ -9256,7 +9299,7 @@ null :
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, recentSourceCopy?: {copy: import('./term-bank-source-copy.js').BorrowedContentRangeCopy, pending: Promise<void>|null, metrics: Record<string, number>}|null}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -9415,6 +9458,7 @@ null :
         const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
             stagedContentMetadata,
             pendingContentSpans,
+            state.recentSourceCopy ?? null,
         );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;

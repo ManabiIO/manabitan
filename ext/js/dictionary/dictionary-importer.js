@@ -157,6 +157,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   contentBytesBaseOffset?: number,
  *   contentMetaList?: Uint32Array,
  *   releaseBorrowedContent?: () => void,
+ *   copyBorrowedContentRange?: import('./term-bank-source-copy.js').BorrowedContentRangeCopy,
  *   contentDictNameList: ((string|null)[]|null),
  *   uniformContentDictName?: string|null,
  *   termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null,
