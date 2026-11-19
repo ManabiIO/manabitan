@@ -669,6 +669,130 @@ describe('full-buffer inflation', () => {
     })
 })
 
+describe('fused row token validation', () => {
+    const recoveryBanks = [
+        '[["first","","","",-2147483648,[],2147483647,""]]',
+        '[["second","second","","",0,[],null,""],["third","reading","","",2147483647,[],-0,""]]',
+    ]
+
+    test('retains independent escape and integer facts for each row', async () => {
+        /** @type {string[]} */
+        const rawRows = []
+        const expectedReadings = []
+        for (let padding = 0; padding < 8; ++padding) {
+            const prefix = 'x'.repeat(padding)
+            const literal = `"${prefix}日"`
+            const escaped = `"${prefix}\\u65e5"`
+            for (const [expression, reading, equals] of [
+                [escaped, literal, 0],
+                [literal, escaped, 0],
+                [escaped, escaped, 1],
+                [literal, '""', 1],
+                [literal, literal, 1],
+            ]) {
+                const score = padding % 2 === 0 ? -2147483648 : 2147483647
+                const sequence = rawRows.length % 2 === 0 ? 'null' : String(rawRows.length)
+                rawRows.push(`[${expression},${reading},"","",${score},[],${sequence},""]`)
+                expectedReadings.push(equals)
+            }
+        }
+        const banks = [`[${rawRows.slice(0, 20).join(',')}]`, `[${rawRows.slice(20).join(',')}]`]
+        const baseline = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks, {experimentalNativeEscapedKeys: true})
+        expect(result.rows).toEqual(baseline.rows)
+        expect(result.rows.map(({readingEqualsExpression}) => readingEqualsExpression)).toEqual(expectedReadings)
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(0)
+    })
+
+    test.each([
+        ['-0', '1'],
+        ['2147483648', '1'],
+        ['-2147483649', '1'],
+        ['1', '2147483648'],
+        ['1', '-2147483649'],
+        ['1.25', '1'],
+        ['1', '1e0'],
+    ])('preserves late numeric fallback and the next parse: score=%s sequence=%s', async (score, sequence) => {
+        const banks = [recoveryBanks[0], `[["wide","","","",${score},[],${sequence},""]]`]
+        const baseline = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks)
+        expect(result.rows).toEqual(baseline.rows)
+        if (score === '-0') { expect(Object.is(result.rows[1].score, -0)).toBe(true) }
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(1)
+        expect(result.profile.discardedFusedRows).toBe(1)
+        const recovered = await parse(recoveryBanks)
+        expect(recovered.rows).toEqual((await parse(recoveryBanks, {experimentalSkipFusedParse: true})).rows)
+        expect(recovered.profile.fusedParseFallbacks).toBe(0)
+    })
+
+    test('rejects malformed late numeric and escaped tokens before recovering', async () => {
+        const invalidNumbers = ['01', '-01', '-', '1.', '1e', '1e+', '+1', '0x10', '1x']
+        const invalidRows = [
+            ...invalidNumbers.map((token) => `["invalid","","","",${token},[],1,""]`),
+            ...invalidNumbers.map((token) => `["invalid","","","",1,[],${token},""]`),
+            '["invalid","","","",null,[],1,""]',
+            '["invalid","","","",true,[],1,""]',
+            String.raw`["invalid\q","","","",1,[],1,""]`,
+            String.raw`["invalid","reading\u00xz","","",1,[],1,""]`,
+            '["invalid","reading\u001f","","",1,[],1,""]',
+        ]
+        const expected = await parse(recoveryBanks, {experimentalSkipFusedParse: true})
+        for (const invalidRow of invalidRows) {
+            const banks = [recoveryBanks[0], `[${invalidRow}]`]
+            await expect(parse(banks, {experimentalSkipFusedParse: true})).rejects.toThrow()
+            await expect(parse(banks, {experimentalNativeEscapedKeys: true})).rejects.toThrow()
+            const recovered = await parse(recoveryBanks)
+            expect(recovered.rows).toEqual(expected.rows)
+            expect(recovered.profile.fusedParseFallbacks).toBe(0)
+        }
+    })
+})
+
+describe('fused integer overflow bounds', () => {
+    const precedingBank = '[["first","","","",1,[],1,""]]'
+    const scoreTokens = Array.from({length: 20}, (_, index) => `${index < 10 ? '' : '-'}214748364${index % 10}`)
+
+    test.each(scoreTokens)('preserves each signed final score digit: %s', async (token) => {
+        const banks = [precedingBank, `[["boundary","","","",${token},[],1,""]]`]
+        const expected = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks)
+        const value = Number(token)
+        expect(result.rows).toEqual(expected.rows)
+        expect(result.rows[1].score).toBe(value)
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(value < -2147483648 || value > 2147483647 ? 1 : 0)
+    })
+
+    test.each(Array.from({length: 10}, (_, index) => `214748364${index}`))('preserves each final sequence digit: %s', async (token) => {
+        const banks = [precedingBank, `[["boundary","","","",1,[],${token},""]]`]
+        const expected = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks)
+        expect(result.rows).toEqual(expected.rows)
+        expect(result.rows[1].sequence).toBe(Number(token))
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(Number(token) > 2147483647 ? 1 : 0)
+    })
+
+    test.each(['2147483650', '-2147483650', '999999999', '-999999999', '9999999999', '-9999999999', '10000000000', '-10000000000'])('preserves prefixes on both sides of the boundary: %s', async (token) => {
+        const banks = [precedingBank, `[["prefix","","","",${token},[],1,""]]`]
+        const result = await parse(banks)
+        expect(result.rows).toEqual((await parse(banks, {experimentalSkipFusedParse: true})).rows)
+        expect(result.profile.fusedParseFallbacks).toBe(Number(token) < -2147483648 || Number(token) > 2147483647 ? 1 : 0)
+    })
+
+    test.each(['02147483647', '-02147483648', '214748364x', '-214748364x', '+2147483647', '2147483647.', '2147483647e+'])('still rejects malformed boundary tokens and recovers: %s', async (token) => {
+        for (const [score, sequence] of [[token, '1'], ['1', token]]) {
+            const banks = [precedingBank, `[["invalid","","","",${score},[],${sequence},""]]`]
+            await expect(parse(banks)).rejects.toThrow()
+        }
+        const recovered = await parse([precedingBank, precedingBank])
+        expect(recovered.rows).toHaveLength(2)
+        expect(recovered.profile.fusedParseFallbacks).toBe(0)
+    })
+})
+
 describe('explicit fused parser bypass', () => {
     test('defaults off and requires literal true', () => {
         expect(snapshotTermBankExperiments().experimentalSkipFusedParse).toBe(false)

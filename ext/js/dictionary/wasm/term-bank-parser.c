@@ -368,6 +368,15 @@ typedef struct {
     uint32_t glossary_requires_text_normalization;
 } TermRowMeta;
 
+/* Values established by this row's grammar scan. These stay on the stack;
+ * the persisted row metadata and the non-fused parser ABI are unchanged. */
+typedef struct {
+    uint32_t key_escape_mask;
+    uint32_t int32_fields; /* bit 0: score, bit 1: sequence */
+    int32_t score;
+    int32_t sequence;
+} FusedTermRowValues;
+
 static uint32_t align8(uint32_t value) {
     return (value + 7u) & ~7u;
 }
@@ -518,8 +527,11 @@ static int is_hex_digit(uint8_t value) {
         (value >= 'A' && value <= 'F');
 }
 
-static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+static __attribute__((always_inline)) inline int parse_string_span_with_escape(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, uint32_t* out_has_escape
+) {
     if (start >= len || src[start] != '"') { return 0; }
+    if (out_has_escape != 0) { *out_has_escape = 0u; }
     uint32_t i = start + 1u;
     while (i < len) {
         while (i + 8u <= len) {
@@ -540,6 +552,7 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
         if (i >= len) { break; }
         uint8_t c = src[i];
         if (c == '\\') {
+            if (out_has_escape != 0) { *out_has_escape = 1u; }
             if (i + 1u >= len) { return 0; }
             const uint8_t escape = src[i + 1u];
             if (escape == 'u') {
@@ -566,6 +579,10 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
         ++i;
     }
     return 0;
+}
+
+static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+    return parse_string_span_with_escape(src, len, start, out_end, 0);
 }
 
 static uint32_t key_hex4(const uint8_t* p);
@@ -995,19 +1012,23 @@ static int parse_int32_token(
     if (i >= end || src[i] < '0' || src[i] > '9') { return 0; }
     if (src[i] == '0' && i + 1u < end) { return 0; }
     uint32_t value = 0u;
-    const uint32_t limit = negative ? 0x80000000u : 0x7fffffffu;
+    const uint32_t last_digit_limit = negative ? 8u : 7u;
     for (; i < end; ++i) {
         const uint8_t c = src[i];
         if (c < '0' || c > '9') { return 0; }
         const uint32_t digit = (uint32_t)(c - '0');
-        if (value > (limit - digit) / 10u) { return 0; }
+        // Only the final int32 boundary needs a sign-dependent digit limit.
+        if (value > 214748364u || (value == 214748364u && digit > last_digit_limit)) { return 0; }
         value = value * 10u + digit;
     }
     *out_value = negative ? (int32_t)(0u - value) : (int32_t)value;
     return 1;
 }
 
-static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
+static int set_field(
+    const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end,
+    FusedTermRowValues* fused_values
+) {
     uint32_t length = end > start ? (end - start) : 0u;
     const int string_token = length >= 2u && src[start] == '"' && src[end - 1u] == '"';
     switch (field_index) {
@@ -1024,11 +1045,27 @@ static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index
             if (!string_token) { return 0; }
             meta->rules_start = start; meta->rules_length = length; break;
         case 4:
+            // A successful bounded integer parse also validates JSON number
+            // grammar. Null is permitted for sequence, never for score.
+            if (fused_values != 0 && src[start] != 'n' &&
+                parse_int32_token(src, start, end, 0, &fused_values->score)) {
+                meta->score_start = start;
+                // Integer storage cannot preserve a negative zero score.
+                if (fused_values->score != 0 || src[start] != '-') { fused_values->int32_fields |= 1u; }
+                break;
+            }
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->score_start = start; break;
         case 5: meta->glossary_start = start; meta->glossary_length = length; break;
         case 6:
             if (is_null_token(src, start, length)) { meta->sequence_start = 0xffffffffu; break; }
+            if (fused_values != 0) {
+                if (parse_int32_token(src, start, end, -1, &fused_values->sequence)) {
+                    meta->sequence_start = start;
+                    break;
+                }
+                fused_values->int32_fields &= ~2u;
+            }
             if (!is_valid_json_number(src, start, end)) { return 0; }
             meta->sequence_start = start; break;
         case 7:
@@ -1144,10 +1181,19 @@ static int parse_row_single_pass(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    int validate_glossary_types
+    int validate_glossary_types,
+    FusedTermRowValues* fused_values
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
+    if (fused_values != 0) {
+        fused_values->key_escape_mask = 0u;
+        // Legacy generic rows may omit sequence; its existing default is -1.
+        // A missing score still requires the ordinary parser fallback.
+        fused_values->int32_fields = 2u;
+        fused_values->score = 0;
+        fused_values->sequence = -1;
+    }
 
     uint32_t i = row_start + 1u;
     uint32_t field_index = 0u;
@@ -1164,6 +1210,10 @@ static int parse_row_single_pass(
         uint32_t value_end = 0u;
         if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
+        } else if (fused_values != 0 && field_index < 2u) {
+            uint32_t has_escape = 0u;
+            if (!parse_string_span_with_escape(src, len, i, &value_end, &has_escape)) { return 0; }
+            fused_values->key_escape_mask |= has_escape << field_index;
         } else if (field_index == 5u) {
             if (validate_glossary_types && src[i] != '[') { return 0; }
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
@@ -1185,7 +1235,7 @@ static int parse_row_single_pass(
             return 0;
         }
         if (field_index < 8u) {
-            if (!set_field(src, out_meta, field_index, i, value_end)) { return 0; }
+            if (!set_field(src, out_meta, field_index, i, value_end, fused_values)) { return 0; }
         }
         ++field_index;
         i = skip_ws(src, len, value_end);
@@ -1777,7 +1827,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -1815,7 +1865,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -2866,8 +2916,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 glossary_lookback = 1u;
             }
         }
+        FusedTermRowValues fused_values;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &fused_values)) {
             return -1;
         }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
@@ -2917,7 +2968,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if (json_string_token_has_escape(src, token_start, token_length)) {
+            if ((fused_values.key_escape_mask & (1u << field)) != 0u) {
                 if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
                 const int32_t decoded_length = decode_escaped_key(
                     src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
@@ -2982,32 +3033,14 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         expression_indexes[row_count] = string_indexes[0];
         reading_indexes[row_count] = string_indexes[1];
         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
-        // The row parser already validated the JSON grammar of both numbers.
-        uint32_t score_end = 0u;
-        int32_t score = 0;
-        if (
-            !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
-            // Integer storage cannot preserve a negative zero score. Use the
-            // ordinary number-preserving path, even in otherwise integer banks.
-            (score == 0 && src[parsed_row->score_start] == '-')
-        ) {
+        // The grammar scan also produced the common int32 values. Other valid
+        // JSON numbers retain the ordinary number-preserving fallback.
+        if (fused_values.int32_fields != 3u) {
             *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
             return -5;
         }
-        scores[row_count] = score;
-        int32_t sequence = -1;
-        if (parsed_row->sequence_start != 0xffffffffu) {
-            uint32_t sequence_end = 0u;
-            if (
-                !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
-                !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)
-            ) {
-                *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
-                return -5;
-            }
-        }
-        sequences[row_count] = sequence;
+        scores[row_count] = fused_values.score;
+        sequences[row_count] = fused_values.sequence;
 
         const uint32_t row_offset = row_count * 4u;
         uint32_t recent_match = 0xffffffffu;
