@@ -152,9 +152,11 @@ A green unit suite is not full browser/OPFS qualification. A green E2E with all 
 
 The committed `dev/perf/import-lookup-screen.js` runs every lexical row in each pinned dictionary through parsing and completed lookup preparation. It checks archive hashes, validates ZIP entries and compares every prepared index byte, compact key plan, row flags/scores/sequences and canonical content digest outside the timed region.
 
+The screen enables `validateGlossaryTypes`, matching the production importer's supported-type and required-field checks, and records that option in each observation. Older screen results that omit it measured a different parser workload and should not be compared directly.
+
 The boundary is resident decoded term banks through parser and lookup completion. It excludes fixture I/O/inflation, worker IPC, global persisted deduplication, Zstd, OPFS and UI. Fixed component grouping is seven JMdict banks, nine JMnedict banks or ten Jitendex banks per group; it is not an assertion that production planners make those exact partitions.
 
-Each child has two excluded complete warmups and GC before measurement. Each pair uses fresh child processes and alternating AB/BA. A is all flags false; B is exactly the requested object. The runner rejects changed source identities, byte mismatches and incomplete observations. After-verification RSS and lifetime maxRSS include other work and are not whole-import peak-memory measurements.
+Each child has two excluded complete warmups and GC before measurement. Each pair uses fresh child processes and alternating AB/BA. A uses its source revision's default flags; B overlays the requested object on its source revision's defaults. The runner rejects changed source identities, byte mismatches and incomplete observations. After-verification RSS and lifetime maxRSS include other work and are not whole-import peak-memory measurements.
 
 ```sh
 node dev/perf/import-lookup-screen.js jmnedict --pairs 8 \
@@ -176,7 +178,7 @@ node dev/perf/import-lookup-screen.js jmnedict --pairs 8 \
   --out builds/perf/lookup-compaction.json
 ```
 
-Repeat on JMdict and Jitendex where the path executes. Use `--initial-order BA` in an independent replication. For the all-off source comparison, prepare a separate clean parent worktree, install the identical dependencies and rebuild its own WASM, then pass `--baseline-root /absolute/path/to/parent` with `--flags '{}'`. Never point both source arms at the same generated WASM by accident. `--cache-dir` can select an existing locked dictionary cache.
+Repeat on JMdict and Jitendex where the path executes. Use `--initial-order BA` in an independent replication. For a source comparison with default flags, prepare separate parent and candidate worktrees, install identical dependencies and rebuild each revision's own WASM, then pass `--baseline-root /absolute/path/to/parent --source-root /absolute/path/to/candidate --flags '{}'`. Both source roots default to the runner's checkout. The parent checks every child's reported source root, WASM hash and validation mode against its requested arm and the binaries read before the cohort. Check those recorded identities before interpreting a comparison. Before the November 19, 2026 correction, the parent runner ignored `--source-root` and always used its own checkout for B. `--cache-dir` can select an existing locked dictionary cache.
 
 Run timing sequentially on a quiet host. Do not run builds, tests, other benchmark cells or profilers concurrently on that host. Freeze sources and generated binaries for the complete cohort. If a source changes or a competing process contaminates it, retain the observations as invalid exploratory data and rerun the entire predetermined cohort. Do not salvage selected favorable pairs.
 
