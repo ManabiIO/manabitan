@@ -8600,9 +8600,9 @@ null :
             /**
              * Atomically adopts one native segment's owned columns. Only the
              * newly appended tail is touched; accepted segments remain owned by
-             * the ordinary outer rollback. The helper restores plan snapshots
-             * and its insertion journal if any synchronous step throws.
-             * @param {{columns: Uint32Array[], planStart: number, epochs: Uint32Array, indexes: Uint32Array}} batch
+             * the ordinary outer rollback. The helper restores its insertion
+             * journal if any synchronous step throws; generic epoch scratch is untouched.
+             * @param {{columns: Uint32Array[], planStart: number}} batch
              * @param {() => void} complete Build bounded exact descriptors before committing the segment.
              * @throws {RangeError} If the native batch cannot fit the canonical pending owner.
              */

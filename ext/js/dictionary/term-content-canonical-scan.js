@@ -21,7 +21,7 @@
 
 import {CANONICAL_SCAN_ABI_VERSION, CANONICAL_SCAN_LAYOUT as layout} from './term-content-canonical-layout.js';
 
-const {MAX, PREFIX, META, IDENT, ROWS, SIGS, FLAGS, OUT, JOURNAL, EXACT, EPOCHS, INDEXES} = layout;
+const {MAX, PREFIX, META, IDENT, ROWS, SIGS, FLAGS, OUT, JOURNAL, EXACT} = layout;
 /** @type {Promise<WebAssembly.Module>|null} */
 let modulePromise = null;
 /** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number}>} */
@@ -48,7 +48,7 @@ export function compileCanonicalScanModule() {
  * @typedef {import('./term-content-metadata-arena.js').TermContentMetadataArena} Arena
  * @typedef {import('./dictionary-database.js').TermContentMeta} TermContentMeta
  * @typedef {import('./dictionary-database.js').ArtifactTermContentDedupPlan} DedupPlan
- * @typedef {{columns: Uint32Array[], epochs: Uint32Array, indexes: Uint32Array, planStart: number}} PendingBatch
+ * @typedef {{columns: Uint32Array[], planStart: number}} PendingBatch
  * @typedef {object} ScanOwner
  * @property {number[]} _termEntryContentMetaFreeIndexes
  * @property {Arena|null} _termContentMetadataArena
@@ -96,8 +96,8 @@ export const CANONICAL_SCAN_METRICS = Object.freeze({
 
 /**
  * Stateless with respect to database/arena lifetime. Compiled immutable code is
- * single-flight; instances are weakly keyed by fixed memory. Segment outputs
- * and original plan slices are owned before exact-byte matching can await.
+ * single-flight; instances are weakly keyed by fixed memory. Pending segment
+ * outputs are owned before exact-byte matching can await.
  */
 export class NativeCanonicalScanner {
     /** @param {{loadModule?: () => Promise<WebAssembly.Module>, hooks?: ScanHooks}} [dependencies] */
@@ -198,7 +198,11 @@ export class NativeCanonicalScanner {
             plan.pendingIndexes.length < last ||
             uniqueSignatures.length < last * 3 ||
             db._termEntryContentMetaFreeIndexes.length > 0 ||
-            (db._termContentMetadataArena !== null && db._termContentMetadataArena.slots.byteOffset < PREFIX)
+            (db._termContentMetadataArena !== null && (
+                db._termContentMetadataArena.slots.byteOffset < PREFIX ||
+                plan.pendingEpochs.buffer === db._termContentMetadataArena.memory.buffer ||
+                plan.pendingIndexes.buffer === db._termContentMetadataArena.memory.buffer
+            ))
         ) {
             ++stats.fallbacks;
             ++stats.fallbackEligibility;
@@ -272,15 +276,12 @@ export class NativeCanonicalScanner {
                 inputArena = a;
             }
             new Uint8Array(buffer, FLAGS + cursor, n - cursor).set(plan.resolvedFlags.subarray(first + cursor, last));
-            // Bounded, segment-owned original JS slices: precise restoration even if a
-            // trap, output copy, partial typed set, or exact descriptor construction fails.
+            // Canonical publication owns unique-index columns, not the generic
+            // epoch/index scratch. The v1 kernel still writes its private ABI
+            // projection, but no caller consumes it. Leave the JS scratch alone
+            // instead of copying and snapshotting each unprocessed suffix.
             const planStart = first + cursor;
-            const previousEpochs = plan.pendingEpochs.slice(planStart, last);
-            const previousIndexes = plan.pendingIndexes.slice(planStart, last);
-            stats.snapshotBytes += previousEpochs.byteLength + previousIndexes.byteLength;
-            new Uint32Array(buffer, EPOCHS + cursor * 4, n - cursor).set(previousEpochs);
-            new Uint32Array(buffer, INDEXES + cursor * 4, n - cursor).set(previousIndexes);
-            stats.copiedInputBytes += (n - cursor) * 9;
+            stats.copiedInputBytes += n - cursor;
             const {pendingBase, pendingEpoch} = getPendingState();
             const beforeDense = db._termEntryContentMetaDenseCount,
                 beforePending = db._termEntryContentMetaHashPairPendingCount;
@@ -319,8 +320,8 @@ export class NativeCanonicalScanner {
                 if (stop < 0) {
                     throw new Error(`Native canonical scan error ${stop}`);
                 }
-                // Six constant-count copies, never a JS per-pending loop/scatter. Own all
-                // outputs, including plan projections, before entering the exact await.
+                // Six constant-count copies, never a JS per-pending loop/scatter.
+                // Own the pending columns before entering the exact await.
                 /** @type {Uint32Array[]} */
                 const columns = [];
                 for (let column = 0; column < 6; ++column) {
@@ -333,13 +334,11 @@ export class NativeCanonicalScanner {
                     segmentResolved = header[4],
                     nextDense = header[5],
                     inserted = header[0];
-                const epochs = new Uint32Array(buffer, EPOCHS + cursor * 4, next - cursor).slice();
-                const indexes = new Uint32Array(buffer, INDEXES + cursor * 4, next - cursor).slice();
-                stats.copiedOutputBytes += exact.byteLength + epochs.byteLength + indexes.byteLength;
+                stats.copiedOutputBytes += exact.byteLength;
                 db._termEntryContentMetaDenseCount = nextDense;
                 db._termEntryContentMetaHashPairPendingCount = beforePending + inserted;
-                this._hooks.beforeAdopt?.({columns, epochs, indexes, planStart, plan});
-                adoptPendingColumns({columns, epochs, indexes, planStart}, () => {
+                this._hooks.beforeAdopt?.({columns, planStart, plan});
+                adoptPendingColumns({columns, planStart}, () => {
                     this._hooks.afterPlanWrite?.({plan, planStart});
                     // Bounded published candidates still use the original exact byte matcher.
                     for (let i = 0; i < exact.length; i += 2) {
@@ -365,7 +364,6 @@ export class NativeCanonicalScanner {
                 stats.exactDescriptorRows += exact.length / 2;
                 stats.nativePendingRows += header[2];
                 stats.adoptedColumnBytes += header[2] * (reserveMetadata ? 24 : 20);
-                stats.adoptedPlanBytes += (next - cursor) * 8;
                 stats.rows += next - cursor;
                 stats.inserted += inserted;
                 resolved += segmentResolved;
@@ -382,8 +380,6 @@ export class NativeCanonicalScanner {
                     a.hash1[index] = a.hash2[index] = a.length[index] = 0;
                     a.signaturePresent[index] = a.signature1[index] = a.signature2[index] = a.signature3[index] = 0;
                 }
-                plan.pendingEpochs.set(previousEpochs, planStart);
-                plan.pendingIndexes.set(previousIndexes, planStart);
                 exactCandidates.length = exactBase;
                 db._termEntryContentMetaDenseCount = beforeDense;
                 db._termEntryContentMetaHashPairPendingCount = beforePending;
