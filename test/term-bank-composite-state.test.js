@@ -19,7 +19,7 @@
 import {readFile} from 'node:fs/promises'
 import {beforeAll, describe, expect, test} from 'vitest'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number, bankSpans: number, bankCount: number, strict: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number, bankSpans: number, bankCount: number, strict: number) => number}} ParserExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number) => number}} ParserExports */
 /** @type {ParserExports} */
 let parser
 const encoder = new TextEncoder()
@@ -33,16 +33,15 @@ beforeAll(async () => {
 /**
  * @param {string} glossary
  * @param {boolean} [hints]
- * @param {boolean} [strict]
  * @returns {{count: number, metadata: number[]}}
  */
-function parseGlossary(glossary, hints = true, strict = false) {
+function parseGlossary(glossary, hints = true) {
     const bytes = encoder.encode(`[["entry","","","",0,${glossary},1,""]]`)
     parser.wasm_reset_heap()
     const input = parser.wasm_alloc(bytes.length)
     const output = parser.wasm_alloc(17 * 4)
     new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
-    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1, 0, 0, strict ? 1 : 0)
+    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
     return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)]}
 }
 
@@ -57,76 +56,6 @@ function nested(depth) {
 }
 
 describe('composite parser state transitions', () => {
-    test.each([
-        {json: '[{"type":"structured-content","content":{"a":[],"b":{},"c":[[],{},"image"]}},"last"]', flags: [1, 0, 0]},
-        {json: '[{"type":"structured-content","content":{"a":[], "b":{},\n"c":[[], {},"image"]}}, "last"]', flags: [1, 1, 0]},
-        {json: '[{"type":"structured-content","content":{"a":[],"b":{"type":"text","text":"value"},"c":{}}},"last"]', flags: [0, 1, 1]},
-        {json: '[{"type":"structured-content","content":[[],{"tag":"\\u0069mg"},{}]},[[],{}],"last"]', flags: [1, 0, 0]},
-        {json: '[{"type":"structured-content","content":[]},{"type":"text","text":"last"},{"type":"image","path":"image.png"}]', flags: [1, 1, 1]},
-        {json: '[{"content":[],"type":"structured-content","content":{"nested":[]}},"last"]', flags: [0, 0, 0]},
-    ])('preserves strict validation and hints after complete children: $json', ({json, flags}) => {
-        expect(() => JSON.parse(json)).not.toThrow()
-        for (const strict of [false, true]) {
-            for (const hints of [false, true]) {
-                const result = parseGlossary(json, hints, strict)
-                expect(result.count).toBe(1)
-                expect(result.metadata.slice(14)).toEqual([hints ? flags[0] : 0, ...flags.slice(1)])
-            }
-        }
-    })
-
-    test.each([
-        '[[],]',
-        '[{},]',
-        '[[],,0]',
-        '[{},:0]',
-        '[[],"last" "extra"]',
-        '{"a":[],}',
-        '{"a":{},}',
-        '{"a":[],,"b":0}',
-        '{"a":{},:"b":0}',
-        '{"a":[],0:0}',
-        '{"a":{},"b":}',
-        '{"a":[],"b",0}',
-        '{"a":[] []}',
-        '{"a":{},[]}',
-        '[{"a":[]},}',
-        '[[{}],]',
-    ])('rejects malformed delimiters after complete children: %s', (content) => {
-        const glossary = `[{"type":"structured-content","content":${content}}]`
-        expect(() => JSON.parse(glossary)).toThrow()
-        for (const strict of [false, true]) {
-            for (const hints of [false, true]) {
-                expect(parseGlossary(glossary, hints, strict).count).toBeLessThan(0)
-            }
-        }
-    })
-
-    test.each([
-        '[{"type":"structured-content","content":[],"content":null}]',
-        '[{"type":"text","text":"first","content":[],"text":0}]',
-        '[{"type":"image","path":"first","content":{},"type":"unknown"}]',
-        '[{"type":"structured-content","content":[]},{"type":"text","text":null}]',
-        '[{"content":[],"type":"text"}]',
-    ])('keeps last-key required-field validation after complete children: %s', (glossary) => {
-        expect(() => JSON.parse(glossary)).not.toThrow()
-        for (const hints of [false, true]) {
-            expect(parseGlossary(glossary, hints, false).count).toBe(1)
-            expect(parseGlossary(glossary, hints, true).count).toBeLessThan(0)
-        }
-    })
-
-    test('preserves the nesting boundary when child close restores a parent before a comma', () => {
-        for (const strict of [false, true]) {
-            for (const hints of [false, true]) {
-                const accepted = parseGlossary(`[${nested(255)},"image"]`, hints, strict)
-                expect(accepted.count).toBe(1)
-                expect(accepted.metadata.slice(14)).toEqual([hints ? 1 : 0, 0, 0])
-                expect(parseGlossary(`[${nested(256)},"image"]`, hints, strict).count).toBeLessThan(0)
-            }
-        }
-    })
-
     test.each([
         '[]',
         '{}',
