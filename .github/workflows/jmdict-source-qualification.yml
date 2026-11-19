@@ -1,0 +1,140 @@
+name: JMdict source qualification
+
+on:
+  push:
+    branches:
+      - research/jmdict-import-20261119-3d067
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jmdict-source-qualification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: JMdict comparison (${{ matrix.initial-order }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        initial-order: [ABC, CBA]
+    env:
+      BASELINE_SHA: d829f5b6e6a75ee8859d38d537d224ec33c4930e
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+
+      - name: Prepare candidate dependencies
+        run: |
+          npm ci
+          npm run build:libs
+          git diff --exit-code
+
+      - name: Install pinned compiler and browser
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npx playwright install --with-deps chromium
+
+      - name: Verify and build candidate
+        run: |
+          npm run build:dictionary-wasm -- --check
+          node dev/bin/build.js --target chrome
+          node node_modules/vitest/vitest.mjs run --maxWorkers 1 test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-number-decode.test.js
+          npm run test:build
+          node dev/perf/prepare-dictionaries.js
+
+      - name: Prepare immutable baseline
+        run: |
+          git fetch --depth=1 origin "$BASELINE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/manabitan-baseline" "$BASELINE_SHA"
+
+      - name: Verify full unit suite
+        if: matrix.initial-order == 'ABC'
+        run: npm run test:unit -- --maxWorkers 1
+
+      - name: Build baseline
+        working-directory: ${{ runner.temp }}/manabitan-baseline
+        run: |
+          npm ci
+          npm run build:libs
+          npm run build:dictionary-wasm -- --check
+          node dev/bin/build.js --target chrome
+          mkdir -p builds/e2e-dictionary-cache
+          cp "$GITHUB_WORKSPACE"/builds/e2e-dictionary-cache/*.zip builds/e2e-dictionary-cache/
+
+      - name: Compare every row and lookup byte before browser timing
+        run: |
+          for dictionary in jmdict jmnedict jitendex; do
+            node dev/perf/import-lookup-screen.js "$dictionary" --pairs 2 \
+              --baseline-root "$RUNNER_TEMP/manabitan-baseline" \
+              --source-root "$GITHUB_WORKSPACE" --flags '{}' \
+              --out "$RUNNER_TEMP/jmdict-source-parity/$dictionary.json"
+          done
+
+      - name: Run fixed source comparison and identical-code controls
+        run: |
+          node test/perf/import-source-cohort.mjs \
+            --baseline "$RUNNER_TEMP/manabitan-baseline" \
+            --candidate "$GITHUB_WORKSPACE" \
+            --dictionary jmdict --rounds 12 --warmup 2 \
+            --initial-order '${{ matrix.initial-order }}' \
+            --output "$RUNNER_TEMP/jmdict-source-evidence"
+
+      - name: Verify full Chromium lifecycle
+        if: matrix.initial-order == 'ABC'
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+          MANABITAN_CHROMIUM_BUILD_TARGET: chrome
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+        run: xvfb-run -a npm run test:e2e:chromium-extension
+
+      - name: Capture separate diagnostic import trace
+        if: matrix.initial-order == 'CBA'
+        run: |
+          node dev/perf/import-benchmark.js jmdict --runs 1 --trace --no-build \
+            --build-target chrome --output "$RUNNER_TEMP/jmdict-source-trace"
+
+      - name: Enforce release lifecycle result
+        if: always() && matrix.initial-order == 'ABC'
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict'
+          import {readFileSync} from 'node:fs'
+          import {createHash} from 'node:crypto'
+          const report = JSON.parse(readFileSync('builds/chromium-e2e-import-report.json', 'utf8'))
+          assert.equal(report.status, 'success')
+          assert.equal(report.skippedVerification, false)
+          assert.equal(report.buildTarget, 'chrome')
+          const digest = createHash('sha256').update(readFileSync('builds/manabitan-chrome.zip')).digest('hex')
+          assert.equal(report.packageSha256, digest)
+          NODE
+
+      - name: Upload complete and failed observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-source-${{ matrix.initial-order }}
+          path: |
+            ${{ runner.temp }}/jmdict-source-evidence
+            ${{ runner.temp }}/jmdict-source-trace
+            ${{ runner.temp }}/jmdict-source-parity
+            builds/chromium-e2e-import-report.json
+          if-no-files-found: warn
+          retention-days: 14
