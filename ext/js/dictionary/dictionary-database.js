@@ -9343,73 +9343,86 @@ null :
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        for (let i = 0; i < pendingOffsets.length; ++i) {
-            const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
-            const dictNameId = uniformPendingDictNameId >= 0 ?
-                uniformPendingDictNameId :
-                this._internTermEntryContentMetaDictName(dictName);
-            const reservedIndex = stagedContentMetadata?.indexes[i] ?? -1;
-            const stagedIndex = stagedContentMetadata === null ?
-                -1 :
-                this._resolveStagedArtifactTermContentIndex(
-                    stagedContentMetadata,
-                    i,
-                    pendingContentHash1s[i],
-                    pendingContentHash2s[i],
-                );
-            if (stagedIndex >= 0) {
-                const offset = pendingOffsets[i];
-                const length = pendingLengths[i];
-                if (!metadataValidated && (!Number.isSafeInteger(offset) || offset < 0)) {
-                    throw new RangeError(`Invalid term content metadata offset: ${offset}`);
+        let reservedPublishedCount = 0;
+        try {
+            for (let i = 0; i < pendingOffsets.length; ++i) {
+                const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
+                const dictNameId = uniformPendingDictNameId >= 0 ?
+                    uniformPendingDictNameId :
+                    this._internTermEntryContentMetaDictName(dictName);
+                const reservedIndex = stagedContentMetadata?.indexes[i] ?? -1;
+                const stagedIndex = stagedContentMetadata === null ?
+                    -1 :
+                    this._resolveStagedArtifactTermContentIndex(
+                        stagedContentMetadata,
+                        i,
+                        pendingContentHash1s[i],
+                        pendingContentHash2s[i],
+                    );
+                if (stagedIndex >= 0) {
+                    const offset = pendingOffsets[i];
+                    const length = pendingLengths[i];
+                    if (!metadataValidated && (!Number.isSafeInteger(offset) || offset < 0)) {
+                        throw new RangeError(`Invalid term content metadata offset: ${offset}`);
+                    }
+                    if (
+                        (!metadataValidated && (
+                            !Number.isSafeInteger(length) ||
+                            length < 0 ||
+                            length >= TERM_CONTENT_META_U32_NULL
+                        )) ||
+                        this._termEntryContentMetaLengthTable[stagedIndex] !== length
+                    ) {
+                        throw new RangeError(`Invalid staged term content metadata length: ${length}`);
+                    }
+                    this._termEntryContentMetaIdTable[stagedIndex] = 0;
+                    this._termEntryContentMetaOffsetTable[stagedIndex] = offset;
+                    this._termEntryContentMetaDictNameIdTable[stagedIndex] = dictNameId;
+                    this._termEntryContentMetaStateTable[stagedIndex] = TERM_CONTENT_META_SLOT_PUBLISHED;
+                    ++reservedPublishedCount;
+                    continue;
                 }
-                if (
-                    (!metadataValidated && (
-                        !Number.isSafeInteger(length) ||
-                        length < 0 ||
-                        length >= TERM_CONTENT_META_U32_NULL
-                    )) ||
-                    this._termEntryContentMetaLengthTable[stagedIndex] !== length
-                ) {
-                    throw new RangeError(`Invalid staged term content metadata length: ${length}`);
+                if (reservedPublishedCount > 0) {
+                    this._termEntryContentMetaHashPairPendingCount -= reservedPublishedCount;
+                    this._termEntryContentMetaHashPairCount += reservedPublishedCount;
+                    reservedPublishedCount = 0;
                 }
-                this._termEntryContentMetaIdTable[stagedIndex] = 0;
-                this._termEntryContentMetaOffsetTable[stagedIndex] = offset;
-                this._termEntryContentMetaDictNameIdTable[stagedIndex] = dictNameId;
-                this._termEntryContentMetaStateTable[stagedIndex] = TERM_CONTENT_META_SLOT_PUBLISHED;
-                --this._termEntryContentMetaHashPairPendingCount;
-                ++this._termEntryContentMetaHashPairCount;
-                continue;
-            }
-            const contentBytes = pendingContentSpans === null ?
-                pendingContentBytes[i] :
-                pendingContentSpans.buffer;
-            const contentByteOffset = pendingContentSpans === null ?
-                0 :
-                pendingContentSpans.offsets[i];
-            if (stagedContentMetadata !== null && reservedIndex < 0) {
-                const collisionEntry = this._appendStagedTermEntryContentMetaCollision(
+                const contentBytes = pendingContentSpans === null ?
+                    pendingContentBytes[i] :
+                    pendingContentSpans.buffer;
+                const contentByteOffset = pendingContentSpans === null ?
+                    0 :
+                    pendingContentSpans.offsets[i];
+                if (stagedContentMetadata !== null && reservedIndex < 0) {
+                    const collisionEntry = this._appendStagedTermEntryContentMetaCollision(
+                        pendingContentHash1s[i],
+                        pendingContentHash2s[i],
+                        pendingOffsets[i],
+                        pendingLengths[i],
+                        dictName,
+                        contentBytes,
+                        contentByteOffset,
+                    );
+                    (stagedContentMetadata.collisionEntries ??= []).push(collisionEntry);
+                    continue;
+                }
+                this._insertTermEntryContentMetaByHashPairFast(
                     pendingContentHash1s[i],
                     pendingContentHash2s[i],
                     pendingOffsets[i],
                     pendingLengths[i],
                     dictName,
+                    dictNameId,
                     contentBytes,
                     contentByteOffset,
                 );
-                (stagedContentMetadata.collisionEntries ??= []).push(collisionEntry);
-                continue;
             }
-            this._insertTermEntryContentMetaByHashPairFast(
-                pendingContentHash1s[i],
-                pendingContentHash2s[i],
-                pendingOffsets[i],
-                pendingLengths[i],
-                dictName,
-                dictNameId,
-                contentBytes,
-                contentByteOffset,
-            );
+        } finally {
+            // Publish counts before a caller can roll back a partially published batch.
+            if (reservedPublishedCount > 0) {
+                this._termEntryContentMetaHashPairPendingCount -= reservedPublishedCount;
+                this._termEntryContentMetaHashPairCount += reservedPublishedCount;
+            }
         }
         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
         const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(

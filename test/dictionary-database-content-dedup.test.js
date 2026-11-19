@@ -1124,6 +1124,126 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
     });
 
+    test.each([
+        {field: 'offset', failureIndex: 0, metadataValidated: false},
+        {field: 'offset', failureIndex: 1, metadataValidated: false},
+        {field: 'offset', failureIndex: 2, metadataValidated: false},
+        {field: 'length', failureIndex: 0, metadataValidated: true},
+        {field: 'length', failureIndex: 1, metadataValidated: true},
+        {field: 'length', failureIndex: 2, metadataValidated: true},
+    ])('preserves counts after a publication $field failure at row $failureIndex', ({field, failureIndex, metadataValidated}) => {
+        const database = new DictionaryDatabase();
+        cacheMeta(database, null, 50, 3, 'raw', 11, 22);
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const contentBytes = [Uint8Array.of(1), Uint8Array.of(2), Uint8Array.of(3)];
+        const hashes1 = [101, 102, 103];
+        const hashes2 = [201, 202, 203];
+        const staged = stage(hashes1, hashes2, contentBytes, null);
+        const state = {
+            count: 3,
+            contentOffsets: new Float64Array(3),
+            contentLengths: new Uint32Array(3),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: Int32Array.of(0, 1, 2),
+            pendingContentBytes: contentBytes,
+            pendingContentHash1s: hashes1,
+            pendingContentHash2s: hashes2,
+            pendingOffsets: [1000, 2000, 3000],
+            pendingLengths: [1, 1, 1],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata: staged,
+            metadataValidated,
+        };
+        if (field === 'offset') {
+            state.pendingOffsets[failureIndex] = -1;
+        } else {
+            state.pendingLengths[failureIndex] = 2;
+        }
+
+        expect(() => publish(state)).toThrow(RangeError);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(3 - failureIndex);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1 + failureIndex);
+        for (let i = 0; i < 3; ++i) {
+            const meta = getMeta(database, hashes1[i], hashes2[i]);
+            if (i < failureIndex) {
+                expect(meta).toMatchObject({offset: 1000 * (i + 1), length: 1});
+            } else {
+                expect(meta).toBeUndefined();
+            }
+        }
+
+        rollback(staged);
+        rollback(staged);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+        expect(getMeta(database, 11, 22)).toMatchObject({offset: 50, length: 3});
+
+        state.pendingOffsets[failureIndex] = 1000 * (failureIndex + 1);
+        state.pendingLengths[failureIndex] = 1;
+        state.stagedContentMetadata = stage(hashes1, hashes2, contentBytes, null);
+        publish(state);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(4);
+    });
+
+    test.each([false, true])('publishes preceding reserved counts before a collision handler (failure=%s)', (failCollision) => {
+        const database = new DictionaryDatabase();
+        cacheMeta(database, null, 50, 3, 'raw', 11, 22);
+        const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
+        const publish = Reflect.get(database, '_publishArtifactTermContentMetadata').bind(database);
+        const rollback = Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').bind(database);
+        const contentBytes = [Uint8Array.of(1), Uint8Array.of(2), Uint8Array.of(3)];
+        const staged = stage([101, 101, 303], [202, 202, 404], contentBytes, null);
+        expect([...staged.indexes].filter((index) => index >= 0)).toHaveLength(2);
+        const appendCollision = Reflect.get(database, '_appendStagedTermEntryContentMetaCollision').bind(database);
+        const failure = new Error('injected collision publication failure');
+        const collision = vi.spyOn(database, '_appendStagedTermEntryContentMetaCollision').mockImplementation((...args) => {
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+            expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(2);
+            if (failCollision) { throw failure; }
+            return appendCollision(...args);
+        });
+        const state = {
+            count: 3,
+            contentOffsets: new Float64Array(3),
+            contentLengths: new Uint32Array(3),
+            resolvedContentDictNames: 'raw',
+            pendingRowToUniqueIndex: Int32Array.of(0, 1, 2),
+            pendingContentBytes: contentBytes,
+            pendingContentHash1s: [101, 101, 303],
+            pendingContentHash2s: [202, 202, 404],
+            pendingOffsets: [1000, 2000, 3000],
+            pendingLengths: [1, 1, 1],
+            pendingResolvedDictNames: 'raw',
+            pendingContentSpans: null,
+            stagedContentMetadata: staged,
+        };
+
+        try {
+            if (failCollision) {
+                expect(() => publish(state)).toThrow(failure);
+                expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+                expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(2);
+            } else {
+                publish(state);
+                expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+                expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(3);
+            }
+            expect(collision).toHaveBeenCalledOnce();
+        } finally {
+            collision.mockRestore();
+        }
+        rollback(staged);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(Reflect.get(database, '_termEntryContentMetaHashPairCount')).toBe(1);
+        expect(getMeta(database, 11, 22)).toMatchObject({offset: 50, length: 3});
+        expect(getMeta(database, 101, 202)).toBeUndefined();
+        expect(getMeta(database, 303, 404)).toBeUndefined();
+    });
+
     test('rolls back parser-verified hash collisions with staged metadata', async () => {
         const database = new DictionaryDatabase();
         const stage = Reflect.get(database, '_stageArtifactTermContentMetadata').bind(database);
