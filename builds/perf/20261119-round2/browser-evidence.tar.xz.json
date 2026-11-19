@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "archive": "browser-evidence.tar.xz",
+  "archiveBytes": 2857968,
+  "archiveSha256": "e7f8be4c29ff90c212bac8960ec119b3432e9cf4e47531492849d77f008c047c",
+  "indexMember": "evidence-index.json",
+  "payloadFiles": 2773,
+  "payloadBytes": 104809873,
+  "sourceZips": [
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/jmdict-study-chromium-forward-44633675935.zip",
+      "prefix": "chromium-forward",
+      "bytes": 3825947,
+      "sha256": "0cdfc9d2680bcb21fa38f13fe2a90f93ecd271ca372d077a22c2063c41130186"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/jmdict-study-chromium-reverse-44633675935.zip",
+      "prefix": "chromium-reverse",
+      "bytes": 3828493,
+      "sha256": "5632cd6eef0b471f17097f1b841710068c9f0d67453826a62c2395d4e55db88a"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/firefox-forward-14585921242.zip",
+      "prefix": "firefox-forward",
+      "bytes": 2252894,
+      "sha256": "d93ac4f3bc206544eb5c0180c107848f70a23470b471e75f19a7689397b58da4"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/firefox-reverse-14585631194.zip",
+      "prefix": "firefox-reverse",
+      "bytes": 2254743,
+      "sha256": "480a103c2d6523ab8e2dd137ccf7c4f462f30eb4f237b491848fe6de92d24e4e"
+    }
+  ],
+  "verification": "Use this script's verify command; it reads every payload and rejects missing, extra, duplicate or changed files."
+}

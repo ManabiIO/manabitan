@@ -393,3 +393,98 @@ These checks qualify only their named source checkout; they do not retroactively
 Concurrent [PR #758](https://github.com/ManabiIO/manabitan/pull/758), [PR #759](https://github.com/ManabiIO/manabitan/pull/759) and [PR #760](https://github.com/ManabiIO/manabitan/pull/760) cover related but different cache-copy, publication and escape-witness implementations. Their source trees, binaries and protocols differ. This round neither modifies those branches nor borrows their measurements or tests to qualify these patches.
 
 A next performance decision requires a quiet supported browser host, same-source controls, reversed-order replication, complete file-input-to-UI import timing and exact persistence/reopen equality. Keep cancellation/recovery, process-tree memory, stored size and subsequent lookup latency as separate gates. Full browser performance, OPFS persistence/reopen equivalence, recovery and lookup-latency qualification for the runtime candidates were not completed here. The current evidence supports retaining the experiments and the improved screening tools, with no runtime promotion.
+
+## November 19 continuation: complete browser imports
+
+The follow-up moved qualification to Linux GitHub-hosted Chromium and official Mozilla Firefox. The first completed study is [PR #765](https://github.com/ManabiIO/manabitan/pull/765), [run 44633675935](https://github.com/ManabiIO/manabitan/actions/runs/44633675935), at tooling source `a4a2ee2b29fce97f6e22c65f7e4bb497bec342ee`, tree `046c4c8c9cb595f6e35d64336d2d6ee954b93bd2`. Later documentation/schema changes do not change the identity of these observations.
+
+**Decision: retain both candidates as experiments; promote neither to the runtime.** The owned source-copy replacement has no repeatable whole-import benefit. Initial compressed-source prefetch has one favorable Firefox cell, an unresolved second Firefox cell, and slower complete imports in both Chromium cells. All four cells pass their source, execution and output checks, so these are performance findings rather than discarded correctness failures.
+
+### Frozen sources and protocol
+
+| Arm | Product source                             | Tree                                       | Change                                                                         |
+| --- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| A   | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` | `841406cd33f6871ab24aee771c1a7881d9e465f0` | Baseline                                                                       |
+| C   | Same as A                                  | Same as A                                  | Independently packaged same-source control                                     |
+| B   | `98b25cbce108b7c63ffe318f06186dadd26d476c` | `a885d2b04792ec33e53b5edfab492ca3128f33fd` | Two owned `Uint8Array.from(subarray)` copies become `new Uint8Array(subarray)` |
+| D   | `2ae43ece52ab621fa1af763bf65635f1bedc0fad` | `7f19cf482e7472ae5e06f499b122b222a66bfe9d` | Begin the first admitted compressed-source read during bulk setup              |
+
+B's historical source commit also contains manual-workflow changes; this study does not execute those workflows. Package verification permits only its two-line product change in `term-bank-source-pipeline.js`. D changes the importer and source pipeline, retains the existing byte budget and reads no additional source speculatively. Its archive plus larger compressed/decoded first-file charge is 18,813,552 bytes, within the unchanged minimum 24 MiB source budget. Deferred failures remain owned until consumption, and abort/join completes before archive close.
+
+The committed [protocol](jmdict-browser-study/README.md), [manifest](jmdict-browser-study/manifest.json), source bundle and zero-context patches reconstruct the candidates. All product and generated package entries are checked; A and C have identical package-entry receipts even when ZIP container metadata gives their archives different hashes. The generated legal page is a shared, hash-checked overlay.
+
+Each of four separate cells fixes two warmups per arm, then 24 four-arm blocks. Forward orders are `ABCD`, `BDAC`, `CADB`, `DCBA`, repeated six times; reverse cells reverse each order. Every observation uses a fresh browser/helper process and profile. Each cell completed **104 observations: 8 warmups plus 96 timed imports**. Across the study there are **416 successful observations, 384 timed**, with no retry, missing observation, dropped tail or post-hoc extension. Browsers, hosts and order replications are not pooled. C/A is a control, not a correction subtracted from candidate results.
+
+The authoritative timer is the browser's monotonic interval from the file-input change to the current import operation's post-UI completion. Source hashing, package builds, fixture probes, process setup, persistence checks and untimed memory snapshots are outside that interval. No trace, profiler, screenshot or process-memory sampler runs within it. All arms retain production worker, cache, compression, batching and experiment defaults.
+
+### Complete-import results
+
+Negative percentages mean faster. Equal-work change compares the sums of the 24 candidate times with the corresponding 24 baseline times. The intervals are descriptive 10,000-resample paired-median bootstrap intervals, seed `20261119`; they do not correct temporal dependence or multiple comparisons. All raw tails remain, including Firefox reverse's largest same-source paired change of +46.97%.
+
+| Browser / order    | Comparison      | Median paired change | Equal-work change | Faster pairs | Descriptive 95% interval |
+| ------------------ | --------------- | -------------------: | ----------------: | -----------: | ------------------------ |
+| Chromium / forward | C/A control     |               −1.10% |            −0.50% |        14/24 | −2.10% to +0.48%         |
+| Chromium / forward | B/A source copy |               +0.69% |            +0.49% |        11/24 | −0.56% to +2.19%         |
+| Chromium / forward | D/A prefetch    |               +1.28% |            +1.24% |         6/24 | +0.40% to +2.25%         |
+| Chromium / reverse | C/A control     |               +0.70% |            +0.29% |         8/24 | −0.03% to +1.77%         |
+| Chromium / reverse | B/A source copy |               −0.27% |            +0.18% |        14/24 | −1.68% to +1.73%         |
+| Chromium / reverse | D/A prefetch    |               +2.26% |            +2.50% |         8/24 | −0.14% to +5.11%         |
+| Firefox / forward  | C/A control     |               −0.49% |            +0.05% |        14/24 | −0.86% to +0.73%         |
+| Firefox / forward  | B/A source copy |             +0.0004% |            +0.32% |        12/24 | −0.49% to +1.35%         |
+| Firefox / forward  | D/A prefetch    |               −1.56% |            −1.67% |        19/24 | −2.41% to −0.86%         |
+| Firefox / reverse  | C/A control     |               +1.01% |            +1.71% |        10/24 | −1.50% to +3.47%         |
+| Firefox / reverse  | B/A source copy |               +1.57% |            +2.83% |         8/24 | −0.51% to +5.01%         |
+| Firefox / reverse  | D/A prefetch    |               −0.21% |            −0.35% |        13/24 | −4.10% to +1.02%         |
+
+Baseline A medians are 739.20 and 735.75 ms for Chromium forward/reverse, and 825.5 and 994.0 ms for Firefox forward/reverse. These are host-specific observations, not a comparison of browser efficiency or a speedup over the older 1,056.75 ms baseline. Chromium cells and Firefox forward used four-logical-CPU Intel Xeon 6975P-C hosts; Firefox reverse used a four-logical-CPU AMD EPYC 9V74 host.
+
+Prefetch lowered Chromium's internal `sourceArchiveReadMs` medians from 50.80 to 40.25 ms and from 52.40 to 41.80 ms while complete imports became slower. Moving work across that phase boundary is not a whole-import saving. The favorable Firefox forward result does not override the reverse result or Chromium regressions.
+
+The [machine-readable analysis](../../builds/perf/20261119-round2/all-browser-analysis.json) retains every paired ratio, arm distribution, worst pair and runtime identity. Independent Chromium and Firefox artifact auditors checked every raw observation and recomputed the statistics. The separate [summary script](jmdict-browser-study-analyze.py) also reproduces all twelve comparisons. Its only numeric tolerance is floating-point summation rounding across Python versions.
+
+### Runtime, correctness and memory interpretation
+
+The Chromium runtime was Chrome for Testing `153.0.8010.12`. Both Firefox cells used the same official Mozilla Developer Edition `161.0b5`, build `20261118090429`, and geckodriver `0.37.1`, distributed from one verified bootstrap. Mozilla's official SHA512SUMS verifies the 91,913,948-byte archive; its SHA256 is `12d15a46911c71eccf78dd80a53ea7a8f32fa3c6160090bda0ba6571765f1cab`. Exact executable, `libxul`, geckodriver, host and package hashes are in preparation and command receipts. Node was `v22.22.0`.
+
+Every import used the locked 526,942-row JMdict archive and native OPFS storage. Executed paths retain 53 source banks, 15,574,114 compressed/transferred bytes, 171,092,992 decoded bytes, three workers, twelve parser groups/native fused calls, zero discarded rows or native fallbacks, and successful publication without housekeeping errors. D alone records one initial prefetch with a 3,226,520-byte decoded estimate. Identical content digests across arms supplement the expected row count and twelve archive-derived expression, reading and complete-glossary probes.
+
+Chromium repeats persisted probes after a complete browser restart. Firefox repeats them after a privileged extension reload from a neutral page and verifies that the background realm's `performance.timeOrigin` changed. **The Firefox check is an extension reload, not a whole-browser restart.** All 208 Firefox profiles are distinct; no import, cleanup or diagnostic error was suppressed. This official runtime/reload protocol succeeds where earlier patched-runtime attempts failed. Both runtime and reload-context handling changed, so the old failure's cause is not established.
+
+Firefox reports no `navigator.deviceMemory`, selecting the production 48 MiB recent-source cache. Its 3,231 cache hits out of 4,010 exact checks are consistent across all arms. Chromium has 4,010 cache hits. The **96 MiB source-prefetch cap is a separate budget**. Firefox's `dedupRecentSourceCacheBytes = 100,724,405` counts cumulative copied bytes, not retained or peak memory. All arms report the same 38,928,384-byte maximum individual parser WASM heap; this is not simultaneous worker or process-tree memory. Untimed RSS snapshots do not establish import peak memory. Stored-size, process-tree memory and lookup-latency qualification remain separate gates for any eventual runtime promotion.
+
+### Validation, retained failures and reproduction
+
+D passed 155 focused tests, relevant lint and TypeScript projects, all seven dry-build targets and the full unit suite: 617 files, 13,694 passed, 47 skipped. All five WASM files remain byte-identical to baseline. The first study driver passed nine contract tests; the Firefox helper passed twenty focused tests. Main/dev/test/bench types, JS, unit/options tests, all-target build, full Chromium/Firefox extension tests and the Chromium Anki matrix passed at the measured tooling source. Those ordinary CI tests exercise the tooling branch's unchanged runtime, while the separate study exercises the bundled candidate sources.
+
+Initial workflow run `44633439009` was rejected before any job or observation because a job-level environment expression referenced an unavailable `runner` context. The corrected workflow is the single complete study above. The measured tooling revision initially failed JSON registration and README hygiene checks; source `602b138474818a51b20a707a53456a4aff46c143` adds a concrete manifest schema, formatting and reference links. Its [CI run 44638388959](https://github.com/ManabiIO/manabitan/actions/runs/44638388959) passes all fifteen enabled jobs, and action, link, dependency and license checks pass. A report-only marker suppresses optional new performance cohorts while ordinary CI still runs. Historical run identities and failures remain in the evidence.
+
+Local receipts also retain the initial wrong test TypeScript invocation, a nonmatching test-name filter that skipped every test, subsequent correct passing commands, and an ESLint declaration-format correction. The skipped invocation is not counted as a pass. Temporary ENOSPC was resolved by moving only the extracted compiler installation and preserving its path; no source or observations were removed.
+
+[The evidence archive](../../builds/perf/20261119-round2/browser-evidence.tar.xz) preserves every file payload from all four original GitHub artifacts, plus independent auditors, raw job logs, local validation, failure records and publication receipts. [Its receipt](../../builds/perf/20261119-round2/browser-evidence.tar.xz.json) records original ZIP identities and the complete archive hash. An internal index hashes every member. ZIP container metadata is not reconstructed; the original payload bytes are preserved. Verify without extraction:
+
+```sh
+python3 dev/perf/import-study-evidence.py verify \
+  builds/perf/20261119-round2/browser-evidence.tar.xz
+```
+
+To regenerate the separate result cells, extract into a new empty directory and point the analyzer at the four artifact roots:
+
+```sh
+mkdir -p builds/perf/review-browser-evidence
+tar -xJf builds/perf/20261119-round2/browser-evidence.tar.xz \
+  -C builds/perf/review-browser-evidence
+python3 dev/perf/jmdict-browser-study-analyze.py \
+  builds/perf/review-browser-evidence/chromium-forward \
+  builds/perf/review-browser-evidence/chromium-reverse \
+  builds/perf/review-browser-evidence/firefox-forward \
+  builds/perf/review-browser-evidence/firefox-reverse \
+  --output builds/perf/review-browser-analysis.json
+```
+
+For a fresh study, follow the committed protocol to reconstruct and freeze the exact sources and runtime. Keep the browser/order cells separate and use a new evidence directory; the driver refuses to append or overwrite an attempted cohort. A fresh run is a new replication, not a replacement for these results.
+
+### Next independent candidate
+
+[PR #767](https://github.com/ManabiIO/manabitan/pull/767) separately tests cooperative task-turn overlap at product source `52a0108053837ff7a504c256606570e397ab93b0`, tree `92b35a642477e5a8161298e8c2e5d1881430508a`. It contains neither source-copy nor initial-prefetch changes. The first callback keeps its late turn; later callbacks start their owned turn before the unchanged sink and join both. A terminal fence preserves delivered cancellation before publication, including empty trailing groups and trailing parser errors. The witness resets at callback entry so a later failed sink cannot inherit a successful earlier overlap. Original sink/parser errors retain priority over turn failures.
+
+This candidate passed 331 focused tests, seventeen new regression cases, five targeted mutation checks, lint, both required type projects, seven dry builds, unchanged WASM checks, and the full 617-file suite with 13,683 passed and 47 skipped. Its separate frozen browser protocol compares A/C baseline and B/D identical candidate, reporting C/A and D/B controls plus B/A and D/A separately. Whole-import completion, including the terminal fence, is authoritative. Browser qualification is pending at this report checkpoint; no task-turn speedup is claimed.
