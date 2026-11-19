@@ -2914,6 +2914,23 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
+            // Cap the extra equality scan at 32 raw token-body bytes.
+            if (row_count > 0u && token_length >= 2u && token_length <= 34u) {
+                const TermRowMeta* previous_row = &rows[row_count - 1u];
+                const uint32_t previous_start = field == 0u ?
+                    previous_row->expression_start : previous_row->reading_start;
+                const uint32_t previous_length = field == 0u ?
+                    previous_row->expression_length : previous_row->reading_length;
+                // Adjacent spelling variants often share one key. The prior
+                // row already interned and validated these exact raw bytes;
+                // preserve the current row's separate reading-equality flag.
+                if (token_length == previous_length && content_bytes_equal_between(
+                        src, token_start + 1u, src, previous_start + 1u, token_length - 2u)) {
+                    string_indexes[field] = field == 0u ?
+                        expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
+                    continue;
+                }
+            }
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
