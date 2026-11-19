@@ -1,0 +1,599 @@
+From 1abf32cb49a8fdce289909c97737a91071457cc6 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Thu, 19 Nov 2026 13:49:55 -0500
+Subject: [PATCH] Encode artifact record fields directly into final buffers
+
+---
+ ext/js/dictionary/term-record-opfs-store.js | 218 ++++++++++------
+ test/term-record-field-encoding.test.js     | 263 ++++++++++++++++++++
+ 2 files changed, 399 insertions(+), 82 deletions(-)
+ create mode 100644 test/term-record-field-encoding.test.js
+
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index 6dc9d5a..d9e04a4 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -210,6 +210,69 @@ function isLosslessInt32Score(score) {
+     );
+ }
+ 
++/* eslint-disable @stylistic/semi */
++
++/**
++ * @typedef {object} ArtifactRecordFieldsPlan
++ * @property {boolean} compact
++ * @property {boolean} integerScores
++ * @property {number[]} scores
++ * @property {Map<number, number>} scoreIndexes
++ * @property {Uint16Array|null} inlineScoreIndexes
++ */
++
++/**
++ * Keeps only the score dictionary while content validation visits each row.
++ * The final offsets, lengths and score keys can then be written in place.
++ * This plan belongs to one synchronous run and must not cross an await.
++ * @param {number[]|Int32Array|Float64Array} scoreList
++ * @param {number} maximumRows
++ * @returns {ArtifactRecordFieldsPlan}
++ */
++function createArtifactRecordFieldsPlan(scoreList, maximumRows) {
++    const integerScores = scoreList instanceof Int32Array
++    return {
++        compact: true,
++        integerScores,
++        scores: [],
++        scoreIndexes: new Map(),
++        inlineScoreIndexes: integerScores && maximumRows >= COMPACT_SCORE_TABLE_MIN_ROWS ?
++            new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
++            null,
++    }
++}
++
++/**
++ * @param {ArtifactRecordFieldsPlan} plan
++ * @param {number} score
++ * @param {number} contentLength
++ */
++function addArtifactRecordFieldsPlanRow(plan, score, contentLength) {
++    if (!plan.compact) { return }
++    if (contentLength >= U16_NULL || (!plan.integerScores && !isLosslessInt32Score(score))) {
++        plan.compact = false
++        return
++    }
++    const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS
++    const {inlineScoreIndexes, scoreIndexes, scores} = plan
++    const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length
++    const scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1)
++    if (scoreIndex >= 0) { return }
++    const nextIndex = scores.length
++    if (nextIndex >= U16_NULL) {
++        plan.compact = false
++        return
++    }
++    if (useInlineScore) {
++        inlineScoreIndexes[inlineScore] = nextIndex + 1
++    } else {
++        scoreIndexes.set(score, nextIndex)
++    }
++    scores.push(score)
++}
++
++/* eslint-enable @stylistic/semi */
++
+ /**
+  * @param {Uint8Array} bytes
+  * @param {number} count
+@@ -2262,6 +2325,8 @@ export class TermRecordOpfsStore {
+         return {encodeMs, appendWriteMs};
+     }
+ 
++    /* eslint-disable @stylistic/semi */
++
+     /**
+      * @param {TermRecordShardState} state
+      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+@@ -2290,6 +2355,7 @@ export class TermRecordOpfsStore {
+             // across runs. The row loop itself is synchronous.
+             const tValidationStart = safePerformance.now();
+             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
++            const recordFieldsPlan = createArtifactRecordFieldsPlan(chunk.scoreList, Math.min(count - runStart, runRowLimit))
+             let runEnd = runStart;
+             let minContentOffset = Number.POSITIVE_INFINITY;
+             let maxContentOffset = Number.NEGATIVE_INFINITY;
+@@ -2312,6 +2378,7 @@ export class TermRecordOpfsStore {
+                 }
+                 minContentOffset = nextMinContentOffset;
+                 maxContentOffset = nextMaxContentOffset;
++                addArtifactRecordFieldsPlanRow(recordFieldsPlan, chunk.scoreList[runEnd] ?? 0, contentLength)
+                 ++runEnd;
+             }
+             const runContentOffsetBase = minContentOffset === Number.POSITIVE_INFINITY ? 0 : minContentOffset;
+@@ -2355,6 +2422,7 @@ export class TermRecordOpfsStore {
+                 runPlan,
+                 preparedLookupIndex?.bytes ?? null,
+                 runContentOffsetBase,
++                recordFieldsPlan,
+             );
+             encodeMs += safePerformance.now() - tEncodeStart;
+             validationMs += runValidationMs + encodedChunk.validationMs;
+@@ -2377,6 +2445,8 @@ export class TermRecordOpfsStore {
+         return {encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
+     }
+ 
++    /* eslint-enable @stylistic/semi */
++
+     /**
+      * Builds offset-independent lookup sidecars before term content persistence
+      * completes. Exact range keys ensure offset-driven shard splits safely fall
+@@ -5358,6 +5428,8 @@ export class TermRecordOpfsStore {
+         };
+     }
+ 
++    /* eslint-disable @stylistic/semi */
++
+     /**
+      * Encodes the hot artifact path as columnar random-access fields. Content
+      * lengths use u16 and repeated scores use per-chunk u16 dictionary keys;
+@@ -5366,102 +5438,80 @@ export class TermRecordOpfsStore {
+      * @param {number[]|Uint32Array|Float64Array} contentOffsets
+      * @param {number[]|Uint32Array} contentLengths
+      * @param {number} contentOffsetBase
++     * @param {ArtifactRecordFieldsPlan|null} [preparedPlan] Prepared in this synchronous validation run.
+      * @returns {Uint8Array}
+      */
+-    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+-        const count = chunk.rowCount;
+-        const useFixedContentSpan = hasFixedContentSpan(chunk, count);
+-        const offsets = new Uint32Array(count);
+-        const lengths = new Uint16Array(count);
+-        const scoreKeys = new Uint16Array(count);
+-        /** @type {number[]} */
+-        const scores = [];
+-        const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
+-        /** @type {Map<number, number>} */
+-        const scoreIndexes = new Map();
++    _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase, preparedPlan = null) {
++        const count = chunk.rowCount
++        const useFixedContentSpan = hasFixedContentSpan(chunk, count)
++        const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0))
+         if (useFloat64Scores) {
+-            const output = new Uint8Array(count * FLOAT64_SCORE_RECORD_FIELDS_BYTES);
+-            const view = new DataView(output.buffer);
++            const output = new Uint8Array(count * FLOAT64_SCORE_RECORD_FIELDS_BYTES)
++            const view = new DataView(output.buffer)
+             for (let i = 0; i < count; ++i) {
+-                const fieldOffset = i * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
+-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+-                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+-                view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true);
+-                view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
+-                view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
++                const fieldOffset = i * FLOAT64_SCORE_RECORD_FIELDS_BYTES
++                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan)
++                const contentLength = getArtifactContentLength(chunk, contentLengths, i)
++                view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true)
++                view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true)
++                view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true)
+             }
+-            return output;
++            return output
+         }
+-        // Common integer scores use a bounded table. Store the key plus one
+-        // so zero can mark an unseen score without initializing the table.
+-        const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+-            new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
+-            null;
+-        let compact = true;
+-        for (let i = 0; i < count; ++i) {
+-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+-            if (contentLength >= U16_NULL) {
+-                compact = false;
+-                break;
+-            }
+-            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+-            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+-            const score = chunk.scoreList[i] ?? 0;
+-            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+-            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+-            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+-            if (scoreIndex < 0) {
+-                scoreIndex = scores.length;
+-                if (scoreIndex >= U16_NULL) {
+-                    compact = false;
+-                    break;
+-                }
+-                if (useInlineScore) {
+-                    inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+-                } else {
+-                    scoreIndexes.set(score, scoreIndex);
+-                }
+-                scores.push(score);
++        const plan = preparedPlan ?? createArtifactRecordFieldsPlan(chunk.scoreList, count)
++        if (preparedPlan === null) {
++            for (let i = 0; i < count && plan.compact; ++i) {
++                addArtifactRecordFieldsPlanRow(plan, chunk.scoreList[i] ?? 0, getArtifactContentLength(chunk, contentLengths, i))
+             }
+-            scoreKeys[i] = scoreIndex;
+         }
++        const {scores, scoreIndexes, inlineScoreIndexes} = plan
+         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
+         (scores.length * 4) +
+-        (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW);
++        (count * COMPACT_RECORD_FIELDS_BYTES_PER_ROW)
+         if (
+-            !compact ||
++            !plan.compact ||
+             scores.length === 0 ||
+             compactByteLength >= count * LOOKUP_INDEX_RECORD_FIELDS_BYTES
+         ) {
+-            const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
+-            const legacyU32 = new Uint32Array(legacy.buffer);
+-            const legacyI32 = new Int32Array(legacy.buffer);
++            const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES)
++            const legacyU32 = new Uint32Array(legacy.buffer)
++            const legacyI32 = new Int32Array(legacy.buffer)
+             for (let i = 0; i < count; ++i) {
+-                const fieldOffset = i * 3;
+-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+-                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+-                legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+-                legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
+-                legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
+-            }
+-            return legacy;
+-        }
+-        const output = new Uint8Array(compactByteLength);
+-        const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4);
+-        header[0] = COMPACT_RECORD_FIELDS_MAGIC;
+-        header[1] = count;
+-        header[2] = scores.length;
+-        header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT;
+-        let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
+-        new Int32Array(output.buffer, cursor, scores.length).set(scores);
+-        cursor += scores.length * 4;
+-        new Uint32Array(output.buffer, cursor, count).set(offsets);
+-        cursor += count * 4;
+-        new Uint16Array(output.buffer, cursor, count).set(lengths);
+-        cursor += count * 2;
+-        new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
+-        return output;
++                const fieldOffset = i * 3
++                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan)
++                const contentLength = getArtifactContentLength(chunk, contentLengths, i)
++                legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase
++                legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength
++                legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0
++            }
++            return legacy
++        }
++        const output = new Uint8Array(compactByteLength)
++        const header = new Uint32Array(output.buffer, 0, COMPACT_RECORD_FIELDS_HEADER_BYTES / 4)
++        header[0] = COMPACT_RECORD_FIELDS_MAGIC
++        header[1] = count
++        header[2] = scores.length
++        header[3] = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT
++        let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES
++        new Int32Array(output.buffer, cursor, scores.length).set(scores)
++        cursor += scores.length * 4
++        const offsets = new Uint32Array(output.buffer, cursor, count)
++        cursor += count * 4
++        const lengths = new Uint16Array(output.buffer, cursor, count)
++        cursor += count * 2
++        const scoreKeys = new Uint16Array(output.buffer, cursor, count)
++        for (let i = 0; i < count; ++i) {
++            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan)
++            const contentLength = getArtifactContentLength(chunk, contentLengths, i)
++            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase
++            lengths[i] = contentLength < 0 ? U16_NULL : contentLength
++            const score = chunk.scoreList[i] ?? 0
++            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS
++            scoreKeys[i] = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length ?
++                inlineScoreIndexes[inlineScore] - 1 :
++                /** @type {number} */ (scoreIndexes.get(score))
++        }
++        return output
+     }
+ 
+     /**
+@@ -5471,9 +5521,10 @@ export class TermRecordOpfsStore {
+      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
+      * @param {Uint8Array|null} [preparedLookupIndexBytes=null]
+      * @param {number|null} [validatedContentOffsetBase=null]
++     * @param {ArtifactRecordFieldsPlan|null} [recordFieldsPlan=null] Prepared in the same synchronous validation run.
+      * @returns {Promise<{contentOffsetBase: number, lookupIndexBytes: Uint8Array, recordFields: Uint8Array, recordFieldsFormat: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
+      */
+-    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null) {
++    async _encodeArtifactChunkRecords(chunk, contentOffsets, contentLengths, preinternedPlan = null, preparedLookupIndexBytes = null, validatedContentOffsetBase = null, recordFieldsPlan = null) {
+         if (chunk.rowCount === 0) {
+             return {
+                 contentOffsetBase: 0,
+@@ -5510,6 +5561,7 @@ export class TermRecordOpfsStore {
+             contentOffsets,
+             contentLengths,
+             contentOffsetBase,
++            recordFieldsPlan,
+         );
+         // Compact fields are strictly smaller than legacy fields; float64 fields
+         // have their own fixed width. Infer the format from the emitted bytes
+@@ -5551,6 +5603,8 @@ export class TermRecordOpfsStore {
+         };
+     }
+ 
++    /* eslint-enable @stylistic/semi */
++
+     /**
+      * @param {TermRecordShardState} state
+      * @param {number} firstId
+diff --git a/test/term-record-field-encoding.test.js b/test/term-record-field-encoding.test.js
+new file mode 100644
+index 0000000..c2b4232
+--- /dev/null
++++ b/test/term-record-field-encoding.test.js
+@@ -0,0 +1,263 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {createHash} from 'node:crypto'
++import {describe, expect, test, vi} from 'vitest'
++import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
++
++const SCORE_VALUES = [-256, 255, 256, -257, -2147483648, 2147483647, 0]
++
++/** @typedef {'uniform'|'mixed'|'unique'|'float'|'array'|'tailFloat'|'wide'|'fixed'|'references'} VectorKind */
++/** @typedef {{name: string, count: number, kind: VectorKind, format: number, sha256: string}} Vector */
++
++// Exact output from develop d829f5b6e6a75ee8859d38d537d224ec33c4930e.
++// These freeze the persisted format independently of the new encoder.
++/** @type {Vector[]} */
++const vectors = [
++    {name: 'empty', count: 0, kind: 'uniform', format: 1, sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'},
++    {name: 'equal-size fallback', count: 5, kind: 'uniform', format: 1, sha256: '7cf1373105686e8612bef232e9c31c64ef1b9796cfc10fc2e28469fc818d34fb'},
++    {name: 'first compact size', count: 6, kind: 'uniform', format: 2, sha256: '7a0ecfa9f4e9b141425ee93a325887b0e08a3d7f81f7c746113a1669e61782e1'},
++    {name: 'below inline table', count: 63, kind: 'mixed', format: 2, sha256: 'd3ef9ee7eb3e4520851057a0baf0f32f87a275fc03eb763920c47bccbc3523b6'},
++    {name: 'inline table boundary', count: 64, kind: 'mixed', format: 2, sha256: '941a207bcf526fab94afccd1d3813a89db4c50308145b69d74e493ca9bb6d3f7'},
++    {name: 'odd compact columns', count: 65, kind: 'mixed', format: 2, sha256: 'bfc14d26eb02c71c301d29c7b6cf0a53902cedd865f99b34cfef2703f8796f5f'},
++    {name: 'ordinary array scores', count: 128, kind: 'array', format: 2, sha256: '031d1e93353b7a7baa31fc9bcc577ba5c7c760c6e39977b6595d5201d5a9ea00'},
++    {name: 'wide length at last row', count: 128, kind: 'wide', format: 1, sha256: '41bb459d750ecdeddbac08cdb289d98714a06469098f16669c8e2bbd43f5d8d3'},
++    {name: 'distinct-score fallback', count: 257, kind: 'unique', format: 1, sha256: '17c81d492b8ccc1312b655b134c683bba90e6d1bae08eb6db2b268ef7ee1248b'},
++    {name: 'row segment boundary', count: 30000, kind: 'mixed', format: 2, sha256: '12351a4861827df2a997011961b96966a164ca5e1b518329bfe620111c90d4b2'},
++    {name: 'last whole-index row count', count: 65534, kind: 'mixed', format: 2, sha256: '27cccc9679c4d0b902bf2c7e2bacafc4c7cced6a0dbdbc4d902c893b81613be3'},
++    {name: 'uint16 row sentinel', count: 65535, kind: 'mixed', format: 2, sha256: '11f331ba25dc4efc4c2c82d49a39e442de7be64b33797ffdcb804edb0d0dcc35'},
++    {name: 'wide score cardinality', count: 65536, kind: 'unique', format: 1, sha256: '6fe474816f5c5e544540ddceb72f3601f7e7e2b9cd93fdbaa69fefe0d9c01c7f'},
++    {name: 'fractional wide and negative-zero scores', count: 65, kind: 'float', format: 3, sha256: '5b5471e9d5a888cfeb6cc1633580e82ecb844ba79faddca041e90ee5a917e159'},
++    {name: 'float score beyond row count', count: 8, kind: 'tailFloat', format: 3, sha256: '3885a6f4e16ff92e9b51c66813e428a06d66553a4f34613b95d7b3a96e4f3abe'},
++    {name: 'fixed spans above 4 GiB', count: 65, kind: 'fixed', format: 2, sha256: 'a18f0182eb0bee2fca342b5887e70f5ac4b556b0153708ee9dfd845aadbcd034'},
++    {name: 'resolved duplicate content references', count: 65, kind: 'references', format: 2, sha256: 'd6d35ef1d07baeb893138131c178ef773003558b8dab62434aaafff6878fda0d'},
++]
++
++/**
++ * @param {Vector} vector
++ * @returns {{chunk: Parameters<TermRecordOpfsStore['_encodeArtifactRecordFields']>[0], offsets: Float64Array, lengths: number[], base: number}}
++ */
++function createVector({count, kind}) {
++    const base = 0x100000000 + 128
++    // Non-zero view offsets catch assumptions that a typed column owns its buffer.
++    const typedScores = new Int32Array(count + 4).subarray(2, count + 2)
++    for (let i = 0; i < count; ++i) {
++        typedScores[i] = kind === 'uniform' ? 7 : (kind === 'unique' ? i : SCORE_VALUES[i % SCORE_VALUES.length])
++    }
++    /** @type {number[]|Int32Array|Float64Array} */
++    let scoreList = typedScores
++    switch (kind) {
++        case 'array': {
++            scoreList = [...typedScores]
++            delete scoreList[17]
++
++            break
++        }
++        case 'float': {
++            const values = [1.5, 0, -0, 2147483648, 0.1, -2.25]
++            scoreList = Float64Array.from({length: count}, (_, i) => values[i % values.length])
++
++            break
++        }
++        case 'tailFloat': {
++            scoreList = new Float64Array(count + 1).fill(7)
++            scoreList[count] = 0.5
++
++            break
++        }
++    // No default
++    }
++    const offsets = Float64Array.from({length: count}, (_, i) => (i % 17 === 0 ? -1 : base + ((i * 73) % 199999)))
++    const lengths = Array.from({length: count}, (_, i) => [0, 1, 65534, -1][i % 4])
++    /** @type {Parameters<TermRecordOpfsStore['_encodeArtifactRecordFields']>[0]} */
++    const chunk = {rowCount: count, scoreList}
++    if (kind === 'wide') { lengths[count - 1] = 65535 }
++    if (kind === 'fixed') {
++        chunk.fixedContentOffsetBase = base
++        chunk.fixedContentLength = 7
++    }
++    if (kind === 'references') {
++        chunk.resolvedContentReferences = {
++            uniqueIndexList: Uint32Array.from({length: count}, (_, i) => i % 5),
++            offsets: new Float64Array([base + 64, base, base + 128, base + 32, base + 96]),
++            lengths: new Uint32Array([1, 0, 65534, 3, 8]),
++        }
++    }
++    return {chunk, offsets, lengths, base}
++}
++
++/**
++ * @param {Uint8Array} bytes
++ * @returns {string}
++ */
++function digest(bytes) {
++    return createHash('sha256').update(bytes).digest('hex')
++}
++
++/**
++ * @param {number} count
++ * @returns {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[1]}
++ */
++function createAppendChunk(count) {
++    const key = new TextEncoder().encode('語')
++    return {
++        dictionary: 'Record field encoding',
++        rowCount: count,
++        expressionBytesList: new Array(count).fill(key),
++        readingBytesList: new Array(count).fill(key),
++        readingEqualsExpressionList: new Uint8Array(count).fill(1),
++        scoreList: new Float64Array(count).fill(7),
++        sequenceList: new Int32Array(count).fill(-1),
++    }
++}
++
++/**
++ * Only the lookup payload is stubbed; these tests exercise the real run
++ * validation, field encoding and owned record-field bytes before persistence.
++ * @param {number[]} counts
++ * @returns {NonNullable<Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[7]>}
++ */
++function createPreparedLookupIndexes(counts) {
++    const key = new TextEncoder().encode('語')
++    /** @type {NonNullable<Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[7]>} */
++    const indexes = new Map()
++    let start = 0
++    for (const count of counts) {
++        indexes.set(`${start}:${count}`, {
++            bytes: new Uint8Array([0]),
++            preinternedPlan: {
++                stringsBuffer: key,
++                stringLengths: Uint16Array.of(key.length),
++                stringOffsets: Uint32Array.of(0),
++                expressionIndexes: new Uint32Array(count),
++                readingIndexes: new Uint32Array(count),
++            },
++        })
++        start += count
++    }
++    return indexes
++}
++
++describe('artifact record-field byte compatibility', () => {
++    test.each(vectors)('$name', (vector) => {
++        const store = new TermRecordOpfsStore()
++        const {chunk, offsets, lengths, base} = createVector(vector)
++        const bytes = store._encodeArtifactRecordFields(chunk, offsets, lengths, base)
++        expect(digest(bytes)).toBe(vector.sha256)
++        if (vector.format === 2) {
++            expect(new DataView(bytes.buffer).getUint32(12, true)).toBe(2)
++        } else {
++            expect(bytes.byteLength).toBe(vector.count * (vector.format === 3 ? 16 : 12))
++        }
++        // A later run and source mutation cannot change already encoded bytes.
++        chunk.scoreList.fill(0)
++        offsets.fill(0)
++        lengths.fill(0)
++        store._encodeArtifactRecordFields(chunk, offsets, lengths, base)
++        expect(digest(bytes)).toBe(vector.sha256)
++    })
++
++    test('plans the next run after awaited appends and preserves late float scores', async () => {
++        const count = 30001
++        const chunk = createAppendChunk(count)
++        const offsets = new Float64Array(count)
++        const lengths = new Uint32Array(count).fill(8)
++        const store = new TermRecordOpfsStore()
++        /** @type {Array<{fields: Uint8Array, format: number}>} */
++        const outputs = []
++        vi.spyOn(store, '_appendEncodedChunk').mockImplementation(async (_state, _first, _count, _dictionary, _base, _lookup, fields, format) => {
++            outputs.push({fields: /** @type {Uint8Array} */ (fields), format: /** @type {number} */ (format)})
++            if (outputs.length === 1) {
++                chunk.scoreList[30000] = -0
++                lengths[30000] = 65535
++            }
++        })
++        await store._encodeAndAppendArtifactChunkForState(
++            /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
++            chunk,
++            1,
++            offsets,
++            lengths,
++            null,
++            'raw',
++            createPreparedLookupIndexes([30000, 1]),
++        )
++        expect(outputs.map(({format}) => format)).toEqual([2, 3])
++        const tail = new DataView(outputs[1].fields.buffer)
++        expect(tail.getUint32(4, true)).toBe(65535)
++        expect(Object.is(tail.getFloat64(8, true), -0)).toBe(true)
++    })
++
++    test('revalidates content references after awaited appends', async () => {
++        const count = 30001
++        const chunk = createAppendChunk(count)
++        const refs = {
++            uniqueIndexList: new Uint32Array(count),
++            offsets: new Float64Array([0]),
++            lengths: new Uint32Array([8]),
++        }
++        chunk.resolvedContentReferences = refs
++        const store = new TermRecordOpfsStore()
++        const append = vi.spyOn(store, '_appendEncodedChunk').mockImplementation(async () => {
++            refs.offsets[0] = Number.NaN
++        })
++        await expect(store._encodeAndAppendArtifactChunkForState(
++            /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
++            chunk,
++            1,
++            new Float64Array(0),
++            new Uint32Array(0),
++            null,
++            'raw',
++            createPreparedLookupIndexes([30000, 1]),
++        )).rejects.toThrow('Invalid term content offset')
++        expect(append).toHaveBeenCalledTimes(1)
++    })
++
++    test('keeps score dictionaries local to offset-driven run splits', async () => {
++        const chunk = createAppendChunk(66)
++        chunk.scoreList = new Int32Array(66).fill(9)
++        chunk.scoreList[0] = -5
++        chunk.scoreList[1] = 7
++        const offsets = new Float64Array(66).fill(0x100000000)
++        offsets[0] = 0
++        offsets[1] = 8
++        const lengths = new Uint32Array(66).fill(8)
++        const store = new TermRecordOpfsStore()
++        /** @type {Array<{count: number, fields: Uint8Array, format: number}>} */
++        const outputs = []
++        vi.spyOn(store, '_appendEncodedChunk').mockImplementation(async (_state, _first, count, _dictionary, _base, _lookup, fields, format) => {
++            outputs.push({count, fields: /** @type {Uint8Array} */ (fields), format: /** @type {number} */ (format)})
++        })
++        await store._encodeAndAppendArtifactChunkForState(
++            /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
++            chunk,
++            1,
++            offsets,
++            lengths,
++            null,
++            'raw',
++            createPreparedLookupIndexes([2, 64]),
++        )
++        expect(outputs.map(({count, format}) => [count, format])).toEqual([[2, 1], [64, 2]])
++        const tail = new DataView(outputs[1].fields.buffer)
++        expect(tail.getUint32(8, true)).toBe(1)
++        expect(tail.getInt32(16, true)).toBe(9)
++    })
++})
+-- 
+2.52.0
+

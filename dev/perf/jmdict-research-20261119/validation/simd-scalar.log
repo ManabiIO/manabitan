@@ -1,0 +1,26 @@
+{"identical": true, "results": [{"root": "/workspace/scratch/cb98f2e06b71/manabitan", "output": "/workspace/scratch/cb98f2e06b71/simd-scalar-parity/manabitan.wasm", "arguments": ["--target=wasm32-freestanding", "-O3", "-matomics", "-mbulk-memory", "-nostdlib", "-Wl,--no-entry", "-Wl,--shared-memory", "-Wl,--max-memory=4294967296", "-Wl,--export=wasm_reset_heap", "-Wl,--export=wasm_alloc", "-Wl,--export=wasm_get_last_parse_capacity", "-Wl,--export=wasm_get_last_content_capacity", "-Wl,--export=inflate_and_join_term_banks", "-Wl,--export=inflate_zip_media_batch", "-Wl,--export=parse_term_bank", "-Wl,--export=parse_term_bank_with_media_hints", "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup", "-Wl,--export=build_term_string_plan", "-Wl,--export=encode_term_lookup_index", "-Wl,--export=compact_term_lookup_keys", "-Wl,--export=encode_term_content", "-Wl,--export=encode_term_content_no_hash", "-Wl,--export=encode_term_content_token_binary", "-Wl,--export=encode_term_content_token_binary_dedup", "-Wl,--strip-all"], "byteLength": 52347, "sha256": "529d64b94c85a64b4673b92016cd796278b813220eea25850a48ce85916ab8e2"}, {"root": "/workspace/scratch/cb98f2e06b71/manabitan-simd", "output": "/workspace/scratch/cb98f2e06b71/simd-scalar-parity/manabitan-simd.wasm", "arguments": ["--target=wasm32-freestanding", "-O3", "-matomics", "-mbulk-memory", "-nostdlib", "-Wl,--no-entry", "-Wl,--shared-memory", "-Wl,--max-memory=4294967296", "-Wl,--export=wasm_reset_heap", "-Wl,--export=wasm_alloc", "-Wl,--export=wasm_get_last_parse_capacity", "-Wl,--export=wasm_get_last_content_capacity", "-Wl,--export=inflate_and_join_term_banks", "-Wl,--export=inflate_zip_media_batch", "-Wl,--export=parse_term_bank", "-Wl,--export=parse_term_bank_with_media_hints", "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup", "-Wl,--export=build_term_string_plan", "-Wl,--export=encode_term_lookup_index", "-Wl,--export=compact_term_lookup_keys", "-Wl,--export=encode_term_content", "-Wl,--export=encode_term_content_no_hash", "-Wl,--export=encode_term_content_token_binary", "-Wl,--export=encode_term_content_token_binary_dedup", "-Wl,--strip-all"], "byteLength": 52347, "sha256": "529d64b94c85a64b4673b92016cd796278b813220eea25850a48ce85916ab8e2"}]}
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v4.1.12 /workspace/scratch/cb98f2e06b71/manabitan-simd
+
+
+ Test Files  1 passed (1)
+      Tests  303 passed (303)
+   Start at  14:39:26
+   Duration  1.67s (transform 244ms, setup 255ms, import 136ms, tests 786ms, environment 0ms)
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+

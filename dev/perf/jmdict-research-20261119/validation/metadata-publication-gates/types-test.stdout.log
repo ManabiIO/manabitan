@@ -1,0 +1,4 @@
+
+> yomitan@0.0.0 test:ts:test
+> npx tsc --noEmit --project test/jsconfig.typecheck.json
+

@@ -1,0 +1,64 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:ts:test
+> npx tsc --noEmit --project test/jsconfig.typecheck.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 build:dictionary-wasm
+> node ./dev/bin/build-dictionary-wasm.js --check
+
+{
+  "mode": "check",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "targets": [
+    {
+      "name": "term-content-canonical-scan-v1.wasm",
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    {
+      "name": "term-bank-parser.wasm",
+      "sha256": "cbdeafe27257aff9e92acdb6dbd1e245e1f38a008bd4f6657e0a7e8d9bf48024"
+    }
+  ]
+}
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:build
+> node ./dev/bin/build.js --dryRun --all
+
+Version: 0.0.0.0...
+Building chrome...
+
+Building chrome-dev...
+
+Building chrome-playwright...
+
+Building firefox...
+
+Building firefox-dev...
+
+Building firefox-android...
+
+Building edge...
+
+Restoring manifest...

@@ -1,0 +1,13 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:ts:main
+> npx tsc --noEmit --project jsconfig.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:ts:test
+> npx tsc --noEmit --project test/jsconfig.typecheck.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+test/zstd-term-content-worker-batch.test.js(80,18): error TS2306: File '/workspace/scratch/cb98f2e06b71/manabitan-dispatch/ext/js/dictionary/zstd-term-content-compression-worker.js' is not a module.

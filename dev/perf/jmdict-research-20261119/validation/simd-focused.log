@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v4.1.12 /workspace/scratch/cb98f2e06b71/manabitan-simd
+
+
+ Test Files  6 passed (6)
+      Tests  579 passed (579)
+   Start at  14:37:46
+   Duration  8.19s (transform 1.59s, setup 79ms, import 2.37s, tests 4.36s, environment 1ms)
+

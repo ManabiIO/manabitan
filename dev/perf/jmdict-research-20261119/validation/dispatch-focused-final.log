@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v4.1.12 /workspace/scratch/cb98f2e06b71/manabitan-dispatch
+
+
+ Test Files  7 passed (7)
+      Tests  64 passed (64)
+   Start at  15:01:17
+   Duration  2.44s (transform 226ms, setup 128ms, import 277ms, tests 537ms, environment 1ms)
+

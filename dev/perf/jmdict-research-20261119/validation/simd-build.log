@@ -1,0 +1,27 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 build:dictionary-wasm
+> node ./dev/bin/build-dictionary-wasm.js --write
+
+{
+  "mode": "write",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "targets": [
+    {
+      "name": "term-content-canonical-scan-v1.wasm",
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    {
+      "name": "term-bank-parser.wasm",
+      "sha256": "cbdeafe27257aff9e92acdb6dbd1e245e1f38a008bd4f6657e0a7e8d9bf48024"
+    }
+  ]
+}
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 build:libs
+> node ./dev/bin/build-libs.js
+

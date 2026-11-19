@@ -1,0 +1,36 @@
+--- cache-copy-screen.mjs
++++ uint32-copy-screen.mjs
+@@ -5,6 +5,7 @@
+ import {fileURLToPath, pathToFileURL} from 'node:url'
+ import path from 'node:path'
+ import os from 'node:os'
++import {copySharedWords4, copySharedWords8} from './uint32-copy-prototype.mjs'
+ 
+ const {values} = parseArgs({options: {
+     'baseline-root': {type: 'string'},
+@@ -23,6 +24,7 @@
+     [baselineRoot, 'ext/js/dictionary/dictionary-database.js'],
+     [baselineRoot, 'ext/js/dictionary/term-bank-wasm-parser.js'],
+     [baselineRoot, 'ext/js/dictionary/term-bank-experiments.js'],
++    ['/workspace/scratch/cb98f2e06b71', 'uint32-copy-prototype.mjs'],
+ ]
+ const snapshots = await Promise.all(sourceFiles.map(async ([root, file]) => ({root, file, bytes: await readFile(path.join(root, file))})))
+ const sourceHashes = snapshots.map(({root, file, bytes}) => ({root, file, sha256: sha256(bytes)}))
+@@ -116,6 +118,8 @@
+         return owned
+     },
+     aligned: candidateCopy,
++    words4: copySharedWords4,
++    words8: copySharedWords8,
+ }
+ const hostBefore = {loadavg: os.loadavg(), uptimeSeconds: os.uptime()}
+ const results = []
+@@ -184,6 +188,8 @@
+     lockSha256: sha256(lockBytes),
+     wasmSha256: sha256(wasmBytes),
+     runnerSha256: sha256(await readFile(fileURLToPath(import.meta.url))),
++    originalRunnerSha256: sha256(await readFile(new URL('./cache-copy-screen.mjs', import.meta.url))),
++    prototypeNote: 'Exploratory Uint32 copy candidates, four/eight-word unrolling; raw integers preserve all bit patterns; private sources retain slice; exact-size allocation and private ownership unchanged',
+     outputDigest: expectedDigest,
+     node: process.version,
+     v8: process.versions.v8,

@@ -1,0 +1,7 @@
+{"phase":"malformed-differential","cases":17050,"comparisons":68200,"malformedOracleCases":9479}
+{"phase":"boundaries","cases":24,"comparisons":68776,"malformedOracleCases":9527}
+{"phase":"string-simd-boundaries","stringBoundaryCases":576,"rawByteCases":32768,"comparisons":103848,"malformedOracleCases":10039}
+{"phase":"full-corpus","dictionary":"jmdict","rows":526942,"sourceBytes":171092992,"banks":53,"metadataDigest":"04849fdc881e2b11b267f009ea5a386a2bba1959f607be28352e35f9c9496ec7"}
+{"phase":"full-corpus","dictionary":"jmnedict","rows":667942,"sourceBytes":45421175,"banks":67,"metadataDigest":"89b16dd429454cb654d8683bb930e6527daa668625cfd045d594e12ebdb04b9e"}
+{"phase":"full-corpus","dictionary":"jitendex","rows":435448,"sourceBytes":537538792,"banks":218,"metadataDigest":"165ba4a50c2a323505e441a035094dfc2ae12143058dea9155fa6071d13a77a4"}
+{"complete":true,"comparisons":104186,"malformedOracleCases":10039,"dictionaries":3}

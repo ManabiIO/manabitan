@@ -1,0 +1,39 @@
+
+ RUN  v4.1.12 /workspace/scratch/cb98f2e06b71/manabitan
+
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: invalid XML: no element found: line 1, column 0.
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: invalid XML: no element found: line 1, column 27.
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: unexpected XML root 'preferences'; expected 'map'.
+Unexpected ownership or mode for /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: 10002 10001 600; expected app UID 10001.
+Failed to restore org.mozilla.firefox to its default enabled state.
+Failed to restore org.mozilla.firefox to its default enabled state.
+Unexpected ownership or mode for /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: 10002 10001 600; expected app UID 10001.
+Failed to restore org.mozilla.firefox to its default enabled state.
+Firefox process remained alive after disabling org.mozilla.firefox; refusing to edit cached preferences.
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: no element found: line 1, column 0
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: no element found: line 1, column 13
+Unexpected authoritative Fenix preferences XML root at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: 'preferences'
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: no element found: line 1, column 0
+Fenix did not retain pref_key_remote_debugging=true after the Firefox Android install ACK.
+Sourcemap for "/workspace/scratch/cb98f2e06b71/manabitan/ext/lib/linkedom.js" points to missing source files
+Sourcemap for "/workspace/scratch/cb98f2e06b71/manabitan/ext/lib/parse5.js" points to missing source files
+1:54:03 PM [vite] (ssr) Failed to load source map for /workspace/scratch/cb98f2e06b71/manabitan/ext/js/dictionary/mdx/vendor/js-mdict/utils.js.
+Error: An error occurred while trying to read the map file at utils.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/cb98f2e06b71/manabitan/ext/js/dictionary/mdx/vendor/js-mdict/utils.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/cb98f2e06b71/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/cb98f2e06b71/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+1:54:03 PM [vite] (ssr) Failed to load source map for /workspace/scratch/cb98f2e06b71/manabitan/ext/js/dictionary/mdx/vendor/js-mdict/ripemd128.js.
+Error: An error occurred while trying to read the map file at ripemd128.js.map
+Error: ENOENT: no such file or directory, open '/workspace/scratch/cb98f2e06b71/manabitan/ext/js/dictionary/mdx/vendor/js-mdict/ripemd128.js.map'
+    at open (node:internal/fs/promises:1345:25)
+    at Object.readFile (node:internal/fs/promises:2003:14)
+    at extractSourcemapFromFile (file:///workspace/scratch/cb98f2e06b71/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:11154:53)
+    at loadAndTransform (file:///workspace/scratch/cb98f2e06b71/manabitan/node_modules/vite/dist/node/chunks/dep-CkSfqg8D.js:36015:27)
+
+ Test Files  6 passed (6)
+      Tests  335 passed (335)
+   Start at  13:53:09
+   Duration  58.08s (transform 3.33s, setup 65ms, import 4.71s, tests 52.22s, environment 1ms)
+

@@ -1,0 +1,6 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:ts:test
+> npx tsc --noEmit --project test/jsconfig.typecheck.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.

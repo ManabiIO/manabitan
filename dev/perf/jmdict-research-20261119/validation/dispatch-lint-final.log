@@ -1,0 +1,112 @@
+{"file": "ext/js/dictionary/zstd-term-content-compression-worker.js"}
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+{"file": "test/zstd-term-content-pool.test.js"}
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+{"file": "test/zstd-term-content-pool-drain.test.js"}
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+{"file": "test/zstd-term-content-block-plan.test.js"}
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/cb98f2e06b71/manabitan-dispatch/test/zstd-term-content-block-plan.test.js
+  130:36  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
+{"file": "test/zstd-term-content-dispatch-batch.test.js"}
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/cb98f2e06b71/manabitan-dispatch/test/zstd-term-content-dispatch-batch.test.js
+  66:96  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+
+{"file": "test/zstd-term-content-worker-batch.test.js"}
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/cb98f2e06b71/manabitan-dispatch/test/zstd-term-content-worker-batch.test.js
+  46:49  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+  81:11  error  Unsafe call to import for argument 0             no-unsanitized/method
+
+✖ 2 problems (2 errors, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

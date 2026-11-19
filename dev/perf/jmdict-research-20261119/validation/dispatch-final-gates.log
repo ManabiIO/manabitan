@@ -1,0 +1,72 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+ RUN  v4.1.12 /workspace/scratch/cb98f2e06b71/manabitan-dispatch
+
+
+ Test Files  7 passed (7)
+      Tests  64 passed (64)
+   Start at  15:04:55
+   Duration  1.90s (transform 183ms, setup 60ms, import 237ms, tests 452ms, environment 1ms)
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> yomitan@0.0.0 test:build
+> node ./dev/bin/build.js --dryRun --all
+
+Restoring manifest...
+file:///workspace/scratch/cb98f2e06b71/manabitan-dispatch/dev/dictionary-wasm.js:125
+    if (typeof directoryState !== 'undefined' && !directoryState.isDirectory()) { throw new Error(`Unexpected dictionary WASM output directory: ${outputDirectory}`); }
+                                                                                        ^
+
+Error: Unexpected dictionary WASM output directory: /workspace/scratch/cb98f2e06b71/manabitan-dispatch/ext/lib
+    at copyDictionaryWasm (file:///workspace/scratch/cb98f2e06b71/manabitan-dispatch/dev/dictionary-wasm.js:125:89)
+    at buildLibs (file:///workspace/scratch/cb98f2e06b71/manabitan-dispatch/dev/build-libs.js:97:5)
+    at main (file:///workspace/scratch/cb98f2e06b71/manabitan-dispatch/dev/bin/build.js:415:15)
+    at file:///workspace/scratch/cb98f2e06b71/manabitan-dispatch/dev/bin/build.js:430:78
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.3

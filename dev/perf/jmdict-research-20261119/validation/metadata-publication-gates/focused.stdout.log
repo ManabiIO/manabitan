@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/cb98f2e06b71/manabitan-publication
+
+
+ Test Files  4 passed (4)
+      Tests  156 passed (156)
+   Start at  14:52:24
+   Duration  7.22s (transform 1.87s, setup 91ms, import 2.99s, tests 3.01s, environment 0ms)
+
