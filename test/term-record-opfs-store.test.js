@@ -52,7 +52,7 @@ function asFileHandle(handle) {
 
 /**
  * @param {Map<string, Uint8Array>} fileBytesByName
- * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, beforeClose?: (name: string) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null)}} [options]
+ * @param {{removeEntryFailures?: Map<string, number>, truncateFailures?: Map<string, number>, getFileFailures?: Map<string, number>, beforeWrite?: (name: string, value: FileSystemWriteChunkType) => Promise<void>|void, beforeClose?: (name: string) => Promise<void>|void, onGetFile?: (name: string) => void, onAbort?: () => Promise<void>|void, fileFactory?: ((name: string, bytes: Uint8Array) => File|null), syncAccessHandleFactory?: (name: string) => import('../ext/js/dictionary/term-record-import-index-writer.js').SyncAccessHandle|Promise<import('../ext/js/dictionary/term-record-import-index-writer.js').SyncAccessHandle>}} [options]
  * @returns {FileSystemDirectoryHandle}
  */
 function createFakeDirectoryHandle(
@@ -66,6 +66,7 @@ function createFakeDirectoryHandle(
         onGetFile = () => {},
         onAbort = () => {},
         fileFactory = () => null,
+        syncAccessHandleFactory,
     } = {},
 ) {
     /**
@@ -88,6 +89,7 @@ function createFakeDirectoryHandle(
                 return false;
             },
             async createSyncAccessHandle() {
+                if (syncAccessHandleFactory !== undefined) { return await syncAccessHandleFactory(name); }
                 const error = new Error('SyncAccessHandle not implemented in test double');
                 error.name = 'NotSupportedError';
                 throw error;
@@ -3136,6 +3138,80 @@ describe('TermRecordOpfsStore', () => {
         const index = readerStore.getDictionaryIndex(dictionaryName);
         expect(index.expression.get('一')).toHaveLength(1);
         expect(index.expression.get('二')).toHaveLength(1);
+    });
+
+    test('truncates a fresh synchronous lookup sidecar once before writing its placeholder', async () => {
+        const descriptorFileName = 'fresh-sync-index.mbtr';
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const fileBytesByName = new Map([
+            [descriptorFileName, new Uint8Array()],
+            [indexFileName, new Uint8Array([0xaa, 0xbb, 0xcc])],
+        ]);
+        /** @type {number[]} */
+        const truncateCalls = [];
+        const directory = createFakeDirectoryHandle(fileBytesByName, {
+            syncAccessHandleFactory(name) {
+                return {
+                    write(buffer, {at = 0} = {}) {
+                        const current = fileBytesByName.get(name) ?? new Uint8Array();
+                        const end = at + buffer.byteLength;
+                        const next = new Uint8Array(Math.max(current.byteLength, end));
+                        next.set(current);
+                        next.set(buffer, at);
+                        fileBytesByName.set(name, next);
+                        return buffer.byteLength;
+                    },
+                    truncate(size) {
+                        truncateCalls.push(size);
+                        const current = fileBytesByName.get(name) ?? new Uint8Array();
+                        fileBytesByName.set(name, current.slice(0, size));
+                    },
+                    flush() {},
+                    close() {},
+                };
+            },
+        });
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        Reflect.set(store, '_importSessionActive', true);
+        const descriptorHandle = await directory.getFileHandle(descriptorFileName, {create: false});
+        const state = store._createShardState(descriptorFileName, descriptorHandle, 0);
+        state.pendingLookupIndexChunks = [new Uint8Array([0x11, 0x22])];
+        state.pendingLookupIndexBytes = 2;
+        state.pendingLookupIndexRecordCount = 1;
+
+        await store._flushPendingLookupIndexChunks(state);
+
+        expect(truncateCalls).toEqual([0]);
+        const indexBytes = fileBytesByName.get(indexFileName);
+        expect(indexBytes).toHaveLength(42);
+        expect(indexBytes?.subarray(0, 40)).toEqual(new Uint8Array(40));
+        expect(indexBytes?.subarray(40)).toEqual(new Uint8Array([0x11, 0x22]));
+        await store._closeAllWritables();
+    });
+
+    test('aborts the asynchronous lookup-index writer when initialization truncation fails', async () => {
+        const descriptorFileName = 'failed-index-init.mbtr';
+        const indexFileName = `${descriptorFileName}.mbti`;
+        const truncateFailures = new Map([[indexFileName, 1]]);
+        let abortCount = 0;
+        const directory = createFakeDirectoryHandle(new Map([[descriptorFileName, new Uint8Array()]]), {
+            truncateFailures,
+            onAbort() { ++abortCount; },
+        });
+        const store = new TermRecordOpfsStore();
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        Reflect.set(store, '_importSessionActive', true);
+        const descriptorHandle = await directory.getFileHandle(descriptorFileName, {create: false});
+        const state = store._createShardState(descriptorFileName, descriptorHandle, 0);
+        state.pendingLookupIndexChunks = [new Uint8Array([1])];
+        state.pendingLookupIndexBytes = 1;
+        state.pendingLookupIndexRecordCount = 1;
+
+        await expect(store._flushPendingLookupIndexChunks(state)).rejects.toThrow('Injected truncate failure');
+        expect(abortCount).toBe(1);
+        expect(state.lookupIndexWritable).toBeNull();
+        expect(state.lookupIndexWriteError?.message).toContain('Injected truncate failure');
     });
 
     test('streams lookup sidecar writes without blocking import chunk ingestion', async () => {

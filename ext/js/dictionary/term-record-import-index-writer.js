@@ -30,7 +30,7 @@ const WRITE_TIME_BUDGET_MS = 6;
  */
 
 /**
- * Acquires only the fresh sidecar owned by the active import. The opener's
+ * Acquires and truncates the fresh sidecar owned by the active import. The opener's
  * Unsupported acquisition permits the established asynchronous writer fallback.
  * Once acquired, every failure belongs to this writer and must fail import.
  * @param {{createSyncAccessHandle?: () => Promise<SyncAccessHandle>}} fileHandle

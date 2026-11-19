@@ -187,7 +187,14 @@ describe('fresh import index writer', () => {
     test('selects synchronous access only for a fresh active-import sidecar', async () => {
         const file = memoryFile();
         const createSyncAccessHandle = vi.fn(async () => file.access);
-        const createWritable = vi.fn(async () => ({}));
+        const truncate = vi.fn(async () => {});
+        const createWritable = vi.fn(async () => ({
+            truncate,
+            async abort() {},
+            async close() {},
+            async seek() {},
+            async write() {},
+        }));
         const fileHandle = {createSyncAccessHandle, createWritable};
         const store = new TermRecordOpfsStore();
         const state = /** @type {Parameters<TermRecordOpfsStore['_createLookupIndexWritable']>[0]} */ (/** @type {unknown} */ ({lookupIndexFileHandle: fileHandle, initialFileLength: 0}));
@@ -202,6 +209,7 @@ describe('fresh import index writer', () => {
         await store._createLookupIndexWritable(state);
         expect(createSyncAccessHandle).toHaveBeenCalledTimes(1);
         expect(createWritable).toHaveBeenCalledTimes(2);
+        expect(truncate).toHaveBeenCalledTimes(2);
     });
 
     test('a synchronous flush failure closes the owned sidecar and fails finalization', async () => {

@@ -5843,7 +5843,6 @@ export class TermRecordOpfsStore {
                         throw new Error('Term-record lookup index directory became unavailable during import');
                     }
                     state.lookupIndexWritable = await this._createLookupIndexWritable(state);
-                    await state.lookupIndexWritable.truncate(0);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
                 await (state.lookupIndexWritable instanceof SyncImportIndexWriter ? state.lookupIndexWritable.writeChunks(chunks) : state.lookupIndexWritable.write(new Blob(chunks)));
@@ -5867,6 +5866,8 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Creates and initializes a fresh lookup-index writer by truncating it to zero bytes.
+     * The synchronous opener owns its access-handle truncation; the fallback is truncated here.
      * @param {TermRecordShardState} state
      * @returns {Promise<FileSystemWritableFileStream|SyncImportIndexWriter>}
      */
@@ -5877,7 +5878,18 @@ export class TermRecordOpfsStore {
             const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)));
             if (writer !== null) { return writer; }
         }
-        return await fileHandle.createWritable();
+        const writable = await fileHandle.createWritable();
+        try {
+            await writable.truncate(0);
+        } catch (error) {
+            try {
+                await writable.abort();
+            } catch (abortError) {
+                throw new AggregateError([error, abortError], 'Failed to initialize asynchronous import index writer');
+            }
+            throw error;
+        }
+        return writable;
     }
 
     /**
