@@ -62,7 +62,7 @@ jobs:
     env:
       STUDY_BROWSER: ${{ matrix.browser }}
       STUDY_REPLICATION: ${{ matrix.replication }}
-      STUDY_EVIDENCE: ${{ runner.temp }}/jmdict-study-evidence
+      STUDY_EVIDENCE: builds/perf/jmdict-study-evidence
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -104,4 +104,4 @@ jobs:
           name: jmdict-study-${{ matrix.browser }}-${{ matrix.replication }}
           retention-days: 7
           if-no-files-found: error
-          path: ${{ runner.temp }}/jmdict-study-evidence
+          path: builds/perf/jmdict-study-evidence
