@@ -305,6 +305,45 @@ function getArtifactContentLength(chunk, contentLengths, index) {
     return contentLengths[index];
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * Select content columns only for the current synchronous traversal. A run
+ * must select them again after any awaited append because its caller can
+ * replace resolved references or fixed-span metadata while the write settles.
+ * @param {{fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {number[]|Uint32Array|Float64Array} contentOffsets
+ * @param {number[]|Uint32Array} contentLengths
+ * @param {number} count
+ * @returns {{offsets: number[]|Uint32Array|Float64Array, lengths: number[]|Uint32Array, indexes: Uint32Array|null, referenceCount: number, fixedOffsetBase: number|null, fixedLength: number|null}}
+ */
+function getArtifactContentColumns(chunk, contentOffsets, contentLengths, count) {
+    const fixedOffsetBase = hasFixedContentSpan(chunk, count) ? /** @type {number} */ (chunk.fixedContentOffsetBase) : null
+    const fixedLength = typeof chunk.fixedContentLength === 'number' ? chunk.fixedContentLength : null
+    const references = chunk.resolvedContentReferences
+    if (fixedOffsetBase === null && typeof references === 'object' && references !== null) {
+        return {
+            offsets: references.offsets,
+            lengths: references.lengths,
+            indexes: references.uniqueIndexList,
+            referenceCount: fixedLength === null ?
+                Math.min(references.offsets.length, references.lengths.length) :
+                references.offsets.length,
+            fixedOffsetBase,
+            fixedLength,
+        }
+    }
+    return {
+        offsets: contentOffsets,
+        lengths: contentLengths,
+        indexes: null,
+        referenceCount: Number.POSITIVE_INFINITY,
+        fixedOffsetBase,
+        fixedLength,
+    }
+}
+
+/* eslint-enable @stylistic/semi */
+
 /**
  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number} count
@@ -2273,6 +2312,7 @@ export class TermRecordOpfsStore {
      * @param {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>|null} [preparedLookupIndexes=null]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
+    /* eslint-disable @stylistic/semi */
     async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
         let encodeMs = 0;
         let appendWriteMs = 0;
@@ -2289,7 +2329,7 @@ export class TermRecordOpfsStore {
             // Recompute after every awaited append; no validity is cached
             // across runs. The row loop itself is synchronous.
             const tValidationStart = safePerformance.now();
-            const useFixedContentSpan = hasFixedContentSpan(chunk, count);
+            const {offsets, lengths, indexes, referenceCount, fixedOffsetBase, fixedLength} = getArtifactContentColumns(chunk, contentOffsets, contentLengths, count)
             let runEnd = runStart;
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
@@ -2297,8 +2337,12 @@ export class TermRecordOpfsStore {
                 if ((runEnd - runStart) >= runRowLimit) {
                     break;
                 }
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
+                const contentIndex = indexes === null ? runEnd : indexes[runEnd]
+                if (contentIndex >= referenceCount) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${contentIndex}`)
+                }
+                const contentOffset = fixedOffsetBase === null ? offsets[contentIndex] : fixedOffsetBase + (runEnd * /** @type {number} */ (fixedLength))
+                const contentLength = fixedLength ?? lengths[contentIndex]
                 validateContentOffset(contentOffset);
                 validateContentLength(contentLength);
                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
@@ -2376,6 +2420,8 @@ export class TermRecordOpfsStore {
         }
         return {encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
     }
+
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Builds offset-independent lookup sidecars before term content persistence
@@ -5368,9 +5414,10 @@ export class TermRecordOpfsStore {
      * @param {number} contentOffsetBase
      * @returns {Uint8Array}
      */
+    /* eslint-disable @stylistic/semi */
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
-        const useFixedContentSpan = hasFixedContentSpan(chunk, count);
+        const {offsets: sourceOffsets, lengths: sourceLengths, indexes, referenceCount, fixedOffsetBase, fixedLength} = getArtifactContentColumns(chunk, contentOffsets, contentLengths, count)
         const offsets = new Uint32Array(count);
         const lengths = new Uint16Array(count);
         const scoreKeys = new Uint16Array(count);
@@ -5384,8 +5431,12 @@ export class TermRecordOpfsStore {
             const view = new DataView(output.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * FLOAT64_SCORE_RECORD_FIELDS_BYTES;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                const contentIndex = indexes === null ? i : indexes[i]
+                if (contentIndex >= referenceCount) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${contentIndex}`)
+                }
+                const contentOffset = fixedOffsetBase === null ? sourceOffsets[contentIndex] : fixedOffsetBase + (i * /** @type {number} */ (fixedLength))
+                const contentLength = fixedLength ?? sourceLengths[contentIndex]
                 view.setUint32(fieldOffset, contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase, true);
                 view.setUint32(fieldOffset + 4, contentLength < 0 ? U32_NULL : contentLength, true);
                 view.setFloat64(fieldOffset + 8, chunk.scoreList[i] ?? 0, true);
@@ -5399,8 +5450,12 @@ export class TermRecordOpfsStore {
             null;
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+            const contentIndex = indexes === null ? i : indexes[i]
+            if (contentIndex >= referenceCount) {
+                throw new RangeError(`Invalid resolved term content reference index: ${contentIndex}`)
+            }
+            const contentOffset = fixedOffsetBase === null ? sourceOffsets[contentIndex] : fixedOffsetBase + (i * /** @type {number} */ (fixedLength))
+            const contentLength = fixedLength ?? sourceLengths[contentIndex]
             if (contentLength >= U16_NULL) {
                 compact = false;
                 break;
@@ -5439,8 +5494,12 @@ export class TermRecordOpfsStore {
             const legacyI32 = new Int32Array(legacy.buffer);
             for (let i = 0; i < count; ++i) {
                 const fieldOffset = i * 3;
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                const contentIndex = indexes === null ? i : indexes[i]
+                if (contentIndex >= referenceCount) {
+                    throw new RangeError(`Invalid resolved term content reference index: ${contentIndex}`)
+                }
+                const contentOffset = fixedOffsetBase === null ? sourceOffsets[contentIndex] : fixedOffsetBase + (i * /** @type {number} */ (fixedLength))
+                const contentLength = fixedLength ?? sourceLengths[contentIndex]
                 legacyU32[fieldOffset] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
                 legacyU32[fieldOffset + 1] = contentLength < 0 ? U32_NULL : contentLength;
                 legacyI32[fieldOffset + 2] = chunk.scoreList[i] ?? 0;
@@ -5463,6 +5522,8 @@ export class TermRecordOpfsStore {
         new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
         return output;
     }
+
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
