@@ -358,6 +358,83 @@ describe('native exceptional keys', () => {
     })
 })
 
+describe('fused key escape witnesses', () => {
+    test.each([false, true])('preserves both key fields across scanner boundaries and bank transitions, preload=%s', async (preload) => {
+        const escapes = ['\\u65e5', '\\"', '\\\\', '\\/', '\\b', '\\n', '\\ud83d\\ude42', '\\ud800']
+        /** @type {string[]} */
+        const rows = []
+        for (const width of [0, 1, 7, 8, 15, 16, 31, 32, 63]) {
+            for (const escape of escapes) {
+                const token = `"${'x'.repeat(width)}${escape}日"`
+                rows.push(
+                    `[${token},"reading","tag","v1",0,["definition"],1,""]`,
+                    `["expression",${token},"tag","v1",0,["definition"],1,""]`,
+                    '["literal日","literalかな","tag\\n","v1\\t",0,["definition\\n"],1,"term\\r"]',
+                )
+            }
+        }
+        const sources = [`[${rows.slice(0, 133).join(',')}]`, '[]', ` \n [${rows.slice(133).join(',')}] \t`]
+        const oracle = await parse(sources, {experimentalSkipFusedParse: true}, preload)
+        const enabled = await parse(sources, {experimentalNativeEscapedKeys: true}, preload)
+        expect(enabled.rows).toEqual(oracle.rows)
+        expect(enabled.profile.fusedParseFallbacks).toBe(0)
+        expect(enabled.profile.escapedKeyDecodeCount).toBe(escapes.length * 9 * 2)
+        const disabled = await parse(sources, {}, preload)
+        expect(disabled.rows).toEqual(oracle.rows)
+        expect(disabled.profile.fusedParseFallbacks).toBe(1)
+        expect(disabled.profile.discardedFusedRows).toBe(0)
+    })
+
+    test.each([false, true])('does not classify escapes in other fields as escaped keys, native=%s', async (native) => {
+        const sources = [JSON.stringify([
+            ['日本', 'にほん', 'tag\n', 'v\\', 0, ['text\n', {type: 'text', text: 'quoted"'}], 1, 'term\t'],
+            ['plain', '', '', '', 1, [], 2, ''],
+        ]), '[]']
+        const result = await parse(sources, {experimentalNativeEscapedKeys: native})
+        expect(result.rows).toEqual((await parse(sources, {experimentalSkipFusedParse: true})).rows)
+        expect(result.profile.fusedParseFallbacks).toBe(0)
+        expect(result.profile.escapedKeyDecodeCount).toBe(0)
+    })
+
+    test.each([0xff, 0xc0, 0x80, 0xed, 0xf5])('retains UTF-8 validation for literal keys containing byte %i', async (byte) => {
+        for (const field of [0, 1]) {
+            const bad = encoder.encode('[["expression","reading","","",0,[],1,""]]')
+            bad[field === 0 ? 4 : 18] = byte
+            const sources = [JSON.stringify([row('ordinary')]), bad]
+            const oracle = await parse(sources, {experimentalSkipFusedParse: true})
+            for (const native of [false, true]) {
+                const result = await parse(sources, {experimentalNativeEscapedKeys: native})
+                expect(result.rows).toEqual(oracle.rows)
+                expect(result.profile.fusedParseFallbacks).toBe(1)
+                expect(result.profile.discardedFusedRows).toBe(1)
+            }
+        }
+    })
+
+    test.each(['\\q', '\\u', '\\u000', '\\u00xz', '\\u-001'])('still rejects malformed key escape %s after a valid literal row', async (escape) => {
+        for (const field of [0, 1]) {
+            const token = `"1234567${escape}"`
+            const bad = field === 0 ?
+                `[${token},"reading","","",0,[],1,""]` :
+                `["expression",${token},"","",0,[],1,""]`
+            const sources = [JSON.stringify([row('ordinary')]), `[${bad}]`]
+            for (const native of [false, true]) {
+                await expect(parse(sources, {experimentalNativeEscapedKeys: native})).rejects.toThrow()
+            }
+        }
+    })
+
+    test('preserves missing-reading fallback and resets witnesses after rejection', async () => {
+        for (const native of [false, true]) {
+            await expect(parse(['[["head"]]', '[]'], {experimentalNativeEscapedKeys: native})).rejects.toThrow('Term-bank number must be finite')
+            const sources = [JSON.stringify([row('literal')]), escapedBank('"\\u65e5"')]
+            const result = await parse(sources, {experimentalNativeEscapedKeys: native})
+            expect(result.rows).toEqual((await parse(sources, {experimentalSkipFusedParse: true})).rows)
+            expect(result.profile.fusedParseFallbacks).toBe(native ? 0 : 1)
+        }
+    })
+})
+
 describe('span boundaries and validated glossary witnesses', () => {
     test('rejects the production-default cross-bank row splice for direct and preloaded sources', async () => {
         const banks = ['[["abc]', '[def","","","",0,[],1,""]]']
