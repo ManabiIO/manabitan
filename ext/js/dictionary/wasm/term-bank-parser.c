@@ -518,8 +518,11 @@ static int is_hex_digit(uint8_t value) {
         (value >= 'A' && value <= 'F');
 }
 
-static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+static __attribute__((always_inline)) inline int parse_string_span_with_escape_flag(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, uint32_t* escaped
+) {
     if (start >= len || src[start] != '"') { return 0; }
+    if (escaped != 0) { *escaped = 0u; }
     uint32_t i = start + 1u;
     while (i < len) {
         while (i + 8u <= len) {
@@ -540,6 +543,7 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
         if (i >= len) { break; }
         uint8_t c = src[i];
         if (c == '\\') {
+            if (escaped != 0) { *escaped = 1u; }
             if (i + 1u >= len) { return 0; }
             const uint8_t escape = src[i + 1u];
             if (escape == 'u') {
@@ -566,6 +570,10 @@ static __attribute__((always_inline)) inline int parse_string_span(const uint8_t
         ++i;
     }
     return 0;
+}
+
+static __attribute__((always_inline)) inline int parse_string_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
+    return parse_string_span_with_escape_flag(src, len, start, out_end, 0);
 }
 
 static uint32_t key_hex4(const uint8_t* p);
@@ -1144,10 +1152,12 @@ static int parse_row_single_pass(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    int validate_glossary_types
+    int validate_glossary_types,
+    uint32_t* key_escape_flags
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
+    if (key_escape_flags != 0) { *key_escape_flags = 0u; }
 
     uint32_t i = row_start + 1u;
     uint32_t field_index = 0u;
@@ -1162,7 +1172,11 @@ static int parse_row_single_pass(
         // retain their existing permissive row/glossary contract.
         if (validate_glossary_types && field_index >= 8u) { return 0; }
         uint32_t value_end = 0u;
-        if (field_index == 4u || field_index == 6u) {
+        if (key_escape_flags != 0 && field_index < 2u) {
+            uint32_t escaped = 0u;
+            if (!parse_string_span_with_escape_flag(src, len, i, &value_end, &escaped)) { return 0; }
+            *key_escape_flags |= escaped << field_index;
+        } else if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
         } else if (field_index == 5u) {
             if (validate_glossary_types && src[i] != '[') { return 0; }
@@ -1777,7 +1791,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -1815,7 +1829,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
             return -1;
         }
         ++row_count;
@@ -2866,8 +2880,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 glossary_lookback = 1u;
             }
         }
+        uint32_t key_escape_flags = 0u;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_flags)) {
             return -1;
         }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
@@ -2917,7 +2932,10 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
-            if (json_string_token_has_escape(src, token_start, token_length)) {
+            // The row's validated string scan already encountered every escape.
+            // This stack-only witness never outlives the current row or changes
+            // the metadata ABI used by the independent non-fused parser.
+            if ((key_escape_flags & (1u << field)) != 0u) {
                 if ((experiment_mask & EXPERIMENT_NATIVE_ESCAPED_KEYS) == 0u) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
                 const int32_t decoded_length = decode_escaped_key(
                     src + token_start, token_length, strings + strings_cursor, strings_capacity - strings_cursor
