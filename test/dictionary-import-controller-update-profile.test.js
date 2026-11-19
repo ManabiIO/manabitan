@@ -282,11 +282,12 @@ describe('DictionaryImportController staged update profile rewrites', () => {
             return targets.map(() => ({}));
         });
         Reflect.set(controller, '_activeImportRunGeneration', 11);
+        const getOptionsFull = vi.fn(async () => optionsFull);
         Reflect.set(controller, '_settingsController', {
             profileIndex: 1,
             getOptionsContext: () => ({profileId: 'profile-2', index: 1}),
             application: {api: {triggerDatabaseUpdated}},
-            getOptionsFull: vi.fn(async () => optionsFull),
+            getOptionsFull,
             modifyGlobalSettings,
         });
         Reflect.set(controller, '_recordImportDebugSnapshot', vi.fn());
@@ -331,6 +332,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         expect(result.importedTitles).toStrictEqual(['JMdict', 'JMnedict']);
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
         expect(deferredFinalizations).toHaveLength(0);
+        expect(getOptionsFull).toHaveBeenCalledTimes(3);
         expect(optionsFull.profiles[0].options.dictionaries).toMatchObject([
             {name: 'JMdict', enabled: false},
             {name: 'JMnedict', enabled: false},
@@ -349,7 +351,17 @@ describe('DictionaryImportController staged update profile rewrites', () => {
             .mockResolvedValueOnce({errors: [], importedTitle: 'JMnedict'});
         const verifyVisible = vi.fn().mockResolvedValue(void 0);
         Reflect.set(controller, '_activeImportRunGeneration', 17);
-        Reflect.set(controller, '_settingsController', {application: {api: {triggerDatabaseUpdated}}});
+        const optionsFull = {profiles: [{id: 'profile-2', options: {dictionaries: [{name: 'JMnedict', enabled: true}]}}]};
+        let currentProfileId = 'profile-2';
+        const getOptionsFull = vi.fn(async () => {
+            currentProfileId = 'profile-1';
+            return optionsFull;
+        });
+        Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({profileId: currentProfileId, index: currentProfileId === 'profile-2' ? 1 : 0}),
+            getOptionsFull,
+            application: {api: {triggerDatabaseUpdated}},
+        });
         Reflect.set(controller, '_finalizeImportedDictionaryResult', finalizeItem);
         Reflect.set(controller, '_verifyImportedDictionaryVisible', verifyVisible);
         Reflect.set(controller, '_recordImportLocalPhase', vi.fn());
@@ -365,8 +377,34 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         expect(result.importedTitles).toStrictEqual(['JMnedict']);
         expect(finalizeItem).toHaveBeenCalledTimes(2);
         expect(triggerDatabaseUpdated).toHaveBeenCalledTimes(1);
-        expect(verifyVisible).toHaveBeenCalledWith('JMnedict', true);
+        expect(verifyVisible).toHaveBeenCalledWith('JMnedict', true, optionsFull, 'profile-2');
         expect(contexts).toHaveLength(0);
+    });
+
+    test('fails every deferred visibility check when the single post-write snapshot cannot be read', async () => {
+        const controller = createControllerForInternalTests();
+        const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
+        const snapshotError = new Error('Fresh options snapshot unavailable');
+        const getOptionsFull = vi.fn().mockRejectedValue(snapshotError);
+        const finalizeItem = vi.fn(async (context) => ({errors: [], importedTitle: context.dictionaryTitle}));
+        Reflect.set(controller, '_activeImportRunGeneration', 21);
+        Reflect.set(controller, '_settingsController', {
+            application: {api: {triggerDatabaseUpdated}},
+            getOptionsFull,
+        });
+        Reflect.set(controller, '_finalizeImportedDictionaryResult', finalizeItem);
+        Reflect.set(controller, '_recordImportLocalPhase', vi.fn());
+        const contexts = [
+            {dictionaryTitle: 'JMdict.zip', profilesDictionarySettings: null, localPhaseTimings: []},
+            {dictionaryTitle: 'JMnedict.zip', profilesDictionarySettings: null, localPhaseTimings: []},
+        ];
+
+        const result = await finalizeDeferredImportedDictionaries.call(controller, contexts, 21);
+
+        expect(getOptionsFull).toHaveBeenCalledOnce();
+        expect(triggerDatabaseUpdated).toHaveBeenCalledOnce();
+        expect(result.importedTitles).toStrictEqual([]);
+        expect(result.errors).toStrictEqual([snapshotError, snapshotError]);
     });
 
     test('drops stale deferred finalizations without publishing settings or notifications', async () => {
@@ -391,6 +429,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         const controller = createControllerForInternalTests();
         Reflect.set(controller, '_settingsController', {
             profileIndex: 0,
+            getOptionsContext: () => ({profileId: 'profile-1', index: 0}),
             getOptionsFull: vi.fn().mockResolvedValue({
                 profiles: [{id: 'profile-1', options: {dictionaries: [{name: 'JMdict', enabled: false}]}}],
             }),
@@ -407,6 +446,7 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         const sibling = {name: 'JMdict', enabled: false};
         Reflect.set(controller, '_settingsController', {
             profileIndex: 0,
+            getOptionsContext: () => ({profileId: 'profile-1', index: 0}),
             getOptionsFull: vi.fn().mockResolvedValue({profiles: [{id: 'profile-1', options: {dictionaries: [exact, sibling]}}]}),
         });
         await expect(verifyImportedDictionaryVisible.call(controller, title, true)).resolves.toBeUndefined();
