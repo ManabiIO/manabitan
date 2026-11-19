@@ -212,7 +212,7 @@ async function verifyPersisted(driver) {
     for (const probe of probes) {
         const diagnostics = await send(driver, 'debugDictionaryLookupState', {text: probe.expression, dictionaryNames: [fixture.expectedTitle]})
         const state = diagnostics.offscreenState ?? diagnostics.workerState ?? diagnostics.localState ?? diagnostics
-        const totalLength = state.termContentStoreDebugState?.totalLength
+        const totalLength = (state.termContentStoreDebugState ?? state.termContentDiagnostics?.opfsStore)?.totalLength
         assert(Number.isSafeInteger(totalLength) && totalLength > 0)
         assert(Array.isArray(state.rowSample) && state.rowSample.length > 0)
         for (const row of state.rowSample) {
