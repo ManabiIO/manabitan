@@ -1876,9 +1876,10 @@ export class DictionaryImporter {
                  * @param {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}|null} streamedProgress
                  * @param {number} streamedProgressStartIndex
                  * @param {number} [streamedProgressAllowance]
+                 * @param {boolean} [retainRecentSources]
                  * @returns {Promise<Record<string, number>>}
                  */
-            const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance) => {
+            const processTermChunk = async (termFile, termChunk, requirements, streamedProgress = null, streamedProgressStartIndex = 0, streamedProgressAllowance = termFileProgressAllowance, retainRecentSources = true) => {
                 if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
                 const trackProgress = streamedProgress === null;
                 /** @type {DirectTermChunk|null} */
@@ -2001,7 +2002,7 @@ export class DictionaryImporter {
                 }
                 const tTermsWriteStart = Date.now();
                 await (directArtifactChunk !== null ?
-                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk) :
+                    dictionaryDatabase.bulkAddArtifactTermsChunk(directArtifactChunk, retainRecentSources) :
                     bulkAdd('terms', termList, {trackProgress}));
                 const tTermsWriteEnd = Date.now();
                 importMetrics.bulkAddTermsMs += Math.max(0, tTermsWriteEnd - tTermsWriteStart);
@@ -2231,7 +2232,15 @@ export class DictionaryImporter {
                             async (termListChunk, requirementsChunk, streamProgress) => {
                                 ++streamedFastPathChunkCount;
                                 const tChunkWorkStart = Date.now();
-                                const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance);
+                                /* eslint-disable @stylistic/semi */
+                                const retainRecentSources = this._shouldRetainRecentTermContentSource(
+                                    termFileIndex,
+                                    sourceTermFileBatchCount,
+                                    activeTermFiles.length,
+                                    streamProgress,
+                                )
+                                const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance, retainRecentSources)
+                                /* eslint-enable @stylistic/semi */
                                 addTermImportMetrics(artifactMetrics, chunkMetrics);
                                 streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
                                 termListChunk.length = 0;
@@ -4830,6 +4839,29 @@ export class DictionaryImporter {
         }
         return {termList: result, requirements};
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Only the importer knows whether this parser batch exhausts the term files.
+     * Unknown progress and empty trailing groups retain the ordinary cache policy.
+     * @param {number} sourceStart
+     * @param {number} sourceCount
+     * @param {number} sourceTotal
+     * @param {{chunkIndex: number, chunkCount: number}|null|undefined} progress
+     * @returns {boolean}
+     */
+    _shouldRetainRecentTermContentSource(sourceStart, sourceCount, sourceTotal, progress) {
+        return !(
+            Number.isSafeInteger(sourceStart) && sourceStart >= 0 &&
+            Number.isSafeInteger(sourceCount) && sourceCount > 0 &&
+            Number.isSafeInteger(sourceTotal) && sourceTotal > 0 &&
+            sourceStart + sourceCount === sourceTotal &&
+            progress !== null && typeof progress === 'object' &&
+            Number.isSafeInteger(progress.chunkCount) && progress.chunkCount > 0 &&
+            progress.chunkIndex === progress.chunkCount
+        )
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {import('@zip.js/zip.js').Entry} termFile

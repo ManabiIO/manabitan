@@ -4828,9 +4828,10 @@ null;
 
     /**
      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {boolean} [retainRecentSources]
      * @returns {Promise<void>}
      */
-    async bulkAddArtifactTermsChunk(chunk) {
+    async bulkAddArtifactTermsChunk(chunk, retainRecentSources = true) {
         this._invalidateGlossarySearchIndex(chunk.dictionary);
         this._lastBulkAddTermsMetrics = null;
         this._termEntryContentCache.clear();
@@ -4849,7 +4850,7 @@ null;
                 chunk.contentMetaList.length >= chunk.rowCount * 4
             );
             if (hasHashArrays || hasContentSlab) {
-                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
+                await this._bulkAddArtifactTermsChunkWithContentDedup(chunk, retainRecentSources);
                 return;
             }
             const rows = this._materializeArtifactChunkTermEntries(chunk);
@@ -7944,9 +7945,10 @@ this._readTermContentSignature(
 
     /**
      * @param {ArtifactTermRecordChunk} chunk
+     * @param {boolean} [retainRecentSources]
      * @returns {Promise<void>}
      */
-    async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
+    async _bulkAddArtifactTermsChunkWithContentDedup(chunk, retainRecentSources = true) {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
         const count = chunk.rowCount;
         if (count <= 0) {
@@ -8156,6 +8158,7 @@ this._readTermContentSignature(
                         contentUniqueIndexList: chunk.contentUniqueIndexList,
                         stagedContentMetadata,
                         importMetrics,
+                        retainRecentSources,
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
                         useResolvedContentReferences,
                     });
@@ -9256,7 +9259,7 @@ null :
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, retainRecentSources?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -9279,6 +9282,7 @@ null :
             importMetrics = null,
             metadataValidated = false,
             useResolvedContentReferences = false,
+            retainRecentSources = true,
         } = state;
         let {resolvedContentDictNames} = state;
         /**
@@ -9412,10 +9416,16 @@ null :
             );
         }
         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
-        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
-            stagedContentMetadata,
-            pendingContentSpans,
-        );
+        /* eslint-disable @stylistic/semi */
+        // The final importer-owned source has no later term chunk to reuse it.
+        // Publication, in-flight ownership, and persisted-byte fallback are unchanged.
+        const recentSourceCacheBytes = retainRecentSources === false ?
+            0 :
+            this._cacheRecentPublishedTermContentSources(
+                stagedContentMetadata,
+                pendingContentSpans,
+            )
+        /* eslint-enable @stylistic/semi */
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;

@@ -2347,6 +2347,32 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
+    /* eslint-disable @stylistic/semi */
+    test.each([false, true])('terminal source keeps ownership and rollback when failure is %s', async (fail) => {
+        const harness = createArtifactOverlapHarness()
+        const importing = harness.database._bulkAddArtifactTermsChunkWithContentDedup(harness.chunk, false)
+        const settled = fail ? expect(importing).rejects.toThrow('terminal content failure') : expect(importing).resolves.toBeUndefined()
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce())
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').size).toBe(0)
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(1)
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled()
+        expect(getMeta(harness.database, 10, 20)).toBeDefined()
+        harness.resolveRecords()
+        await Promise.resolve()
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled()
+        if (fail) {
+            harness.rejectContent(new Error('terminal content failure'))
+        } else {
+            harness.resolveContent()
+        }
+        await settled
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce()
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0)
+        expect(getMeta(harness.database, 10, 20) !== undefined).toBe(!fail)
+        expect(harness.plan.resolvedFlags[0]).toBe(fail ? 0 : 1)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('retains parser content until reserved content is durable', async () => {
         const harness = createArtifactOverlapHarness();
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
