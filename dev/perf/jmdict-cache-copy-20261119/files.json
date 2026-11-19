@@ -1,0 +1,18 @@
+{
+    "baseline-control.json": {
+        "bytes": 580872,
+        "sha256": "4ebaeb970e7be11a4d015459f60fd2a5968c25b8126572e9890bb500898b1d48"
+    },
+    "cache-copy-replication.json": {
+        "bytes": 872461,
+        "sha256": "a164d603506d110c5a0b0a06b573fb75e21bc3fd7cd4662a6631c85f8618d241"
+    },
+    "cache-copy-screen.json": {
+        "bytes": 585901,
+        "sha256": "d474c6a6bb7ef3a33c51f6ab07949311cdc8ec667270f9a757abb44bbf884490"
+    },
+    "report.md": {
+        "bytes": 6610,
+        "sha256": "0e293eb78543c926299ed6f205549732ebdce7fdcf13270b06f95ea980be7785"
+    }
+}
