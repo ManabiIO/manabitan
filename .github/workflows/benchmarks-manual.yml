@@ -55,7 +55,7 @@ jobs:
         include: ${{ fromJSON((github.event_name == 'push' || inputs.workload == 'imports') && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
     env:
       PERF_BASELINE_SHA: ${{ inputs.baseline_sha || '67d2f09380ba42b75d699249bdacda90766807b8' }}
-      PERF_REPETITIONS: ${{ inputs.repetitions || '1' }}
+      PERF_REPETITIONS: ${{ inputs.repetitions || '3' }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: ${{ matrix.boundary }}
       PERF_RUN_ORDER: ${{ (github.event_name == 'push' || inputs.run_order == 'CROSSOVER') && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
@@ -138,6 +138,22 @@ jobs:
           git status --porcelain > "$evidence/candidate-status.txt"
           git -C "$baseline" status --porcelain > "$evidence/baseline-status-with-harness-overlay.txt"
 
+      - name: Measure same-code noise on this runner
+        if: matrix.dictionary != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          for observation in A1 B1 B2 A2; do
+            output="$PERF_EVIDENCE_ROOT/same-code-control/$observation"
+            mkdir -p "$output"
+            node dev/perf/host-environment.js > "$output/host-before.json"
+            (
+              cd "$PERF_BASELINE_ROOT"
+              node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --output "$output"
+            ) > "$output/run.log" 2>&1
+            node dev/perf/host-environment.js > "$output/host-after.json"
+          done
+
       - name: Run counterbalanced adjacent observations
         shell: bash
         env:
@@ -188,3 +204,19 @@ jobs:
           path: ${{ env.PERF_EVIDENCE_ROOT }}
           if-no-files-found: error
           retention-days: 14
+
+  validate-candidate:
+    name: Validate importer experiment
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+      - name: Unit regressions
+        run: npm run test:unit -- --maxWorkers=2
+      - name: TypeScript contracts
+        run: npm run test:ts
+      - name: JavaScript lint
+        run: npm run test:js
+      - name: Build all targets
+        run: npm run test:build
