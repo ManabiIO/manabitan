@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-11-19T20:28:24.821529+00:00",
+  "status": "final",
+  "baselinePrerequisite": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+  "archives": [
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866.tar.gz",
+      "sha256": "cee9781dfe5d34b3c83230a1ff0bcf7fcdaf9fcfdc4b34667c6a4f38bdf98cc7",
+      "bytes": 27931078,
+      "files": 4924,
+      "kind": "main",
+      "compression": "gzip",
+      "uncompressedBytes": 172256537
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866.tar.xz",
+      "sha256": "08493628f9c798360cd3740c2826264d478cbec2b4b1146efba9750d767c8303",
+      "bytes": 5516556,
+      "files": 4924,
+      "kind": "main",
+      "compression": "xz",
+      "sameTarStreamAs": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866.tar.gz",
+      "uncompressedBytes": 172256537
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866-traces.tar.gz",
+      "sha256": "76a279ffc742919714ee537428fae045100e36be222f5e9fc01c5871f05da87e",
+      "bytes": 4633760,
+      "files": 6,
+      "kind": "traces",
+      "compression": "gzip",
+      "uncompressedBytes": 36775214
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866-traces.tar.xz",
+      "sha256": "04f7d32b225aff951bc1b5e3ade7939330f4fe64a260e874bdbad37f58c8a469",
+      "bytes": 2601364,
+      "files": 6,
+      "kind": "traces",
+      "compression": "xz",
+      "sameTarStreamAs": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866-traces.tar.gz",
+      "uncompressedBytes": 36775214
+    }
+  ],
+  "bundledHeads": {
+    "refs/heads/perf/jmdict-import-20261119-8866": "7ba5dbe12adcc58655c3bd5bb62a0dc9b34808f2",
+    "refs/heads/perf/jmdict-final-tag-20261119": "9a8cf1e8d98d3dc755aafa70b26ddf61c365bdfe",
+    "refs/heads/perf/jmdict-container-comma-20261119-8866": "b57834b293b43407e1d9f29e35e903d3ef8facb2",
+    "refs/heads/perf/jmdict-strict-meta-20261119-8866": "e5d4ee33d22bb0fbba6f624a9ffffb6c32a94f82",
+    "refs/heads/perf/jmdict-literal-type-20261119-8866": "cec9e569f2ccb87a0bce9a5b9a3c46808c58ee2f",
+    "refs/heads/perf/jmdict-combined-parser-20261119-8866": "87f4a024dcf8199f043774b99ab931828c048f07",
+    "refs/heads/perf/jmdict-metadata-publish-20261119": "fb7bc7d0f1bdb5951d94bf3bcf4ebe3b266f998d",
+    "refs/heads/perf/jmdict-publication-cache-witness-20261119": "ef5821631dfeffafa707dd9122451ca6ec765c2f",
+    "refs/heads/perf/jmdict-qualify-20261119-8866-control": "bd8b56fb7a83aa4635abbaacd9b8190ab87f6931",
+    "refs/heads/perf/jmdict-qualify-20261119-8866-storage": "95a9befff16b7ed0989f27e78c268cee9bb5fe43",
+    "refs/heads/perf/jmdict-qualify-20261119-8866-storage-confirm": "0c56f531e8f4aed52a75dca27389b65b0f356ea8",
+    "refs/heads/perf/jmdict-qualify-20261119-8866-parser-confirm": "8e805da1132b610cf2df4668ae16e86f0c6eb5ae"
+  },
+  "ciCohorts": [
+    {
+      "kind": "ci-control",
+      "dictionary": "jitendex",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-control/jitendex/cohort-receipt.json",
+      "files": 99,
+      "plannedObservations": 8,
+      "attemptedObservations": 8,
+      "failures": []
+    },
+    {
+      "kind": "ci-control",
+      "dictionary": "jmdict",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-control/jmdict/cohort-receipt.json",
+      "files": 101,
+      "plannedObservations": 8,
+      "attemptedObservations": 8,
+      "failures": []
+    },
+    {
+      "kind": "ci-control",
+      "dictionary": "jmnedict",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-control/jmnedict/cohort-receipt.json",
+      "files": 99,
+      "plannedObservations": 8,
+      "attemptedObservations": 8,
+      "failures": []
+    },
+    {
+      "kind": "ci-parser-confirm",
+      "dictionary": "jitendex-AB",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-parser-confirm/jitendex-AB/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-parser-confirm",
+      "dictionary": "jitendex-BA",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-parser-confirm/jitendex-BA/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-parser-confirm",
+      "dictionary": "jmdict-AB",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-parser-confirm/jmdict-AB/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-parser-confirm",
+      "dictionary": "jmdict-BA",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-parser-confirm/jmdict-BA/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-parser-confirm",
+      "dictionary": "jmnedict-AB",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-parser-confirm/jmnedict-AB/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-parser-confirm",
+      "dictionary": "jmnedict-BA",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-parser-confirm/jmnedict-BA/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage",
+      "dictionary": "jitendex",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage/jitendex/cohort-receipt.json",
+      "files": 99,
+      "plannedObservations": 8,
+      "attemptedObservations": 8,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage",
+      "dictionary": "jmdict",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage/jmdict/cohort-receipt.json",
+      "files": 99,
+      "plannedObservations": 8,
+      "attemptedObservations": 8,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage",
+      "dictionary": "jmnedict",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage/jmnedict/cohort-receipt.json",
+      "files": 99,
+      "plannedObservations": 8,
+      "attemptedObservations": 8,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage-confirm",
+      "dictionary": "jitendex-AB",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage-confirm/jitendex-AB/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage-confirm",
+      "dictionary": "jitendex-BA",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage-confirm/jitendex-BA/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage-confirm",
+      "dictionary": "jmdict-AB",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage-confirm/jmdict-AB/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage-confirm",
+      "dictionary": "jmdict-BA",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage-confirm/jmdict-BA/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage-confirm",
+      "dictionary": "jmnedict-AB",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage-confirm/jmnedict-AB/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    },
+    {
+      "kind": "ci-storage-confirm",
+      "dictionary": "jmnedict-BA",
+      "completeSuccessfulCohort": true,
+      "receipt": "repo/builds/perf/ci-storage-confirm/jmnedict-BA/cohort-receipt.json",
+      "files": 345,
+      "plannedObservations": 36,
+      "attemptedObservations": 36,
+      "failures": []
+    }
+  ],
+  "omissions": [
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/zstd-cdict-explicit-check",
+      "sha256": "141f20ecc000a92d4f0e5c44302f1a593a259c08b18b48c0a8c62d3e49a6fa9a",
+      "bytes": 771992,
+      "reason": "Reconstructible dictionary-content probe input or native executable; source, recipe and results retained"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/zstd-cdict-input.bin",
+      "sha256": "abfdd9f61f1f0ac76774f2739f5bc7d5e65a71a2790a55af330acb27d20abe9e",
+      "bytes": 4194165,
+      "reason": "Reconstructible dictionary-content probe input or native executable; source, recipe and results retained"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-control/jitendex.zip",
+      "sha256": "7bc20c13bd013ccffd62253628a670597527011e6a96e337c30529c9d1f7248f",
+      "bytes": 1086806,
+      "membersVerified": 99,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-control/jmdict.zip",
+      "sha256": "e6570426be767bd99a21969c7db35d01aefac409508a23b28a9d5b5cce50c0cc",
+      "bytes": 815365,
+      "membersVerified": 99,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-control/jmnedict.zip",
+      "sha256": "04859e05cda5495bda2a3b4fc6484d7698ad29372baafa1a380abab02dc5aca9",
+      "bytes": 778606,
+      "membersVerified": 99,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-parser-confirm/jitendex-AB.zip",
+      "sha256": "01eff2e26ee296400392bf9197bd24de0510ca0cdf0be0a5ec45af6c1eed0903",
+      "bytes": 1214782,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-parser-confirm/jitendex-BA.zip",
+      "sha256": "470cbc2a2262670a220dcb07b95ecc8b8577b7e5a2ebb27175791ee691805738",
+      "bytes": 1215046,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-parser-confirm/jmdict-AB.zip",
+      "sha256": "c8569d9d41bc28d0a2e1a46931bc2d5c84fb1fbb8f4e16e09670c41371ba5993",
+      "bytes": 1207408,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-parser-confirm/jmdict-BA.zip",
+      "sha256": "d7ab4e8e6e7f19dbf0e25c51c315ed3082f9b396628fdb1bb340a85a00c28efd",
+      "bytes": 1206733,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-parser-confirm/jmnedict-AB.zip",
+      "sha256": "fd3a9d17114a4f52b66e1d349b711e625479974fd0c59098428b923af72fdd3a",
+      "bytes": 1208275,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-parser-confirm/jmnedict-BA.zip",
+      "sha256": "f74703b9fcedb1a1fbf8b8dcaca83169efafbb2f26fb7574b763646af84c5082",
+      "bytes": 1208182,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage/jitendex.zip",
+      "sha256": "c05f285f207014517fbbc7de6180ca493f421d0e1eb5fce265793e83dea505a4",
+      "bytes": 1129645,
+      "membersVerified": 99,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage/jmdict.zip",
+      "sha256": "d3f959df5deca37b669015e16988e35cdc018cdcb67410330afe0443c8dd0929",
+      "bytes": 819944,
+      "membersVerified": 99,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage/jmnedict.zip",
+      "sha256": "5551ca75ab72a69d5434c6f6d23404e68ce183e2e362f44e9ab70b2c6eae85b3",
+      "bytes": 814703,
+      "membersVerified": 99,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage-confirm/jitendex-AB.zip",
+      "sha256": "5832c867a95214f2caaffa96d2ff5999d7410ea37a411c2f568ad4059bffdfae",
+      "bytes": 1215003,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage-confirm/jitendex-BA.zip",
+      "sha256": "45c00d5c13eeb4e087701d6608605ef4fdc4714306c6e71a563f34a4d0ade792",
+      "bytes": 1213082,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage-confirm/jmdict-AB.zip",
+      "sha256": "5ec98b1099cfcb6eb273e3ed626866122fb6cc45a5cbd8399eba7408750b267f",
+      "bytes": 1207759,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage-confirm/jmdict-BA.zip",
+      "sha256": "0a90e365a69ba76f97d7c094094a628a46bd42578d61ce8fb032461aa01f5c30",
+      "bytes": 1206913,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage-confirm/jmnedict-AB.zip",
+      "sha256": "7ea4f75a8bb67eb65fbf07f2adb56c5e5d4c8ba6584bbdfd34dd628a71b98ed5",
+      "bytes": 1210932,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/ci-storage-confirm/jmnedict-BA.zip",
+      "sha256": "f213f88e6be45b23d15f9e1b1e63a3a95e513534d2541e157b9e40f4b49ae43c",
+      "bytes": 1208253,
+      "membersVerified": 345,
+      "reason": "Redundant CI transfer ZIP; all extracted members copied verbatim"
+    }
+  ]
+}

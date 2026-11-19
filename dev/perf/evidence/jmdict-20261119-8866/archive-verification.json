@@ -1,0 +1,47 @@
+{
+  "generatedAtUtc": "2026-11-19T20:28:42.033801+00:00",
+  "status": "final",
+  "allMemberHashesMatch": true,
+  "sameTarStreamAcrossCompressionVariants": true,
+  "noExcludedPayloads": true,
+  "archives": [
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866.tar.gz",
+      "sha256": "cee9781dfe5d34b3c83230a1ff0bcf7fcdaf9fcfdc4b34667c6a4f38bdf98cc7",
+      "kind": "main",
+      "compression": "gzip",
+      "membersVerified": 4924,
+      "payloadBytes": 172256537,
+      "uncompressedTarSha256": "572ac8c7a271b513e2875f29f50a974d818b83175882b0f8d7a28cb4a8e3d6cb"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866.tar.xz",
+      "sha256": "08493628f9c798360cd3740c2826264d478cbec2b4b1146efba9750d767c8303",
+      "kind": "main",
+      "compression": "xz",
+      "membersVerified": 4924,
+      "payloadBytes": 172256537,
+      "uncompressedTarSha256": "572ac8c7a271b513e2875f29f50a974d818b83175882b0f8d7a28cb4a8e3d6cb"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866-traces.tar.gz",
+      "sha256": "76a279ffc742919714ee537428fae045100e36be222f5e9fc01c5871f05da87e",
+      "kind": "traces",
+      "compression": "gzip",
+      "membersVerified": 6,
+      "payloadBytes": 36775214,
+      "uncompressedTarSha256": "a45daea497349d026238cf6fc496d8b7344cbd2df1979121ad529ee0f1851bb9"
+    },
+    {
+      "path": "/workspace/scratch/8866feedb165/manabitan/builds/perf/durable-evidence/manabitan-jmdict-evidence-20261119-8866-traces.tar.xz",
+      "sha256": "04f7d32b225aff951bc1b5e3ade7939330f4fe64a260e874bdbad37f58c8a469",
+      "kind": "traces",
+      "compression": "xz",
+      "membersVerified": 6,
+      "payloadBytes": 36775214,
+      "uncompressedTarSha256": "a45daea497349d026238cf6fc496d8b7344cbd2df1979121ad529ee0f1851bb9"
+    }
+  ],
+  "gitBundleVerification": "payload/git/bundle-verification.txt",
+  "note": "Integrity verification only; no product tests or performance measurements"
+}
