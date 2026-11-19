@@ -110,9 +110,10 @@ function publishSlabMeta(database, source, sourceOffset, length, hash1, hash2, s
  * @param {number[]} [sourceValues]
  * @param {number} [hash1]
  * @param {number} [hash2]
+ * @param {Promise<void>} [sourceConsumed]
  * @returns {{database: DictionaryDatabase, chunk: ArtifactTermContentChunkFixture, plan: ArtifactTermContentDedupPlan, appendRecords: ReturnType<typeof vi.fn>, releaseBorrowedContent: ReturnType<typeof vi.fn>, resolveContent: () => void, rejectContent: (error: Error) => void, resolveRecords: () => void, rejectRecords: (error: Error) => void, run: () => Promise<void>}}
  */
-function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash2 = 20) {
+function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash2 = 20, sourceConsumed = Promise.resolve()) {
     const database = new DictionaryDatabase();
     Reflect.set(database, '_bulkImportTransactionOpen', true);
     Reflect.set(database, '_deferTermsVirtualTableSync', true);
@@ -155,7 +156,7 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
     Reflect.set(database, '_termContentBlockImportSession', {
         tryBeginAppendSpans: vi.fn(() => ({
             initialSelection: true,
-            sourceConsumed: Promise.resolve(),
+            sourceConsumed,
             storage: Promise.resolve({
                 contentOffsets: new Float64Array([100]),
                 contentLengths: new Uint32Array([sourceValues.length]),
@@ -2347,8 +2348,10 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.plan.resolvedLengths).toStrictEqual(new Uint32Array([0]));
     });
 
-    test('retains parser content until reserved content is durable', async () => {
-        const harness = createArtifactOverlapHarness();
+    test('retains parser content until durable when the recent source cache skips the batch', async () => {
+        /** @type {Promise<void>} */
+        const sourceConsumed = new Promise(() => { /* The conservative path must not require this signal. */ });
+        const harness = createArtifactOverlapHarness(Array.from({length: 513}, (_, i) => i & 0xff), 10, 20, sourceConsumed);
         Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
         Reflect.set(harness.chunk, 'contentRowStart', 0);
         Reflect.set(harness.chunk, 'useResolvedContentReferences', true);
@@ -2371,6 +2374,142 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         harness.resolveRecords();
         await importing;
         expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+    });
+
+    test('releases consumed parser content after retaining owned exact-match bytes through cache eviction', async () => {
+        /** @type {() => void} */
+        let consumeSource = () => {};
+        /** @type {Promise<void>} */
+        const sourceConsumed = new Promise((resolve) => { consumeSource = resolve; });
+        const expected = Uint8Array.from({length: 20}, (_, i) => i + 1);
+        const harness = createArtifactOverlapHarness([...expected], 10, 20, sourceConsumed);
+        const source = new Uint8Array(new SharedArrayBuffer(64), 7, 32);
+        source.fill(0xee);
+        source.set(expected, 3);
+        harness.chunk.contentBytesBuffer = source;
+        harness.chunk.contentBytesBaseOffset = 3;
+        const readPersisted = vi.spyOn(harness.database, '_readTermEntryContentBytesDetailed');
+        const importing = harness.run();
+        let importSettled = false;
+        void importing.finally(() => { importSettled = true; }).catch(() => {});
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+        consumeSource();
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
+        expect(importSettled).toBe(false);
+
+        Reflect.get(harness.database, '_recentTermContentSourceBatches').clear();
+        Reflect.set(harness.database, '_recentTermContentSourceBatchBytes', 0);
+        source.fill(0);
+        const findInFlight = Reflect.get(harness.database, '_findInFlightTermContentSource').bind(harness.database);
+        const retained = findInFlight(100, expected.length, 'raw-block-v2:jmdict');
+        expect(retained).toEqual({buffer: expected, offset: 0, length: expected.length});
+        expect(retained?.buffer.buffer).toBeInstanceOf(ArrayBuffer);
+        const findMatching = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database);
+        await expect(findMatching(10, 20, expected)).resolves.toMatchObject({offset: 100, length: expected.length});
+        const collision = new Uint8Array(expected);
+        collision[6] ^= 0xff;
+        await expect(findMatching(10, 20, collision)).resolves.toBeUndefined();
+        expect(readPersisted).not.toHaveBeenCalled();
+
+        harness.resolveContent();
+        await vi.waitFor(() => expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0));
+        expect(importSettled).toBe(false);
+        harness.resolveRecords();
+        await importing;
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            contentBorrowedSourceAdoptionCount: 1,
+            contentBorrowedSourceEarlyReleaseCount: 1,
+        });
+    });
+
+    test('retains the borrowed source when publication includes a hash collision', async () => {
+        const harness = createArtifactOverlapHarness();
+        Reflect.set(harness.plan, 'uniqueRowIndexes', new Uint32Array([0]));
+        Reflect.set(harness.plan, 'persistedLookupRequired', true);
+        Reflect.set(harness.chunk, 'contentRowStart', 0);
+        publishSlabMeta(harness.database, Uint8Array.of(9, 8, 7), 0, 3, 10, 20);
+        const importing = harness.run();
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+        const findInFlight = Reflect.get(harness.database, '_findInFlightTermContentSource').bind(harness.database);
+        expect(findInFlight(100, 3, 'raw-block-v2:jmdict')?.buffer).toBe(harness.chunk.contentBytesBuffer);
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            contentBorrowedSourceAdoptionCount: 0,
+            contentBorrowedSourceEarlyReleaseCount: 0,
+        });
+    });
+
+    test('keeps the terminal drain responsible after source consumption fails', async () => {
+        const failure = new Error('injected source consumption failure');
+        const sourceConsumed = Promise.reject(failure);
+        void sourceConsumed.catch(() => {});
+        const harness = createArtifactOverlapHarness([1, 2, 3], 10, 20, sourceConsumed);
+        const importing = harness.run();
+        void importing.catch(() => {});
+
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+        harness.rejectContent(failure);
+        harness.resolveRecords();
+        await expect(importing).rejects.toBe(failure);
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
+    });
+
+    test.each(['content', 'records'])('drains and rolls back a %s failure after parser source reuse', async (failingOperation) => {
+        const harness = createArtifactOverlapHarness();
+        const failure = new Error(`injected late ${failingOperation} failure`);
+        const importing = harness.run();
+        let importSettled = false;
+        void importing.finally(() => { importSettled = true; }).catch(() => {});
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
+        harness.chunk.contentBytesBuffer?.fill(0);
+
+        if (failingOperation === 'content') {
+            harness.rejectContent(failure);
+        } else {
+            harness.rejectRecords(failure);
+        }
+        await Promise.resolve();
+        expect(importSettled).toBe(false);
+        if (failingOperation === 'content') {
+            harness.resolveRecords();
+        } else {
+            harness.resolveContent();
+        }
+        await expect(importing).rejects.toBe(failure);
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.plan.resolvedFlags).toStrictEqual(new Uint8Array([0]));
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').size).toBe(0);
+    });
+
+    test('joins a throwing early release callback before reporting import failure', async () => {
+        const harness = createArtifactOverlapHarness();
+        const failure = new Error('injected source release failure');
+        harness.releaseBorrowedContent.mockImplementation(() => { throw failure; });
+        const importing = harness.run();
+        let importSettled = false;
+        void importing.finally(() => { importSettled = true; }).catch(() => {});
+
+        await vi.waitFor(() => expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce());
+        expect(importSettled).toBe(false);
+        harness.resolveContent();
+        harness.resolveRecords();
+        await expect(importing).rejects.toBe(failure);
+        expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_inFlightTermContentSourceBatches').size).toBe(0);
     });
 
     test('does not release parser content on source consumption before metadata publication', async () => {
@@ -2485,8 +2624,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
             'Duplicate in-flight term content storage reference',
         );
 
-        unregisterUnordered();
-        unregisterOrdered();
+        unregisterUnordered.unregister();
+        unregisterOrdered.unregister();
         expect(Reflect.get(database, '_inFlightTermContentSourceBatches').size).toBe(0);
     });
 
@@ -3058,6 +3197,7 @@ describe('recent-source cache metadata mapping', () => {
             _recentTermContentSourceBatchBytes: fixture.wrap ? 1 : 0,
             _recentTermContentSourceCacheMaxBytes: 48 * 1024 * 1024,
             _nextRecentTermContentSourceBatchId: fixture.wrap ? 0x100000000 : 1,
+            _inFlightTermContentSourceBatches: new Set(),
         };
         const source = Uint8Array.from({length: 20}, (_, i) => i + 1);
         const expectedBytes = source.slice(fixture.minimum, fixture.end);

@@ -123,6 +123,8 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {string|string[]} dictNames
  * @property {Uint8Array[]} contentBytes
  * @property {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} contentSpans
+ * @property {number} contentSpansBaseOffset
+ * @property {boolean} ownsContentSpans
  * @property {boolean} sortedOffsets
  * @property {number} minimumOffset
  * @property {number} maximumOffset
@@ -6397,7 +6399,7 @@ null;
                 }
                 return {
                     buffer: batch.contentSpans.buffer,
-                    offset: batch.contentSpans.offsets[i],
+                    offset: batch.contentSpans.offsets[i] - batch.contentSpansBaseOffset,
                     length: batch.contentSpans.lengths[i],
                 };
             }
@@ -6530,6 +6532,16 @@ null;
                 this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
             }
         }
+        if (publishedCount === staged.indexes.length) {
+            for (const batch of this._inFlightTermContentSourceBatches) {
+                if (batch.contentSpans !== spans || batch.offsets.length !== publishedCount) { continue; }
+                // Keep the owned copy alive independently of cache eviction.
+                // Collisions or incomplete publication retain the borrowed slab.
+                batch.contentSpans = {buffer: owned, offsets: spans.offsets, lengths: spans.lengths};
+                batch.contentSpansBaseOffset = minimumOffset;
+                batch.ownsContentSpans = true;
+            }
+        }
         return owned.byteLength;
     }
 
@@ -6559,7 +6571,7 @@ null;
      * @param {string|string[]} pendingResolvedDictNames
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {() => void}
+     * @returns {{batch: InFlightTermContentSourceBatch, unregister: () => void}}
      * @throws {Error} If source metadata is inconsistent or aliases an active reservation.
      */
     _registerInFlightTermContentSources(
@@ -6652,13 +6664,16 @@ null;
             dictNames: pendingResolvedDictNames,
             contentBytes: pendingContentBytes,
             contentSpans: pendingContentSpans,
+            contentSpansBaseOffset: 0,
+            ownsContentSpans: false,
             sortedOffsets,
             minimumOffset,
             maximumOffset,
         };
         this._inFlightTermContentSourceBatches.add(batch);
-        return () => {
-            this._inFlightTermContentSourceBatches.delete(batch);
+        return {
+            batch,
+            unregister: () => { this._inFlightTermContentSourceBatches.delete(batch); },
         };
     }
 
@@ -8049,16 +8064,21 @@ this._readTermContentSignature(
                     null;
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
-                /** @type {(() => void)|null} */
-                let unregisterInFlightContentSources = null;
+                /** @type {Promise<void>|null} */
+                let pendingBorrowedContentRelease = null;
+                /** @type {{batch: InFlightTermContentSourceBatch, unregister: () => void}|null} */
+                let inFlightContentSources = null;
                 let borrowedContentReleased = false;
-                const releaseInFlightContentSources = () => {
-                    unregisterInFlightContentSources?.();
-                    unregisterInFlightContentSources = null;
+                const releaseBorrowedContent = () => {
                     if (!borrowedContentReleased) {
                         borrowedContentReleased = true;
                         chunk.releaseBorrowedContent?.();
                     }
+                };
+                const releaseInFlightContentSources = () => {
+                    inFlightContentSources?.unregister();
+                    inFlightContentSources = null;
+                    releaseBorrowedContent();
                 };
                 try {
                     if (stagedContentMetadata === null) {
@@ -8131,7 +8151,7 @@ this._readTermContentSignature(
                         }
                     }
                     if (earlyContentPersistence !== null) {
-                        unregisterInFlightContentSources = this._registerInFlightTermContentSources(
+                        inFlightContentSources = this._registerInFlightTermContentSources(
                             pendingOffsets,
                             pendingLengths,
                             pendingResolvedDictNames,
@@ -8165,6 +8185,9 @@ this._readTermContentSignature(
                     if (earlyContentPersistence !== null) {
                         const metadataPublishedAt = safePerformance.now();
                         let contentCompletedAt = metadataPublishedAt;
+                        let contentCompletionObserved = false;
+                        /** @type {number|null} */
+                        let sourceReleasedAt = null;
                         const recordChunk = this._createResolvedArtifactTermRecordChunk(
                             chunk,
                             preparedLookupIndexes,
@@ -8184,12 +8207,32 @@ this._readTermContentSignature(
                         const measuredContentCompletion = earlyContentPersistence.completion
                             .then((blockProfile) => {
                                 contentCompletedAt = safePerformance.now();
+                                contentCompletionObserved = true;
+                                if (sourceReleasedAt !== null) {
+                                    importMetrics.contentBorrowedSourceEarlyReleaseLeadMs += Math.max(0, contentCompletedAt - sourceReleasedAt);
+                                }
                                 return blockProfile;
                             })
                             .finally(releaseInFlightContentSources);
+                        if (
+                            inFlightContentSources?.batch.ownsContentSpans === true &&
+                            typeof chunk.releaseBorrowedContent === 'function'
+                        ) {
+                            importMetrics.contentBorrowedSourceAdoptionCount += 1;
+                            pendingBorrowedContentRelease = earlyContentPersistence.sourceConsumed.then(() => {
+                                if (contentCompletionObserved || borrowedContentReleased) { return; }
+                                sourceReleasedAt = safePerformance.now();
+                                importMetrics.contentBorrowedSourceEarlyReleaseCount += 1;
+                                releaseBorrowedContent();
+                            }, () => {
+                                // Failed consumption keeps the established terminal
+                                // drain responsible for releasing the borrowed slab.
+                            });
+                        }
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,
+                            pendingBorrowedContentRelease,
                         ]);
                         const concurrentErrors = concurrentResults
                             .filter((result) => result.status === 'rejected')
@@ -8222,6 +8265,9 @@ this._readTermContentSignature(
                     }
                     if (pendingRecordAppend !== null) {
                         pendingOperations.push(pendingRecordAppend);
+                    }
+                    if (pendingBorrowedContentRelease !== null) {
+                        pendingOperations.push(pendingBorrowedContentRelease);
                     }
                     await Promise.allSettled(pendingOperations);
                     throw error;
@@ -9132,7 +9178,7 @@ null :
      * import. A null result means the caller must use normal persistence.
      * @param {string} dictionary
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
+     * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, sourceConsumed: Promise<void>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
      */
     _tryBeginPersistArtifactTermContent(dictionary, pendingContentSpans) {
         if (
@@ -9167,7 +9213,7 @@ null :
         }));
         void storage.catch(() => {});
         void completion.catch(() => {});
-        return {storage, completion, initialSelection: operation.initialSelection};
+        return {storage, sourceConsumed: operation.sourceConsumed, completion, initialSelection: operation.initialSelection};
     }
 
     /**
