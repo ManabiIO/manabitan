@@ -611,7 +611,7 @@ export class DictionaryDatabase {
         this._termEntryContentMetaCollisionsByHashPair = new Map();
         /** @type {Set<InFlightTermContentSourceBatch>} */
         this._inFlightTermContentSourceBatches = new Set();
-        /** @type {Map<number, Uint8Array>} */
+        /** @type {Map<number, {buffer: Uint8Array, sourceOffset: number}>} */
         this._recentTermContentSourceBatches = new Map();
         /** @type {number} */
         this._recentTermContentSourceBatchBytes = 0;
@@ -6405,25 +6405,29 @@ null;
         return void 0;
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * @param {TermContentMeta} meta
      * @returns {{buffer: Uint8Array, offset: number, length: number}|undefined}
      */
     _findRecentTermContentSource(meta) {
-        const index = meta.tableIndex;
+        const index = meta.tableIndex
         if (typeof index !== 'number' || index < 0 || index >= this._termEntryContentMetaRecentSourceBatchIdTable.length) {
-            return void 0;
+            return void 0
         }
-        const batchId = this._termEntryContentMetaRecentSourceBatchIdTable[index];
-        if (batchId === 0) { return void 0; }
-        const buffer = this._recentTermContentSourceBatches.get(batchId);
-        if (typeof buffer === 'undefined') { return void 0; }
-        const offset = this._termEntryContentMetaRecentSourceOffsetTable[index];
-        const length = meta.length;
-        if (length < 0 || offset > buffer.byteLength || length > buffer.byteLength - offset) { return void 0; }
-        return {buffer, offset, length};
+        const batchId = this._termEntryContentMetaRecentSourceBatchIdTable[index]
+        if (batchId === 0) { return void 0 }
+        const batch = this._recentTermContentSourceBatches.get(batchId)
+        if (typeof batch === 'undefined') { return void 0 }
+        const {buffer, sourceOffset} = batch
+        const offset = this._termEntryContentMetaRecentSourceOffsetTable[index] - sourceOffset
+        const length = meta.length
+        if (length < 0 || offset < 0 || offset > buffer.byteLength || length > buffer.byteLength - offset) { return void 0 }
+        return {buffer, offset, length}
     }
+    /* eslint-enable @stylistic/semi */
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Retains a bounded owned copy so the next parser groups can verify exact
      * duplicates without reading recently written OPFS blocks.
@@ -6490,7 +6494,7 @@ null;
             const first = this._recentTermContentSourceBatches.entries().next();
             if (first.done) { break; }
             this._recentTermContentSourceBatches.delete(first.value[0]);
-            this._recentTermContentSourceBatchBytes -= first.value[1].byteLength;
+            this._recentTermContentSourceBatchBytes -= first.value[1].buffer.byteLength
         }
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
@@ -6500,12 +6504,14 @@ null;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
         const owned = spans.buffer.slice(minimumOffset, maximumEnd);
-        this._recentTermContentSourceBatches.set(batchId, owned);
+        // Store the shared source origin once per owned batch. Metadata keeps
+        // source offsets so a dense run can publish its offset column directly.
+        this._recentTermContentSourceBatches.set(batchId, {buffer: owned, sourceOffset: minimumOffset})
         this._recentTermContentSourceBatchBytes += owned.byteLength;
         const firstIndex = staged.indexes[0];
         const endIndex = firstIndex + staged.indexes.length;
         let contiguousPublished = (
-            minimumOffset === 0 && publishedCount === staged.indexes.length &&
+            publishedCount === staged.indexes.length &&
             firstIndex >= 0 && spans.offsets instanceof Uint32Array &&
             endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
             endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
@@ -6527,11 +6533,12 @@ null;
                 const index = staged.indexes[i];
                 if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
                 this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
-                this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
+                this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i]
             }
         }
         return owned.byteLength;
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Builds diagnostic strings only on a read failure, not for every imported
@@ -7264,7 +7271,8 @@ this._readTermContentSignature(
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
-            this._recentTermContentSourceBatchBytes -= source.byteLength;
+            // eslint-disable-next-line @stylistic/semi
+            this._recentTermContentSourceBatchBytes -= source.buffer.byteLength
         }
         if (indexesToClear.length > 0) {
             this._ensureTermEntryContentMetaHashPairCapacity(

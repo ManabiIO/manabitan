@@ -3012,6 +3012,7 @@ describe('TermRecordOpfsStore batch dictionary indexes', () => {
 });
 
 
+/* eslint-disable @stylistic/semi */
 describe('recent-source cache metadata mapping', () => {
     test.each([
         [null, 48],
@@ -3030,11 +3031,15 @@ describe('recent-source cache metadata mapping', () => {
     const cases = [
         {name: 'dense zero-base spans', indexes: [2, 3, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 0, end: 10, wrap: false},
         {name: 'dense relative spans', indexes: [2, 3, 4], offsets: [3, 7, 11, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 3, end: 13, wrap: false},
+        {name: 'permuted relative spans', indexes: [4, 2, 3], offsets: [3, 7, 11, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[4, 0], [2, 4], [3, 8]], minimum: 3, end: 13, wrap: false},
+        {name: 'relative collision slots', indexes: [4, -1, 1], offsets: [3, 12345, 11, 999], lengths: [2, 99999, 2], unpublished: [], mapping: [[4, 0], [1, 8]], minimum: 3, end: 13, wrap: false},
+        {name: 'relative unpublished slots', indexes: [2, 3, 4], offsets: [3, 12345, 11, 999], lengths: [2, 99999, 2], unpublished: [3], mapping: [[2, 0], [4, 8]], minimum: 3, end: 13, wrap: false},
         {name: 'permuted published slots', indexes: [4, 2, 3], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[4, 0], [2, 4], [3, 8]], minimum: 0, end: 10, wrap: false},
         {name: 'skipped collision slots', indexes: [4, -1, 1], offsets: [0, 12345, 8, 999], lengths: [2, 99999, 2], unpublished: [], mapping: [[4, 0], [1, 8]], minimum: 0, end: 10, wrap: false},
         {name: 'unpublished slots', indexes: [2, 3, 4], offsets: [0, 12345, 8, 999], lengths: [2, 99999, 2], unpublished: [3], mapping: [[2, 0], [4, 8]], minimum: 0, end: 10, wrap: false},
         {name: 'repeated slot fallback', indexes: [2, 2, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 4], [4, 8]], minimum: 0, end: 10, wrap: false},
         {name: 'dense identifier wrap', indexes: [2, 3, 4], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 0, end: 10, wrap: true},
+        {name: 'relative identifier wrap', indexes: [2, 3, 4], offsets: [3, 7, 11, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[2, 0], [3, 4], [4, 8]], minimum: 3, end: 13, wrap: true},
         {name: 'permuted identifier wrap', indexes: [4, 2, 3], offsets: [0, 4, 8, 999], lengths: [2, 2, 2], unpublished: [], mapping: [[4, 0], [2, 4], [3, 8]], minimum: 0, end: 10, wrap: true},
     ];
 
@@ -3054,7 +3059,7 @@ describe('recent-source cache metadata mapping', () => {
             _termEntryContentMetaStateTable: states,
             _termEntryContentMetaRecentSourceBatchIdTable: batchIds,
             _termEntryContentMetaRecentSourceOffsetTable: offsets,
-            _recentTermContentSourceBatches: fixture.wrap ? new Map([[99, Uint8Array.of(1)]]) : new Map(),
+            _recentTermContentSourceBatches: fixture.wrap ? new Map([[99, {buffer: Uint8Array.of(1), sourceOffset: 0}]]) : new Map(),
             _recentTermContentSourceBatchBytes: fixture.wrap ? 1 : 0,
             _recentTermContentSourceCacheMaxBytes: 48 * 1024 * 1024,
             _nextRecentTermContentSourceBatchId: fixture.wrap ? 0x100000000 : 1,
@@ -3069,7 +3074,7 @@ describe('recent-source cache metadata mapping', () => {
         const expectedOffsets = new Uint32Array(8).fill(77);
         for (const [index, offset] of fixture.mapping) {
             expectedIds[index] = 1;
-            expectedOffsets[index] = offset;
+            expectedOffsets[index] = offset + fixture.minimum
         }
         expect(batchIds).toEqual(expectedIds);
         expect(offsets).toEqual(expectedOffsets);
@@ -3077,7 +3082,12 @@ describe('recent-source cache metadata mapping', () => {
         expect(owner._recentTermContentSourceBatchBytes).toBe(expectedBytes.length);
         expect(owner._recentTermContentSourceBatches.size).toBe(1);
         source.fill(0);
-        expect(owner._recentTermContentSourceBatches.get(1)).toEqual(expectedBytes);
+        expect(owner._recentTermContentSourceBatches.get(1)).toEqual({buffer: expectedBytes, sourceOffset: fixture.minimum})
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource')
+        for (const [index, offset] of fixture.mapping) {
+            const found = findRecent.call(owner, {tableIndex: index, length: 2})
+            expect(found?.buffer.subarray(found.offset, found.offset + found.length)).toEqual(expectedBytes.subarray(offset, offset + 2))
+        }
     });
 
     test('rejects an invalid later span without publishing any cache mappings', () => {
@@ -3102,4 +3112,46 @@ describe('recent-source cache metadata mapping', () => {
         expect([...owner._termEntryContentMetaRecentSourceOffsetTable]).toEqual([0, 0]);
         expect(owner._nextRecentTermContentSourceBatchId).toBe(1);
     });
+
+    test('rejects a source offset before the owned batch origin', () => {
+        const database = new DictionaryDatabase()
+        const {meta} = publishSlabMeta(database, new Uint8Array([99, 1, 2, 3, 4, 99]), 1, 4, 10, 20)
+        const offsets = Reflect.get(database, '_termEntryContentMetaRecentSourceOffsetTable')
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database)
+        expect(findRecent(meta)?.offset).toBe(0)
+        offsets[meta.tableIndex] = 0
+        expect(findRecent(meta)).toBeUndefined()
+        offsets[meta.tableIndex] = 2
+        expect(findRecent(meta)).toBeUndefined()
+    })
+
+    test('evicts owned relative spans using retained bytes and then verifies storage', async () => {
+        const database = new DictionaryDatabase()
+        Reflect.set(database, '_recentTermContentSourceCacheMaxBytes', 6)
+        const source = new Uint8Array([90, 1, 2, 3, 4, 91])
+        const expected = source.slice(1, 5)
+        const first = publishSlabMeta(database, source, 1, 4, 10, 20)
+        const second = publishSlabMeta(database, new Uint8Array([90, 91, 5, 6, 7, 8, 92]), 2, 4, 30, 40)
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database)
+        expect(findRecent(first.meta)).toBeUndefined()
+        expect(findRecent(second.meta)?.buffer).toEqual(Uint8Array.of(5, 6, 7, 8))
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(4)
+        source.fill(0)
+        const readStorage = vi.fn(async () => [{status: 'ok', bytes: expected}])
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage)
+        const findBatch = Reflect.get(database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(database)
+        const [result] = await findBatch([{hash1: 10, hash2: 20, contentBytes: expected, primary: first.meta}])
+        expect(result).toStrictEqual({existingMeta: first.meta, exactFallback: true})
+        expect(readStorage).toHaveBeenCalledOnce()
+    })
+
+    test('removes an owned relative batch and its byte count on rollback', () => {
+        const database = new DictionaryDatabase()
+        const {meta, staged} = publishSlabMeta(database, new Uint8Array([99, 1, 2, 3, 4, 99]), 1, 4, 10, 20)
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, staged)
+        expect(Reflect.get(database, '_findRecentTermContentSource').call(database, meta)).toBeUndefined()
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0)
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0)
+    })
 });
+/* eslint-enable @stylistic/semi */
