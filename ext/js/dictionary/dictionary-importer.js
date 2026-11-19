@@ -1543,6 +1543,26 @@ export class DictionaryImporter {
                 await importSession.closeArchive();
                 this._logImport('released source archive after packed artifact preload');
             }
+            const hasArchiveImageMediaFiles = this._archiveHasImageMediaFiles(fileMap);
+            const hasUsableArtifactMediaFiles = termArtifactManifest?.includesMediaFiles === true;
+            const useMediaPipeline = (
+                !this._skipMediaImport &&
+                (hasArchiveImageMediaFiles || hasUsableArtifactMediaFiles)
+            );
+            // The session already owns parser cleanup, including a failed bulk
+            // start. Warm eligible workers while storage acquires its handles.
+            if (
+                version === 3 &&
+                !this._disableTermBankWasmFastPath &&
+                !useTermArtifactFiles &&
+                !usePackedTermArtifact &&
+                !useMediaPipeline &&
+                enableTermEntryContentDedup &&
+                effectiveTermContentStorageMode === 'raw-bytes' &&
+                activeTermFiles.length >= 4
+            ) {
+                void prewarmParallelTermBankParser(this._termBankExperiments);
+            }
             await importSession.startBulkImport();
             if (sharedGlossaryArtifactBytes instanceof Uint8Array && sharedGlossaryArtifactBytes.byteLength > 0) {
                 const tSharedGlossaryAppendStart = Date.now();
@@ -1557,13 +1577,7 @@ export class DictionaryImporter {
                 }
                 sharedGlossaryArtifactAppendMs = Math.max(0, Date.now() - tSharedGlossaryAppendStart);
             }
-            const hasArchiveImageMediaFiles = this._archiveHasImageMediaFiles(fileMap);
-            const hasUsableArtifactMediaFiles = termArtifactManifest?.includesMediaFiles === true;
-            const useMediaPipeline = (
-                !this._skipMediaImport &&
-                (hasArchiveImageMediaFiles || hasUsableArtifactMediaFiles)
-            );
-                /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: ImportFileEntry}>} */
+            /** @type {Array<{path: string, mediaType: string, packedOffset?: number, packedLength?: number, compressionMethod?: number, uncompressedLength?: number, fileEntry?: ImportFileEntry}>} */
             const artifactArchiveImageFileEntries = (() => {
                 if (
                     !useMediaPipeline ||
@@ -2042,18 +2056,6 @@ export class DictionaryImporter {
             if (useExternalPackedMediaStorage && this._skipImageMetadata) {
                 packedMediaArtifactBytes = null;
                 packedMediaArtifactBlob = null;
-            }
-            if (
-                version === 3 &&
-                !this._disableTermBankWasmFastPath &&
-                !useTermArtifactFiles &&
-                !usePackedTermArtifact &&
-                !useTermMediaRequirements &&
-                enableTermEntryContentDedup &&
-                effectiveTermContentStorageMode === 'raw-bytes' &&
-                activeTermFiles.length >= 4
-            ) {
-                void prewarmParallelTermBankParser(this._termBankExperiments);
             }
             let importWideSourceRunEnabled = true;
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {
