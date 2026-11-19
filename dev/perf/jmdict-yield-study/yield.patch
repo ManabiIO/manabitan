@@ -1,0 +1,629 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index 26706f0080f2e9c2e3108e81ed06d592cea4555c..42fb1fecc5769a7fa6ed1678cd88b56a3a215549 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -2220,6 +2220,9 @@ export class DictionaryImporter {
+                         if (!usedImportWideSourceRun) {
+                             termBankSourcePipeline.prefetchNext(termFileIndex + sourceTermFileBatchCount);
+                         }
++                        /* eslint-disable @stylistic/semi */
++                        let successfulOverlap = false
++                        /* eslint-enable @stylistic/semi */
+                         await this._readTermBankFileFast(
+                             sourceTermFileBatchCount > 1 ? /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (sourceTermFileForProcessing)) : termFileEntry,
+                             version,
+@@ -2229,20 +2232,52 @@ export class DictionaryImporter {
+                             enableTermEntryContentDedup,
+                             termContentStorageMode,
+                             async (termListChunk, requirementsChunk, streamProgress) => {
+-                                ++streamedFastPathChunkCount;
+-                                const tChunkWorkStart = Date.now();
+-                                const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance);
+-                                addTermImportMetrics(artifactMetrics, chunkMetrics);
+-                                streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart);
+-                                termListChunk.length = 0;
+-                                if (requirementsChunk !== null) {
+-                                    requirementsChunk.length = 0;
+-                                }
+-                                await eventLoopYielder.yield();
++                                /* eslint-disable @stylistic/semi */
++                                successfulOverlap = false
++                                this._throwIfCancelled()
++                                ++streamedFastPathChunkCount
++                                // Preserve the first chunk's late turn; later
++                                // chunks can overlap their owned turn with I/O.
++                                const pendingTurn = streamedFastPathChunkCount > 1 ? eventLoopYielder.yield() : null
++                                const pendingSink = (async () => {
++                                    const tChunkWorkStart = Date.now()
++                                    const chunkMetrics = await processTermChunk(sourceTermFileForProcessing, termListChunk, requirementsChunk, streamProgress, streamedProgressStartIndex, sourceTermFileProgressAllowance)
++                                    addTermImportMetrics(artifactMetrics, chunkMetrics)
++                                    streamChunkWorkMs += Math.max(0, Date.now() - tChunkWorkStart)
++                                    termListChunk.length = 0
++                                    if (requirementsChunk !== null) {
++                                        requirementsChunk.length = 0
++                                    }
++                                })()
++                                const [sinkResult, turnResult] = await Promise.allSettled([pendingSink, pendingTurn])
++                                // Neither failure may retire the other's owner.
++                                if (sinkResult.status === 'rejected') { throw sinkResult.reason }
++                                if (turnResult.status === 'rejected') { throw turnResult.reason }
++                                if (pendingTurn === null) { await eventLoopYielder.yield() }
++                                this._throwIfCancelled()
++                                if (pendingTurn !== null) { successfulOverlap = true }
++                                /* eslint-enable @stylistic/semi */
+                             },
+                             preloadedTermFileBytes,
+                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
+-                        );
++                        ).catch(async (error) => {
++                            /* eslint-disable @stylistic/semi */
++                            if (successfulOverlap) {
++                                // Keep the original failure if the terminal turn
++                                // also fails; the outer catch checks cancellation.
++                                try { await eventLoopYielder.yield() } catch (_) { /* NOP */ }
++                            }
++                            throw error
++                            /* eslint-enable @stylistic/semi */
++                        });
++                        /* eslint-disable @stylistic/semi */
++                        // A cancellation queued after the last overlapped turn
++                        // still gets a task opportunity before publication.
++                        if (successfulOverlap) {
++                            await eventLoopYielder.yield()
++                            this._throwIfCancelled()
++                        }
++                        /* eslint-enable @stylistic/semi */
+                         termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
+                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
+                         const parallelSourceReadWallMs = lastFastTermBankReadProfile?.parserProfile?.parallelSourceReadWallMs;
+diff --git a/test/dictionary-importer-task-turn.test.js b/test/dictionary-importer-task-turn.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..4246832d4526de2a9fcaba614fa54492fddc850b
+--- /dev/null
++++ b/test/dictionary-importer-task-turn.test.js
+@@ -0,0 +1,545 @@
++/* Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint-disable @stylistic/semi */
++import {setImmediate as nextTask} from 'node:timers/promises'
++import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js'
++import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest'
++import {ZipReader} from '../ext/lib/zip.js'
++import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
++import {TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js'
++import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
++import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
++
++/** @type {ArrayBuffer} */
++let archiveBytes
++
++beforeAll(async () => {
++    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0})
++    const options = {useWebWorkers: false}
++    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Task turns', revision: '1', format: 3})), options)
++    for (let index = 0; index < 4; ++index) {
++        await writer.add(`term_bank_${index + 1}.json`, new TextReader(JSON.stringify([
++            [`term-${index}`, '', '', '', 0, ['definition'], index, ''],
++        ])), options)
++    }
++    archiveBytes = new Uint8Array(await writer.close()).buffer
++})
++
++afterEach(() => {
++    vi.restoreAllMocks()
++    vi.unstubAllGlobals()
++})
++
++/*
++ * Tasks stay separate from Promise continuations. Tests choose when a channel
++ * task or an external cancellation task is delivered, without timer/port races.
++ */
++function controlledTurns(/** @type {'none'|'construct'|'post'} */ failure, failAfterPosts = 0) {
++    /** @type {Array<() => void>} */
++    const pending = []
++    /** @type {Array<() => void>} */
++    const external = []
++    /** @type {Array<{port1: {onmessage: (() => void)|null, close: ReturnType<typeof vi.fn>}, port2: {close: ReturnType<typeof vi.fn>}}>} */
++    const channels = []
++    const turnFailure = new Error('task turn failed')
++    let automatic = false
++    let postCount = 0
++    class ControlledMessageChannel {
++        constructor() {
++            if (failure === 'construct') { throw turnFailure }
++            this.port1 = {
++                onmessage: /** @type {(() => void)|null} */ (null),
++                close: vi.fn(),
++            }
++            this.port2 = {
++                close: vi.fn(),
++                postMessage: () => {
++                    ++postCount
++                    if (failure === 'post' && postCount > failAfterPosts) { throw turnFailure }
++                    const task = () => { this.port1.onmessage?.() }
++                    if (automatic) {
++                        queueMicrotask(task)
++                    } else {
++                        pending.push(task)
++                    }
++                },
++            }
++            channels.push(this)
++        }
++    }
++    vi.stubGlobal('MessageChannel', ControlledMessageChannel)
++    return {
++        pending,
++        channels,
++        turnFailure,
++        get postCount() { return postCount },
++        /** @param {() => void} task */
++        queueExternal(task) { external.push(task) },
++        async deliverExternal() {
++            await nextTask()
++            const task = external.shift()
++            expect(task).toBeTypeOf('function')
++            task?.()
++            await nextTask()
++        },
++        async deliver() {
++            await nextTask()
++            const task = pending.shift()
++            expect(task).toBeTypeOf('function')
++            task?.()
++            await nextTask()
++        },
++        release() {
++            automatic = true
++            for (const task of pending.splice(0)) { queueMicrotask(task) }
++        },
++    }
++}
++
++/*
++ * ZIP parsing, importer callbacks, cancellation, and session cleanup are real.
++ * Ready parser results replace only native computation; each result keeps an
++ * observed loan until the actual importer callback finishes.
++ */
++function startImport(/** @type {{chunks?: number, trailingEmptyGroups?: number, turnFailure?: 'none'|'construct'|'post', failAfterPosts?: number, sink?: (index: number) => Promise<void>|void, beforeParser?: (state: {cancelled: boolean}) => void, afterParser?: () => void}} */ {chunks = 3, trailingEmptyGroups = 0, turnFailure = 'none', failAfterPosts = 0, sink = () => {}, beforeParser = () => {}, afterParser = () => {}} = {}) {
++    const turns = controlledTurns(turnFailure, failAfterPosts)
++    const admitted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++    const state = {cancelled: false, activeLoans: 0, settled: false}
++    /** @type {string[]} */
++    const events = []
++    let sinkCount = 0
++    const db = {
++        isPrepared: () => true,
++        setImportOptimizationFlags() {},
++        setTermEntryContentDedupEnabled() {},
++        setImportDebugLogging() {},
++        dictionaryExists: async () => false,
++        addWithResult: async () => 1,
++        startBulkImport: vi.fn(async () => 'task-turn-session'),
++        finishBulkImport: vi.fn(async () => {
++            events.push('publish')
++            return {}
++        }),
++        abortBulkImport: vi.fn(async () => { events.push('rollback') }),
++        deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
++        getLastBulkAddTermsMetrics: () => null,
++        queuePendingTermContentImportWrites: async () => {},
++        bulkAdd: vi.fn(async () => {}),
++        bulkAddArtifactTermsChunk: vi.fn(async () => {
++            const index = ++sinkCount
++            events.push(`sink:${index}`)
++            admitted.resolve()
++            try {
++                await sink(index)
++            } finally {
++                events.push(`sink-settled:${index}`)
++            }
++        }),
++    }
++    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => state.cancelled)
++    vi.stubGlobal('Worker', void 0)
++    vi.spyOn(parser, 'prewarmParallelTermBankParser').mockResolvedValue(false)
++    vi.spyOn(importer, '_readTermBankFileFast').mockImplementation(async (...args) => {
++        const onChunk = args[7]
++        if (typeof onChunk !== 'function') { throw new Error('Expected streaming import') }
++        beforeParser(state)
++        for (let index = 0; index < chunks; ++index) {
++            const chunk = {
++                dictionary: 'Task turns',
++                rowCount: 1,
++                expressionBytesList: [],
++                readingBytesList: [],
++                readingEqualsExpressionList: new Uint8Array(1),
++                scoreList: new Int32Array(1),
++                sequenceList: new Int32Array(1),
++                contentBytesList: [],
++                contentHash1List: new Uint32Array(1),
++                contentHash2List: new Uint32Array(1),
++                contentDictNameList: null,
++            }
++            ++state.activeLoans
++            events.push(`loan:${index + 1}`)
++            try {
++                await onChunk(
++                    /** @type {import('dictionary-database').DatabaseTermEntry[]} */ (/** @type {unknown} */ (chunk)),
++                    null,
++                    {processedRows: index + 1, totalRows: chunks, chunkIndex: index + 1, chunkCount: chunks + trailingEmptyGroups},
++                )
++            } finally {
++                --state.activeLoans
++                events.push(`retire:${index + 1}`)
++            }
++        }
++        afterParser()
++        return {termList: [], requirements: null}
++    })
++    const closeArchive = vi.spyOn(ZipReader.prototype, 'close')
++    const releaseSources = vi.spyOn(TermBankSourcePipeline.prototype, 'releaseBatch')
++    const pending = importer.importDictionary(
++        /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
++        archiveBytes,
++        /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false}),
++    ).then((result) => {
++        state.settled = true
++        return result
++    })
++    return {
++        turns,
++        admitted,
++        state,
++        events,
++        db,
++        pending,
++        closeArchive,
++        releaseSources,
++        async cleanup() {
++            state.cancelled = true
++            turns.release()
++            await pending
++        },
++    }
++}
++
++describe('native import task turns', () => {
++    test('checks cancellation at chunk entry before acquiring a turn or admitting a sink', async () => {
++        const run = startImport({beforeParser: (state) => { state.cancelled = true }})
++        try {
++            const result = await run.pending
++            expect(result.result).toBeNull()
++            expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true)
++            expect(run.db.bulkAddArtifactTermsChunk).not.toHaveBeenCalled()
++            expect(run.turns.channels).toHaveLength(0)
++            expect(run.state.activeLoans).toBe(0)
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++        } finally { await run.cleanup() }
++    })
++
++    test('empty reads keep zero task turns', async () => {
++        const run = startImport({chunks: 0})
++        try {
++            expect((await run.pending).errors).toEqual([])
++            expect(run.turns.channels).toHaveLength(0)
++            expect(run.turns.postCount).toBe(0)
++        } finally { await run.cleanup() }
++    })
++
++    test('single-callback reads retain exactly one late turn', async () => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({chunks: 1, sink: () => sink.promise})
++        try {
++            await run.admitted.promise
++            await nextTask()
++            expect(run.turns.pending).toHaveLength(0)
++            expect(run.turns.postCount).toBe(0)
++            expect(run.state.activeLoans).toBe(1)
++            sink.resolve()
++            await nextTask()
++            expect(run.turns.pending).toHaveLength(1)
++            await run.turns.deliver()
++            expect((await run.pending).errors).toEqual([])
++            expect(run.turns.postCount).toBe(1)
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++
++    test('ready sinks cannot drain through microtasks and the terminal turn precedes publication', async () => {
++        const run = startImport()
++        try {
++            await run.admitted.promise
++            await nextTask()
++            for (let index = 1; index <= 3; ++index) {
++                expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(index)
++                expect(run.state.activeLoans).toBe(1)
++                expect(run.turns.pending).toHaveLength(1)
++                await run.turns.deliver()
++            }
++            expect(run.state.activeLoans).toBe(0)
++            expect(run.turns.pending).toHaveLength(1)
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.releaseSources).not.toHaveBeenCalled()
++            await run.turns.deliver()
++            expect((await run.pending).errors).toEqual([])
++            expect(run.db.finishBulkImport).toHaveBeenCalledOnce()
++            expect(run.releaseSources).toHaveBeenCalledOnce()
++            expect(run.turns.channels).toHaveLength(1)
++            expect(run.turns.channels[0].port1.close).toHaveBeenCalledOnce()
++            expect(run.turns.channels[0].port2.close).toHaveBeenCalledOnce()
++        } finally { await run.cleanup() }
++    })
++
++    test('overlaps the turn with an asynchronous sink without retiring its loan', async () => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({chunks: 2, sink: (index) => (index === 2 ? sink.promise : void 0)})
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(2)
++            expect(run.turns.pending).toHaveLength(1)
++            await run.turns.deliver()
++            expect(run.state.activeLoans).toBe(1)
++            expect(run.closeArchive).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).not.toHaveBeenCalled()
++            sink.resolve()
++            await nextTask()
++            expect(run.state.activeLoans).toBe(0)
++            expect(run.turns.pending).toHaveLength(1)
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            await run.turns.deliver()
++            expect((await run.pending).errors).toEqual([])
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++
++    test('observes task-delivered cancellation before admitting the next ready sink', async () => {
++        const run = startImport()
++        try {
++            await run.admitted.promise
++            await nextTask()
++            run.turns.queueExternal(() => { run.state.cancelled = true })
++            await run.turns.deliverExternal()
++            await run.turns.deliver()
++            const result = await run.pending
++            expect(result.result).toBeNull()
++            expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true)
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledOnce()
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++            expect(run.events.indexOf('rollback')).toBeGreaterThan(run.events.indexOf('retire:1'))
++        } finally { await run.cleanup() }
++    })
++
++    test.each([0, 2])('retains a terminal cancellation opportunity with %i empty trailing groups', async (trailingEmptyGroups) => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({chunks: 2, trailingEmptyGroups, sink: (index) => (index === 2 ? sink.promise : void 0)})
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(2)
++            await run.turns.deliver()
++            // Queue, but do not deliver, a cancellation after the early turn.
++            run.turns.queueExternal(() => { run.state.cancelled = true })
++            sink.resolve()
++            await nextTask()
++            expect(run.state.activeLoans).toBe(0)
++            expect(run.turns.pending).toHaveLength(1)
++            expect(run.state.settled).toBe(false)
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.releaseSources).not.toHaveBeenCalled()
++            await run.turns.deliverExternal()
++            await run.turns.deliver()
++            const result = await run.pending
++            expect(result.result).toBeNull()
++            expect(result.errors.some(({message}) => message.includes('cancelled'))).toBe(true)
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++            expect(run.releaseSources).not.toHaveBeenCalled()
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++
++    test('late nonterminal cancellation gets another task opportunity within the next chunk', async () => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({chunks: 4, sink: (index) => (index === 2 ? sink.promise : void 0)})
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(2)
++            await run.turns.deliver()
++            run.turns.queueExternal(() => { run.state.cancelled = true })
++            sink.resolve()
++            await nextTask()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(3)
++            expect(run.turns.pending).toHaveLength(1)
++            await run.turns.deliverExternal()
++            await run.turns.deliver()
++            expect(run.turns.pending).toHaveLength(0)
++            expect((await run.pending).result).toBeNull()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(3)
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++
++    test('delivers queued cancellation before reporting a trailing ready parser failure', async () => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({
++            chunks: 2,
++            sink: (index) => (index === 2 ? sink.promise : void 0),
++            afterParser: () => { throw new Error('trailing parser failed') },
++        })
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            await run.turns.deliver()
++            run.turns.queueExternal(() => { run.state.cancelled = true })
++            sink.resolve()
++            await nextTask()
++            expect(run.state.activeLoans).toBe(0)
++            expect(run.turns.pending).toHaveLength(1)
++            expect(run.state.settled).toBe(false)
++            expect(run.db.abortBulkImport).not.toHaveBeenCalled()
++            expect(run.closeArchive).not.toHaveBeenCalled()
++            await run.turns.deliverExternal()
++            await run.turns.deliver()
++            const result = await run.pending
++            expect(result.errors).toHaveLength(1)
++            expect(result.errors[0].message).toContain('cancelled')
++            expect(result.errors[0].message).not.toContain('trailing parser failed')
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++
++    test('preserves a trailing parser failure when its terminal task fence also fails', async () => {
++        const run = startImport({
++            chunks: 2,
++            turnFailure: 'post',
++            failAfterPosts: 2,
++            afterParser: () => { throw new Error('trailing parser wins') },
++        })
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            await run.turns.deliver()
++            const result = await run.pending
++            expect(run.turns.postCount).toBe(3)
++            expect(result.errors).toHaveLength(1)
++            expect(result.errors[0].message).toContain('trailing parser wins')
++            expect(result.errors[0].message).not.toContain('task turn failed')
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++        } finally { await run.cleanup() }
++    })
++
++    test('a later failed sink preserves its error without acquiring a new terminal turn', async () => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({sink: (index) => (index === 3 ? sink.promise : void 0)})
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            await run.turns.deliver()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(3)
++            await run.turns.deliver()
++            expect(run.state.activeLoans).toBe(1)
++            run.turns.queueExternal(() => { run.state.cancelled = true })
++            sink.reject(new Error('last sink failed'))
++            await nextTask()
++            expect(run.turns.pending).toHaveLength(0)
++            expect(run.turns.postCount).toBe(3)
++            const result = await run.pending
++            expect(result.errors).toHaveLength(1)
++            expect(result.errors[0].message).toContain('last sink failed')
++            expect(result.errors[0].message).not.toContain('cancelled')
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++            expect(run.events.indexOf('rollback')).toBeGreaterThan(run.events.indexOf('retire:3'))
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++
++    test('a failed sink drains its already-owned turn before cleanup', async () => {
++        const failure = new Error('sink failed')
++        const run = startImport({sink: (index) => {
++            if (index === 2) { throw failure }
++        }})
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            expect(run.state.settled).toBe(false)
++            expect(run.state.activeLoans).toBe(1)
++            expect(run.closeArchive).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).not.toHaveBeenCalled()
++            await run.turns.deliver()
++            const result = await run.pending
++            expect(result.errors.some(({message}) => message.includes('sink failed'))).toBe(true)
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(2)
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++        } finally { await run.cleanup() }
++    })
++
++    for (const turnFailure of /** @type {const} */ (['construct', 'post'])) {
++        test(`single-callback ${turnFailure} failure keeps the sink's original late boundary`, async () => {
++            const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++            const run = startImport({chunks: 1, turnFailure, sink: () => sink.promise})
++            try {
++                await run.admitted.promise
++                await nextTask()
++                expect(run.turns.postCount).toBe(0)
++                expect(run.state.settled).toBe(false)
++                expect(run.state.activeLoans).toBe(1)
++                expect(run.closeArchive).not.toHaveBeenCalled()
++                expect(run.db.abortBulkImport).not.toHaveBeenCalled()
++                sink.resolve()
++                const result = await run.pending
++                expect(result.errors).toHaveLength(1)
++                expect(result.errors[0].message).toContain('task turn failed')
++                expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledOnce()
++                expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++                expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++                expect(run.events.indexOf('rollback')).toBeGreaterThan(run.events.indexOf('sink-settled:1'))
++                expect(run.events.indexOf('rollback')).toBeGreaterThan(run.events.indexOf('retire:1'))
++            } finally {
++                sink.resolve()
++                await run.cleanup()
++            }
++        })
++    }
++
++    test.each([false, true])('an overlapped post failure drains its sink and preserves sink error precedence (sink fails: %s)', async (sinkFails) => {
++        const sink = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++        const run = startImport({
++            turnFailure: 'post',
++            failAfterPosts: 1,
++            sink: (index) => (index === 2 ? sink.promise : void 0),
++        })
++        try {
++            await run.admitted.promise
++            await nextTask()
++            await run.turns.deliver()
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(2)
++            expect(run.state.settled).toBe(false)
++            expect(run.state.activeLoans).toBe(1)
++            expect(run.closeArchive).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).not.toHaveBeenCalled()
++            if (sinkFails) {
++                sink.reject(new Error('sink wins'))
++            } else {
++                sink.resolve()
++            }
++            const result = await run.pending
++            expect(result.errors).toHaveLength(1)
++            expect(result.errors[0].message).toContain(sinkFails ? 'sink wins' : 'task turn failed')
++            if (sinkFails) { expect(result.errors[0].message).not.toContain('task turn failed') }
++            expect(run.db.bulkAddArtifactTermsChunk).toHaveBeenCalledTimes(2)
++            expect(run.db.finishBulkImport).not.toHaveBeenCalled()
++            expect(run.db.abortBulkImport).toHaveBeenCalledOnce()
++            expect(run.events.indexOf('rollback')).toBeGreaterThan(run.events.indexOf('sink-settled:2'))
++            expect(run.events.indexOf('rollback')).toBeGreaterThan(run.events.indexOf('retire:2'))
++        } finally {
++            sink.resolve()
++            await run.cleanup()
++        }
++    })
++})
++/* eslint-enable @stylistic/semi */
