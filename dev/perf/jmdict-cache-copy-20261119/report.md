@@ -1,6 +1,6 @@
 # JMdict recent-content cache copy: provisional performance evidence
 
-The isolated cache-copy candidate consistently reduces time spent retaining recent term content. **It does not establish a reliable whole-import speedup.** Keep this PR in draft for review; the evidence supports a cache-phase improvement with the existing private ownership and cache limits preserved.
+The isolated cache-copy candidate has favorable repeated measurements for retaining recent term content: 16 of 18 candidate pairs are faster in that phase. **Its effect magnitude remains noisy, and it does not establish a reliable whole-import speedup.** Keep this PR in draft for review, with the existing private ownership and cache limits preserved.
 
 ## Change and mechanism
 
@@ -22,13 +22,15 @@ Negative changes mean less elapsed time. Equal-work change compares all measured
 
 | Cohort                              | Median paired browser change | Equal-work browser change | Faster browser pairs |  Median paired cache-phase change |
 | ----------------------------------- | ---------------------------: | ------------------------: | -------------------: | --------------------------------: |
-| Identical-product control           |                       +4.58% |                    +7.35% |                  1/6 |                                 — |
+| Identical-product control           |                       +4.58% |                    +7.35% |                  1/6 |     −8.22% / −9.40 ms; 4/6 faster |
 | Cache copy, six-pair screen         |                       −1.13% |                    +1.44% |                  4/6 |     −6.20% / −8.10 ms; 6/6 faster |
 | Cache copy, twelve-pair replication |                       −1.02% |                    −2.22% |                 8/12 | −16.57% / −19.15 ms; 10/12 faster |
 
 The same-code pre/post controls moved −11.78%/−11.28% in the calibration job, −5.18%/−7.62% in the initial screen, and −15.80%/+1.94% in replication. These variations are materially larger than the approximately 1% paired browser change. The first screen's slower candidate tail remains included, producing a positive equal-work change.
 
-The cache-phase effect replicates across an EPYC 7763 host and an EPYC 9V74 host. Cache bytes remain exactly **100,724,405** per import. Import-data-bank wall time improves by a median paired 15.5 ms in the screen and 8.5 ms in replication; parallel worker and sink timings overlap, so detailed phase times must not be summed. No precise whole-import benefit, cross-browser/device benefit, or peak-memory reduction is claimed.
+Cache-phase controls also vary materially. The identical-product cohort itself shows a median paired −8.22% / −9.40 ms change, with four of six pairs faster despite identical code. Same-code pre/post cache-phase controls are +9.89%/−1.10% in the initial cache screen and −14.02%/+9.64% in replication. The candidate's 16 of 18 faster cache-phase pairs provide favorable repeated evidence, while these controls limit confidence in a precise effect size.
+
+Both candidate cohorts favor the cache phase, across an EPYC 7763 host and an EPYC 9V74 host. Cache bytes remain exactly **100,724,405** per import. Import-data-bank wall time improves by a median paired 15.5 ms in the screen and 8.5 ms in replication; parallel worker and sink timings overlap, so detailed phase times must not be summed. No precise whole-import benefit, cross-browser/device benefit, or peak-memory reduction is claimed.
 
 ## Correctness and identity receipts
 
