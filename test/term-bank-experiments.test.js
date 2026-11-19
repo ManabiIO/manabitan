@@ -676,6 +676,7 @@ describe('fused row token validation', () => {
     ]
 
     test('retains independent escape and integer facts for each row', async () => {
+        /** @type {string[]} */
         const rawRows = []
         const expectedReadings = []
         for (let padding = 0; padding < 8; ++padding) {
