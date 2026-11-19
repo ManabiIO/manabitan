@@ -1,12 +1,14 @@
 name: Benchmarks (Manual)
 
 on:
+  push:
+    branches: ['perf/jmdict-qualification-20261119-34f1-*']
   workflow_dispatch:
     inputs:
       baseline_sha:
         description: 'Full same-repository commit SHA for matched browser comparisons'
         required: true
-        default: 'a2ef0f168c26553cba01cf363faf319eabdbeb05'
+        default: 'd829f5b6e6a75ee8859d38d537d224ec33c4930e'
         type: string
       workload:
         description: 'Comparison boundaries to run'
@@ -30,7 +32,7 @@ permissions:
 jobs:
   bench:
     name: Benchmarks
-    if: inputs.workload != 'imports'
+    if: github.event_name != 'push' && inputs.workload != 'imports'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -50,13 +52,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(inputs.workload == 'imports' && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
+        include: ${{ fromJSON((github.event_name == 'push' || inputs.workload == 'imports') && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
     env:
-      PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
-      PERF_REPETITIONS: ${{ inputs.repetitions || '1' }}
+      PERF_BASELINE_SHA: ${{ inputs.baseline_sha || 'd829f5b6e6a75ee8859d38d537d224ec33c4930e' }}
+      PERF_REPETITIONS: ${{ inputs.repetitions || '3' }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: ${{ matrix.boundary }}
-      PERF_RUN_ORDER: ${{ inputs.run_order == 'CROSSOVER' && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
+      PERF_RUN_ORDER: ${{ (github.event_name == 'push' || inputs.run_order == 'CROSSOVER') && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -136,6 +138,38 @@ jobs:
           git status --porcelain > "$evidence/candidate-status.txt"
           git -C "$baseline" status --porcelain > "$evidence/baseline-status-with-harness-overlay.txt"
 
+      - name: Exclude one complete warmup from each source
+        if: matrix.dictionary != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          for arm in A B; do
+            source_root="$GITHUB_WORKSPACE"
+            if [[ "$arm" == A ]]; then source_root="$PERF_BASELINE_ROOT"; fi
+            output="$PERF_EVIDENCE_ROOT/warmup-$arm"
+            mkdir -p "$output"
+            (
+              cd "$source_root"
+              node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --output "$output"
+            ) > "$output/run.log" 2>&1
+          done
+
+      - name: Measure same-code noise on this runner
+        if: matrix.dictionary != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          for observation in A1 B1 B2 A2; do
+            output="$PERF_EVIDENCE_ROOT/same-code-control/$observation"
+            mkdir -p "$output"
+            node dev/perf/host-environment.js > "$output/host-before.json"
+            (
+              cd "$PERF_BASELINE_ROOT"
+              node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --output "$output"
+            ) > "$output/run.log" 2>&1
+            node dev/perf/host-environment.js > "$output/host-after.json"
+          done
+
       - name: Run counterbalanced adjacent observations
         shell: bash
         env:
@@ -152,6 +186,7 @@ jobs:
           set -euo pipefail
           candidate="$GITHUB_WORKSPACE"
           read -r -a observations < "$PERF_EVIDENCE_ROOT/observation-order.txt"
+          completed=0
           for observation in "${observations[@]}"; do
             source_root="$candidate"
             if [[ "$observation" == A* ]]; then source_root="$PERF_BASELINE_ROOT"; fi
@@ -169,6 +204,21 @@ jobs:
             ) 2>&1 | tee "$output/run.log"
             node "$candidate/dev/perf/host-environment.js" > "$output/host-after.json"
             uptime > "$output/uptime-after.txt"
+            completed=$((completed + 1))
+            if [[ "$completed" == 8 || "$completed" == 16 ]]; then
+              noise_first=$((completed / 4 + 1))
+              noise_second=$((noise_first + 1))
+              for control in "A$noise_first" "B$noise_first" "B$noise_second" "A$noise_second"; do
+                control_output="$PERF_EVIDENCE_ROOT/same-code-control/$control"
+                mkdir -p "$control_output"
+                node "$candidate/dev/perf/host-environment.js" > "$control_output/host-before.json"
+                (
+                  cd "$PERF_BASELINE_ROOT"
+                  node ./dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --output "$control_output"
+                ) > "$control_output/run.log" 2>&1
+                node "$candidate/dev/perf/host-environment.js" > "$control_output/host-after.json"
+              done
+            fi
           done
 
       - name: Capture separate candidate import trace after timing
@@ -185,4 +235,23 @@ jobs:
           name: browser-comparison-${{ matrix.boundary }}
           path: ${{ env.PERF_EVIDENCE_ROOT }}
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
+
+  validate-candidate:
+    name: Validate importer experiment
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+      - name: Unit regressions
+        run: npm run test:unit -- --maxWorkers=2 --hookTimeout=60000
+      - name: TypeScript contracts
+        if: success() || failure()
+        run: npm run test:ts
+      - name: JavaScript lint
+        if: success() || failure()
+        run: npm run test:js
+      - name: Build all targets
+        if: success() || failure()
+        run: npm run test:build
