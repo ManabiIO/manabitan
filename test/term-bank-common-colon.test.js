@@ -19,7 +19,7 @@
 import {readFile} from 'node:fs/promises'
 import {beforeAll, describe, expect, test} from 'vitest'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number) => number}} ParserExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number, spans?: number, spanCount?: number, validateGlossaryTypes?: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number, spans?: number, spanCount?: number, validateGlossaryTypes?: number) => number}} ParserExports */
 /** @type {ParserExports} */
 let parser
 const encoder = new TextEncoder()
@@ -33,15 +33,16 @@ beforeAll(async () => {
 /**
  * @param {string} glossary
  * @param {boolean} [hints]
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {{count: number, metadata: number[]}}
  */
-function parseGlossary(glossary, hints = true) {
+function parseGlossary(glossary, hints = true, validateGlossaryTypes = false) {
     const bytes = encoder.encode(`[["entry","","","",0,${glossary},1,""]]`)
     parser.wasm_reset_heap()
     const input = parser.wasm_alloc(bytes.length)
     const output = parser.wasm_alloc(17 * 4)
     new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
-    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
+    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1, 0, 0, validateGlossaryTypes ? 1 : 0)
     return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)]}
 }
 
@@ -90,6 +91,63 @@ describe('adjacent common-key colons', () => {
             expect(result.metadata.slice(14)).toEqual([1, space.length === 0 ? 0 : 1, 0])
         }
         expect(parseGlossary(`[{"tag":"${tag}",}]`).count).toBeLessThan(0)
+    })
+
+    test.each(['a', 'div', 'li', 'rt', 'ruby', 'span', 'ul'])('preserves parent frames and media after a final %s tag', (tag) => {
+        for (const space of ['', ' ', '\t', '\n']) {
+            const glossary = `[{"type":"structured-content","content":[{"content":{"tag":${space}"${tag}"},"tag":${space}"${tag}"},{"tag":"img","path":"image.png"}],"tag":${space}"${tag}"}]`
+            const result = parseGlossary(glossary, true, true)
+            expect(result.count).toBe(1)
+            expect(result.metadata.slice(14)).toEqual([1, space.length === 0 ? 0 : 1, 0])
+            expect(parseGlossary(glossary, false, true).count).toBe(1)
+        }
+    })
+
+    test.each(['a', 'div', 'li', 'rt', 'ruby', 'span', 'ul'])('validates required fields before closing a final %s tag', (tag) => {
+        for (const fields of [
+            '"type":"text","text":"value"',
+            '"type":"image","path":"image.png"',
+            '"type":"structured-content","content":[]',
+        ]) {
+            expect(parseGlossary(`[{${fields},"tag":"${tag}"}]`, true, true).count).toBe(1)
+        }
+        for (const fields of [
+            '"type":"text"',
+            '"type":"text","text":"value","text":null',
+            '"type":"image","path":true',
+            '"type":"structured-content","content":null',
+            '"type":"unsupported","content":[]',
+        ]) {
+            const glossary = `[{${fields},"tag":"${tag}"}]`
+            expect(parseGlossary(glossary, true, true).count).toBeLessThan(0)
+            expect(parseGlossary(glossary, false, true).count).toBeLessThan(0)
+        }
+    })
+
+    test.each(['a', 'div', 'li', 'rt', 'ruby', 'span', 'ul'])('does not admit malformed final %s tag delimiters', (tag) => {
+        for (const glossary of [
+            `[{"tag":"${tag}" "content":0}]`,
+            `[{"tag":"${tag}",}]`,
+            `[{"tag":"${tag}"]}]`,
+            `[{"tag":"${tag}"x}]`,
+        ]) {
+            expect(parseGlossary(glossary).count).toBeLessThan(0)
+            expect(parseGlossary(glossary, false).count).toBeLessThan(0)
+        }
+    })
+
+    test.each(['a', 'div', 'li', 'rt', 'ruby', 'span', 'ul'])('bounds the final %s tag to the logical bank end', (tag) => {
+        const bank = `[["word","","","",0,[{"content":{"tag":"${tag}"},"type":"structured-content"}],1,""]]`
+        const bytes = encoder.encode(bank)
+        const valueStart = bank.indexOf(`"${tag}"`)
+        for (let length = valueStart; length <= valueStart + tag.length + 3; ++length) {
+            parser.wasm_reset_heap()
+            const input = parser.wasm_alloc(bytes.length)
+            const output = parser.wasm_alloc(17 * 4)
+            new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
+            expect(parser.parse_term_bank_with_media_hints(input, length, output, 1, 0, 0, 1)).toBeLessThan(0)
+            expect(parser.parse_term_bank(input, length, output, 1, 0, 0, 1)).toBeLessThan(0)
+        }
     })
 
     test('keeps nested media and text normalization hints', () => {

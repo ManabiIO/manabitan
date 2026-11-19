@@ -23,9 +23,10 @@ beforeAll(async () => {
  * @param {string[]} banks
  * @param {number} [alignment]
  * @param {boolean} [physicalEnd]
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {{count: number, metadata: number[], bytes: Uint8Array}}
  */
-function parse(banks, alignment = 0, physicalEnd = false) {
+function parse(banks, alignment = 0, physicalEnd = false, validateGlossaryTypes = false) {
     wasm.wasm_reset_heap()
     const bytes = encoder.encode(banks.join(''))
     const spanPointer = wasm.wasm_alloc(Math.max(8, banks.length * 8))
@@ -45,7 +46,7 @@ function parse(banks, alignment = 0, physicalEnd = false) {
         spans[i * 2 + 1] = length
         cursor += length
     }
-    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, banks.length > 1 ? spanPointer : 0, banks.length > 1 ? banks.length : 0)
+    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, banks.length > 1 ? spanPointer : 0, banks.length > 1 ? banks.length : 0, validateGlossaryTypes ? 1 : 0)
     expect([...heap.subarray(guard, output)]).toEqual(new Array(16).fill(0xa5))
     expect([...heap.subarray(output + 68, output + 84)]).toEqual(new Array(16).fill(0xa5))
     return {count, metadata: [...new Uint32Array(wasm.memory.buffer, output, 17)], bytes}
@@ -120,6 +121,52 @@ describe('adjacent JSON delimiter state transitions', () => {
         for (const text of malformed) { check(text, 7) }
     })
 
+    test.each(Array.from({length: 16}, (_, i) => i))('preserves container separators and parent states at alignment %i', (alignment) => {
+        for (const container of ['[]', '{}', '[[]]', '{"nested":{}}', '[{"nested":[0]}]']) {
+            for (const before of spaces) {
+                for (const after of spaces) {
+                    check(`[${container}${before},${after}"last"]`, alignment)
+                    check(`{"first":${container}${before},${after}"last":[]}`, alignment)
+                }
+            }
+        }
+    })
+
+    test('rejects trailing, doubled and misplaced separators after containers', () => {
+        for (const container of ['[]', '{}', '[{}]', '{"nested":[]}']) {
+            for (const text of [
+                `[${container},]`,
+                `[${container},,0]`,
+                `[${container}:0]`,
+                `[${container}{}]`,
+                `{"x":${container},}`,
+                `{"x":${container},,"y":0}`,
+                `{"x":${container}:0}`,
+                `{"x":${container}"y":0}`,
+            ]) { check(text, 9) }
+        }
+    })
+
+    test('agrees on every ASCII character immediately after containers', () => {
+        for (let byte = 0; byte < 128; ++byte) {
+            const token = String.fromCharCode(byte)
+            for (const json of [`[{}${token},0]`, `[[]${token},0]`, `{"x":{}${token},"y":0}`, `{"x":[]${token},"y":0}`]) {
+                check(json, byte % 16)
+            }
+        }
+    })
+
+    test('validates required glossary fields before consuming a container separator', () => {
+        for (const object of ['{"type":"text","text":null}', '{"type":"image"}', '{"type":"structured-content","content":false}']) {
+            const source = bank(`[${object},{"type":"text","text":"valid"}]`)
+            expect(parse([source], 0, false, true).count).toBeLessThan(0)
+        }
+        const source = bank('[{"type":"structured-content","content":[]}, {"type":"text","text":"valid"}]')
+        const result = parse([source], 0, false, true)
+        expect(result.count).toBe(1)
+        expect(result.metadata.slice(14)).toEqual([0, 1, 1])
+    })
+
     test('agrees on every ASCII character immediately after keys and string values', () => {
         for (let byte = 0; byte < 128; ++byte) {
             const token = String.fromCharCode(byte)
@@ -130,7 +177,7 @@ describe('adjacent JSON delimiter state transitions', () => {
     })
 
     test('keeps delimiter lookahead inside logical and physical source bounds', () => {
-        for (const text of ['{"key":"value","next":["",{"x":"y"}]}', '["",{"type":"text","text":"日🙂"}]']) {
+        for (const text of ['{"key":"value","next":["",{"x":"y"}]}', '["",{"type":"text","text":"日🙂"}]', '[{},[],{"x":[],"y":{}},"last"]']) {
             const source = bank(text)
             for (let length = 1; length < source.length; ++length) {
                 expect(parse([source.slice(0, length)], length % 16).count).toBeLessThan(0)

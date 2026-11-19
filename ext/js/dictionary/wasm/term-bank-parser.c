@@ -681,7 +681,8 @@ static __attribute__((always_inline)) inline uint32_t advance_glossary_delimiter
     return next;
 }
 
-/* Short literal tags can consume their colon and following comma together. */
+/* Short literal tags can consume their colon and adjacent field delimiter.
+ * Object closing braces remain subject to the ordinary frame validation. */
 static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t len, uint32_t start) {
     if (start >= len || src[start] != ':') { return 0u; }
     uint32_t value = start + 1u;
@@ -691,20 +692,47 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
     __builtin_memcpy(&prefix, src + value, sizeof(prefix));
     switch (prefix) {
         case UINT32_C(0x76696422): /* "div */
-            return len - value >= 6u && src[value + 4u] == '"' && src[value + 5u] == ',' ? value + 6u : 0u;
+            return len - value >= 6u && src[value + 4u] == '"' &&
+                (src[value + 5u] == ',' || src[value + 5u] == '}') ? value + 6u : 0u;
         case UINT32_C(0x61707322): /* "spa */
-            return len - value >= 7u && src[value + 4u] == 'n' && src[value + 5u] == '"' && src[value + 6u] == ',' ? value + 7u : 0u;
+            return len - value >= 7u && src[value + 4u] == 'n' && src[value + 5u] == '"' &&
+                (src[value + 6u] == ',' || src[value + 6u] == '}') ? value + 7u : 0u;
         case UINT32_C(0x62757222): /* "rub */
-            return len - value >= 7u && src[value + 4u] == 'y' && src[value + 5u] == '"' && src[value + 6u] == ',' ? value + 7u : 0u;
+            return len - value >= 7u && src[value + 4u] == 'y' && src[value + 5u] == '"' &&
+                (src[value + 6u] == ',' || src[value + 6u] == '}') ? value + 7u : 0u;
         case UINT32_C(0x22747222): /* "rt" */
         case UINT32_C(0x226c7522): /* "ul" */
         case UINT32_C(0x22696c22): /* "li" */
-            return len - value >= 5u && src[value + 4u] == ',' ? value + 5u : 0u;
+            return len - value >= 5u && (src[value + 4u] == ',' || src[value + 4u] == '}') ? value + 5u : 0u;
         case UINT32_C(0x2c226122): /* "a", */
+        case UINT32_C(0x7d226122): /* "a"} */
             return value + 4u;
         default:
             return 0u;
     }
+}
+
+/* Recognize one complete literal key/value pair. Other spellings retain the
+ * generic parser, and a closing brace still runs the ordinary frame checks. */
+static inline uint32_t common_structured_type_end(const uint8_t* src, uint32_t len, uint32_t start) {
+    if (start >= len || len - start < 28u) { return 0u; }
+    uint32_t key;
+    __builtin_memcpy(&key, src + start, sizeof(key));
+    if (key != UINT32_C(0x70797422) || /* "typ */
+        src[start + 4u] != 'e' || src[start + 5u] != '"' || src[start + 6u] != ':') { return 0u; }
+    uint32_t value = start + 7u;
+    if (src[value] == ' ') { ++value; }
+    if (len - value < 21u) { return 0u; }
+    uint64_t first;
+    uint64_t second;
+    uint32_t last;
+    __builtin_memcpy(&first, src + value, sizeof(first));
+    __builtin_memcpy(&second, src + value + 8u, sizeof(second));
+    __builtin_memcpy(&last, src + value + 16u, sizeof(last));
+    if (first != UINT64_C(0x7574637572747322) || /* "structu */
+        second != UINT64_C(0x746e6f632d646572) || /* red-cont */
+        last != UINT32_C(0x22746e65)) { return 0u; } /* ent" */
+    return src[value + 20u] == ',' || src[value + 20u] == '}' ? value + 21u : 0u;
 }
 
 static int parse_composite_span_impl(
@@ -755,6 +783,22 @@ static int parse_composite_span_impl(
             const int common_key_kind = object_key ?
                 parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
             if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
+                const uint32_t type_end = object_key ? common_structured_type_end(src, len, i) : 0u;
+                if (type_end != 0u) {
+                    if (normalization_hint != 0 && src[i + 7u] == ' ') { *normalization_hint = 1u; }
+                    if (validate_top_level_objects && depth == 2u) {
+                        glossary_key = 0u;
+                        glossary_object_type = GLOSSARY_CONTENT_FIELD;
+                    }
+                    if (src[type_end - 1u] == ',') {
+                        state = OBJECT_KEY;
+                        i = advance_glossary_delimiter(src, len, type_end - 1u, normalization_hint);
+                    } else {
+                        state = OBJECT_AFTER_VALUE;
+                        i = type_end - 1u;
+                    }
+                    continue;
+                }
                 if (!parse_string_span(src, len, i, &s_end)) { return 0; }
                 // A validated token can match these markers only with a literal or escaped i.
                 const uint8_t first = src[i + 1u];
@@ -769,8 +813,13 @@ static int parse_composite_span_impl(
                     if (tag_end != 0u) {
                         if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
                         if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }
-                        state = OBJECT_KEY;
-                        i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
+                        if (src[tag_end - 1u] == ',') {
+                            state = OBJECT_KEY;
+                            i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
+                        } else {
+                            state = OBJECT_AFTER_VALUE;
+                            i = tag_end - 1u;
+                        }
                         continue;
                     }
                 }
@@ -842,6 +891,12 @@ static int parse_composite_span_impl(
                 return 1;
             }
             state = parents[depth - 1u];
+            // A completed child restores an after-value parent frame. Consume
+            // its adjacent comma without redispatching the same transition.
+            if (i < len && src[i] == ',') {
+                state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
+                i = advance_glossary_delimiter(src, len, i, normalization_hint);
+            }
             continue;
         }
         if (c == ',') {
@@ -1147,7 +1202,17 @@ static int parse_row_single_pass(
     int validate_glossary_types
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
-    clear_term_row_meta(out_meta);
+    if (validate_glossary_types) {
+        // Strict source rows assign every field before their required eighth
+        // field permits success. Keep the early empty-row check and glossary
+        // hints initialized; permissive legacy rows still need all defaults.
+        out_meta->expression_length = 0u;
+        out_meta->glossary_may_contain_media = 0u;
+        out_meta->glossary_requires_normalization = 0u;
+        out_meta->glossary_requires_text_normalization = 0u;
+    } else {
+        clear_term_row_meta(out_meta);
+    }
 
     uint32_t i = row_start + 1u;
     uint32_t field_index = 0u;
