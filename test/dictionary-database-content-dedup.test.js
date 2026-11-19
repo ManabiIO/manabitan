@@ -481,13 +481,16 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         source.set([5, 6, 7, 8], 2);
         const first = publishSlabMeta(database, source, 2, 4, 10, 20);
         const recentBatch = Reflect.get(database, '_recentTermContentSourceBatches').get(1);
+        if (typeof recentBatch === 'undefined') { throw new Error('Expected the published shared source to be cached'); }
         expect(recentBatch.byteLength).toBe(4);
         expect(recentBatch.byteOffset % 8).toBe((source.byteOffset + 2) % 8);
         expect(recentBatch.buffer.byteLength).toBe(9);
         expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(9);
         source.fill(0);
         const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
-        expect([...findRecent(first.meta).buffer]).toEqual([5, 6, 7, 8]);
+        const cachedSource = findRecent(first.meta);
+        if (typeof cachedSource === 'undefined') { throw new Error('Expected a recent shared source lookup hit'); }
+        expect([...cachedSource.buffer]).toEqual([5, 6, 7, 8]);
         const readStorage = vi.fn();
         Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
         const plan = /** @type {ArtifactTermContentDedupPlan} */ ({
