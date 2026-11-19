@@ -2426,6 +2426,8 @@ int32_t encode_term_lookup_index(
     uint32_t sequence_key_count = 0u;
     uint32_t sequence_posting_count = 0u;
     uint32_t reading_posting_count = 0u;
+    int32_t last_valid_sequence = -1;
+    uint32_t last_valid_sequence_key = 0u;
     memset(sequence_slots, 0, sequence_slots_count * sizeof(uint16_t));
 
     for (uint32_t row = 0u; row < row_count; ++row) {
@@ -2444,20 +2446,26 @@ int32_t encode_term_lookup_index(
             sequence_key_by_row[row] = TERM_LOOKUP_U16_NULL;
             continue;
         }
-        uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence) & sequence_slot_mask;
         uint32_t key = 0u;
-        for (;;) {
-            const uint16_t entry = sequence_slots[slot];
-            if (entry == 0u) {
-                if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
-                key = sequence_key_count++;
-                sequence_keys[key] = sequence;
-                sequence_slots[slot] = (uint16_t)(key + 1u);
-                break;
+        if (sequence == last_valid_sequence) {
+            key = last_valid_sequence_key;
+        } else {
+            uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence) & sequence_slot_mask;
+            for (;;) {
+                const uint16_t entry = sequence_slots[slot];
+                if (entry == 0u) {
+                    if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
+                    key = sequence_key_count++;
+                    sequence_keys[key] = sequence;
+                    sequence_slots[slot] = (uint16_t)(key + 1u);
+                    break;
+                }
+                key = (uint32_t)entry - 1u;
+                if (sequence_keys[key] == sequence) { break; }
+                slot = (slot + 1u) & sequence_slot_mask;
             }
-            key = (uint32_t)entry - 1u;
-            if (sequence_keys[key] == sequence) { break; }
-            slot = (slot + 1u) & sequence_slot_mask;
+            last_valid_sequence = sequence;
+            last_valid_sequence_key = key;
         }
         sequence_key_by_row[row] = (uint16_t)key;
         ++sequence_posting_count;

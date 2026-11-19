@@ -133,7 +133,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const dictionaryCacheDir = path.join(root, 'builds', 'e2e-dictionary-cache');
 const buildTarget = process.env.MANABITAN_CHROMIUM_BUILD_TARGET ?? 'chrome-dev';
-if (buildTarget !== 'chrome' && buildTarget !== 'chrome-dev' && buildTarget !== 'edge') {
+if (buildTarget !== 'chrome' && buildTarget !== 'chrome-dev' && buildTarget !== 'chrome-playwright' && buildTarget !== 'edge') {
     throw new Error('MANABITAN_CHROMIUM_BUILD_TARGET must be chrome, chrome-dev or edge');
 }
 const packageFilename = `manabitan-${buildTarget}.zip`;
@@ -3558,6 +3558,7 @@ async function main() {
         const launchContext = async (headless, hideWindowForHeaded) => {
             /** @type {string[]} */
             const launchArgs = [
+                '--disable-features=MacAppCodeSignClone',
                 `--disable-extensions-except=${extensionDir}`,
                 `--load-extension=${extensionDir}`,
             ];
@@ -3569,6 +3570,8 @@ async function main() {
                 headless,
                 args: launchArgs,
             };
+            const pinnedExecutablePath = (process.env.MANABITAN_CHROMIUM_EXECUTABLE_PATH ?? '').trim();
+            if (pinnedExecutablePath.length > 0) { launchOptions.executablePath = pinnedExecutablePath; }
             if (browserChannel !== null) {
                 launchOptions.channel = browserChannel;
             }
@@ -4187,9 +4190,57 @@ async function main() {
                 }
                 const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
                 if (probeTerms.length !== 12) { fail('Insufficient benchmark content probes'); }
+                const probeResults = [];
                 for (const term of probeTerms) {
                     const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
                     if (!integrity.ok) { fail(`Unreadable benchmark content for ${term}: ${JSON.stringify(integrity)}`); }
+                    probeResults.push({term, probes: integrity.probes});
+                }
+                const probeDigest = (results) => {
+                    const canonical = results.map(({term, probes}) => ({
+                        term,
+                        probes: probes.map((probe) => {
+                            const diagnostics = probe.diagnostics;
+                            const stateView = diagnostics?.offscreenState ?? diagnostics?.localState ?? diagnostics;
+                            const rowSample = Array.isArray(stateView?.rowSample) ? stateView.rowSample : [];
+                            return {
+                                term: probe.term,
+                                totalLength: probe.totalLength,
+                                rowSampleCount: probe.rowSampleCount,
+                                inBoundsRowCount: probe.inBoundsRowCount,
+                                outOfBoundsRowCount: probe.outOfBoundsRowCount,
+                                glossaryReadyRowCount: probe.glossaryReadyRowCount,
+                                readablePreviewRowCount: probe.readablePreviewRowCount,
+                                rowSample: rowSample.map((row) => ({
+                                    rawEntryContentOffset: row.rawEntryContentOffset,
+                                    rawEntryContentLength: row.rawEntryContentLength,
+                                    glossaryLength: row.glossaryLength,
+                                    rawContentPreview: row.rawContentPreview,
+                                })),
+                            };
+                        }),
+                    }));
+                    return createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
+                };
+                const preRestartOutputDigest = probeDigest(probeResults);
+                await relaunchPersistentContext();
+                await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
+                await waitForSettingsPageReady(page);
+                const restartedState = await evalSendMessage(page, 'benchmarkDictionaryState');
+                const restartedInfo = restartedState.dictionaryInfo;
+                if (restartedInfo.length !== 1 || restartedInfo[0].title !== fixture.expectedTitle || restartedInfo[0].revision !== fixture.revision ||
+                restartedState.counts[0]?.terms !== fixture.termRows) {
+                    fail(`Persisted benchmark fixture changed across restart: ${JSON.stringify(restartedState)}`);
+                }
+                const restartedProbeResults = [];
+                for (const term of probeTerms) {
+                    const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
+                    if (!integrity.ok) { fail(`Unreadable benchmark content after restart for ${term}: ${JSON.stringify(integrity)}`); }
+                    restartedProbeResults.push({term, probes: integrity.probes});
+                }
+                const postRestartOutputDigest = probeDigest(restartedProbeResults);
+                if (preRestartOutputDigest !== postRestartOutputDigest) {
+                    fail(`Persisted content probe digest changed across restart: before=${preRestartOutputDigest} after=${postRestartOutputDigest}`);
                 }
                 report.benchmark.validation = {
                     title: info[0].title,
@@ -4198,6 +4249,8 @@ async function main() {
                     contentReadable: true,
                     probeCount: probeTerms.length,
                     probeTerms,
+                    outputDigestSha256: postRestartOutputDigest,
+                    restart: {title: restartedInfo[0].title, revision: restartedInfo[0].revision, termRows: restartedState.counts[0].terms, contentReadable: true, probeCount: restartedProbeResults.length},
                 };
             }
             report.status = 'success';

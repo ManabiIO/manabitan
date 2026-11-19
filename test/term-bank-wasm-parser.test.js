@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {createHash} from 'node:crypto';
 import {existsSync} from 'node:fs';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -26,6 +27,7 @@ import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionarySourceIntegrityError} from '../ext/js/dictionary/dictionary-source-integrity-error.js';
 import {hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {hashTermKeyBytes} from '../ext/js/dictionary/term-key-hash.js';
+import {prepareTermLookupIndexesFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index-preparation.js';
 import {encodePersistedTermLookupIndexFromPreinternedPlan, findExactRows, parsePersistedTermLookupIndex} from '../ext/js/dictionary/term-lookup-index.js';
 import {decodeRawTermContentTokenBinary} from '../ext/js/dictionary/raw-term-content.js';
 import {
@@ -3918,6 +3920,66 @@ describe('term bank wide sequence parity', () => {
         `["sequence-${String(index)}","","","",1,["g"],${String(sequence)},""]`
     ));
     const sequenceBank = () => textEncoder.encode(`[${sequenceRows.join(',')}]`);
+
+    maybeTest.each([
+        {
+            name: 'monotone repeats with missing rows',
+            sequences: [10, 10, -1, 10, 11, 11, 13, -1, 13, 17],
+            digest: '9c52c1f58e4c2e86944f7e6317d4b36db2b7b0bc6238479262e45e23e87ea05f',
+            byteLength: 624,
+        },
+        {
+            name: 'first decrease after a monotone prefix',
+            sequences: [10, 10, 11, 14, -1, 14, 20, 20, 4, 4, -1, 14, 7, 20],
+            digest: 'e71591382e385e65c71e4954a43f3e466d8530feb3ba5594b928ea3b65f51c2a',
+            byteLength: 848,
+        },
+        {
+            name: 'shuffled sequence IDs',
+            sequences: [7, 2, 9, 7, -1, 2, 4, 9, 7, 1, 8, 1],
+            digest: '75a76894a54a7a23a5b0ea16a27a96f378073c2a26d374654626b28c614aef43',
+            byteLength: 744,
+        },
+    ])('preserves exact lookup index bytes for $name', async ({sequences, digest, byteLength}) => {
+        const rows = sequences.map((sequence, index) => [
+            `expression-${index}`,
+            `reading-${index}`,
+            '',
+            '',
+            1,
+            [`glossary-${index % 3}`],
+            sequence,
+            '',
+        ]);
+        const splitIndex = Math.ceil(rows.length / 2);
+        let preparedIndexes = null;
+        await parseTermBankWithWasmColumnChunks([
+            textEncoder.encode(JSON.stringify(rows.slice(0, splitIndex))),
+            textEncoder.encode(JSON.stringify(rows.slice(splitIndex))),
+        ], 3, (chunk) => {
+            expect(chunk.sequenceList).toStrictEqual(new Int32Array(sequences));
+            preparedIndexes = chunk.preparedLookupIndexes ??
+            prepareTermLookupIndexesFromPreinternedPlan(chunk, null, {}).indexes;
+        }, 64, {
+            singleChunk: true,
+            emitTermByteLists: false,
+            computeContentHashes: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            mediaHintFastScan: true,
+            prepareLookupIndexes: true,
+        });
+        expect(preparedIndexes).not.toBeNull();
+        const hash = createHash('sha256');
+        let actualByteLength = 0;
+        for (const [key, entry] of /** @type {NonNullable<typeof preparedIndexes>} */ (preparedIndexes)) {
+            hash.update(key);
+            hash.update(entry.bytes);
+            actualByteLength += entry.bytes.byteLength;
+        }
+        expect(actualByteLength).toBe(byteLength);
+        expect(hash.digest('hex')).toBe(digest);
+    });
 
     maybeTest('preserves safe sequences beyond int32 in row parsing', async () => {
         /** @type {(number|null)[]} */
