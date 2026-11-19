@@ -6424,12 +6424,13 @@ null;
         return {buffer, offset, length};
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Retains a bounded owned copy so the next parser groups can verify exact
      * duplicates without reading recently written OPFS blocks.
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
-     * @returns {number} Number of owned source bytes retained.
+     * @returns {number} Number of owned backing bytes retained, including copy alignment padding.
      */
     _cacheRecentPublishedTermContentSources(staged, spans) {
         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
@@ -6481,16 +6482,20 @@ null;
             return 0;
         }
         const byteLength = maximumEnd - minimumOffset;
+        const padding = typeof SharedArrayBuffer === 'function' && spans.buffer.buffer instanceof SharedArrayBuffer ?
+            (spans.buffer.byteOffset + minimumOffset) % 8 :
+            0
+        const allocationByteLength = byteLength + padding
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
-        if (byteLength > cacheMaxBytes) { return 0; }
+        if (allocationByteLength > cacheMaxBytes) { return 0 }
         while (
-            this._recentTermContentSourceBatchBytes + byteLength > cacheMaxBytes &&
+            this._recentTermContentSourceBatchBytes + allocationByteLength > cacheMaxBytes &&
             this._recentTermContentSourceBatches.size > 0
         ) {
             const first = this._recentTermContentSourceBatches.entries().next();
             if (first.done) { break; }
             this._recentTermContentSourceBatches.delete(first.value[0]);
-            this._recentTermContentSourceBatchBytes -= first.value[1].byteLength;
+            this._recentTermContentSourceBatchBytes -= first.value[1].buffer.byteLength
         }
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
@@ -6499,9 +6504,14 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        // Match the shared source's alignment so the runtime can copy whole
+        // machine words. The owned view still exposes only the logical span.
+        const owned = padding === 0 ?
+            spans.buffer.slice(minimumOffset, maximumEnd) :
+            new Uint8Array(new ArrayBuffer(allocationByteLength), padding, byteLength)
+        if (padding !== 0) { owned.set(spans.buffer.subarray(minimumOffset, maximumEnd)) }
         this._recentTermContentSourceBatches.set(batchId, owned);
-        this._recentTermContentSourceBatchBytes += owned.byteLength;
+        this._recentTermContentSourceBatchBytes += owned.buffer.byteLength
         const firstIndex = staged.indexes[0];
         const endIndex = firstIndex + staged.indexes.length;
         let contiguousPublished = (
@@ -6530,8 +6540,9 @@ null;
                 this._termEntryContentMetaRecentSourceOffsetTable[index] = spans.offsets[i] - minimumOffset;
             }
         }
-        return owned.byteLength;
+        return owned.buffer.byteLength
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Builds diagnostic strings only on a read failure, not for every imported
@@ -7264,7 +7275,8 @@ this._readTermContentSignature(
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
-            this._recentTermContentSourceBatchBytes -= source.byteLength;
+            // eslint-disable-next-line @stylistic/semi
+            this._recentTermContentSourceBatchBytes -= source.buffer.byteLength
         }
         if (indexesToClear.length > 0) {
             this._ensureTermEntryContentMetaHashPairCapacity(
