@@ -3349,28 +3349,35 @@ export class DictionaryImportController {
         }
         let verificationOptionsFull = null;
         let verificationActiveProfileId = null;
+        let verificationOptionsReadStartTime = null;
+        let verificationOptionsReadEndTime = null;
         if (successfulFinalizations.length > 0) {
             const activeProfileContext = this._settingsController.getOptionsContext?.();
             verificationActiveProfileId = typeof activeProfileContext?.profileId === 'string' ? activeProfileContext.profileId : '';
+            verificationOptionsReadStartTime = safePerformance.now();
             try {
                 verificationOptionsFull = await this._settingsController.getOptionsFull();
             } catch (error) {
-                const verificationError = toError(error);
-                for (const {importedTitle} of successfulFinalizations) {
-                    errors.push(verificationError);
-                    const importedTitleIndex = importedTitles.indexOf(importedTitle);
-                    if (importedTitleIndex >= 0) { importedTitles.splice(importedTitleIndex, 1); }
-                    reportDiagnostics('dictionary-import-batch-visibility-verification-failed', {
-                        dictionaryTitle: importedTitle,
-                        message: verificationError.message,
-                        importRunGeneration,
-                    });
-                }
+                reportDiagnostics('dictionary-import-batch-visibility-options-fetch-failed', {
+                    message: toError(error).message,
+                    importRunGeneration,
+                });
+            } finally {
+                verificationOptionsReadEndTime = safePerformance.now();
             }
         }
         for (const {context, importedTitle} of successfulFinalizations) {
-            if (verificationOptionsFull === null) { continue; }
             const verifyStartTime = safePerformance.now();
+            if (verificationOptionsReadStartTime !== null && verificationOptionsReadEndTime !== null) {
+                this._recordImportLocalPhase(
+                    context.dictionaryTitle,
+                    context.localPhaseTimings,
+                    'verify-imported-dictionary-options-batch-read',
+                    verificationOptionsReadStartTime,
+                    verificationOptionsReadEndTime,
+                    {dictionaryCount: successfulFinalizations.length, batchFinalization: true},
+                );
+            }
             try {
                 await this._verifyImportedDictionaryVisible(
                     importedTitle,

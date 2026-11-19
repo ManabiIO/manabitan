@@ -381,14 +381,16 @@ describe('DictionaryImportController staged update profile rewrites', () => {
         expect(contexts).toHaveLength(0);
     });
 
-    test('fails every deferred visibility check when the single post-write snapshot cannot be read', async () => {
+    test('falls back to per-dictionary reads when the shared post-write snapshot fails', async () => {
         const controller = createControllerForInternalTests();
         const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
         const snapshotError = new Error('Fresh options snapshot unavailable');
-        const getOptionsFull = vi.fn().mockRejectedValue(snapshotError);
-        const finalizeItem = vi.fn(async (context) => ({errors: [], importedTitle: context.dictionaryTitle}));
+        const optionsFull = {profiles: [{id: 'profile-1', options: {dictionaries: [{name: 'JMdict', enabled: true}, {name: 'JMnedict', enabled: true}]}}]};
+        const getOptionsFull = vi.fn().mockRejectedValueOnce(snapshotError).mockResolvedValue(optionsFull);
+        const finalizeItem = vi.fn(async (context) => ({errors: [], importedTitle: context.dictionaryTitle.replace('.zip', '')}));
         Reflect.set(controller, '_activeImportRunGeneration', 21);
         Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({profileId: 'profile-1', index: 0}),
             application: {api: {triggerDatabaseUpdated}},
             getOptionsFull,
         });
@@ -401,10 +403,37 @@ describe('DictionaryImportController staged update profile rewrites', () => {
 
         const result = await finalizeDeferredImportedDictionaries.call(controller, contexts, 21);
 
-        expect(getOptionsFull).toHaveBeenCalledOnce();
+        expect(getOptionsFull).toHaveBeenCalledTimes(3);
         expect(triggerDatabaseUpdated).toHaveBeenCalledOnce();
+        expect(result.importedTitles).toStrictEqual(['JMdict', 'JMnedict']);
+        expect(result.errors).toStrictEqual([]);
+    });
+
+    test('keeps every item failed when the shared and per-dictionary option reads fail', async () => {
+        const controller = createControllerForInternalTests();
+        const triggerDatabaseUpdated = vi.fn().mockResolvedValue(void 0);
+        const snapshotError = new Error('Fresh options snapshot unavailable');
+        const getOptionsFull = vi.fn().mockRejectedValue(snapshotError);
+        const finalizeItem = vi.fn(async (context) => ({errors: [], importedTitle: context.dictionaryTitle}));
+        Reflect.set(controller, '_activeImportRunGeneration', 22);
+        Reflect.set(controller, '_settingsController', {
+            getOptionsContext: () => ({profileId: 'profile-1', index: 0}),
+            application: {api: {triggerDatabaseUpdated}},
+            getOptionsFull,
+        });
+        Reflect.set(controller, '_finalizeImportedDictionaryResult', finalizeItem);
+        Reflect.set(controller, '_recordImportLocalPhase', vi.fn());
+        const contexts = [
+            {dictionaryTitle: 'JMdict.zip', profilesDictionarySettings: null, localPhaseTimings: []},
+            {dictionaryTitle: 'JMnedict.zip', profilesDictionarySettings: null, localPhaseTimings: []},
+        ];
+
+        const result = await finalizeDeferredImportedDictionaries.call(controller, contexts, 22);
+
+        expect(getOptionsFull).toHaveBeenCalledTimes(3);
         expect(result.importedTitles).toStrictEqual([]);
-        expect(result.errors).toStrictEqual([snapshotError, snapshotError]);
+        expect(result.errors).toHaveLength(2);
+        expect(result.errors.every((error) => error.message === snapshotError.message)).toBe(true);
     });
 
     test('drops stale deferred finalizations without publishing settings or notifications', async () => {
