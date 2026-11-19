@@ -842,6 +842,12 @@ static int parse_composite_span_impl(
                 return 1;
             }
             state = parents[depth - 1u];
+            // The complete child is a validated value in its parent. Consume
+            // its adjacent comma without redispatching through the main loop.
+            if (i < len && src[i] == ',') {
+                state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
+                i = advance_glossary_delimiter(src, len, i, normalization_hint);
+            }
             continue;
         }
         if (c == ',') {

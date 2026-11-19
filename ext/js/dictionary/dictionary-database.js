@@ -521,33 +521,6 @@ function packFixedSizeContentChunksIntoSlabs(chunks, targetBytes, fixedChunkByte
     return {packedChunks, packedRowStarts, packedRowCounts};
 }
 
-/* eslint-disable @stylistic/semi */
-/**
- * Copies a validated, immutable source span into an exact-size private buffer.
- * @param {Uint8Array} source
- * @param {number} start
- * @param {number} end
- * @returns {Uint8Array}
- */
-function copyRecentTermContentSource(source, start, end) {
-    // Shared parser memory remains identifiable when its constructor is hidden.
-    if (source.buffer instanceof ArrayBuffer) { return source.slice(start, end) }
-    const byteLength = end - start
-    const owned = new Uint8Array(byteLength)
-    const prefix = (-source.byteOffset - start) & 7
-    if (prefix === 0 || prefix >= byteLength) {
-        owned.set(source.subarray(start, end))
-    } else {
-        // Align the shared bulk copy, then shift only private bytes. This is the
-        // same bounded copy used by Zstd gathering, without retained padding.
-        owned.set(source.subarray(start + prefix, end))
-        owned.copyWithin(prefix, 0, byteLength - prefix)
-        owned.set(source.subarray(start, start + prefix))
-    }
-    return owned
-}
-/* eslint-enable @stylistic/semi */
-
 export class DictionaryDatabase {
     constructor() {
         /** @type {import('@sqlite.org/sqlite-wasm').Sqlite3Static|null} */
@@ -6526,8 +6499,7 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        // eslint-disable-next-line @stylistic/semi
-        const owned = copyRecentTermContentSource(spans.buffer, minimumOffset, maximumEnd)
+        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.byteLength;
         const firstIndex = staged.indexes[0];
