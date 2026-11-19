@@ -8106,29 +8106,16 @@ this._readTermContentSignature(
                     }
                     const tContentMetadataStart = safePerformance.now();
                     if (contentDedupPlan !== null) {
-                        const {
-                            resolvedFlags,
-                            resolvedOffsets,
-                            resolvedLengths,
-                        } = contentDedupPlan;
-                        const planUniqueCount = pendingPlanUniqueStart === null ?
-                            pendingPlanUniqueIndexes.length :
-                            pendingOffsets.length;
-                        for (let i = 0; i < planUniqueCount; ++i) {
-                            const uniqueIndex = pendingPlanUniqueStart === null ?
-                                pendingPlanUniqueIndexes[i] :
-                                pendingPlanUniqueStart + i;
-                            resolvedOffsets[uniqueIndex] = pendingOffsets[i];
-                            resolvedLengths[uniqueIndex] = pendingLengths[i];
-                            setResolvedTermContentPlanDictName(
-                                contentDedupPlan,
-                                uniqueIndex,
-                                Array.isArray(pendingResolvedDictNames) ?
-                                    pendingResolvedDictNames[i] :
-                                    pendingResolvedDictNames,
-                            );
-                            resolvedFlags[uniqueIndex] = 1;
-                        }
+                        /* eslint-disable @stylistic/semi */
+                        this._publishResolvedArtifactTermContentPlan(
+                            contentDedupPlan,
+                            pendingPlanUniqueStart,
+                            pendingPlanUniqueIndexes,
+                            pendingOffsets,
+                            pendingLengths,
+                            pendingResolvedDictNames,
+                        )
+                        /* eslint-enable @stylistic/semi */
                     }
                     if (earlyContentPersistence !== null) {
                         unregisterInFlightContentSources = this._registerInFlightTermContentSources(
@@ -9253,6 +9240,83 @@ null :
         }
         return {pendingOffsets, pendingLengths, pendingResolvedDictNames, blockProfile: null};
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Publishes one synchronous batch to its parser-owned resolution columns.
+     * Uniform codecs need one update; consecutive unique IDs can then copy
+     * their persisted columns directly without visiting every field in JS.
+     * @param {ArtifactTermContentDedupPlan} plan
+     * @param {number|null} pendingStart
+     * @param {number[]|Uint32Array} pendingIndexes
+     * @param {number[]|Float64Array} pendingOffsets
+     * @param {number[]|Uint32Array} pendingLengths
+     * @param {string|string[]} pendingDictNames
+     */
+    _publishResolvedArtifactTermContentPlan(plan, pendingStart, pendingIndexes, pendingOffsets, pendingLengths, pendingDictNames) {
+        const {resolvedFlags, resolvedOffsets, resolvedLengths} = plan
+        const count = pendingStart === null ? pendingIndexes.length : pendingOffsets.length
+        if (count === 0) { return }
+        const offsetBuffer = resolvedOffsets.buffer
+        const lengthBuffer = resolvedLengths.buffer
+        const flagBuffer = resolvedFlags.buffer
+        const hasCompatibleIndexes = pendingStart === null ?
+            pendingIndexes instanceof Uint32Array :
+            Number.isSafeInteger(pendingStart) && pendingStart >= 0
+        const canCopyRuns = (
+            typeof pendingDictNames === 'string' &&
+            !Array.isArray(plan.resolvedDictNames) &&
+            (typeof plan.resolvedUniformDictName !== 'string' || plan.resolvedUniformDictName === pendingDictNames) &&
+            pendingOffsets instanceof Float64Array && pendingOffsets.length >= count &&
+            pendingLengths instanceof Uint32Array && pendingLengths.length >= count &&
+            resolvedOffsets instanceof Float64Array &&
+            resolvedLengths instanceof Uint32Array && resolvedFlags instanceof Uint8Array &&
+            hasCompatibleIndexes &&
+            // Scalar writes must keep their established order for aliased views.
+            offsetBuffer !== lengthBuffer && offsetBuffer !== flagBuffer && lengthBuffer !== flagBuffer &&
+            pendingOffsets.buffer !== offsetBuffer && pendingOffsets.buffer !== lengthBuffer && pendingOffsets.buffer !== flagBuffer &&
+            pendingLengths.buffer !== offsetBuffer && pendingLengths.buffer !== lengthBuffer && pendingLengths.buffer !== flagBuffer &&
+            (pendingStart !== null || (
+                pendingIndexes.buffer !== offsetBuffer && pendingIndexes.buffer !== lengthBuffer && pendingIndexes.buffer !== flagBuffer
+            ))
+        )
+        let i = 0
+        if (canCopyRuns) {
+            const capacity = Math.min(resolvedOffsets.length, resolvedLengths.length, resolvedFlags.length)
+            plan.resolvedUniformDictName = pendingDictNames
+            while (i < count) {
+                const uniqueIndex = pendingStart === null ? pendingIndexes[i] : pendingStart + i
+                let end = pendingStart === null ? i + 1 : count
+                while (end < count && pendingIndexes[end] === uniqueIndex + end - i) { ++end }
+                const length = end - i
+                // Keep malformed/private callers on the original scalar path;
+                // typed-array set must not introduce a new out-of-range throw.
+                if (uniqueIndex + length > capacity) { break }
+                if (length === 1) {
+                    resolvedOffsets[uniqueIndex] = pendingOffsets[i]
+                    resolvedLengths[uniqueIndex] = pendingLengths[i]
+                    resolvedFlags[uniqueIndex] = 1
+                } else {
+                    resolvedOffsets.set(pendingOffsets.subarray(i, end), uniqueIndex)
+                    resolvedLengths.set(pendingLengths.subarray(i, end), uniqueIndex)
+                    resolvedFlags.fill(1, uniqueIndex, uniqueIndex + length)
+                }
+                i = end
+            }
+        }
+        for (; i < count; ++i) {
+            const uniqueIndex = pendingStart === null ? pendingIndexes[i] : pendingStart + i
+            resolvedOffsets[uniqueIndex] = pendingOffsets[i]
+            resolvedLengths[uniqueIndex] = pendingLengths[i]
+            setResolvedTermContentPlanDictName(
+                plan,
+                uniqueIndex,
+                Array.isArray(pendingDictNames) ? pendingDictNames[i] : pendingDictNames,
+            )
+            resolvedFlags[uniqueIndex] = 1
+        }
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
