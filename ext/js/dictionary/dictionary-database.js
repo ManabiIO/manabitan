@@ -6480,7 +6480,10 @@ null;
         if (publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
             return 0;
         }
-        const byteLength = maximumEnd - minimumOffset;
+        const source = spans.buffer;
+        const sharedSource = !(source.buffer instanceof ArrayBuffer);
+        const padding = sharedSource ? (source.byteOffset + minimumOffset) & 7 : 0;
+        const byteLength = maximumEnd - minimumOffset + padding;
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
         if (byteLength > cacheMaxBytes) { return 0; }
         while (
@@ -6490,7 +6493,7 @@ null;
             const first = this._recentTermContentSourceBatches.entries().next();
             if (first.done) { break; }
             this._recentTermContentSourceBatches.delete(first.value[0]);
-            this._recentTermContentSourceBatchBytes -= first.value[1].byteLength;
+            this._recentTermContentSourceBatchBytes -= first.value[1].buffer.byteLength;
         }
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
@@ -6499,9 +6502,15 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        // Match the source alignment so the shared bytes need only one copy.
+        const owned = sharedSource ?
+            new Uint8Array(byteLength).subarray(padding) :
+            source.slice(minimumOffset, maximumEnd);
+        if (sharedSource) {
+            owned.set(source.subarray(minimumOffset, maximumEnd));
+        }
         this._recentTermContentSourceBatches.set(batchId, owned);
-        this._recentTermContentSourceBatchBytes += owned.byteLength;
+        this._recentTermContentSourceBatchBytes += owned.buffer.byteLength;
         const firstIndex = staged.indexes[0];
         const endIndex = firstIndex + staged.indexes.length;
         let contiguousPublished = (
@@ -7264,7 +7273,7 @@ this._readTermContentSignature(
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
-            this._recentTermContentSourceBatchBytes -= source.byteLength;
+            this._recentTermContentSourceBatchBytes -= source.buffer.byteLength;
         }
         if (indexesToClear.length > 0) {
             this._ensureTermEntryContentMetaHashPairCapacity(

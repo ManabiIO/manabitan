@@ -475,10 +475,24 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         },
     );
 
-    test('reports recent source hits from canonical plan deduplication', async () => {
+    test('uses an owned aligned copy of misaligned shared spans for exact deduplication', async () => {
         const database = new DictionaryDatabase();
-        const source = new Uint8Array([1, 2, 3, 4]);
-        publishSlabMeta(database, source, 0, source.length, 10, 20);
+        const source = new Uint8Array(new SharedArrayBuffer(32), 3, 12);
+        source.set([5, 6, 7, 8], 2);
+        const first = publishSlabMeta(database, source, 2, 4, 10, 20);
+        const recentBatch = Reflect.get(database, '_recentTermContentSourceBatches').get(1);
+        if (typeof recentBatch === 'undefined') { throw new Error('Expected the published shared source to be cached'); }
+        expect(recentBatch.byteLength).toBe(4);
+        expect(recentBatch.byteOffset % 8).toBe((source.byteOffset + 2) % 8);
+        expect(recentBatch.buffer.byteLength).toBe(9);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(9);
+        source.fill(0);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        const cachedSource = findRecent(first.meta);
+        if (typeof cachedSource === 'undefined') { throw new Error('Expected a recent shared source lookup hit'); }
+        expect([...cachedSource.buffer]).toEqual([5, 6, 7, 8]);
+        const readStorage = vi.fn();
+        Reflect.set(database, '_readTermEntryContentBytesDetailedBatch', readStorage);
         const plan = /** @type {ArtifactTermContentDedupPlan} */ ({
             uniqueCount: 1,
             sourceRowCount: 1,
@@ -501,9 +515,9 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
             contentBytesList: [],
             contentHash1List: new Uint32Array(0),
             contentHash2List: new Uint32Array(0),
-            contentBytesBuffer: source,
+            contentBytesBuffer: Uint8Array.of(5, 6, 7, 8),
             contentBytesBaseOffset: 0,
-            contentMetaList: new Uint32Array([0, source.length, 10, 20]),
+            contentMetaList: new Uint32Array([0, 4, 10, 20]),
             contentUniqueIndexList: new Uint32Array([0]),
             contentDedupPlan: plan,
             contentDictNameList: null,
@@ -514,6 +528,10 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(result.persistedHitCount).toBe(1);
         expect(result.exactFallbackCount).toBe(1);
         expect(result.recentSourceHitCount).toBe(1);
+        expect(readStorage).not.toHaveBeenCalled();
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, first.staged);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
     });
 
     test('removes recent source mappings on rollback and cache reset', () => {
@@ -532,6 +550,47 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(findRecent(second.meta)).toBeDefined();
         Reflect.get(database, '_clearTermEntryContentMetaCaches').call(database);
         expect(findRecent(second.meta)).toBeUndefined();
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
+    });
+
+    test('charges padded shared backing bytes on cache admission and eviction', () => {
+        const database = new DictionaryDatabase();
+        const seed = publishSlabMeta(database, Uint8Array.of(42), 0, 1, 10, 20);
+        const published = Reflect.get(database, '_termEntryContentMetaStateTable')[seed.staged.indexes[0]];
+        const cacheRecent = Reflect.get(database, '_cacheRecentPublishedTermContentSources');
+        const owner = {
+            _termEntryContentMetaStateTable: new Uint8Array(2).fill(published),
+            _termEntryContentMetaRecentSourceBatchIdTable: new Uint32Array(2),
+            _termEntryContentMetaRecentSourceOffsetTable: new Uint32Array(2),
+            _recentTermContentSourceBatches: new Map(),
+            _recentTermContentSourceBatchBytes: 0,
+            _recentTermContentSourceCacheMaxBytes: 8,
+            _nextRecentTermContentSourceBatchId: 1,
+        };
+
+        const firstSource = new Uint8Array(new SharedArrayBuffer(32), 3, 12);
+        firstSource.set([5, 6, 7, 8], 2);
+        const firstSpans = {buffer: firstSource, offsets: new Uint32Array([2]), lengths: new Uint32Array([4])};
+        const firstStage = {indexes: new Int32Array([0]), active: true};
+        expect(cacheRecent.call(owner, firstStage, firstSpans)).toBe(0);
+        expect(owner._recentTermContentSourceBatches.size).toBe(0);
+        expect(owner._recentTermContentSourceBatchBytes).toBe(0);
+
+        owner._recentTermContentSourceCacheMaxBytes = 9;
+        expect(cacheRecent.call(owner, firstStage, firstSpans)).toBe(4);
+        expect(owner._recentTermContentSourceBatchBytes).toBe(9);
+        const secondSource = new Uint8Array(new SharedArrayBuffer(32), 5, 12);
+        secondSource.set([9, 10, 11, 12], 2);
+        owner._recentTermContentSourceCacheMaxBytes = 11;
+        expect(cacheRecent.call(owner, {indexes: new Int32Array([1]), active: true}, {
+            buffer: secondSource,
+            offsets: new Uint32Array([2]),
+            lengths: new Uint32Array([4]),
+        })).toBe(4);
+        expect(owner._recentTermContentSourceBatches.size).toBe(1);
+        expect(owner._recentTermContentSourceBatches.has(1)).toBe(false);
+        expect(owner._recentTermContentSourceBatches.get(2).buffer.byteLength).toBe(11);
+        expect(owner._recentTermContentSourceBatchBytes).toBe(11);
     });
 
     test('ignores incomplete recent source span metadata', () => {
