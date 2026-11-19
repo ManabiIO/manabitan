@@ -640,7 +640,8 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
 enum {
-    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
+    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG,
+    COMMON_STRUCTURED_KEY_OTHER
 };
 
 /* These complete ASCII literals are already valid JSON strings. Matching
@@ -660,9 +661,40 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
     if (len - start >= 5u) {
         uint32_t word;
         __builtin_memcpy(&word, src + start, sizeof(word));
-        if (word == UINT32_C(0x67617422) && src[start + 4u] == '"') {
+        // Keep the complete five-byte tag test ahead of the prefix dispatch.
+        if (((word ^ UINT32_C(0x67617422)) | (uint32_t)(src[start + 4u] ^ '"')) == 0u) {
             *out_end = start + 5u;
             return COMMON_STRUCTURED_KEY_TAG;
+        }
+        // Keep content/tag on their existing short paths. These other common
+        // keys have no glossary-type or media semantics; only their complete
+        // literal spellings can bypass the generic string scanner.
+        switch (word) {
+            case UINT32_C(0x74616422): /* "dat */
+                if (len - start >= 6u && src[start + 4u] == 'a' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return COMMON_STRUCTURED_KEY_OTHER;
+                }
+                break;
+            case UINT32_C(0x6e616c22): /* "lan */
+                if (len - start >= 6u && src[start + 4u] == 'g' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return COMMON_STRUCTURED_KEY_OTHER;
+                }
+                break;
+            case UINT32_C(0x65726822): /* "hre */
+                if (len - start >= 6u && src[start + 4u] == 'f' && src[start + 5u] == '"') {
+                    *out_end = start + 6u;
+                    return COMMON_STRUCTURED_KEY_OTHER;
+                }
+                break;
+            case UINT32_C(0x79747322): /* "sty */
+            case UINT32_C(0x74697422): /* "tit */
+                if (len - start >= 7u && src[start + 4u] == 'l' && src[start + 5u] == 'e' && src[start + 6u] == '"') {
+                    *out_end = start + 7u;
+                    return COMMON_STRUCTURED_KEY_OTHER;
+                }
+                break;
         }
     }
     return COMMON_STRUCTURED_KEY_NONE;
