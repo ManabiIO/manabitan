@@ -140,7 +140,7 @@ export class RawZipPayloadReader {
         }
         return ranged ?
             await this._readBlobRange(dataOffset, compressedSize, signal) :
-            Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
+            new Uint8Array(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
     }
 
     /**
@@ -262,7 +262,7 @@ export class RawZipPayloadReader {
                 }
                 result.push({
                     file: entry.file,
-                    bytes: Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
+                    bytes: new Uint8Array(bytes.subarray(dataOffset, payloadEnd)),
                     compressionMethod: entry.compressionMethod,
                     compressedSize: entry.compressedSize,
                     uncompressedSize: entry.uncompressedSize,
