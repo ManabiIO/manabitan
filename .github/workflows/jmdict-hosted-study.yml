@@ -1,0 +1,108 @@
+name: Temporary JMdict Hosted Study
+
+on:
+  push:
+    branches: [perf/jmdict-hosted-study-20261119]
+
+permissions:
+  contents: read
+
+jobs:
+  study:
+    if: github.ref == 'refs/heads/perf/jmdict-hosted-study-20261119'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      STUDY_EVIDENCE_DIR: ${{ github.workspace }}/builds/perf/jmdict-hosted-study
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+      MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+      MANABITAN_E2E_PHASE_PROFILING: '0'
+      MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+      MANABITAN_E2E_PROCESS_SAMPLING: '0'
+      MANABITAN_CHROMIUM_HEADLESS: '1'
+      MANABITAN_CHROMIUM_BUILD_TARGET: 'chrome'
+      MANABITAN_E2E_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Initialize evidence before setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$STUDY_EVIDENCE_DIR"
+          date +%s > "$STUDY_EVIDENCE_DIR/started-epoch-seconds.txt"
+          git rev-parse HEAD > "$STUDY_EVIDENCE_DIR/diagnostic-commit.txt"
+          cp .github/workflows/jmdict-hosted-study.yml "$STUDY_EVIDENCE_DIR/workflow.yml"
+          python3 - <<'PY'
+          import json, os, platform
+          from pathlib import Path
+          keys = ['GITHUB_REF', 'GITHUB_SHA', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT', 'GITHUB_WORKFLOW', 'RUNNER_OS', 'RUNNER_ARCH']
+          evidence = Path(os.environ['STUDY_EVIDENCE_DIR'])
+          (evidence / 'job-context.json').write_text(json.dumps({'github': {key: os.environ.get(key) for key in keys}, 'platform': platform.platform()}, indent=2) + '\n')
+          PY
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Prepare independent sources and all packages before timing
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/hosted-jmdict-study/run.mjs prepare 2>&1 | tee "$STUDY_EVIDENCE_DIR/prepare-driver.log"
+
+      - name: Run frozen component controls and four comparisons
+        if: steps.prepare.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/hosted-jmdict-study/run.mjs components 2>&1 | tee "$STUDY_EVIDENCE_DIR/components-driver.log"
+
+      - name: Retain component evidence before browser work
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: jmdict-hosted-components-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.STUDY_EVIDENCE_DIR }}/*.json
+            ${{ env.STUDY_EVIDENCE_DIR }}/*.txt
+            ${{ env.STUDY_EVIDENCE_DIR }}/*.log
+            ${{ env.STUDY_EVIDENCE_DIR }}/workflow.yml
+            ${{ env.STUDY_EVIDENCE_DIR }}/components
+            ${{ env.STUDY_EVIDENCE_DIR }}/commands
+            ${{ env.STUDY_EVIDENCE_DIR }}/sources
+            ${{ env.STUDY_EVIDENCE_DIR }}/packages/*-entries.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+
+      - name: Run paired JMdict browser imports with fresh profiles
+        if: always() && steps.prepare.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/hosted-jmdict-study/run.mjs browser 2>&1 | tee "$STUDY_EVIDENCE_DIR/browser-driver.log"
+
+      - name: Retain all evidence including failed observations
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: jmdict-hosted-full-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.STUDY_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1

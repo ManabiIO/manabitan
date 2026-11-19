@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "branch": "perf/jmdict-hosted-study-20261119",
+  "baselineSha": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+  "dictionary": "jmdict",
+  "dictionaryLockSha256": "4e3e98dfd2bf06968aefaa4f72328ec3736121124e57752e374c7ee507975b13",
+  "packageSha256": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+  "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+  "runners": {
+    "v1": {
+      "file": "runners/import-lookup-screen.js",
+      "destination": "dev/perf/import-lookup-screen.js",
+      "sha256": "af305db6756073e7d9f10eb2a50d4a66f63be4939fad5221de0c2ad253de4fbb"
+    },
+    "v3": {
+      "file": "runners/import-lookup-group-paired-screen.js",
+      "destination": "dev/perf/import-lookup-group-paired-screen.js",
+      "sha256": "d1f39e4ed364931332636f536649bc475e2487dfec94a7106d797eb0e5144fe9"
+    }
+  },
+  "candidates": {
+    "numeric-spans": {
+      "nativeFiles": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": "da85ae1c5d575c38c57a8a06d6e6fce016643ac858d7a0ed994a045500dda2c7",
+        "dev/data/dictionary-wasm/manifest.json": "84ceb4c845cd450839a5085a92adb2e7cf2363c6a35b525312b54a3dfdc95de6",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "360d1e8b7791a90fa62b3bf561f5329b316001591783b1802046754845b8c78b"
+      }
+    },
+    "int32-cutoff": {
+      "nativeFiles": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": "9e78570abeaea0fc3bf8dff3f89a8f2c47c551cebf07c5d9f19ec70877bd2123",
+        "dev/data/dictionary-wasm/manifest.json": "5aae3775d860022fbdfa146a3828351ac3dcfb7eca29ea55f36a753dd1a701b8",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "a232163b1f9d969f1a4bc9b19108dfb1ac777d65e08dc9d1dd028124af00cf07"
+      }
+    },
+    "escape-hints": {
+      "nativeFiles": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": "c2a6992e1dab30f7fd0ba9b4e3ab8a2e6b4af8ee1b07b6c0bfa125f8193223c7",
+        "dev/data/dictionary-wasm/manifest.json": "3c4ce1184dc004b78fcd283ad209b4eb50e36076e0b504fdc9060bd3ef3db78d",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "6a5b9a85c9c0131a376008f8fa46af9f1daafa57041c18645ab03a5103ebe390"
+      }
+    },
+    "bounded-key-reuse": {
+      "nativeFiles": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": "66fcc43450d74bf761b5cc35c8a244a44c319c50d1729acbb3581e5127d262cf",
+        "dev/data/dictionary-wasm/manifest.json": "c2ad280f7a0d5ada58ae64e9b03fe1cad9b1968ca459ba3521d4ff3554daff78",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "bb091c2894cde479c75feed4d736e874fdc89340bfde301577b9e92a80ceed37"
+      }
+    }
+  },
+  "plan": {
+    "v1": {
+      "pairs": 8,
+      "controlPairs": 6,
+      "flags": {}
+    },
+    "v3": {
+      "pairs": 8,
+      "controlPairs": 6,
+      "warmupPairs": 6,
+      "passes": 5,
+      "flags": {}
+    },
+    "browserOrder": [
+      "A1",
+      "B1",
+      "B2",
+      "A2",
+      "B3",
+      "A3",
+      "A4",
+      "B4"
+    ],
+    "browserRunsPerObservation": 1,
+    "buildTarget": "chrome",
+    "productionDefaults": true
+  },
+  "analysisHashes": {
+    "validate-import-lookup-v3.py": "9d6d9d304f1c3b2c5b2ec8cf152f2e84dd1a2c707bcf87585f67a4e33e6b38a7",
+    "analyze-import-lookup-v2.py": "ecbfb8bd2f3aafb6a7066f03fa04e0678b383abe13a709cb5cd9871f1996254a"
+  }
+}
