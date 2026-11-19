@@ -15,7 +15,7 @@ const study = fileURLToPath(new URL('./', import.meta.url))
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 const catalog = JSON.parse(await readFile(path.join(study, 'catalog.json'), 'utf8'))
 const phase = process.argv[2]
-assert(['prepare', 'components', 'browser'].includes(phase), 'Specify prepare, components or browser')
+assert(['prepare', 'browser'].includes(phase), 'Specify prepare or browser')
 assert.equal(process.platform, 'linux', 'This diagnostic only runs on Linux')
 assert.equal(process.env.GITHUB_REF, `refs/heads/${catalog.branch}`, 'Unexpected diagnostic branch')
 assert(process.env.STUDY_EVIDENCE_DIR && process.env.RUNNER_TEMP, 'Missing hosted workspace paths')
@@ -23,8 +23,8 @@ const evidence = path.resolve(process.env.STUDY_EVIDENCE_DIR)
 const stateFile = path.join(evidence, 'preparation.json')
 const started = Number(await readFile(path.join(evidence, 'started-epoch-seconds.txt'), 'utf8'))
 assert(Number.isFinite(started) && started > 0, 'Missing study start time')
-// Reserve three minutes of the 40-minute job for final artifact retention.
-const deadline = started * 1000 + 37 * 60 * 1000
+// Reserve three minutes of the 20-minute job for final artifact retention.
+const deadline = started * 1000 + 17 * 60 * 1000
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
 const fileHash = async filename => sha256(await readFile(filename))
 const save = async (filename, value) => {
@@ -125,7 +125,7 @@ async function verifyArm(arm) {
 async function prepare() {
     await checkFrozenInputs()
     await cp(study, path.join(evidence, 'sources', 'study'), {recursive: true})
-    const worktreeRoot = path.join(process.env.RUNNER_TEMP, `jmdict-hosted-study-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`)
+    const worktreeRoot = path.join(process.env.RUNNER_TEMP, `jmdict-browser-confirm-${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`)
     await mkdir(worktreeRoot, {recursive: true})
     const state = {catalogSha256: await fileHash(path.join(study, 'catalog.json')), baselineSha: catalog.baselineSha,
         diagnosticSha: process.env.GITHUB_SHA, host: getHostEnvironment(), prepared: false, arms: {}, fixtures: {}}
@@ -199,57 +199,19 @@ async function prepare() {
     await save(stateFile, state)
 }
 
-async function components(state) {
-    const results = []
-    const v3Reports = []
-    for (const protocol of ['v1', 'v3']) {
-        for (const name of ['control', ...Object.keys(catalog.candidates)]) {
-            const baseline = state.arms['baseline-a']
-            const candidate = state.arms[name === 'control' ? 'baseline-b' : name]
-            const directory = path.join(evidence, 'components', protocol, name)
-            const reportFile = path.join(directory, 'report.json')
-            const pairs = name === 'control' ? catalog.plan[protocol].controlPairs : catalog.plan[protocol].pairs
-            const args = ['--expose-gc', path.join(candidate.root, catalog.runners[protocol].destination), 'jmdict',
-                '--baseline-root', baseline.root, '--cache-dir', state.cache, '--pairs', String(pairs), '--flags', '{}', '--out', reportFile]
-            if (protocol === 'v3') args.push('--candidate-root', candidate.root, '--warmup-pairs', '6', '--passes', '5')
-            const result = {protocol, candidate: name, pairs, reportFile, complete: false}
-            results.push(result)
-            try {
-                await verifyArm(baseline)
-                await verifyArm(candidate)
-                const command = await run(`${protocol}-${name}`, process.execPath, args, {cwd: candidate.root, directory, required: false})
-                result.commandComplete = command.complete
-                const report = JSON.parse(await readFile(reportFile, 'utf8'))
-                assert.equal(report.complete, true, 'Component report incomplete')
-                assert(command.complete, 'Component command failed')
-                await verifyArm(baseline)
-                await verifyArm(candidate)
-                result.summary = report.summary
-                result.complete = true
-            } catch (error) { result.error = String(error) }
-            if (protocol === 'v3') v3Reports.push(reportFile)
-            await save(path.join(evidence, 'components', 'index.json'), {complete: false, results})
-        }
-    }
-    const validation = await run('v3-oracle-validation', 'python3', [path.join(study, 'runners/validate-import-lookup-v3.py'), ...v3Reports,
-        '--out', path.join(evidence, 'components/v3-validation.json')], {required: false})
-    const complete = results.every(result => result.complete) && validation.complete
-    await save(path.join(evidence, 'components', 'index.json'), {complete, results, validationComplete: validation.complete})
-    return complete
-}
-
 async function browser(state) {
     const environment = {MANABITAN_E2E_STRICT_RUNTIME: '1', MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1',
         MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1', MANABITAN_E2E_PHASE_PROFILING: '0',
         MANABITAN_E2E_PHASE_SCREENSHOTS: '0', MANABITAN_E2E_PROCESS_SAMPLING: '0',
         MANABITAN_CHROMIUM_HEADLESS: '1', MANABITAN_CHROMIUM_BUILD_TARGET: 'chrome', MANABITAN_E2E_SKIP_BUILD: '1'}
     const results = []
-    for (const name of Object.keys(catalog.candidates)) {
+    for (const comparison of catalog.plan.browserCases) {
+        const name = comparison.id
         const observations = []
-        const result = {candidate: name, order: catalog.plan.browserOrder, observations, complete: false}
+        const result = {...comparison, candidate: name, observations, complete: false}
         results.push(result)
-        for (const label of catalog.plan.browserOrder) {
-            const arm = state.arms[label[0] === 'A' ? 'baseline-a' : name]
+        for (const label of comparison.order) {
+            const arm = state.arms[label[0] === 'A' ? comparison.sourceA : comparison.sourceB]
             const directory = path.join(evidence, 'browser', name, label)
             const observation = {label, arm: label[0], pair: Number(label.slice(1)), source: arm.name, complete: false}
             observations.push(observation)
@@ -291,7 +253,7 @@ try {
         const state = JSON.parse(await readFile(stateFile, 'utf8'))
         assert.equal(state.prepared, true, 'Preparation did not complete')
         assert.equal(state.catalogSha256, await fileHash(path.join(study, 'catalog.json')))
-        complete = phase === 'components' ? await components(state) : await browser(state)
+        complete = await browser(state)
     }
     await save(statusFile, {phase, complete, commands, finishedAt: new Date().toISOString(), host: getHostEnvironment()})
 } catch (error) {

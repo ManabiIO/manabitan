@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "branch": "perf/jmdict-hosted-study-20261119",
+  "branch": "perf/jmdict-browser-confirm-20261119",
   "baselineSha": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
   "dictionary": "jmdict",
   "dictionaryLockSha256": "4e3e98dfd2bf06968aefaa4f72328ec3736121124e57752e374c7ee507975b13",
@@ -26,20 +26,6 @@
         "dev/data/dictionary-wasm/term-bank-parser.wasm": "360d1e8b7791a90fa62b3bf561f5329b316001591783b1802046754845b8c78b"
       }
     },
-    "int32-cutoff": {
-      "nativeFiles": {
-        "ext/js/dictionary/wasm/term-bank-parser.c": "9e78570abeaea0fc3bf8dff3f89a8f2c47c551cebf07c5d9f19ec70877bd2123",
-        "dev/data/dictionary-wasm/manifest.json": "5aae3775d860022fbdfa146a3828351ac3dcfb7eca29ea55f36a753dd1a701b8",
-        "dev/data/dictionary-wasm/term-bank-parser.wasm": "a232163b1f9d969f1a4bc9b19108dfb1ac777d65e08dc9d1dd028124af00cf07"
-      }
-    },
-    "escape-hints": {
-      "nativeFiles": {
-        "ext/js/dictionary/wasm/term-bank-parser.c": "c2a6992e1dab30f7fd0ba9b4e3ab8a2e6b4af8ee1b07b6c0bfa125f8193223c7",
-        "dev/data/dictionary-wasm/manifest.json": "3c4ce1184dc004b78fcd283ad209b4eb50e36076e0b504fdc9060bd3ef3db78d",
-        "dev/data/dictionary-wasm/term-bank-parser.wasm": "6a5b9a85c9c0131a376008f8fa46af9f1daafa57041c18645ab03a5103ebe390"
-      }
-    },
     "bounded-key-reuse": {
       "nativeFiles": {
         "ext/js/dictionary/wasm/term-bank-parser.c": "66fcc43450d74bf761b5cc35c8a244a44c319c50d1729acbb3581e5127d262cf",
@@ -49,27 +35,74 @@
     }
   },
   "plan": {
-    "v1": {
-      "pairs": 8,
-      "controlPairs": 6,
-      "flags": {}
-    },
-    "v3": {
-      "pairs": 8,
-      "controlPairs": 6,
-      "warmupPairs": 6,
-      "passes": 5,
-      "flags": {}
-    },
-    "browserOrder": [
-      "A1",
-      "B1",
-      "B2",
-      "A2",
-      "B3",
-      "A3",
-      "A4",
-      "B4"
+    "browserCases": [
+      {
+        "id": "control",
+        "sourceA": "baseline-a",
+        "sourceB": "baseline-b",
+        "candidateArm": null,
+        "pairs": 4,
+        "order": [
+          "A1",
+          "B1",
+          "B2",
+          "A2",
+          "B3",
+          "A3",
+          "A4",
+          "B4"
+        ]
+      },
+      {
+        "id": "numeric-spans",
+        "sourceA": "baseline-a",
+        "sourceB": "numeric-spans",
+        "candidateArm": "B",
+        "pairs": 8,
+        "order": [
+          "A1",
+          "B1",
+          "B2",
+          "A2",
+          "B3",
+          "A3",
+          "A4",
+          "B4",
+          "A5",
+          "B5",
+          "B6",
+          "A6",
+          "B7",
+          "A7",
+          "A8",
+          "B8"
+        ]
+      },
+      {
+        "id": "bounded-key-reuse",
+        "sourceA": "baseline-a",
+        "sourceB": "bounded-key-reuse",
+        "candidateArm": "B",
+        "pairs": 8,
+        "order": [
+          "A1",
+          "B1",
+          "B2",
+          "A2",
+          "B3",
+          "A3",
+          "A4",
+          "B4",
+          "A5",
+          "B5",
+          "B6",
+          "A6",
+          "B7",
+          "A7",
+          "A8",
+          "B8"
+        ]
+      }
     ],
     "browserRunsPerObservation": 1,
     "buildTarget": "chrome",
@@ -78,5 +111,10 @@
   "analysisHashes": {
     "validate-import-lookup-v3.py": "9d6d9d304f1c3b2c5b2ec8cf152f2e84dd1a2c707bcf87585f67a4e33e6b38a7",
     "analyze-import-lookup-v2.py": "ecbfb8bd2f3aafb6a7066f03fa04e0678b383abe13a709cb5cd9871f1996254a"
+  },
+  "confirmationOf": {
+    "localStudyCommit": "673cb061874bfd18c6939ce5e84ce0729fad71c4",
+    "remoteStudyCommit": "93610119ac4e05b113bd33d3b2304030ab5a3fcd",
+    "scope": "Fresh-browser confirmation of numeric spans and bounded key reuse"
   }
 }
