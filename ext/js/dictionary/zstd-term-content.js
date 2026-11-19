@@ -54,6 +54,8 @@ const COMPRESSION_JOB_TIMEOUT_MS = 60_000;
 const JMDICT_COMPRESSION_LEVEL = -1;
 const EMPTY_COMPRESSION_DICTIONARY = new Uint8Array(0);
 
+/** @typedef {{id: number} & Record<string, unknown>} CompressionRequest */
+
 /**
  * @param {unknown} value
  * @returns {Uint8Array}
@@ -191,6 +193,10 @@ export class TermContentCompressionPool {
         const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length);
         offsets.set(sourceOffsets);
         lengths.set(sourceLengths);
+        /* eslint-disable @stylistic/semi */
+        /** @type {CompressionRequest[][]} */
+        const queuedMessages = Array.from({length: this._workers.length}, () => [])
+        /* eslint-enable @stylistic/semi */
         const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
             const workerIndex = blockIndex % this._workers.length;
             const start = blockStartIndexes[blockIndex];
@@ -206,8 +212,14 @@ export class TermContentCompressionPool {
                     wrap: true,
                     compressionExperiments,
                 },
+                queuedMessages[workerIndex],
             );
         });
+        /* eslint-disable @stylistic/semi */
+        for (let workerIndex = 0; workerIndex < queuedMessages.length; ++workerIndex) {
+            this._postQueuedCompressionJobs(workerIndex, queuedMessages[workerIndex])
+        }
+        /* eslint-enable @stylistic/semi */
         // A failed job does not stop other workers from reading the borrowed
         // source. Drain both barriers before rejection can trigger a fallback
         // or allow the caller to release/reuse that source.
@@ -299,21 +311,49 @@ export class TermContentCompressionPool {
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
+     * @param {CompressionRequest[]|null} [queuedMessages]
      * @returns {{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
      */
-    _dispatchWithSourceConsumed(workerIndex, message) {
-        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, [], true);
+    _dispatchWithSourceConsumed(workerIndex, message, queuedMessages = null) {
+        /* eslint-disable @stylistic/semi */
+        const {sourceConsumed, completion} = this._startDispatch(workerIndex, message, [], true, queuedMessages)
+        /* eslint-enable @stylistic/semi */
         return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Coalesces transport only: every block retains its own ID, timeout and
+     * source/completion barriers. A failed post rejects only its unsent jobs.
+     * @param {number} workerIndex
+     * @param {CompressionRequest[]} jobs
+     */
+    _postQueuedCompressionJobs(workerIndex, jobs) {
+        if (jobs.length === 0) { return }
+        try {
+            this._workers[workerIndex].postMessage({jobs}, [])
+        } catch (error) {
+            for (const {id} of jobs) {
+                const pending = this._pending.get(id)
+                if (typeof pending === 'undefined') { continue }
+                clearTimeout(pending.timeoutId)
+                this._pending.delete(id)
+                if (!pending.sourceConsumedSettled) { pending.rejectSourceConsumed?.(error) }
+                pending.reject(error)
+            }
+        }
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
      * @param {Transferable[]} transfer
      * @param {boolean} trackSourceConsumed
+     * @param {CompressionRequest[]|null} [queuedMessages]
      * @returns {{sourceConsumed: Promise<void>|null, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}}
      */
-    _startDispatch(workerIndex, message, transfer, trackSourceConsumed) {
+    _startDispatch(workerIndex, message, transfer, trackSourceConsumed, queuedMessages = null) {
         const id = this._nextId++;
         /** @type {((value?: void|PromiseLike<void>) => void)|null} */
         let resolveSourceConsumed = null;
@@ -332,7 +372,13 @@ export class TermContentCompressionPool {
             }, COMPRESSION_JOB_TIMEOUT_MS);
             this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId});
             try {
-                this._workers[workerIndex].postMessage({id, ...message}, transfer);
+                /* eslint-disable @stylistic/semi */
+                if (queuedMessages === null) {
+                    this._workers[workerIndex].postMessage({id, ...message}, transfer)
+                } else {
+                    queuedMessages.push({id, ...message})
+                }
+                /* eslint-enable @stylistic/semi */
             } catch (error) {
                 clearTimeout(timeoutId);
                 this._pending.delete(id);
