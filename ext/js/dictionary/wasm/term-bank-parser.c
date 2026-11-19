@@ -707,6 +707,76 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
     }
 }
 
+/* Constant short literals specialize to word comparisons. The caller proves
+ * the complete span is inside its logical source before entering this helper. */
+static __attribute__((always_inline)) inline int common_literal_bytes_equal(
+    const uint8_t* bytes, const uint8_t* expected, uint32_t length
+) {
+    uint32_t i = 0u;
+    while (i + 8u <= length) {
+        uint64_t first;
+        uint64_t second;
+        __builtin_memcpy(&first, bytes + i, sizeof(first));
+        __builtin_memcpy(&second, expected + i, sizeof(second));
+        if (first != second) { return 0; }
+        i += 8u;
+    }
+    while (i < length) {
+        if (bytes[i] != expected[i]) { return 0; }
+        ++i;
+    }
+    return 1;
+}
+
+/* These complete child objects contain no media/type markers. The caller has
+ * validated the parent key and must still enforce the child nesting limit. */
+static inline uint32_t common_structured_metadata_end(
+    const uint8_t* src, uint32_t len, uint32_t key_start, uint32_t key_end,
+    uint32_t* normalization_hint
+) {
+    static const uint8_t DATA_PREFIX[] = "{\"content\":";
+    static const uint8_t DATA_SUFFIX[] = "\"glossary\"}";
+    static const uint8_t STYLE_PREFIX[] = "{\"listStyleType\":";
+    static const uint8_t STYLE_SUFFIX[] = "\"circle\"}";
+    if (key_end >= len || src[key_end] != ':') { return 0u; }
+    const uint32_t key_length = key_end - key_start;
+    if (key_length != 6u && key_length != 7u) { return 0u; }
+    uint32_t prefix;
+    __builtin_memcpy(&prefix, src + key_start, sizeof(prefix));
+    const int data = key_length == 6u && prefix == UINT32_C(0x74616422) &&
+        src[key_start + 4u] == 'a' && src[key_start + 5u] == '"';
+    const int style = key_length == 7u && prefix == UINT32_C(0x79747322) &&
+        src[key_start + 4u] == 'l' && src[key_start + 5u] == 'e' && src[key_start + 6u] == '"';
+    if (!data && !style) { return 0u; }
+    uint32_t i = key_end + 1u;
+    int spaced = 0;
+    if (i < len && src[i] == ' ') { ++i; spaced = 1; }
+    const uint32_t object_start = i;
+    // The value discriminates these objects from the many other data/style
+    // values. Check it first, then prove the complete child-key prefix.
+    if (data) {
+        const uint32_t prefix_length = sizeof(DATA_PREFIX) - 1u;
+        const uint32_t suffix_length = sizeof(DATA_SUFFIX) - 1u;
+        if (prefix_length > len - i) { return 0u; }
+        i += prefix_length;
+        if (i < len && src[i] == ' ') { ++i; spaced = 1; }
+        if (suffix_length > len - i || !common_literal_bytes_equal(src + i, DATA_SUFFIX, suffix_length)) { return 0u; }
+        if (!common_literal_bytes_equal(src + object_start, DATA_PREFIX, prefix_length)) { return 0u; }
+        i += suffix_length;
+    } else {
+        const uint32_t prefix_length = sizeof(STYLE_PREFIX) - 1u;
+        const uint32_t suffix_length = sizeof(STYLE_SUFFIX) - 1u;
+        if (prefix_length > len - i) { return 0u; }
+        i += prefix_length;
+        if (i < len && src[i] == ' ') { ++i; spaced = 1; }
+        if (suffix_length > len - i || !common_literal_bytes_equal(src + i, STYLE_SUFFIX, suffix_length)) { return 0u; }
+        if (!common_literal_bytes_equal(src + object_start, STYLE_PREFIX, prefix_length)) { return 0u; }
+        i += suffix_length;
+    }
+    if (spaced && normalization_hint != 0) { *normalization_hint = 1u; }
+    return i;
+}
+
 static int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
@@ -771,6 +841,16 @@ static int parse_composite_span_impl(
                         if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }
                         state = OBJECT_KEY;
                         i = advance_glossary_delimiter(src, len, tag_end - 1u, normalization_hint);
+                        continue;
+                    }
+                }
+                if (common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
+                    (src[i + 1u] == 'd' || src[i + 1u] == 's') && depth < MAX_JSON_NESTING) {
+                    const uint32_t metadata_end = common_structured_metadata_end(src, len, i, s_end, normalization_hint);
+                    if (metadata_end != 0u) {
+                        if (validate_top_level_objects && depth == 2u) { glossary_key = 0u; }
+                        state = OBJECT_AFTER_VALUE;
+                        i = metadata_end;
                         continue;
                     }
                 }
