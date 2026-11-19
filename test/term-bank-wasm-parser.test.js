@@ -3952,14 +3952,17 @@ describe('term bank wide sequence parity', () => {
             '',
         ]);
         const splitIndex = Math.ceil(rows.length / 2);
+        /** @type {Map<string, import('../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} */
         let preparedIndexes = null;
         await parseTermBankWithWasmColumnChunks([
             textEncoder.encode(JSON.stringify(rows.slice(0, splitIndex))),
             textEncoder.encode(JSON.stringify(rows.slice(splitIndex))),
         ], 3, (chunk) => {
             expect(chunk.sequenceList).toStrictEqual(new Int32Array(sequences));
-            preparedIndexes = chunk.preparedLookupIndexes ??
-            prepareTermLookupIndexesFromPreinternedPlan(chunk, null, {}).indexes;
+            const prepared = chunk.preparedLookupIndexes ??
+            prepareTermLookupIndexesFromPreinternedPlan(chunk, null, {});
+            if (prepared === null) { throw new Error('Expected prepared lookup indexes'); }
+            preparedIndexes = prepared.indexes;
         }, 64, {
             singleChunk: true,
             emitTermByteLists: false,
@@ -3969,10 +3972,10 @@ describe('term bank wide sequence parity', () => {
             mediaHintFastScan: true,
             prepareLookupIndexes: true,
         });
-        expect(preparedIndexes).not.toBeNull();
+        if (preparedIndexes === null) { throw new Error('Expected prepared lookup indexes'); }
         const hash = createHash('sha256');
         let actualByteLength = 0;
-        for (const [key, entry] of /** @type {NonNullable<typeof preparedIndexes>} */ (preparedIndexes)) {
+        for (const [key, entry] of preparedIndexes) {
             hash.update(key);
             hash.update(entry.bytes);
             actualByteLength += entry.bytes.byteLength;
