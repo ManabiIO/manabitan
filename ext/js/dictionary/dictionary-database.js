@@ -7222,6 +7222,80 @@ this._readTermContentSignature(
     }
 
     /**
+     * Publishes an ordinary contiguous reservation with bulk column writes.
+     * The witness is rebuilt synchronously for this publication; collisions
+     * and incompatible reservations retain the scalar publication path.
+     * @param {{indexes: Int32Array, active: boolean}|null} staged
+     * @param {number[]|Uint32Array} hash1s
+     * @param {number[]|Uint32Array} hash2s
+     * @param {number[]|Float64Array} offsets
+     * @param {number[]|Uint32Array} lengths
+     * @param {number} dictNameId
+     * @param {boolean} metadataValidated
+     * @returns {boolean}
+     */
+    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated) {
+        const count = offsets.length;
+        if (
+            staged === null || !staged.active || count < 64 || dictNameId < 0 ||
+            !(hash1s instanceof Uint32Array) || !(hash2s instanceof Uint32Array) ||
+            !(offsets instanceof Float64Array) || !(lengths instanceof Uint32Array) ||
+            staged.indexes.length !== count || hash1s.length !== count ||
+            hash2s.length !== count || lengths.length !== count
+        ) {
+            return false;
+        }
+        const indexes = staged.indexes;
+        const first = indexes[0];
+        const end = first + count;
+        const states = this._termEntryContentMetaStateTable;
+        const hash1Table = this._termEntryContentMetaHash1Table;
+        const hash2Table = this._termEntryContentMetaHash2Table;
+        const lengthTable = this._termEntryContentMetaLengthTable;
+        const offsetTable = this._termEntryContentMetaOffsetTable;
+        const idTable = this._termEntryContentMetaIdTable;
+        const dictNameIdTable = this._termEntryContentMetaDictNameIdTable;
+        if (
+            first < 0 || end > states.length || end > hash1Table.length ||
+            end > hash2Table.length || end > lengthTable.length ||
+            end > offsetTable.length || end > idTable.length || end > dictNameIdTable.length
+        ) {
+            return false;
+        }
+        // Bulk writes must not change inputs that the scalar path reads later.
+        for (const source of [indexes, hash1s, hash2s, offsets, lengths]) {
+            if (
+                source.buffer === offsetTable.buffer || source.buffer === idTable.buffer ||
+                source.buffer === dictNameIdTable.buffer || source.buffer === states.buffer
+            ) {
+                return false;
+            }
+        }
+        for (let i = 0; i < count; ++i) {
+            const index = first + i;
+            if (
+                indexes[i] !== index || states[index] !== TERM_CONTENT_META_SLOT_PENDING ||
+                hash1Table[index] !== hash1s[i] || hash2Table[index] !== hash2s[i] ||
+                lengthTable[index] !== lengths[i] ||
+                (!metadataValidated && (
+                    !Number.isSafeInteger(offsets[i]) || offsets[i] < 0 ||
+                    lengths[i] >= TERM_CONTENT_META_U32_NULL
+                ))
+            ) {
+                return false;
+            }
+        }
+        // No await or callback can invalidate the witness before publication.
+        offsetTable.set(offsets, first);
+        idTable.fill(0, first, end);
+        dictNameIdTable.fill(dictNameId, first, end);
+        states.fill(TERM_CONTENT_META_SLOT_PUBLISHED, first, end);
+        this._termEntryContentMetaHashPairPendingCount -= count;
+        this._termEntryContentMetaHashPairCount += count;
+        return true;
+    }
+
+    /**
      * @param {{indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null} staged
      */
     _rollbackStagedArtifactTermContentMetadata(staged) {
@@ -9343,7 +9417,18 @@ null :
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        for (let i = 0; i < pendingOffsets.length; ++i) {
+        const publishedCount = this._tryPublishContiguousArtifactTermContentMetadata(
+            stagedContentMetadata,
+            pendingContentHash1s,
+            pendingContentHash2s,
+            pendingOffsets,
+            pendingLengths,
+            uniformPendingDictNameId,
+            metadataValidated,
+        ) ?
+            pendingOffsets.length :
+            0;
+        for (let i = publishedCount; i < pendingOffsets.length; ++i) {
             const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
