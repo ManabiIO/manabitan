@@ -43,3 +43,44 @@ Run `node dev/perf/overflow-layout-benchmark.js --baseline '98ecaa39^' --font /p
 Counts must be positive safe integers; malformed counts fail before browser launch. Missing diagnostic metrics and undefined percentage changes are represented as `null`, not zero. A/B output uses paired AB/BA ordering and fails with a nonzero exit status if either arm fails validation. A five-pair result is exploratory evidence, not by itself proof of a cross-device improvement.
 
 Run regression coverage with `node ./node_modules/vitest/vitest.mjs run test/perf-benchmark-support.test.js`. Cached fixtures are replaced only after size and SHA-256 verification, using atomic rename; a failed download does not remove an existing cache file.
+
+### Canonical content resolution component screen
+
+`canonical-scan-benchmark.js` exercises the production WASM parser, `NativeCanonicalScanner`, exact content matcher and `DictionaryDatabase` metadata publication using every row of a pinned dictionary. It compares source checkouts with adjacent AB/BA pairs in alternating ABBA/BAAB brackets:
+
+```sh
+node dev/perf/canonical-scan-benchmark.js jmdict \
+  --baseline-root /path/to/baseline --candidate-root /path/to/candidate \
+  --brackets 3 --out builds/perf/canonical-jmdict.json
+node dev/perf/canonical-scan-benchmark.js jmdict \
+  --baseline-root /path/to/baseline --control \
+  --brackets 3 --out builds/perf/canonical-jmdict-control.json
+```
+
+Both checkouts need generated `ext/lib` files and compatible dependencies. The runner uses its own dictionary lock and cache, verifies archive size/SHA-256 and ZIP CRCs, and records all JavaScript source hashes plus the executed WASM artifacts. Each observation runs in a fresh Node process with one full untimed warmup. Source or fixture changes within a cohort fail the run. Use `--order BAAB` to reverse the first bracket. `--control` measures identical baseline bytes in both arms. `--mode existing` first publishes the same complete dictionary outside timing, then measures resolution against existing content; the default `fresh` starts with an empty metadata index. Parser groups are fixed at seven JMdict banks, nine JMnedict banks or ten Jitendex banks, matching the existing parser component screen rather than asserting a particular browser scheduling decision.
+
+The existing content mode is a duplicate continuation stress screen within one import session. Production `startBulkImport()` clears content metadata caches before each dictionary import, so this mode does not represent importing a second dictionary or updating a previously imported dictionary.
+
+The measured interval is the sum of `_resolveArtifactTermContentDedup` calls. Parsing, modeled persistence, metadata publication and verification are outside that interval. The model stores owned canonical bytes in memory and gives the production exact matcher those complete bytes. Every resolved row, including aliases, is compared byte-for-byte with parser output. Reports also require equal references, plan state, metadata columns and stored-content digests across observations. Native counters expose whether the changed path actually ran. These checks establish component parity; they do not establish persisted browser-database parity.
+
+The output is explicitly component-only. In-memory reads, warmup, fixed grouping, verification allocations and Node's runtime differ from browser import. Process RSS includes the source fixture and verification model and is not a production memory estimate. Use this screen to reject a candidate or justify full browser qualification; its percentages are not end-to-end import gains. Run timing serially on a quiet host, keep A/A results, and use the normal browser import and lifecycle checks before promoting an optimization.
+
+The oracle's regression tests are `test/canonical-scan-benchmark.test.js`.
+
+### Raw ZIP payload copy component screen
+
+`raw-zip-copy-screen.js` serves the actual `RawZipPayloadReader` modules from two clean checkouts to the pinned Playwright browser. It verifies the locked JMdict archive and all 53 compressed term-bank payloads. Run Chromium and Firefox separately:
+
+```sh
+npx playwright install --with-deps chromium firefox
+node dev/perf/raw-zip-copy-screen.js \
+  --baseline /path/to/baseline --candidate /path/to/candidate \
+  --zip builds/e2e-dictionary-cache/JMdict.zip --browser chromium \
+  --output builds/perf/raw-zip-component/chromium.json
+```
+
+Repeat with `--browser firefox` and a separate output path. The driver can live outside both source checkouts. `--prepare-only` validates fixture and source provenance without launching a browser. Source commits and clean status must remain unchanged throughout the cohort; served module hashes must match the initial and final receipts. Dependencies, browser identity and executable hash are recorded.
+
+There are four independent cells: ArrayBuffer or memory-backed Blob input, each through `read` or `readBatch`. Each cell has two excluded complete warmups per source arm, four alternating ABBA/BAAB comparison blocks and two same-code control blocks. Each observation reads all banks four times through fresh readers. The final report must contain all 120 observations, `completed: true`, an empty error field and 212 verified independently owned payloads per observation. Byte equality, payload digests, metadata, source mutation and transfer-ownership checks run outside timing. Failed or incomplete observations remain in the output.
+
+The boundary includes fresh-reader Blob materialization, but excludes input creation, module loading, inflation, parsing and storage. All four passes retain their output until verification, unlike the production streaming importer. The batch cell invokes the API directly and falls back to `read` for a bank exceeding its unchanged budget; it does not demonstrate automatic importer dispatch. Treat any result as a reader-component measurement and qualify full imports separately.
