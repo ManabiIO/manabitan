@@ -2262,6 +2262,18 @@ int32_t build_term_string_plan(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
+            if (local_row > 0u) {
+                const TermRowMeta* previous = &rows[row_start + local_row - 1u];
+                const uint32_t previous_start = field == 0u ? previous->expression_start : previous->reading_start;
+                const uint32_t previous_length = field == 0u ? previous->expression_length : previous->reading_length;
+                // Only an exactly equal token from this completed native plan
+                // can reuse its already-decoded, UTF-8-validated key.
+                if (token_length == previous_length &&
+                    content_bytes_equal(src, token_start, previous_start, token_length)) {
+                    indexes[field] = field == 0u ? expression_indexes[local_row - 1u] : reading_indexes[local_row - 1u];
+                    continue;
+                }
+            }
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
@@ -2914,6 +2926,18 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
             const uint32_t token_start = token_starts[field];
             const uint32_t token_length = token_lengths[field];
+            if (row_count > 0u) {
+                const TermRowMeta* previous = &rows[row_count - 1u];
+                const uint32_t previous_start = field == 0u ? previous->expression_start : previous->reading_start;
+                const uint32_t previous_length = field == 0u ? previous->expression_length : previous->reading_length;
+                // Raw equality preserves escaped spelling and reading-alias
+                // semantics; the preceding completed row owns the valid ID.
+                if (token_length == previous_length &&
+                    content_bytes_equal(src, token_start, previous_start, token_length)) {
+                    string_indexes[field] = field == 0u ? expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
+                    continue;
+                }
+            }
             const uint8_t* value_source = src;
             uint32_t value_start = token_start + 1u;
             uint32_t value_length = token_length - 2u;
