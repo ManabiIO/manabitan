@@ -1,6 +1,8 @@
 name: Benchmarks (Manual)
 
 on:
+  push:
+    branches: ['perf/jmdict-qualification-20261119-34f1-*']
   workflow_dispatch:
     inputs:
       baseline_sha:
@@ -30,7 +32,7 @@ permissions:
 jobs:
   bench:
     name: Benchmarks
-    if: inputs.workload != 'imports'
+    if: github.event_name != 'push' && inputs.workload != 'imports'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -50,13 +52,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(inputs.workload == 'imports' && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
+        include: ${{ fromJSON((github.event_name == 'push' || inputs.workload == 'imports') && '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"}]' || '[{"boundary":"import-jmdict","dictionary":"jmdict"},{"boundary":"import-jitendex","dictionary":"jitendex"},{"boundary":"lookup-lifecycle","dictionary":""}]') }}
     env:
-      PERF_BASELINE_SHA: ${{ inputs.baseline_sha }}
+      PERF_BASELINE_SHA: ${{ inputs.baseline_sha || '67d2f09380ba42b75d699249bdacda90766807b8' }}
       PERF_REPETITIONS: ${{ inputs.repetitions || '1' }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: ${{ matrix.boundary }}
-      PERF_RUN_ORDER: ${{ inputs.run_order == 'CROSSOVER' && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
+      PERF_RUN_ORDER: ${{ (github.event_name == 'push' || inputs.run_order == 'CROSSOVER') && 'A1 B1 B2 A2 B3 A3 A4 B4' || inputs.run_order == 'BAAB' && 'B1 A1 A2 B2' || 'A1 B1 B2 A2' }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
