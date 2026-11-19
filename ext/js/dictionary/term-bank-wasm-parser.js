@@ -3241,8 +3241,11 @@ function canUseParallelParserForSourceSize(totalBytes) {
  */
 async function createParallelParserWorkers(abortController, workerCount) {
     const {signal} = abortController;
-    const module = await waitForParallelParserModule(signal);
     if (signal.aborted) { throw createParallelParserCancellationError(); }
+    // Module workers can load their JavaScript graph while WASM compiles. Keep
+    // the shared compile observed even if the first Worker constructor fails.
+    const modulePromise = waitForParallelParserModule(signal);
+    void modulePromise.catch(() => {});
     /** @type {Worker[]} */
     const workers = [];
     /** @type {Promise<void>[]} */
@@ -3254,7 +3257,7 @@ async function createParallelParserWorkers(abortController, workerCount) {
                 {type: 'module', name: `manabitan-term-bank-parser-${i + 1}`},
             );
             workers.push(worker);
-            ready.push(waitForParallelParserWorkerReady(worker, module, signal));
+            ready.push(waitForParallelParserWorkerReady(worker, modulePromise, signal));
         }
         await Promise.all(ready);
         return {workers};
@@ -3263,7 +3266,7 @@ async function createParallelParserWorkers(abortController, workerCount) {
         // Retire every peer waiter before releasing this startup generation.
         abortController.abort();
         for (const worker of workers) { worker.terminate(); }
-        await Promise.allSettled(ready);
+        await Promise.allSettled([modulePromise, ...ready]);
         throw error;
     }
 }
@@ -3295,20 +3298,20 @@ function waitForParallelParserModule(signal) {
 
 /**
  * @param {Worker} worker
- * @param {WebAssembly.Module} module
+ * @param {Promise<WebAssembly.Module>} modulePromise
  * @param {AbortSignal} signal
  * @returns {Promise<void>}
  */
-function waitForParallelParserWorkerReady(worker, module, signal) {
+function waitForParallelParserWorkerReady(worker, modulePromise, signal) {
     return new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-            cleanup();
-            reject(new Error(`Term-bank parser worker initialization timed out after ${PARALLEL_WORKER_READY_TIMEOUT_MS}ms`));
-        }, PARALLEL_WORKER_READY_TIMEOUT_MS);
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        let timeoutId = null;
+        let settled = false;
+        let initializationSent = false;
         /** @param {MessageEvent<unknown>} event */
         const onMessage = (event) => {
             const data = /** @type {ParallelParserWorkerMessage} */ (event.data);
-            if (data?.type !== 'ready' && data?.type !== 'initialization-error') { return; }
+            if (!initializationSent || (data?.type !== 'ready' && data?.type !== 'initialization-error')) { return; }
             cleanup();
             if (data.type === 'ready') {
                 resolve();
@@ -3330,7 +3333,8 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
             reject(createParallelParserCancellationError());
         };
         const cleanup = () => {
-            clearTimeout(timeoutId);
+            settled = true;
+            if (timeoutId !== null) { clearTimeout(timeoutId); }
             worker.removeEventListener('message', onMessage);
             worker.removeEventListener('error', onError);
             worker.removeEventListener('messageerror', onMessageError);
@@ -3340,16 +3344,33 @@ function waitForParallelParserWorkerReady(worker, module, signal) {
         worker.addEventListener('error', onError);
         worker.addEventListener('messageerror', onMessageError);
         signal.addEventListener('abort', onAbort, {once: true});
-        try {
-            if (signal.aborted) {
-                onAbort();
-                return;
+        void modulePromise.then((module) => {
+            // Abort, script-load failure or disposal may have retired this
+            // worker while compilation continued for the next import.
+            if (settled) { return; }
+            try {
+                if (signal.aborted) {
+                    onAbort();
+                    return;
+                }
+                // Preserve the initialization timeout's original boundary:
+                // the compiled module is available and initialization starts.
+                timeoutId = setTimeout(() => {
+                    cleanup();
+                    reject(new Error(`Term-bank parser worker initialization timed out after ${PARALLEL_WORKER_READY_TIMEOUT_MS}ms`));
+                }, PARALLEL_WORKER_READY_TIMEOUT_MS);
+                initializationSent = true;
+                worker.postMessage({type: 'initialize', module});
+            } catch (error) {
+                cleanup();
+                reject(error);
             }
-            worker.postMessage({type: 'initialize', module});
-        } catch (error) {
+        }, (error) => {
+            if (settled) { return; }
             cleanup();
             reject(error);
-        }
+        });
+        if (signal.aborted) { onAbort(); }
     });
 }
 

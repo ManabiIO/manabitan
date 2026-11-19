@@ -2265,7 +2265,7 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     // One failure must settle peers that never acknowledge readiness.
-                    if (instances.length !== 1) { return; }
+                    if (instances[0] !== this) { return; }
                     if (failure === 'post-message') { throw new Error('Initialize dispatch failed'); }
                     queueMicrotask(() => {
                         if (failure === 'initialization-error') {
