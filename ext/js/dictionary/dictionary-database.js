@@ -6499,7 +6499,10 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        // eslint-disable-next-line @stylistic/semi
+        const owned = new Uint8Array(byteLength)
+        // eslint-disable-next-line @stylistic/semi
+        owned.set(spans.buffer.subarray(minimumOffset, maximumEnd))
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.byteLength;
         const firstIndex = staged.indexes[0];
