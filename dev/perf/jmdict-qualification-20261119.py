@@ -13,15 +13,23 @@ import sys
 import zipfile
 
 
+def configuration():
+    pair_count = int(os.environ.get("PERF_PAIR_COUNT", "6"))
+    initial_order = os.environ.get("PERF_INITIAL_ORDER", "AB")
+    if pair_count < 1 or pair_count > 30 or initial_order not in ("AB", "BA"):
+        raise ValueError("Choose 1–30 pairs and AB or BA initial order")
+    return pair_count, initial_order
+
+
 def plan():
-    observations = [
-        {"id": "warmup-A", "kind": "warmup", "arm": "A"},
-        {"id": "warmup-B", "kind": "warmup", "arm": "B"},
+    pair_count, initial_order = configuration()
+    observations = [{"id": f"warmup-{arm}", "kind": "warmup", "arm": arm} for arm in initial_order]
+    observations.extend([
         {"id": "control-pre-A1", "kind": "control-pre", "arm": "A"},
         {"id": "control-pre-A2", "kind": "control-pre", "arm": "A"},
-    ]
-    for pair in range(1, 7):
-        for arm in ("AB" if pair % 2 else "BA"):
+    ])
+    for pair in range(1, pair_count + 1):
+        for arm in (initial_order if pair % 2 else initial_order[::-1]):
             observations.append({"id": f"pair-{pair:02d}-{arm}", "kind": "measured", "pair": pair, "arm": arm})
     observations.extend([
         {"id": "control-post-B1", "kind": "control-post", "arm": "B"},
@@ -82,14 +90,16 @@ def prepare(roots, evidence, dictionary):
     lock = json.loads((roots["B"] / "test/perf/dictionaries.lock.json").read_text())
     entries_a, entries_b = (identities[arm]["packageEntries"] for arm in "AB")
     changed = [name for name in sorted(entries_a.keys() | entries_b.keys()) if entries_a.get(name) != entries_b.get(name)]
+    pair_count, initial_order = configuration()
     manifest = {
         "schemaVersion": 1, "dictionary": dictionary, "fixture": lock["dictionaries"][dictionary],
         "sources": identities, "sharedInputs": hashes, "changedPackageEntries": changed,
         "sameProductControl": not changed, "plan": plan(),
+        "cohort": {"pairCount": pair_count, "initialOrder": initial_order},
         "runnerSha256": digest(__file__),
         "workflowSha256": digest(roots["B"] / ".github/workflows/jmdict-qualification-20261119.yml"),
         "timingBoundary": "browser file-input change to post-UI completion; fresh profiles; no trace during timing",
-        "limitations": "Six pairs on one Ubuntu host; sampled content equality, not exhaustive stored-row equality or memory qualification.",
+        "limitations": f"{pair_count} pairs on one Ubuntu host; sampled content equality, not exhaustive stored-row equality or memory qualification.",
     }
     write_json(evidence / "manifest.json", manifest)
     (evidence / "candidate.patch").write_text(output(["git", "diff", "--binary", identities["A"]["gitSha"], identities["B"]["gitSha"]], roots["B"]) + "\n")
@@ -194,7 +204,7 @@ def summarize(observations):
         if len({item["result"][key] for item in observations}) != 1:
             raise ValueError(f"Cross-observation {key} mismatch; no performance estimate")
     pairs = []
-    for pair in range(1, 7):
+    for pair in range(1, configuration()[0] + 1):
         arms = {item["arm"]: item["result"]["totalImportMs"] for item in observations if item.get("pair") == pair}
         pairs.append({"pair": pair, "baselineMs": arms["A"], "candidateMs": arms["B"], "changePercent": change(arms["A"], arms["B"])})
     controls = {}
@@ -222,6 +232,8 @@ def main():
     if action not in ("run", "trace"):
         raise ValueError("Choose plan, prepare, run or trace")
     manifest = json.loads((evidence / "manifest.json").read_text())
+    if manifest["plan"] != plan():
+        raise ValueError("Cohort configuration differs from the frozen manifest")
     state = {"complete": False, "observations": []}
     destination = evidence / ("diagnostics.json" if action == "trace" else "results.json")
     write_json(destination, state)

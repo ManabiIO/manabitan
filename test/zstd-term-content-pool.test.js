@@ -35,12 +35,6 @@ class MockCompressionWorker {
      * @param {Transferable[]} transfer
      */
     postMessage(message, transfer = []) {
-        /* eslint-disable @stylistic/semi */
-        if (Array.isArray(message.jobs)) {
-            for (const job of message.jobs) { this.postMessage(job, transfer) }
-            return
-        }
-        /* eslint-enable @stylistic/semi */
         this.calls.push({message, transfer});
         const response = this.respond(message, transfer);
         queueMicrotask(() => {
