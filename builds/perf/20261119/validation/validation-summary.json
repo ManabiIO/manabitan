@@ -1,0 +1,312 @@
+{
+  "createdAt": "2026-11-19T20:40:13.373007+00:00",
+  "candidateCommit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+  "candidateWorktree": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+  "trackedSourceClean": true,
+  "trackedDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "status": "?? node_modules\n",
+  "runtimeSourceMatchesMeasuredIdentity": true,
+  "runtimeSourceHashes": {
+    "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "ext/js/dictionary/dictionary-database.js": "20db081c3676cbce1c123a88e52641f39766a6fe73dd41c59072acf84ed6b09d",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "384d0ee9369e03827e3beb653d5221e64095f8a50b15eb45f913c9381182af6c",
+    "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+    "ext/js/dictionary/term-content-canonical-layout.js": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c",
+    "ext/js/dictionary/term-content-canonical-scan.js": "6f22f3df0c29f22094924e7f7c076e2367759724df8eea26dbb6f21233fbe731",
+    "ext/js/dictionary/term-content-metadata-arena.js": "9aa2d546bb46cd0073b33bd31c43d76f421f158b529995dc94ee583dee54e14c",
+    "ext/js/dictionary/term-content-block-store.js": "d27395a9ce7402f1bb745b0bd0da95e8a0686bd496e19a3657179abcf9086056",
+    "ext/js/dictionary/term-entry-content-hash.js": "3a661e6875bf8dcb4c3b9f301e79506539b27d83cb069b3d5566e9bad9346620",
+    "ext/js/dictionary/raw-term-content.js": "b71d2ccde0554051ac4baca5f4be48fb63ae53ce12bf21194e62429cf0aec9db",
+    "ext/js/dictionary/wasm/term-bank-parser.c": "cb4d577c2ec6350fd73c5ae2ee318784c613d20116cb549663a0da0973442c8b",
+    "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "af0348063a64e4cf0f71e09ef5fd0acea7f548d7d872d24f867acf63412b412b",
+    "dev/data/dictionary-wasm/manifest.json": "eb335cc2fd1dc880fea5e2403bbcefd47fff199681d1819b88df659ea59c46ff",
+    "ext/lib/term-bank-parser.wasm": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5",
+    "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+  },
+  "requiredGates": {
+    "mainTypeScript": "passed",
+    "fullUnitSuite": "passed",
+    "dryBuildAllTargets": "passed"
+  },
+  "fullUnitCounts": {
+    "files": {
+      "summary": "616 passed (616)",
+      "passed": 616,
+      "failed": 0,
+      "skipped": 0,
+      "total": 616
+    },
+    "tests": {
+      "summary": "13674 passed | 47 skipped (13721)",
+      "passed": 13674,
+      "failed": 0,
+      "skipped": 47,
+      "total": 13721
+    }
+  },
+  "checks": [
+    {
+      "name": "storage-main-types",
+      "receiptFile": "storage-main-types.command.json",
+      "receiptSha256": "c66aee818a4aa3852605098a77ed2390df7892b3a2b71647b4850c45ed0b04f4",
+      "logFile": "storage-main-types.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receipt": {
+        "name": "storage-main-types",
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+        "command": [
+          "node",
+          "--max-old-space-size=2048",
+          "node_modules/typescript/bin/tsc",
+          "--noEmit",
+          "--project",
+          "jsconfig.json"
+        ],
+        "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+        "startedAt": "2026-11-19T20:13:07.896330+00:00",
+        "exitCode": 0,
+        "durationSeconds": 12.734882636999828,
+        "completedAt": "2026-11-19T20:13:20.631617+00:00"
+      },
+      "counts": {}
+    },
+    {
+      "name": "storage-full-unit",
+      "receiptFile": "storage-full-unit.command.json",
+      "receiptSha256": "5ca91f5acf1b4046b816cbe4fcdd2e9b044d2321eaa7974f677b79f6457ebcbd",
+      "logFile": "storage-full-unit.log",
+      "logSha256": "9e9875fcc7b88a0713b3ca499336965f400848407bdd570405a4d034589a355d",
+      "receipt": {
+        "name": "storage-full-unit",
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--maxWorkers=1"
+        ],
+        "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+        "startedAt": "2026-11-19T20:14:18.112341+00:00",
+        "exitCode": 1,
+        "durationSeconds": 602.8907181780014,
+        "completedAt": "2026-11-19T20:24:21.003644+00:00"
+      },
+      "counts": {
+        "files": {
+          "summary": "2 failed | 614 passed (616)",
+          "passed": 614,
+          "failed": 2,
+          "skipped": 0,
+          "total": 616
+        },
+        "tests": {
+          "summary": "13654 passed | 67 skipped (13721)",
+          "passed": 13654,
+          "failed": 0,
+          "skipped": 67,
+          "total": 13721
+        }
+      }
+    },
+    {
+      "name": "storage-compiler-suite-retry",
+      "receiptFile": "storage-compiler-suite-retry.command.json",
+      "receiptSha256": "f778ee03ed6d782a8075d45ae4643b42e063bbab91c5f4d946bbf51507137d58",
+      "logFile": "storage-compiler-suite-retry.log",
+      "logSha256": "bcadb6dec467a9bae7b11763c9e9497fbd5fd32db450aa3e90eb02311482c0e1",
+      "receipt": {
+        "name": "storage-compiler-suite-retry",
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "test/term-bank-crc.test.js",
+          "test/term-bank-memory-page.test.js",
+          "--maxWorkers=1"
+        ],
+        "environmentOverrides": {
+          "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+          "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+          "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+        },
+        "pathPrefix": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin",
+        "compilerVersion": "Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)",
+        "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+        "startedAt": "2026-11-19T20:25:32.879599+00:00",
+        "exitCode": 1,
+        "durationSeconds": 1.8823011870008486,
+        "completedAt": "2026-11-19T20:25:34.762413+00:00"
+      },
+      "counts": {
+        "files": {
+          "summary": "2 failed (2)",
+          "passed": 0,
+          "failed": 2,
+          "skipped": 0,
+          "total": 2
+        },
+        "tests": {
+          "summary": "20 skipped (20)",
+          "passed": 0,
+          "failed": 0,
+          "skipped": 20,
+          "total": 20
+        }
+      }
+    },
+    {
+      "name": "storage-compiler-suite-pinned",
+      "receiptFile": "storage-compiler-suite-pinned.command.json",
+      "receiptSha256": "0b2637a9d0fb5b50ab5a0c45c9fd6ebaac9e9c51db15bed75bf325f5403cf16f",
+      "logFile": "storage-compiler-suite-pinned.log",
+      "logSha256": "d4c5da6f4d4ddc03d48afdd74e4ca093851c533b4f4f210e5c41c2f2ec9a78f0",
+      "receipt": {
+        "name": "storage-compiler-suite-pinned",
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "test/term-bank-crc.test.js",
+          "test/term-bank-memory-page.test.js",
+          "--maxWorkers=1"
+        ],
+        "environmentOverrides": {
+          "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+          "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+          "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+        },
+        "pathPrefixes": [
+          "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin",
+          "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin"
+        ],
+        "compilerVersion": "Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)",
+        "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+        "startedAt": "2026-11-19T20:26:33.759446+00:00",
+        "exitCode": 0,
+        "durationSeconds": 5.1437533240023185,
+        "completedAt": "2026-11-19T20:26:38.904466+00:00"
+      },
+      "counts": {
+        "files": {
+          "summary": "2 passed (2)",
+          "passed": 2,
+          "failed": 0,
+          "skipped": 0,
+          "total": 2
+        },
+        "tests": {
+          "summary": "20 passed (20)",
+          "passed": 20,
+          "failed": 0,
+          "skipped": 0,
+          "total": 20
+        }
+      }
+    },
+    {
+      "name": "storage-build",
+      "receiptFile": "storage-build.command.json",
+      "receiptSha256": "e33b277e4e61941e7bfd8043de5b2302d45b11c005dbfb6ba83ee7485a2bdad1",
+      "logFile": "storage-build.log",
+      "logSha256": "f58f7fe0ac48e0d52ba8236ca6f5ee90074a08899acfa572dc9103cc9469d0b8",
+      "receipt": {
+        "name": "storage-build",
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+        "command": [
+          "npm",
+          "run",
+          "test:build"
+        ],
+        "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+        "startedAt": "2026-11-19T20:26:49.533322+00:00",
+        "exitCode": 0,
+        "durationSeconds": 1.7174947439998505,
+        "completedAt": "2026-11-19T20:26:51.251452+00:00"
+      },
+      "counts": {}
+    },
+    {
+      "name": "storage-full-unit-pinned",
+      "receiptFile": "storage-full-unit-pinned.command.json",
+      "receiptSha256": "b28d755c1fbe3263e241906e26e63be62f75d26585ab37bd8ba4720053230f08",
+      "logFile": "storage-full-unit-pinned.log",
+      "logSha256": "1f170b210032d5393c886cdeef57b8790fcd63f615cebf04d2ff7273b7a846cd",
+      "receipt": {
+        "name": "storage-full-unit-pinned",
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-storage",
+        "command": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--maxWorkers=1"
+        ],
+        "environmentOverrides": {
+          "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+          "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+          "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+        },
+        "pathPrefixes": [
+          "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin",
+          "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin"
+        ],
+        "compilerVersion": "Debian clang version 21.1.8 (++20251221033036+2078da43e25a-1~exp1~20251221153213.50)",
+        "commit": "5bdaf01c47fdddf27211a461afb9e67df17dacbf",
+        "startedAt": "2026-11-19T20:30:54.253256+00:00",
+        "heartbeatScope": "Live descendant process CPU counters and summed RSS within this exec namespace; diagnostic only, shared RSS pages can be counted more than once",
+        "exitCode": 0,
+        "durationSeconds": 515.5672359319979,
+        "completedAt": "2026-11-19T20:39:29.821448+00:00",
+        "maxSampledProcessRssBytes": 1408724992
+      },
+      "counts": {
+        "files": {
+          "summary": "616 passed (616)",
+          "passed": 616,
+          "failed": 0,
+          "skipped": 0,
+          "total": 616
+        },
+        "tests": {
+          "summary": "13674 passed | 47 skipped (13721)",
+          "passed": 13674,
+          "failed": 0,
+          "skipped": 47,
+          "total": 13721
+        }
+      }
+    }
+  ],
+  "initialFailures": {
+    "classification": "compiler-toolchain-setup-only",
+    "fullUnitInitial": "614 files and 13,654 tests passed; CRC and memory-page suites could not locate a supported compiler; 20 tests were skipped by failed setup in addition to 47 other skips",
+    "firstTargetedRetry": "Explicit clang and library path worked, but the extracted unversioned bin directory did not contain the versioned wasm-ld-21 name requested by clang; the test helper does not consume MANABITAN_WASM_LD",
+    "resolution": "Prepend both llvm21/usr/bin and llvm21/usr/lib/llvm-21/bin to PATH, set MANABITAN_CLANG and LD_LIBRARY_PATH; targeted 20/20 tests then full616-file suite passed without source changes",
+    "preservedAttemptNames": [
+      "storage-full-unit",
+      "storage-compiler-suite-retry"
+    ]
+  },
+  "buildTargets": [
+    "chrome",
+    "chrome-dev",
+    "chrome-playwright",
+    "firefox",
+    "firefox-dev",
+    "firefox-android",
+    "edge"
+  ],
+  "limitations": [
+    "Main TypeScript, full unit suite and dry build are separate checks; this is not a claim that every npm test subcommand ran",
+    "Browser validation and whole-import performance qualification were not completed for this exact candidate",
+    "Heartbeat RSS is summed live-process diagnostic RSS and can count shared pages more than once; it is not a production import memory measurement"
+  ],
+  "allStorageHeavyJobsStopped": true,
+  "furtherTestsPlanned": false
+}
