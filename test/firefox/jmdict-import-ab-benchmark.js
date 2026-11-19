@@ -211,7 +211,7 @@ async function verifyPersisted(driver) {
     const samples = []
     for (const probe of probes) {
         const diagnostics = await send(driver, 'debugDictionaryLookupState', {text: probe.expression, dictionaryNames: [fixture.expectedTitle]})
-        const state = diagnostics.offscreenState ?? diagnostics.localState ?? diagnostics
+        const state = diagnostics.offscreenState ?? diagnostics.workerState ?? diagnostics.localState ?? diagnostics
         const totalLength = state.termContentStoreDebugState?.totalLength
         assert(Number.isSafeInteger(totalLength) && totalLength > 0)
         assert(Array.isArray(state.rowSample) && state.rowSample.length > 0)
@@ -317,11 +317,19 @@ async function observe(arm, index) {
         assert(termFiles.length > 0, 'Missing disjoint term-file work receipts')
         record.termFileWork = termFiles.map((phase) => ({
             phase: phase.phase,
-            counters: Object.fromEntries(Object.entries(phase.details).filter(([name, value]) => typeof value === 'number' && !name.endsWith('Ms') && /(?:Count|Bytes|Rows)$|^(?:rows|chunkCount)$/.test(name))),
+            counters: Object.fromEntries(Object.entries(phase.details).filter(([name, value]) => typeof value === 'number' && !name.endsWith('Ms') && /(?:Count|Bytes|Rows|Fallbacks)$|^(?:rows|chunkCount)$/.test(name))),
         }))
         for (const [name, expected] of Object.entries({rows: fixture.termRows, parserSourceCompressedBytes: 15_574_114, parserSourceTransferredBytes: 15_574_114})) {
             assert.equal(termFiles.reduce((sum, phase) => sum + (phase.details[name] ?? 0), 0), expected, `Changed raw compressed source path did not execute: ${name}`)
         }
+        for (const phase of termFiles) {
+            assert.equal(phase.details.parserFusedFallbacks, 0)
+            assert.equal(phase.details.dedupNativeFallbackCount, 0)
+        }
+        const finalization = debug.importerPhaseTimings.find((phase) => phase.phase === 'bulk-finalization')?.details
+        assert(finalization?.ok === true && finalization.published === true)
+        assert.deepEqual(finalization.housekeepingErrors, [])
+        record.finalizationWork = Object.fromEntries(Object.entries(finalization).filter(([name, value]) => typeof value === 'number' && !name.endsWith('Ms') && name !== 'termRecordLookupIndexMaxQueuedBytes'))
         record.beforeReload = await verifyPersisted(driver)
         const priorOrigin = await driver.executeAsyncScript('const done = arguments[arguments.length - 1]; window.browser.runtime.getBackgroundPage().then((page) => done(page.performance.timeOrigin), (error) => done({error:String(error)}));')
         assert(Number.isFinite(priorOrigin))
@@ -356,6 +364,7 @@ try {
             if (first) {
                 assert.equal(observation.beforeReload.digest, first.beforeReload.digest, 'Persisted source probes differ across observations')
                 assert.deepEqual(observation.termFileWork, first.termFileWork, 'Disjoint term-file work differs across observations')
+                assert.deepEqual(observation.finalizationWork, first.finalizationWork, 'Final storage work differs across observations')
                 assert.deepEqual(observation.beforeReload.counts, first.beforeReload.counts, 'Persisted dictionary counts differ across observations')
             }
             report.observations.push(observation)
@@ -371,6 +380,9 @@ try {
     assert.equal(hash(await readFile(fileURLToPath(import.meta.url))), report.driverSha256)
     assert.equal(hash(await readFile(path.join(root, 'test/e2e/import-timing.js'))), report.sharedTimingFileSha256)
     assert.equal(hash(await readFile(path.join(root, 'test/perf/dictionaries.lock.json'))), report.fixtureLockSha256)
+    const finalDictionaryBytes = await readFile(values.zip)
+    assert.equal(finalDictionaryBytes.byteLength, fixture.sizeBytes)
+    assert.equal(hash(finalDictionaryBytes), fixture.sha256)
     report.completed = true
 } catch (error) {
     report.error = String(error)

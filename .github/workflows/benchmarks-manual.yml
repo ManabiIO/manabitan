@@ -59,9 +59,9 @@ jobs:
               npm run build -- --target firefox
             )
           done
-          git -C "$baseline" rev-parse HEAD HEAD^{tree} > "$evidence/baseline-source.txt"
-          git -C "$candidate" rev-parse HEAD HEAD^{tree} > "$evidence/candidate-source.txt"
-          git rev-parse HEAD HEAD^{tree} > "$evidence/harness-source.txt"
+          git -C "$baseline" rev-parse HEAD 'HEAD^{tree}' > "$evidence/baseline-source.txt"
+          git -C "$candidate" rev-parse HEAD 'HEAD^{tree}' > "$evidence/candidate-source.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$evidence/harness-source.txt"
           sha256sum "$baseline/builds/manabitan-firefox.zip" "$candidate/builds/manabitan-firefox.zip" > "$evidence/package-sha256.txt"
           sha256sum test/firefox/jmdict-import-ab-benchmark.js test/e2e/import-timing.js package-lock.json test/perf/dictionaries.lock.json "$PERF_GECKODRIVER" > "$evidence/tooling-sha256.txt"
           printf 'PERF_BASELINE_ROOT=%s\nPERF_CANDIDATE_ROOT=%s\nPERF_EVIDENCE_ROOT=%s\n' "$baseline" "$candidate" "$evidence" >> "$GITHUB_ENV"
