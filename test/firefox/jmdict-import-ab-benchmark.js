@@ -333,7 +333,17 @@ async function observe(arm, index) {
         record.beforeReload = await verifyPersisted(driver)
         const priorOrigin = await driver.executeAsyncScript('const done = arguments[arguments.length - 1]; window.browser.runtime.getBackgroundPage().then((page) => done(page.performance.timeOrigin), (error) => done({error:String(error)}));')
         assert(Number.isFinite(priorOrigin))
-        await driver.executeScript('setTimeout(() => window.browser.runtime.reload(), 0);')
+        const settingsHandle = await driver.getWindowHandle()
+        await driver.switchTo().newWindow('tab')
+        await driver.get('about:blank')
+        const reloadHandle = await driver.getWindowHandle()
+        await driver.switchTo().window(settingsHandle)
+        try {
+            await driver.executeScript('setTimeout(() => window.browser.runtime.reload(), 0);')
+        } catch (error) {
+            if (error?.name !== 'NoSuchWindowError' && !String(error).includes('Browsing context has been discarded')) { throw error }
+        }
+        await driver.switchTo().window(reloadHandle)
         await driver.sleep(500)
         await openSettings(driver, baseUrl)
         const nextOrigin = await driver.executeAsyncScript('const done = arguments[arguments.length - 1]; window.browser.runtime.getBackgroundPage().then((page) => done(page.performance.timeOrigin), (error) => done({error:String(error)}));')

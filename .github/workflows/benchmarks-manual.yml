@@ -1,4 +1,4 @@
-name: Firefox JMdict source comparison
+name: Firefox JMdict complete-import confirmation
 
 on:
   push:
@@ -10,7 +10,11 @@ permissions:
 
 jobs:
   firefox-import-comparison:
-    name: Firefox complete JMdict imports
+    name: Firefox complete JMdict imports (${{ matrix.order }})
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [normal, reverse]
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -75,6 +79,7 @@ jobs:
           --output "$PERF_EVIDENCE_ROOT/smoke"
           --mode smoke
       - name: Run the fixed complete-import cohort
+        if: matrix.order == 'normal'
         run: >-
           node test/firefox/jmdict-import-ab-benchmark.js
           --baseline-package "$PERF_BASELINE_ROOT/builds/manabitan-firefox.zip"
@@ -83,11 +88,21 @@ jobs:
           --geckodriver "$PERF_GECKODRIVER"
           --output "$PERF_EVIDENCE_ROOT/cohort"
           --mode cohort
+      - name: Run the reversed complete-import cohort
+        if: matrix.order == 'reverse'
+        run: >-
+          node test/firefox/jmdict-import-ab-benchmark.js
+          --baseline-package "$PERF_BASELINE_ROOT/builds/manabitan-firefox.zip"
+          --candidate-package "$PERF_CANDIDATE_ROOT/builds/manabitan-firefox.zip"
+          --zip builds/e2e-dictionary-cache/JMdict.zip
+          --geckodriver "$PERF_GECKODRIVER"
+          --output "$PERF_EVIDENCE_ROOT/cohort"
+          --mode cohort --reverse-order
       - name: Preserve complete or failed observations
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: firefox-jmdict-raw-zip-comparison
+          name: firefox-jmdict-raw-zip-${{ matrix.order }}
           path: ${{ env.PERF_EVIDENCE_ROOT }}
           if-no-files-found: error
           retention-days: 30
