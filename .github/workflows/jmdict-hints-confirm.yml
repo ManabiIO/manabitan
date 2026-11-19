@@ -1,19 +1,19 @@
-name: Temporary JMdict Hosted Study
+name: Temporary JMdict Escape-Hint Confirmation
 
 on:
   push:
-    branches: [perf/jmdict-hosted-study-20261119]
+    branches: [perf/jmdict-hints-confirm-20261119]
 
 permissions:
   contents: read
 
 jobs:
   study:
-    if: github.ref == 'refs/heads/perf/jmdict-hosted-study-20261119'
+    if: github.ref == 'refs/heads/perf/jmdict-hints-confirm-20261119'
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 25
     env:
-      STUDY_EVIDENCE_DIR: ${{ github.workspace }}/builds/perf/jmdict-hosted-study
+      STUDY_EVIDENCE_DIR: ${{ github.workspace }}/builds/perf/jmdict-hints-confirm
       MANABITAN_E2E_STRICT_RUNTIME: '1'
       MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
       MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
@@ -36,7 +36,7 @@ jobs:
           mkdir -p "$STUDY_EVIDENCE_DIR"
           date +%s > "$STUDY_EVIDENCE_DIR/started-epoch-seconds.txt"
           git rev-parse HEAD > "$STUDY_EVIDENCE_DIR/diagnostic-commit.txt"
-          cp .github/workflows/jmdict-hosted-study.yml "$STUDY_EVIDENCE_DIR/workflow.yml"
+          cp .github/workflows/jmdict-hints-confirm.yml "$STUDY_EVIDENCE_DIR/workflow.yml"
           python3 - <<'PY'
           import json, os, platform
           from pathlib import Path
@@ -65,7 +65,7 @@ jobs:
           set -euo pipefail
           node dev/perf/hosted-jmdict-study/run.mjs prepare 2>&1 | tee "$STUDY_EVIDENCE_DIR/prepare-driver.log"
 
-      - name: Run frozen component controls and four comparisons
+      - name: Run fresh control and four crossed source-role/order cells
         if: steps.prepare.outcome == 'success'
         shell: bash
         run: |
@@ -76,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: jmdict-hosted-components-${{ github.run_id }}-${{ github.run_attempt }}
+          name: jmdict-hints-confirm-components-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             ${{ env.STUDY_EVIDENCE_DIR }}/*.json
             ${{ env.STUDY_EVIDENCE_DIR }}/*.txt
@@ -90,7 +90,7 @@ jobs:
           retention-days: 14
           compression-level: 1
 
-      - name: Run paired JMdict browser imports with fresh profiles
+      - name: Run four-pair fresh-browser control and escape-hint comparison
         if: always() && steps.prepare.outcome == 'success'
         shell: bash
         run: |
@@ -101,7 +101,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: jmdict-hosted-full-${{ github.run_id }}-${{ github.run_attempt }}
+          name: jmdict-hints-confirm-full-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.STUDY_EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 14
