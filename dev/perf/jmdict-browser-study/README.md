@@ -1,14 +1,17 @@
 # JMdict browser study, 2026-11-19
 
+The [draft qualification PR](https://github.com/ManabiIO/manabitan/pull/765)
+tracks the declared runs, evidence and interpretation.
+
 This study measures two independent changes against the same pinned source.
 It does not apply either runtime change to this tooling branch.
 
-| Arm | Source | Change |
-| --- | --- | --- |
-| A | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` | Baseline |
-| B | `98b25cbce108b7c63ffe318f06186dadd26d476c` | Use typed-array construction for owned ZIP payload copies |
-| C | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` | Independently packaged, identical baseline control |
-| D | `2ae43ece52ab621fa1af763bf65635f1bedc0fad` | Start one bounded compressed source read during import setup |
+| Arm | Source                                     | Change                                                       |
+| --- | ------------------------------------------ | ------------------------------------------------------------ |
+| A   | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` | Baseline                                                     |
+| B   | `98b25cbce108b7c63ffe318f06186dadd26d476c` | Use typed-array construction for owned ZIP payload copies    |
+| C   | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` | Independently packaged, identical baseline control           |
+| D   | `2ae43ece52ab621fa1af763bf65635f1bedc0fad` | Start one bounded compressed source read during import setup |
 
 `candidates.bundle` preserves both candidate commits and requires the baseline
 commit already present in the checkout. `rawzip.patch` and `prefetch.patch` are
@@ -116,3 +119,9 @@ Actual browser qualification runs only in the branch-scoped, read-only
 Linux workflow. It does not use macOS runners, secrets, deployment steps or
 release-workflow modifications. Evidence includes the exact tooling snapshot,
 manifest, package-entry hashes, commands, raw reports and failure logs.
+
+Commits marked `[study-report]` update documentation, schema registration or
+retained analysis without launching another optional measurement cohort.
+Ordinary repository CI still runs. Runtime or measurement-protocol changes
+require a separately declared run; existing observations remain bound to their
+original diagnostic commit and manifest.

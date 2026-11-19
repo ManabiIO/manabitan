@@ -18,7 +18,7 @@ concurrency:
 jobs:
   runtime:
     name: Freeze official Mozilla runtime
-    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/jmdict-browser-study-20261119-f34c9c9'
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/jmdict-browser-study-20261119-f34c9c9' && !contains(github.event.head_commit.message, '[study-report]')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
