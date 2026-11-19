@@ -22,6 +22,7 @@ import {createHash} from 'node:crypto'
 import {crc32, deflateRawSync} from 'node:zlib'
 import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest'
 import {snapshotTermBankExperiments, getTermBankExperimentMask} from '../ext/js/dictionary/term-bank-experiments.js'
+import {createUniqueKeyBanks} from './fixtures/key-reuse/inputs.mjs'
 import {
     consumeLastTermBankWasmParseProfile,
     inflateCompressedTermBankSourcesWasm,
@@ -676,6 +677,7 @@ describe('fused row token validation', () => {
     ]
 
     test('retains independent escape and integer facts for each row', async () => {
+        /** @type {string[]} */
         const rawRows = []
         const expectedReadings = []
         for (let padding = 0; padding < 8; ++padding) {
@@ -789,6 +791,55 @@ describe('fused integer overflow bounds', () => {
         const recovered = await parse([precedingBank, precedingBank])
         expect(recovered.rows).toHaveLength(2)
         expect(recovered.profile.fusedParseFallbacks).toBe(0)
+    })
+})
+
+describe('adjacent same-field key reuse', () => {
+    const rows = [
+        String.raw`["漢字","かんじ","","",1,[],1,""]`,
+        String.raw`["漢字","かんじ","","",2,[],2,""]`,
+        String.raw`["漢字","","","",3,[],3,""]`,
+        String.raw`["漢字","かんじ","","",4,[],4,""]`,
+        String.raw`["別字","かんじ","","",5,[],5,""]`,
+        String.raw`["\u5225字","\u304bんじ","","",6,[],6,""]`,
+        String.raw`["\u5225字","\u304bんじ","","",7,[],7,""]`,
+        String.raw`["終","終","","",8,[],8,""]`,
+        String.raw`["終","終","","",9,[],9,""]`,
+        String.raw`["別の終","終","","",10,[],10,""]`,
+    ]
+
+    test.each([1, 5, 9])('preserves aliases, escaped decode accounting and cross-bank reuse at split %i', async (split) => {
+        const banks = [`[${rows.slice(0, split).join(',')}]`, '[]', `[${rows.slice(split).join(',')}]`]
+        const expected = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks, {experimentalNativeEscapedKeys: true})
+        expect(result.rows).toEqual(expected.rows)
+        expect(result.rows.map(({readingEqualsExpression}) => readingEqualsExpression)).toEqual([0, 0, 1, 0, 0, 0, 0, 1, 1, 0])
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(0)
+        expect(result.profile.escapedKeyDecodeCount).toBe(4)
+    })
+
+    test('keeps unsupported escaped-key fallback after adjacent literal hits', async () => {
+        const banks = [`[${rows.slice(0, 2).join(',')}]`, `[${rows[5]}]`]
+        const expected = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks)
+        expect(result.rows).toEqual(expected.rows)
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(1)
+        expect(result.profile.discardedFusedRows).toBe(2)
+        expect(result.profile.escapedKeyDecodeCount).toBe(0)
+    })
+
+    test('preserves all unique common-prefix keys without a native fallback', async () => {
+        const banks = [...createUniqueKeyBanks(2000), '[]']
+        const expected = await parse(banks, {experimentalSkipFusedParse: true})
+        const result = await parse(banks)
+        expect(result.rows).toEqual(expected.rows)
+        expect(result.rows).toHaveLength(2000)
+        expect(result.profile.fusedParseAttempts).toBe(1)
+        expect(result.profile.fusedParseFallbacks).toBe(0)
+        expect(new Set(result.rows.map(({expression}) => expression.join(','))).size).toBe(2000)
+        expect(new Set(result.rows.map(({reading}) => reading.join(','))).size).toBe(2000)
     })
 })
 

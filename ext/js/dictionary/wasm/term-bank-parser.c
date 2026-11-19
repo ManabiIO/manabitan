@@ -2980,6 +2980,19 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 if (experiment_stats != 0) { ++experiment_stats[0]; }
             }
             if (value_length > MAX_INTERNED_KEY_BYTES) { *(uint32_t*)(uintptr_t)row_count_ptr = row_count; return -5; }
+            if (row_count > 0u) {
+                const TermRowMeta* previous_row = &rows[row_count - 1u];
+                const uint32_t previous_start = field == 0u ? previous_row->expression_start : previous_row->reading_start;
+                const uint32_t previous_length = field == 0u ? previous_row->expression_length : previous_row->reading_length;
+                // The preceding row has already interned this exact raw token.
+                // Keep escaped-key admission/decoding above this local reuse.
+                if (token_length == previous_length && content_bytes_equal_between(
+                    src, token_start, src, previous_start, token_length
+                )) {
+                    string_indexes[field] = field == 0u ? expression_indexes[row_count - 1u] : reading_indexes[row_count - 1u];
+                    continue;
+                }
+            }
             const uint32_t string_hash = hash_content_xxh32(value_source + value_start, value_length, FNV1A_OFFSET);
             uint32_t string_slot = mix_string_hash(string_hash, value_length) & string_table_mask;
             uint32_t matched_index = 0xffffffffu;
