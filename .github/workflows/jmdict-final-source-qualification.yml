@@ -1,0 +1,110 @@
+name: JMdict combined parser qualification
+
+on:
+  push:
+    branches:
+      - research/jmdict-final-20261119-3d067
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jmdict-final-qualification-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: JMdict comparison (${{ matrix.initial-order }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        initial-order: [ABC, CBA]
+    env:
+      BASELINE_SHA: d829f5b6e6a75ee8859d38d537d224ec33c4930e
+      MANABITAN_CLANG: clang-21
+      MANABITAN_WASM_LD: wasm-ld-21
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+
+      - name: Prepare candidate dependencies
+        run: |
+          npm ci
+          npm run build:libs
+          git diff --exit-code
+
+      - name: Install pinned compiler and browser
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-21 lld-21
+          npx playwright install --with-deps chromium
+
+      # The product runtime and its focused tests have already passed the full
+      # unit suite. Verify exact identity before this separate fixed cohort.
+      - name: Confirm previously tested product sources
+        run: |
+          git fetch --depth=1 origin 97aa1167f5cbcd44e37d8cd39da48b8e693ba16b
+          git diff --exit-code 97aa1167f5cbcd44e37d8cd39da48b8e693ba16b -- \
+            ext dev/data package.json package-lock.json \
+            test/term-bank-experiments.test.js test/fixtures/key-reuse/inputs.mjs
+
+      - name: Verify and build candidate
+        run: |
+          npm run build:dictionary-wasm -- --check
+          node dev/bin/build.js --target chrome
+          node node_modules/vitest/vitest.mjs run --maxWorkers 1 test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-number-decode.test.js
+          npm run test:build
+          node dev/perf/prepare-dictionaries.js
+
+      - name: Prepare immutable baseline
+        run: |
+          git fetch --depth=1 origin "$BASELINE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/manabitan-baseline" "$BASELINE_SHA"
+
+      - name: Build baseline
+        working-directory: ${{ runner.temp }}/manabitan-baseline
+        run: |
+          npm ci
+          npm run build:libs
+          npm run build:dictionary-wasm -- --check
+          node dev/bin/build.js --target chrome
+          mkdir -p builds/e2e-dictionary-cache
+          cp "$GITHUB_WORKSPACE"/builds/e2e-dictionary-cache/*.zip builds/e2e-dictionary-cache/
+
+      - name: Compare every row and lookup byte before browser timing
+        run: |
+          for dictionary in jmdict jmnedict jitendex; do
+            node dev/perf/import-lookup-screen.js "$dictionary" --pairs 2 \
+              --baseline-root "$RUNNER_TEMP/manabitan-baseline" \
+              --source-root "$GITHUB_WORKSPACE" --flags '{}' \
+              --out "$RUNNER_TEMP/jmdict-source-parity/$dictionary.json"
+          done
+
+      - name: Run fixed source comparison and identical-code controls
+        run: |
+          node test/perf/import-source-cohort.mjs \
+            --baseline "$RUNNER_TEMP/manabitan-baseline" \
+            --candidate "$GITHUB_WORKSPACE" \
+            --dictionary jmdict --rounds 36 --warmup 2 \
+            --initial-order '${{ matrix.initial-order }}' \
+            --output "$RUNNER_TEMP/jmdict-source-evidence"
+
+      - name: Upload complete and failed observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-final-${{ matrix.initial-order }}
+          path: |
+            ${{ runner.temp }}/jmdict-source-evidence
+            ${{ runner.temp }}/jmdict-source-parity
+          if-no-files-found: warn
+          retention-days: 14
