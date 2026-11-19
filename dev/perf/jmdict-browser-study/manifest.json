@@ -1,0 +1,147 @@
+{
+    "schemaVersion": 1,
+    "study": "jmdict-browser-study-20261119-f34c9c9",
+    "branch": "perf/jmdict-browser-study-20261119-f34c9c9",
+    "workflow": ".github/workflows/jmdict-browser-study-f34c9c9.yml",
+    "node": "v22.22.0",
+    "dictionary": "jmdict",
+    "blocks": 24,
+    "warmupsPerArm": 2,
+    "measurementDeadlineMinutes": 35,
+    "observationTimeoutSeconds": 180,
+    "arms": {
+        "A": "baseline",
+        "B": "rawzip",
+        "C": "baseline",
+        "D": "prefetch"
+    },
+    "sources": {
+        "baseline": {
+            "commit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+            "tree": "841406cd33f6871ab24aee771c1a7881d9e465f0",
+            "productPaths": [],
+            "expectedInitialPrefetchFileCount": 0
+        },
+        "rawzip": {
+            "commit": "98b25cbce108b7c63ffe318f06186dadd26d476c",
+            "tree": "a885d2b04792ec33e53b5edfab492ca3128f33fd",
+            "productPaths": [
+                "ext/js/dictionary/term-bank-source-pipeline.js"
+            ],
+            "expectedInitialPrefetchFileCount": 0
+        },
+        "prefetch": {
+            "commit": "2ae43ece52ab621fa1af763bf65635f1bedc0fad",
+            "tree": "7f19cf482e7472ae5e06f499b122b222a66bfe9d",
+            "productPaths": [
+                "ext/js/dictionary/dictionary-importer.js",
+                "ext/js/dictionary/term-bank-source-pipeline.js"
+            ],
+            "expectedInitialPrefetchFileCount": 1
+        }
+    },
+    "bundle": {
+        "file": "candidates.bundle",
+        "sha256": "6e6a2a6cf5008bcda21a069008235dd562c6d6b4aac216f7aa33db715c0214fb",
+        "refs": [
+            "refs/heads/study-source/rawzip-f34c9c9",
+            "refs/heads/study-source/prefetch-f34c9c9"
+        ]
+    },
+    "sharedProductInputs": {
+        "dev/bin/build.js": "f4c661fe2cf6b70d43fa61d8dd31d7146f6ece8ae316239b7058fbb1fae542a1",
+        "dev/build-libs.js": "edd3d2794a75150665ccdebb9701cb247abc786ac369132a5f951f15bfe3ae32",
+        "dev/data/dictionary-wasm/manifest.json": "eb335cc2fd1dc880fea5e2403bbcefd47fff199681d1819b88df659ea59c46ff",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "dev/data/manifest-variants.json": "6d90489abd50d9496e106b4416e83e09b086849194b1497052996065cc8a9bbc",
+        "dev/data/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+        "dev/data/zstd-simd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+        "dev/dictionary-wasm.js": "65ffde7d98a687784b63cbad65047cb5adb53cb6789787e88f0b9b7281208d17",
+        "dev/manifest-util.js": "f473ea0dfb186d034a8e63dc42856a4d97649d190d0784f929eaa775feda9666",
+        "dev/perf/benchmark-support.js": "75c5f2f797d4dfd128630354d44fffba3fbbeaf053e6b564f4fc1a56804edb94",
+        "dev/perf/dictionary-fixtures.js": "3bf38d84f12650ee1b26fabecd6199c1f8127295353bbe1db31595c5b1b8ff55",
+        "dev/perf/host-environment.js": "0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5",
+        "dev/perf/import-benchmark.js": "bdd7af08657d421fd18d0fcd49d6c45383af559fef87fd1c3bd068aa38870d2b",
+        "ext/js/core/safe-performance.js": "492fe81d7671ba8755d2da06a56289355307d5949c9017df42156d1d0af5a6a2",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "c470f961e2b7a1e1985f458d15fffb09b97496db0313ffc561765ad5b9936bf1",
+        "test/e2e/anki-dedupe-matrix.js": "8c755e80ada4e15290e97e6cfbd70089aba45e4e677616a4725d947106b2e724",
+        "test/e2e/anki-mock-http-server.js": "bca3db882fa31f9aa4d91e4300b12f032d21ff42ceb50a9fc418dec4bce196cb",
+        "test/e2e/anki-mock-state.js": "6936a409f75b10cd5842a859fb34bb6207af42449ceade9338ee977b9e26e855",
+        "test/e2e/anki-save-destination.js": "46e0c259bf16db3195f71629f5bf1942c8b952d4887dcc821ac78d737722148a",
+        "test/e2e/anki-screenshot-ownership.js": "180acf6986ced2290837e8e7d9157146b5f1c5eff70890246591e22295e33cbc",
+        "test/e2e/chromium-launch-options.js": "a631dd35a96c7123075b3b9879bed94197275f81beb480f717a6355a2c2362e5",
+        "test/e2e/dictionary-auto-update-fixture.js": "44a4d5e8340521c2921529b5542cda7ebb7e64aca006136c9a8d80700b5a0827",
+        "test/e2e/display-history-recovery.js": "4b3af640ebd2f117a0c6458723e71e44a4df12fb4a962ba104ed8dab4d00a58e",
+        "test/e2e/firefox-extension-base-url.js": "603474b34fdcf06d7d60c46f9868cede2dfeb9273981e1d4588d45864037daf7",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/e2e/reader-finalization.js": "7f9b4b3e36d0eb64bfbca8251177c2dd31d37ad602ba929638119062ddcc1c6a",
+        "test/e2e/repeat-command.js": "4b673b9daee25f73c5b8a3cf416474655e58b732d7c316ada2ac0f3e5bce484a",
+        "test/e2e/report-tabs.js": "fce2a926396a301759875ed821794ace46bd0f3f8d0f6253d737d24675b2abfa",
+        "test/e2e/request-builder-rule-matching.js": "6da0852a97a52f2a9206c00c30d62bb251c2384dcd1394e583a6868de63531c6",
+        "test/perf/dictionaries.lock.json": "4e3e98dfd2bf06968aefaa4f72328ec3736121124e57752e374c7ee507975b13"
+    },
+    "harnessSha256": {
+        ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        ".github/workflows/jmdict-browser-study-f34c9c9.yml": "cea0810a86317a39b6957244e8507c5f13003f8186881709b36b9ca4c1dbb7bb",
+        "dev/bin/build.js": "f4c661fe2cf6b70d43fa61d8dd31d7146f6ece8ae316239b7058fbb1fae542a1",
+        "dev/build-libs.js": "edd3d2794a75150665ccdebb9701cb247abc786ac369132a5f951f15bfe3ae32",
+        "dev/data/dictionary-wasm/manifest.json": "eb335cc2fd1dc880fea5e2403bbcefd47fff199681d1819b88df659ea59c46ff",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5",
+        "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "dev/data/manifest-variants.json": "6d90489abd50d9496e106b4416e83e09b086849194b1497052996065cc8a9bbc",
+        "dev/data/zstd-dicts/jmdict.zdict": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+        "dev/data/zstd-simd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+        "dev/dictionary-wasm.js": "65ffde7d98a687784b63cbad65047cb5adb53cb6789787e88f0b9b7281208d17",
+        "dev/manifest-util.js": "f473ea0dfb186d034a8e63dc42856a4d97649d190d0784f929eaa775feda9666",
+        "dev/perf/benchmark-support.js": "75c5f2f797d4dfd128630354d44fffba3fbbeaf053e6b564f4fc1a56804edb94",
+        "dev/perf/dictionary-fixtures.js": "3bf38d84f12650ee1b26fabecd6199c1f8127295353bbe1db31595c5b1b8ff55",
+        "dev/perf/host-environment.js": "0f478d0bc49972b2ba87f299612993ffb6b69cc99d1943efc21483a21ec88ce5",
+        "dev/perf/import-benchmark.js": "bdd7af08657d421fd18d0fcd49d6c45383af559fef87fd1c3bd068aa38870d2b",
+        "dev/perf/jmdict-browser-study/README.md": "e4cf02170c40777b44e7eebecae209bea378d7f4f32e2087835126ccae5700d1",
+        "dev/perf/jmdict-browser-study/firefox-runtime.py": "94fd15681c9dfdbc260c78fc88d62363940104d5c401f0cfbedcecef341006d9",
+        "dev/perf/jmdict-browser-study/prefetch.patch": "4924ef015bb4bb57648c63119acae7f891e5e677fd96683929e082fbe6bb9138",
+        "dev/perf/jmdict-browser-study/rawzip.patch": "6014d50b50964420427fb6c6c21dfc3f2fdf6f1ca0de506a3d536e882411484a",
+        "dev/perf/jmdict-browser-study/run.py": "05f650ce277d493f6949978e8d33f5640a65c98b240699b4a38e4745a073ca1b",
+        "dev/perf/jmdict-browser-study/test_driver.py": "a83da06ae65b6873366cb213ebbe0dff98a1ce1a83e584cba81a3da7f3032955",
+        "ext/js/core/safe-performance.js": "492fe81d7671ba8755d2da06a56289355307d5949c9017df42156d1d0af5a6a2",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+        "test/chromium/extension-two-dictionary-import.e2e.js": "c470f961e2b7a1e1985f458d15fffb09b97496db0313ffc561765ad5b9936bf1",
+        "test/e2e/anki-dedupe-matrix.js": "8c755e80ada4e15290e97e6cfbd70089aba45e4e677616a4725d947106b2e724",
+        "test/e2e/anki-mock-http-server.js": "bca3db882fa31f9aa4d91e4300b12f032d21ff42ceb50a9fc418dec4bce196cb",
+        "test/e2e/anki-mock-state.js": "6936a409f75b10cd5842a859fb34bb6207af42449ceade9338ee977b9e26e855",
+        "test/e2e/anki-save-destination.js": "46e0c259bf16db3195f71629f5bf1942c8b952d4887dcc821ac78d737722148a",
+        "test/e2e/anki-screenshot-ownership.js": "180acf6986ced2290837e8e7d9157146b5f1c5eff70890246591e22295e33cbc",
+        "test/e2e/chromium-launch-options.js": "a631dd35a96c7123075b3b9879bed94197275f81beb480f717a6355a2c2362e5",
+        "test/e2e/dictionary-auto-update-fixture.js": "44a4d5e8340521c2921529b5542cda7ebb7e64aca006136c9a8d80700b5a0827",
+        "test/e2e/display-history-recovery.js": "4b3af640ebd2f117a0c6458723e71e44a4df12fb4a962ba104ed8dab4d00a58e",
+        "test/e2e/firefox-extension-base-url.js": "603474b34fdcf06d7d60c46f9868cede2dfeb9273981e1d4588d45864037daf7",
+        "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+        "test/e2e/reader-finalization.js": "7f9b4b3e36d0eb64bfbca8251177c2dd31d37ad602ba929638119062ddcc1c6a",
+        "test/e2e/repeat-command.js": "4b673b9daee25f73c5b8a3cf416474655e58b732d7c316ada2ac0f3e5bce484a",
+        "test/e2e/report-tabs.js": "fce2a926396a301759875ed821794ace46bd0f3f8d0f6253d737d24675b2abfa",
+        "test/e2e/request-builder-rule-matching.js": "6da0852a97a52f2a9206c00c30d62bb251c2384dcd1394e583a6868de63531c6",
+        "test/firefox/jmdict-import-observation.js": "e43900dec0866a3fa803a89884b89039f8a838938734d24c4bbabcbab250e115",
+        "test/firefox/jmdict-import-observation.test.js": "f541c9fbbfaad104788ce552e6c3fb76d81a6d17a731b90e451eb3d505b27a46",
+        "test/perf/dictionaries.lock.json": "4e3e98dfd2bf06968aefaa4f72328ec3736121124e57752e374c7ee507975b13"
+    },
+    "interpretation": {
+        "timingBoundary": "Browser monotonic file-input change to current-operation post-UI completion",
+        "independentCells": [
+            "chromium-forward",
+            "chromium-reverse",
+            "firefox-forward",
+            "firefox-reverse"
+        ],
+        "control": "C/A; no noise subtraction; same-source control and independent order replications required",
+        "comparisons": "B/A and D/A share baseline A within each block",
+        "bootstrap": "10000 resampled paired-ratio medians, seed20261119; descriptive only",
+        "failurePolicy": "Retain every attempted observation; no retries, tail deletion, appending, pooling, or post-hoc sample extension",
+        "memory": "No in-timing process sampler; Firefox untimed RSS snapshots and reported WASM heap maxima are not peak-memory evidence"
+    }
+}

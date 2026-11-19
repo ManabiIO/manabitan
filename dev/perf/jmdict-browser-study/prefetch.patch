@@ -1,0 +1,341 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index 26706f0..9696031 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -1535,0 +1536,12 @@ export class DictionaryImporter {
++            } else if (
++                version === 3 && enableTermEntryContentDedup &&
++                effectiveTermContentStorageMode === 'raw-bytes' && typeof Worker !== 'undefined' &&
++                (this._skipMediaImport || (!this._archiveHasImageMediaFiles(fileMap) && termArtifactManifest?.includesMediaFiles !== true))
++            ) {
++                /* eslint-disable @stylistic/semi */
++                this._throwIfCancelled()
++                initialSourcePrefetch = termBankSourcePipeline.prefetchCompressedFirst(
++                    0,
++                    archiveContent instanceof Blob ? archiveContent.size : 0,
++                )
++                /* eslint-enable @stylistic/semi */
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index 3cfc3bb..db7e348 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -615,0 +616,30 @@ export class TermBankSourcePipeline {
++    /* eslint-disable @stylistic/semi */
++    /**
++     * Starts one already-admitted compressed source during import setup. Charge
++     * any new archive materialization against the existing prefetch budget too.
++     * The pool keeps the read owned until its eventual consumer or cleanup.
++     * @param {number} startIndex
++     * @param {number} archiveMaterializationBytes
++     * @returns {{fileCount: number, estimatedBytes: number}}
++     */
++    prefetchCompressedFirst(startIndex, archiveMaterializationBytes) {
++        const none = {fileCount: 0, estimatedBytes: 0}
++        if (
++            !this._enabled || this._compressedReadPool === null ||
++            !Number.isSafeInteger(archiveMaterializationBytes) || archiveMaterializationBytes < 0 ||
++            archiveMaterializationBytes > this._prefetchMaxBytes
++        ) { return none }
++        const file = this._termFiles[startIndex]
++        if (typeof file === 'undefined') { return none }
++        const metadata = this._getCompressedSourceMetadata(file)
++        if (
++            metadata === null || metadata.uncompressedSize === 0 ||
++            Math.max(metadata.compressedSize, metadata.uncompressedSize) > this._prefetchMaxBytes - archiveMaterializationBytes
++        ) { return none }
++        // Observe speculative failure without replacing the cached rejection.
++        // The loader still validates and consumes the original result later.
++        void this._compressedReadPool.read(file).catch(() => {})
++        return {fileCount: 1, estimatedBytes: metadata.uncompressedSize}
++    }
++    /* eslint-enable @stylistic/semi */
++
+diff --git a/test/term-bank-compressed-prefetch.test.js b/test/term-bank-compressed-prefetch.test.js
+new file mode 100644
+index 0000000..c93958a
+--- /dev/null
++++ b/test/term-bank-compressed-prefetch.test.js
+@@ -0,0 +1,283 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {TextReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js'
++import {describe, expect, test, vi} from 'vitest'
++import {ZipReader} from '../ext/lib/zip.js'
++import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
++import {RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js'
++import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
++import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
++
++const MiB = 1024 * 1024
++
++/** @returns {Array<{filename: string, offset: number, compressionMethod: number, compressedSize: number, uncompressedSize: number, signature: number, getData: () => void}>} */
++function filesForPlan() {
++    return Array.from({length: 16}, (_, index) => ({
++        filename: `term_bank_${index + 1}.json`,
++        offset: index * 64,
++        compressionMethod: 8,
++        compressedSize: 4,
++        uncompressedSize: 8 * MiB,
++        signature: index,
++        getData() {},
++    }))
++}
++
++describe('first compressed source prefetch', () => {
++    test.each([4, 8])('shares only the first admitted read with its later loader at deviceMemory=%s', async (deviceMemory) => {
++        const files = filesForPlan()
++        const bytes = Uint8Array.of(1, 2, 3, 4)
++        const read = vi.fn(async () => new Uint8Array(0))
++        const readCompressed = vi.fn(async (/** @type {unknown} */ _file) => bytes)
++        const pipeline = new TermBankSourcePipeline({termFiles: files, enabled: true, deviceMemory, read, readCompressed})
++        try {
++            const plan = pipeline.createCompressedImportRunPlan(0)
++            if (plan === null) { throw new Error('Expected admitted compressed plan') }
++            expect(pipeline.prefetchCompressedFirst(0, MiB)).toEqual({fileCount: 1, estimatedBytes: 8 * MiB})
++            expect(readCompressed).toHaveBeenCalledOnce()
++            expect(readCompressed.mock.calls[0][0]).toBe(files[0])
++            expect((await plan.loaders[0]()).bytes).toBe(bytes)
++            expect(readCompressed).toHaveBeenCalledOnce()
++            expect(read).not.toHaveBeenCalled()
++            pipeline.releaseBatch(plan.files)
++            await plan.loaders[0]()
++            expect(readCompressed).toHaveBeenCalledTimes(2)
++        } finally {
++            await pipeline.dispose()
++        }
++    })
++
++    for (const deviceMemory of [4, 8]) {
++        const limit = (deviceMemory === 4 ? 24 : 96) * MiB
++        test.each([
++            {name: 'decoded bytes exactly fit', decoded: limit, compressed: 4, archive: 0, admitted: true},
++            {name: 'decoded bytes exceed cap', decoded: limit + 1, compressed: 4, archive: 0, admitted: false},
++            {name: 'compressed bytes exceed cap', decoded: 8, compressed: limit + 1, archive: 0, admitted: false},
++            {name: 'archive and source exactly fit', decoded: 8, compressed: 4, archive: limit - 8, admitted: true},
++            {name: 'archive and source exceed cap', decoded: 8, compressed: 4, archive: limit - 7, admitted: false},
++            {name: 'larger compressed input is charged', decoded: 4, compressed: 8, archive: limit - 7, admitted: false},
++        ])(`preserves the ${limit / MiB} MiB prefetch budget: $name`, async ({decoded, compressed, archive, admitted}) => {
++            const files = filesForPlan()
++            files[0].uncompressedSize = decoded
++            files[0].compressedSize = compressed
++            const readCompressed = vi.fn(async () => new Uint8Array(0))
++            const pipeline = new TermBankSourcePipeline({termFiles: files, enabled: true, deviceMemory, read: async () => new Uint8Array(0), readCompressed})
++            try {
++                expect(pipeline.prefetchCompressedFirst(0, archive)).toEqual(admitted ? {fileCount: 1, estimatedBytes: decoded} : {fileCount: 0, estimatedBytes: 0})
++                expect(readCompressed).toHaveBeenCalledTimes(admitted ? 1 : 0)
++            } finally {
++                await pipeline.dispose()
++            }
++        })
++    }
++
++    test.each([-1, Number.NaN, Infinity, 128 * MiB])('does not speculate with invalid or over-budget archive allocation: %s', async (archiveBytes) => {
++        const readCompressed = vi.fn(async () => new Uint8Array(4))
++        const pipeline = new TermBankSourcePipeline({termFiles: filesForPlan(), enabled: true, deviceMemory: 8, read: async () => new Uint8Array(0), readCompressed})
++        try {
++            expect(pipeline.prefetchCompressedFirst(0, archiveBytes)).toEqual({fileCount: 0, estimatedBytes: 0})
++            expect(readCompressed).not.toHaveBeenCalled()
++        } finally {
++            await pipeline.dispose()
++        }
++    })
++
++    test('retains disabled, unavailable, missing and invalid source admission', async () => {
++        const files = filesForPlan()
++        const readCompressed = vi.fn(async () => new Uint8Array(4))
++        const read = async () => new Uint8Array(0)
++        const disabled = new TermBankSourcePipeline({termFiles: files, enabled: false, read, readCompressed})
++        const unavailable = new TermBankSourcePipeline({termFiles: files, enabled: true, read})
++        const pipeline = new TermBankSourcePipeline({termFiles: files, enabled: true, read, readCompressed})
++        try {
++            expect(disabled.prefetchCompressedFirst(0, 0).fileCount).toBe(0)
++            expect(unavailable.prefetchCompressedFirst(0, 0).fileCount).toBe(0)
++            expect(pipeline.prefetchCompressedFirst(files.length, 0).fileCount).toBe(0)
++            files[0].compressionMethod = 12
++            expect(pipeline.prefetchCompressedFirst(0, 0).fileCount).toBe(0)
++            files[0].compressionMethod = 8
++            files[0].uncompressedSize = 0
++            expect(pipeline.prefetchCompressedFirst(0, 0).fileCount).toBe(0)
++            expect(readCompressed).not.toHaveBeenCalled()
++        } finally {
++            await Promise.all([disabled.dispose(), unavailable.dispose(), pipeline.dispose()])
++        }
++    })
++
++    test.each([new Error('raw prefetch failure'), void 0])('observes speculation while retaining the original loader rejection: %s', async (failure) => {
++        const files = filesForPlan()
++        const pipeline = new TermBankSourcePipeline({
++            termFiles: files,
++            enabled: true,
++            deviceMemory: 8,
++            read: async () => new Uint8Array(0),
++            readCompressed: async () => { throw failure },
++        })
++        /** @type {unknown[]} */
++        const unhandled = []
++        /** @param {unknown} reason */
++        const onUnhandled = (reason) => {
++            if (reason === failure) { unhandled.push(reason) }
++        }
++        process.on('unhandledRejection', onUnhandled)
++        try {
++            const plan = pipeline.createCompressedImportRunPlan(0)
++            if (plan === null) { throw new Error('Expected admitted compressed plan') }
++            expect(pipeline.prefetchCompressedFirst(0, 0).fileCount).toBe(1)
++            await new Promise((resolve) => { setImmediate(resolve) })
++            expect(unhandled).toEqual([])
++            await expect(plan.loaders[0]()).rejects.toBe(failure)
++        } finally {
++            process.off('unhandledRejection', onUnhandled)
++            await pipeline.dispose()
++        }
++    })
++})
++
++/**
++ * @param {number} [format=3]
++ * @param {boolean} [image=false]
++ * @returns {Promise<Blob>}
++ */
++async function smallArchive(format = 3, image = false) {
++    const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0})
++    const options = {useWebWorkers: false}
++    await writer.add('index.json', new TextReader(JSON.stringify({title: 'Compressed prefetch', revision: '1', format})), options)
++    for (let index = 1; index <= 4; ++index) {
++        await writer.add(`term_bank_${index}.json`, new TextReader('[]'), options)
++    }
++    if (image) { await writer.add('unused.png', new TextReader('unused'), options) }
++    return new Blob([Uint8Array.from(await writer.close())])
++}
++
++test.each(['media', 'format 1', 'workers unavailable', 'baseline storage', 'dedup disabled'])('retains lazy compressed reads for %s imports', async (mode) => {
++    const archive = await smallArchive(mode === 'format 1' ? 1 : 3, mode === 'media')
++    const rawRead = vi.spyOn(RawZipPayloadReader.prototype, 'read')
++    vi.stubGlobal('navigator', {hardwareConcurrency: 4, deviceMemory: 8})
++    vi.stubGlobal('Worker', mode === 'workers unavailable' ? void 0 : class {})
++    const failure = new Error('Stop after setup admission')
++    const db = {
++        isPrepared: () => true,
++        setImportOptimizationFlags() {},
++        setTermEntryContentDedupEnabled() {},
++        setImportDebugLogging() {},
++        dictionaryExists: async () => false,
++        addWithResult: async () => 1,
++        startBulkImport: vi.fn(async () => { throw failure }),
++        deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
++    }
++    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
++    try {
++        const result = await importer.importDictionary(
++            /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
++            archive,
++            /** @type {import('dictionary-importer').ImportDetails} */ ({
++                zipUseWebWorkers: false,
++                enableTermEntryContentDedup: mode !== 'dedup disabled',
++                termContentStorageMode: mode === 'baseline storage' ? 'baseline' : 'raw-bytes',
++            }),
++        )
++        expect(db.startBulkImport).toHaveBeenCalledOnce()
++        expect(result.result).toBeNull()
++        expect(result.errors).toContain(failure)
++        expect(rawRead).not.toHaveBeenCalled()
++    } finally {
++        vi.restoreAllMocks()
++        vi.unstubAllGlobals()
++    }
++})
++
++test.each(['setup failure', 'cancellation'])('joins early compressed prefetch before archive close after %s', async (mode) => {
++    const archive = await smallArchive()
++    const readAborted = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++    const drainRead = /** @type {PromiseWithResolvers<void>} */ (Promise.withResolvers())
++    const failure = new Error('Bulk setup failed')
++    /** @type {AbortSignal[]} */
++    const signals = []
++    /** @type {string[]} */
++    const events = []
++    let cancelled = false
++    const rawRead = vi.spyOn(RawZipPayloadReader.prototype, 'read').mockImplementation(async (_file, signal) => {
++        signals.push(signal)
++        events.push('raw-read')
++        await new Promise((resolve) => {
++            signal.addEventListener('abort', () => {
++                readAborted.resolve()
++                resolve(void 0)
++            }, {once: true})
++        })
++        await drainRead.promise
++        events.push('raw-settled')
++        throw signal.reason
++    })
++    const close = ZipReader.prototype.close
++    const closeSpy = vi.spyOn(ZipReader.prototype, 'close').mockImplementation(/** @this {import('@zip.js/zip.js').ZipReader<unknown>} */ async function closeArchive() {
++        events.push('archive-close')
++        await Reflect.apply(close, this, [])
++    })
++    vi.spyOn(parser, 'prewarmParallelTermBankParser').mockResolvedValue(false)
++    vi.stubGlobal('navigator', {hardwareConcurrency: 4, deviceMemory: 8})
++    vi.stubGlobal('Worker', class {})
++    const db = {
++        isPrepared: () => true,
++        setImportOptimizationFlags() {},
++        setTermEntryContentDedupEnabled() {},
++        setImportDebugLogging() {},
++        dictionaryExists: async () => false,
++        addWithResult: async () => 1,
++        startBulkImport: vi.fn(async () => {
++            events.push('bulk-start')
++            expect(rawRead).toHaveBeenCalledOnce()
++            if (mode === 'setup failure') { throw failure }
++            cancelled = true
++            return 'compressed-prefetch-session'
++        }),
++        finishBulkImport: vi.fn(async () => ({})),
++        abortBulkImport: vi.fn(async () => { events.push('rollback') }),
++        deleteDictionaryImportPlaceholder: vi.fn(async () => {}),
++        getLastBulkAddTermsMetrics: () => null,
++        queuePendingTermContentImportWrites: async () => {},
++        bulkAdd: vi.fn(async () => {}),
++    }
++    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => cancelled)
++    let settled = false
++    const pending = importer.importDictionary(
++        /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ (db)),
++        archive,
++        /** @type {import('dictionary-importer').ImportDetails} */ ({zipUseWebWorkers: false, enableTermEntryContentDedup: true}),
++    ).then((result) => { settled = true; return result })
++    try {
++        await Promise.race([readAborted.promise, pending.then(() => {})])
++        expect(signals).toHaveLength(1)
++        expect(signals[0].aborted).toBe(true)
++        expect(events.slice(0, 2)).toEqual(['raw-read', 'bulk-start'])
++        expect(settled).toBe(false)
++        expect(closeSpy).not.toHaveBeenCalled()
++        expect(db.abortBulkImport).not.toHaveBeenCalled()
++        drainRead.resolve()
++        const result = await pending
++        expect(result.result).toBeNull()
++        expect(result.errors.some((error) => error.message === (mode === 'setup failure' ? failure.message : 'Dictionary import was cancelled'))).toBe(true)
++        expect(db.finishBulkImport).not.toHaveBeenCalled()
++        expect(db.bulkAdd).not.toHaveBeenCalled()
++        expect(db.deleteDictionaryImportPlaceholder).toHaveBeenCalledWith(1)
++        expect(closeSpy).toHaveBeenCalledOnce()
++        expect(events.indexOf('archive-close')).toBeGreaterThan(events.indexOf('raw-settled'))
++        if (mode === 'setup failure') {
++            expect(db.abortBulkImport).not.toHaveBeenCalled()
++        } else {
++            expect(db.abortBulkImport).toHaveBeenCalledWith('compressed-prefetch-session')
++            expect(events.indexOf('rollback')).toBeGreaterThan(events.indexOf('raw-settled'))
++        }
++    } finally {
++        cancelled = true
++        drainRead.resolve()
++        await pending
++        vi.restoreAllMocks()
++        vi.unstubAllGlobals()
++    }
++})
