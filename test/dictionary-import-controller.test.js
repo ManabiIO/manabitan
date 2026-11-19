@@ -144,6 +144,25 @@ describe('Dictionary import profile visibility', () => {
             .resolves.toBeUndefined();
     });
 
+    test('verifies the profile ID captured before options refresh when profile order changes', async () => {
+        const profiles = [
+            {id: 'previous-active', options: {dictionaries: [{name: 'Jitendex', enabled: false}]}},
+            {id: 'selected', options: {dictionaries: [{name: 'Jitendex', enabled: true}]}},
+        ];
+        const emitDiagnostics = vi.fn();
+        const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
+            _settingsController: {
+                profileIndex: 0,
+                getOptionsContext: () => ({profileId: 'selected', index: 0}),
+                getOptionsFull: vi.fn().mockResolvedValue({profiles}),
+            },
+            _emitImportedDictionaryProfileEnablementDiagnostics: emitDiagnostics,
+        }));
+
+        await expect(verifyImportedDictionaryVisible.call(controller, 'Jitendex', true)).resolves.toBeUndefined();
+        expect(emitDiagnostics).toHaveBeenCalledWith('Jitendex', profiles, 1);
+    });
+
     test('accepts an enabled dictionary in the selected profile', async () => {
         const controller = /** @type {DictionaryImportController} */ (/** @type {unknown} */ ({
             _settingsController: {

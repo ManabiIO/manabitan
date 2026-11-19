@@ -2586,25 +2586,48 @@ export class DictionaryImportController {
     /**
      * @param {string} dictionaryTitle
      * @param {boolean} requireEnabledForActiveProfile
+     * @param {import('settings').Options|null} [optionsFullOverride]
+     * @param {string|null} [activeProfileIdOverride]
      * @returns {Promise<void>}
      */
-    async _verifyImportedDictionaryVisible(dictionaryTitle, requireEnabledForActiveProfile) {
+    async _verifyImportedDictionaryVisible(dictionaryTitle, requireEnabledForActiveProfile, optionsFullOverride = null, activeProfileIdOverride = null) {
         const normalizedTitle = typeof dictionaryTitle === 'string' ? dictionaryTitle : '';
         if (normalizedTitle.length === 0) {
             throw new Error('Cannot verify imported dictionary visibility without a title');
         }
-        const activeProfileIndex = this._settingsController.profileIndex;
-        const optionsFull = await this._settingsController.getOptionsFull();
-        const activeProfile = Array.isArray(optionsFull.profiles) ? optionsFull.profiles[activeProfileIndex] : void 0;
+        const activeProfileId = activeProfileIdOverride ?? this._settingsController.getOptionsContext?.()?.profileId;
+        if (typeof activeProfileId !== 'string' || activeProfileId.length === 0) {
+            throw new Error('Cannot verify imported dictionary visibility without an active profile ID');
+        }
+        let optionsFull = optionsFullOverride;
+        if (optionsFull === null) {
+            try {
+                optionsFull = await this._settingsController.getOptionsFull();
+            } catch (error) {
+                reportDiagnostics('dictionary-import-visibility-options-fetch-failed', {
+                    dictionaryTitle: normalizedTitle,
+                    activeProfileId,
+                    message: toError(error).message,
+                });
+                throw error;
+            }
+        }
+        const profiles = Array.isArray(optionsFull?.profiles) ? optionsFull.profiles : [];
+        const activeProfileIndex = profiles.findIndex((profile) => profile?.id === activeProfileId);
+        if (activeProfileIndex < 0) {
+            throw new Error(`Active profile ${activeProfileId} was not found while verifying imported dictionary ${normalizedTitle}`);
+        }
+        const activeProfile = profiles[activeProfileIndex];
         const activeProfileDictionaries = Array.isArray(activeProfile?.options?.dictionaries) ? activeProfile.options.dictionaries : [];
         const activeProfileEnabled = !requireEnabledForActiveProfile || activeProfileDictionaries.some((dictionary) => (
             dictionary.name === normalizedTitle &&
             dictionary.enabled === true
         ));
-        this._emitImportedDictionaryProfileEnablementDiagnostics(normalizedTitle, optionsFull.profiles, activeProfileIndex);
+        this._emitImportedDictionaryProfileEnablementDiagnostics(normalizedTitle, profiles, activeProfileIndex);
         if (!activeProfileEnabled) {
             reportDiagnostics('dictionary-import-active-profile-disabled', {
                 dictionaryTitle: normalizedTitle,
+                activeProfileId,
                 activeProfileIndex,
             });
             throw new Error(`Imported dictionary ${normalizedTitle} was not enabled for the active profile`);
@@ -2612,6 +2635,7 @@ export class DictionaryImportController {
         reportDiagnostics('dictionary-import-visibility-verified', {
             dictionaryTitle: normalizedTitle,
             requireEnabledForActiveProfile,
+            activeProfileId,
             activeProfileEnabled,
             backendLookupVerificationSkipped: true,
         });
@@ -3323,10 +3347,37 @@ export class DictionaryImportController {
                 });
             }
         }
+        let verificationOptionsFull = null;
+        let verificationActiveProfileId = null;
+        if (successfulFinalizations.length > 0) {
+            const activeProfileContext = this._settingsController.getOptionsContext?.();
+            verificationActiveProfileId = typeof activeProfileContext?.profileId === 'string' ? activeProfileContext.profileId : '';
+            try {
+                verificationOptionsFull = await this._settingsController.getOptionsFull();
+            } catch (error) {
+                const verificationError = toError(error);
+                for (const {importedTitle} of successfulFinalizations) {
+                    errors.push(verificationError);
+                    const importedTitleIndex = importedTitles.indexOf(importedTitle);
+                    if (importedTitleIndex >= 0) { importedTitles.splice(importedTitleIndex, 1); }
+                    reportDiagnostics('dictionary-import-batch-visibility-verification-failed', {
+                        dictionaryTitle: importedTitle,
+                        message: verificationError.message,
+                        importRunGeneration,
+                    });
+                }
+            }
+        }
         for (const {context, importedTitle} of successfulFinalizations) {
+            if (verificationOptionsFull === null) { continue; }
             const verifyStartTime = safePerformance.now();
             try {
-                await this._verifyImportedDictionaryVisible(importedTitle, context.profilesDictionarySettings === null);
+                await this._verifyImportedDictionaryVisible(
+                    importedTitle,
+                    context.profilesDictionarySettings === null,
+                    verificationOptionsFull,
+                    verificationActiveProfileId,
+                );
                 const verifyEndTime = safePerformance.now();
                 this._recordImportLocalPhase(
                     context.dictionaryTitle,
