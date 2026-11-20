@@ -1,0 +1,276 @@
+name: JMdict Linux qualification (2026-11-20)
+
+on:
+  push:
+    branches:
+      - 'perf/jmdict-qualify-20261120-ccf816-*'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-comparison:
+    name: Linux comparison (${{ matrix.dictionary }})
+    if: >-
+      github.repository == 'ManabiIO/manabitan' &&
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/heads/perf/jmdict-qualify-20261120-ccf816-')
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dictionary: jmdict
+    env:
+      PERF_BASELINE_SHA: d733d0efe53398bfc2b45985aa709ade54f5710a
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_RUN_ORDER: A1 B1 B2 A2 B3 A3 A4 B4
+      PERF_QUALIFICATION_WORKFLOW: .github/workflows/jmdict-qualification-20261120.yml
+    steps:
+      - name: Initialize evidence before source preparation
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/jmdict-qualification-evidence/$PERF_DICTIONARY"
+          mkdir -p "$evidence"
+          printf 'PERF_EVIDENCE_ROOT=%s\n' "$evidence" >> "$GITHUB_ENV"
+          printf '%s\n' "$PERF_RUN_ORDER" > "$evidence/observation-order.txt"
+          printf 'run_id=%s\nrun_attempt=%s\nref=%s\nsha=%s\ndictionary=%s\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_REF" "$GITHUB_SHA" "$PERF_DICTIONARY" \
+            > "$evidence/run-context.txt"
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify qualifier scope and unchanged measurement inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" =~ ^refs/heads/perf/jmdict-qualify-20261120-ccf816-[a-z0-9][a-z0-9-]*$ ]]
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          [[ "$PERF_BASELINE_SHA" == d733d0efe53398bfc2b45985aa709ade54f5710a ]]
+          read -r -a revision <<< "$(git rev-list --parents -n 1 HEAD)"
+          [[ "${#revision[@]}" == 2 ]]
+          candidate_source_sha="${revision[1]}"
+          [[ "$(git diff --name-only "$candidate_source_sha" HEAD)" == "$PERF_QUALIFICATION_WORKFLOW" ]]
+          git cat-file -e "${PERF_BASELINE_SHA}^{commit}"
+          git merge-base --is-ancestor "$PERF_BASELINE_SHA" "$candidate_source_sha"
+          printf '%s\n' "$GITHUB_SHA" > "$PERF_EVIDENCE_ROOT/candidate-qualification-sha.txt"
+          printf '%s\n' "$candidate_source_sha" > "$PERF_EVIDENCE_ROOT/candidate-source-sha.txt"
+          printf '%s\n' "$PERF_BASELINE_SHA" > "$PERF_EVIDENCE_ROOT/baseline-sha.txt"
+          git diff --name-status "$PERF_BASELINE_SHA" "$candidate_source_sha" > "$PERF_EVIDENCE_ROOT/product-source-diff.txt"
+          git diff "$candidate_source_sha" HEAD > "$PERF_EVIDENCE_ROOT/qualification-only.patch"
+          comparison_root=$(mktemp -d "$RUNNER_TEMP/jmdict-qualification.XXXXXX")
+          baseline="$comparison_root/baseline"
+          git worktree add --detach "$baseline" "$PERF_BASELINE_SHA"
+          printf 'PERF_BASELINE_ROOT=%s\n' "$baseline" >> "$GITHUB_ENV"
+          shared_files=(
+            package.json
+            package-lock.json
+            .github/actions/setup/action.yml
+            test/perf/dictionaries.lock.json
+            test/chromium/extension-two-dictionary-import.e2e.js
+            dev/perf/import-benchmark.js
+            dev/perf/benchmark-support.js
+            dev/perf/host-environment.js
+            dev/perf/dictionary-fixtures.js
+            dev/perf/prepare-dictionaries.js
+            ext/js/core/safe-performance.js
+          )
+          for shared_file in "${shared_files[@]}"; do
+            cmp "$shared_file" "$baseline/$shared_file"
+            sha256sum "$shared_file" "$baseline/$shared_file" >> "$PERF_EVIDENCE_ROOT/shared-inputs-sha256.txt"
+          done
+          # Retain the existing manual workflow's shared-harness overlay.
+          # The comparisons above prove these copies are byte-identical.
+          cp test/chromium/extension-two-dictionary-import.e2e.js "$baseline/test/chromium/extension-two-dictionary-import.e2e.js"
+          cp dev/perf/import-benchmark.js "$baseline/dev/perf/import-benchmark.js"
+          cp dev/perf/benchmark-support.js "$baseline/dev/perf/benchmark-support.js"
+
+      - uses: ./.github/actions/setup
+
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Prepare both release packages before timing
+        id: prepare
+        shell: bash
+        run: |
+          set -euo pipefail
+          node ./dev/perf/prepare-dictionaries.js 2>&1 | tee "$PERF_EVIDENCE_ROOT/prepare-dictionaries.log"
+          mkdir -p "$PERF_BASELINE_ROOT/builds/e2e-dictionary-cache"
+          cp builds/e2e-dictionary-cache/*.zip "$PERF_BASELINE_ROOT/builds/e2e-dictionary-cache/"
+          (
+            cd "$PERF_BASELINE_ROOT"
+            npm ci
+            npm run build:libs
+            npm run license-report:html
+            npm run build -- --target chrome
+          ) 2>&1 | tee "$PERF_EVIDENCE_ROOT/build-baseline.log"
+          npm run build -- --target chrome 2>&1 | tee "$PERF_EVIDENCE_ROOT/build-candidate.log"
+          git status --porcelain > "$PERF_EVIDENCE_ROOT/candidate-status.txt"
+          git -C "$PERF_BASELINE_ROOT" status --porcelain > "$PERF_EVIDENCE_ROOT/baseline-status-with-harness-overlay.txt"
+          node ./dev/perf/host-environment.js > "$PERF_EVIDENCE_ROOT/host-after-builds.json"
+          python3 - "$GITHUB_WORKSPACE" "$PERF_BASELINE_ROOT" "$PERF_EVIDENCE_ROOT" <<'PYTHON'
+          import hashlib, json, pathlib, subprocess, sys, zipfile
+          candidate, baseline, evidence = map(pathlib.Path, sys.argv[1:])
+          digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+          lock = json.loads((candidate / 'test/perf/dictionaries.lock.json').read_text())
+          identity = {}
+          entry_hashes = {}
+          for arm, root in (('A', baseline), ('B', candidate)):
+              package = root / 'builds/manabitan-chrome.zip'
+              with zipfile.ZipFile(package) as archive:
+                  entries = {entry.filename: hashlib.sha256(archive.read(entry)).hexdigest()
+                             for entry in archive.infolist() if not entry.is_dir()}
+              entry_hashes[arm] = entries
+              (evidence / f'{arm}-package-entry-sha256.json').write_text(json.dumps(entries, sort_keys=True, indent=2))
+              archives = {}
+              for key, fixture in lock['dictionaries'].items():
+                  archive = root / 'builds/e2e-dictionary-cache' / fixture['cacheFile']
+                  actual = {'sha256': digest(archive), 'sizeBytes': archive.stat().st_size}
+                  if actual != {'sha256': fixture['sha256'], 'sizeBytes': fixture['sizeBytes']}:
+                      raise RuntimeError(f'{arm}: pinned archive mismatch: {key}')
+                  archives[key] = actual
+              identity[arm] = {
+                  'gitSha': subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD'], text=True).strip(),
+                  'packageSha256': digest(package),
+                  'dictionaryLockSha256': digest(root / 'test/perf/dictionaries.lock.json'),
+                  'archives': archives,
+              }
+          source_sha = (evidence / 'candidate-source-sha.txt').read_text().strip()
+          identity['candidateProductSourceSha'] = source_sha
+          identity['sameSourceControl'] = source_sha == identity['A']['gitSha']
+          identity['packageEntriesEqual'] = entry_hashes['A'] == entry_hashes['B']
+          identity['changedPackageEntries'] = sorted(
+              name for name in set(entry_hashes['A']) | set(entry_hashes['B'])
+              if entry_hashes['A'].get(name) != entry_hashes['B'].get(name)
+          )
+          (evidence / 'package-identity.json').write_text(json.dumps(identity, indent=2))
+          (evidence / 'dictionaries.lock.json').write_bytes((candidate / 'test/perf/dictionaries.lock.json').read_bytes())
+          if identity['sameSourceControl'] and not identity['packageEntriesEqual']:
+              raise RuntimeError('Same-source control produced different package contents')
+          PYTHON
+
+      - name: Run all counterbalanced adjacent observations
+        id: timing
+        shell: bash
+        env:
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+          MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1'
+          MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1'
+          MANABITAN_E2E_PHASE_PROFILING: '0'
+          MANABITAN_E2E_PHASE_SCREENSHOTS: '0'
+          MANABITAN_E2E_PROCESS_SAMPLING: '0'
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_BUILD_TARGET: 'chrome'
+          MANABITAN_E2E_SKIP_BUILD: '1'
+        run: |
+          set -euo pipefail
+          candidate="$GITHUB_WORKSPACE"
+          read -r -a observations < "$PERF_EVIDENCE_ROOT/observation-order.txt"
+          [[ "${observations[*]}" == 'A1 B1 B2 A2 B3 A3 A4 B4' ]]
+          for observation in "${observations[@]}"; do
+            source_root="$candidate"
+            if [[ "$observation" == A* ]]; then source_root="$PERF_BASELINE_ROOT"; fi
+            output="$PERF_EVIDENCE_ROOT/$observation"
+            mkdir -p "$output"
+            host_before_status=0
+            host_after_status=0
+            node "$candidate/dev/perf/host-environment.js" > "$output/host-before.json" || host_before_status=$?
+            uptime > "$output/uptime-before.txt"
+            # Continue the fixed cohort after failures. Never retry an arm or
+            # discard a slow/failed observation to obtain a favorable sample.
+            set +e
+            (
+              cd "$source_root" || exit
+              node ./dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --output "$output"
+            ) 2>&1 | tee "$output/run.log"
+            pipeline_status=("${PIPESTATUS[@]}")
+            set -e
+            node "$candidate/dev/perf/host-environment.js" > "$output/host-after.json" || host_after_status=$?
+            uptime > "$output/uptime-after.txt"
+            printf '{"benchmarkExitCode":%s,"logExitCode":%s,"hostBeforeExitCode":%s,"hostAfterExitCode":%s}\n' \
+              "${pipeline_status[0]}" "${pipeline_status[1]}" "$host_before_status" "$host_after_status" \
+              > "$output/status.json"
+            printf '%s\n' "$observation" >> "$PERF_EVIDENCE_ROOT/observations-attempted.txt"
+          done
+          # The unchanged production harness validates OPFS, exact fixture
+          # identity/row count, sampled content, timing boundaries and flags.
+          # This cohort receipt additionally binds every successful observation
+          # to its pre-built package and requires all eight planned observations.
+          python3 - "$PERF_EVIDENCE_ROOT" "$PERF_DICTIONARY" <<'PYTHON'
+          import json, pathlib, sys
+          evidence = pathlib.Path(sys.argv[1])
+          dictionary = sys.argv[2]
+          planned = 'A1 B1 B2 A2 B3 A3 A4 B4'.split()
+          identity = json.loads((evidence / 'package-identity.json').read_text())
+          fixture = json.loads((evidence / 'dictionaries.lock.json').read_text())['dictionaries'][dictionary]
+          failures, observations, versions = [], [], set()
+          attempted = (evidence / 'observations-attempted.txt').read_text().split()
+          if attempted != planned:
+              failures.append('Attempted observations do not match the complete planned cohort')
+          for label in planned:
+              output = evidence / label
+              try:
+                  status = json.loads((output / 'status.json').read_text())
+                  if any(value != 0 for value in status.values()):
+                      raise RuntimeError(f'Observation failed: {status}')
+                  summary = json.loads((output / 'summary.json').read_text())
+                  runs = summary.get('runs', [])
+                  arm = identity[label[0]]
+                  if (summary.get('gitSha') != arm['gitSha'] or summary.get('dictionary') != dictionary or
+                      summary.get('fixture') != fixture or summary.get('buildTarget') != 'chrome' or
+                      summary.get('authoritativeTiming') is not True or summary.get('traceEnabled') is not False or
+                      summary.get('importFlags') is not None or len(runs) != 1 or
+                      runs[0].get('packageSha256') != arm['packageSha256']):
+                      raise RuntimeError('Observation identity differs from the planned source/package/fixture')
+                  versions.add(summary.get('browserVersion'))
+                  observations.append({'label': label, 'totalImportMs': runs[0]['totalImportMs']})
+              except Exception as error:
+                  failures.append(f'{label}: {error}')
+          if len(versions) != 1 or None in versions:
+              failures.append('Timed observations do not share one recorded Chromium version')
+          receipt = {
+              'planned': planned, 'attempted': attempted,
+              'completeSuccessfulCohort': not failures and len(observations) == len(planned),
+              'observations': observations, 'failures': failures,
+              'browserVersions': sorted(str(value) for value in versions),
+              'pairing': [['A1', 'B1'], ['B2', 'A2'], ['B3', 'A3'], ['A4', 'B4']],
+              'traceExcludedFromTiming': True,
+          }
+          (evidence / 'cohort-receipt.json').write_text(json.dumps(receipt, indent=2))
+          if failures:
+              raise SystemExit('\n'.join(failures))
+          PYTHON
+
+      - name: Capture separate candidate trace after complete timing cohort
+        if: ${{ success() && steps.timing.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$PERF_EVIDENCE_ROOT/candidate-trace"
+          mkdir -p "$output"
+          node ./dev/perf/host-environment.js > "$output/host-before.json"
+          node ./dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --runs 1 --no-build --build-target chrome --trace --output "$output" \
+            2>&1 | tee "$output/run.log"
+          node ./dev/perf/host-environment.js > "$output/host-after.json"
+
+      - name: Preserve all evidence including failed observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-qualification-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/jmdict-qualification-evidence/${{ matrix.dictionary }}
+          if-no-files-found: error
+          retention-days: 14
