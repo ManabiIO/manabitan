@@ -70,6 +70,7 @@ import {DictionaryImportSession} from './dictionary-import-session.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
+import {readDenseZipDirectory} from './dense-zip-directory.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
@@ -1054,13 +1055,14 @@ export class DictionaryImporter {
         let fileMap;
         /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>|null} */
         let archiveReader = null;
+        let archiveCatalog = 'zip.js';
         /** @type {import('dictionary-data').Index} */
         let index;
         try {
             if (archiveContent === null) {
                 throw new Error('Archive content is no longer available');
             }
-            ({fileMap, zipReader: archiveReader} = await this._getFilesFromArchive(archiveContent));
+            ({fileMap, zipReader: archiveReader, catalog: archiveCatalog} = await this._getFilesFromArchive(archiveContent));
             archiveOwnership.own(archiveReader);
             index = await this._readAndValidateIndex(fileMap);
         } catch (e) {
@@ -1075,6 +1077,7 @@ export class DictionaryImporter {
         recordPhaseTiming('archive-and-index', tArchiveStart, {
             ok: true,
             fileCount: fileMap.size,
+            catalog: archiveCatalog,
             indexVersion: typeof index.version === 'number' ? index.version : null,
             zipMaxWorkers,
             zipChunkSize,
@@ -2811,7 +2814,7 @@ export class DictionaryImporter {
 
     /**
      * @param {ArrayBuffer|Blob} archiveContent
-     * @returns {Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, zipReader: import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>}>}
+     * @returns {Promise<{fileMap: import('dictionary-importer').ArchiveFileMap, zipReader: import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>, catalog: string}>}
      * @throws {Error}
      */
     async _getFilesFromArchive(archiveContent) {
@@ -2822,9 +2825,52 @@ export class DictionaryImporter {
         );
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
         try {
+            if (archiveContent instanceof Blob) {
+                const entries = await readDenseZipDirectory(archiveContent, () => this._throwIfCancelled());
+                if (entries !== null) {
+                    const rawReader = new RawZipPayloadReader(archiveContent);
+                    const textDecoder = new TextDecoder();
+                    /** @type {Promise<Map<string, import('@zip.js/zip.js').Entry>>|null} */
+                    let fallback = null;
+                    /**
+                     * @this {import('./dense-zip-directory.js').DenseZipEntry}
+                     * @param {import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter} writer
+                     * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
+                     * @returns {Promise<unknown>}
+                     */
+                    const getData = async function getDenseEntryData(writer, options = {}) {
+                        if (
+                            this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                            this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                            (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter)
+                        ) {
+                            const signal = options.signal ?? new AbortController().signal;
+                            const bytes = await rawReader.read(this, signal);
+                            const decoded = await inflateCompressedZipMediaBatchWasm([{...this, bytes}]);
+                            signal.throwIfAborted();
+                            return writer instanceof TextWriter ? textDecoder.decode(decoded.sources[0]) : decoded.sources[0];
+                        }
+                        fallback ??= zipReader.getEntries().then((all) => new Map(all.map((entry) => [entry.filename, entry])));
+                        const entry = (await fallback).get(this.filename);
+                        if (typeof entry?.getData !== 'function') {
+                            throw new Error(`Cannot read ${this.filename}`);
+                        }
+                        return await entry.getData(writer, options);
+                    };
+                    /** @type {import('dictionary-importer').ArchiveFileMap} */
+                    const fileMap = new Map();
+                    for (const entry of entries) {
+                        if (fileMap.has(entry.filename)) {
+                            throw new Error(`Duplicate archive filename: '${entry.filename}'`);
+                        }
+                        fileMap.set(entry.filename, /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (Object.assign(entry, {getData}))));
+                    }
+                    return {fileMap, zipReader, catalog: 'dense-zip'};
+                }
+            }
             const zipEntries = await zipReader.getEntries();
             const fileMap = this._createArchiveFileMap(zipEntries);
-            return {fileMap, zipReader};
+            return {fileMap, zipReader, catalog: 'zip.js'};
         } catch (e) {
             try {
                 await zipReader.close();
