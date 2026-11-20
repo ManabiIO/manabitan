@@ -33,7 +33,7 @@ const RAW_ZIP_BATCH_MAX_GAP_BYTES = 256 * 1024;
 
 export const RAW_ZIP_BATCH_MAX_FILES = 1024;
 
-const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
+export const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}} CompressedTermBankSource */
@@ -155,7 +155,7 @@ export class RawZipPayloadReader {
      * @param {TermBankSourceFile[]} files
      * @param {AbortSignal} [signal]
      * @param {() => boolean} [isCancelled]
-     * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>, rangeReadCount: number, rangeReadBytes: number}|null>}
+     * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>, rangeReadCount: number, rangeReadBytes: number}|null>}
      */
     async readBatch(files, signal = new AbortController().signal, isCancelled = () => false) {
         if (!Array.isArray(files) || files.length === 0) { return {sources: [], rangeReadCount: 0, rangeReadBytes: 0}; }
@@ -190,7 +190,7 @@ export class RawZipPayloadReader {
         }
 
         entries.sort((a, b) => a.offset - b.offset);
-        /** @type {Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>} */
+        /** @type {Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>} */
         const result = [];
         let rangeReadCount = 0;
         let rangeReadBytes = 0;
@@ -267,6 +267,7 @@ export class RawZipPayloadReader {
                 }
                 result.push({
                     file: entry.file,
+                    archiveOffset: absoluteDataOffset,
                     bytes: Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
                     compressionMethod: entry.compressionMethod,
                     compressedSize: entry.compressedSize,

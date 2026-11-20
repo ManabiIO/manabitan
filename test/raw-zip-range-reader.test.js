@@ -15,12 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {afterAll, beforeAll, describe, expect, test} from 'vitest';
-import {openAsBlob} from 'node:fs';
-import {mkdir, mkdtemp, open} from 'node:fs/promises';
+import {afterAll, beforeAll, describe, expect, test, vi} from 'vitest';
+import {existsSync, openAsBlob} from 'node:fs';
+import {mkdir, mkdtemp, open, readFile} from 'node:fs/promises';
 import {homedir, tmpdir} from 'node:os';
 import path from 'node:path';
-import {deflateRawSync, inflateRawSync} from 'node:zlib';
+import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
+import {preparePackedSourceZipMedia} from '../ext/js/dictionary/source-zip-media-pack.js';
 import {AbortableZipReadPool, RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js';
 
@@ -207,6 +208,81 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.rangeReadCount).toBe(1);
         expect(batch?.sources.map(({filename}) => filename)).toEqual(entries.map(({file}) => file.filename));
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual(entries.map(({payload}) => payload));
+    });
+
+    test.skipIf(!existsSync(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))('projects checked stored and compressed payloads into one source span', async () => {
+        const nativeFetch = globalThis.fetch;
+        vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
+            const url = resource instanceof URL ? resource : new URL(String(resource));
+            return url.protocol === 'file:' ? new Response(await readFile(url)) : await nativeFetch(resource);
+        });
+        try {
+            const image = Uint8Array.from({length: 512}, (_, index) => index & 7);
+            const deflated = new Uint8Array(deflateRawSync(image));
+            const stored = new Uint8Array(image.length + 5);
+            stored[0] = 1;
+            const deflateHeader = new DataView(stored.buffer);
+            deflateHeader.setUint16(1, image.length, true);
+            deflateHeader.setUint16(3, image.length ^ 0xffff, true);
+            stored.set(image, 5);
+            const signature = crc32(image);
+            const row = {dictionary: 'Media ZIP test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
+            /** @type {import('dictionary-importer').ImportRequirement[]} */
+            const requests = [];
+            /** @type {BlobPart[]} */
+            const parts = [];
+            /** @type {Map<string, {offset: number, signature: number}>} */
+            const entryMap = new Map();
+            let offset = 0;
+            for (let i = 0; i < 8192; ++i) {
+                const filename = `image${i}.webp`;
+                const rawFilename = encoder.encode(filename);
+                const data = i === 0 ? deflated : stored;
+                const header = new Uint8Array(30 + rawFilename.length);
+                const view = new DataView(header.buffer);
+                view.setUint32(0, 0x04034b50, true);
+                view.setUint16(8, 8, true);
+                view.setUint16(26, rawFilename.length, true);
+                header.set(rawFilename, 30);
+                parts.push(header, data);
+                const metadata = {
+                    filename,
+                    rawFilename,
+                    compressionMethod: 8,
+                    offset,
+                    signature,
+                    compressedSize: data.length,
+                    uncompressedSize: image.length,
+                    encrypted: false,
+                };
+                entryMap.set(filename, metadata);
+                requests.push({type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row});
+                offset += header.length + data.length;
+            }
+            const archive = new TrackedBlob([...parts, padding]);
+            const files = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (entryMap));
+            const reader = new RawZipPayloadReader(archive);
+            const prepared = await preparePackedSourceZipMedia(archive, requests.reverse(), files, reader, () => {});
+            expect(prepared?.records).toHaveLength(8192);
+            expect(prepared?.blob.size).toBe(offset);
+            if (prepared === null) { throw new Error('Expected the dense source span'); }
+            const head = prepared.records[0];
+            const tail = prepared.records.at(-1);
+            if (typeof tail === 'undefined') { throw new Error('Missing the first physical image'); }
+            expect(head).toMatchObject({path: 'image8191.webp', compressionMethod: 0, packedLength: image.length});
+            expect(tail).toMatchObject({path: 'image0.webp', compressionMethod: 8, packedLength: deflated.length});
+            expect(new Uint8Array(await prepared.blob.slice(head.packedOffset, head.packedOffset + head.packedLength).arrayBuffer())).toEqual(image);
+            const deflatedBody = new Uint8Array(await prepared.blob.slice(tail.packedOffset, tail.packedOffset + tail.packedLength).arrayBuffer());
+            expect(new Uint8Array(inflateRawSync(deflatedBody))).toEqual(image);
+
+            const corrupt = entryMap.get('image0.webp');
+            if (typeof corrupt === 'undefined') { throw new Error('Missing test fixture metadata'); }
+            corrupt.signature ^= 1;
+            corrupt.signature >>>= 0;
+            await expect(preparePackedSourceZipMedia(archive, requests, files, reader, () => {})).rejects.toThrow('CRC32');
+        } finally {
+            vi.unstubAllGlobals();
+        }
     });
 
     test('validates each batched filename against its ZIP central metadata', async () => {

@@ -24,7 +24,7 @@ afterEach(() => {
     for (const connection of connections.splice(0)) { connection.close(); }
 });
 
-test.each([11, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
+test.each([12, -1])('startup refuses schema %s before old SQL or OPFS initialization', async (version) => {
     const connection = new sqlite3.oo1.DB(':memory:');
     connections.push(connection);
     connection.exec(`PRAGMA user_version = ${version}`);
@@ -49,4 +49,29 @@ test.each([11, -1])('startup refuses schema %s before old SQL or OPFS initializa
     expect(connection.selectValue('PRAGMA user_version')).toBe(version);
     expect(connection.selectValues('SELECT value FROM newer_storage')).toEqual(['preserved']);
     expect(connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'table'")).toEqual(['newer_storage']);
+});
+
+test('keeps ordinary dictionaries at schema 10 and accepts a published packed-media schema', async () => {
+    const connection = new sqlite3.oo1.DB(':memory:');
+    connections.push(connection);
+    connection.exec('PRAGMA user_version = 10');
+    connection.exec('CREATE TABLE preserved(value TEXT)');
+    connection.exec("INSERT INTO preserved VALUES ('text')");
+    const database = new DictionaryDatabase();
+    Reflect.set(database, '_db', connection);
+    await database._runSchemaMigrations();
+    expect(connection.selectValue('PRAGMA user_version')).toBe(10);
+
+    connection.exec('BEGIN');
+    connection.exec('PRAGMA user_version = 11');
+    connection.exec('ROLLBACK');
+    expect(connection.selectValue('PRAGMA user_version')).toBe(10);
+
+    connection.exec('BEGIN');
+    connection.exec('PRAGMA user_version = 11');
+    connection.exec('COMMIT');
+    expect(database._getSupportedInstalledSchemaVersion()).toBe(11);
+    await database._runSchemaMigrations();
+    expect(connection.selectValue('PRAGMA user_version')).toBe(11);
+    expect(connection.selectValues('SELECT value FROM preserved')).toEqual(['text']);
 });

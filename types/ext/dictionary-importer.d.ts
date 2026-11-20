@@ -119,6 +119,7 @@ export type Summary = {
     title: string;
     termRecordStorageName?: string;
     storageGenerationId?: string;
+    generationMedia?: import('../../ext/js/dictionary/dictionary-generation-media-store.js').GenerationMediaDescriptor;
     storageImportOperationId?: string;
     sourceTitle?: string | null;
     replacedDictionaryTitle?: string | null;

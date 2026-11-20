@@ -320,6 +320,25 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
  * @returns {Promise<{sources: Uint8Array[], inflateMs: number, compressedBytes: number, uncompressedBytes: number}>}
  */
 export async function inflateCompressedZipMediaBatchWasm(sources) {
+    return await processCompressedZipMediaBatchWasm(sources, true);
+}
+
+/**
+ * Validates all CRCs and decoded lengths without copying each decoded payload
+ * out of the WASM arena.
+ * @param {CompressedTermBankSource[]} sources
+ * @returns {Promise<void>}
+ */
+export async function validateCompressedZipMediaBatchWasm(sources) {
+    await processCompressedZipMediaBatchWasm(sources, false);
+}
+
+/**
+ * @param {CompressedTermBankSource[]} sources
+ * @param {boolean} retainDecodedSources
+ * @returns {Promise<{sources: Uint8Array[], inflateMs: number, compressedBytes: number, uncompressedBytes: number}>}
+ */
+async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources) {
     if (!Array.isArray(sources) || sources.length === 0) {
         throw new TypeError('Compressed ZIP media sources are empty');
     }
@@ -398,6 +417,9 @@ export async function inflateCompressedZipMediaBatchWasm(sources) {
     }
     if (outputLength !== uncompressedBytes) {
         throw new Error('Compressed ZIP media batch returned an invalid byte length');
+    }
+    if (!retainDecodedSources) {
+        return {sources: [], inflateMs, compressedBytes, uncompressedBytes};
     }
     const output = new Uint8Array(wasm.memory.buffer, outputPtr, outputLength);
     const decoded = sources.map((source, index) => output.slice(outputOffsets[index], outputOffsets[index] + source.uncompressedSize));

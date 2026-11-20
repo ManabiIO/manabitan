@@ -72,6 +72,9 @@ import {DictionarySourceIntegrityError} from './dictionary-source-integrity-erro
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipDirectory} from './dense-zip-directory.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
+import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
+import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
+import {startSourceZipMediaPreparation} from './source-zip-media-preparation.js';
 import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
@@ -1529,6 +1532,24 @@ export class DictionaryImporter {
         const prefetchedNoMetadataMedia = [];
         let mediaPrefetchRemainingBytes = 4 * 1024 * 1024;
         let mediaPrefetchRemainingEntries = 256;
+        /** @type {import('./dictionary-generation-media-store.js').GenerationMediaDescriptor|null} */
+        let sourceGenerationMedia = null;
+        let sourcePackedMediaEntryCount = 0;
+        let sourcePackedMediaBytes = 0;
+        let sourcePackedMediaAppendMs = 0;
+        let sourcePackedMediaParallel = false;
+        let sourcePackedMediaEarlyPayload = false;
+        /** @type {ReturnType<typeof startSourceZipMediaPreparation>} */
+        let sourceMediaPreparation = null;
+        const stagedSourceMedia = {
+            preparation: /** @type {Promise<import('./source-zip-media-preparation.js').SpeculativeSourceMedia|null>|null} */ (null),
+            write: /** @type {ReturnType<import('./dictionary-database.js').DictionaryDatabase['stageGenerationMediaPayload']>|null} */ (null),
+        };
+        const discardStagedSourceMedia = async () => {
+            await stagedSourceMedia.preparation;
+            await stagedSourceMedia.write?.discard();
+            stagedSourceMedia.write = null;
+        };
 
         try {
             // Start the bounded first read before transaction and media setup so
@@ -1609,6 +1630,36 @@ export class DictionaryImporter {
             const uniqueMediaPaths = useTermMediaRequirements ? new Set() : null;
             /** @type {import('dictionary-importer').ImportRequirement[]} */
             const deferredNoMetadataMediaRequirements = [];
+
+            const canPackSourceMedia = (
+                useTermMediaRequirements &&
+                this._skipImageMetadata &&
+                termArtifactManifest === null &&
+                !usePackedTermArtifact &&
+                !useTermArtifactFiles &&
+                !fileMap.has('styles.css') &&
+                fileMap.size >= MIN_SOURCE_ZIP_IMAGE_COUNT &&
+                archiveContent instanceof Blob &&
+                rawZipPayloadReader !== null &&
+                dictionaryDatabase.canWriteGenerationMedia()
+            );
+            if (canPackSourceMedia && archiveCatalog === 'dense-zip' && archiveContent instanceof Blob) {
+                sourceMediaPreparation = startSourceZipMediaPreparation(archiveContent, () => this._isCancelled());
+                if (sourceMediaPreparation !== null) {
+                    stagedSourceMedia.preparation = sourceMediaPreparation.result.then((prepared) => {
+                        if (prepared === null || !acceptMediaPrefetch || this._isCancelled()) { return prepared; }
+                        try {
+                            stagedSourceMedia.write = dictionaryDatabase.stageGenerationMediaPayload(prepared.blob, prepared.plan);
+                        } catch (error) {
+                            // A staging admission failure leaves the readonly
+                            // result available to the ordinary one-shot writer.
+                            this._logImport(toError(error).message);
+                        }
+                        return prepared;
+                    });
+                    void stagedSourceMedia.preparation.catch(() => {});
+                }
+            }
             const termFileProgressAllowance = bulkAddProgressAllowance * 2;
             const step4ArtifactPreloadMs = (
                 packedTermArtifactPreloadMs +
@@ -2423,19 +2474,92 @@ export class DictionaryImporter {
                 await mediaPrefetch;
                 if (mediaPrefetchFailure !== null) { throw toError(mediaPrefetchFailure); }
                 let mediaWriteMs = 0;
-                const mediaCount = await this._importDeferredMediaRequirements(
-                    deferredNoMetadataMediaRequirements,
+                const mediaProgressTotal = deferredNoMetadataMediaRequirements.length + prefetchedNoMetadataMedia.length;
+                let packedCandidate = null;
+                if (canPackSourceMedia && deferredNoMetadataMediaRequirements.length >= MIN_SOURCE_ZIP_IMAGE_COUNT &&
+                archiveContent instanceof Blob && rawZipPayloadReader !== null) {
+                    const prepared = await stagedSourceMedia.preparation;
+                    this._throwIfCancelled();
+                    if (prepared !== null) {
+                        const plan = restrictGenerationMediaIndex(prepared.plan, deferredNoMetadataMediaRequirements.map(({source}) => source.path));
+                        if (plan !== null) {
+                            packedCandidate = {...prepared, plan};
+                            sourcePackedMediaParallel = true;
+                        }
+                    }
+                    if (packedCandidate === null) {
+                        await discardStagedSourceMedia();
+                        this._throwIfCancelled();
+                        const original = await preparePackedSourceZipMedia(archiveContent, deferredNoMetadataMediaRequirements, fileMap, rawZipPayloadReader, () => this._throwIfCancelled());
+                        if (original !== null) {
+                            const {blob, records, ...metrics} = original;
+                            const plan = createGenerationMediaIndex(records, blob.size);
+                            if (plan !== null) { packedCandidate = {blob, plan, metrics}; }
+                        }
+                    }
+                }
+                sourceMediaPreparation?.cancel();
+                if (!sourcePackedMediaParallel && stagedSourceMedia.preparation !== null) {
+                    await discardStagedSourceMedia();
+                }
+                let mediaCount = 0;
+                let generationMediaPlan = packedCandidate?.plan ?? null;
+                if (packedCandidate !== null && generationMediaPlan !== null) {
+                    this._throwIfCancelled();
+                    const {blob, metrics} = packedCandidate;
+                    const recordCount = generationMediaPlan.descriptor.count;
+                    const appendStart = Date.now();
+                    if (stagedSourceMedia.write !== null) {
+                        const staged = stagedSourceMedia.write;
+                        try {
+                            await staged.seal(generationMediaPlan);
+                            sourcePackedMediaEarlyPayload = true;
+                        } catch (error) {
+                            // The source plan still contains verified bytes.
+                            // Reclaim the staging writer before retrying.
+                            await staged.discard();
+                            this._logImport(toError(error).message);
+                        }
+                        stagedSourceMedia.write = null;
+                    }
+                    if (!sourcePackedMediaEarlyPayload) {
+                        this._throwIfCancelled();
+                        if (!await dictionaryDatabase.writeGenerationMedia(blob, generationMediaPlan)) {
+                            generationMediaPlan = null;
+                            sourcePackedMediaParallel = false;
+                        }
+                    }
+                    this._throwIfCancelled();
+                    if (generationMediaPlan !== null) {
+                        sourcePackedMediaAppendMs = Math.max(0, Date.now() - appendStart);
+                        mediaWriteMs += sourcePackedMediaAppendMs;
+                        sourcePackedMediaBytes = blob.size;
+                        sourceGenerationMedia = generationMediaPlan.descriptor;
+                        mediaCount += recordCount;
+                        counts.media.total += recordCount;
+                        sourcePackedMediaEntryCount = recordCount;
+                        step4TimingBreakdown.mediaZipBatchReadMs += metrics.readMs;
+                        step4TimingBreakdown.mediaZipBatchInflateMs += metrics.validationMs;
+                        step4TimingBreakdown.mediaZipBatchCount += metrics.rangeReadCount;
+                        step4TimingBreakdown.mediaZipBatchEntryCount += recordCount;
+                        step4TimingBreakdown.mediaZipBatchRangeBytes += metrics.rangeReadBytes;
+                        step4TimingBreakdown.mediaZipBatchCompressedBytes += metrics.compressedBytes;
+                        step4TimingBreakdown.mediaZipBatchUncompressedBytes += metrics.uncompressedBytes;
+                    }
+                }
+                mediaCount += await this._importDeferredMediaRequirements(
+                    generationMediaPlan === null ? deferredNoMetadataMediaRequirements : [],
                     prefetchedNoMetadataMedia,
                     fileMap,
-                    async (media, processed, total) => {
+                    async (media, processed) => {
                         const tMediaWriteStart = Date.now();
                         await bulkAdd('media', media, {trackProgress: false});
                         const writeMs = Math.max(0, Date.now() - tMediaWriteStart);
                         mediaWriteMs += writeMs;
                         counts.media.total += media.length;
-                        this._progressData.index = mediaProgressStartIndex + deferredMediaProgressAllowance * processed / total;
+                        this._progressData.index = mediaProgressStartIndex + deferredMediaProgressAllowance * processed / mediaProgressTotal;
                         this._progress();
-                        this._logImport(`deferred media batch: processed=${processed}/${total} rows=${media.length} write=${writeMs}ms`);
+                        this._logImport(`deferred media batch: processed=${processed}/${mediaProgressTotal} rows=${media.length} write=${writeMs}ms`);
                     },
                     rawZipPayloadReader,
                     step4TimingBreakdown,
@@ -2583,6 +2707,11 @@ export class DictionaryImporter {
                 step4MediaZipBatchRangeBytes: step4TimingBreakdown.mediaZipBatchRangeBytes,
                 step4MediaZipBatchCompressedBytes: step4TimingBreakdown.mediaZipBatchCompressedBytes,
                 step4MediaZipBatchUncompressedBytes: step4TimingBreakdown.mediaZipBatchUncompressedBytes,
+                step4SourcePackedMediaEntryCount: sourcePackedMediaEntryCount,
+                step4SourcePackedMediaBytes: sourcePackedMediaBytes,
+                step4SourcePackedMediaAppendMs: sourcePackedMediaAppendMs,
+                step4SourcePackedMediaParallel: sourcePackedMediaParallel,
+                step4SourcePackedMediaEarlyPayload: sourcePackedMediaEarlyPayload,
                 step4TermFileNonParseWriteMs: Math.max(0, step4TimingBreakdown.termFileNonParseWriteMs),
                 step4ArtifactPreloadMs: Math.max(0, step4ArtifactPreloadMs),
                 step4ArtifactReadBytesMs: Math.max(0, step4ArtifactReadBytesMs),
@@ -2685,6 +2814,7 @@ export class DictionaryImporter {
             importSuccess = true;
             summaryDetails = {prefixWildcardsSupported, counts, styles, yomitanVersion, importSuccess};
             summary = this._createSummary(dictionaryTitle, version, index, summaryDetails);
+            if (sourceGenerationMedia !== null) { summary.generationMedia = sourceGenerationMedia; }
             if (sourceDictionaryTitle !== dictionaryTitle) {
                 summary.sourceTitle = sourceDictionaryTitle;
             }
@@ -2704,6 +2834,14 @@ export class DictionaryImporter {
             });
         } finally {
             acceptMediaPrefetch = false;
+            sourceMediaPreparation?.cancel();
+            if (stagedSourceMedia.preparation !== null) {
+                try {
+                    await discardStagedSourceMedia();
+                } catch (error) {
+                    importSession.recordFailure(error);
+                }
+            }
             // A failed sink can leave media decoders pending. Abort and join
             // direct reads before waiting for prefetch or closing the archive.
             await this._directZipReads?.dispose();
