@@ -62,6 +62,7 @@ describe('media headwords with omitted native byte columns', () => {
         const glossary = String.raw`["an image.png path in text", {"type":"structured-content","content":[{"tag":"a","path":"unrelated.webp","content":"link"},{"tag":"\u0069mg","pa\u0074h":"img/\u732b.webp"}]}]`
         const bytes = new TextEncoder().encode(`[["term","","","",0,${glossary},0,""]]`)
         const entry = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'}))
+        /** @type {string[]} */
         const paths = []
         await importer._readTermBankFileFast(entry, 3, 'media-fixture', false, true, true, 'raw-bytes', (_terms, requirements) => {
             for (const requirement of requirements ?? []) {
