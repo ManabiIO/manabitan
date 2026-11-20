@@ -36,7 +36,7 @@ import {
 } from './term-content-block-envelope.js';
 import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressWrappedTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
@@ -63,6 +63,10 @@ const DEFAULT_CACHE_MAX_BYTES = 48 * 1024 * 1024;
 const EARLY_SELECTION_MAX_SAMPLES = 32 * 1024;
 const EARLY_SELECTION_MAX_SPANS = 512;
 const EARLY_SELECTION_SAVINGS_MARGIN = 0.08;
+/* eslint-disable @stylistic/semi */
+const MAX_COALESCED_CONTENT_RUNS = 4096
+const MIN_CONTENT_SPANS_PER_COALESCED_RUN = 4
+/* eslint-enable @stylistic/semi */
 
 export class TermContentBlockImportSession {
     /**
@@ -623,27 +627,34 @@ export class TermContentBlockStore {
         const expectedHash1 = storedBlockView.getUint32(4, true);
         const expectedHash2 = storedBlockView.getUint32(8, true);
         const compressed = storedBlock.subarray(TERM_CONTENT_BLOCK_ENVELOPE_BYTES);
-        const [actualHash1, actualHash2] = hashTermEntryContentBytesPair(compressed);
-        if (actualHash1 !== expectedHash1 || actualHash2 !== expectedHash2) {
-            this._recordError('term-content-block-checksum-mismatch', {
-                contentDictName: context.contentDictName,
-                blockOffset: reference.blockOffset,
-                expectedHash1,
-                expectedHash2,
-                actualHash1,
-                actualHash2,
-            });
-            throw new TermContentReadError('corrupt', 'Term content block checksum does not match its stored payload');
-        }
+        /**
+         * @param {[number, number]|null} hashes
+         * @throws {TermContentReadError} If the payload differs from its stored checksum.
+         */
+        const validateEnvelope = (hashes) => {
+            const [actualHash1, actualHash2] = hashes ?? hashTermEntryContentBytesPair(compressed);
+            if (actualHash1 !== expectedHash1 || actualHash2 !== expectedHash2) {
+                this._recordError('term-content-block-checksum-mismatch', {
+                    contentDictName: context.contentDictName,
+                    blockOffset: reference.blockOffset,
+                    expectedHash1,
+                    expectedHash2,
+                    actualHash1,
+                    actualHash2,
+                });
+                throw new TermContentReadError('corrupt', 'Term content block checksum does not match its stored payload');
+            }
+        };
         /** @type {Uint8Array} */
         let block;
         try {
             // The decoder returns owned bytes that remain safe to cache.
-            block = decompressTermContentZstd(compressed, compressionDictName, {
+            block = decompressWrappedTermContentZstd(storedBlock, compressionDictName, validateEnvelope, {
                 defaultHeapSize: reference.blockUncompressedLength,
                 maxOutputSize: reference.blockUncompressedLength,
             });
         } catch (error) {
+            if (error instanceof TermContentReadError) { throw error; }
             this._recordError('term-content-block-decompress-error', {
                 ...context,
                 blockOffset: reference.blockOffset,
@@ -779,7 +790,7 @@ export class TermContentBlockStore {
     _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
         const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes, sourceOffsets);
         let packMs = safePerformance.now() - planStart;
         const referenceLayout = createTermContentReferenceLayout(
             sourceLengths.length,
@@ -803,9 +814,9 @@ export class TermContentBlockStore {
             try {
                 const operation = beginCompressWrappedTermContentZstdSpansBatch(
                     sourceBytes,
-                    sourceOffsets,
-                    sourceLengths,
-                    packed.blockStartIndexes,
+                    packed.compressionSpans?.offsets ?? sourceOffsets,
+                    packed.compressionSpans?.lengths ?? sourceLengths,
+                    packed.compressionSpans?.blockStartIndexes ?? packed.blockStartIndexes,
                     packed.packedChunkLengths,
                     compressionDictName,
                     compressionExperiments,
@@ -964,7 +975,7 @@ export class TermContentBlockStore {
         if (!force && uncompressedBytes < this._minInputBytes) { return null; }
 
         let phaseStart = safePerformance.now();
-        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes, sourceOffsets);
         const packMs = safePerformance.now() - phaseStart;
         let compressedChunks;
         let envelopeMs = 0;
@@ -972,9 +983,9 @@ export class TermContentBlockStore {
         try {
             const result = await compressWrappedTermContentZstdSpansBatch(
                 sourceBytes,
-                sourceOffsets,
-                sourceLengths,
-                packed.blockStartIndexes,
+                packed.compressionSpans?.offsets ?? sourceOffsets,
+                packed.compressionSpans?.lengths ?? sourceLengths,
+                packed.compressionSpans?.blockStartIndexes ?? packed.blockStartIndexes,
                 packed.packedChunkLengths,
                 compressionDictName,
                 compressionExperiments,
@@ -1404,41 +1415,83 @@ function packContentChunksIntoSlabs(chunks, sourceLengths, targetBytes) {
     return {packedChunks, blockStartIndexes};
 }
 
+/* eslint-disable @stylistic/semi */
 /**
  * @param {Uint32Array} sourceLengths
  * @param {number} targetBytes
- * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array}}
+ * @param {Uint32Array|null} [sourceOffsets]
+ * @returns {{packedChunkLengths: Uint32Array, blockStartIndexes: Uint32Array, compressionSpans: {offsets: Uint32Array, lengths: Uint32Array, blockStartIndexes: Uint32Array}|null}}
  * @throws {RangeError} If a planned block cannot use the 32-bit storage format.
  */
-function planContentSpansIntoSlabs(sourceLengths, targetBytes) {
+function planContentSpansIntoSlabs(sourceLengths, targetBytes, sourceOffsets = null) {
     /** @type {number[]} */
-    const packedChunkLengths = [];
+    const packedChunkLengths = []
     /** @type {number[]} */
-    const blockStartIndexes = [0];
-    let startIndex = 0;
+    const blockStartIndexes = [0]
+    // Every original span was checked before this synchronous planner. Only
+    // owned columns can retain that validation while runs are constructed;
+    // shared metadata stays on the original worker validation path.
+    const runCapacity = sourceOffsets !== null &&
+    sourceOffsets.buffer instanceof ArrayBuffer && sourceLengths.buffer instanceof ArrayBuffer ?
+        Math.min(MAX_COALESCED_CONTENT_RUNS, Math.floor(sourceLengths.length / MIN_CONTENT_SPANS_PER_COALESCED_RUN)) :
+        0
+    let runOffsets = runCapacity > 0 ? new Uint32Array(runCapacity) : null
+    let runLengths = runCapacity > 0 ? new Uint32Array(runCapacity) : null
+    /** @type {number[]|null} */
+    let runBlockStartIndexes = runCapacity > 0 ? [0] : null
+    let runCount = 0
+    let runEnd = 0
+    let startIndex = 0
     while (startIndex < sourceLengths.length) {
-        let totalBytes = 0;
-        let endIndex = startIndex;
+        const firstBlockRun = runCount
+        let totalBytes = 0
+        let endIndex = startIndex
         while (endIndex < sourceLengths.length) {
-            const nextBytes = sourceLengths[endIndex];
+            const nextBytes = sourceLengths[endIndex]
             if (totalBytes > 0 && (totalBytes + nextBytes) > targetBytes && nextBytes > 0) {
-                break;
+                break
             }
-            totalBytes += nextBytes;
-            ++endIndex;
+            totalBytes += nextBytes
+            if (runOffsets !== null && runLengths !== null && sourceOffsets !== null) {
+                const offset = sourceOffsets[endIndex]
+                if (runCount > firstBlockRun && offset === runEnd) {
+                    runLengths[runCount - 1] += nextBytes
+                } else if (runCount < runCapacity) {
+                    runOffsets[runCount] = offset
+                    runLengths[runCount] = nextBytes
+                    ++runCount
+                } else {
+                    // Fragmented input keeps the original plan. Staging is
+                    // capped at 32 KiB of columns, with no extra full-span pass.
+                    runOffsets = null
+                    runLengths = null
+                    runBlockStartIndexes = null
+                }
+                runEnd = offset + nextBytes
+            }
+            ++endIndex
         }
         if (totalBytes > 0xffffffff) {
-            throw new RangeError('Packed term content block exceeds the 32-bit storage format');
+            throw new RangeError('Packed term content block exceeds the 32-bit storage format')
         }
-        packedChunkLengths.push(totalBytes);
-        blockStartIndexes.push(endIndex);
-        startIndex = endIndex;
+        packedChunkLengths.push(totalBytes)
+        blockStartIndexes.push(endIndex)
+        runBlockStartIndexes?.push(runCount)
+        startIndex = endIndex
     }
     return {
         packedChunkLengths: Uint32Array.from(packedChunkLengths),
         blockStartIndexes: Uint32Array.from(blockStartIndexes),
-    };
+        compressionSpans: runOffsets !== null && runLengths !== null && runBlockStartIndexes !== null ?
+            {
+                offsets: runOffsets.subarray(0, runCount),
+                lengths: runLengths.subarray(0, runCount),
+                blockStartIndexes: Uint32Array.from(runBlockStartIndexes),
+            } :
+            null,
+    }
 }
+/* eslint-enable @stylistic/semi */
 
 /**
  * Re-packs a stable shared source using the exact block plan whose reference

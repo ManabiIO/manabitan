@@ -18,6 +18,15 @@ const {decode, sharedDecode} = vi.hoisted(() => ({decode: vi.fn(), sharedDecode:
 vi.mock('../ext/js/dictionary/zstd-term-content.js', async (original) => ({
     ...await original(),
     decompressTermContentZstd: decode,
+    decompressWrappedTermContentZstd: (
+        /** @type {Uint8Array} */ bytes,
+        /** @type {string|null} */ dictName,
+        /** @type {(hashes: [number, number]|null) => void} */ validateEnvelope,
+        /** @type {{defaultHeapSize?: number, maxOutputSize?: number}} */ options,
+    ) => {
+        validateEnvelope(null);
+        return decode(bytes.subarray(12), dictName, options);
+    },
 }));
 vi.mock('../ext/lib/zstd-wasm.js', async (original) => ({
     ...await original(),

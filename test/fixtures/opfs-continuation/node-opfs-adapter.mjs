@@ -6,9 +6,17 @@ import {mkdir, mkdtemp, readFile, writeFile, readdir, rm, stat, rename} from 'no
 import path from 'node:path'
 import os from 'node:os'
 
+/** @typedef {Blob|string|ArrayBuffer|ArrayBufferView} NodeOpfsWriteData */
+/** @typedef {NodeOpfsWriteData|{type: 'write', position?: number, data: NodeOpfsWriteData}} NodeOpfsWriteValue */
+/** @typedef {{seek: (offset: number) => Promise<void>, truncate: (size: number) => Promise<void>, write: (value: NodeOpfsWriteValue) => Promise<void>, close: () => Promise<void>, abort: () => Promise<void>}} NodeOpfsWritable */
+/** @typedef {{type: 'create'|'remove'|'writable'|'truncate'|'write'|'close'|'abort', name: string, size?: number, previousSize?: number, length?: number}} NodeOpfsOperation */
+/** @typedef {{beforeWrite: ((name: string, value: NodeOpfsWriteValue) => void|Promise<void>)|null, beforeGetFile: ((name: string) => void|Promise<void>)|null, beforeTruncate: ((name: string, size: number) => void|Promise<void>)|null, beforeCreateWritable: ((name: string) => void|Promise<void>)|null, afterCreateWritable: ((name: string, writable: NodeOpfsWritable) => void|Promise<void>)|null}} NodeOpfsHooks */
+
 export async function createNodeOpfs() {
     const rootPath = await mkdtemp(path.join(os.tmpdir(), 'manabitan-opfs-'))
+    /** @type {NodeOpfsOperation[]} */
     const operations = []
+    /** @type {NodeOpfsHooks} */
     const hooks = {
         beforeWrite: null,
         beforeGetFile: null,
@@ -20,12 +28,18 @@ export async function createNodeOpfs() {
     const missing = () => new DOMException('File not found', 'NotFoundError')
 
     class Directory {
+        /** @param {string} location */
         constructor(location) {
             this.location = location
             this.kind = 'directory'
             this.name = path.basename(location)
         }
 
+        /**
+         * @param {string} name
+         * @param {{create?: boolean}} [options]
+         * @returns {Promise<Directory>}
+         */
         async getDirectoryHandle(name, options = {}) {
             const location = path.join(this.location, name)
             try {
@@ -33,13 +47,18 @@ export async function createNodeOpfs() {
                     throw new DOMException('Not a directory', 'TypeMismatchError')
                 }
             } catch (error) {
-                if (error.code !== 'ENOENT') { throw error }
+                if ((/** @type {NodeJS.ErrnoException} */ (error)).code !== 'ENOENT') { throw error }
                 if (!options.create) { throw missing() }
                 await mkdir(location)
             }
             return new Directory(location)
         }
 
+        /**
+         * @param {string} name
+         * @param {{create?: boolean}} [options]
+         * @returns {Promise<Handle>}
+         */
         async getFileHandle(name, options = {}) {
             if (typeof name !== 'string' || name.includes('/') || name.includes('\\') || !name) {
                 throw new TypeError('Invalid filename')
@@ -50,7 +69,7 @@ export async function createNodeOpfs() {
                     throw new DOMException('Not a file', 'TypeMismatchError')
                 }
             } catch (error) {
-                if (error.code !== 'ENOENT') { throw error }
+                if ((/** @type {NodeJS.ErrnoException} */ (error)).code !== 'ENOENT') { throw error }
                 if (!options.create) { throw missing() }
                 await writeFile(location, new Uint8Array())
                 operations.push({type: 'create', name})
@@ -58,16 +77,24 @@ export async function createNodeOpfs() {
             return new Handle(location)
         }
 
+        /**
+         * @param {string} name
+         * @param {{recursive?: boolean}} [options]
+         */
         async removeEntry(name, options = {}) {
             operations.push({type: 'remove', name})
             try {
                 await rm(path.join(this.location, name), {recursive: options.recursive ?? false})
             } catch (error) {
-                if (error.code === 'ENOENT') { throw missing() }
+                if ((/** @type {NodeJS.ErrnoException} */ (error)).code === 'ENOENT') { throw missing() }
                 throw error
             }
         }
 
+        /**
+         * @returns {AsyncGenerator<[string, Directory|Handle]>}
+         * @yields {[string, Directory|Handle]}
+         */
         async *entries() {
             for (const entry of await readdir(this.location, {withFileTypes: true})) {
                 if (entry.name.startsWith('.temporary-')) { continue }
@@ -78,6 +105,7 @@ export async function createNodeOpfs() {
     }
 
     class Handle {
+        /** @param {string} location */
         constructor(location) {
             this.location = location
             this.kind = 'file'
@@ -89,11 +117,15 @@ export async function createNodeOpfs() {
             try {
                 return new File([await readFile(this.location)], this.name)
             } catch (error) {
-                if (error.code === 'ENOENT') { throw missing() }
+                if ((/** @type {NodeJS.ErrnoException} */ (error)).code === 'ENOENT') { throw missing() }
                 throw error
             }
         }
 
+        /**
+         * @param {{keepExistingData?: boolean}} [options]
+         * @returns {Promise<NodeOpfsWritable>}
+         */
         async createWritable({keepExistingData = false} = {}) {
             await hooks.beforeCreateWritable?.(this.name)
             operations.push({type: 'writable', name: this.name})
@@ -105,6 +137,7 @@ export async function createNodeOpfs() {
             }
             const name = this.name
             const location = this.location
+            /** @type {NodeOpfsWritable} */
             const stream = {
                 async seek(offset) {
                     check()
@@ -122,25 +155,29 @@ export async function createNodeOpfs() {
                 async write(value) {
                     check()
                     await hooks.beforeWrite?.(name, value)
-                    if (value?.type === 'write') {
-                        if (value.position !== undefined) { cursor = value.position }
-                        value = value.data
+                    if ((/** @type {{type?: string}} */ (value))?.type === 'write') {
+                        const command = /** @type {{position?: number, data: NodeOpfsWriteData}} */ (value)
+                        if (command.position !== undefined) { cursor = command.position }
+                        value = command.data
                     }
+                    /** @type {Uint8Array} */
+                    let data
                     if (value instanceof Blob) {
-                        value = new Uint8Array(await value.arrayBuffer())
+                        data = new Uint8Array(await value.arrayBuffer())
                     } else if (typeof value === 'string') {
-                        value = new TextEncoder().encode(value)
+                        data = new TextEncoder().encode(value)
                     } else if (value instanceof ArrayBuffer) {
-                        value = new Uint8Array(value)
+                        data = new Uint8Array(value)
                     } else {
-                        value = new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+                        const view = /** @type {ArrayBufferView} */ (value)
+                        data = new Uint8Array(view.buffer, view.byteOffset, view.byteLength)
                     }
-                    const next = new Uint8Array(Math.max(bytes.length, cursor + value.length))
+                    const next = new Uint8Array(Math.max(bytes.length, cursor + data.length))
                     next.set(bytes)
-                    next.set(value, cursor)
+                    next.set(data, cursor)
                     bytes = next
-                    cursor += value.length
-                    operations.push({type: 'write', name, length: value.length})
+                    cursor += data.length
+                    operations.push({type: 'write', name, length: data.length})
                 },
                 async close() {
                     check()

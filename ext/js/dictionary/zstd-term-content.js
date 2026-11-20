@@ -24,6 +24,7 @@ import {
     compressUsingDictWithPrefix,
     decompress,
     decompressUsingDict,
+    decompressUsingDictWithEnvelope,
     finishPreparedSpanCompression,
     freeCCtx,
     freeDCtx,
@@ -871,6 +872,28 @@ export function decompressTermContentZstd(content, dictName, options = {}) {
         return decompressUsingDict(dctx, content, jmdictDict, options);
     }
     return decompress(content, options);
+}
+
+/**
+ * @param {Uint8Array} content
+ * @param {string|null} dictName
+ * @param {(hashes: [number, number]|null) => void} validateEnvelope
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
+ * @returns {Uint8Array}
+ * @throws {Error} If the decoder has not been initialized.
+ */
+export function decompressWrappedTermContentZstd(content, dictName, validateEnvelope, options = {}) {
+    if (!isInitialized || dctx === null) {
+        validateEnvelope(null);
+        throw new Error('Term content zstd not initialized');
+    }
+    return decompressUsingDictWithEnvelope(
+        dctx,
+        content,
+        dictName === 'jmdict' && jmdictDict !== null ? jmdictDict : null,
+        validateEnvelope,
+        options,
+    );
 }
 
 /**

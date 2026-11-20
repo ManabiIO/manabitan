@@ -31,13 +31,14 @@ import {ZipReader, Uint8ArrayReader, TextWriter} from '@zip.js/zip.js'
 import {parseJson} from '../../ext/js/core/json.js'
 import {safePerformance} from '../../ext/js/core/safe-performance.js'
 import {loadDictionaryFixtures} from './dictionary-fixtures.js'
+import {installNodeImportWorkers} from './node-import-workers.js'
 
 /** @typedef {import('@zip.js/zip.js').Entry} ZipFile */
 /** @typedef {import('../../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} ComponentDatabase */
 /** @typedef {import('../../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk} ColumnChunk */
 /** @typedef {import('../../ext/js/dictionary/term-bank-wasm-parser.js').CompressedTermBankSource} CompressedSource */
 /** @typedef {{name: string, bytes: number, sha256: string}} FileIdentity */
-/** @typedef {{source: string, fixture: string, dictionary: string, groups: number, limitBanks: number, deviceMemory: number, hardwareConcurrency: number, verify: boolean, profile?: string}} RunOptions */
+/** @typedef {{source: string, fixture: string, dictionary: string, groups: number, limitBanks: number, deviceMemory: number, hardwareConcurrency: number, verify: boolean, nodeWorkers: boolean, profile?: string}} RunOptions */
 /** @typedef {{rows: number, sha256: string, elapsedMs: number}} RowVerification */
 /** @typedef {{componentMs: number, finalizationMs: number, cpuUserMs: number, cpuSystemMs: number, profiled: boolean, instrumentedDiagnostic: boolean}} ComponentTiming */
 /** @typedef {{rows: number, timing: ComponentTiming, verification: RowVerification|null, storedFilesSha256: string, storedFilesCanonicalSha256: string, parserTotals: Record<string, number>, sinkTotals: Record<string, number>} & Record<string, unknown>} ComponentReport */
@@ -47,6 +48,8 @@ import {loadDictionaryFixtures} from './dictionary-fixtures.js'
 
 const scriptPath = fileURLToPath(import.meta.url)
 const harnessRoot = path.resolve(path.dirname(scriptPath), '../..')
+const sourceRuntimeRoots = ['ext/js', 'ext/lib', 'dev/data/dictionary-wasm', 'dev/lib']
+const sourceProvenanceFiles = ['package.json', 'package-lock.json', 'dev/dictionary-wasm.js']
 const boundary = {
     kind: 'node-sequential-import-components',
     includes: [
@@ -79,6 +82,7 @@ const {values} = parseArgs({options: {
     'device-memory': {type: 'string', default: '8'},
     'hardware-concurrency': {type: 'string', default: '8'},
     'no-verify': {type: 'boolean', default: false},
+    'node-workers': {type: 'boolean', default: false},
     'profile': {type: 'string'},
     'profile-dir': {type: 'string'},
     'help': {type: 'boolean', default: false},
@@ -147,10 +151,10 @@ async function sourceModule(root, name) {
 }
 
 /**
- * Match the production lazy-source grouping algorithm and the high-capability
- * plain-term policy (five workers, four groups per worker, at most 24 MiB target).
- * Execution remains sequential in this harness. Explicit --groups overrides
- * only this partition count; every report records the exact bank membership.
+ * Match the production lazy-source grouping algorithm. The caller selects the
+ * group count from the production worker policy and the 24 MiB target. Worker
+ * mode checks this declaration against the actual pipeline; only sequential
+ * mode accepts an explicit --groups override. Reports retain bank membership.
  * @param {CompressedSource[]} sources
  * @param {number} requestedCount
  * @returns {CompressedSource[][]}
@@ -209,19 +213,53 @@ async function identifyFiles(root, names) {
 /**
  * @param {string} root
  * @param {string} [relative]
+ * @param {boolean} [strict]
  * @returns {Promise<FileIdentity[]>}
+ * @throws {Error} If a runtime tree contains a symlink or special file.
  */
-async function identifyTree(root, relative = '') {
+async function identifyTree(root, relative = '', strict = false) {
     const identities = []
     for (const entry of (await readdir(path.join(root, relative), {withFileTypes: true})).sort((a, b) => a.name.localeCompare(b.name))) {
         const name = path.join(relative, entry.name)
         if (entry.isDirectory()) {
-            identities.push(...await identifyTree(root, name))
+            identities.push(...await identifyTree(root, name, strict))
         } else if (entry.isFile()) {
             identities.push(...await identifyFiles(root, [name]))
+        } else if (strict) {
+            throw new Error(`Runtime tree contains a symlink or special file: ${name}`)
         }
     }
     return identities
+}
+
+/**
+ * Hash every runtime entry, including generated assets and otherwise untracked
+ * regular files. The study saves this full manifest once per source; child
+ * reports carry its canonical digest instead of repeating the complete list.
+ * @param {string} source
+ * @returns {Promise<{roots: string[], provenanceFiles: string[], files: number, bytes: number, sha256: string}>}
+ */
+async function identifyRuntimeTree(source) {
+    const files = []
+    for (const name of sourceRuntimeRoots) {
+        const entry = await lstat(path.join(source, name))
+        assert.ok(entry.isDirectory() && !entry.isSymbolicLink(), `Runtime root must be a real directory: ${name}`)
+        assert.equal(await realpath(path.join(source, name)), path.join(source, name), `Runtime root traverses a symlink: ${name}`)
+        files.push(...await identifyTree(source, name, true))
+    }
+    for (const name of sourceProvenanceFiles) {
+        const entry = await lstat(path.join(source, name))
+        assert.ok(entry.isFile() && !entry.isSymbolicLink(), `Provenance input must be a regular file: ${name}`)
+        assert.equal(await realpath(path.join(source, name)), path.join(source, name), `Provenance input traverses a symlink: ${name}`)
+        files.push(...await identifyFiles(source, [name]))
+    }
+    files.sort((a, b) => (a.name < b.name ? -1 : (a.name > b.name ? 1 : 0)))
+    const canonical = files.map(({name, bytes, sha256}) => JSON.stringify([name, bytes, sha256])).join('\n') + '\n'
+    return {roots: sourceRuntimeRoots,
+        provenanceFiles: sourceProvenanceFiles,
+        files: files.length,
+        bytes: files.reduce((total, file) => total + file.bytes, 0),
+        sha256: hash(canonical)}
 }
 
 /**
@@ -296,6 +334,7 @@ async function identifySource(source) {
             .trim().split('\n')
             .filter(Boolean),
         trackedDiffSha256: hash(execFileSync('git', ['-C', source, 'diff', 'HEAD', '--binary'], {maxBuffer: 32 * 1024 * 1024})),
+        runtimeTree: await identifyRuntimeTree(source),
         files: await identifyFiles(source, [
             'ext/js/dictionary/dictionary-database.js',
             'ext/js/dictionary/dictionary-importer.js',
@@ -367,6 +406,17 @@ async function runComponent(options) {
     const rawFinalize = /** @type {unknown} */ (Reflect.get(globalThis, Symbol.for('manabitan.perf.finalize')))
     assert.ok(typeof rawFinalize === 'undefined' || (typeof rawFinalize === 'function' && instrumentation !== null), 'A diagnostic finalizer requires the instrumentation marker')
     const source = await realpath(options.source)
+    assert.ok(!options.nodeWorkers || options.groups === 0, 'Node workers use the production planner; --groups cannot override it')
+    const workerTransport = options.nodeWorkers ? installNodeImportWorkers({source, hardwareConcurrency: options.hardwareConcurrency, deviceMemory: options.deviceMemory}) : null
+    const workerTransportSha256 = options.nodeWorkers ? hash(await readFile(new URL('node-import-workers.js', import.meta.url))) : null
+    const runBoundary = options.nodeWorkers ?
+{
+    kind: 'node-parallel-import-components',
+    includes: [...boundary.includes, 'Production parser pipeline and compression workers through Node worker_threads transport', 'Production source-consumed messages and ordered sink/source lease overlap'],
+    excludes: ['Browser worker implementation and browser scheduling', 'Real browser OPFS costs: the adapter commits Node temporary files on close', 'SQLite, journal, tags, metadata/media import, backend adoption and visible UI readiness', 'Archive directory and compressed-payload reads, main-thread module compilation, and exhaustive reopened-row validation'],
+    warning: 'Node worker component evidence only. Real production worker code executes, but this is not complete browser import latency. Internal phase counters overlap; do not add them.',
+} :
+boundary
     const fixtures = await loadDictionaryFixtures()
     const fixture = fixtures[options.dictionary]
     if (!fixture) { throw new Error(`Unknown pinned dictionary: ${options.dictionary}`) }
@@ -488,101 +538,137 @@ async function runComponent(options) {
         const parserTotals = {}
         /** @type {Record<string, number>} */
         const sinkTotals = {}
-        for (const group of groups) {
-            const groupStart = safePerformance.now()
-            const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(group, experiments)
-            const inflateMs = safePerformance.now() - groupStart
-            /** @type {ColumnChunk|null} */
-            let chunk = null
-            let copyMs = 0
-            let borrowsWorkerMemory = false
-            const parseStart = safePerformance.now()
-            await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (value) => {
-                assert.equal(chunk, null, 'Expected one chunk per native group')
-                const copyStart = safePerformance.now()
-                chunk = parser.copyWasmBackedColumnChunk(value, true)
-                borrowsWorkerMemory = value.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
-                chunk.contentBytesBuffer?.buffer === value.contentBytesBuffer.buffer
-                copyMs += safePerformance.now() - copyStart
-            }, 2048, {...parserOptions, preloadedSource})
-            const parseMs = safePerformance.now() - parseStart
-            const profile = parser.consumeLastTermBankWasmParseProfile()
-            const resultChunk = /** @type {ColumnChunk|null} */ (chunk)
-            assert.ok(resultChunk !== null || profile?.rowCount === 0, 'Parser emitted no chunk for a nonempty group')
-            if (profile !== null) {
-                Object.assign(profile, {
-                    resultCopyMs: copyMs,
-                    sourceInflateMs: preloadedSource.inflateMs,
-                    sourceCompressedBytes: preloadedSource.compressedBytes,
-                    sourceUncompressedBytes: preloadedSource.uncompressedBytes,
-                    borrowedContentResultCount: borrowsWorkerMemory ? 1 : 0,
-                })
-            }
-            const fallbackStart = safePerformance.now()
-            let workerLookupFallback = false
-            if (resultChunk !== null && !(resultChunk.preparedLookupIndexes instanceof Map)) {
-                const prepared = prepareTermLookupIndexesFromPreinternedPlan(resultChunk, null, experiments)
-                if (prepared !== null) {
-                    workerLookupFallback = true
-                    ++workerLookupFallbackGroups
-                    resultChunk.preparedLookupIndexes = prepared.indexes
-                    resultChunk.preparedLookupIndexEncodeMs = prepared.totalMs
-                    if (profile !== null) {
-                        profile.lookupIndexPrepareMs = (profile.lookupIndexPrepareMs ?? 0) + prepared.totalMs
-                        profile.lookupIndexCompactMs = prepared.compactMs
-                        profile.lookupIndexEncodeMs = (profile.lookupIndexEncodeMs ?? 0) + prepared.indexEncodeMs
-                        profile.directLookupArenaSegments = prepared.directArenaSegments
-                        profile.directLookupArenaCopiedBytesAvoided = prepared.directArenaCopiedBytesAvoided
-                        profile.lookupCompactionSourceValidationPasses = prepared.compactionSourceValidationPasses
+        if (options.nodeWorkers) {
+            const workerDatabase = database
+            const parsed = await parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(
+                sources.map((bank) => async () => ({...bank, bytes: new Uint8Array(bank.bytes)})),
+                sources.map((bank) => bank.uncompressedSize),
+                3,
+                async (resultChunk, pipelineProgress) => {
+                    const group = groups[pipelineProgress.chunkIndex - 1]
+                    assert.ok(group, 'Production group has no matching declared source group')
+                    assert.equal(pipelineProgress.chunkCount, groups.length, 'Production source grouping differs from declared plan')
+                    rows += resultChunk.rowCount
+                    assert.equal(pipelineProgress.processedRows, rows)
+                    if (groupResults.length === 0) { estimatedTotalRows = pipelineProgress.totalRows }
+                    const isFinalTermChunk = sourceRunExhaustsTermFiles && pipelineProgress.chunkIndex === pipelineProgress.chunkCount
+                    const sinkStart = safePerformance.now()
+                    await workerDatabase._bulkAddArtifactTermsChunkWithContentDedup({
+                        ...resultChunk,
+                        dictionary: index.title,
+                        dictionaryTotalRows: pipelineProgress.totalRows,
+                        isFinalTermChunk,
+                        contentDictNameList: null,
+                        uniformContentDictName: 'raw-v6',
+                    })
+                    const sinkMs = safePerformance.now() - sinkStart
+                    const sinkProfile = {...workerDatabase._lastBulkAddTermsMetrics}
+                    addNumericMetrics(sinkTotals, sinkProfile)
+                    groupResults.push({banks: group.map((bank) => bank.filename), rows: resultChunk.rowCount, sourceBytes: group.reduce((total, bank) => total + bank.uncompressedSize, 0), processedRows: rows, estimatedTotalRows, dictionaryTotalRows: pipelineProgress.totalRows, pipelineProgress, isFinalTermChunk, sinkMs, sink: sinkProfile})
+                    process.stderr.write(`Worker group ${pipelineProgress.chunkIndex}/${pipelineProgress.chunkCount}: ${resultChunk.rowCount} rows\n`)
+                },
+                parserOptions,
+            )
+            assert.ok(parsed, `Production parallel parser was not used: ${parser.consumeLastParallelParserSkipReason()}`)
+            addNumericMetrics(parserTotals, parser.consumeLastTermBankWasmParseProfile())
+            assert.equal(parserTotals.parallelGroupCount, groups.length)
+        } else {
+            for (const group of groups) {
+                const groupStart = safePerformance.now()
+                const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(group, experiments)
+                const inflateMs = safePerformance.now() - groupStart
+                /** @type {ColumnChunk|null} */
+                let chunk = null
+                let copyMs = 0
+                let borrowsWorkerMemory = false
+                const parseStart = safePerformance.now()
+                await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (value) => {
+                    assert.equal(chunk, null, 'Expected one chunk per native group')
+                    const copyStart = safePerformance.now()
+                    chunk = parser.copyWasmBackedColumnChunk(value, true)
+                    borrowsWorkerMemory = value.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                    chunk.contentBytesBuffer?.buffer === value.contentBytesBuffer.buffer
+                    copyMs += safePerformance.now() - copyStart
+                }, 2048, {...parserOptions, preloadedSource})
+                const parseMs = safePerformance.now() - parseStart
+                const profile = parser.consumeLastTermBankWasmParseProfile()
+                const resultChunk = /** @type {ColumnChunk|null} */ (chunk)
+                assert.ok(resultChunk !== null || profile?.rowCount === 0, 'Parser emitted no chunk for a nonempty group')
+                if (profile !== null) {
+                    Object.assign(profile, {
+                        resultCopyMs: copyMs,
+                        sourceInflateMs: preloadedSource.inflateMs,
+                        sourceCompressedBytes: preloadedSource.compressedBytes,
+                        sourceUncompressedBytes: preloadedSource.uncompressedBytes,
+                        borrowedContentResultCount: borrowsWorkerMemory ? 1 : 0,
+                    })
+                }
+                const fallbackStart = safePerformance.now()
+                let workerLookupFallback = false
+                if (resultChunk !== null && !(resultChunk.preparedLookupIndexes instanceof Map)) {
+                    const prepared = prepareTermLookupIndexesFromPreinternedPlan(resultChunk, null, experiments)
+                    if (prepared !== null) {
+                        workerLookupFallback = true
+                        ++workerLookupFallbackGroups
+                        resultChunk.preparedLookupIndexes = prepared.indexes
+                        resultChunk.preparedLookupIndexEncodeMs = prepared.totalMs
+                        if (profile !== null) {
+                            profile.lookupIndexPrepareMs = (profile.lookupIndexPrepareMs ?? 0) + prepared.totalMs
+                            profile.lookupIndexCompactMs = prepared.compactMs
+                            profile.lookupIndexEncodeMs = (profile.lookupIndexEncodeMs ?? 0) + prepared.indexEncodeMs
+                            profile.directLookupArenaSegments = prepared.directArenaSegments
+                            profile.directLookupArenaCopiedBytesAvoided = prepared.directArenaCopiedBytesAvoided
+                            profile.lookupCompactionSourceValidationPasses = prepared.compactionSourceValidationPasses
+                        }
                     }
                 }
-            }
-            const workerLookupFallbackMs = safePerformance.now() - fallbackStart
-            addNumericMetrics(parserTotals, profile)
-            const groupRows = resultChunk?.rowCount ?? 0
-            const groupSourceBytes = group.reduce((total, bank) => total + bank.uncompressedSize, 0)
-            // ParallelTermBankPipelineRun._runPipeline uses only the first
-            // result to estimate future rows. Preserve that hint because it
-            // controls sink preallocation and persisted-only record storage.
-            if (groupResults.length === 0) {
-                estimatedTotalRows = groupSourceBytes > 0 ?
-                    Math.max(groupRows, Math.round(groupRows * totalBytes / groupSourceBytes)) :
-                    groupRows
-            }
-            rows += groupRows
-            /** @type {number} */
-            const dictionaryTotalRows = groupResults.length + 1 === groups.length ?
-                rows :
-                Math.max(rows, estimatedTotalRows)
-            // The worker emits one chunk per group, but its local 1/1 progress
-            // is not dictionary finality. Mirror the ordered pipeline callback
-            // and the importer's independent proof that its source run is last.
-            /** @type {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} */
-            const pipelineProgress = {processedRows: rows, totalRows: dictionaryTotalRows, chunkIndex: groupResults.length + 1, chunkCount: groups.length}
-            const isFinalTermChunk = (
-                resultChunk !== null &&
-                sourceRunExhaustsTermFiles &&
-                Number.isSafeInteger(pipelineProgress.chunkIndex) && pipelineProgress.chunkIndex > 0 &&
-                Number.isSafeInteger(pipelineProgress.chunkCount) && pipelineProgress.chunkCount > 0 &&
-                pipelineProgress.chunkIndex === pipelineProgress.chunkCount
-            )
-            const sinkStart = safePerformance.now()
-            if (resultChunk !== null) {
-                const payload = {
-                    ...resultChunk,
-                    dictionary: index.title,
-                    dictionaryTotalRows,
-                    isFinalTermChunk,
-                    contentDictNameList: null,
-                    uniformContentDictName: 'raw-v6',
+                const workerLookupFallbackMs = safePerformance.now() - fallbackStart
+                addNumericMetrics(parserTotals, profile)
+                const groupRows = resultChunk?.rowCount ?? 0
+                const groupSourceBytes = group.reduce((total, bank) => total + bank.uncompressedSize, 0)
+                // ParallelTermBankPipelineRun._runPipeline uses only the first
+                // result to estimate future rows. Preserve that hint because it
+                // controls sink preallocation and persisted-only record storage.
+                if (groupResults.length === 0) {
+                    estimatedTotalRows = groupSourceBytes > 0 ?
+                        Math.max(groupRows, Math.round(groupRows * totalBytes / groupSourceBytes)) :
+                        groupRows
                 }
-                await database._bulkAddArtifactTermsChunkWithContentDedup(payload)
+                rows += groupRows
+                /** @type {number} */
+                const dictionaryTotalRows = groupResults.length + 1 === groups.length ?
+                    rows :
+                    Math.max(rows, estimatedTotalRows)
+                // The worker emits one chunk per group, but its local 1/1 progress
+                // is not dictionary finality. Mirror the ordered pipeline callback
+                // and the importer's independent proof that its source run is last.
+                /** @type {{processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}} */
+                const pipelineProgress = {processedRows: rows, totalRows: dictionaryTotalRows, chunkIndex: groupResults.length + 1, chunkCount: groups.length}
+                const isFinalTermChunk = (
+                    resultChunk !== null &&
+                    sourceRunExhaustsTermFiles &&
+                    Number.isSafeInteger(pipelineProgress.chunkIndex) && pipelineProgress.chunkIndex > 0 &&
+                    Number.isSafeInteger(pipelineProgress.chunkCount) && pipelineProgress.chunkCount > 0 &&
+                    pipelineProgress.chunkIndex === pipelineProgress.chunkCount
+                )
+                const sinkStart = safePerformance.now()
+                if (resultChunk !== null) {
+                    const payload = {
+                        ...resultChunk,
+                        dictionary: index.title,
+                        dictionaryTotalRows,
+                        isFinalTermChunk,
+                        contentDictNameList: null,
+                        uniformContentDictName: 'raw-v6',
+                    }
+                    await database._bulkAddArtifactTermsChunkWithContentDedup(payload)
+                }
+                const sinkMs = safePerformance.now() - sinkStart
+                const sinkProfile = resultChunk === null ? {} : {...database._lastBulkAddTermsMetrics}
+                addNumericMetrics(sinkTotals, sinkProfile)
+                groupResults.push({banks: group.map((bank) => bank.filename), rows: groupRows, sourceBytes: groupSourceBytes, processedRows: rows, estimatedTotalRows, dictionaryTotalRows, pipelineProgress, isFinalTermChunk, inflateMs, parseMs, copyMs, workerLookupFallback, workerLookupFallbackMs, sinkMs, elapsedMs: safePerformance.now() - groupStart, parser: profile, sink: sinkProfile})
+                process.stderr.write(`Group ${groupResults.length}/${groups.length}: ${groupRows} rows\n`)
             }
-            const sinkMs = safePerformance.now() - sinkStart
-            const sinkProfile = resultChunk === null ? {} : {...database._lastBulkAddTermsMetrics}
-            addNumericMetrics(sinkTotals, sinkProfile)
-            groupResults.push({banks: group.map((bank) => bank.filename), rows: groupRows, sourceBytes: groupSourceBytes, processedRows: rows, estimatedTotalRows, dictionaryTotalRows, pipelineProgress, isFinalTermChunk, inflateMs, parseMs, copyMs, workerLookupFallback, workerLookupFallbackMs, sinkMs, elapsedMs: safePerformance.now() - groupStart, parser: profile, sink: sinkProfile})
-            process.stderr.write(`Group ${groupResults.length}/${groups.length}: ${groupRows} rows\n`)
         }
         const finalizeStart = safePerformance.now()
         database._termContentBlockImportSession.close()
@@ -618,18 +704,20 @@ async function runComponent(options) {
         }
         report = {
             schemaVersion: 1,
-            harnessSemanticsVersion: 4,
-            boundary: instrumentation === null ? boundary : {...boundary, warning: `${boundary.warning} Instrumented diagnostic run; do not use its timings as performance evidence.`},
+            harnessSemanticsVersion: 5,
+            boundary: instrumentation === null ? runBoundary : {...runBoundary, warning: `${runBoundary.warning} Instrumented diagnostic run; do not use its timings as performance evidence.`},
             instrumentation,
             generatedAt: new Date().toISOString(),
             source: sourceIdentity,
             harnessSha256,
             adapterSha256,
+            workerTransportSha256,
+            workerTransport: workerTransport?.snapshot() ?? null,
             fixture: {...fixture, path: path.resolve(options.fixture)},
-            runtime: {node: process.version, platform: process.platform, arch: process.arch, cpus: os.cpus().length, cpuModel: os.cpus()[0]?.model, memory: process.memoryUsage(), maxRssKiB: process.resourceUsage().maxRSS},
-            policy: {...options, groupCount: groups.length, requestedGroupCount, sourceUncompressedBytes: totalBytes, sourceRun, sourceRunExhaustsTermFiles, finalTermChunkPolicy: 'Explicit source-run exhaustion plus positive safe pipeline chunk index/count equality; truncated source prefixes and empty final groups remain unmarked', estimatedTotalRows, dictionaryTotalRowsPolicy: 'Production first-group byte-weighted estimate; running row count on final group; no advance fixture row count', experiments, parserOptions, storageAdapter: 'Node temporary files, commit on close', parallelWorkers: 0, compressionWorkers: 0},
+            runtime: {node: process.version, execArgv: process.execArgv, platform: process.platform, arch: process.arch, cpus: os.cpus().length, cpuModel: os.cpus()[0]?.model, memory: process.memoryUsage(), maxRssKiB: process.resourceUsage().maxRSS},
+            policy: {...options, groupCount: groups.length, requestedGroupCount, sourceUncompressedBytes: totalBytes, sourceRun, sourceRunExhaustsTermFiles, finalTermChunkPolicy: 'Explicit source-run exhaustion plus positive safe pipeline chunk index/count equality; truncated source prefixes and empty final groups remain unmarked', estimatedTotalRows, dictionaryTotalRowsPolicy: 'Production first-group byte-weighted estimate; running row count on final group; no advance fixture row count', experiments, parserOptions, storageAdapter: 'Node temporary files, commit on close', parallelWorkers: workerTransport?.snapshot().parserWorkers ?? 0, compressionWorkers: workerTransport?.snapshot().compressionWorkers ?? 0},
             rows,
-            workerLookupFallbackGroups,
+            workerLookupFallbackGroups: options.nodeWorkers ? null : workerLookupFallbackGroups,
             timing: {componentMs, finalizationMs, cpuUserMs: cpu.user / 1000, cpuSystemMs: cpu.system / 1000, profiled: Boolean(options.profile), instrumentedDiagnostic: instrumentation !== null},
             parserTotals,
             sinkTotals,
@@ -644,9 +732,20 @@ async function runComponent(options) {
             const finalize = /** @type {(report: ComponentReport, context: {source: string, dictionaryTitle: string, rows: number, storageRootPath: string}) => Promise<unknown>} */ (rawFinalize)
             report.diagnosticResult = await finalize(report, {source, dictionaryTitle: index.title, rows, storageRootPath: env.rootPath})
         }
-        const sourceFiles = /** @type {FileIdentity[]} */ (sourceIdentity.files)
-        assert.deepEqual(await identifyFiles(source, sourceFiles.map(({name}) => name)), sourceFiles, 'Selected source or runtime asset changed during the run')
+        if (workerTransport !== null) {
+            const stats = workerTransport.snapshot()
+            assert.deepEqual(stats.errors, [], 'Production worker errors invalidate the run')
+            assert.ok(stats.parserWorkers > 0 && stats.compressionWorkers > 0, 'Production worker pools must execute')
+            assert.ok(stats.compressionJobs > 0 && stats.compressionJobs === stats.completedCompressionJobs, 'Every compression worker job must complete')
+            assert.equal(stats.sourceConsumedMessages, stats.compressionSpanJobs, 'Every worker span job must acknowledge source ownership')
+            assert.equal(workerTransportSha256, hash(await readFile(new URL('node-import-workers.js', import.meta.url))))
+        }
+        const finalSourceIdentity = await identifySource(source)
+        for (const key of ['commit', 'trackedDiffSha256', 'runtimeTree', 'files']) {
+            assert.deepEqual(finalSourceIdentity[key], sourceIdentity[key], `Selected source identity changed during the run: ${key}`)
+        }
         assert.equal(hash(await readFile(adapterPath)), adapterSha256, 'Filesystem adapter changed during the run')
+        assert.equal(hash(await readFile(scriptPath)), harnessSha256, 'Component harness changed during the run')
     } catch (error) {
         originalFailure = error
         failed = true
@@ -669,6 +768,16 @@ async function runComponent(options) {
                     if (result.status === 'rejected') { cleanupErrors.push(result.reason) }
                 }
             }
+        }
+        try {
+            if (workerTransport !== null) { await parser.disposeParallelTermBankParser() }
+        } catch (error) {
+            cleanupErrors.push(error)
+        }
+        try {
+            await workerTransport?.dispose()
+        } catch (error) {
+            cleanupErrors.push(error)
         }
         try {
             await zip.close()
@@ -729,16 +838,19 @@ Alternating isolated A/B processes:
 
 Options:
   --dictionary jmdict|jmnedict|jitendex  Select the pinned fixture (default jmdict).
-  --groups N                          Override production-style group count.
+  --groups N                          Override group count in sequential mode only.
   --limit-banks N                     Smoke test only; report marks the subset.
   --no-verify                         Skip exhaustive reopened-row/source comparison.
+  --node-workers                      Run production parser/compression workers via Node transport.
   --device-memory N                   Navigator memory hint in GiB (default 8).
   --hardware-concurrency N            Navigator CPU hint (default 8).
   --profile FILE                     CPU profile of a single component run.
   --profile-dir DIRECTORY             Per-arm profiles for paired runs.
 
-Compilation and storage preparation occur before timing. Native group execution
-and compression are sequential; store finalization occurs inside the timer.
+Main-thread compilation and storage preparation occur before timing. The default
+mode executes native groups and compression sequentially. With --node-workers,
+production workers run concurrently and their startup/module initialization can
+cross the timed boundary. Store finalization occurs inside the timer in both modes.
 All reported file paths must be new. Profiled runs are diagnostic, not timing evidence.`)
         return
     }
@@ -758,6 +870,7 @@ All reported file paths must be new. Profiled runs are diagnostic, not timing ev
         deviceMemory: integerOption(values['device-memory'], 'device-memory', 1),
         hardwareConcurrency: integerOption(values['hardware-concurrency'], 'hardware-concurrency', 1),
         verify: !values['no-verify'],
+        nodeWorkers: values['node-workers'],
         profile: values.profile ? path.resolve(values.profile) : void 0,
     }
     if (!values.baseline && !values.candidate) {
@@ -777,6 +890,7 @@ All reported file paths must be new. Profiled runs are diagnostic, not timing ev
             const runOutput = path.join(path.dirname(output), `${path.basename(output, '.json')}-${pair + 1}-${arm}.json`)
             const args = ['--source', source, '--fixture', options.fixture, '--dictionary', options.dictionary, '--output', runOutput, '--groups', String(options.groups), '--limit-banks', String(options.limitBanks), '--device-memory', String(options.deviceMemory), '--hardware-concurrency', String(options.hardwareConcurrency)]
             if (!options.verify) { args.push('--no-verify') }
+            if (options.nodeWorkers) { args.push('--node-workers') }
             if (values['profile-dir']) { args.push('--profile', path.resolve(values['profile-dir'], `${pair + 1}-${arm}.cpuprofile`)) }
             await isolatedRun(args)
             const report = /** @type {ComponentReport} */ (parseJson(await readFile(runOutput, 'utf8')))
@@ -792,7 +906,7 @@ All reported file paths must be new. Profiled runs are diagnostic, not timing ev
         }
         assert.equal(report.storedFilesCanonicalSha256, first.storedFilesCanonicalSha256, 'Persisted artifact bytes differ outside audited shard generation fields')
     }
-    await writeJson(output, {schemaVersion: 1, harnessSemanticsVersion: 4, boundary, pairs, parity: {rows: first.rows, semanticSha256: first.verification?.sha256 ?? null, storedFilesCanonicalSha256: first.storedFilesCanonicalSha256}, runs: reports.map(({pair, arm, output: filename, report}) => ({pair, arm, output: filename, timing: report.timing, storedFilesSha256: report.storedFilesSha256, storedFilesCanonicalSha256: report.storedFilesCanonicalSha256, parserTotals: report.parserTotals, sinkTotals: report.sinkTotals}))})
+    await writeJson(output, {schemaVersion: 1, harnessSemanticsVersion: 5, boundary: first.boundary, pairs, parity: {rows: first.rows, semanticSha256: first.verification?.sha256 ?? null, storedFilesCanonicalSha256: first.storedFilesCanonicalSha256}, runs: reports.map(({pair, arm, output: filename, report}) => ({pair, arm, output: filename, timing: report.timing, storedFilesSha256: report.storedFilesSha256, storedFilesCanonicalSha256: report.storedFilesCanonicalSha256, parserTotals: report.parserTotals, sinkTotals: report.sinkTotals}))})
     console.log(`Component comparison and exhaustive parity: ${output}`)
 }
 
