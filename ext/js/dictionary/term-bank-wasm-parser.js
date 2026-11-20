@@ -2701,11 +2701,13 @@ class ParallelTermBankPipelineRun {
         this._version = version;
         /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
+        const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
         this._options = {
             ...options,
             ...snapshotTermBankExperiments(options),
-            ownContentBytes: options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES,
+            ownContentBytes: largeProjectedImport,
+            experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true || largeProjectedImport,
         };
         /** @type {() => boolean} */
         this._shouldCancel = shouldCancel;
