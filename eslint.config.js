@@ -48,6 +48,7 @@ const manabitanHeaderFiles = [
     'ext/js/comm/dictionary-import-owner-client.js',
     'ext/js/dictionary/dictionary-zip-read-scope.js',
     'ext/js/dictionary/dense-zip-directory.js',
+    'ext/js/dictionary/dictionary-image-references.js',
     'ext/js/app/reader-lookup-bridge.js',
     'ext/js/app/reader-lookup-integration.js',
     'dev/lib/zstd-simd-module.d.ts',
