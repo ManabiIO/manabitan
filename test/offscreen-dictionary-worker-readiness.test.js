@@ -96,7 +96,7 @@ test.each(['none', 'database', 'translator'])('concurrent cold requests await co
     expect(postMessage).toHaveBeenCalledWith({id: 4, result: {dictionaryEntries: [], originalTextLength: 0}});
 });
 
-test.each(['resume', 'databaseRefreshOffscreen', 'translatorPrepareOffscreen'])('translator preparation failure during %s remains retryable', async (action) => {
+test.each(['resume', 'databaseRefreshOffscreen'])('translator preparation failure during %s remains retryable', async (action) => {
     vi.stubGlobal('self', {addEventListener: vi.fn(), postMessage: vi.fn()});
     const {OffscreenDictionaryWorkerHandler} = await import('../ext/js/background/offscreen-dictionary-worker.js');
     const worker = new OffscreenDictionaryWorkerHandler();
@@ -123,5 +123,5 @@ test.each(['resume', 'databaseRefreshOffscreen', 'translatorPrepareOffscreen'])(
     expect(translator.prepare).toHaveBeenCalledTimes(3);
     await worker._ensureDatabasePrepared();
     expect(translator.prepare).toHaveBeenCalledTimes(3);
-    expect(close).toHaveBeenCalledTimes(action === 'translatorPrepareOffscreen' ? 0 : 1);
+    expect(close).toHaveBeenCalledOnce();
 });

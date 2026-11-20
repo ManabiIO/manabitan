@@ -676,10 +676,6 @@ export class OffscreenDictionaryWorkerHandler {
                 const media = await this._dictionaryDatabase.getMedia(targets);
                 return media.map((m) => ({...m, content: arrayBufferToBase64(m.content)}));
             }
-            case 'translatorPrepareOffscreen':
-                this._databaseReady = false;
-                await this._ensureDatabasePrepared();
-                return;
             case 'findKanjiOffscreen': {
                 await this._ensureDatabasePrepared();
                 const options = /** @type {import('offscreen').FindKanjiOptionsOffscreen} */ (params.options);

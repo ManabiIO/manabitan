@@ -134,10 +134,6 @@ type ApiSurface = {
         };
         return: DictionaryDatabase.Media<string>[];
     };
-    translatorPrepareOffscreen: {
-        params: void;
-        return: void;
-    };
     findKanjiOffscreen: {
         params: {
             text: string;
