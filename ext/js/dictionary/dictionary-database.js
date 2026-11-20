@@ -1600,18 +1600,19 @@ export class DictionaryDatabase {
                     });
                     const tCommitStart = safePerformance.now();
                     db.exec('COMMIT');
-                    commitMs = safePerformance.now() - tCommitStart;
-                    this._bulkImportTransactionOpen = false;
                     sqlitePublished = true;
+                    this._bulkImportTransactionOpen = false;
+                    // The durable receipt now owns recovery. Detach the live
+                    // rollback journal before any fallible housekeeping.
+                    this._bulkImportJournalRecord = null;
+                    this._importJournalRecoveryPending = true;
+                    commitMs = safePerformance.now() - tCommitStart;
                     if (publication !== null) {
                         this._termRecordGenerationByStorage.set(this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title), sessionId);
                     }
-                    // SQLite now owns the published state. A failed journal
-                    // deletion must not let close() roll the committed OPFS
-                    // data back in this process.
-                    this._bulkImportJournalRecord = null;
                     try {
                         await this._importJournal.clear();
+                        this._importJournalRecoveryPending = false;
                         this._deleteImportPublicationMarkerBestEffort(sessionId);
                     } catch (error) {
                         this._importJournalRecoveryPending = true;
