@@ -651,6 +651,34 @@ describe('actual parser worker flag propagation', () => {
 })
 
 
+describe('structured bank capacity', () => {
+    const glossary = [{type: 'structured-content', content: {tag: 'div', content: 'x'.repeat(450)}}]
+    const structuredRow = JSON.stringify(row('dense', glossary)).replace('"type":"structured-content"', '"type": "structured-content"')
+    const sparseBank = ('[' + structuredRow + ']').padEnd(1024 * 1024, ' ')
+
+    test('retains the smaller metadata slab for small structured banks', async () => {
+        const {rows, profile} = await parse(new Array(4).fill(sparseBank), {}, true)
+        expect(rows).toHaveLength(4)
+        expect(profile.fusedParseAttempts).toBe(1)
+        expect(profile.fusedParseFallbacks).toBe(0)
+        expect(profile.metaCapacity).toBe(10_000)
+    })
+
+    test('keeps normal capacity for a dense structured bank in a mixed group', async () => {
+        const denseBank = '[' + new Array(10_000).fill(structuredRow).join(',') + ']'
+        expect(denseBank.length).toBeGreaterThan(5 * 1024 * 1024)
+        const banks = [sparseBank, sparseBank, denseBank, sparseBank]
+        const candidate = await parse(banks, {}, true)
+        const fallback = await parse(banks, {experimentalSkipFusedParse: true}, true)
+        expect(candidate.rows).toHaveLength(10_003)
+        expect(candidate.profile.fusedParseAttempts).toBe(1)
+        expect(candidate.profile.fusedParseFallbacks).toBe(0)
+        expect(candidate.profile.metaCapacity).toBe(40_000)
+        expect(candidate.rows).toEqual(fallback.rows)
+    })
+})
+
+
 describe('full-buffer inflation', () => {
     test.each([false, true])('preserves exact keys, content, hints and hashes with spans=%s', async (experimentalTermBankSpans) => {
         const sources = [JSON.stringify([row('日本語', [{type: 'structured-content', content: {tag: 'div', content: 'long'.repeat(4096)}}])]), JSON.stringify([row('tail'), row('duplicate')])]
