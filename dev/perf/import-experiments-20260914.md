@@ -231,3 +231,30 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-20 native configuration diagnostic
+
+A separate unqualified diagnostic is prepared in
+`dev/perf/jmdict-native-config-study/README.md` on branch
+`perf/jmdict-native-config-study-20261120-f34c9c9`. It compares baseline
+`bde55dfbee1451edc32051f8bf51e8a870d5c72c` in A/C against native configuration
+snapshot candidate `19b13a550d9b7f2a53f37d74aa36b2ee9c3e7472` in B/D.
+C/A and D/B remain separate same-source controls; B/A and D/A remain separate
+candidate comparisons.
+
+The fixed native component screen was inconclusive: apparent candidate changes
+(-6.07% and -4.53%) overlap unchanged-source movement (-5.11% and +1.15%), and
+both candidate descriptive intervals cross zero. All 104 output/work/identity
+oracles passed. This is not a passed performance gate. Eleven eliminated repeated
+hot-loop configuration loads and 166 focused passing tests motivate one fixed
+browser-engine/whole-import diagnostic; no component regression was established.
+The source, timing boundary and sample plan were not adapted to that result.
+
+The separate browser protocol fixes four Linux browser/order cells, each with
+24 blocks, 96 measured observations and eight retained warmups. It reuses the
+exact current Chromium binary and official Firefox artifact from PR770. Every
+attempt, failure and tail is retained, without retries, pooling or extensions.
+Only the packaged canonical scanner WASM may differ; the parser module, build
+recipes and product policies remain unchanged. The source bundle and full patch
+preserve the C, generated manifest/WASM and direct ABI tests. Browser outcomes are
+pending; no product adoption is authorized or implied by this diagnostic.
