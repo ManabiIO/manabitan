@@ -1,0 +1,315 @@
+{
+  "recordedAt": "2026-11-19T23:39:41.773655+00:00",
+  "status": "all-local-gates-passed-browser-qualification-pending",
+  "source": {
+    "commit": "52a0108053837ff7a504c256606570e397ab93b0",
+    "tree": "92b35a642477e5a8161298e8c2e5d1881430508a",
+    "baseCommit": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "branch": "perf/jmdict-overlap-task-turn-20261119-f34c9c9",
+    "changedFiles": [
+      "ext/js/dictionary/dictionary-importer.js",
+      "test/dictionary-importer-task-turn.test.js"
+    ],
+    "productFiles": [
+      "ext/js/dictionary/dictionary-importer.js"
+    ],
+    "sha256": {
+      "ext/js/dictionary/dictionary-importer.js": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+      "test/dictionary-importer-task-turn.test.js": "4baa6e531290192f17a41e6933964c558db98984580a3e25c5a8e77f5968307f"
+    }
+  },
+  "node": "v24.22.3",
+  "checks": [
+    {
+      "command": [
+        "node",
+        "--max-old-space-size=1536",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--maxWorkers",
+        "1",
+        "test/dictionary-importer-task-turn.test.js",
+        "test/dictionary-importer-source-cancellation.test.js",
+        "test/dictionary-import-ownership.test.js",
+        "test/dictionary-importer-direct-read-cancellation.test.js",
+        "test/dictionary-importer-progress.test.js",
+        "test/dictionary-importer-source-row-contract.test.js",
+        "test/term-bank-wasm-parser.test.js"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+      "startedAt": "2026-11-19T23:26:08.857068+00:00",
+      "status": "completed",
+      "output": "focused-qualified.log",
+      "completedAt": "2026-11-19T23:26:15.594156+00:00",
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "ext/js/dictionary/dictionary-importer.js",
+        "test/dictionary-importer-task-turn.test.js"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+      "startedAt": "2026-11-19T23:26:15.595226+00:00",
+      "status": "completed",
+      "output": "eslint-qualified.log",
+      "completedAt": "2026-11-19T23:26:31.891638+00:00",
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "--max-old-space-size=2048",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "jsconfig.json"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+      "startedAt": "2026-11-19T23:26:31.891922+00:00",
+      "status": "completed",
+      "output": "main-tsc-qualified.log",
+      "completedAt": "2026-11-19T23:26:44.670638+00:00",
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "node",
+        "--max-old-space-size=2048",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+      "startedAt": "2026-11-19T23:26:44.673621+00:00",
+      "status": "completed",
+      "output": "test-tsc-qualified.log",
+      "completedAt": "2026-11-19T23:27:14.585870+00:00",
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "test:build"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+      "environmentOverrides": {
+        "NODE_OPTIONS": "--max-old-space-size=2048",
+        "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+        "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+        "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+      },
+      "pathPrepend": [
+        "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin",
+        "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin"
+      ],
+      "startedAt": "2026-11-19T23:28:03.130725+00:00",
+      "status": "completed",
+      "output": "build.log",
+      "completedAt": "2026-11-19T23:28:04.250638+00:00",
+      "exitCode": 0
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=1"
+      ],
+      "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+      "environmentOverrides": {
+        "NODE_OPTIONS": "--max-old-space-size=2048",
+        "MANABITAN_CLANG": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/clang-21",
+        "MANABITAN_WASM_LD": "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin/wasm-ld-21",
+        "LD_LIBRARY_PATH": "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/x86_64-linux-gnu"
+      },
+      "pathPrepend": [
+        "/workspace/scratch/f34c9c9fae89/llvm21/usr/bin",
+        "/workspace/scratch/f34c9c9fae89/llvm21/usr/lib/llvm-21/bin"
+      ],
+      "sourceCommit": "52a0108053837ff7a504c256606570e397ab93b0",
+      "startedAt": "2026-11-19T23:31:20.537226+00:00",
+      "status": "completed",
+      "output": "full-unit.log",
+      "completedAt": "2026-11-19T23:39:06.548580+00:00",
+      "exitCode": 0
+    }
+  ],
+  "focusedTests": {
+    "files": 7,
+    "passed": 331,
+    "newCases": 17
+  },
+  "mutationChecks": {
+    "candidateRestored": true,
+    "candidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+    "checks": [
+      {
+        "purpose": "regression sensitivity; not performance evidence",
+        "mutation": "baseline-late-turn",
+        "command": [
+          "node",
+          "--max-old-space-size=1536",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--maxWorkers",
+          "1",
+          "test/dictionary-importer-task-turn.test.js",
+          "-t",
+          "overlaps the turn with an asynchronous sink"
+        ],
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+        "candidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+        "mutatedSourceSha256": "56ee76fcfc48a23bcd848dae1de1123d8eea42d22c721db195b4c2c3f99cdad7",
+        "expectedExitCode": 1,
+        "startedAt": "2026-11-19T23:27:32.406615+00:00",
+        "status": "completed",
+        "output": "baseline-late-turn.log",
+        "completedAt": "2026-11-19T23:27:34.126236+00:00",
+        "exitCode": 1,
+        "expectedAssertionFailureObserved": true
+      },
+      {
+        "purpose": "regression sensitivity; not performance evidence",
+        "mutation": "missing-per-chunk-turn",
+        "command": [
+          "node",
+          "--max-old-space-size=1536",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--maxWorkers",
+          "1",
+          "test/dictionary-importer-task-turn.test.js",
+          "-t",
+          "ready sinks cannot drain"
+        ],
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+        "candidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+        "mutatedSourceSha256": "cd01f24055b0bea1ba3fde51748021fe6e8aa72fc167b3ec978947d3216c5cff",
+        "expectedExitCode": 1,
+        "startedAt": "2026-11-19T23:27:34.128094+00:00",
+        "status": "completed",
+        "output": "missing-per-chunk-turn.log",
+        "completedAt": "2026-11-19T23:27:35.349760+00:00",
+        "exitCode": 1,
+        "expectedAssertionFailureObserved": true
+      },
+      {
+        "purpose": "regression sensitivity; not performance evidence",
+        "mutation": "missing-success-terminal",
+        "command": [
+          "node",
+          "--max-old-space-size=1536",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--maxWorkers",
+          "1",
+          "test/dictionary-importer-task-turn.test.js",
+          "-t",
+          "retains a terminal cancellation opportunity"
+        ],
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+        "candidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+        "mutatedSourceSha256": "fd6cf4f9fcfce1b23c01584319207a720afabb080bea3d9a17a0bcd26e40bfb8",
+        "expectedExitCode": 1,
+        "startedAt": "2026-11-19T23:27:35.351469+00:00",
+        "status": "completed",
+        "output": "missing-success-terminal.log",
+        "completedAt": "2026-11-19T23:27:36.698323+00:00",
+        "exitCode": 1,
+        "expectedAssertionFailureObserved": true
+      },
+      {
+        "purpose": "regression sensitivity; not performance evidence",
+        "mutation": "missing-failure-terminal",
+        "command": [
+          "node",
+          "--max-old-space-size=1536",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--maxWorkers",
+          "1",
+          "test/dictionary-importer-task-turn.test.js",
+          "-t",
+          "delivers queued cancellation before reporting a trailing ready parser failure"
+        ],
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+        "candidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+        "mutatedSourceSha256": "93cb192cbba70825f29406ef81a1697e36782fc3f58bce8a88aa80446253de7b",
+        "expectedExitCode": 1,
+        "startedAt": "2026-11-19T23:27:36.699392+00:00",
+        "status": "completed",
+        "output": "missing-failure-terminal.log",
+        "completedAt": "2026-11-19T23:27:37.869795+00:00",
+        "exitCode": 1,
+        "expectedAssertionFailureObserved": true
+      },
+      {
+        "purpose": "regression sensitivity; not performance evidence",
+        "mutation": "sticky-success-witness",
+        "command": [
+          "node",
+          "--max-old-space-size=1536",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "--maxWorkers",
+          "1",
+          "test/dictionary-importer-task-turn.test.js",
+          "-t",
+          "a later failed sink preserves its error without acquiring a new terminal turn"
+        ],
+        "cwd": "/workspace/scratch/f34c9c9fae89/manabitan-yield",
+        "candidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+        "mutatedSourceSha256": "04d913283b03f834b29f1dc6b3e34fa06054d87a2ca07ce2975f8fda40597ff1",
+        "expectedExitCode": 1,
+        "startedAt": "2026-11-19T23:27:37.870677+00:00",
+        "status": "completed",
+        "output": "sticky-success-witness.log",
+        "completedAt": "2026-11-19T23:27:39.858075+00:00",
+        "exitCode": 1,
+        "expectedAssertionFailureObserved": true
+      }
+    ]
+  },
+  "artifactCheck": {
+    "allFiveWasmEqualBaseline": true,
+    "artifacts": {
+      "ext/lib/resvg.wasm": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+      "ext/lib/sqlite/sqlite3.wasm": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+      "ext/lib/term-bank-parser.wasm": "f1c029745da0eec890baf951249647fa7e0ce23fb3b1b83c51f34313f08f5fd5",
+      "ext/lib/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+      "ext/lib/zstd.wasm": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "restoredCandidateSourceSha256": "1af2cf61a67ec81202478a7ee5b0a0d5bde98300fc5bbca80e2c62ef3528ca53",
+    "gitDiffCheckExitCode": 0
+  },
+  "fullUnitStatus": "passed",
+  "performanceStatus": "no candidate benchmark collected",
+  "limitations": [
+    "The archived 26\u201346 ms sink-minus-bulk residual is an upper bound, not measured yield latency or a demonstrated saving.",
+    "Every successful callback retains a real task; zero/one callbacks retain their original task counts and timing.",
+    "A late queued cancellation can admit at most the next bounded sink before its mandatory turn; no wall-clock bound is claimed.",
+    "Successful multi-callback reads add one terminal task; synchronous multi-callback imports need a negative control.",
+    "No worker counts, cache/source budgets, persisted formats, native artifacts or compression settings changed."
+  ],
+  "fullUnitTests": {
+    "files": 617,
+    "passed": 13683,
+    "skipped": 47,
+    "total": 13730,
+    "durationSeconds": 465.26
+  },
+  "postFullUnitVerification": {
+    "recordedAt": "2026-11-19T23:39:41.773655+00:00",
+    "commitAndTreeUnchanged": true,
+    "allChangedFileSha256Unchanged": true,
+    "allFiveWasmEqualBaseline": true,
+    "trackedWorktreeClean": true,
+    "gitDiffCheckExitCode": 0
+  }
+}

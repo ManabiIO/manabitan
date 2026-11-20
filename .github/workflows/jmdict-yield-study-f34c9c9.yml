@@ -104,4 +104,5 @@ jobs:
           name: jmdict-yield-study-${{ matrix.browser }}-${{ matrix.replication }}
           retention-days: 7
           if-no-files-found: error
+          include-hidden-files: true
           path: builds/perf/jmdict-yield-study-evidence

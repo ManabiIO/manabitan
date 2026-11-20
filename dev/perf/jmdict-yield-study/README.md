@@ -3,6 +3,9 @@
 This independent study tests overlap between import sink work and its existing
 MessageChannel task turn. The tooling branch does not apply the runtime change.
 
+Protocol and results are tracked in [PR #767](https://github.com/ManabiIO/manabitan/pull/767).
+The earlier source-copy/prefetch study is [PR #765](https://github.com/ManabiIO/manabitan/pull/765).
+
 | Arm | Source                                     | Role                                     |
 | --- | ------------------------------------------ | ---------------------------------------- |
 | A   | `d829f5b6e6a75ee8859d38d537d224ec33c4930e` | Baseline                                 |
@@ -75,7 +78,11 @@ extension reload from a neutral tab; that reload is not a browser restart.
 Every observation must verify the pinned 526,942 term rows, title, revision,
 real OPFS storage, source-derived content probes, exact compressed source work,
 zero native/fused fallbacks and clean final publication. Per-cell content
-digests must agree across every arm and observation. Browser/runtime, source,
+digests must agree across every arm and observation. These digests cover the
+verified probes and storage samples, not every persisted dictionary byte.
+Firefox compares the twelve expected expression/reading/full-glossary tuples;
+Chromium checks bounds and readable content previews for twelve source terms.
+Browser/runtime, source,
 package and fixture identities are checked and retained with the raw reports.
 Untimed RSS snapshots and WASM heap maxima are diagnostics, not peak-memory
 qualification.

@@ -1,0 +1,30 @@
+{
+  "archiveSha256": "e7f8be4c29ff90c212bac8960ec119b3432e9cf4e47531492849d77f008c047c",
+  "originalArtifactPayloadComparison": "passed",
+  "artifacts": [
+    {
+      "artifact": "chromium-forward",
+      "originalZipSha256": "0cdfc9d2680bcb21fa38f13fe2a90f93ecd271ca372d077a22c2063c41130186",
+      "filesComparedByteForByte": 720
+    },
+    {
+      "artifact": "chromium-reverse",
+      "originalZipSha256": "5632cd6eef0b471f17097f1b841710068c9f0d67453826a62c2395d4e55db88a",
+      "filesComparedByteForByte": 720
+    },
+    {
+      "artifact": "firefox-forward",
+      "originalZipSha256": "d93ac4f3bc206544eb5c0180c107848f70a23470b471e75f19a7689397b58da4",
+      "filesComparedByteForByte": 616
+    },
+    {
+      "artifact": "firefox-reverse",
+      "originalZipSha256": "480a103c2d6523ab8e2dd137ccf7c4f462f30eb4f237b491848fe6de92d24e4e",
+      "filesComparedByteForByte": 616
+    }
+  ],
+  "manifestVerification": "2773 file hashes verified",
+  "pythonSyntax": "passed",
+  "markdownFormatting": "passed",
+  "whitespace": "passed"
+}

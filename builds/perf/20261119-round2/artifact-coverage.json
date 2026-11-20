@@ -1,0 +1,46 @@
+[
+  {
+    "zip": "firefox-forward-14585921242.zip",
+    "sha256": "d93ac4f3bc206544eb5c0180c107848f70a23470b471e75f19a7689397b58da4",
+    "omittedDeclaredToolingCopies": [
+      ".github/actions/setup/action.yml",
+      ".github/workflows/jmdict-browser-study-f34c9c9.yml"
+    ],
+    "declaredInputs": 44,
+    "embeddedInputs": 42,
+    "topLevelWorkflowMatches": true
+  },
+  {
+    "zip": "firefox-reverse-14585631194.zip",
+    "sha256": "480a103c2d6523ab8e2dd137ccf7c4f462f30eb4f237b491848fe6de92d24e4e",
+    "omittedDeclaredToolingCopies": [
+      ".github/actions/setup/action.yml",
+      ".github/workflows/jmdict-browser-study-f34c9c9.yml"
+    ],
+    "declaredInputs": 44,
+    "embeddedInputs": 42,
+    "topLevelWorkflowMatches": true
+  },
+  {
+    "zip": "jmdict-study-chromium-forward-44633675935.zip",
+    "sha256": "0cdfc9d2680bcb21fa38f13fe2a90f93ecd271ca372d077a22c2063c41130186",
+    "omittedDeclaredToolingCopies": [
+      ".github/actions/setup/action.yml",
+      ".github/workflows/jmdict-browser-study-f34c9c9.yml"
+    ],
+    "declaredInputs": 44,
+    "embeddedInputs": 42,
+    "topLevelWorkflowMatches": true
+  },
+  {
+    "zip": "jmdict-study-chromium-reverse-44633675935.zip",
+    "sha256": "5632cd6eef0b471f17097f1b841710068c9f0d67453826a62c2395d4e55db88a",
+    "omittedDeclaredToolingCopies": [
+      ".github/actions/setup/action.yml",
+      ".github/workflows/jmdict-browser-study-f34c9c9.yml"
+    ],
+    "declaredInputs": 44,
+    "embeddedInputs": 42,
+    "topLevelWorkflowMatches": true
+  }
+]
