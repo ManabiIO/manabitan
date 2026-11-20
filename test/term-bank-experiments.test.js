@@ -600,10 +600,13 @@ function requestWorker(worker, request) {
 
 describe('actual parser worker flag propagation', () => {
     test('projects exact image paths without losing the owned term content', async () => {
-        const glossary = [{type: 'structured-content', content: [
-            {tag: 'a', path: 'ignored.png', content: 'ordinary link'},
-            {tag: 'img', path: 'img/猫.webp'},
-        ]}]
+        const glossary = [{
+            type: 'structured-content',
+            content: [
+                {tag: 'a', path: 'ignored.png', content: 'ordinary link'},
+                {tag: 'img', path: 'img/猫.webp'},
+            ],
+        }]
         const sources = [JSON.stringify([row('猫', glossary)]), JSON.stringify([row('ordinary')])]
         await parseTermBankWithWasmColumnChunks(sources.map((source) => encoder.encode(source)), 3, (chunk) => {
             const baseline = copyWasmBackedColumnChunk(chunk)

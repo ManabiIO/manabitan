@@ -18,7 +18,10 @@
 import {parseJson} from '../core/json.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 
-/** @param {string} glossaryJson */
+/**
+ * @param {string} glossaryJson
+ * @returns {string[]}
+ */
 export function tryCollectGlossaryImagePaths(glossaryJson) {
     let glossary;
     try {
