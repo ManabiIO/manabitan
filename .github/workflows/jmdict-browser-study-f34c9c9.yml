@@ -1,0 +1,108 @@
+name: JMdict browser study f34c9c9
+
+on:
+  push:
+    branches: [perf/jmdict-browser-study-20261119-f34c9c9]
+    paths:
+      - .github/workflows/jmdict-browser-study-f34c9c9.yml
+      - dev/perf/jmdict-browser-study/**
+      - test/firefox/jmdict-import-observation.js
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jmdict-browser-study-f34c9c9-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  runtime:
+    name: Freeze official Mozilla runtime
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/jmdict-browser-study-20261119-f34c9c9' && !contains(github.event.head_commit.message, '[study-report]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Resolve and verify one official release
+        run: python3 dev/perf/jmdict-browser-study/firefox-runtime.py resolve --output "$RUNNER_TEMP/official-firefox-artifact"
+      - name: Preserve exact runtime archives
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: jmdict-study-official-firefox
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/official-firefox-artifact/firefox.archive
+            ${{ runner.temp }}/official-firefox-artifact/geckodriver.tar.gz
+            ${{ runner.temp }}/official-firefox-artifact/runtime.json
+            ${{ runner.temp }}/official-firefox-artifact/SHA512SUMS
+
+  comparison:
+    name: ${{ matrix.browser }} / ${{ matrix.replication }}
+    needs: runtime
+    if: github.repository == 'ManabiIO/manabitan' && github.ref == 'refs/heads/perf/jmdict-browser-study-20261119-f34c9c9'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - browser: chromium
+            replication: forward
+          - browser: chromium
+            replication: reverse
+          - browser: firefox
+            replication: forward
+          - browser: firefox
+            replication: reverse
+    env:
+      STUDY_BROWSER: ${{ matrix.browser }}
+      STUDY_REPLICATION: ${{ matrix.replication }}
+      STUDY_EVIDENCE: builds/perf/jmdict-study-evidence
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install locked Chromium
+        if: matrix.browser == 'chromium'
+        run: npx playwright install --with-deps chromium
+      - name: Install Firefox system libraries
+        if: matrix.browser == 'firefox'
+        run: npx playwright install-deps firefox
+      - name: Download the shared official Firefox artifact
+        if: matrix.browser == 'firefox'
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: jmdict-study-official-firefox
+          path: ${{ runner.temp }}/official-firefox-artifact
+      - name: Verify and extract the frozen runtime
+        if: matrix.browser == 'firefox'
+        run: python3 dev/perf/jmdict-browser-study/firefox-runtime.py install --artifact "$RUNNER_TEMP/official-firefox-artifact" --output "$RUNNER_TEMP/official-firefox"
+      - name: Restore locked dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare and verify all four packages before timing
+        run: python3 dev/perf/jmdict-browser-study/run.py prepare --browser "$STUDY_BROWSER" --replication "$STUDY_REPLICATION" --evidence "$STUDY_EVIDENCE"
+      - name: Measure fixed Chromium schedule
+        if: matrix.browser == 'chromium'
+        run: python3 dev/perf/jmdict-browser-study/run.py measure --browser "$STUDY_BROWSER" --replication "$STUDY_REPLICATION" --evidence "$STUDY_EVIDENCE"
+      - name: Measure fixed Firefox schedule
+        if: matrix.browser == 'firefox'
+        run: xvfb-run -a python3 dev/perf/jmdict-browser-study/run.py measure --browser "$STUDY_BROWSER" --replication "$STUDY_REPLICATION" --evidence "$STUDY_EVIDENCE"
+      - name: Preserve every attempted observation and failure
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: jmdict-study-${{ matrix.browser }}-${{ matrix.replication }}
+          retention-days: 7
+          if-no-files-found: error
+          include-hidden-files: true
+          path: builds/perf/jmdict-study-evidence

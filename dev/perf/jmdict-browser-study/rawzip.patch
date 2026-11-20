@@ -1,0 +1,10 @@
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index 3cfc3bb..d1e4572 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -143 +143 @@ export class RawZipPayloadReader {
+-            Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
++            new Uint8Array(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
+@@ -265 +265 @@ export class RawZipPayloadReader {
+-                    bytes: Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
++                    bytes: new Uint8Array(bytes.subarray(dataOffset, payloadEnd)),

@@ -39,6 +39,11 @@
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
 
         {
+            "path": "dev/perf/jmdict-browser-study/manifest.json",
+            "typeFile": "types/dev/jmdict-browser-study.d.ts",
+            "type": "JmdictBrowserStudyManifest"
+        },
+        {
             "path": "test/perf/dictionaries.lock.json",
             "typeFile": "types/test/performance-dictionary-lock.d.ts",
             "type": "PerformanceDictionaryLock"

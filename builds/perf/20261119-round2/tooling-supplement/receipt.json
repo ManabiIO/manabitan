@@ -1,0 +1,26 @@
+{
+  "studyRun": 44633675935,
+  "measuredToolingCommit": "a4a2ee2b29fce97f6e22c65f7e4bb497bec342ee",
+  "measuredToolingTree": "046c4c8c9cb595f6e35d64336d2d6ee954b93bd2",
+  "originalManifestSha256": "52cd728aa534c0a1a45ad657b4190134d9f6a562b3b2d3b1fccd2b64880dfc76",
+  "purpose": "Separate reconstruction of two hidden tooling copies omitted by upload-artifact; original ZIPs and their payloads remain untouched",
+  "files": [
+    {
+      "sourcePath": ".github/actions/setup/action.yml",
+      "gitBlobSha": "8b78c0b384094c378465c3e25fc21c948bcb076f",
+      "bytes": 930,
+      "sha256": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+      "originalArtifactEmbedded": false,
+      "embeddedTopLevelDuplicate": null
+    },
+    {
+      "sourcePath": ".github/workflows/jmdict-browser-study-f34c9c9.yml",
+      "gitBlobSha": "8becfbcc481c3ea23a26d99544887e1f157669c3",
+      "bytes": 4726,
+      "sha256": "3edc962b1051c54fcf168a8aa8cbe5493400e65877452d0f94ca14fdc97d3e87",
+      "originalArtifactEmbedded": false,
+      "embeddedTopLevelDuplicate": "workflow.yml"
+    }
+  ],
+  "futureFix": "Evidence uploads now include hidden files; historical source and observation identities are unchanged"
+}
