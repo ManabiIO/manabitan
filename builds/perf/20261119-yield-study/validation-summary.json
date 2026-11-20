@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "decision": "Hold task-turn candidate; no repeatable complete-import improvement qualified",
+  "runtime": {
+    "baseline": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+    "candidate": "52a0108053837ff7a504c256606570e397ab93b0",
+    "candidateTree": "92b35a642477e5a8161298e8c2e5d1881430508a"
+  },
+  "study": {
+    "runId": 44640155099,
+    "toolingCommit": "999c08aded15c901e6862e04f7bd36922e3fd51f",
+    "toolingTree": "5d65b96a2fdbb14023c6596341a7e6ace75f9942",
+    "manifestSha256": "cbe2f907c567ff3a44e5fc0c43d95757abcfeeecf3aa46e2a482e9dbb2424743",
+    "cells": 4,
+    "completeObservations": 416,
+    "timedObservations": 384,
+    "excludedWarmups": 32,
+    "failedObservations": 0,
+    "comparisonRows": 16,
+    "pooled": false,
+    "retried": false
+  },
+  "candidateValidation": {
+    "receiptSha256": "fda6104358273727db6e29ab0c022753817a8e61c60372fb9c3d97635c78d5ad",
+    "focusedFiles": 7,
+    "focusedTestsPassed": 331,
+    "newCases": 17,
+    "mutationChecks": 5,
+    "fullUnitFilesPassed": 617,
+    "fullUnitTestsPassed": 13683,
+    "skipped": 47,
+    "eslint": "passed",
+    "mainTypes": "passed",
+    "requiredTestTypes": "passed",
+    "dryBuildTargetsPassed": 7,
+    "unchangedWasmFiles": 5,
+    "node": "v24.22.3",
+    "clangAndLld": "21.1.8"
+  },
+  "studyToolingValidation": {
+    "pythonContractsPassed": 10,
+    "jsonSchemaTestsPassed": 155,
+    "scopedEslint": "passed",
+    "readmeFormatting": "passed",
+    "planValidation": "passed",
+    "summaryPythonSyntax": "passed"
+  },
+  "browserScope": {
+    "chromium": "Twelve source-derived persisted readability/bounds/preview probes; sample digest after complete restart",
+    "firefox": "Twelve source-derived exact expression/reading/full-glossary probes and storage samples after realm-changing extension reload",
+    "rowCount": 526942,
+    "exhaustivePersistedByteOracle": false,
+    "peakMemoryMeasured": false,
+    "currentDevelopQualified": false
+  },
+  "artifactCoverage": {
+    "declaredHarnessInputs": 43,
+    "embeddedInputs": 41,
+    "omittedPaths": [
+      ".github/actions/setup/action.yml",
+      ".github/workflows/jmdict-yield-study-f34c9c9.yml"
+    ],
+    "supplement": "Separate measured Git source, with commit/tree/blob/SHA256 identities; top-level workflow.yml is also embedded",
+    "futureUploadsIncludeHiddenFiles": true
+  },
+  "retainedSetupAndAuditFailures": [
+    "Initial scoped lint lacked generated libraries; corrected setup passed",
+    "Link checker found no README links; real study links added",
+    "First independent Chromium audit found two omitted hidden input copies; separate source supplement added"
+  ],
+  "allBrowserAnalysisSha256": "fccf5b52092d364df06ea6482a9cf9adc6122dea6eeed8a220bff5a64ac20ade"
+}

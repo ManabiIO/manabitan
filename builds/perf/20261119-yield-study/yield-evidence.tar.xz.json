@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "archive": "yield-evidence.tar.xz",
+  "archiveBytes": 2931772,
+  "archiveSha256": "30063579238e840d626f85f18a64b18b74ce0a440f32b2bdade48adfaee90553",
+  "indexMember": "evidence-index.json",
+  "payloadFiles": 2843,
+  "payloadBytes": 106911065,
+  "sourceZips": [
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/jmdict-yield-study-chromium-forward-44640155099.zip",
+      "prefix": "chromium-forward",
+      "bytes": 3834066,
+      "sha256": "50963dc5fb97bcec8a1083be31f6572e57b847d12fadcc95f0bef6f3cb31f537"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/jmdict-yield-study-chromium-reverse-44640155099.zip",
+      "prefix": "chromium-reverse",
+      "bytes": 3845982,
+      "sha256": "8cffde958bd3acfbbbb6f66b4b1419336993d4dbbc17fe2b7a67fd83c7f89b45"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/firefox-forward-14588296501.zip",
+      "prefix": "firefox-forward",
+      "bytes": 2253779,
+      "sha256": "6f0e2848b92cae53600d6bf58b478c641f800328f02e469344faf535b7de5a95"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/firefox-reverse-14588108629.zip",
+      "prefix": "firefox-reverse",
+      "bytes": 2252646,
+      "sha256": "a6d4a5f75b0103c7736b34b3d30fdf9304e76ad387c9aa33d4d34573bc693525"
+    }
+  ],
+  "verification": "Use this script's verify command; it reads every payload and rejects missing, extra, duplicate or changed files."
+}

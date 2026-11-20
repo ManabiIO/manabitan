@@ -1,0 +1,35 @@
+{
+  "archiveSha256": "30063579238e840d626f85f18a64b18b74ce0a440f32b2bdade48adfaee90553",
+  "payloadFiles": 2843,
+  "originalArtifactPayloadComparison": "passed",
+  "artifacts": [
+    {
+      "artifact": "chromium-forward",
+      "originalZipSha256": "50963dc5fb97bcec8a1083be31f6572e57b847d12fadcc95f0bef6f3cb31f537",
+      "filesComparedByteForByte": 719
+    },
+    {
+      "artifact": "chromium-reverse",
+      "originalZipSha256": "8cffde958bd3acfbbbb6f66b4b1419336993d4dbbc17fe2b7a67fd83c7f89b45",
+      "filesComparedByteForByte": 719
+    },
+    {
+      "artifact": "firefox-forward",
+      "originalZipSha256": "6f0e2848b92cae53600d6bf58b478c641f800328f02e469344faf535b7de5a95",
+      "filesComparedByteForByte": 615
+    },
+    {
+      "artifact": "firefox-reverse",
+      "originalZipSha256": "a6d4a5f75b0103c7736b34b3d30fdf9304e76ad387c9aa33d4d34573bc693525",
+      "filesComparedByteForByte": 615
+    }
+  ],
+  "fullExtraction": "passed",
+  "separateCellsReproduced": 4,
+  "comparisonsReproduced": 16,
+  "summaryComparison": "Exact structured equality after removing only extraction directory paths",
+  "offlinePhaseInventoryReproduction": "Byte-for-byte equality using only extracted adapter and preserved first tar; zero original ZIP opens",
+  "phaseInventorySha256": "56f9b30e48d76cd75767044082138156056d51be5a994bacf7582d866548b500",
+  "summaryStdout": "| Browser / order | Comparison | Pairs | Median change | Equal-work change | Faster | Worst pair | Descriptive 95% interval |\n| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |\n| chromium / forward | C/A | 24 | +0.82% | +0.81% | 9/24 | +7.98% | [-0.38%, +2.60%] |\n| chromium / forward | D/B | 24 | +1.72% | +1.15% | 9/24 | +5.92% | [-0.21%, +2.86%] |\n| chromium / forward | B/A | 24 | +1.04% | -0.13% | 11/24 | +7.18% | [-2.06%, +2.73%] |\n| chromium / forward | D/A | 24 | +0.77% | +1.02% | 10/24 | +7.56% | [-0.57%, +3.29%] |\n| chromium / reverse | C/A | 24 | +0.67% | +0.72% | 8/24 | +5.83% | [-0.58%, +2.36%] |\n| chromium / reverse | D/B | 24 | +0.21% | +0.16% | 11/24 | +7.13% | [-1.20%, +1.14%] |\n| chromium / reverse | B/A | 24 | +0.62% | -0.24% | 11/24 | +5.82% | [-1.79%, +0.80%] |\n| chromium / reverse | D/A | 24 | -0.18% | -0.08% | 12/24 | +6.34% | [-2.16%, +2.23%] |\n| firefox / forward | C/A | 24 | -1.15% | -1.16% | 19/24 | +1.83% | [-2.16%, -0.60%] |\n| firefox / forward | D/B | 24 | +0.36% | +0.07% | 10/24 | +3.29% | [-0.60%, +1.12%] |\n| firefox / forward | B/A | 24 | -1.20% | -0.96% | 17/24 | +2.65% | [-1.66%, -0.12%] |\n| firefox / forward | D/A | 24 | -0.71% | -0.89% | 14/24 | +1.69% | [-1.71%, +0.24%] |\n| firefox / reverse | C/A | 24 | +0.82% | +1.22% | 10/24 | +10.33% | [-0.52%, +2.55%] |\n| firefox / reverse | D/B | 24 | -0.06% | -0.24% | 12/24 | +8.16% | [-1.02%, +0.78%] |\n| firefox / reverse | B/A | 24 | +0.51% | +0.74% | 9/24 | +9.32% | [-0.77%, +1.69%] |\n| firefox / reverse | D/A | 24 | -0.26% | +0.50% | 13/24 | +8.73% | [-0.75%, +0.77%] |\n",
+  "phaseStdout": "{\"output\": \"/tmp/manabitan-f34c9c9-yield-reproduction-12ma32v1/phase.json\", \"sha256\": \"56f9b30e48d76cd75767044082138156056d51be5a994bacf7582d866548b500\", \"cells\": 4, \"observationsPerCell\": 24}\n{\"offlineReproduction\": \"byte-for-byte equal\", \"payloadsVerified\": 104, \"verification\": \"/tmp/manabitan-f34c9c9-yield-reproduction-12ma32v1/phase-verification.json\"}\n"
+}

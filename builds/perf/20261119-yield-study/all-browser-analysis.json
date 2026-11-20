@@ -1,0 +1,908 @@
+{
+  "schemaVersion": 1,
+  "analysisDriverSha256": "be7d34dce4ebd5506945fb351df54e661b26d4500e9045ac461442d20c1cd9d1",
+  "frozenStatisticsDriverSha256": "4f0248a49f7e6bf90bcc6fcbd7e1e720dce594ab1c87a604e9aa23c15fa11ddf",
+  "cells": [
+    {
+      "directory": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/chromium-forward-evidence",
+      "cohortSha256": "2d0776358dbca50cd48e23c0265f8414499a06668aefd340562ad4f3f57f4633",
+      "manifestSha256": "cbe2f907c567ff3a44e5fc0c43d95757abcfeeecf3aa46e2a482e9dbb2424743",
+      "diagnosticCommit": "999c08aded15c901e6862e04f7bd36922e3fd51f",
+      "browser": "chromium",
+      "replication": "forward",
+      "dictionary": "jmdict",
+      "complete": true,
+      "failures": [],
+      "attemptedObservations": 104,
+      "plannedObservations": 104,
+      "browserRuntime": {
+        "binary": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "sourceCommits": {
+        "A": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "B": "52a0108053837ff7a504c256606570e397ab93b0",
+        "C": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "D": "52a0108053837ff7a504c256606570e397ab93b0"
+      },
+      "armTimingsMs": {
+        "A": {
+          "count": 24,
+          "min": 734.8000000000466,
+          "median": 764.8999999999069,
+          "p95": 805.8000000000466,
+          "max": 820
+        },
+        "B": {
+          "count": 24,
+          "min": 721.7000000000698,
+          "median": 762.7000000001281,
+          "p95": 802.5,
+          "max": 809.5
+        },
+        "C": {
+          "count": 24,
+          "min": 735.5,
+          "median": 776.1500000000233,
+          "p95": 795.5999999998603,
+          "max": 800.8000000000466
+        },
+        "D": {
+          "count": 24,
+          "min": 731.9000000000233,
+          "median": 773.3999999999069,
+          "p95": 802.5999999998603,
+          "max": 810.6999999999534
+        }
+      },
+      "comparisons": {
+        "C/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            2.3490813648324504,
+            5.0994183687371075,
+            -1.7036850075718868,
+            0.4584681769179255,
+            1.7443374121353994,
+            2.8730180241323344,
+            7.982740021584633,
+            -1.547437848831068,
+            -1.3191598360420276,
+            -0.1919140225179472,
+            2.5967143614015864,
+            -7.036585365876369,
+            -4.231935320898039,
+            3.4123469653806415,
+            -0.37924962752896585,
+            5.816285599710946,
+            0.9101547263033583,
+            0.7216103304157562,
+            -7.061305534889106,
+            -2.3591594688729733,
+            1.7011431682089295,
+            7.547169811333876,
+            0.7158006362547598,
+            3.502974223397226
+          ],
+          "medianPairedChangePercent": 0.8158825283595572,
+          "equalWorkChangePercent": 0.8058942923522494,
+          "fasterPairs": 9,
+          "worstPairPercent": 7.982740021584633,
+          "descriptiveBootstrap95Percent": [
+            -0.37924962752896585,
+            2.5967143614015864
+          ]
+        },
+        "D/B": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            2.5319865319928025,
+            3.798459731117876,
+            1.4133296383473049,
+            -0.5652688313456222,
+            2.5261208834780113,
+            2.033525693862215,
+            2.986237340919451,
+            5.467302091581416,
+            4.956191970663637,
+            0.1482396541017117,
+            2.9798308392852135,
+            -1.567317574506022,
+            2.7566919695987124,
+            -4.177247333660827,
+            -5.131851085855931,
+            -1.0643959552955717,
+            -3.794782174527045,
+            -1.9563862928290932,
+            5.6142668428005305,
+            2.85829850346333,
+            1.37571791105211,
+            -0.1899696048632049,
+            -0.191350937619561,
+            5.919547961791638
+          ],
+          "medianPairedChangePercent": 1.7234276661047598,
+          "equalWorkChangePercent": 1.148579803950689,
+          "fasterPairs": 9,
+          "worstPairPercent": 5.919547961791638,
+          "descriptiveBootstrap95Percent": [
+            -0.20851458862195527,
+            2.85829850346333
+          ]
+        },
+        "B/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -2.5590551181102317,
+            3.625050723664147,
+            -8.922261484092797,
+            2.575512405622127,
+            -1.5751106482657429,
+            -1.3687491529830065,
+            3.8565264293703327,
+            -4.185692541856179,
+            -2.0619877048708157,
+            3.5696008188516704,
+            1.8150503444558375,
+            -5.07317073171868,
+            -5.141485598780782,
+            2.578796561611285,
+            4.781254232702747,
+            0.4947185452538916,
+            4.160707320243939,
+            1.5951386251543909,
+            -6.056093323410739,
+            -4.383137811009674,
+            1.8916712030356608,
+            7.180670557912716,
+            3.910392364792492,
+            -1.7448777263652904
+          ],
+          "medianPairedChangePercent": 1.0449285852041412,
+          "equalWorkChangePercent": -0.13059731948368292,
+          "fasterPairs": 11,
+          "worstPairPercent": 7.180670557912716,
+          "descriptiveBootstrap95Percent": [
+            -2.0619877048708157,
+            2.7306360109436656
+          ]
+        },
+        "D/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -0.0918635170542581,
+            7.561206546753008,
+            -7.635032811711029,
+            1.995685005400083,
+            0.9112210361885476,
+            0.6369426751687834,
+            6.9579288025860775,
+            1.0527650938371824,
+            2.7920081967279353,
+            3.7231320368600773,
+            4.848966613653682,
+            -6.560975609761776,
+            -2.526528549801732,
+            -1.7061734826600006,
+            -0.5959637004116836,
+            -0.5749431742274491,
+            0.20803536599403039,
+            -0.3924547410888324,
+            -0.7818317200355196,
+            -1.650122470003157,
+            3.2934131736461536,
+            6.977059861564139,
+            3.7115588547183,
+            4.071381361539528
+          ],
+          "medianPairedChangePercent": 0.7740818556786655,
+          "equalWorkChangePercent": 1.0164824700308994,
+          "fasterPairs": 10,
+          "worstPairPercent": 7.561206546753008,
+          "descriptiveBootstrap95Percent": [
+            -0.5749431742274491,
+            3.2934131736461536
+          ]
+        }
+      },
+      "largestReportedParserWasmHeapBytes": {
+        "A": 38928384,
+        "B": 38928384,
+        "C": 38928384,
+        "D": 38928384
+      },
+      "observedVersions": [
+        "153.0.8010.12"
+      ],
+      "interpretation": "Separate cell. C/A and D/B are separate unchanged-source controls; B/A and D/A share baseline A. No control subtraction, pooling, or automatic qualification."
+    },
+    {
+      "directory": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/chromium-reverse-evidence",
+      "cohortSha256": "e0b036177ecf28b8b2a41b920f06d62210f66ef7e1bb2bba4a1dedfbb228ba0f",
+      "manifestSha256": "cbe2f907c567ff3a44e5fc0c43d95757abcfeeecf3aa46e2a482e9dbb2424743",
+      "diagnosticCommit": "999c08aded15c901e6862e04f7bd36922e3fd51f",
+      "browser": "chromium",
+      "replication": "reverse",
+      "dictionary": "jmdict",
+      "complete": true,
+      "failures": [],
+      "attemptedObservations": 104,
+      "plannedObservations": 104,
+      "browserRuntime": {
+        "binary": "/home/runner/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome",
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "version": "Google Chrome for Testing 153.0.8010.12"
+      },
+      "sourceCommits": {
+        "A": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "B": "52a0108053837ff7a504c256606570e397ab93b0",
+        "C": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "D": "52a0108053837ff7a504c256606570e397ab93b0"
+      },
+      "armTimingsMs": {
+        "A": {
+          "count": 24,
+          "min": 991.1999999999534,
+          "median": 1031.0999999999767,
+          "p95": 1062,
+          "max": 1069.7999999999884
+        },
+        "B": {
+          "count": 24,
+          "min": 991.3000000000466,
+          "median": 1027.550000000003,
+          "p95": 1057.5999999999767,
+          "max": 1071.5
+        },
+        "C": {
+          "count": 24,
+          "min": 1009.1000000000058,
+          "median": 1038.9000000000233,
+          "p95": 1072.3000000000466,
+          "max": 1073.5999999999767
+        },
+        "D": {
+          "count": 24,
+          "min": 983.2000000000116,
+          "median": 1034.5499999999884,
+          "p95": 1064.2000000000116,
+          "max": 1069.7999999999302
+        }
+      },
+      "comparisons": {
+        "C/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            0.06776379477082539,
+            -4.630942254985326,
+            1.942494470623246,
+            0.8286252354037904,
+            -0.5836575875486361,
+            5.830815709966264,
+            -4.103570760886665,
+            1.0253953042656194,
+            0.3375446041083974,
+            2.538020936210783,
+            -1.1815252416846,
+            5.292615868042483,
+            4.192546583846313,
+            -1.2707444286413683,
+            -1.2696897374746108,
+            2.556538839724687,
+            -1.434386509006702,
+            -1.823591515500489,
+            2.360774818416145,
+            0.27700831024237704,
+            1.4910731802975308,
+            2.5441076128254414,
+            0.5014948404076236,
+            2.605863192196556
+          ],
+          "medianPairedChangePercent": 0.665060037905707,
+          "equalWorkChangePercent": 0.7202997611142958,
+          "fasterPairs": 8,
+          "worstPairPercent": 5.830815709966264,
+          "descriptiveBootstrap95Percent": [
+            -0.5836575875486361,
+            2.360774818416145
+          ]
+        },
+        "D/B": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            0.4127867908215732,
+            -3.692877326320043,
+            -1.2021753649439026,
+            0.46656298600198376,
+            -1.3346713497228713,
+            4.350429056086136,
+            -1.0660574909586829,
+            -2.924088008388337,
+            7.127038453793699,
+            -1.0732617825478297,
+            0.3874842584633109,
+            0.04878048780487809,
+            5.160778086542406,
+            -6.327072661729883,
+            -5.824508320724098,
+            2.9951219512263316,
+            -2.2346368715062237,
+            1.1362523263763746,
+            4.201680672268915,
+            6.352520131216366,
+            -0.9414329600634486,
+            1.2508826793122818,
+            -2.511021659975343,
+            0.3779802287400269
+          ],
+          "medianPairedChangePercent": 0.2133803582724525,
+          "equalWorkChangePercent": 0.16288030728515146,
+          "fasterPairs": 11,
+          "worstPairPercent": 7.127038453793699,
+          "descriptiveBootstrap95Percent": [
+            -1.2021753649439026,
+            1.1362523263763746
+          ]
+        },
+        "B/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            0.8422071636022821,
+            -3.00538701445876,
+            0.7885373593569778,
+            -3.126177024483201,
+            -3.0642023346303504,
+            0.9264853977797971,
+            -1.7947279865406451,
+            0.6133205558239929,
+            -4.195197222490021,
+            5.816709460796421,
+            0.8007030563261575,
+            0.6480754124208232,
+            -2.2127329192591305,
+            -0.028449502138128135,
+            0.9642004773247503,
+            0.7866273352999054,
+            2.3551075789928433,
+            -2.0155485171321152,
+            2.0480225988748435,
+            -0.48476454293856497,
+            -1.0103982734987582,
+            -3.3726484062750695,
+            0.6268685505095295,
+            1.8458197611478377
+          ],
+          "medianPairedChangePercent": 0.6200945531667612,
+          "equalWorkChangePercent": -0.23848308588935163,
+          "fasterPairs": 11,
+          "worstPairPercent": 5.816709460796421,
+          "descriptiveBootstrap95Percent": [
+            -1.7947279865406451,
+            0.8007030563261575
+          ]
+        },
+        "D/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            1.2584704743465736,
+            -6.587279085153696,
+            -0.4231176074644849,
+            -2.6741996233543563,
+            -4.357976653695362,
+            5.317220543811341,
+            -2.841652645356474,
+            -2.3287014853901833,
+            2.632847912044345,
+            4.681019158604016,
+            1.1912899130897658,
+            0.6971720345732235,
+            2.8338509316724325,
+            -6.353722143195828,
+            -4.91646778042959,
+            3.8053097345201348,
+            0.0678426051628156,
+            -0.9021979076708986,
+            6.335754640844393,
+            5.836960823098614,
+            -1.9423190111875765,
+            -2.1639536017109773,
+            -1.8998939145486782,
+            2.230776823643188
+          ],
+          "medianPairedChangePercent": -0.17763750115083465,
+          "equalWorkChangePercent": -0.07599122058731256,
+          "fasterPairs": 12,
+          "worstPairPercent": 6.335754640844393,
+          "descriptiveBootstrap95Percent": [
+            -2.1639536017109773,
+            2.230776823643188
+          ]
+        }
+      },
+      "largestReportedParserWasmHeapBytes": {
+        "A": 38928384,
+        "B": 38928384,
+        "C": 38928384,
+        "D": 38928384
+      },
+      "observedVersions": [
+        "153.0.8010.12"
+      ],
+      "interpretation": "Separate cell. C/A and D/B are separate unchanged-source controls; B/A and D/A share baseline A. No control subtraction, pooling, or automatic qualification."
+    },
+    {
+      "directory": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/firefox-forward-14588296501",
+      "cohortSha256": "ea607b503e11637f7a9833e2107553ef71a3461c70c16b0c4ec489df52e2ae4f",
+      "manifestSha256": "cbe2f907c567ff3a44e5fc0c43d95757abcfeeecf3aa46e2a482e9dbb2424743",
+      "diagnosticCommit": "999c08aded15c901e6862e04f7bd36922e3fd51f",
+      "browser": "firefox",
+      "replication": "forward",
+      "dictionary": "jmdict",
+      "complete": true,
+      "failures": [],
+      "attemptedObservations": 104,
+      "plannedObservations": 104,
+      "browserRuntime": {
+        "schemaVersion": 1,
+        "officialMozillaBuild": true,
+        "requestedUrl": "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US",
+        "resolvedUrl": "https://download-installer.cdn.mozilla.net/pub/devedition/releases/161.0b5/linux-x86_64/en-US/firefox-161.0b5.tar.xz",
+        "release": "161.0b5",
+        "checksumUrl": "https://archive.mozilla.org/pub/devedition/releases/161.0b5/SHA512SUMS",
+        "officialArchivePath": "linux-x86_64/en-US/firefox-161.0b5.tar.xz",
+        "archiveFile": "firefox.archive",
+        "archiveSha256": "12d15a46911c71eccf78dd80a53ea7a8f32fa3c6160090bda0ba6571765f1cab",
+        "archiveSha512": "52b3092d40580a7f1bcfff944a9887092251c63f9cd2e325718899721dfb45221df39e8663d9f33f691b17923beee02c6a4ff45b400399951b0b49c160723702",
+        "archiveBytes": 91913948,
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "applicationVersion": "161.0",
+        "applicationBuildId": "20261118090429",
+        "applicationIniSha256": "a3607c5b2c71b572e9639517f157382c723577135a3eea5daeeae7478992e8f3",
+        "libxulSha256": "d9b99d219d0fc732b601d68aa3569c9bb228259d16228478ef5e39584cc09b5b",
+        "geckodriver": {
+          "version": "0.37.1",
+          "url": "https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-linux64.tar.gz",
+          "archiveFile": "geckodriver.tar.gz",
+          "archiveSha256": "e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e",
+          "binarySha256": "f831b7e61454804e8a307edd951bf8a5f373efe3f718e75454a6485a51f6e39f"
+        }
+      },
+      "sourceCommits": {
+        "A": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "B": "52a0108053837ff7a504c256606570e397ab93b0",
+        "C": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "D": "52a0108053837ff7a504c256606570e397ab93b0"
+      },
+      "armTimingsMs": {
+        "A": {
+          "count": 24,
+          "min": 816,
+          "median": 829.0,
+          "p95": 853,
+          "max": 858
+        },
+        "B": {
+          "count": 24,
+          "min": 797,
+          "median": 825.5,
+          "p95": 847,
+          "max": 853
+        },
+        "C": {
+          "count": 24,
+          "min": 797,
+          "median": 822.0,
+          "p95": 836,
+          "max": 842
+        },
+        "D": {
+          "count": 24,
+          "min": 802,
+          "median": 825.5,
+          "p95": 842,
+          "max": 847
+        }
+      },
+      "comparisons": {
+        "C/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -3.210463733650415,
+            -0.11976047904191933,
+            -1.8648018648018683,
+            -2.9726516052318686,
+            0.6016847172081841,
+            1.4705882352941124,
+            -2.70588235294118,
+            -1.4285714285714235,
+            -0.6127450980392135,
+            -0.7317073170731714,
+            -2.1791767554479424,
+            -2.1582733812949617,
+            -1.2048192771084376,
+            -3.6275695284159637,
+            -3.0480656506447823,
+            -1.0895883777239712,
+            -1.2077294685990392,
+            1.833740831295838,
+            -0.24449877750610804,
+            -0.9779951100244544,
+            0.4878048780487809,
+            0.8547008547008517,
+            -2.473498233215543,
+            -0.9557945041816063
+          ],
+          "medianPairedChangePercent": -1.1472038274162044,
+          "equalWorkChangePercent": -1.1628489800010078,
+          "fasterPairs": 19,
+          "worstPairPercent": 1.833740831295838,
+          "descriptiveBootstrap95Percent": [
+            -2.1582733812949617,
+            -0.6046744283829453
+          ]
+        },
+        "D/B": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -2.6602176541717037,
+            -0.5959475566150174,
+            0.3654080389768666,
+            1.6908212560386549,
+            -1.992966002344665,
+            -2.8846153846153855,
+            -1.4302741358760418,
+            0.0,
+            -1.2062726176115812,
+            1.3563501849568338,
+            -4.368358913813464,
+            0.6273525721455453,
+            2.871410736579283,
+            -1.9417475728155331,
+            3.292682926829271,
+            2.1897810218978186,
+            0.6045949214026569,
+            0.36275695284160303,
+            1.1207970112079746,
+            1.845018450184499,
+            0.6045949214026569,
+            -0.3712871287128716,
+            -0.12195121951219523,
+            2.822085889570558
+          ],
+          "medianPairedChangePercent": 0.3640824959092348,
+          "equalWorkChangePercent": 0.0708537881471738,
+          "fasterPairs": 10,
+          "worstPairPercent": 3.292682926829271,
+          "descriptiveBootstrap95Percent": [
+            -0.5959475566150174,
+            1.1207970112079746
+          ]
+        },
+        "B/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -1.6646848989298468,
+            0.4790419161676551,
+            -4.312354312354316,
+            -1.545778834720568,
+            2.6474127557160054,
+            1.9607843137254832,
+            -1.2941176470588234,
+            -1.3095238095238049,
+            1.5931372549019551,
+            -1.097560975609757,
+            2.5423728813559254,
+            -4.436450839328532,
+            -3.4939759036144546,
+            -0.36275695284159193,
+            -3.86869871043376,
+            -0.4842615012106588,
+            -0.12077294685990392,
+            1.1002444987775029,
+            -1.833740831295838,
+            -0.6112469437652757,
+            0.8536585365853666,
+            -1.3431013431013383,
+            -3.4157832744405203,
+            -2.628434886499398
+          ],
+          "medianPairedChangePercent": -1.1958393113342902,
+          "equalWorkChangePercent": -0.9623577765525582,
+          "fasterPairs": 17,
+          "worstPairPercent": 2.6474127557160054,
+          "descriptiveBootstrap95Percent": [
+            -1.6646848989298468,
+            -0.12077294685990392
+          ]
+        },
+        "D/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -4.280618311533891,
+            -0.11976047904191933,
+            -3.9627039627039617,
+            0.11890606420927874,
+            0.6016847172081841,
+            -0.9803921568627416,
+            -2.70588235294118,
+            -1.3095238095238049,
+            0.3676470588235281,
+            0.24390243902439046,
+            -1.937046004842613,
+            -3.83693045563549,
+            -0.7228915662650603,
+            -2.297460701330112,
+            -0.7033997655334079,
+            1.6949152542372836,
+            0.48309178743961567,
+            1.4669926650366705,
+            -0.7334963325183352,
+            1.2224938875305513,
+            1.4634146341463428,
+            -1.7094017094017144,
+            -3.5335689045936425,
+            0.11947431302270495
+          ],
+          "medianPairedChangePercent": -0.7131456658992341,
+          "equalWorkChangePercent": -0.8921858553455952,
+          "fasterPairs": 14,
+          "worstPairPercent": 1.6949152542372836,
+          "descriptiveBootstrap95Percent": [
+            -1.7094017094017144,
+            0.24390243902439046
+          ]
+        }
+      },
+      "largestReportedParserWasmHeapBytes": {
+        "A": 38928384,
+        "B": 38928384,
+        "C": 38928384,
+        "D": 38928384
+      },
+      "observedVersions": [
+        "161.0"
+      ],
+      "interpretation": "Separate cell. C/A and D/B are separate unchanged-source controls; B/A and D/A share baseline A. No control subtraction, pooling, or automatic qualification."
+    },
+    {
+      "directory": "/workspace/scratch/f34c9c9fae89/github-refresh-20261119/round2/yield-study/firefox-reverse-14588108629",
+      "cohortSha256": "9cfe0861802028bb0be0114f62e3d48c5bce915d95ede8c63f956a7d6950515f",
+      "manifestSha256": "cbe2f907c567ff3a44e5fc0c43d95757abcfeeecf3aa46e2a482e9dbb2424743",
+      "diagnosticCommit": "999c08aded15c901e6862e04f7bd36922e3fd51f",
+      "browser": "firefox",
+      "replication": "reverse",
+      "dictionary": "jmdict",
+      "complete": true,
+      "failures": [],
+      "attemptedObservations": 104,
+      "plannedObservations": 104,
+      "browserRuntime": {
+        "schemaVersion": 1,
+        "officialMozillaBuild": true,
+        "requestedUrl": "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US",
+        "resolvedUrl": "https://download-installer.cdn.mozilla.net/pub/devedition/releases/161.0b5/linux-x86_64/en-US/firefox-161.0b5.tar.xz",
+        "release": "161.0b5",
+        "checksumUrl": "https://archive.mozilla.org/pub/devedition/releases/161.0b5/SHA512SUMS",
+        "officialArchivePath": "linux-x86_64/en-US/firefox-161.0b5.tar.xz",
+        "archiveFile": "firefox.archive",
+        "archiveSha256": "12d15a46911c71eccf78dd80a53ea7a8f32fa3c6160090bda0ba6571765f1cab",
+        "archiveSha512": "52b3092d40580a7f1bcfff944a9887092251c63f9cd2e325718899721dfb45221df39e8663d9f33f691b17923beee02c6a4ff45b400399951b0b49c160723702",
+        "archiveBytes": 91913948,
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "applicationVersion": "161.0",
+        "applicationBuildId": "20261118090429",
+        "applicationIniSha256": "a3607c5b2c71b572e9639517f157382c723577135a3eea5daeeae7478992e8f3",
+        "libxulSha256": "d9b99d219d0fc732b601d68aa3569c9bb228259d16228478ef5e39584cc09b5b",
+        "geckodriver": {
+          "version": "0.37.1",
+          "url": "https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-linux64.tar.gz",
+          "archiveFile": "geckodriver.tar.gz",
+          "archiveSha256": "e815130ea95983e162ae91843b48d3a3ce991735635fce83a647afde21e09f7e",
+          "binarySha256": "f831b7e61454804e8a307edd951bf8a5f373efe3f718e75454a6485a51f6e39f"
+        }
+      },
+      "sourceCommits": {
+        "A": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "B": "52a0108053837ff7a504c256606570e397ab93b0",
+        "C": "d829f5b6e6a75ee8859d38d537d224ec33c4930e",
+        "D": "52a0108053837ff7a504c256606570e397ab93b0"
+      },
+      "armTimingsMs": {
+        "A": {
+          "count": 24,
+          "min": 756,
+          "median": 783.0,
+          "p95": 812,
+          "max": 841
+        },
+        "B": {
+          "count": 24,
+          "min": 767,
+          "median": 785.0,
+          "p95": 856,
+          "max": 858
+        },
+        "C": {
+          "count": 24,
+          "min": 769,
+          "median": 788.5,
+          "p95": 849,
+          "max": 865
+        },
+        "D": {
+          "count": 24,
+          "min": 767,
+          "median": 785.5,
+          "p95": 822,
+          "max": 835
+        }
+      },
+      "comparisons": {
+        "C/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -2.9813664596273326,
+            6.792452830188678,
+            0.8951406649616356,
+            0.7537688442211143,
+            -2.9556650246305383,
+            10.331632653061229,
+            -3.57142857142857,
+            7.369758576874208,
+            1.6602809706258048,
+            3.3068783068783025,
+            0.0,
+            -0.2560819462227859,
+            -0.5174644243208237,
+            3.0729833546734975,
+            -1.9059720457433316,
+            -5.588585017835912,
+            1.9230769230769162,
+            -1.2658227848101222,
+            -0.5154639175257714,
+            2.5510204081632626,
+            7.573812580231065,
+            -0.7662835249042099,
+            1.6861219195849486,
+            2.7308192457737412
+          ],
+          "medianPairedChangePercent": 0.824454754591375,
+          "equalWorkChangePercent": 1.2230634828188647,
+          "fasterPairs": 10,
+          "worstPairPercent": 10.331632653061229,
+          "descriptiveBootstrap95Percent": [
+            -0.5174644243208237,
+            2.5510204081632626
+          ]
+        },
+        "D/B": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -6.759906759906764,
+            -0.24721878862793423,
+            -7.279236276849643,
+            1.8041237113401998,
+            0.8838383838383868,
+            -2.777777777777779,
+            -0.4987531172069848,
+            0.12771392081736277,
+            0.5108556832694733,
+            5.927835051546393,
+            2.264150943396226,
+            0.7772020725388629,
+            -1.0217113665389577,
+            2.207792207792214,
+            -0.7623888182973326,
+            1.8252933507170832,
+            -2.154626108998736,
+            8.160621761658039,
+            -1.5247776365946653,
+            0.3841229193341844,
+            -1.5404364569961526,
+            -4.439252336448596,
+            0.5012531328320913,
+            -0.38363171355498826
+          ],
+          "medianPairedChangePercent": -0.05975243390528573,
+          "equalWorkChangePercent": -0.2417617070478828,
+          "fasterPairs": 12,
+          "worstPairPercent": 8.160621761658039,
+          "descriptiveBootstrap95Percent": [
+            -1.0217113665389577,
+            0.7772020725388629
+          ]
+        },
+        "B/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            6.5838509316770155,
+            1.7610062893081757,
+            7.161125319693085,
+            -2.5125628140703515,
+            -2.463054187192115,
+            1.0204081632652962,
+            -1.2315270935960632,
+            -0.5082592121982255,
+            0.0,
+            2.645502645502651,
+            1.9230769230769162,
+            -1.1523687580025643,
+            1.2936610608020649,
+            -1.4084507042253502,
+            0.0,
+            -8.799048751486326,
+            1.1538461538461497,
+            -2.278481012658229,
+            1.4175257731958713,
+            -0.3826530612244916,
+            0.0,
+            9.323116219667948,
+            3.5019455252918386,
+            1.6905071521456483
+          ],
+          "medianPairedChangePercent": 0.5102040816326481,
+          "equalWorkChangePercent": 0.7412505956478022,
+          "fasterPairs": 9,
+          "worstPairPercent": 9.323116219667948,
+          "descriptiveBootstrap95Percent": [
+            -0.767510909613528,
+            1.6905071521456483
+          ]
+        },
+        "D/A": {
+          "pairs": 24,
+          "pairedChangesPercent": [
+            -0.6211180124223614,
+            1.5094339622641506,
+            -0.6393861892583175,
+            -0.7537688442211032,
+            -1.6009852216748777,
+            -1.7857142857142905,
+            -1.7241379310344862,
+            -0.3811944091486663,
+            0.5108556832694733,
+            8.73015873015872,
+            4.230769230769238,
+            -0.3841229193341844,
+            0.2587322121604174,
+            0.7682458386683688,
+            -0.7623888182973326,
+            -7.13436385255648,
+            -1.025641025641022,
+            5.696202531645578,
+            -0.12886597938144284,
+            0.0,
+            -1.5404364569961526,
+            4.469987228607919,
+            4.020752269779515,
+            1.3003901170351106
+          ],
+          "medianPairedChangePercent": -0.2550301942650546,
+          "equalWorkChangePercent": 0.49769682850637764,
+          "fasterPairs": 13,
+          "worstPairPercent": 8.73015873015872,
+          "descriptiveBootstrap95Percent": [
+            -0.7537688442211032,
+            0.7682458386683688
+          ]
+        }
+      },
+      "largestReportedParserWasmHeapBytes": {
+        "A": 38928384,
+        "B": 38928384,
+        "C": 38928384,
+        "D": 38928384
+      },
+      "observedVersions": [
+        "161.0"
+      ],
+      "interpretation": "Separate cell. C/A and D/B are separate unchanged-source controls; B/A and D/A share baseline A. No control subtraction, pooling, or automatic qualification."
+    }
+  ],
+  "limitations": [
+    "Never pool browsers, order replications or attempts.",
+    "Bootstrap intervals are descriptive and do not correct temporal dependence or multiple comparisons.",
+    "Reported parser heaps and untimed RSS snapshots do not measure import peak memory."
+  ]
+}

@@ -44,6 +44,11 @@
             "type": "JmdictBrowserStudyManifest"
         },
         {
+            "path": "dev/perf/jmdict-yield-study/manifest.json",
+            "typeFile": "types/dev/jmdict-yield-study.d.ts",
+            "type": "JmdictYieldStudyManifest"
+        },
+        {
             "path": "test/perf/dictionaries.lock.json",
             "typeFile": "types/test/performance-dictionary-lock.d.ts",
             "type": "PerformanceDictionaryLock"

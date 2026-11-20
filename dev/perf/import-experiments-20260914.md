@@ -487,8 +487,102 @@ python3 dev/perf/jmdict-browser-study-analyze.py \
 
 For a fresh study, follow the committed protocol to reconstruct and freeze the exact sources and runtime. Keep the browser/order cells separate and use a new evidence directory; the driver refuses to append or overwrite an attempted cohort. A fresh run is a new replication, not a replacement for these results.
 
-### Next independent candidate
+### Task-turn candidate and local validation
 
 [PR #767](https://github.com/ManabiIO/manabitan/pull/767) separately tests cooperative task-turn overlap at product source `52a0108053837ff7a504c256606570e397ab93b0`, tree `92b35a642477e5a8161298e8c2e5d1881430508a`. It contains neither source-copy nor initial-prefetch changes. The first callback keeps its late turn; later callbacks start their owned turn before the unchanged sink and join both. A terminal fence preserves delivered cancellation before publication, including empty trailing groups and trailing parser errors. The witness resets at callback entry so a later failed sink cannot inherit a successful earlier overlap. Original sink/parser errors retain priority over turn failures.
 
-This candidate passed 331 focused tests, seventeen new regression cases, five targeted mutation checks, lint, both required type projects, seven dry builds, unchanged WASM checks, and the full 617-file suite with 13,683 passed and 47 skipped. Its separate frozen browser protocol compares A/C baseline and B/D identical candidate, reporting C/A and D/B controls plus B/A and D/A separately. Whole-import completion, including the terminal fence, is authoritative. Browser qualification is pending at this report checkpoint; no task-turn speedup is claimed.
+This candidate passed 331 focused tests, seventeen new regression cases, five targeted mutation checks, lint, both required type projects, seven dry builds, unchanged WASM checks, and the full 617-file suite with 13,683 passed and 47 skipped. Its separate frozen browser protocol compares A/C baseline and B/D identical candidate, reporting C/A and D/B controls plus B/A and D/A separately. Whole-import completion, including the terminal fence, is authoritative. The complete browser study below does not qualify this candidate for runtime promotion.
+
+### Task-turn Chromium results
+
+The second study is [run 44640155099](https://github.com/ManabiIO/manabitan/actions/runs/44640155099), measured at tooling commit `999c08aded15c901e6862e04f7bd36922e3fd51f`, tree `5d65b96a2fdbb14023c6596341a7e6ace75f9942`. Its original manifest SHA256 is `cbe2f907c567ff3a44e5fc0c43d95757abcfeeecf3aa46e2a482e9dbb2424743`. A/C independently package the baseline; B/D independently package the same task-turn candidate. C/A and D/B are separate unchanged-source controls, and B/A and D/A share A within their block. No arms or cells are pooled and no control is subtracted.
+
+Both Chromium cells completed all 104 observations, with no observed import, command or path failure. Forward used Intel Xeon 6975P-C; reverse used AMD EPYC 7763, each with four logical CPUs. Their baseline A medians are 764.90 and 1,031.10 ms; these hosts must remain separate. All 119 recorded command receipts per cell and every raw import report were independently audited, including exact source/package/fixture/runtime identities, both package controls, twelve native/borrowed chunks, three workers, zero fallback and sampled restart consistency.
+
+| Chromium cell | Comparison              | Median paired change | Equal-work change | Faster pairs | Descriptive 95% interval |
+| ------------- | ----------------------- | -------------------: | ----------------: | -----------: | ------------------------ |
+| Forward       | C/A baseline control    |               +0.82% |            +0.81% |         9/24 | −0.38% to +2.60%         |
+| Forward       | D/B candidate control   |               +1.72% |            +1.15% |         9/24 | −0.21% to +2.86%         |
+| Forward       | B/A task-turn candidate |               +1.04% |            −0.13% |        11/24 | −2.06% to +2.73%         |
+| Forward       | D/A task-turn candidate |               +0.77% |            +1.02% |        10/24 | −0.57% to +3.29%         |
+| Reverse       | C/A baseline control    |               +0.67% |            +0.72% |         8/24 | −0.58% to +2.36%         |
+| Reverse       | D/B candidate control   |               +0.21% |            +0.16% |        11/24 | −1.20% to +1.14%         |
+| Reverse       | B/A task-turn candidate |               +0.62% |            −0.24% |        11/24 | −1.79% to +0.80%         |
+| Reverse       | D/A task-turn candidate |               −0.18% |            −0.08% |        12/24 | −2.16% to +2.23%         |
+
+**No repeatable Chromium whole-import gain is established.** Candidate-minus-baseline differences between arm medians for `importerChunkSinkMs` are −29.5/−25.5 ms in forward B/D and −26.5/−22.0 ms in reverse B/D. That counter surrounds the entire native `onChunk` callback, including its task-turn wait; the new terminal fence is outside it. The process-only `streamChunkWorkMs` boundary stays unchanged. These nested counter reductions are not equivalent whole-import savings. The separate phase summary retains all 192 measured observation identifiers and raw values; its SHA256 is `a95aa1799b9b3d3d8f40906a415169b491681bff78c10da451397602c6e8d562`.
+
+The upload action omitted two hidden tooling copies from each Chromium artifact. Forty-one other declared harness inputs are embedded; top-level `workflow.yml` verifies the workflow duplicate. The exact two omitted files are separately reconstructed from the actual measured Git commit, with Git blob and SHA256 receipts. The initial audit attempt that discovered this is preserved. Original ZIPs and observations are untouched; future uploads include hidden files. This evidence-packaging correction does not change the comparisons.
+
+### Task-turn Firefox results and final decision
+
+Both Firefox cells also completed all 104 observations and passed independent raw-receipt audits. Both hosts exposed four logical CPUs on Intel Xeon 6975P-C in separate VMs, and all 208 profile paths are distinct. Baseline A medians are 829.0 ms forward and 783.0 ms reverse. The runtime remains the exact official Mozilla archive/executables recorded above. Every source, package, row-count, twelve-probe semantic check, storage sample and realm-changing reload check passed. As with Chromium, only the two hidden tooling paths were omitted from the original snapshots; the same explicitly separate source supplement verifies them. No observation or source artifact was replaced.
+
+| Firefox cell | Comparison              | Median paired change | Equal-work change | Faster pairs | Descriptive 95% interval |
+| ------------ | ----------------------- | -------------------: | ----------------: | -----------: | ------------------------ |
+| Forward      | C/A baseline control    |               −1.15% |            −1.16% |        19/24 | −2.16% to −0.60%         |
+| Forward      | D/B candidate control   |               +0.36% |            +0.07% |        10/24 | −0.60% to +1.12%         |
+| Forward      | B/A task-turn candidate |               −1.20% |            −0.96% |        17/24 | −1.66% to −0.12%         |
+| Forward      | D/A task-turn candidate |               −0.71% |            −0.89% |        14/24 | −1.71% to +0.24%         |
+| Reverse      | C/A baseline control    |               +0.82% |            +1.22% |        10/24 | −0.52% to +2.55%         |
+| Reverse      | D/B candidate control   |               −0.06% |            −0.24% |        12/24 | −1.02% to +0.78%         |
+| Reverse      | B/A task-turn candidate |               +0.51% |            +0.74% |         9/24 | −0.77% to +1.69%         |
+| Reverse      | D/A task-turn candidate |               −0.26% |            +0.50% |        13/24 | −0.75% to +0.77%         |
+
+**Hold the task-turn candidate.** Its favorable Firefox-forward B/A result is accompanied by a similarly favorable unchanged-baseline C/A control. The reverse cell does not reproduce the candidate benefit, and neither Chromium cell establishes a gain. Controls are not subtracted to manufacture a corrected effect. The implementation remains an isolated, reconstructable experiment with its correctness tests; it is not applied to the runtime on either diagnostic branch.
+
+The second study retains **416 successful observations, including 384 measured imports and 32 warmups**. Across both independent studies, **832 complete imports / 768 measured imports** are preserved; this is a count of work, not a pooled performance result. [The task-turn analysis](../../builds/perf/20261119-yield-study/all-browser-analysis.json) retains all sixteen comparisons and can be reproduced with [the separate analyzer](jmdict-yield-study-analyze.py). Both browser audits and the independent summary agree with the original driver. These measurements qualify neither peak process memory nor exhaustive persisted-byte equality, and their effects on current `develop` remain untested.
+
+### Task-turn evidence and validation
+
+[The validation summary](../../builds/perf/20261119-yield-study/validation-summary.json) separates the runtime candidate's local gates from the diagnostic branch and browser observations. The candidate's full suite passed 617 files / 13,683 tests, with 47 skipped; its 331 focused tests include seventeen new cases and overlap that full-suite count. Five targeted mutations failed their intended regression assertions, after which the exact source bytes were restored. Lint, main and required-test types, seven dry builds and all five unchanged-WASM checks passed. The study tooling passed ten Python contracts and 155 JSON schema tests. Original failed setup, formatting/link and artifact-coverage attempts remain with their corrected outcomes; none is a discarded import observation.
+
+[The task-turn evidence archive](../../builds/perf/20261119-yield-study/yield-evidence.tar.xz) contains every payload from all four original artifact ZIPs, complete job logs, independent audits, the explicitly separate measured-source supplement, source/fixture/runtime identities, local candidate and tooling validation, and the phase inventory. [Its receipt](../../builds/perf/20261119-yield-study/yield-evidence.tar.xz.json) and internal per-file index preserve the original ZIP identities and all member hashes. Verify and reproduce the sixteen separate comparisons:
+
+```sh
+python3 dev/perf/import-study-evidence.py verify \
+  builds/perf/20261119-yield-study/yield-evidence.tar.xz
+mkdir -p builds/perf/review-yield-evidence
+tar -xJf builds/perf/20261119-yield-study/yield-evidence.tar.xz \
+  -C builds/perf/review-yield-evidence
+python3 dev/perf/jmdict-yield-study-analyze.py \
+  builds/perf/review-yield-evidence/chromium-forward \
+  builds/perf/review-yield-evidence/chromium-reverse \
+  builds/perf/review-yield-evidence/firefox-forward \
+  builds/perf/review-yield-evidence/firefox-reverse \
+  --output builds/perf/review-yield-analysis.json
+```
+
+The summaries preserve original source identities even though report-only commits add documentation and archive fixes. Optional browser studies are not rerun for those commits; ordinary CI continues. No parser, worker, cache, compression, batching, storage-format or production experiment default is promoted by either diagnostic PR.
+
+### Remaining opportunities on the frozen baseline
+
+The next directions come from the first browser study's 24 measured baseline A observations in each cell, not from the older component screens. The reproducible inventory is retained in the task-turn evidence under `local/phase-inventory/`; it pins every source ZIP identity, selection and host identity. These are nested phase measurements and upper bounds, not predicted speedups.
+
+The offline adapter reproduces the inventory byte-for-byte from the committed first evidence archive, without reopening or downloading any original ZIP. It directly verifies that tar and all 104 required payloads; original ZIP hashes remain historical identities in the verified index, not hashes of reconstructed ZIP containers. After extracting the task-turn evidence as above:
+
+```sh
+python3 builds/perf/review-yield-evidence/local/phase-inventory/extract-phase-inventory-offline.py \
+  --evidence builds/perf/20261119-round2/browser-evidence.tar.xz \
+  --evidence-receipt builds/perf/20261119-round2/browser-evidence.tar.xz.json \
+  --output builds/perf/review-phase-inventory.json \
+  --verification-output builds/perf/review-phase-inventory-verification.json
+```
+
+| Phase median, ms                        | Chromium forward | Chromium reverse | Firefox forward | Firefox reverse |
+| --------------------------------------- | ---------------: | ---------------: | --------------: | --------------: |
+| Canonical scan excluding exact matching |            54.85 |            53.70 |              51 |              53 |
+| Exact content matching                  |            12.00 |            11.75 |           103.5 |             114 |
+| Record validation                       |            19.75 |            20.30 |              27 |              31 |
+
+A small implementation candidate is the synchronous run-validation loop in `TermRecordOpfsStore._encodeAndAppendArtifactChunkForState`. It separately resolves the same row's unique content index for offset and length. Selecting the resolved-reference shape once per synchronous run and loading that index once per row could remove repeated dispatch while retaining independent bounds checks, overflow/run splitting, fixed-span/fixed-length precedence and the generic fallback. Re-select after each awaited append; do not carry an unchecked reference snapshot across an await. The exact current [PR #764](https://github.com/ManabiIO/manabitan/pull/764) patch at `2ec02361cadea559648621306e7659b44b5ec2a7` changes the later field encoder, not this validation loop. However, validation already overlaps content compression. Its entire 19.75–31 ms phase is an upper bound, and current receipts cannot identify how much extends the final join.
+
+The larger serialized stages need attribution before a new production edit. Dedup resolution completes before the current chunk starts content compression. Canonical scanning performs twelve native calls over 364,869 rows, with 16,741,613 copied input bytes and no fallback. Its timer also includes module setup, input staging, native table work and pending-column adoption; those subphases have no separate durations. The 32,080-byte copied-output counter covers exact descriptors and excludes six adopted owned columns. Copy volume alone therefore does not establish which operation consumes the 51–55 ms median stage.
+
+Firefox's 779 successful exact matches outside its recent-source cache are another lead. They pass through reference reads, grouped compressed-block loads, checksum validation, synchronous decompression and equality checks. The implementation already groups requests by block and shares in-flight loads, so adding basic read batching would duplicate existing behavior. Measure those subphases separately before choosing an optimization. Do not enlarge the cache or remove checks to manufacture a gain. Firefox reverse's 107 ms finalization median includes an 89 ms close-writable median, versus 21/8 ms in Firefox forward; these remain host-specific observations, not evidence that durability work can be omitted.
+
+### Upstream scope
+
+Fresh GitHub reads at `2026-11-20T00:00:03Z` confirm that `develop` is now `e8a927ab5401c19e6119a95de6a8f53eb92302ec`. [PR #759](https://github.com/ManabiIO/manabitan/pull/759) merged batched metadata publication at `594f7fde31c6a69262115ccce733c17a3382b2c8`; [PR #766](https://github.com/ManabiIO/manabitan/pull/766) merged reduced shared-content cache copying at `e8a927ab5401c19e6119a95de6a8f53eb92302ec`. Those changes belong to parallel work and are not attributed to this study.
+
+Both browser studies and the phase inventory retain their exact `d829` baseline. Neither study was rebased or restarted after observing results. Candidate effects and phase costs on the newer `develop` revision remain untested. Any subsequent runtime proposal must reconcile that source and repeat its required functional and performance qualification; these fixed-baseline observations cannot be transferred to the new revision.
