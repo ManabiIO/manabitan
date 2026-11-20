@@ -70,10 +70,16 @@ describe('DictionaryDatabaseProxy purge acknowledgement', () => {
         await expect(Reflect.get(backend, '_dictionaryDatabase').purge()).resolves.toBe(purgeResult);
     });
 
-    test('propagates an actual purge failure without claiming readiness or notifying', async () => {
+    test.each([false, true])('invalidates readiness after a purge fails (prepared: %s)', async (prepared) => {
         const {backend, sendMessagePromise, updated} = fixture({purgeFails: true});
+        const database = Reflect.get(backend, '_dictionaryDatabase');
+        if (prepared) {
+            await database.prepare();
+            expect(database.isPrepared()).toBe(true);
+            sendMessagePromise.mockClear();
+        }
         await expect(backend._onApiPurgeDatabase(void 0, {})).rejects.toThrow('Purge storage failed');
-        expect(Reflect.get(backend, '_dictionaryDatabase').isPrepared()).toBe(false);
+        expect(database.isPrepared()).toBe(false);
         expect(sendMessagePromise).toHaveBeenCalledExactlyOnceWith({action: 'databasePurgeOffscreen'});
         expect(updated).not.toHaveBeenCalled();
     });

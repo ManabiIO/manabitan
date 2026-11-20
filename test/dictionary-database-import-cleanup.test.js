@@ -1273,7 +1273,7 @@ describe('DictionaryDatabase import cleanup', () => {
         expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);
     });
 
-    test('purge attempts every cleanup step and reopens after independent failures', async () => {
+    test('preserves purge recovery when the SQLite wipe fails after runtime cleanup', async () => {
         const database = new DictionaryDatabase();
         const db = {
             close: vi.fn(() => {
@@ -1285,9 +1285,11 @@ describe('DictionaryDatabase import cleanup', () => {
                 }
             }),
         };
-        const termContentReset = vi.fn().mockRejectedValue(new Error('term content reset failed'));
-        const termRecordReset = vi.fn(resolveVoid);
-        const journalClear = vi.fn().mockRejectedValue(new Error('journal clear failed'));
+        const root = {
+            getFileHandle: vi.fn(async () => ({})),
+            removeEntry: vi.fn(resolveVoid),
+        };
+        const finishPurge = vi.spyOn(database, '_finishPersistentDictionaryPurge').mockRejectedValue(new Error('SQLite wipe failed'));
         const terminate = vi.fn();
         const prepare = vi.spyOn(database, '_prepareOnce').mockResolvedValue();
         Reflect.set(database, '_db', db);
@@ -1295,20 +1297,18 @@ describe('DictionaryDatabase import cleanup', () => {
         Reflect.set(database, '_bulkImportTransactionOpen', true);
         Reflect.set(database, '_bulkImportJournalRecord', {sessionId: 'purge-test'});
         Reflect.set(database, '_importJournalRecoveryPending', true);
-        Reflect.set(database, '_termContentStore', {reset: termContentReset});
-        Reflect.set(database, '_termRecordStore', {reset: termRecordReset});
-        Reflect.set(database, '_importJournal', {clear: journalClear});
         Reflect.set(database, '_worker', {terminate});
         Reflect.set(database, '_applyRuntimePragmas', vi.fn());
+        vi.spyOn(database, '_getDictionaryPurgeRoot').mockResolvedValue(/** @type {FileSystemDirectoryHandle} */ (/** @type {unknown} */ (root)));
 
         await expect(database.purge()).rejects.toThrow('Dictionary database purge encountered cleanup failures');
 
-        expect(termContentReset).toHaveBeenCalledOnce();
-        expect(termRecordReset).toHaveBeenCalledOnce();
-        expect(journalClear).toHaveBeenCalledOnce();
+        expect(root.getFileHandle).toHaveBeenCalledWith('manabitan-dictionary-purge-pending', {create: true});
+        expect(finishPurge).toHaveBeenCalledOnce();
+        expect(root.removeEntry).not.toHaveBeenCalled();
         expect(db.close).toHaveBeenCalledOnce();
         expect(terminate).toHaveBeenCalledOnce();
-        expect(prepare).toHaveBeenCalledOnce();
+        expect(prepare).not.toHaveBeenCalled();
         expect(Reflect.get(database, '_db')).toBeNull();
         expect(Reflect.get(database, '_bulkImportState')).toBe('idle');
         expect(Reflect.get(database, '_bulkImportTransactionOpen')).toBe(false);

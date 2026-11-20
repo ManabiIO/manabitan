@@ -157,10 +157,16 @@ await run('ordinary write/read/clear round trip', async (journal) => {
     await journal.clear()
     assert.equal(await journal.read(), null)
 })
-await run('empty journal is removable before import mutation', async (journal, fs) => {
+await run('empty journal is ignored until the next import writes it', async (journal, fs) => {
     await writeFile(path.join(fs.rootPath, filename), '')
+    fs.hooks.beforeRemove = () => {
+        throw new DOMException('busy', 'NotAllowedError')
+    }
     assert.equal(await journal.read(), null)
-    assert(fs.operations.some((x) => x.type === 'remove'))
+    assert.equal(await readFile(path.join(fs.rootPath, filename), 'utf8'), '')
+    const record = makeRecord()
+    await journal.write(record)
+    assert.deepEqual(await journal.read(), record)
 })
 await run('unreadable journal is not treated as missing', async (journal, fs) => {
     const e = new DOMException('busy', 'NotReadableError')
