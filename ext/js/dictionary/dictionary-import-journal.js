@@ -53,7 +53,7 @@ export class DictionaryImportJournal {
             // The file handle is created before any import mutation begins. A
             // crash before the first writable closes can therefore leave an
             // empty file with no state to roll back.
-            await this._clear();
+            // Leave the empty file for the next journal write to replace.
             return null;
         }
         const value = /** @type {unknown} */ (parseJson(await file.text()));
@@ -132,7 +132,7 @@ export class DictionaryImportJournal {
     }
 
     /**
-     * Serialize this journal instance, including empty-file cleanup by reads.
+     * Serialize reads, writes, and clears for this journal instance.
      * Cross-instance ownership remains the database coordinator's responsibility.
      * @template T
      * @param {() => Promise<T>} operation

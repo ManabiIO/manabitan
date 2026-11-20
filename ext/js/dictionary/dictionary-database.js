@@ -75,6 +75,7 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
+const DICTIONARY_PURGE_MARKER = 'manabitan-dictionary-purge-pending';
 const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
 const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
@@ -1165,18 +1166,13 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {boolean} clearImportJournal
      * @returns {Promise<Error[]>}
      */
-    async _collectPersistentStoreResetErrors(clearImportJournal) {
-        const operations = [
+    async _collectPersistentStoreResetErrors() {
+        const results = await Promise.allSettled([
             this._termContentStore.reset(),
             this._termRecordStore.reset(),
-        ];
-        if (clearImportJournal) {
-            operations.push(this._importJournal.clear());
-        }
-        const results = await Promise.allSettled(operations);
+        ]);
         return results
             .filter((result) => result.status === 'rejected')
             .map((result) => toError(result.reason));
@@ -1872,7 +1868,19 @@ export class DictionaryDatabase {
                 // Setup performs its own rollback; purge still resets all persistence.
             }
         }
+        const previousBulkImportState = this._bulkImportState;
         this._beginExclusiveDatabaseCleanup();
+        let root;
+        try {
+            root = await this._getDictionaryPurgeRoot();
+            if (root === null) { throw new Error('Dictionary database purge requires OPFS'); }
+            // The presence of this file is the durable intent. No file contents
+            // are needed, so a crash during creation is safe on either side.
+            await root.getFileHandle(DICTIONARY_PURGE_MARKER, {create: true});
+        } catch (error) {
+            this._transitionBulkImportState(BULK_IMPORT_STATE_FINALIZING, previousBulkImportState);
+            throw error;
+        }
 
         /** @type {Error[]} */
         const errors = [];
@@ -1895,7 +1903,6 @@ export class DictionaryDatabase {
                 }
             }
             this._releaseRuntimeConnection(errors);
-            errors.push(...await this._collectPersistentStoreResetErrors(true));
             this._bulkImportTransactionOpen = false;
             this._bulkImportJournalRecord = null;
             this._importJournalRecoveryPending = false;
@@ -1912,12 +1919,7 @@ export class DictionaryDatabase {
 
             let result = false;
             try {
-                result = await deleteOpfsDatabaseFiles();
-            } catch (error) {
-                errors.push(toError(error));
-            }
-
-            try {
+                result = await this._finishPersistentDictionaryPurge(root);
                 await this._prepareOnce(true);
             } catch (error) {
                 errors.push(toError(error));
@@ -9620,10 +9622,46 @@ null :
 
     // Private
 
+    /** @returns {Promise<FileSystemDirectoryHandle|null>} */
+    async _getDictionaryPurgeRoot() {
+        if (typeof navigator === 'undefined' || typeof navigator.storage?.getDirectory !== 'function') { return null; }
+        return await navigator.storage.getDirectory();
+    }
+
+    /** Completes an explicit purge before opening SQLite or recovering an import. */
+    async _resumePersistentDictionaryPurge() {
+        const root = await this._getDictionaryPurgeRoot();
+        if (root === null) { return; }
+        try {
+            await root.getFileHandle(DICTIONARY_PURGE_MARKER);
+        } catch (error) {
+            if ((error instanceof DOMException || error instanceof Error) && error.name === 'NotFoundError') { return; }
+            throw error;
+        }
+        await this._finishPersistentDictionaryPurge(root);
+    }
+
+    /**
+     * SQLite owns the references to the payload files. Wipe it before deleting
+     * those files and retain the marker until every cleanup operation succeeds.
+     * @param {FileSystemDirectoryHandle} root
+     * @returns {Promise<boolean>}
+     */
+    async _finishPersistentDictionaryPurge(root) {
+        const result = await deleteOpfsDatabaseFiles();
+        const errors = await this._collectPersistentStoreResetErrors();
+        if (errors.length === 1) { throw errors[0]; }
+        if (errors.length > 1) { throw new AggregateError(errors, 'Failed to reset dictionary payloads'); }
+        await this._importJournal.clear();
+        await root.removeEntry(DICTIONARY_PURGE_MARKER);
+        return result;
+    }
+
     /**
      * @returns {Promise<void>}
      */
     async _openConnection() {
+        await this._resumePersistentDictionaryPurge();
         this._sqlite3 = await getSqlite3();
         try {
             this._db = await openOpfsDatabase('DictionaryDatabase._openConnection');
@@ -10019,7 +10057,7 @@ null :
         }
         // Read and validate the inventory before destructive storage I/O. A
         // metadata read failure must leave the old files available for retry.
-        const resetErrors = await this._collectPersistentStoreResetErrors(false);
+        const resetErrors = await this._collectPersistentStoreResetErrors();
         if (resetErrors.length === 1) {
             throw resetErrors[0];
         }
