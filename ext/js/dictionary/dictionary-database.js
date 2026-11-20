@@ -63,6 +63,8 @@ import {TermContentIntegrityError, TermContentOpfsStore} from './term-content-op
 import {TermContentBlockStore} from './term-content-block-store.js';
 import {createTermImportMetrics} from './term-import-metrics.js';
 import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictionary-import-journal.js';
+import {computeGenerationMediaCrc, DictionaryGenerationMediaStore, encodeGenerationMediaDescriptor, isGenerationMediaDescriptor} from './dictionary-generation-media-store.js';
+import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
 import {TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
@@ -75,6 +77,7 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
+const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
 const DICTIONARY_PURGE_MARKER = 'manabitan-dictionary-purge-pending';
 const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
@@ -691,6 +694,20 @@ export class DictionaryDatabase {
         this._dictionaryNameByTermRecordStorage = new Map();
         /** @type {Map<string, string>} Publication identity, separate from display/storage names. */
         this._termRecordGenerationByStorage = new Map();
+        /** @type {Map<string, import('./dictionary-generation-media-store.js').GenerationMediaDescriptor>} */
+        this._generationMediaByDictionary = new Map();
+        /**
+         *
+         */
+        this._generationMediaStore = new DictionaryGenerationMediaStore();
+        /** @type {{generationId: string, descriptorKey: string|null, promise: Promise<void>, cancel: (() => void)|null, cleanup: Promise<void>|null}|null} */
+        this._generationMediaWrite = null;
+        /**
+         *
+         */
+        this._generationMediaReadEpoch = 0;
+        /** @type {{checkedCount: number, unavailable: Array<{dictionary: string, reason: string}>}|null} */
+        this._startupGenerationMediaHealth = null;
         /** @type {import('@sqlite.org/sqlite-wasm').sqlite3_module|null} */
         this._termsVtabModule = null;
         /** @type {boolean} */
@@ -805,6 +822,7 @@ export class DictionaryDatabase {
                     this._refreshTermRecordStorageNameMappings();
                     await this._cleanupMissingTermRecordShards();
                 }
+                await this._checkStartupGenerationMediaHealth();
 
                 // keep existing draw worker split behaviour.
                 const isWorker = self.constructor.name !== 'Window';
@@ -903,6 +921,8 @@ export class DictionaryDatabase {
      * @param {Error[]} errors
      */
     _releaseRuntimeConnection(errors) {
+        this._invalidateGenerationMediaReads();
+        this._startupGenerationMediaHealth = null;
         try {
             this._termContentBlockImportSession?.close();
         } catch (error) {
@@ -973,6 +993,7 @@ export class DictionaryDatabase {
         }
         const expectedState = this._bulkImportState;
         this._transitionBulkImportState(expectedState, BULK_IMPORT_STATE_FINALIZING);
+        this._invalidateGenerationMediaReads();
     }
 
     /** Waits until active import setup has either completed or cleaned itself up. */
@@ -1001,6 +1022,7 @@ export class DictionaryDatabase {
 
     /** Returns the lifecycle to idle after setup or finalization cleanup. */
     _endBulkImportLifecycle() {
+        this._generationMediaWrite = null;
         if (this._bulkImportState === BULK_IMPORT_STATE_IDLE) { return; }
         if (this._bulkImportState === BULK_IMPORT_STATE_ACTIVE) {
             this._transitionBulkImportState(BULK_IMPORT_STATE_ACTIVE, BULK_IMPORT_STATE_IDLE);
@@ -1092,7 +1114,7 @@ export class DictionaryDatabase {
             return sqliteRollbackSucceeded;
         }
 
-        const operations = [];
+        const operations = [this._rollbackGenerationMedia(journalRecord.sessionId)];
         if (rollbackTermContent) {
             operations.push(Promise.resolve().then(() => this._termContentStore.rollbackImportSession(journalRecord.contentCheckpoint)));
         }
@@ -1174,6 +1196,7 @@ export class DictionaryDatabase {
         const results = await Promise.allSettled([
             this._termContentStore.reset(),
             this._termRecordStore.reset(),
+            this._generationMediaStore.reset(),
         ]);
         return results
             .filter((result) => result.status === 'rejected')
@@ -1498,6 +1521,10 @@ export class DictionaryDatabase {
             let termRecordSessionEnded = false;
             let sqlitePublished = false;
             try {
+                const generationMedia = publication?.summary.generationMedia;
+                if (this._generationMediaWrite !== null || typeof generationMedia !== 'undefined') {
+                    await this._awaitGenerationMediaPublication(generationMedia);
+                }
                 const tTermContentEndImportSessionStart = safePerformance.now();
                 const termContentEndImportSessionPromise = this._termContentStore.endImportSession()
                     .then(() => {
@@ -1594,6 +1621,10 @@ export class DictionaryDatabase {
                             1,
                         );
                     }
+                    if (isGenerationMediaDescriptor(publication?.summary.generationMedia)) {
+                        // The storage gate and the summary become durable together.
+                        db.exec(`PRAGMA user_version = ${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}`);
+                    }
                     db.exec({
                         sql: 'INSERT OR REPLACE INTO dictionaryImportPublications (sessionId, publishedAt) VALUES (?, ?)',
                         bind: [sessionId, Date.now()],
@@ -1609,6 +1640,7 @@ export class DictionaryDatabase {
                     commitMs = safePerformance.now() - tCommitStart;
                     if (publication !== null) {
                         this._termRecordGenerationByStorage.set(this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title), sessionId);
+                        this._setGenerationMediaDescriptor(publication.summary.title, publication.summary.generationMedia);
                     }
                     try {
                         await this._importJournal.clear();
@@ -1888,6 +1920,14 @@ export class DictionaryDatabase {
         /** @type {Error[]} */
         const errors = [];
         try {
+            // An early media writer may still be waiting for the index the
+            // abandoned import will never supply. Cancel before joining it.
+            const mediaWrite = this._generationMediaWrite;
+            if (mediaWrite !== null) {
+                mediaWrite.cancel?.();
+                await mediaWrite.promise.catch(() => {});
+                await mediaWrite.cleanup?.catch(() => {});
+            }
             if (this._db !== null) {
                 if (this._bulkImportTransactionOpen) {
                     try {
@@ -1972,6 +2012,7 @@ export class DictionaryDatabase {
         /** @type {number[]} */
         const counts = [];
         const termRecordStorageName = this._getTermRecordStorageName(dictionaryName);
+        const mediaGeneration = this._generationMediaByDictionary.has(dictionaryName) ? this._termRecordGenerationByStorage.get(termRecordStorageName) : void 0;
         await this._termRecordStore.ensureDictionariesLoaded([termRecordStorageName]);
         const termCount = this._getDirectDictionaryRecordCount(dictionaryName);
         progressData.count += termCount;
@@ -2061,6 +2102,14 @@ export class DictionaryDatabase {
         }
         ++progressData.storesProcesed;
         reportPostCommitProgress('term-record-delete');
+
+        if (typeof mediaGeneration === 'string' && ![...this._termRecordGenerationByStorage.values()].includes(mediaGeneration)) {
+            try {
+                await this._generationMediaStore.remove(mediaGeneration);
+            } catch (error) {
+                reportCleanupFailure('generation-media-delete', error);
+            }
+        }
 
         try {
             await this._cleanupTermContentAfterDictionaryDelete();
@@ -2166,6 +2215,13 @@ null;
                 this._getTermRecordStorageName(sourceTitle);
             nextSummary.termRecordStorageName = fallbackStorageName;
             nextSummary.storageGenerationId = this._getSummaryStorageGenerationId(parsedSummary, fallbackStorageName);
+            // A caller-supplied title override cannot rebind media ownership.
+            const generationMedia = parsedSummary !== null ? /** @type {unknown} */ (Reflect.get(parsedSummary, 'generationMedia')) : null;
+            if (isGenerationMediaDescriptor(generationMedia)) {
+                nextSummary.generationMedia = generationMedia;
+            } else {
+                delete nextSummary.generationMedia;
+            }
             if (parsedSummary !== null && typeof Reflect.get(parsedSummary, 'storageImportOperationId') === 'string') {
                 nextSummary.storageImportOperationId = Reflect.get(parsedSummary, 'storageImportOperationId');
             } else {
@@ -2186,7 +2242,7 @@ null;
             transientUpdateStage: stage,
             updateSessionToken: transientSessionToken,
         });
-        const metadataRenames = /** @type {Array<{sourceTitle: string, targetTitle: string, storageName: string, generationId: string}>} */ ([]);
+        const metadataRenames = /** @type {Array<{sourceTitle: string, targetTitle: string, storageName: string, generationId: string, generationMedia: unknown}>} */ ([]);
         /**
          * @param {string} sourceTitle
          * @param {string} targetTitle
@@ -2242,7 +2298,13 @@ null;
                 db.exec({sql: 'DELETE FROM dictionaryStorageHealth WHERE title = $title', bind: {$title: targetTitle}});
                 db.exec({sql: 'UPDATE dictionaryStorageHealth SET title = $toTitle WHERE title = $fromTitle', bind: {$fromTitle: sourceTitle, $toTitle: targetTitle}});
             }
-            metadataRenames.push({sourceTitle, targetTitle, storageName: termRecordStorageName, generationId: this._getSummaryStorageGenerationId(nextSummary, targetTitle)});
+            metadataRenames.push({
+                sourceTitle,
+                targetTitle,
+                storageName: termRecordStorageName,
+                generationId: this._getSummaryStorageGenerationId(nextSummary, targetTitle),
+                generationMedia: nextSummary.generationMedia,
+            });
             this._lastReplaceDictionaryTitleDebug = {
                 ...this._lastReplaceDictionaryTitleDebug,
                 [debugKey]: snapshotRows(),
@@ -2313,8 +2375,9 @@ null;
         }
         // Publish all mappings only after COMMIT, removing prior owners first.
         for (const {sourceTitle} of metadataRenames) { this._unregisterTermRecordStorageName(sourceTitle); }
-        for (const {targetTitle, storageName, generationId} of metadataRenames) {
+        for (const {targetTitle, storageName, generationId, generationMedia} of metadataRenames) {
             this._registerTermRecordStorageName(targetTitle, storageName, generationId);
+            this._setGenerationMediaDescriptor(targetTitle, generationMedia);
         }
         this._termsVirtualTableDirty = true;
         this._clearBulkImportRuntimeCaches();
@@ -2569,6 +2632,7 @@ null;
     _unregisterTermRecordStorageName(dictionaryName) {
         const storageName = this._termRecordStorageNameByDictionary.get(dictionaryName);
         this._termRecordStorageNameByDictionary.delete(dictionaryName);
+        this._generationMediaByDictionary.delete(dictionaryName);
         if (typeof storageName !== 'undefined' && this._dictionaryNameByTermRecordStorage.get(storageName) === dictionaryName) {
             this._dictionaryNameByTermRecordStorage.delete(storageName);
             this._termRecordGenerationByStorage.delete(storageName);
@@ -2582,6 +2646,7 @@ null;
         this._termRecordStorageNameByDictionary.clear();
         this._dictionaryNameByTermRecordStorage.clear();
         this._termRecordGenerationByStorage.clear();
+        this._generationMediaByDictionary.clear();
         for (const row of rows) {
             const title = this._asString(row.title);
             if (title.length === 0) { continue; }
@@ -2596,6 +2661,19 @@ null;
                 this._getSummaryTermRecordStorageName(summary, title),
                 this._getSummaryStorageGenerationId(summary, title),
             );
+            this._setGenerationMediaDescriptor(title, Reflect.get(summary, 'generationMedia'));
+        }
+    }
+
+    /**
+     * @param {string} title
+     * @param {unknown} descriptor
+     */
+    _setGenerationMediaDescriptor(title, descriptor) {
+        if (isGenerationMediaDescriptor(descriptor)) {
+            this._generationMediaByDictionary.set(title, {...descriptor});
+        } else {
+            this._generationMediaByDictionary.delete(title);
         }
     }
 
@@ -4045,6 +4123,8 @@ null;
             return [];
         }
         const generation = this._directTermIndexGeneration;
+        const mediaEpoch = this._generationMediaReadEpoch;
+        this._assertGenerationMediaReadEpoch(generation, mediaEpoch);
         /** @type {import('dictionary-database').Media[]} */
         const results = [];
         /** @type {Map<string, {dictionary: string, path: string, indexes: number[]}>} */
@@ -4061,7 +4141,25 @@ null;
             }
         }
         const uniqueRequests = [...mediaRequestIndexes.values()];
-        for (const requestChunk of this._chunkValues(uniqueRequests, 128)) {
+        for (const requests of this._chunkValues(uniqueRequests, 128)) {
+            let requestChunk = requests;
+            if (this._generationMediaByDictionary.size > 0) {
+                this._requireDb();
+                requestChunk = [];
+                for (const request of requests) {
+                    const descriptor = this._generationMediaByDictionary.get(request.dictionary);
+                    const media = descriptor === void 0 ? null : await this._readGenerationMedia(request.dictionary, request.path, descriptor);
+                    this._assertGenerationMediaReadEpoch(generation, mediaEpoch);
+                    if (media === null) {
+                        requestChunk.push(request);
+                        continue;
+                    }
+                    for (const itemIndex of request.indexes) {
+                        results.push(this._createMedia(media, {itemIndex, indexIndex: 0, item: items[itemIndex]}));
+                    }
+                }
+                if (requestChunk.length === 0) { continue; }
+            }
             /** @type {Record<string, string>} */
             const bind = {};
             const conditions = [];
@@ -4092,7 +4190,7 @@ null;
                 const converted = await this._deserializeMediaRow(row);
                 // Direct drawing ports can overlap mutations. An old media row
                 // must not label bytes read after its content offsets are reused.
-                this._assertTermLookupGeneration(generation);
+                this._assertGenerationMediaReadEpoch(generation, mediaEpoch);
                 const itemIndexes = mediaRequestIndexes.get(this._createDictionaryQueryKey(converted.dictionary, converted.path));
                 if (typeof itemIndexes === 'undefined') { continue; }
                 for (const itemIndex of itemIndexes.indexes) {
@@ -4102,6 +4200,55 @@ null;
         }
 
         return results;
+    }
+
+    /**
+     *
+     */
+    _invalidateGenerationMediaReads() {
+        ++this._generationMediaReadEpoch;
+        this._generationMediaStore.clearReadSnapshots();
+    }
+
+    /**
+     * @param {number} lookupGeneration
+     * @param {number} mediaEpoch
+     * @throws {TermContentLookupReadError} If media ownership changed during the read.
+     */
+    _assertGenerationMediaReadEpoch(lookupGeneration, mediaEpoch) {
+        this._assertTermLookupGeneration(lookupGeneration);
+        if (
+            mediaEpoch !== this._generationMediaReadEpoch ||
+            this._closingPromise !== null ||
+            this._purgingPromise !== null
+        ) {
+            throw new TermContentLookupReadError('temporarilyUnavailable', 'Dictionary media state changed during lookup');
+        }
+    }
+
+    /**
+     * @param {string} dictionary
+     * @param {string} path
+     * @param {import('./dictionary-generation-media-store.js').GenerationMediaDescriptor} descriptor
+     * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent|null>}
+     */
+    async _readGenerationMedia(dictionary, path, descriptor) {
+        const generationId = this._termRecordGenerationByStorage.get(this._getTermRecordStorageName(dictionary));
+        if (typeof generationId !== 'string') { return null; }
+        const mediaType = getImageMediaTypeFromFileName(path);
+        if (mediaType === null) { return null; }
+        try {
+            const range = await this._generationMediaStore.read(generationId, descriptor, path);
+            if (range === null) { return null; }
+            const payload = await inflateZipMediaContent(new Uint8Array(range.content), range.method, range.outputLength);
+            if (computeGenerationMediaCrc(payload) !== range.signature) { throw new Error('Generation media CRC32 mismatch'); }
+            return {dictionary, path, mediaType, width: 0, height: 0, content: this._toArrayBuffer(payload)};
+        } catch (error) {
+            // Follow the existing optional-media read path. The dictionary's
+            // text and other source images remain available.
+            logTermContentZstdError(error);
+            return null;
+        }
     }
 
     /**
@@ -4323,6 +4470,33 @@ null;
             const reason = this._asString(row.reason).trim() || 'Dictionary record data is damaged';
             this._termRecordStore.markDictionaryReimportRequired(this._getTermRecordStorageName(title), reason);
         }
+    }
+
+    /**
+     *
+     */
+    async _checkStartupGenerationMediaHealth() {
+        this._startupGenerationMediaHealth = null;
+        if (this._generationMediaByDictionary.size === 0) { return; }
+        const unavailable = [];
+        for (const [dictionary, descriptor] of this._generationMediaByDictionary) {
+            const generationId = this._termRecordGenerationByStorage.get(this._getTermRecordStorageName(dictionary));
+            try {
+                if (typeof generationId !== 'string') { throw new Error('Missing generation media owner'); }
+                await this._generationMediaStore.inspect(generationId, descriptor);
+            } catch (error) {
+                unavailable.push({dictionary, reason: toError(error).message});
+            }
+        }
+        this._startupGenerationMediaHealth = {checkedCount: this._generationMediaByDictionary.size, unavailable};
+        if (unavailable.length > 0) {
+            reportDiagnostics('dictionary-generation-media-startup-unavailable', this._startupGenerationMediaHealth);
+        }
+    }
+
+    /** @returns {typeof this._startupGenerationMediaHealth} */
+    getStartupGenerationMediaHealth() {
+        return this._startupGenerationMediaHealth;
     }
 
     /**
@@ -4741,6 +4915,7 @@ null;
             for (const table of tables) {
                 total[table] = this._asNumber(db.selectValue(`SELECT COUNT(*) FROM ${table}`), 0);
             }
+            for (const {count} of this._generationMediaByDictionary.values()) { total.media += count; }
             counts.push(total);
         }
 
@@ -4754,6 +4929,7 @@ null;
                     0,
                 );
             }
+            countGroup.media += this._generationMediaByDictionary.get(dictionaryName)?.count ?? 0;
             counts.push(countGroup);
         }
 
@@ -5151,6 +5327,119 @@ null;
         this._sharedGlossaryArtifactInflatedByDictionary.delete(dictionary);
         this._sharedGlossaryArtifactInflatePromiseByDictionary.delete(dictionary);
         return span;
+    }
+
+    /** @returns {boolean} */
+    canWriteGenerationMedia() {
+        return !this._usesFallbackStorage && this._bulkImportState === BULK_IMPORT_STATE_ACTIVE &&
+        this._bulkImportTransactionOpen && this._bulkImportJournalRecord !== null &&
+        this._generationMediaWrite === null && DictionaryGenerationMediaStore.supportsWrite();
+    }
+
+    /**
+     * The existing bulk-import journal owns this file by its unique session ID
+     * even if the worker dies before the complete summary is published.
+     * @param {Blob} blob
+     * @param {import('./dictionary-generation-media-store.js').GenerationMediaIndex} plan
+     * @returns {Promise<boolean>} Whether the pack was written, or the caller can use ordinary media storage.
+     */
+    async writeGenerationMedia(blob, plan) {
+        if (!this.canWriteGenerationMedia() || this._bulkImportJournalRecord === null) {
+            throw new Error('No active owner for dictionary generation media');
+        }
+        const {sessionId: generationId} = this._bulkImportJournalRecord;
+        const descriptor = {...plan.descriptor};
+        const promise = Promise.resolve().then(async () => await this._generationMediaStore.write(generationId, blob, {descriptor, index: plan.index}));
+        const write = {generationId, descriptorKey: encodeGenerationMediaDescriptor(descriptor), promise, cancel: null, cleanup: null};
+        this._generationMediaWrite = write;
+        try {
+            await promise;
+            return true;
+        } catch (error) {
+            await this._rollbackGenerationMedia(generationId);
+            if (this._generationMediaWrite !== write || this._bulkImportState !== BULK_IMPORT_STATE_ACTIVE) { throw error; }
+            this._generationMediaWrite = null;
+            reportDiagnostics('dictionary-generation-media-write-fallback', {reason: toError(error).message});
+            return false;
+        }
+    }
+
+    /**
+     * Register the readonly worker's verified Blob under the live journal.
+     * The returned owner only seals or discards this exact staged operation.
+     * @param {Blob} blob
+     * @param {import('./dictionary-generation-media-store.js').GenerationMediaIndex} plan
+     * @returns {{seal: (plan: import('./dictionary-generation-media-store.js').GenerationMediaIndex) => Promise<void>, discard: () => Promise<void>}}
+     * @throws {Error} If no active import owns the payload.
+     */
+    stageGenerationMediaPayload(blob, plan) {
+        if (!this.canWriteGenerationMedia() || this._bulkImportJournalRecord === null) {
+            throw new Error('No active owner for staged generation media');
+        }
+        const {sessionId: generationId} = this._bulkImportJournalRecord;
+        const staged = this._generationMediaStore.stage(generationId, blob, plan);
+        /** @type {NonNullable<DictionaryDatabase['_generationMediaWrite']>} */
+        const write = {generationId, descriptorKey: null, promise: staged.promise, cancel: staged.cancel, cleanup: null};
+        // No OPFS work runs until the microtask after this assignment.
+        this._generationMediaWrite = write;
+        void write.promise.catch(() => {});
+        return {
+            seal: async (selectedPlan) => {
+                if (
+                    this._generationMediaWrite !== write || this._bulkImportState !== BULK_IMPORT_STATE_ACTIVE ||
+                    write.cleanup !== null || this._bulkImportJournalRecord?.sessionId !== generationId
+                ) {
+                    throw new Error('Staged generation media no longer owns this import');
+                }
+                write.descriptorKey = staged.select(selectedPlan);
+                await write.promise;
+            },
+            discard: async () => {
+                if (this._generationMediaWrite !== write || this._bulkImportState !== BULK_IMPORT_STATE_ACTIVE) { return; }
+                await this._rollbackGenerationMedia(generationId);
+                if (this._generationMediaWrite === write && this._bulkImportState === BULK_IMPORT_STATE_ACTIVE) {
+                    this._generationMediaWrite = null;
+                }
+            },
+        };
+    }
+
+    /**
+     * @param {import('./dictionary-generation-media-store.js').GenerationMediaDescriptor|undefined} descriptor
+     */
+    async _awaitGenerationMediaPublication(descriptor) {
+        const write = this._generationMediaWrite;
+        if (write === null && typeof descriptor === 'undefined') { return; }
+        if (
+            write === null ||
+            write.generationId !== this._bulkImportJournalRecord?.sessionId ||
+            write.cleanup !== null ||
+            !isGenerationMediaDescriptor(descriptor) ||
+            write.descriptorKey !== encodeGenerationMediaDescriptor(descriptor)
+        ) {
+            throw new Error('Generation media publication does not match the owned write');
+        }
+        await write.promise;
+    }
+
+    /** @param {string} generationId */
+    async _rollbackGenerationMedia(generationId) {
+        const write = this._generationMediaWrite;
+        if (write === null) {
+            await this._generationMediaStore.remove(generationId);
+            return;
+        }
+        if (write.generationId !== generationId) {
+            throw new Error('Generation media rollback does not own the active write');
+        }
+        write.cancel?.();
+        write.cleanup ??= (async () => {
+            // Failed/cancelled writes still have to settle before we unlink.
+            // All concurrent cleanup requests join this same operation.
+            await write.promise.catch(() => {});
+            await this._generationMediaStore.remove(generationId);
+        })();
+        await write.cleanup;
     }
 
     /**
@@ -9705,6 +9994,13 @@ null :
         await this._initializeSchema();
         await this._runSchemaMigrations();
         this._restoreTermRecordDictionaryHealth();
+        if (!this._hasUnresolvedImportJournal()) {
+            try {
+                await this._generationMediaStore.removeOrphans(new Set(this._termRecordGenerationByStorage.values()));
+            } catch (error) {
+                reportDiagnostics('dictionary-generation-media-orphan-cleanup-failed', {error: toError(error).message});
+            }
+        }
     }
 
     /** */
@@ -9727,6 +10023,7 @@ null :
                 const rollbackResults = await Promise.allSettled([
                     this._termContentStore.rollbackImportSession(record.contentCheckpoint),
                     this._termRecordStore.rollbackImportSession(record.recordCheckpoint),
+                    this._generationMediaStore.remove(record.sessionId),
                 ]);
                 const rollbackErrors = rollbackResults
                     .filter((result) => result.status === 'rejected')
@@ -9959,13 +10256,13 @@ null :
         if (!Number.isSafeInteger(installedSchemaVersion) || installedSchemaVersion < 0) {
             throw new Error('Dictionary storage schema version is invalid');
         }
-        if (installedSchemaVersion > CURRENT_DICTIONARY_SCHEMA_VERSION) {
+        if (installedSchemaVersion > PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION) {
             reportDiagnostics('dictionary-schema-migration-skipped', {
                 reason: 'newer-installed-version',
                 installedSchemaVersion,
-                currentSchemaVersion: CURRENT_DICTIONARY_SCHEMA_VERSION,
+                currentSchemaVersion: PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION,
             });
-            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${CURRENT_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
+            throw new Error(`Dictionary storage schema ${installedSchemaVersion} is newer than this build supports (${PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION}). Update Manabitan before opening these dictionaries.`);
         }
         return installedSchemaVersion;
     }
