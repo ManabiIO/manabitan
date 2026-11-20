@@ -26,6 +26,7 @@ import {
     consumeLastTermBankWasmParseProfile,
     inflateCompressedTermBankSourcesWasm,
     parseTermBankWithWasmColumnChunks,
+    copyWasmBackedColumnChunk,
 } from '../ext/js/dictionary/term-bank-wasm-parser.js'
 
 /** @typedef {import('dictionary-importer').ImportExperiments} Experiments */
@@ -598,6 +599,25 @@ function requestWorker(worker, request) {
 }
 
 describe('actual parser worker flag propagation', () => {
+    test('projects exact image paths without losing the owned term content', async () => {
+        const glossary = [{type: 'structured-content', content: [
+            {tag: 'a', path: 'ignored.png', content: 'ordinary link'},
+            {tag: 'img', path: 'img/猫.webp'},
+        ]}]
+        const sources = [JSON.stringify([row('猫', glossary)]), JSON.stringify([row('ordinary')])]
+        await parseTermBankWithWasmColumnChunks(sources.map((source) => encoder.encode(source)), 3, (chunk) => {
+            const baseline = copyWasmBackedColumnChunk(chunk)
+            const projected = copyWasmBackedColumnChunk(chunk, false, true)
+            expect(projected.mediaRows).toHaveLength(1)
+            expect(projected.mediaRows[0].imagePaths).toEqual(['img/猫.webp'])
+            expect(projected.mediaRows[0].row.glossaryJsonBytes).toBeUndefined()
+            expect(projected.mediaRows[0].row.termEntryContentBytes).toHaveLength(0)
+            expect(projected.mediaRows[0].row.expressionBytes).toEqual(baseline.mediaRows[0].row.expressionBytes)
+            expect(projected.contentBytesBuffer).toEqual(baseline.contentBytesBuffer)
+            expect(projected.contentMetaList).toEqual(baseline.contentMetaList)
+        }, 2048, {computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true, singleChunk: true})
+    })
+
     test.each([false, true])('preserves owned keys, lookup bytes and resets flags across requests: compressed=%s', async (preload) => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'

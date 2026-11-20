@@ -71,6 +71,7 @@ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
+import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
 const BlobWriter = /** @type {typeof import('@zip.js/zip.js').BlobWriter} */ (/** @type {unknown} */ (BlobWriter0));
@@ -3154,64 +3155,11 @@ export class DictionaryImporter {
      * @returns {boolean}
      */
     _tryAddFastMediaRequirementsFromFastRow(row, entry, requirements) {
-        let glossary;
-        try {
-            glossary = /** @type {unknown} */ (parseJson(this._getFastRowGlossaryJson(row)));
-        } catch (_) {
-            return false;
-        }
-        const paths = this._collectGlossaryImagePaths(glossary);
+        const paths = tryCollectGlossaryImagePaths(this._getFastRowGlossaryJson(row));
         for (const path of paths) {
             this._addFastMediaRequirement(path, entry, requirements);
         }
         return paths.length > 0;
-    }
-
-    /**
-     * @param {unknown} glossary
-     * @returns {string[]}
-     */
-    _collectGlossaryImagePaths(glossary) {
-        /** @type {string[]} */
-        const paths = [];
-        if (!Array.isArray(glossary)) { return paths; }
-        for (const value of /** @type {unknown[]} */ (glossary)) {
-            if (!isJsonObject(value)) { continue; }
-            if (value.type === 'image') {
-                if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
-                    paths.push(value.path);
-                }
-                continue;
-            }
-            if (value.type === 'structured-content') {
-                this._collectStructuredContentImagePaths(value.content, paths);
-            }
-        }
-        return paths;
-    }
-
-    /**
-     * @param {unknown} content
-     * @param {string[]} paths
-     */
-    _collectStructuredContentImagePaths(content, paths) {
-        if (Array.isArray(content)) {
-            for (const item of content) {
-                this._collectStructuredContentImagePaths(item, paths);
-            }
-            return;
-        }
-        if (!(typeof content === 'object' && content !== null)) { return; }
-        const value = /** @type {Record<string, unknown>} */ (content);
-        if (value.tag === 'img') {
-            if (typeof value.path === 'string' && getImageMediaTypeFromFileName(value.path) !== null) {
-                paths.push(value.path);
-            }
-            return;
-        }
-        if (typeof value.content !== 'undefined') {
-            this._collectStructuredContentImagePaths(value.content, paths);
-        }
     }
 
     /**
@@ -4847,10 +4795,10 @@ export class DictionaryImporter {
                 }
                 if (useDirectArtifactChunkImport) {
                     const tMaterializationStart = Date.now();
-                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow}>}} */ (/** @type {unknown} */ (parsedRows));
+                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
-                        for (const {index, row} of mediaRows) {
+                        for (const {index, row, imagePaths} of mediaRows) {
                             const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
                             let reading = expression;
                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
@@ -4867,6 +4815,10 @@ export class DictionaryImporter {
                                 termTags: row.termTags ?? '',
                                 dictionary: dictionaryTitle,
                             };
+                            if (typeof imagePaths !== 'undefined') {
+                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+                                continue;
+                            }
                             let glossaryList;
                             if (
                                 this._skipImageMetadata &&
@@ -5094,6 +5046,7 @@ export class DictionaryImporter {
                 skipTagRuleDecode: usePrecomputedContentForMediaRows,
                 lazyGlossaryDecode: useLazyGlossaryDecode,
                 mediaHintFastScan: useMediaHintFastScan,
+                projectImagePaths: useMediaDirectArtifactChunkImport,
                 validateGlossaryTypes: true,
                 computeContentHashes: enableTermEntryContentDedup,
                 emitContentSlab: useDirectArtifactChunkImport && enableTermEntryContentDedup,
