@@ -657,7 +657,7 @@ describe('structured bank capacity', () => {
     const sparseBank = ('[' + structuredRow + ']').padEnd(1024 * 1024, ' ')
 
     test('retains the smaller metadata slab for small structured banks', async () => {
-        const {rows, profile} = await parse(Array(4).fill(sparseBank), {}, true)
+        const {rows, profile} = await parse(new Array(4).fill(sparseBank), {}, true)
         expect(rows).toHaveLength(4)
         expect(profile.fusedParseAttempts).toBe(1)
         expect(profile.fusedParseFallbacks).toBe(0)
@@ -665,7 +665,7 @@ describe('structured bank capacity', () => {
     })
 
     test('keeps normal capacity for a dense structured bank in a mixed group', async () => {
-        const denseBank = '[' + Array(10_000).fill(structuredRow).join(',') + ']'
+        const denseBank = '[' + new Array(10_000).fill(structuredRow).join(',') + ']'
         expect(denseBank.length).toBeGreaterThan(5 * 1024 * 1024)
         const banks = [sparseBank, sparseBank, denseBank, sparseBank]
         const candidate = await parse(banks, {}, true)

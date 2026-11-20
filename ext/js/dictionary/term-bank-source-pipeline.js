@@ -30,7 +30,9 @@ const ZIP_LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
 const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
 const RAW_ZIP_BATCH_MAX_RANGE_BYTES = 16 * 1024 * 1024;
 const RAW_ZIP_BATCH_MAX_GAP_BYTES = 256 * 1024;
+
 export const RAW_ZIP_BATCH_MAX_FILES = 1024;
+
 const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
 
 /** @typedef {import('@zip.js/zip.js').Entry|{filename: string}} TermBankSourceFile */
@@ -105,7 +107,8 @@ export class RawZipPayloadReader {
         const ranged = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
         const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
         const expectedFilenameLength = rawFilename instanceof Uint8Array && rawFilename.byteLength <= 0xffff ?
-            rawFilename.byteLength : 0;
+            rawFilename.byteLength :
+0;
         // The central filename length bounds the local name read. The local
         // header still has to agree before any payload is read.
         const metadataLength = Math.min(archiveSize - offset, ZIP_LOCAL_FILE_HEADER_LENGTH + expectedFilenameLength);
