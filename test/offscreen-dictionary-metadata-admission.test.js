@@ -39,7 +39,9 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-test('metadata requested during warmup cannot turn warmup into a foreground lookup barrier', async () => {
+const cooperativeReadActions = ['getDictionaryInfoOffscreen', 'databaseGetMediaOffscreen'];
+
+test.each(cooperativeReadActions)('%s during warmup does not make foreground lookups wait', async (action) => {
     const {worker, postMessage} = await createWorker();
     const warm = deferPromise();
     const invoke = vi.spyOn(worker, '_invokeAction').mockImplementation(async (action) => {
@@ -47,12 +49,13 @@ test('metadata requested during warmup cannot turn warmup into a foreground look
         return action;
     });
     send(worker, 1, 'warmTermLookupCachesOffscreen');
-    send(worker, 2, 'getDictionaryInfoOffscreen');
+    send(worker, 2, action);
     send(worker, 3, 'findTermsStructuredOffscreen');
     try {
         await vi.waitFor(() => expect(postMessage).toHaveBeenCalledWith({id: 3, result: 'findTermsStructuredOffscreen'}));
-        expect(invoke.mock.calls.map(([action]) => action)).toEqual([
-            'warmTermLookupCachesOffscreen', 'getDictionaryInfoOffscreen', 'findTermsStructuredOffscreen',
+        expect(postMessage).toHaveBeenCalledWith({id: 2, result: action});
+        expect(invoke.mock.calls.map(([name]) => name)).toEqual([
+            'warmTermLookupCachesOffscreen', action, 'findTermsStructuredOffscreen',
         ]);
         expect(postMessage).not.toHaveBeenCalledWith({id: 1, result: expect.anything()});
     } finally {
@@ -61,38 +64,38 @@ test('metadata requested during warmup cannot turn warmup into a foreground look
     }
 });
 
-test('mutation waits for active metadata and warmup; later reads preserve mutation ordering', async () => {
+test.each(cooperativeReadActions)('mutation waits for active %s and warmup; later reads preserve ordering', async (readAction) => {
     const {worker, postMessage} = await createWorker();
     const warm = deferPromise();
-    const metadata = deferPromise();
+    const reader = deferPromise();
     const mutation = deferPromise();
     const invoke = vi.spyOn(worker, '_invokeAction').mockImplementation(async (action) => {
         if (action === 'warmTermLookupCachesOffscreen') { await warm.promise; }
-        if (action === 'getDictionaryInfoOffscreen') { await metadata.promise; }
+        if (action === readAction) { await reader.promise; }
         if (action === 'databaseRefreshOffscreen') { await mutation.promise; }
         return action;
     });
     send(worker, 1, 'warmTermLookupCachesOffscreen');
-    send(worker, 2, 'getDictionaryInfoOffscreen');
+    send(worker, 2, readAction);
     send(worker, 3, 'databaseRefreshOffscreen');
-    send(worker, 4, 'getDictionaryInfoOffscreen');
+    send(worker, 4, readAction);
     send(worker, 5, 'findTermsStructuredOffscreen');
     try {
-        expect(invoke.mock.calls.map(([action]) => action)).toEqual(['warmTermLookupCachesOffscreen', 'getDictionaryInfoOffscreen']);
+        expect(invoke.mock.calls.map(([action]) => action)).toEqual(['warmTermLookupCachesOffscreen', readAction]);
         warm.resolve(void 0);
         await Promise.resolve();
         expect(invoke).not.toHaveBeenCalledWith('databaseRefreshOffscreen', expect.anything(), expect.anything());
-        metadata.resolve(void 0);
+        reader.resolve(void 0);
         await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith('databaseRefreshOffscreen', {}, []));
         expect(postMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 4}));
         expect(postMessage).not.toHaveBeenCalledWith(expect.objectContaining({id: 5}));
         mutation.resolve(void 0);
         await drain(worker);
-        expect(postMessage).toHaveBeenCalledWith({id: 4, result: 'getDictionaryInfoOffscreen'});
+        expect(postMessage).toHaveBeenCalledWith({id: 4, result: readAction});
         expect(postMessage).toHaveBeenCalledWith({id: 5, result: 'findTermsStructuredOffscreen'});
     } finally {
         warm.resolve(void 0);
-        metadata.resolve(void 0);
+        reader.resolve(void 0);
         mutation.resolve(void 0);
         await drain(worker);
     }
@@ -112,12 +115,17 @@ test('metadata failure releases the read before the next mutation', async () => 
     expect(Reflect.get(worker, '_activeConcurrentLookupPromises').size).toBe(0);
 });
 
-test.each(['queued', 'active'])('metadata is rejected during %s import ownership', async (state) => {
+test.each(cooperativeReadActions)('%s is rejected during queued and active import ownership', async (action) => {
     const {worker, postMessage} = await createWorker();
     const invoke = vi.spyOn(worker, '_invokeAction');
-    Reflect.set(worker, state === 'queued' ? '_queuedImportRequestCount' : '_activeImportAbortController', state === 'queued' ? 1 : new AbortController());
-    send(worker, 1, 'getDictionaryInfoOffscreen');
+    Reflect.set(worker, '_queuedImportRequestCount', 1);
+    send(worker, 1, action);
+    Reflect.set(worker, '_queuedImportRequestCount', 0);
+    Reflect.set(worker, '_activeImportAbortController', new AbortController());
+    send(worker, 2, action);
     await drain(worker);
     expect(invoke).not.toHaveBeenCalled();
-    expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({id: 1, error: expect.objectContaining({data: {action: 'getDictionaryInfoOffscreen', code: 'DICTIONARY_IMPORT_IN_PROGRESS'}})}));
+    for (const id of [1, 2]) {
+        expect(postMessage).toHaveBeenCalledWith(expect.objectContaining({id, error: expect.objectContaining({data: {action, code: 'DICTIONARY_IMPORT_IN_PROGRESS'}})}));
+    }
 });

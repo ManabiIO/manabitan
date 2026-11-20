@@ -192,6 +192,23 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload]);
     });
 
+    test('coalesces the full deferred media entry limit in a bounded Blob range', async () => {
+        const entries = Array.from({length: 1024}, (_, index) => {
+            const result = entry(0);
+            result.file.filename = 'image-' + String(index).padStart(5, '0') + '.webp';
+            result.file.rawFilename = encoder.encode(result.file.filename);
+            result.file.offset = index * (result.header.length + result.payload.length);
+            result.header.set(result.file.rawFilename, 30);
+            return result;
+        });
+        const archive = new TrackedBlob([...entries.flatMap(({header, payload}) => [header, payload]), padding]);
+        const batch = await new RawZipPayloadReader(archive).readBatch(entries.map(({file}) => file), signal());
+
+        expect(batch?.rangeReadCount).toBe(1);
+        expect(batch?.sources.map(({filename}) => filename)).toEqual(entries.map(({file}) => file.filename));
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(entries.map(({payload}) => payload));
+    });
+
     test('validates each batched filename against its ZIP central metadata', async () => {
         const first = entry(8);
         const second = entry(8);
@@ -236,7 +253,7 @@ describe('bounded large ZIP entry reads', () => {
             first.file.uncompressedSize = 3 * 1024 * 1024;
             second.file.uncompressedSize = 3 * 1024 * 1024;
         }
-        if (kind === 'source-count') { files = Array.from({length: 257}, () => first.file); }
+        if (kind === 'source-count') { files = Array.from({length: 1025}, () => first.file); }
         if (kind === 'unsafe-offset') { second.file.offset = Number.MAX_SAFE_INTEGER; }
         const archive = new TrackedBlob([first.header, first.payload, padding]);
 
@@ -280,9 +297,27 @@ describe('bounded large ZIP entry reads', () => {
         const actual = await reader.read(file, signal());
         expect(actual).toEqual(payload);
         expect(method === 8 ? new Uint8Array(inflateRawSync(actual)) : actual).toEqual(content);
-        expect(archive.ranges).toEqual([[0, 30], [30, 30 + name.length], [header.length, header.length + payload.length]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
+        expect(actual.byteOffset).toBe(0);
+        expect(actual.buffer.byteLength).toBe(actual.byteLength);
         actual.fill(0);
         expect(await reader.read(file, signal())).toEqual(payload);
+    });
+    test('reads a fixed header when central filename bytes are unavailable', async () => {
+        const {header, payload, file} = entry(8, 12);
+        const archive = new TrackedBlob([header, payload, padding]);
+        const reader = new RawZipPayloadReader(archive);
+        expect(await reader.read({...file, rawFilename: void 0}, signal())).toEqual(payload);
+        expect(archive.ranges).toEqual([[0, 30], [header.length, header.length + payload.length]]);
+    });
+    test('bounds the coalesced metadata read at a truncated local name', async () => {
+        const {header, file} = entry(0);
+        const archive = new TrackedBlob([padding, header.subarray(0, 31)]);
+        file.offset = padding.size;
+        file.compressedSize = 0;
+        const reader = new RawZipPayloadReader(archive);
+        await expect(reader.read(file, signal())).rejects.toThrow('payload is out of bounds');
+        expect(archive.ranges).toEqual([[file.offset, archive.size]]);
     });
     test('reads a local header beyond the old archive ceiling', async () => {
         const {header, payload, file} = entry(8);
@@ -336,7 +371,7 @@ describe('bounded large ZIP entry reads', () => {
         release();
         await disposal;
         await rejected;
-        expect(archive.ranges).toEqual([[0, 30]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length]]);
     });
     test.each([2, 8])('retains the compressed-source budget on deviceMemory=%i', async (deviceMemory) => {
         const lowMemory = deviceMemory === 2;

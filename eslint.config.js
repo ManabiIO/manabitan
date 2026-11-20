@@ -78,6 +78,7 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/term-bank-wasm-parser.js',
     'ext/js/dictionary/term-bank-wasm-parser-worker.js',
     'ext/js/core/diagnostics-reporter.js',
+    'ext/js/core/dictionary-storage-unavailable-error.js',
     'ext/js/core/retryable-promise-cache.js',
     'ext/js/background/dictionary-runtime-action-policy.js',
     'ext/js/background/dictionary-worker-client.js',

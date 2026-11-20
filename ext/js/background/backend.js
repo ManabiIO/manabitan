@@ -23,6 +23,8 @@ import {Mecab} from '../comm/mecab.js';
 import {YomitanApi} from '../comm/yomitan-api.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {isDictionaryImportBusyError} from '../core/dictionary-import-busy-error.js';
+import {createDictionaryStorageUnavailableError} from '../core/dictionary-storage-unavailable-error.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {fetchText} from '../core/fetch-utilities.js';
 import {parseJson, readResponseJson} from '../core/json.js';
@@ -1069,13 +1071,20 @@ export class Backend {
                 this._setupSharedWorkerBridge();
                 recordPhase('sharedWorkerBridge.setup', startedAt);
             }
-            {
-                const startedAt = safePerformance.now();
-                await this._ensureDictionaryDatabaseReady();
-                recordPhase('dictionaryDatabase.prepare', startedAt);
+            let dictionaryStartupError = null;
+            try {
+                await measureAsyncPhase('dictionaryDatabase.prepare', () => this._ensureDictionaryDatabaseReady());
+            } catch (error) {
+                // Keep settings and explicit database recovery reachable. All
+                // dictionary reads still require the storage owner to open.
+                dictionaryStartupError = toError(error);
+                log.error(dictionaryStartupError);
             }
 
-            void this._translator.prepare();
+            // Preparing the worker database also prepares its translator.
+            if (this._translator instanceof Translator) {
+                this._translator.prepare();
+            }
 
             await optionsUtilPreparePromise;
             this._defaultAnkiFieldTemplates = await defaultTemplatesPromise;
@@ -1086,13 +1095,13 @@ export class Backend {
             }
 
             const dictionaryOptionsPruneSummary = await measureAsyncPhase('pruneStaleProfileDictionaryOptions', async () => (
-                await this._pruneStaleProfileDictionaryOptions()
+                await this._pruneStaleProfileDictionaryOptions(dictionaryStartupError)
             ));
             await measureAsyncPhase('captureStartupCleanupDiagnostics', async () => {
                 await this._captureStartupCleanupDiagnostics(dictionaryOptionsPruneSummary);
             });
             await measureAsyncPhase('reportStartupHealthCheck', async () => {
-                await this._reportStartupHealthCheck();
+                await this._reportStartupHealthCheck(dictionaryStartupError);
             });
 
             {
@@ -1101,9 +1110,11 @@ export class Backend {
                 recordPhase('applyOptions(background)', startedAt);
             }
 
-            await measureAsyncPhase('reconcileInstalledDictionaryVisibilityStartup', async () => {
-                await this._reconcileInstalledDictionaryVisibilityStartup();
-            });
+            if (dictionaryStartupError === null) {
+                await measureAsyncPhase('reconcileInstalledDictionaryVisibilityStartup', async () => {
+                    await this._reconcileInstalledDictionaryVisibilityStartup();
+                });
+            }
 
             {
                 const startedAt = safePerformance.now();
@@ -1997,8 +2008,13 @@ export class Backend {
     async _onApiGetDictionaryInfo() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
-        await this._ensureDictionaryDatabaseReady();
-        return await this._dictionaryDatabase.getDictionaryInfo();
+        try {
+            await this._ensureDictionaryDatabaseReady();
+            return await this._dictionaryDatabase.getDictionaryInfo();
+        } catch (error) {
+            if (isDictionaryImportBusyError(error)) { throw error; }
+            throw createDictionaryStorageUnavailableError(error);
+        }
     }
 
     /** @type {import('api').ApiHandler<'deleteDictionaryByTitle'>} */
@@ -5365,6 +5381,7 @@ null;
     /**
      * Removes dictionary option entries that no longer correspond to installed dictionaries.
      * This keeps profile settings in sync with startup cleanup that removes incomplete imports.
+     * @param {?Error} [dictionaryStartupError]
      * @returns {Promise<{
      *   skipped: boolean,
      *   reason: string,
@@ -5377,7 +5394,7 @@ null;
      *   sortFrequencyDictionaryResets: number
      * }>}
      */
-    async _pruneStaleProfileDictionaryOptions() {
+    async _pruneStaleProfileDictionaryOptions(dictionaryStartupError = null) {
         const options = this._options;
         if (options === null) {
             return {
@@ -5395,6 +5412,7 @@ null;
         /** @type {import('dictionary-importer').Summary[]} */
         let dictionaryInfo;
         try {
+            if (dictionaryStartupError !== null) { throw dictionaryStartupError; }
             await this._ensureDictionaryDatabaseReady();
             dictionaryInfo = await this._dictionaryDatabase.getDictionaryInfo();
         } catch (e) {
@@ -5635,9 +5653,10 @@ null;
     }
 
     /**
+     * @param {?Error} [dictionaryStartupError]
      * @returns {Promise<void>}
      */
-    async _reportStartupHealthCheck() {
+    async _reportStartupHealthCheck(dictionaryStartupError = null) {
         const dictionaryDatabase = this._dictionaryDatabase;
         const isPreparedValue = /** @type {unknown} */ (Reflect.get(dictionaryDatabase, 'isPrepared'));
         let dbOpened = null;
@@ -5671,13 +5690,14 @@ null;
                 opfsReady = (mode === 'opfs-sahpool');
             }
         }
-        if (usesFallbackStorage === true) {
+        if (usesFallbackStorage === true || dictionaryStartupError !== null) {
             opfsReady = false;
         }
 
         let installedDictionaryCount = null;
         let installedDictionaryError = null;
         try {
+            if (dictionaryStartupError !== null) { throw dictionaryStartupError; }
             const getDictionaryInfoValue = /** @type {unknown} */ (Reflect.get(dictionaryDatabase, 'getDictionaryInfo'));
             if (typeof getDictionaryInfoValue === 'function') {
                 const dictionaryInfo = /** @type {unknown} */ (await getDictionaryInfoValue.call(dictionaryDatabase));

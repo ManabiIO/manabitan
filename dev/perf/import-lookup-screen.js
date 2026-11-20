@@ -31,7 +31,7 @@ import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} from '@zip.js/zip.js'
 /** @typedef {Parameters<Parameters<typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunks>[2]>[0] & {preparedLookupIndexes?: Map<string, import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>}} Chunk */
 /** @typedef {{cacheFile: string, sha256: string, termRows: number}} Lock */
 /** @typedef {{elapsedMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
-/** @typedef {Measurement & {flags: Flags, dictionary: string, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */
+/** @typedef {Measurement & {flags: Flags, validateGlossaryTypes: boolean, dictionary: string, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */
 /** @typedef {{pair: number, arm: string, result: ScreenResult}} Observation */
 const root = fileURLToPath(new URL('../../', import.meta.url))
 /** @type {Record<string, number>} */
@@ -70,7 +70,7 @@ async function sourceHash(filename) {
 
 /**
  * Sequential parser + completed lookup construction, not end-to-end import.
- * Fixture I/O, compilation, warmups, GC and digest verification are outside time.
+ * Fixture I/O, compilation, warmups, explicit GC and digest verification are outside time.
  * Grouping is fixed component-fixture grouping, not a production planner override.
  * @param {string} dictionary
  * @param {string} cache
@@ -118,6 +118,9 @@ async function measure(dictionary, cache, sourceRoot, flags) {
         emitContentSlab: true,
         emitTokenBinaryContent: true,
         mediaHintFastScan: true,
+        // Match the production importer: supported glossary types and their
+        // required fields are part of the native parser workload.
+        validateGlossaryTypes: true,
         prepareLookupIndexes: true}
     /**
      * @param {boolean} verify
@@ -211,6 +214,7 @@ async function measure(dictionary, cache, sourceRoot, flags) {
     }
     return {...result,
         flags,
+        validateGlossaryTypes: options.validateGlossaryTypes,
         dictionary,
         filesPerGroup: filesPerGroup[dictionary],
         node: process.version,
@@ -253,24 +257,42 @@ if (values.child) {
     await mkdir(path.dirname(values.out), {recursive: true})
     /** @type {Observation[]} */
     const observations = []
-    const plan = {dictionary, pairs, flags, initialOrder: values['initial-order'], baselineRoot: values['baseline-root'] ?? root}
+    const plan = {
+        dictionary,
+        pairs,
+        flags,
+        validateGlossaryTypes: true,
+        initialOrder: values['initial-order'],
+        baselineRoot: path.resolve(values['baseline-root'] ?? root),
+        sourceRoot: path.resolve(values['source-root']),
+    }
+    const expectedWasmHashes = new Map(await Promise.all([plan.baselineRoot, plan.sourceRoot].map(async (sourceRoot) => (
+        /** @type {[string, string]} */ ([sourceRoot, sha256(await readFile(path.join(sourceRoot, 'ext/lib/term-bank-parser.wasm')))])
+    ))))
     const save = async (/** @type {object} */ status) => writeFile(values.out, JSON.stringify({...plan, ...status, observations}, null, 2))
     try {
         for (let pair = 0; pair < pairs; ++pair) {
             const order = pair % 2 === 0 ? values['initial-order'] : [...values['initial-order']].reverse().join('')
             for (const arm of order) {
+                const expectedSourceRoot = arm === 'A' ? plan.baselineRoot : plan.sourceRoot
                 const args = [fileURLToPath(import.meta.url),
                     dictionary,
                     '--child',
                     '--cache-dir',
                     values['cache-dir'],
                     '--source-root',
-arm === 'A' ? values['baseline-root'] ?? root : root,
-'--flags',
-JSON.stringify(arm === 'A' ? {} : flags)]
+                    expectedSourceRoot,
+                    '--flags',
+                    JSON.stringify(arm === 'A' ? {} : flags)]
                 const child = spawnSync(process.execPath, ['--expose-gc', ...args], {encoding: 'utf8', timeout: 180000, maxBuffer: 4 * 1024 * 1024})
                 if (child.status !== 0) { throw new Error(`Child failed (${child.status}): ${child.error ?? ''}\n${child.stderr}`) }
                 const result = /** @type {Awaited<ReturnType<typeof measure>>} */ (parseJson(child.stdout))
+                if (path.resolve(result.sourceRoot) !== expectedSourceRoot || result.wasmSha256 !== expectedWasmHashes.get(expectedSourceRoot)) {
+                    throw new Error(`Child ${arm} did not measure the requested source root and WASM`)
+                }
+                if (result.dictionary !== dictionary || result.validateGlossaryTypes !== plan.validateGlossaryTypes) {
+                    throw new Error(`Child ${arm} did not use the requested production workload`)
+                }
                 observations.push({pair, arm, result})
                 await save({complete: false})
                 console.log(`${dictionary} pair ${pair + 1}/${pairs} ${arm}: ${result.elapsedMs.toFixed(2)}ms`)

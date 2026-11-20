@@ -75,6 +75,7 @@ import {
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
+const DICTIONARY_PURGE_MARKER = 'manabitan-dictionary-purge-pending';
 const DICTIONARY_STORAGE_UPGRADE_REASON = 'Dictionary storage was upgraded. Download or import this dictionary again.';
 const TERM_ENTRY_CONTENT_CACHE_MAX_ENTRIES = 4096;
 const TERM_ENTRY_CONTENT_CACHE_MAX_BYTES = 32 * 1024 * 1024;
@@ -99,6 +100,8 @@ const DEFAULT_RAW_TERM_CONTENT_PACK_TARGET_BYTES = 4 * 1024 * 1024;
 const TERM_CONTENT_BLOCK_TARGET_BYTES = 1024 * 1024;
 const DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS = 0;
 const EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE = 512;
+const MEDIA_BULK_INSERT_BATCH_SIZE = 64;
+const MEDIA_BULK_INSERT_BATCH_MAX_BYTES = 4 * 1024 * 1024;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
 const TERM_CONTENT_META_U32_NULL = 0xffffffff;
@@ -1166,18 +1169,13 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {boolean} clearImportJournal
      * @returns {Promise<Error[]>}
      */
-    async _collectPersistentStoreResetErrors(clearImportJournal) {
-        const operations = [
+    async _collectPersistentStoreResetErrors() {
+        const results = await Promise.allSettled([
             this._termContentStore.reset(),
             this._termRecordStore.reset(),
-        ];
-        if (clearImportJournal) {
-            operations.push(this._importJournal.clear());
-        }
-        const results = await Promise.allSettled(operations);
+        ]);
         return results
             .filter((result) => result.status === 'rejected')
             .map((result) => toError(result.reason));
@@ -1873,7 +1871,19 @@ export class DictionaryDatabase {
                 // Setup performs its own rollback; purge still resets all persistence.
             }
         }
+        const previousBulkImportState = this._bulkImportState;
         this._beginExclusiveDatabaseCleanup();
+        let root;
+        try {
+            root = await this._getDictionaryPurgeRoot();
+            if (root === null) { throw new Error('Dictionary database purge requires OPFS'); }
+            // The presence of this file is the durable intent. No file contents
+            // are needed, so a crash during creation is safe on either side.
+            await root.getFileHandle(DICTIONARY_PURGE_MARKER, {create: true});
+        } catch (error) {
+            this._transitionBulkImportState(BULK_IMPORT_STATE_FINALIZING, previousBulkImportState);
+            throw error;
+        }
 
         /** @type {Error[]} */
         const errors = [];
@@ -1896,7 +1906,6 @@ export class DictionaryDatabase {
                 }
             }
             this._releaseRuntimeConnection(errors);
-            errors.push(...await this._collectPersistentStoreResetErrors(true));
             this._bulkImportTransactionOpen = false;
             this._bulkImportJournalRecord = null;
             this._importJournalRecoveryPending = false;
@@ -1913,12 +1922,7 @@ export class DictionaryDatabase {
 
             let result = false;
             try {
-                result = await deleteOpfsDatabaseFiles();
-            } catch (error) {
-                errors.push(toError(error));
-            }
-
-            try {
+                result = await this._finishPersistentDictionaryPurge(root);
                 await this._prepareOnce(true);
             } catch (error) {
                 errors.push(toError(error));
@@ -4801,6 +4805,18 @@ null;
             return;
         }
         const descriptor = this._getBulkInsertDescriptor(objectStoreName);
+        if (objectStoreName === 'media' && count >= MEDIA_BULK_INSERT_BATCH_SIZE) {
+            // Limit the amount of blob data SQLite can hold in bound parameters.
+            // Keep the normal small statements for a batch with large payloads.
+            let bytes = 0;
+            for (let i = start, end = start + count; i < end; ++i) {
+                bytes += (/** @type {import('dictionary-database').MediaDataArrayBufferContent} */ (items[i])).content.byteLength;
+                if (bytes > MEDIA_BULK_INSERT_BATCH_MAX_BYTES) { break; }
+            }
+            if (bytes <= MEDIA_BULK_INSERT_BATCH_MAX_BYTES) {
+                descriptor.batchSize = MEDIA_BULK_INSERT_BATCH_SIZE;
+            }
+        }
         const useLocalTransaction = !this._bulkImportTransactionOpen;
 
         if (useLocalTransaction) {
@@ -6492,7 +6508,10 @@ null;
         if (publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
             return 0;
         }
-        const byteLength = maximumEnd - minimumOffset;
+        const source = spans.buffer;
+        const sharedSource = !(source.buffer instanceof ArrayBuffer);
+        const padding = sharedSource ? (source.byteOffset + minimumOffset) & 7 : 0;
+        const byteLength = maximumEnd - minimumOffset + padding;
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
         if (byteLength > cacheMaxBytes) { return 0; }
         while (
@@ -6502,7 +6521,7 @@ null;
             const first = this._recentTermContentSourceBatches.entries().next();
             if (first.done) { break; }
             this._recentTermContentSourceBatches.delete(first.value[0]);
-            this._recentTermContentSourceBatchBytes -= first.value[1].byteLength;
+            this._recentTermContentSourceBatchBytes -= first.value[1].buffer.byteLength;
         }
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
@@ -6511,9 +6530,15 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const owned = spans.buffer.slice(minimumOffset, maximumEnd);
+        // Match the source alignment so the shared bytes need only one copy.
+        const owned = sharedSource ?
+            new Uint8Array(byteLength).subarray(padding) :
+            source.slice(minimumOffset, maximumEnd);
+        if (sharedSource) {
+            owned.set(source.subarray(minimumOffset, maximumEnd));
+        }
         this._recentTermContentSourceBatches.set(batchId, owned);
-        this._recentTermContentSourceBatchBytes += owned.byteLength;
+        this._recentTermContentSourceBatchBytes += owned.buffer.byteLength;
         const firstIndex = staged.indexes[0];
         const endIndex = firstIndex + staged.indexes.length;
         let contiguousPublished = (
@@ -7276,7 +7301,7 @@ this._readTermContentSignature(
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
-            this._recentTermContentSourceBatchBytes -= source.byteLength;
+            this._recentTermContentSourceBatchBytes -= source.buffer.byteLength;
         }
         if (indexesToClear.length > 0) {
             this._ensureTermEntryContentMetaHashPairCapacity(
@@ -8118,29 +8143,16 @@ this._readTermContentSignature(
                     }
                     const tContentMetadataStart = safePerformance.now();
                     if (contentDedupPlan !== null) {
-                        const {
-                            resolvedFlags,
-                            resolvedOffsets,
-                            resolvedLengths,
-                        } = contentDedupPlan;
-                        const planUniqueCount = pendingPlanUniqueStart === null ?
-                            pendingPlanUniqueIndexes.length :
-                            pendingOffsets.length;
-                        for (let i = 0; i < planUniqueCount; ++i) {
-                            const uniqueIndex = pendingPlanUniqueStart === null ?
-                                pendingPlanUniqueIndexes[i] :
-                                pendingPlanUniqueStart + i;
-                            resolvedOffsets[uniqueIndex] = pendingOffsets[i];
-                            resolvedLengths[uniqueIndex] = pendingLengths[i];
-                            setResolvedTermContentPlanDictName(
-                                contentDedupPlan,
-                                uniqueIndex,
-                                Array.isArray(pendingResolvedDictNames) ?
-                                    pendingResolvedDictNames[i] :
-                                    pendingResolvedDictNames,
-                            );
-                            resolvedFlags[uniqueIndex] = 1;
-                        }
+                        /* eslint-disable @stylistic/semi */
+                        this._publishResolvedArtifactTermContentPlan(
+                            contentDedupPlan,
+                            pendingPlanUniqueStart,
+                            pendingPlanUniqueIndexes,
+                            pendingOffsets,
+                            pendingLengths,
+                            pendingResolvedDictNames,
+                        )
+                        /* eslint-enable @stylistic/semi */
                     }
                     if (earlyContentPersistence !== null) {
                         unregisterInFlightContentSources = this._registerInFlightTermContentSources(
@@ -9267,6 +9279,83 @@ null :
         return {pendingOffsets, pendingLengths, pendingResolvedDictNames, blockProfile: null};
     }
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Publishes one synchronous batch to its parser-owned resolution columns.
+     * Uniform codecs need one update; consecutive unique IDs can then copy
+     * their persisted columns directly without visiting every field in JS.
+     * @param {ArtifactTermContentDedupPlan} plan
+     * @param {number|null} pendingStart
+     * @param {number[]|Uint32Array} pendingIndexes
+     * @param {number[]|Float64Array} pendingOffsets
+     * @param {number[]|Uint32Array} pendingLengths
+     * @param {string|string[]} pendingDictNames
+     */
+    _publishResolvedArtifactTermContentPlan(plan, pendingStart, pendingIndexes, pendingOffsets, pendingLengths, pendingDictNames) {
+        const {resolvedFlags, resolvedOffsets, resolvedLengths} = plan
+        const count = pendingStart === null ? pendingIndexes.length : pendingOffsets.length
+        if (count === 0) { return }
+        const offsetBuffer = resolvedOffsets.buffer
+        const lengthBuffer = resolvedLengths.buffer
+        const flagBuffer = resolvedFlags.buffer
+        const hasCompatibleIndexes = pendingStart === null ?
+            pendingIndexes instanceof Uint32Array :
+            Number.isSafeInteger(pendingStart) && pendingStart >= 0
+        const canCopyRuns = (
+            typeof pendingDictNames === 'string' &&
+            !Array.isArray(plan.resolvedDictNames) &&
+            (typeof plan.resolvedUniformDictName !== 'string' || plan.resolvedUniformDictName === pendingDictNames) &&
+            pendingOffsets instanceof Float64Array && pendingOffsets.length >= count &&
+            pendingLengths instanceof Uint32Array && pendingLengths.length >= count &&
+            resolvedOffsets instanceof Float64Array &&
+            resolvedLengths instanceof Uint32Array && resolvedFlags instanceof Uint8Array &&
+            hasCompatibleIndexes &&
+            // Scalar writes must keep their established order for aliased views.
+            offsetBuffer !== lengthBuffer && offsetBuffer !== flagBuffer && lengthBuffer !== flagBuffer &&
+            pendingOffsets.buffer !== offsetBuffer && pendingOffsets.buffer !== lengthBuffer && pendingOffsets.buffer !== flagBuffer &&
+            pendingLengths.buffer !== offsetBuffer && pendingLengths.buffer !== lengthBuffer && pendingLengths.buffer !== flagBuffer &&
+            (pendingStart !== null || (
+                pendingIndexes.buffer !== offsetBuffer && pendingIndexes.buffer !== lengthBuffer && pendingIndexes.buffer !== flagBuffer
+            ))
+        )
+        let i = 0
+        if (canCopyRuns) {
+            const capacity = Math.min(resolvedOffsets.length, resolvedLengths.length, resolvedFlags.length)
+            plan.resolvedUniformDictName = pendingDictNames
+            while (i < count) {
+                const uniqueIndex = pendingStart === null ? pendingIndexes[i] : pendingStart + i
+                let end = pendingStart === null ? i + 1 : count
+                while (end < count && pendingIndexes[end] === uniqueIndex + end - i) { ++end }
+                const length = end - i
+                // Keep malformed/private callers on the original scalar path;
+                // typed-array set must not introduce a new out-of-range throw.
+                if (uniqueIndex + length > capacity) { break }
+                if (length === 1) {
+                    resolvedOffsets[uniqueIndex] = pendingOffsets[i]
+                    resolvedLengths[uniqueIndex] = pendingLengths[i]
+                    resolvedFlags[uniqueIndex] = 1
+                } else {
+                    resolvedOffsets.set(pendingOffsets.subarray(i, end), uniqueIndex)
+                    resolvedLengths.set(pendingLengths.subarray(i, end), uniqueIndex)
+                    resolvedFlags.fill(1, uniqueIndex, uniqueIndex + length)
+                }
+                i = end
+            }
+        }
+        for (; i < count; ++i) {
+            const uniqueIndex = pendingStart === null ? pendingIndexes[i] : pendingStart + i
+            resolvedOffsets[uniqueIndex] = pendingOffsets[i]
+            resolvedLengths[uniqueIndex] = pendingLengths[i]
+            setResolvedTermContentPlanDictName(
+                plan,
+                uniqueIndex,
+                Array.isArray(pendingDictNames) ? pendingDictNames[i] : pendingDictNames,
+            )
+            resolvedFlags[uniqueIndex] = 1
+        }
+    }
+    /* eslint-enable @stylistic/semi */
+
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
      * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, isFinalTermChunk?: boolean}} state
@@ -9565,10 +9654,46 @@ null :
 
     // Private
 
+    /** @returns {Promise<FileSystemDirectoryHandle|null>} */
+    async _getDictionaryPurgeRoot() {
+        if (typeof navigator === 'undefined' || typeof navigator.storage?.getDirectory !== 'function') { return null; }
+        return await navigator.storage.getDirectory();
+    }
+
+    /** Completes an explicit purge before opening SQLite or recovering an import. */
+    async _resumePersistentDictionaryPurge() {
+        const root = await this._getDictionaryPurgeRoot();
+        if (root === null) { return; }
+        try {
+            await root.getFileHandle(DICTIONARY_PURGE_MARKER);
+        } catch (error) {
+            if ((error instanceof DOMException || error instanceof Error) && error.name === 'NotFoundError') { return; }
+            throw error;
+        }
+        await this._finishPersistentDictionaryPurge(root);
+    }
+
+    /**
+     * SQLite owns the references to the payload files. Wipe it before deleting
+     * those files and retain the marker until every cleanup operation succeeds.
+     * @param {FileSystemDirectoryHandle} root
+     * @returns {Promise<boolean>}
+     */
+    async _finishPersistentDictionaryPurge(root) {
+        const result = await deleteOpfsDatabaseFiles();
+        const errors = await this._collectPersistentStoreResetErrors();
+        if (errors.length === 1) { throw errors[0]; }
+        if (errors.length > 1) { throw new AggregateError(errors, 'Failed to reset dictionary payloads'); }
+        await this._importJournal.clear();
+        await root.removeEntry(DICTIONARY_PURGE_MARKER);
+        return result;
+    }
+
     /**
      * @returns {Promise<void>}
      */
     async _openConnection() {
+        await this._resumePersistentDictionaryPurge();
         this._sqlite3 = await getSqlite3();
         try {
             this._db = await openOpfsDatabase('DictionaryDatabase._openConnection');
@@ -9964,7 +10089,7 @@ null :
         }
         // Read and validate the inventory before destructive storage I/O. A
         // metadata read failure must leave the old files available for retry.
-        const resetErrors = await this._collectPersistentStoreResetErrors(false);
+        const resetErrors = await this._collectPersistentStoreResetErrors();
         if (resetErrors.length === 1) {
             throw resetErrors[0];
         }

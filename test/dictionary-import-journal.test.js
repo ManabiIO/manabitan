@@ -90,21 +90,26 @@ describe('DictionaryImportJournal', () => {
         expect(Reflect.get(journal, '_isRecord').call(journal, record)).toBe(false);
     });
 
-    test('clears an empty pre-import journal as an abandoned safe state', async () => {
-        const removeEntry = vi.fn(async () => {});
+    test('reads an empty journal without removing it and replaces it on the next write', async () => {
+        let content = '';
+        const removeEntry = vi.fn(async () => { throw new DOMException('Temporarily locked', 'NotAllowedError'); });
+        const handle = {
+            getFile: async () => new Blob([content]),
+            createWritable: async () => ({
+                write: async (/** @type {string} */ value) => { content = value; },
+                close: async () => {},
+            }),
+        };
         vi.stubGlobal('navigator', {
-            storage: {
-                getDirectory: vi.fn(async () => ({
-                    getFileHandle: vi.fn(async () => ({
-                        getFile: vi.fn(async () => ({size: 0, text: vi.fn(async () => '')})),
-                    })),
-                    removeEntry,
-                })),
-            },
+            storage: {getDirectory: async () => ({getFileHandle: async () => handle, removeEntry})},
         });
         try {
-            await expect(new DictionaryImportJournal().read()).resolves.toBeNull();
-            expect(removeEntry).toHaveBeenCalledWith('manabitan-dictionary-import-journal.json');
+            const journal = new DictionaryImportJournal();
+            await expect(journal.read()).resolves.toBeNull();
+            expect(removeEntry).not.toHaveBeenCalled();
+            const record = createRecord();
+            await journal.write(record);
+            await expect(journal.read()).resolves.toEqual(record);
         } finally {
             vi.unstubAllGlobals();
         }

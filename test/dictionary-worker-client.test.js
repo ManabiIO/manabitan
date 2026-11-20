@@ -84,7 +84,6 @@ describe('dictionary runtime action policies', () => {
             'getTermFrequenciesOffscreen',
             'importDictionaryOffscreen',
             'replaceDictionaryTitleOffscreen',
-            'translatorPrepareOffscreen',
             'warmTermLookupCachesOffscreen',
         ].sort());
         for (const action of dictionaryRuntimeActionNames) {
@@ -113,6 +112,7 @@ describe('dictionary runtime action policies', () => {
         ].sort());
         expect(lookupActions.sort()).toEqual([
             ...retryableActions,
+            'databaseGetMediaOffscreen',
             'getDictionaryInfoOffscreen',
             'warmTermLookupCachesOffscreen',
         ].sort());
