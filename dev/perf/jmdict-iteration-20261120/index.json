@@ -1,0 +1,1512 @@
+{
+  "cells": [
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14672777230,
+      "artifactSha256": "e4f72fdb3b16b3c2abc449ccebb81001f65258bfc967d1cfb5adc57be28da1dc",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+      "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -2.866744687933609,
+          "fasterPairs": 3,
+          "meanSavingMs": 33.375000000009095,
+          "medianPairedChangePercent": 0.36966690345507924,
+          "pairedChangesPercent": [
+            10.535699125561626,
+            0.4557715561337661,
+            0.2835622507763924,
+            -25.44065804935466,
+            -0.9048557606169072,
+            1.1864250896711503,
+            -2.680893033266707,
+            1.6272189349090471
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": -19.045785430075167,
+          "fasterPairs": 3,
+          "meanSavingMs": 259.6750000000029,
+          "medianPairedChangePercent": -0.7537371458561648,
+          "pairedChangesPercent": [
+            -48.69362000467344,
+            -0.8640086400869218,
+            1.8004910430133414,
+            -0.6434656516254078
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "constructor-initial",
+      "id": "constructor-initial--chromium-jmdict",
+      "observations": 24,
+      "originalArchiveRelativePath": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-chromium-jmdict-44822987274-1.zip",
+      "packageSha256": {
+        "A": "0c740299d992ca072e68adb0ab09b3efc0574c771d2a3ef90492f70bdf9a0521",
+        "B": "3fa14bea177f8e499cc28da5d27cd89f264c49e588653b772cc74c9e2baf0af9"
+      },
+      "qualifier": "5e51646ca8ebc13a1c0ee4a35a6eec41cdc0b93c",
+      "qualifierTree": "4eca386561a24d95bb5d98d924f8578a1ba7e9b6",
+      "runId": 44822987274,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822987274",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14672886740,
+      "artifactSha256": "80796fbe5e3fb6e09e962065ea14361410f4be612759be1f5aeb53ca9264a24c",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "firefox",
+      "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+      "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -5.70182037009177,
+          "fasterPairs": 8,
+          "meanSavingMs": 47.375,
+          "medianPairedChangePercent": -5.92533049116899,
+          "pairedChangesPercent": [
+            -5.904059040590404,
+            -7.9041916167664645,
+            -6.393244873341375,
+            -5.946601941747575,
+            -4.062126642771801,
+            -7.351225204200695,
+            -5.376344086021501,
+            -2.5766871165644134
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": 1.5271838729383092,
+          "fasterPairs": 1,
+          "meanSavingMs": -12.5,
+          "medianPairedChangePercent": 1.3361311328433767,
+          "pairedChangesPercent": [
+            0.728155339805836,
+            -0.8684863523573227,
+            1.9441069258809174,
+            4.263093788063332
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "constructor-initial",
+      "id": "constructor-initial--firefox-jmdict",
+      "observations": 24,
+      "originalArchiveRelativePath": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-firefox-jmdict-44822987274-1.zip",
+      "packageSha256": {
+        "A": "a6756f4e75fd031444f68e8d6701ef9ccc0b27992ce0ca203e705b1d3fc7fec6",
+        "B": "89b8d79aebc64096b9a0023d7272bde1101b8b9eb44b492737e193850f14c89c"
+      },
+      "qualifier": "5e51646ca8ebc13a1c0ee4a35a6eec41cdc0b93c",
+      "qualifierTree": "4eca386561a24d95bb5d98d924f8578a1ba7e9b6",
+      "runId": 44822987274,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822987274",
+      "runtimeIdentity": {
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+          "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+          "repository": "ManabiIO/manabitan",
+          "sourceArtifactBytes": 94953342,
+          "sourceArtifactId": 14621448317,
+          "sourceArtifactName": "jmdict-validation-study-official-firefox",
+          "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+          "sourceRunId": 44720953991,
+          "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+          "version": "161.0b5"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14670769472,
+      "artifactSha256": "fa7d73e05e6f4a9f43edf2bba2503608fc67ab2bea4115ebd0586b9617d88537",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+      "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": 0.4822213069752834,
+          "fasterPairs": 4,
+          "meanSavingMs": -3.5125000000080036,
+          "medianPairedChangePercent": 0.778385428393108,
+          "pairedChangesPercent": [
+            3.8702491994992094,
+            2.0431010355431267,
+            -0.48633017875691076,
+            2.9659825695819597,
+            -2.80258277236195,
+            -1.4277869302573132,
+            3.451621846413011,
+            -3.4658785599087083
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": -1.6062884483932338,
+          "fasterPairs": 3,
+          "meanSavingMs": 11.749999999996362,
+          "medianPairedChangePercent": -0.6736083376189306,
+          "pairedChangesPercent": [
+            -5.309617918313958,
+            0.41310933627101143,
+            -0.13871549452073584,
+            -1.2085011807171253
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmnedict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMnedict.zip",
+        "expectedTitle": "JMnedict [2026-09-06]",
+        "label": "JMnedict",
+        "release": "2026-09-06",
+        "revision": "JMnedict.2026-09-06",
+        "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+        "sizeBytes": 11432315,
+        "termRows": 667942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip"
+      },
+      "group": "constructor-initial",
+      "id": "constructor-initial--chromium-jmnedict",
+      "observations": 24,
+      "originalArchiveRelativePath": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-chromium-jmnedict-44822987274-1.zip",
+      "packageSha256": {
+        "A": "38754a7dfb0caaa1a0e200053291d3b8be0469aa9c5c6c8fe9dcb5808b296ad9",
+        "B": "e4c9e4ad4c2af72f71acfc868d04ea695a56c9276af380b118bac9e562e46280"
+      },
+      "qualifier": "5e51646ca8ebc13a1c0ee4a35a6eec41cdc0b93c",
+      "qualifierTree": "4eca386561a24d95bb5d98d924f8578a1ba7e9b6",
+      "runId": 44822987274,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822987274",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14673435096,
+      "artifactSha256": "517d1a13a3f394f842d814a52f0fad5313a43a8508932754f8c76dbaf7491a91",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+      "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+      "comparisons": null,
+      "dictionary": "jitendex",
+      "errors": 24,
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-08-11]",
+        "label": "Jitendex",
+        "release": "2026.08.11.0",
+        "revision": "2026.08.11.0",
+        "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "sizeBytes": 38698313,
+        "termRows": 435448,
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip"
+      },
+      "group": "constructor-initial",
+      "id": "constructor-initial--chromium-jitendex",
+      "observations": 24,
+      "originalArchiveRelativePath": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-chromium-jitendex-44822987274-1.zip",
+      "packageSha256": {
+        "A": "a21d87f50980a8de0c10b31fce57dc387c9aa05d12739c8f286bba537fddd843",
+        "B": "9b54afe1d9f021c00f3a7ee911f710493e1e81115cb6995655e93cbd6f611409"
+      },
+      "qualifier": "5e51646ca8ebc13a1c0ee4a35a6eec41cdc0b93c",
+      "qualifierTree": "4eca386561a24d95bb5d98d924f8578a1ba7e9b6",
+      "runId": 44822987274,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822987274",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": false
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14672747239,
+      "artifactSha256": "7e149d378bb3fa6ad4b2218565bb3fbe35c23c28dbe4b420f15c710bd6058bc9",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+      "candidateTree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -9.613131502484107,
+          "fasterPairs": 8,
+          "meanSavingMs": 102.56250000000364,
+          "medianPairedChangePercent": -7.421397974984095,
+          "pairedChangesPercent": [
+            -24.510781981429464,
+            -6.792342823824726,
+            -7.134140617666462,
+            -4.117298578200135,
+            -7.708655332301728,
+            -9.165067178502884,
+            -3.721488595442235,
+            -9.63648506821836
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": -0.4720673123950636,
+          "fasterPairs": 2,
+          "meanSavingMs": 4.824999999989814,
+          "medianPairedChangePercent": 0.17330736767564026,
+          "pairedChangesPercent": [
+            -3.435114503816794,
+            1.2901964617351158,
+            0.5251684502593612,
+            -0.1785537149080807
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "owned-initial",
+      "id": "owned-initial--chromium-jmdict",
+      "observations": 24,
+      "originalArchiveRelativePath": "owned-results-20261120/jmdict-qualification-20261120-chromium-jmdict-44822991557-1.zip",
+      "packageSha256": {
+        "A": "c848127db0ce9e12d5b0333a7d9f7c9bf482e15651c10e273b805fabfefc3459",
+        "B": "90b3c7f2b4c6d3418685652d874ef642149a752ec228f0d614faf6120a6859da"
+      },
+      "qualifier": "c385d7403de9d3142bf232bab495f6643a9f8168",
+      "qualifierTree": "665b78b42d5de6b1f9a870da62e5ac76265537a7",
+      "runId": 44822991557,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822991557",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14672264651,
+      "artifactSha256": "5354e77ec2efb79a1f06f09b00d54132c3123945e2a8a63d176832f90625631a",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "firefox",
+      "candidate": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+      "candidateTree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -2.0427404148334327,
+          "fasterPairs": 7,
+          "meanSavingMs": 16.25,
+          "medianPairedChangePercent": -1.8232639972757425,
+          "pairedChangesPercent": [
+            -3.995006242197252,
+            -1.6109045848822778,
+            -1.3906447534766109,
+            -1.5424164524421635,
+            5.821474773609325,
+            -7.919621749408979,
+            -2.035623409669207,
+            -3.069053708439895
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": 3.7815126050420256,
+          "fasterPairs": 0,
+          "meanSavingMs": -29.25,
+          "medianPairedChangePercent": 3.888278462127781,
+          "pairedChangesPercent": [
+            0.12836970474967568,
+            7.253886010362698,
+            4.2746113989637236,
+            3.5019455252918386
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "owned-initial",
+      "id": "owned-initial--firefox-jmdict",
+      "observations": 24,
+      "originalArchiveRelativePath": "owned-results-20261120/jmdict-qualification-20261120-firefox-jmdict-44822991557-1.zip",
+      "packageSha256": {
+        "A": "0dd9007871b0fd7983c68ce8ca0f91181a73304c8da5a9082f40b98e6966fa3b",
+        "B": "9365241b3e1e3eda707c7f5e34380bdc5a3a5b91efff4924dbf74075487b4455"
+      },
+      "qualifier": "c385d7403de9d3142bf232bab495f6643a9f8168",
+      "qualifierTree": "665b78b42d5de6b1f9a870da62e5ac76265537a7",
+      "runId": 44822991557,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822991557",
+      "runtimeIdentity": {
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+          "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+          "repository": "ManabiIO/manabitan",
+          "sourceArtifactBytes": 94953342,
+          "sourceArtifactId": 14621448317,
+          "sourceArtifactName": "jmdict-validation-study-official-firefox",
+          "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+          "sourceRunId": 44720953991,
+          "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+          "version": "161.0b5"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14673770120,
+      "artifactSha256": "101b1199e85bb1ec94f8dc97f5ee95d70f775257838f7f80e20a6c66e03cb086",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+      "candidateTree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": 1.1462848201097886,
+          "fasterPairs": 3,
+          "meanSavingMs": -11.53750000000764,
+          "medianPairedChangePercent": 1.573181390742584,
+          "pairedChangesPercent": [
+            28.047250679491942,
+            -0.08335938314086855,
+            7.3098172545706275,
+            -17.702899170441544,
+            0.256990131578938,
+            -10.622406639002534,
+            4.856904115315364,
+            2.88937264990623
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": 0.29302495944774076,
+          "fasterPairs": 1,
+          "meanSavingMs": -2.8000000000029104,
+          "medianPairedChangePercent": 0.21204614579526382,
+          "pairedChangesPercent": [
+            -0.7186641302068697,
+            1.4730818143274815,
+            0.4137360364087739,
+            0.01035625518175376
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmnedict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMnedict.zip",
+        "expectedTitle": "JMnedict [2026-09-06]",
+        "label": "JMnedict",
+        "release": "2026-09-06",
+        "revision": "JMnedict.2026-09-06",
+        "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+        "sizeBytes": 11432315,
+        "termRows": 667942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip"
+      },
+      "group": "owned-initial",
+      "id": "owned-initial--chromium-jmnedict",
+      "observations": 24,
+      "originalArchiveRelativePath": "owned-results-20261120/jmdict-qualification-20261120-chromium-jmnedict-44822991557-1.zip",
+      "packageSha256": {
+        "A": "cc5e1bfaaf9ae69202929e86d966efbfbb1b5961de4716d2aecb26fa6573e3e4",
+        "B": "5db06b2bcb597c974615beda411b084c218fefe667e59d095fc778c63957479f"
+      },
+      "qualifier": "c385d7403de9d3142bf232bab495f6643a9f8168",
+      "qualifierTree": "665b78b42d5de6b1f9a870da62e5ac76265537a7",
+      "runId": 44822991557,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822991557",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14673091677,
+      "artifactSha256": "554b540ccb82a2132726c3208af67a1969fa90f0d59b4814718d26599be548e9",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+      "candidateTree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+      "comparisons": null,
+      "dictionary": "jitendex",
+      "errors": 24,
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-08-11]",
+        "label": "Jitendex",
+        "release": "2026.08.11.0",
+        "revision": "2026.08.11.0",
+        "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "sizeBytes": 38698313,
+        "termRows": 435448,
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip"
+      },
+      "group": "owned-initial",
+      "id": "owned-initial--chromium-jitendex",
+      "observations": 24,
+      "originalArchiveRelativePath": "owned-results-20261120/jmdict-qualification-20261120-chromium-jitendex-44822991557-1.zip",
+      "packageSha256": {
+        "A": "3a73656f64c21a8ea44473de374e9134f247f17da89ff3f8e5bada123d2703bd",
+        "B": "13eb3f426a246c0d22f929987b83cfdbc91db0b4259bd3fd1f3649722abed721"
+      },
+      "qualifier": "c385d7403de9d3142bf232bab495f6643a9f8168",
+      "qualifierTree": "665b78b42d5de6b1f9a870da62e5ac76265537a7",
+      "runId": 44822991557,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44822991557",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": false
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14673147435,
+      "artifactSha256": "fe0cccd3cd518abb76c3175738f94dbbcff8073445fd643f809c9ad44cae63b2",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "0c63c2ba0e582ce02f61dca6a5d52c93742302d6",
+      "candidateTree": "5aee97050b42ed5f2878e226e6e122235d602709",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -7.241572813759955,
+          "fasterPairs": 7,
+          "meanSavingMs": 69.36249999999745,
+          "medianPairedChangePercent": -3.977014873035617,
+          "pairedChangesPercent": [
+            -27.680552132117054,
+            -1.8237402487879861,
+            -5.045579817681379,
+            -1.4166483637156335,
+            5.005016163191822,
+            -2.9084499283898557,
+            -7.745865970407295,
+            -9.52121871599565
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": -3.194052275728798,
+          "fasterPairs": 3,
+          "meanSavingMs": 30.824999999989814,
+          "medianPairedChangePercent": -2.1954033413455143,
+          "pairedChangesPercent": [
+            -9.484912550452728,
+            1.8260399783925685,
+            -2.756785524214389,
+            -1.6340211584766395
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "flush-initial",
+      "id": "flush-initial--chromium-jmdict",
+      "observations": 24,
+      "originalArchiveRelativePath": "flush-results-20261120/artifacts/chromium-jmdict.zip",
+      "packageSha256": {
+        "A": "06a9e7d47fab4fb6320ad59746e6119a892dd0c9932cd36dd8cd74664e5ef798",
+        "B": "3db23a00e5dedd370d6435eada0ac44ee8c912e7c91c075544385377f9a07784"
+      },
+      "qualifier": "ab448de8c08a949d377a39435f60c35b8db0c8f8",
+      "qualifierTree": "263d5c4533d1b371b88ebfcbc70020a9f8b60a3a",
+      "runId": 44823809974,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44823809974",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14672529330,
+      "artifactSha256": "00e7db68604cfa90e5fd96fc2f3317d02dd44335636c5b94a28c619379cad8ae",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "firefox",
+      "candidate": "0c63c2ba0e582ce02f61dca6a5d52c93742302d6",
+      "candidateTree": "5aee97050b42ed5f2878e226e6e122235d602709",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": 0.4085338175215725,
+          "fasterPairs": 3,
+          "meanSavingMs": -4.5,
+          "medianPairedChangePercent": 0.7247880818483377,
+          "pairedChangesPercent": [
+            4.150579150579148,
+            -0.8204193254329972,
+            0.6445672191528473,
+            0.9208103130755152,
+            0.805008944543828,
+            -3.3129904097646046,
+            2.653247941445569,
+            -1.305483028720622
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": 3.860577983675273,
+          "fasterPairs": 2,
+          "meanSavingMs": -43.75,
+          "medianPairedChangePercent": 0.7548042704626334,
+          "pairedChangesPercent": [
+            -1.690391459074736,
+            -5.092186128182618,
+            18.864628820960693,
+            3.200000000000003
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "flush-initial",
+      "id": "flush-initial--firefox-jmdict",
+      "observations": 24,
+      "originalArchiveRelativePath": "flush-results-20261120/artifacts/firefox-jmdict.zip",
+      "packageSha256": {
+        "A": "f3040b76a26ce8256b8c803c1691a52b083612a396afdf2f0049110344fb991e",
+        "B": "31d582eb305a993e8d8cc2963266de515fb0131e477edcb443a38f97dc17b3ad"
+      },
+      "qualifier": "ab448de8c08a949d377a39435f60c35b8db0c8f8",
+      "qualifierTree": "263d5c4533d1b371b88ebfcbc70020a9f8b60a3a",
+      "runId": 44823809974,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44823809974",
+      "runtimeIdentity": {
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+          "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+          "repository": "ManabiIO/manabitan",
+          "sourceArtifactBytes": 94953342,
+          "sourceArtifactId": 14621448317,
+          "sourceArtifactName": "jmdict-validation-study-official-firefox",
+          "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+          "sourceRunId": 44720953991,
+          "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+          "version": "161.0b5"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14674350726,
+      "artifactSha256": "14b2d4f94d4b2970ebc5a02ad8fdd31dc42a202e808945e9353f6f0daea3595f",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "0c63c2ba0e582ce02f61dca6a5d52c93742302d6",
+      "candidateTree": "5aee97050b42ed5f2878e226e6e122235d602709",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": 3.02081511282164,
+          "fasterPairs": 3,
+          "meanSavingMs": -21.587500000001455,
+          "medianPairedChangePercent": 2.113335668652083,
+          "pairedChangesPercent": [
+            19.879770725571632,
+            2.241524236480852,
+            -3.471849865947063,
+            2.5568980050592716,
+            1.9851471008233146,
+            -0.3392226148442812,
+            -1.4235868806715457,
+            2.9607593143539113
+          ],
+          "pairs": 8
+        },
+        "D/C": {
+          "equalWorkChangePercent": 1.1108350782549126,
+          "fasterPairs": 0,
+          "meanSavingMs": -7.82499999999709,
+          "medianPairedChangePercent": 1.1243325688948813,
+          "pairedChangesPercent": [
+            1.5698587127158214,
+            0.6489841986423217,
+            0.7613510520487532,
+            1.4873140857410094
+          ],
+          "pairs": 4
+        }
+      },
+      "dictionary": "jmnedict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMnedict.zip",
+        "expectedTitle": "JMnedict [2026-09-06]",
+        "label": "JMnedict",
+        "release": "2026-09-06",
+        "revision": "JMnedict.2026-09-06",
+        "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+        "sizeBytes": 11432315,
+        "termRows": 667942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip"
+      },
+      "group": "flush-initial",
+      "id": "flush-initial--chromium-jmnedict",
+      "observations": 24,
+      "originalArchiveRelativePath": "flush-results-20261120/artifacts/chromium-jmnedict.zip",
+      "packageSha256": {
+        "A": "da9cd5539b93384944b20cfaecef1624f7ae431b276b8077a8e76cc85c597525",
+        "B": "ec069b1e858b30627619ee263bdf266121a337ce3a58bb9c18e268c3ef8baa19"
+      },
+      "qualifier": "ab448de8c08a949d377a39435f60c35b8db0c8f8",
+      "qualifierTree": "263d5c4533d1b371b88ebfcbc70020a9f8b60a3a",
+      "runId": 44823809974,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44823809974",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "6d506a46a8b42d600f9a565d8e5c6bc5415711f64149cd0f7a3625e772e5bdfe",
+      "artifactId": 14674135515,
+      "artifactSha256": "663c399348ba73c237c72fd2bf2abd7795ed35c6c16b7180e67bdce397264748",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "0c63c2ba0e582ce02f61dca6a5d52c93742302d6",
+      "candidateTree": "5aee97050b42ed5f2878e226e6e122235d602709",
+      "comparisons": null,
+      "dictionary": "jitendex",
+      "errors": 24,
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-08-11]",
+        "label": "Jitendex",
+        "release": "2026.08.11.0",
+        "revision": "2026.08.11.0",
+        "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "sizeBytes": 38698313,
+        "termRows": 435448,
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip"
+      },
+      "group": "flush-initial",
+      "id": "flush-initial--chromium-jitendex",
+      "observations": 24,
+      "originalArchiveRelativePath": "flush-results-20261120/artifacts/chromium-jitendex.zip",
+      "packageSha256": {
+        "A": "5faca3af4095d46b58df4121cac7f08347138ca8183065d8b6b0205ad7876aa7",
+        "B": "5c9e6f640f78353445ff17f3358a8a937a35427f8c37e021df5b3956b5826187"
+      },
+      "qualifier": "ab448de8c08a949d377a39435f60c35b8db0c8f8",
+      "qualifierTree": "263d5c4533d1b371b88ebfcbc70020a9f8b60a3a",
+      "runId": 44823809974,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44823809974",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": null,
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": false
+    },
+    {
+      "analyzerSha256": "ae9942371c0ee8b8d959aea7fdea6742bbc5083b50c82851f69f90d883c1b94a",
+      "artifactId": 14673128648,
+      "artifactSha256": "e93355fb98829c3855b907ee4a1ae010e41777e38b8d1d92672394505d20a210",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+      "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -5.217908470162036,
+          "fasterPairs": 3,
+          "meanSavingMs": 57.75833333334109,
+          "medianPairedChangePercent": 1.6816910142428587,
+          "pairedChangesPercent": [
+            -47.464494205803035,
+            4.580458045806357,
+            2.3267475679452865,
+            -2.098435711563207,
+            2.7065966862218627,
+            0.4290132694790172,
+            1.036634460540431,
+            3.37630448127082,
+            -0.7870916961826291,
+            5.637893050275178,
+            0.14869151467089559,
+            23.18438623523489
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": 0.179423868312667,
+          "fasterPairs": 4,
+          "meanSavingMs": -1.8166666666656965,
+          "medianPairedChangePercent": -0.09306194625200992,
+          "pairedChangesPercent": [
+            3.894695326365616,
+            -3.5605089259301725,
+            -0.1763668430323717,
+            1.694243535121065,
+            -0.009757049471648127,
+            -0.7761314383583962
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "constructor-confirmation",
+      "id": "constructor-confirmation--chromium-jmdict",
+      "observations": 36,
+      "originalArchiveRelativePath": "constructor-confirmation-results-20261120/chromium-jmdict/artifact.zip",
+      "packageSha256": {
+        "A": "da4ad5ced576d8f85157ae6af501e38e1ad5819290bea3ce81fc444ce303bbfa",
+        "B": "c0c7cc21e686b6c93d7f4cd62c76cc29efae46bfd8589436d1dd6089825e2b2f"
+      },
+      "qualifier": "b339d6ae73d62b701e7c5411340e88172c1d74a0",
+      "qualifierTree": "48870928ae0049836b04dac8e4520525b70f5cb4",
+      "runId": 44824128941,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44824128941",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": "153.0.8010.12",
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "ae9942371c0ee8b8d959aea7fdea6742bbc5083b50c82851f69f90d883c1b94a",
+      "artifactId": 14673292734,
+      "artifactSha256": "6de32169562a7d14d9249862035e39e25b688bc3b754a3c9e814c6f07f247f42",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "firefox",
+      "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+      "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -4.158936301793448,
+          "fasterPairs": 11,
+          "meanSavingMs": 44.833333333333336,
+          "medianPairedChangePercent": -3.801105974871577,
+          "pairedChangesPercent": [
+            -7.233273056057865,
+            -1.1070110701106972,
+            -3.85338345864662,
+            -7.00354609929078,
+            -3.748828491096534,
+            -1.7045454545454586,
+            -1.3914656771799594,
+            -5.482041587901698,
+            -7.209737827715356,
+            1.8129770992366456,
+            -11.111111111111116,
+            -1.3059701492537323
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": 1.05377343871067,
+          "fasterPairs": 3,
+          "meanSavingMs": -11.333333333333334,
+          "medianPairedChangePercent": 0.41103949253120664,
+          "pairedChangesPercent": [
+            8.333333333333325,
+            -1.2037037037037068,
+            2.02578268876612,
+            -3.1746031746031744,
+            -1.510859301227574,
+            2.354048964218447
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "constructor-confirmation",
+      "id": "constructor-confirmation--firefox-jmdict",
+      "observations": 36,
+      "originalArchiveRelativePath": "constructor-confirmation-results-20261120/firefox-jmdict/artifact.zip",
+      "packageSha256": {
+        "A": "12e6f762ec6718b3447592dcc851bf09e966d584a92226647540fde9a50550a3",
+        "B": "ba6c4c645bd476ba3adea89ab08d728cbd382256426d1149d412c080cadf9d27"
+      },
+      "qualifier": "b339d6ae73d62b701e7c5411340e88172c1d74a0",
+      "qualifierTree": "48870928ae0049836b04dac8e4520525b70f5cb4",
+      "runId": 44824128941,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44824128941",
+      "runtimeIdentity": {
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "expectedBrowserVersion": "161.0",
+        "pin": {
+          "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+          "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+          "repository": "ManabiIO/manabitan",
+          "sourceArtifactBytes": 94953342,
+          "sourceArtifactId": 14621448317,
+          "sourceArtifactName": "jmdict-validation-study-official-firefox",
+          "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+          "sourceRunId": 44720953991,
+          "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+          "version": "161.0b5"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "ae9942371c0ee8b8d959aea7fdea6742bbc5083b50c82851f69f90d883c1b94a",
+      "artifactId": 14673183269,
+      "artifactSha256": "744bed9a2857c27d9c37dd540d95c855e2dd690cc482f073cdad69fb000c86fc",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+      "candidateTree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -3.1045526411804802,
+          "fasterPairs": 11,
+          "meanSavingMs": 31.90833333333285,
+          "medianPairedChangePercent": -4.578891433935167,
+          "pairedChangesPercent": [
+            16.72745194677152,
+            -6.737209979614445,
+            -2.185254454176855,
+            -5.416051206302319,
+            -2.666267225884944,
+            -0.11262414251834718,
+            -7.164576206767547,
+            -0.42129452316786997,
+            -3.741731661568015,
+            -6.816220880066948,
+            -10.99617929364033,
+            -6.777408637870441
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": 2.992450017822512,
+          "fasterPairs": 2,
+          "meanSavingMs": -30.783333333340124,
+          "medianPairedChangePercent": 0.6222647465630837,
+          "pairedChangesPercent": [
+            20.49737711288111,
+            1.9732908112435332,
+            -2.9613858511542746,
+            0.7018555908074653,
+            0.5426739023187022,
+            -2.68883610451196
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "owned-confirmation",
+      "id": "owned-confirmation--chromium-jmdict",
+      "observations": 36,
+      "originalArchiveRelativePath": "owned-confirmation-results-20261120/jmdict-confirmation-20261120-chromium-jmdict-44824275564-1.zip",
+      "packageSha256": {
+        "A": "ba38e04db6554bee46921b146bf509a578db79820c1db2a6796304b35e5f295b",
+        "B": "95a806d94b79539735e8ae76c88b77a69e2cedcff9df7fe8bce076f5ab1701c7"
+      },
+      "qualifier": "358d5e0a58b1cd99dbca409ef0510091ed99adc9",
+      "qualifierTree": "f3e4c29980099307395ec207230db7a122f85533",
+      "runId": 44824275564,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44824275564",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": "153.0.8010.12",
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "ae9942371c0ee8b8d959aea7fdea6742bbc5083b50c82851f69f90d883c1b94a",
+      "artifactId": 14673647091,
+      "artifactSha256": "db1f2ec460abfdb7a635849cbfd977aaa1899ba7e6ae02fb4543b243f19e0a84",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "firefox",
+      "candidate": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+      "candidateTree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -0.5969075871988472,
+          "fasterPairs": 7,
+          "meanSavingMs": 6.916666666666667,
+          "medianPairedChangePercent": -1.1576352132114553,
+          "pairedChangesPercent": [
+            4.0035587188612,
+            1.507092198581561,
+            0.2566295979469668,
+            -1.3570822731128085,
+            -2.941176470588236,
+            8.362676056338024,
+            0.5319148936170137,
+            -4.322033898305088,
+            -7.844756399669695,
+            -1.6550522648083654,
+            -1.8900343642611728,
+            -0.9581881533101022
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": 1.1138434832923538,
+          "fasterPairs": 3,
+          "meanSavingMs": -12.833333333333334,
+          "medianPairedChangePercent": 0.772941387849474,
+          "pairedChangesPercent": [
+            3.8428693424423566,
+            -1.58311345646438,
+            -1.0480349344978213,
+            -1.17647058823529,
+            4.079861111111116,
+            2.593917710196769
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "owned-confirmation",
+      "id": "owned-confirmation--firefox-jmdict",
+      "observations": 36,
+      "originalArchiveRelativePath": "owned-confirmation-results-20261120/jmdict-confirmation-20261120-firefox-jmdict-44824275564-1.zip",
+      "packageSha256": {
+        "A": "c3fe6334925cf96de417466d071baa181dd8cde3fe0d1961d7a1663ebea2b2c0",
+        "B": "60f953b93e81c6f10d36e77cd7a3001f4287f37bd89f7ee2cb356ef9af3152c3"
+      },
+      "qualifier": "358d5e0a58b1cd99dbca409ef0510091ed99adc9",
+      "qualifierTree": "f3e4c29980099307395ec207230db7a122f85533",
+      "runId": 44824275564,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44824275564",
+      "runtimeIdentity": {
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "expectedBrowserVersion": "161.0",
+        "pin": {
+          "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+          "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+          "repository": "ManabiIO/manabitan",
+          "sourceArtifactBytes": 94953342,
+          "sourceArtifactId": 14621448317,
+          "sourceArtifactName": "jmdict-validation-study-official-firefox",
+          "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+          "sourceRunId": 44720953991,
+          "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+          "version": "161.0b5"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "12c68b10e7d3e506622732cb0f8fe3cadaab3793cee2ccb31d7402e7eea6e557",
+      "artifactId": 14675037159,
+      "artifactSha256": "657d014bcdec832ae4a28c0fed0aaf38e08a2b926931ec1a22ed36982f7e9565",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+      "candidateTree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -5.564041021164967,
+          "fasterPairs": 11,
+          "meanSavingMs": 57.37499999999758,
+          "medianPairedChangePercent": -6.01695782680497,
+          "pairedChangesPercent": [
+            -20.361953557557854,
+            -8.196561156702764,
+            -7.797404118278084,
+            14.395374339546741,
+            -5.431629488848333,
+            -6.919034643830813,
+            -4.239751428283844,
+            -1.803687095170392,
+            -6.6022861647616065,
+            -8.400460299192336,
+            -4.172788715831121,
+            -3.9478918058882817
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": -0.04262924037982119,
+          "fasterPairs": 3,
+          "meanSavingMs": 0.43333333333430346,
+          "medianPairedChangePercent": 0.06400257451025237,
+          "pairedChangesPercent": [
+            2.760489861473614,
+            0.933110696395234,
+            -4.835645069351502,
+            -1.2713936430317818,
+            3.2788539144470885,
+            -0.8051055473747293
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "combined-final",
+      "id": "combined-final--chromium-jmdict",
+      "observations": 36,
+      "originalArchiveRelativePath": "final-results-20261120/artifacts/jmdict-final-20261120-chromium-jmdict-44827149924-1.zip",
+      "packageSha256": {
+        "A": "c554f7c44fc0628d063268c26baa1c0ad3de7cf2b61a2726ed7e353e44b3554b",
+        "B": "c17eda37f5d8c4d3916f592b0a92c269ab04fb7051551bd98a8e312b1465216a"
+      },
+      "qualifier": "a85079bae287ff799fbdebc169cd08e16edd9943",
+      "qualifierTree": "a43adbf33bfb8c3dabbb0bae91f2849dea4fd836",
+      "runId": 44827149924,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44827149924",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": "153.0.8010.12",
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "12c68b10e7d3e506622732cb0f8fe3cadaab3793cee2ccb31d7402e7eea6e557",
+      "artifactId": 14673852971,
+      "artifactSha256": "3edb51607ec2a916bfb08990ce89e66e02a7ad0c352086fa0ae9421594b8d7ee",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "firefox",
+      "candidate": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+      "candidateTree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -3.2511126197480533,
+          "fasterPairs": 10,
+          "meanSavingMs": 35.916666666666664,
+          "medianPairedChangePercent": -4.149387429198792,
+          "pairedChangesPercent": [
+            -6.5077910174152205,
+            -4.860486048604862,
+            2.5735294117646967,
+            -4.8214285714285765,
+            -4.280510018214933,
+            -3.8147138964577665,
+            -3.0701754385964897,
+            2.4321796071094415,
+            -4.018264840182651,
+            -6.375545851528386,
+            -4.7533632286995475,
+            -1.1070110701106972
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": -1.1568509615384581,
+          "fasterPairs": 4,
+          "meanSavingMs": 12.833333333333334,
+          "medianPairedChangePercent": -0.8594811277512437,
+          "pairedChangesPercent": [
+            -1.4414414414414378,
+            -6.56303972366149,
+            -3.6091549295774628,
+            3.2527881040892215,
+            2.191780821917799,
+            -0.27752081406104967
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmdict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "group": "combined-final",
+      "id": "combined-final--firefox-jmdict",
+      "observations": 36,
+      "originalArchiveRelativePath": "final-results-20261120/artifacts/jmdict-final-20261120-firefox-jmdict-44827149924-1.zip",
+      "packageSha256": {
+        "A": "4b98bcfe9190ea5a258a0a99f91df24b3b37612dbd02c447e1867b735ee1c62a",
+        "B": "4c4f45bd71d8839bca62aea3657840a7e3c1e9387633040a947558d5aa2738b7"
+      },
+      "qualifier": "a85079bae287ff799fbdebc169cd08e16edd9943",
+      "qualifierTree": "a43adbf33bfb8c3dabbb0bae91f2849dea4fd836",
+      "runId": 44827149924,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44827149924",
+      "runtimeIdentity": {
+        "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+        "expectedBrowserVersion": "161.0",
+        "pin": {
+          "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+          "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+          "repository": "ManabiIO/manabitan",
+          "sourceArtifactBytes": 94953342,
+          "sourceArtifactId": 14621448317,
+          "sourceArtifactName": "jmdict-validation-study-official-firefox",
+          "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+          "sourceRunId": 44720953991,
+          "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+          "version": "161.0b5"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "12c68b10e7d3e506622732cb0f8fe3cadaab3793cee2ccb31d7402e7eea6e557",
+      "artifactId": 14675720664,
+      "artifactSha256": "52796523eab7b5f56e696afe3492b264282ab49fab96a82cd3345bbd6e4b6a47",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+      "candidateTree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": 2.253653690292201,
+          "fasterPairs": 1,
+          "meanSavingMs": -21.549999999996846,
+          "medianPairedChangePercent": 1.6270745701233436,
+          "pairedChangesPercent": [
+            1.8803241221712508,
+            -2.423378474698845,
+            1.3738250180754363,
+            0.010419922896209854,
+            1.093011035210023,
+            5.056539364198254,
+            5.829167109874289,
+            0.7311645650125209,
+            6.053906085491767,
+            4.457667815007027,
+            0.6389117889541884,
+            2.6277065377338094
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": 3.927562658657213,
+          "fasterPairs": 1,
+          "meanSavingMs": -36.61666666666133,
+          "medianPairedChangePercent": 3.038544598476922,
+          "pairedChangesPercent": [
+            3.042187831248344,
+            2.151573538854268,
+            -0.4625249658356201,
+            3.0349013657055,
+            5.282034561458304,
+            10.702667534158582
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jmnedict",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "JMnedict.zip",
+        "expectedTitle": "JMnedict [2026-09-06]",
+        "label": "JMnedict",
+        "release": "2026-09-06",
+        "revision": "JMnedict.2026-09-06",
+        "sha256": "d3afb02f2dbe4837ce1799c4a9fd9917bca6749c77a440ca87bc9f0890b3cd12",
+        "sizeBytes": 11432315,
+        "termRows": 667942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMnedict.zip"
+      },
+      "group": "combined-final",
+      "id": "combined-final--chromium-jmnedict",
+      "observations": 36,
+      "originalArchiveRelativePath": "final-results-20261120/artifacts/jmdict-final-20261120-chromium-jmnedict-44827149924-1.zip",
+      "packageSha256": {
+        "A": "4d40db2bf56e3f703462a781e71e69ca82af7159550aa487697dec19febbe757",
+        "B": "6e34d9a5646e7f3fd664dd62dc935ed23ad22d231804f9811154e77d69b8efd8"
+      },
+      "qualifier": "a85079bae287ff799fbdebc169cd08e16edd9943",
+      "qualifierTree": "a43adbf33bfb8c3dabbb0bae91f2849dea4fd836",
+      "runId": 44827149924,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44827149924",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": "153.0.8010.12",
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    },
+    {
+      "analyzerSha256": "12c68b10e7d3e506622732cb0f8fe3cadaab3793cee2ccb31d7402e7eea6e557",
+      "artifactId": 14673727875,
+      "artifactSha256": "fea6eef2def13ae6d345f52af6decab08ea0b188ed09cef93093b475b29f47ef",
+      "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+      "browser": "chromium",
+      "candidate": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+      "candidateTree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+      "comparisons": {
+        "B/A": {
+          "equalWorkChangePercent": -1.0548544625722522,
+          "fasterPairs": 8,
+          "meanSavingMs": 17.31666666666327,
+          "medianPairedChangePercent": -0.6054157489755407,
+          "pairedChangesPercent": [
+            25.47616004090529,
+            -18.458124774239316,
+            -3.382106020629827,
+            -0.20674100989960253,
+            -0.8368694012265254,
+            -4.369312360634037,
+            0.28202557031837827,
+            -2.97549231433758,
+            -0.37396209672455605,
+            0.6453674121428055,
+            0.7348748812148642,
+            -4.535755654451357
+          ],
+          "pairs": 12
+        },
+        "D/C": {
+          "equalWorkChangePercent": 1.6771642779772167,
+          "fasterPairs": 2,
+          "meanSavingMs": -26.58333333331878,
+          "medianPairedChangePercent": 1.2042801370037548,
+          "pairedChangesPercent": [
+            7.406696114204081,
+            0.8829881844761411,
+            1.5255720895313685,
+            -1.034271725827618,
+            3.13921747042305,
+            -1.6169309526760656
+          ],
+          "pairs": 6
+        }
+      },
+      "dictionary": "jitendex",
+      "errors": 0,
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-08-11]",
+        "label": "Jitendex",
+        "release": "2026.08.11.0",
+        "revision": "2026.08.11.0",
+        "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "sizeBytes": 38698313,
+        "termRows": 435448,
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip"
+      },
+      "group": "combined-final",
+      "id": "combined-final--chromium-jitendex",
+      "observations": 36,
+      "originalArchiveRelativePath": "final-results-20261120/artifacts/jmdict-final-20261120-chromium-jitendex-44827149924-1.zip",
+      "packageSha256": {
+        "A": "a12fd3f59c7b8c6cb8520bfb301f29175faf2ce263d204ca8fb1850ba15c1f98",
+        "B": "b4bc56b9730109f2238ab9ee3dbd61259ad420e3a154fc76dc4f4a0ed7287446"
+      },
+      "qualifier": "a85079bae287ff799fbdebc169cd08e16edd9943",
+      "qualifierTree": "a43adbf33bfb8c3dabbb0bae91f2849dea4fd836",
+      "runId": 44827149924,
+      "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/44827149924",
+      "runtimeIdentity": {
+        "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+        "expectedBrowserVersion": "153.0.8010.12",
+        "pin": {
+          "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+          "version": "153.0.8010.12"
+        }
+      },
+      "valid": true
+    }
+  ],
+  "invalidObservationsPreserved": 72,
+  "observations": 576,
+  "pairs": 288,
+  "qualifiedObservations": 504,
+  "schema": "manabitan-offline-evidence-20261120-v1"
+}

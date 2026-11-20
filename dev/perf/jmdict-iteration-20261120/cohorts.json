@@ -1,0 +1,1148 @@
+[
+  {
+    "browser": "chromium",
+    "cell": "constructor-initial--chromium-jmdict",
+    "dictionary": "jmdict",
+    "group": "constructor-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -2.866744687933609,
+        "fasterPairs": 3,
+        "meanSavingMs": 33.375000000009095,
+        "medianPairedChangePercent": 0.36966690345507924,
+        "pairedChangesPercent": [
+          10.535699125561626,
+          0.4557715561337661,
+          0.2835622507763924,
+          -25.44065804935466,
+          -0.9048557606169072,
+          1.1864250896711503,
+          -2.680893033266707,
+          1.6272189349090471
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": -19.045785430075167,
+        "fasterPairs": 3,
+        "meanSavingMs": 259.6750000000029,
+        "medianPairedChangePercent": -0.7537371458561648,
+        "pairedChangesPercent": [
+          -48.69362000467344,
+          -0.8640086400869218,
+          1.8004910430133414,
+          -0.6434656516254078
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "firefox",
+    "cell": "constructor-initial--firefox-jmdict",
+    "dictionary": "jmdict",
+    "group": "constructor-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -5.70182037009177,
+        "fasterPairs": 8,
+        "meanSavingMs": 47.375,
+        "medianPairedChangePercent": -5.92533049116899,
+        "pairedChangesPercent": [
+          -5.904059040590404,
+          -7.9041916167664645,
+          -6.393244873341375,
+          -5.946601941747575,
+          -4.062126642771801,
+          -7.351225204200695,
+          -5.376344086021501,
+          -2.5766871165644134
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": 1.5271838729383092,
+        "fasterPairs": 1,
+        "meanSavingMs": -12.5,
+        "medianPairedChangePercent": 1.3361311328433767,
+        "pairedChangesPercent": [
+          0.728155339805836,
+          -0.8684863523573227,
+          1.9441069258809174,
+          4.263093788063332
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "chromium",
+    "cell": "constructor-initial--chromium-jmnedict",
+    "dictionary": "jmnedict",
+    "group": "constructor-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": 0.4822213069752834,
+        "fasterPairs": 4,
+        "meanSavingMs": -3.5125000000080036,
+        "medianPairedChangePercent": 0.778385428393108,
+        "pairedChangesPercent": [
+          3.8702491994992094,
+          2.0431010355431267,
+          -0.48633017875691076,
+          2.9659825695819597,
+          -2.80258277236195,
+          -1.4277869302573132,
+          3.451621846413011,
+          -3.4658785599087083
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": -1.6062884483932338,
+        "fasterPairs": 3,
+        "meanSavingMs": 11.749999999996362,
+        "medianPairedChangePercent": -0.6736083376189306,
+        "pairedChangesPercent": [
+          -5.309617918313958,
+          0.41310933627101143,
+          -0.13871549452073584,
+          -1.2085011807171253
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "chromium",
+    "cell": "constructor-initial--chromium-jitendex",
+    "dictionary": "jitendex",
+    "group": "constructor-initial",
+    "independentComparisons": null,
+    "invalidObservations": 24,
+    "observations": 24,
+    "originalDisposition": "invalid_original_verifier_receipt_mismatch",
+    "originalErrors": [
+      {
+        "error": "Command failed",
+        "label": "A1"
+      },
+      {
+        "error": "Command failed",
+        "label": "B1"
+      },
+      {
+        "error": "Command failed",
+        "label": "C1"
+      },
+      {
+        "error": "Command failed",
+        "label": "D1"
+      },
+      {
+        "error": "Command failed",
+        "label": "B2"
+      },
+      {
+        "error": "Command failed",
+        "label": "A2"
+      },
+      {
+        "error": "Command failed",
+        "label": "A3"
+      },
+      {
+        "error": "Command failed",
+        "label": "B3"
+      },
+      {
+        "error": "Command failed",
+        "label": "D2"
+      },
+      {
+        "error": "Command failed",
+        "label": "C2"
+      },
+      {
+        "error": "Command failed",
+        "label": "B4"
+      },
+      {
+        "error": "Command failed",
+        "label": "A4"
+      },
+      {
+        "error": "Command failed",
+        "label": "A5"
+      },
+      {
+        "error": "Command failed",
+        "label": "B5"
+      },
+      {
+        "error": "Command failed",
+        "label": "C3"
+      },
+      {
+        "error": "Command failed",
+        "label": "D3"
+      },
+      {
+        "error": "Command failed",
+        "label": "B6"
+      },
+      {
+        "error": "Command failed",
+        "label": "A6"
+      },
+      {
+        "error": "Command failed",
+        "label": "A7"
+      },
+      {
+        "error": "Command failed",
+        "label": "B7"
+      },
+      {
+        "error": "Command failed",
+        "label": "D4"
+      },
+      {
+        "error": "Command failed",
+        "label": "C4"
+      },
+      {
+        "error": "Command failed",
+        "label": "B8"
+      },
+      {
+        "error": "Command failed",
+        "label": "A8"
+      }
+    ],
+    "originalValid": false,
+    "pairRows": 12,
+    "qualifiedObservations": 0
+  },
+  {
+    "browser": "chromium",
+    "cell": "owned-initial--chromium-jmdict",
+    "dictionary": "jmdict",
+    "group": "owned-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -9.613131502484107,
+        "fasterPairs": 8,
+        "meanSavingMs": 102.56250000000364,
+        "medianPairedChangePercent": -7.421397974984095,
+        "pairedChangesPercent": [
+          -24.510781981429464,
+          -6.792342823824726,
+          -7.134140617666462,
+          -4.117298578200135,
+          -7.708655332301728,
+          -9.165067178502884,
+          -3.721488595442235,
+          -9.63648506821836
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": -0.4720673123950636,
+        "fasterPairs": 2,
+        "meanSavingMs": 4.824999999989814,
+        "medianPairedChangePercent": 0.17330736767564026,
+        "pairedChangesPercent": [
+          -3.435114503816794,
+          1.2901964617351158,
+          0.5251684502593612,
+          -0.1785537149080807
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "firefox",
+    "cell": "owned-initial--firefox-jmdict",
+    "dictionary": "jmdict",
+    "group": "owned-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -2.0427404148334327,
+        "fasterPairs": 7,
+        "meanSavingMs": 16.25,
+        "medianPairedChangePercent": -1.8232639972757425,
+        "pairedChangesPercent": [
+          -3.995006242197252,
+          -1.6109045848822778,
+          -1.3906447534766109,
+          -1.5424164524421635,
+          5.821474773609325,
+          -7.919621749408979,
+          -2.035623409669207,
+          -3.069053708439895
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": 3.7815126050420256,
+        "fasterPairs": 0,
+        "meanSavingMs": -29.25,
+        "medianPairedChangePercent": 3.888278462127781,
+        "pairedChangesPercent": [
+          0.12836970474967568,
+          7.253886010362698,
+          4.2746113989637236,
+          3.5019455252918386
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "chromium",
+    "cell": "owned-initial--chromium-jmnedict",
+    "dictionary": "jmnedict",
+    "group": "owned-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": 1.1462848201097886,
+        "fasterPairs": 3,
+        "meanSavingMs": -11.53750000000764,
+        "medianPairedChangePercent": 1.573181390742584,
+        "pairedChangesPercent": [
+          28.047250679491942,
+          -0.08335938314086855,
+          7.3098172545706275,
+          -17.702899170441544,
+          0.256990131578938,
+          -10.622406639002534,
+          4.856904115315364,
+          2.88937264990623
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": 0.29302495944774076,
+        "fasterPairs": 1,
+        "meanSavingMs": -2.8000000000029104,
+        "medianPairedChangePercent": 0.21204614579526382,
+        "pairedChangesPercent": [
+          -0.7186641302068697,
+          1.4730818143274815,
+          0.4137360364087739,
+          0.01035625518175376
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "chromium",
+    "cell": "owned-initial--chromium-jitendex",
+    "dictionary": "jitendex",
+    "group": "owned-initial",
+    "independentComparisons": null,
+    "invalidObservations": 24,
+    "observations": 24,
+    "originalDisposition": "invalid_original_verifier_receipt_mismatch",
+    "originalErrors": [
+      {
+        "error": "Command failed",
+        "label": "A1"
+      },
+      {
+        "error": "Command failed",
+        "label": "B1"
+      },
+      {
+        "error": "Command failed",
+        "label": "C1"
+      },
+      {
+        "error": "Command failed",
+        "label": "D1"
+      },
+      {
+        "error": "Command failed",
+        "label": "B2"
+      },
+      {
+        "error": "Command failed",
+        "label": "A2"
+      },
+      {
+        "error": "Command failed",
+        "label": "A3"
+      },
+      {
+        "error": "Command failed",
+        "label": "B3"
+      },
+      {
+        "error": "Command failed",
+        "label": "D2"
+      },
+      {
+        "error": "Command failed",
+        "label": "C2"
+      },
+      {
+        "error": "Command failed",
+        "label": "B4"
+      },
+      {
+        "error": "Command failed",
+        "label": "A4"
+      },
+      {
+        "error": "Command failed",
+        "label": "A5"
+      },
+      {
+        "error": "Command failed",
+        "label": "B5"
+      },
+      {
+        "error": "Command failed",
+        "label": "C3"
+      },
+      {
+        "error": "Command failed",
+        "label": "D3"
+      },
+      {
+        "error": "Command failed",
+        "label": "B6"
+      },
+      {
+        "error": "Command failed",
+        "label": "A6"
+      },
+      {
+        "error": "Command failed",
+        "label": "A7"
+      },
+      {
+        "error": "Command failed",
+        "label": "B7"
+      },
+      {
+        "error": "Command failed",
+        "label": "D4"
+      },
+      {
+        "error": "Command failed",
+        "label": "C4"
+      },
+      {
+        "error": "Command failed",
+        "label": "B8"
+      },
+      {
+        "error": "Command failed",
+        "label": "A8"
+      }
+    ],
+    "originalValid": false,
+    "pairRows": 12,
+    "qualifiedObservations": 0
+  },
+  {
+    "browser": "chromium",
+    "cell": "flush-initial--chromium-jmdict",
+    "dictionary": "jmdict",
+    "group": "flush-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -7.241572813759955,
+        "fasterPairs": 7,
+        "meanSavingMs": 69.36249999999745,
+        "medianPairedChangePercent": -3.977014873035617,
+        "pairedChangesPercent": [
+          -27.680552132117054,
+          -1.8237402487879861,
+          -5.045579817681379,
+          -1.4166483637156335,
+          5.005016163191822,
+          -2.9084499283898557,
+          -7.745865970407295,
+          -9.52121871599565
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": -3.194052275728798,
+        "fasterPairs": 3,
+        "meanSavingMs": 30.824999999989814,
+        "medianPairedChangePercent": -2.1954033413455143,
+        "pairedChangesPercent": [
+          -9.484912550452728,
+          1.8260399783925685,
+          -2.756785524214389,
+          -1.6340211584766395
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "firefox",
+    "cell": "flush-initial--firefox-jmdict",
+    "dictionary": "jmdict",
+    "group": "flush-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": 0.4085338175215725,
+        "fasterPairs": 3,
+        "meanSavingMs": -4.5,
+        "medianPairedChangePercent": 0.7247880818483377,
+        "pairedChangesPercent": [
+          4.150579150579148,
+          -0.8204193254329972,
+          0.6445672191528473,
+          0.9208103130755152,
+          0.805008944543828,
+          -3.3129904097646046,
+          2.653247941445569,
+          -1.305483028720622
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": 3.860577983675273,
+        "fasterPairs": 2,
+        "meanSavingMs": -43.75,
+        "medianPairedChangePercent": 0.7548042704626334,
+        "pairedChangesPercent": [
+          -1.690391459074736,
+          -5.092186128182618,
+          18.864628820960693,
+          3.200000000000003
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "chromium",
+    "cell": "flush-initial--chromium-jmnedict",
+    "dictionary": "jmnedict",
+    "group": "flush-initial",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": 3.02081511282164,
+        "fasterPairs": 3,
+        "meanSavingMs": -21.587500000001455,
+        "medianPairedChangePercent": 2.113335668652083,
+        "pairedChangesPercent": [
+          19.879770725571632,
+          2.241524236480852,
+          -3.471849865947063,
+          2.5568980050592716,
+          1.9851471008233146,
+          -0.3392226148442812,
+          -1.4235868806715457,
+          2.9607593143539113
+        ],
+        "pairs": 8
+      },
+      "D/C": {
+        "equalWorkChangePercent": 1.1108350782549126,
+        "fasterPairs": 0,
+        "meanSavingMs": -7.82499999999709,
+        "medianPairedChangePercent": 1.1243325688948813,
+        "pairedChangesPercent": [
+          1.5698587127158214,
+          0.6489841986423217,
+          0.7613510520487532,
+          1.4873140857410094
+        ],
+        "pairs": 4
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 24,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 12,
+    "qualifiedObservations": 24
+  },
+  {
+    "browser": "chromium",
+    "cell": "flush-initial--chromium-jitendex",
+    "dictionary": "jitendex",
+    "group": "flush-initial",
+    "independentComparisons": null,
+    "invalidObservations": 24,
+    "observations": 24,
+    "originalDisposition": "invalid_original_verifier_receipt_mismatch",
+    "originalErrors": [
+      {
+        "error": "Command failed",
+        "label": "A1"
+      },
+      {
+        "error": "Command failed",
+        "label": "B1"
+      },
+      {
+        "error": "Command failed",
+        "label": "C1"
+      },
+      {
+        "error": "Command failed",
+        "label": "D1"
+      },
+      {
+        "error": "Command failed",
+        "label": "B2"
+      },
+      {
+        "error": "Command failed",
+        "label": "A2"
+      },
+      {
+        "error": "Command failed",
+        "label": "A3"
+      },
+      {
+        "error": "Command failed",
+        "label": "B3"
+      },
+      {
+        "error": "Command failed",
+        "label": "D2"
+      },
+      {
+        "error": "Command failed",
+        "label": "C2"
+      },
+      {
+        "error": "Command failed",
+        "label": "B4"
+      },
+      {
+        "error": "Command failed",
+        "label": "A4"
+      },
+      {
+        "error": "Command failed",
+        "label": "A5"
+      },
+      {
+        "error": "Command failed",
+        "label": "B5"
+      },
+      {
+        "error": "Command failed",
+        "label": "C3"
+      },
+      {
+        "error": "Command failed",
+        "label": "D3"
+      },
+      {
+        "error": "Command failed",
+        "label": "B6"
+      },
+      {
+        "error": "Command failed",
+        "label": "A6"
+      },
+      {
+        "error": "Command failed",
+        "label": "A7"
+      },
+      {
+        "error": "Command failed",
+        "label": "B7"
+      },
+      {
+        "error": "Command failed",
+        "label": "D4"
+      },
+      {
+        "error": "Command failed",
+        "label": "C4"
+      },
+      {
+        "error": "Command failed",
+        "label": "B8"
+      },
+      {
+        "error": "Command failed",
+        "label": "A8"
+      }
+    ],
+    "originalValid": false,
+    "pairRows": 12,
+    "qualifiedObservations": 0
+  },
+  {
+    "browser": "chromium",
+    "cell": "constructor-confirmation--chromium-jmdict",
+    "dictionary": "jmdict",
+    "group": "constructor-confirmation",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -5.217908470162036,
+        "fasterPairs": 3,
+        "meanSavingMs": 57.75833333334109,
+        "medianPairedChangePercent": 1.6816910142428587,
+        "pairedChangesPercent": [
+          -47.464494205803035,
+          4.580458045806357,
+          2.3267475679452865,
+          -2.098435711563207,
+          2.7065966862218627,
+          0.4290132694790172,
+          1.036634460540431,
+          3.37630448127082,
+          -0.7870916961826291,
+          5.637893050275178,
+          0.14869151467089559,
+          23.18438623523489
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": 0.179423868312667,
+        "fasterPairs": 4,
+        "meanSavingMs": -1.8166666666656965,
+        "medianPairedChangePercent": -0.09306194625200992,
+        "pairedChangesPercent": [
+          3.894695326365616,
+          -3.5605089259301725,
+          -0.1763668430323717,
+          1.694243535121065,
+          -0.009757049471648127,
+          -0.7761314383583962
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "firefox",
+    "cell": "constructor-confirmation--firefox-jmdict",
+    "dictionary": "jmdict",
+    "group": "constructor-confirmation",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -4.158936301793448,
+        "fasterPairs": 11,
+        "meanSavingMs": 44.833333333333336,
+        "medianPairedChangePercent": -3.801105974871577,
+        "pairedChangesPercent": [
+          -7.233273056057865,
+          -1.1070110701106972,
+          -3.85338345864662,
+          -7.00354609929078,
+          -3.748828491096534,
+          -1.7045454545454586,
+          -1.3914656771799594,
+          -5.482041587901698,
+          -7.209737827715356,
+          1.8129770992366456,
+          -11.111111111111116,
+          -1.3059701492537323
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": 1.05377343871067,
+        "fasterPairs": 3,
+        "meanSavingMs": -11.333333333333334,
+        "medianPairedChangePercent": 0.41103949253120664,
+        "pairedChangesPercent": [
+          8.333333333333325,
+          -1.2037037037037068,
+          2.02578268876612,
+          -3.1746031746031744,
+          -1.510859301227574,
+          2.354048964218447
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "chromium",
+    "cell": "owned-confirmation--chromium-jmdict",
+    "dictionary": "jmdict",
+    "group": "owned-confirmation",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -3.1045526411804802,
+        "fasterPairs": 11,
+        "meanSavingMs": 31.90833333333285,
+        "medianPairedChangePercent": -4.578891433935167,
+        "pairedChangesPercent": [
+          16.72745194677152,
+          -6.737209979614445,
+          -2.185254454176855,
+          -5.416051206302319,
+          -2.666267225884944,
+          -0.11262414251834718,
+          -7.164576206767547,
+          -0.42129452316786997,
+          -3.741731661568015,
+          -6.816220880066948,
+          -10.99617929364033,
+          -6.777408637870441
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": 2.992450017822512,
+        "fasterPairs": 2,
+        "meanSavingMs": -30.783333333340124,
+        "medianPairedChangePercent": 0.6222647465630837,
+        "pairedChangesPercent": [
+          20.49737711288111,
+          1.9732908112435332,
+          -2.9613858511542746,
+          0.7018555908074653,
+          0.5426739023187022,
+          -2.68883610451196
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "firefox",
+    "cell": "owned-confirmation--firefox-jmdict",
+    "dictionary": "jmdict",
+    "group": "owned-confirmation",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -0.5969075871988472,
+        "fasterPairs": 7,
+        "meanSavingMs": 6.916666666666667,
+        "medianPairedChangePercent": -1.1576352132114553,
+        "pairedChangesPercent": [
+          4.0035587188612,
+          1.507092198581561,
+          0.2566295979469668,
+          -1.3570822731128085,
+          -2.941176470588236,
+          8.362676056338024,
+          0.5319148936170137,
+          -4.322033898305088,
+          -7.844756399669695,
+          -1.6550522648083654,
+          -1.8900343642611728,
+          -0.9581881533101022
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": 1.1138434832923538,
+        "fasterPairs": 3,
+        "meanSavingMs": -12.833333333333334,
+        "medianPairedChangePercent": 0.772941387849474,
+        "pairedChangesPercent": [
+          3.8428693424423566,
+          -1.58311345646438,
+          -1.0480349344978213,
+          -1.17647058823529,
+          4.079861111111116,
+          2.593917710196769
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "chromium",
+    "cell": "combined-final--chromium-jmdict",
+    "dictionary": "jmdict",
+    "group": "combined-final",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -5.564041021164967,
+        "fasterPairs": 11,
+        "meanSavingMs": 57.37499999999758,
+        "medianPairedChangePercent": -6.01695782680497,
+        "pairedChangesPercent": [
+          -20.361953557557854,
+          -8.196561156702764,
+          -7.797404118278084,
+          14.395374339546741,
+          -5.431629488848333,
+          -6.919034643830813,
+          -4.239751428283844,
+          -1.803687095170392,
+          -6.6022861647616065,
+          -8.400460299192336,
+          -4.172788715831121,
+          -3.9478918058882817
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": -0.04262924037982119,
+        "fasterPairs": 3,
+        "meanSavingMs": 0.43333333333430346,
+        "medianPairedChangePercent": 0.06400257451025237,
+        "pairedChangesPercent": [
+          2.760489861473614,
+          0.933110696395234,
+          -4.835645069351502,
+          -1.2713936430317818,
+          3.2788539144470885,
+          -0.8051055473747293
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "firefox",
+    "cell": "combined-final--firefox-jmdict",
+    "dictionary": "jmdict",
+    "group": "combined-final",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -3.2511126197480533,
+        "fasterPairs": 10,
+        "meanSavingMs": 35.916666666666664,
+        "medianPairedChangePercent": -4.149387429198792,
+        "pairedChangesPercent": [
+          -6.5077910174152205,
+          -4.860486048604862,
+          2.5735294117646967,
+          -4.8214285714285765,
+          -4.280510018214933,
+          -3.8147138964577665,
+          -3.0701754385964897,
+          2.4321796071094415,
+          -4.018264840182651,
+          -6.375545851528386,
+          -4.7533632286995475,
+          -1.1070110701106972
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": -1.1568509615384581,
+        "fasterPairs": 4,
+        "meanSavingMs": 12.833333333333334,
+        "medianPairedChangePercent": -0.8594811277512437,
+        "pairedChangesPercent": [
+          -1.4414414414414378,
+          -6.56303972366149,
+          -3.6091549295774628,
+          3.2527881040892215,
+          2.191780821917799,
+          -0.27752081406104967
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "chromium",
+    "cell": "combined-final--chromium-jmnedict",
+    "dictionary": "jmnedict",
+    "group": "combined-final",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": 2.253653690292201,
+        "fasterPairs": 1,
+        "meanSavingMs": -21.549999999996846,
+        "medianPairedChangePercent": 1.6270745701233436,
+        "pairedChangesPercent": [
+          1.8803241221712508,
+          -2.423378474698845,
+          1.3738250180754363,
+          0.010419922896209854,
+          1.093011035210023,
+          5.056539364198254,
+          5.829167109874289,
+          0.7311645650125209,
+          6.053906085491767,
+          4.457667815007027,
+          0.6389117889541884,
+          2.6277065377338094
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": 3.927562658657213,
+        "fasterPairs": 1,
+        "meanSavingMs": -36.61666666666133,
+        "medianPairedChangePercent": 3.038544598476922,
+        "pairedChangesPercent": [
+          3.042187831248344,
+          2.151573538854268,
+          -0.4625249658356201,
+          3.0349013657055,
+          5.282034561458304,
+          10.702667534158582
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  },
+  {
+    "browser": "chromium",
+    "cell": "combined-final--chromium-jitendex",
+    "dictionary": "jitendex",
+    "group": "combined-final",
+    "independentComparisons": {
+      "B/A": {
+        "equalWorkChangePercent": -1.0548544625722522,
+        "fasterPairs": 8,
+        "meanSavingMs": 17.31666666666327,
+        "medianPairedChangePercent": -0.6054157489755407,
+        "pairedChangesPercent": [
+          25.47616004090529,
+          -18.458124774239316,
+          -3.382106020629827,
+          -0.20674100989960253,
+          -0.8368694012265254,
+          -4.369312360634037,
+          0.28202557031837827,
+          -2.97549231433758,
+          -0.37396209672455605,
+          0.6453674121428055,
+          0.7348748812148642,
+          -4.535755654451357
+        ],
+        "pairs": 12
+      },
+      "D/C": {
+        "equalWorkChangePercent": 1.6771642779772167,
+        "fasterPairs": 2,
+        "meanSavingMs": -26.58333333331878,
+        "medianPairedChangePercent": 1.2042801370037548,
+        "pairedChangesPercent": [
+          7.406696114204081,
+          0.8829881844761411,
+          1.5255720895313685,
+          -1.034271725827618,
+          3.13921747042305,
+          -1.6169309526760656
+        ],
+        "pairs": 6
+      }
+    },
+    "invalidObservations": 0,
+    "observations": 36,
+    "originalDisposition": "valid",
+    "originalErrors": [],
+    "originalValid": true,
+    "pairRows": 18,
+    "qualifiedObservations": 36
+  }
+]

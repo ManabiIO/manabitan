@@ -1,0 +1,124 @@
+{
+  "complete": true,
+  "pullRequest": 784,
+  "head": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+  "merge": "ef8b8e242e8fbeef260d23db05827896f2320323",
+  "tree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+  "mergeTreeEqualsProductTree": true,
+  "workflowCount": 7,
+  "allWorkflowConclusions": "success",
+  "successfulJobs": 21,
+  "conditionalSkippedJobs": 4,
+  "allJobsLinux": true,
+  "unitTests": {
+    "passedFiles": 622,
+    "passedTests": 13854,
+    "skippedTests": 47,
+    "totalTests": 13901,
+    "logSha256": "b6df592cb19349aba93c1bfe3c5a4bbd79aee19ed44db6736f73eba0b3faa02e"
+  },
+  "browserReports": {
+    "chromium": {
+      "status": "success",
+      "skippedVerification": false,
+      "phaseCount": 90,
+      "scenarioCount": null,
+      "reportSha256": "664fa6c54ed97b91e61f8d29604d332e7744f114dbf68211f0a942bfb4d1dae3",
+      "receiptPath": "chromium-e2e/report-validation.json",
+      "opfsSahpool": true,
+      "fallbackDisabled": true
+    },
+    "firefox": {
+      "status": "success",
+      "skippedVerification": false,
+      "phaseCount": 63,
+      "scenarioCount": null,
+      "reportSha256": "8b3fc66b5563bb438c5c153c7bb7710bee97edcbef0a80003524397dfe426f59",
+      "receiptPath": "firefox-e2e/report-validation.json",
+      "opfsSahpool": true,
+      "fallbackDisabled": true
+    },
+    "anki": {
+      "status": "success",
+      "skippedVerification": null,
+      "phaseCount": null,
+      "scenarioCount": 10,
+      "reportSha256": "3b69ac064a5b7641b5b5de917e6c85596dba6790c27824d206a4496b42267eb0",
+      "receiptPath": "anki-deduplication/report-validation.json",
+      "opfsSahpool": true,
+      "fallbackDisabled": true
+    }
+  },
+  "independentRestartReview": {
+    "status": "passed",
+    "checksPassed": 23,
+    "reviewer": "ownership_pipeline",
+    "receiptPath": "restart-interruption/report-validation.json",
+    "receiptSha256": "c7963fdb1fc49e366a889d3a4f5fcb60703a318b1b5e1f3820d7b273cb672894",
+    "validatorPath": "restart-interruption/validate-report.py",
+    "validatorSha256": "248498ae40bedddc3733c88ec91d337078b05ff614aa2fce3151709d484f107c",
+    "sourceAndPackageChecksPassed": true,
+    "instrumentedPackageFiles": 546,
+    "killedAndExitedProcesses": 9,
+    "recoveredOldGeneration": true,
+    "stagingRowsRemoved": 1,
+    "completedUpdateRows": 350001,
+    "scope": [
+      "Read-only offline report and artifact validation; no browser campaign rerun and no extracted files changed.",
+      "The exact test-only observer insertion pauses after the awaited payload write and before write completion/publication; the source harness waits for captured process identities to exit before releasing it.",
+      "The all-or-nothing oracle verifies generation, inventory, exact old/new sentinels, ordinary misses and transient metadata; it is not an exhaustive hash of every persisted term.",
+      "The original extension package ZIP and revision-two ZIP are not retained in this artifact. Their reported ZIP hashes cannot be independently rehashed here. The complete instrumented package tree, exact changed source bytes, exact observer insertion and all archived fixture rows were independently verified."
+    ]
+  },
+  "workflows": [
+    {
+      "id": 44826704642,
+      "name": "CodeQL",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704642",
+      "conclusion": "success"
+    },
+    {
+      "id": 44826704582,
+      "name": "ManabiTan static web acceptance",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704582",
+      "conclusion": "success"
+    },
+    {
+      "id": 44826704285,
+      "name": "Dependency Review",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704285",
+      "conclusion": "success"
+    },
+    {
+      "id": 44826704224,
+      "name": "Lint GitHub Actions workflows",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704224",
+      "conclusion": "success"
+    },
+    {
+      "id": 44826704427,
+      "name": "Chromium Restart Interruption",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704427",
+      "conclusion": "success"
+    },
+    {
+      "id": 44826704229,
+      "name": "Auto-Approve Safe PRs",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704229",
+      "conclusion": "success"
+    },
+    {
+      "id": 44826704284,
+      "name": "CI",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/44826704284",
+      "conclusion": "success"
+    }
+  ],
+  "scope": {
+    "benchmarkEvidenceIncluded": false,
+    "noTimingClaims": true,
+    "runtimeArtifactsPreserved": true,
+    "sourceChangesMade": false,
+    "rerunsLaunched": false
+  }
+}

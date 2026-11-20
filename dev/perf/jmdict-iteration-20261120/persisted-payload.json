@@ -1,0 +1,37 @@
+{
+  "complete": true,
+  "diagnosticOnly": true,
+  "authoritativeTiming": false,
+  "peakMemoryClaim": false,
+  "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+  "candidate": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+  "helper": "caf308f10233b176c22f59dcd8999ef20f4ad6f0",
+  "observations": 2,
+  "rawEqualityOverReload": true,
+  "normalizedEqualityAcrossArms": true,
+  "firefoxRelease": "161.0b5",
+  "firefoxApplicationVersion": "161.0",
+  "scope": "Every byte of all persisted term-content segments and term-record/index files; only paired 16-byte generation fields normalized across fresh imports. Extension reload, not browser restart. SQLite metadata and media excluded.",
+  "arms": {
+    "A": {
+      "rowCount": 526942,
+      "fileCount": 3,
+      "totalBytes": 43176166,
+      "excludedByteCount": 32,
+      "normalizedManifestSha256": "a96c7590672d8e6260b225e336112b9da92fcc07b3352aa57a089793159ac3ef",
+      "rawManifestSha256": "7075513a2a29619b28f56592928428f13e04292512e2855aefa11ac88dd0d1b0",
+      "profile": "/tmp/rust_mozprofile0kobZt",
+      "browserVersion": "161.0"
+    },
+    "B": {
+      "rowCount": 526942,
+      "fileCount": 3,
+      "totalBytes": 43176166,
+      "excludedByteCount": 32,
+      "normalizedManifestSha256": "a96c7590672d8e6260b225e336112b9da92fcc07b3352aa57a089793159ac3ef",
+      "rawManifestSha256": "591e989846115ba37f0259a470fb8bba50d12fd9c035744e4e17fe2b9e652c0a",
+      "profile": "/tmp/rust_mozprofilezkO6ki",
+      "browserVersion": "161.0"
+    }
+  }
+}

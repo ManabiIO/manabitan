@@ -1,0 +1,373 @@
+{
+  "combined-publication-20261120.json": {
+    "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "localCommit": "58105ed64b453b3166cf5632f657808005b15b65",
+    "tree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+    "files": [
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "bytes": 597320,
+        "sha256": "d11be090f93c6812edcbfdbda28b8b0e0013b8d41d0f8129fe732d59b1f82600",
+        "blob": "b5aab6d535dc3df1ce67975f1950a34d238a680b"
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-importer.js",
+        "bytes": 333070,
+        "sha256": "08f0c30b3d77960cf0e8e11111f362bf11ac562b5e3ae8c0688a9bd1d2483e46",
+        "blob": "70f8bfa025421e586331625663f0d0fff689948a"
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+        "bytes": 14926,
+        "sha256": "eb2a4d5c71a098da0bbb883378c1f1e806cc16466de6d79915daf1796da48f6c",
+        "blob": "22d700d2d7ca97aca911a5963d8506b9b2ad27e5"
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "bytes": 195404,
+        "sha256": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+        "blob": "55df1b5a83be7bfe0828208d7c1c71fa5f9af7e3"
+      },
+      {
+        "path": "ext/js/dictionary/term-content-ownership.js",
+        "bytes": 3095,
+        "sha256": "10fbf48dc6cc3bf874f0edd1c60474c788ff9dd22786185198d8809ce936a4d5",
+        "blob": "7cbd53979b3eb59dea35e23e7cebbe720ea091d0"
+      },
+      {
+        "path": "ext/js/dictionary/term-import-metrics.js",
+        "bytes": 3043,
+        "sha256": "419e9d3deeeb6d2599550dc72b3b1ece4476a5f410040d338614456697e763b1",
+        "blob": "9be8c76eb0561a30ba16959eb17e9062178653e4"
+      },
+      {
+        "path": "test/dictionary-database-content-dedup.test.js",
+        "bytes": 158594,
+        "sha256": "7d9ceb3739300e6bd8a30afc4291518e2899a9910e1bf527526d4894ab0640ec",
+        "blob": "4faed7c87ff9caf65fb960a71cadc7e4e6ef852a"
+      },
+      {
+        "path": "test/fixtures/parser-settlement/cases.mjs",
+        "bytes": 8719,
+        "sha256": "3f1842f36e29318f1c5ceeef518f22264c96f8ace845b2d514de0f1384a92317",
+        "blob": "c076733f99ea1821840f53ec75e1985414b6df4c"
+      },
+      {
+        "path": "test/lookup-construction-experiments.test.js",
+        "bytes": 28776,
+        "sha256": "9d06a5daf7c154108544e11485e9dd1e0da2cd2beda0ef9429196f814896f614",
+        "blob": "5964fbb76e913d28f7070e35d3977ae77a5b0b2a"
+      },
+      {
+        "path": "test/term-bank-experiments.test.js",
+        "bytes": 41222,
+        "sha256": "89bf9bee47bbb6fbd6c9c1b4148a25aa74ed8f177f59364c8b0b50e84cf11d79",
+        "blob": "e709ac09b90e8826c6ff1b6479d5cc980dc2893c"
+      },
+      {
+        "path": "test/term-bank-wasm-parser.test.js",
+        "bytes": 191011,
+        "sha256": "bb5e40290e10cb44bf958733014c9e6639757a19b7375e0497c46e9b6694c598",
+        "blob": "2cacac9c8a1698459d7f9bbae9127aba10b4c15c"
+      },
+      {
+        "path": "test/term-content-ownership.test.js",
+        "bytes": 2633,
+        "sha256": "350b08296336fe8388c5c13ddfe5cbb7b7b5b70119748a864c8f4c03c290e660",
+        "blob": "10e7952a757826700dca225813f956f6b7f14e6e"
+      }
+    ],
+    "includes": {
+      "ownedContent": "fecdb1124ee1b058733a389b0d6070d561fed1da",
+      "constructorCopies": "4285a7145a763d4fcc0a6c52343d28057d3563b6",
+      "settlementFixture": "ff0c3e4e264bda10759236e6c1cdf4d068cd9861"
+    },
+    "validation": {
+      "focusedTests": 651,
+      "focusedFiles": 9,
+      "changedLint": "passed",
+      "mainTypes": "passed",
+      "testTypes": "pending",
+      "build": "pending"
+    },
+    "product": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+    "branch": "perf/jmdict-owned-import-pipeline-20261120-ccf816"
+  },
+  "native-copy-publication-20261120.json": {
+    "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "baselineTree": "2e13cff67cc5805562d68af572ed66b01b677838",
+    "localCommit": "4285a7145a763d4fcc0a6c52343d28057d3563b6",
+    "tree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+    "branch": "perf/jmdict-native-pipeline-20261120",
+    "files": [
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "bytes": 194023,
+        "gitBlob": "38681c106580bab99b6b8d98394978d8e0d1f560",
+        "sha256": "9c1fb1e3bdf9947b954b1f08227bfea578d18c6f28d98cd7d429e97e1c37595e"
+      },
+      {
+        "path": "test/lookup-construction-experiments.test.js",
+        "bytes": 28776,
+        "gitBlob": "5964fbb76e913d28f7070e35d3977ae77a5b0b2a",
+        "sha256": "9d06a5daf7c154108544e11485e9dd1e0da2cd2beda0ef9429196f814896f614"
+      }
+    ],
+    "remoteCommit": "2410799f2ce8e918576fcfa2f340d75060361aae",
+    "remoteBranch": "perf/jmdict-parser-owned-copies-20261120-ccf816"
+  },
+  "ownership-publication-20261120.json": {
+    "base": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "localCommit": "fecdb1124ee1b058733a389b0d6070d561fed1da",
+    "tree": "2ac5f597867898a55e8f165954cb1350a1843cde",
+    "files": [
+      {
+        "path": "ext/js/dictionary/dictionary-database.js",
+        "bytes": 597320,
+        "blob": "b5aab6d535dc3df1ce67975f1950a34d238a680b",
+        "sha256": "d11be090f93c6812edcbfdbda28b8b0e0013b8d41d0f8129fe732d59b1f82600"
+      },
+      {
+        "path": "ext/js/dictionary/dictionary-importer.js",
+        "bytes": 333070,
+        "blob": "70f8bfa025421e586331625663f0d0fff689948a",
+        "sha256": "08f0c30b3d77960cf0e8e11111f362bf11ac562b5e3ae8c0688a9bd1d2483e46"
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+        "bytes": 14926,
+        "blob": "22d700d2d7ca97aca911a5963d8506b9b2ad27e5",
+        "sha256": "eb2a4d5c71a098da0bbb883378c1f1e806cc16466de6d79915daf1796da48f6c"
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "bytes": 195411,
+        "blob": "79e1b77e42be6dcaeb854eff0794876ab68489c3",
+        "sha256": "75963c83761f01d36d0707911aca1fd108abb163640f9929f4db96453bc98df2"
+      },
+      {
+        "path": "ext/js/dictionary/term-content-ownership.js",
+        "bytes": 3095,
+        "blob": "7cbd53979b3eb59dea35e23e7cebbe720ea091d0",
+        "sha256": "10fbf48dc6cc3bf874f0edd1c60474c788ff9dd22786185198d8809ce936a4d5"
+      },
+      {
+        "path": "ext/js/dictionary/term-import-metrics.js",
+        "bytes": 3043,
+        "blob": "9be8c76eb0561a30ba16959eb17e9062178653e4",
+        "sha256": "419e9d3deeeb6d2599550dc72b3b1ece4476a5f410040d338614456697e763b1"
+      },
+      {
+        "path": "test/dictionary-database-content-dedup.test.js",
+        "bytes": 158594,
+        "blob": "4faed7c87ff9caf65fb960a71cadc7e4e6ef852a",
+        "sha256": "7d9ceb3739300e6bd8a30afc4291518e2899a9910e1bf527526d4894ab0640ec"
+      },
+      {
+        "path": "test/term-bank-experiments.test.js",
+        "bytes": 41222,
+        "blob": "e709ac09b90e8826c6ff1b6479d5cc980dc2893c",
+        "sha256": "89bf9bee47bbb6fbd6c9c1b4148a25aa74ed8f177f59364c8b0b50e84cf11d79"
+      },
+      {
+        "path": "test/term-bank-wasm-parser.test.js",
+        "bytes": 191011,
+        "blob": "2cacac9c8a1698459d7f9bbae9127aba10b4c15c",
+        "sha256": "bb5e40290e10cb44bf958733014c9e6639757a19b7375e0497c46e9b6694c598"
+      },
+      {
+        "path": "test/term-content-ownership.test.js",
+        "bytes": 2633,
+        "blob": "10e7952a757826700dca225813f956f6b7f14e6e",
+        "sha256": "350b08296336fe8388c5c13ddfe5cbb7b7b5b70119748a864c8f4c03c290e660"
+      }
+    ],
+    "validation": {
+      "focusedTests": 550,
+      "focusedFiles": 8,
+      "lint": "pass",
+      "mainTypes": "pass",
+      "testTypes": "pass",
+      "diffCheck": "pass"
+    },
+    "limitations": [
+      "No browser timing yet",
+      "Queue occupancy excludes workers before result arrival, retained cache, and WASM heaps",
+      "One previous concurrent run timed out an existing native-key-arena test; final serial run passed all550"
+    ],
+    "metrics": [
+      "parserParallelOwnedContentBytes",
+      "parserParallelPeakQueuedOwnedContentBytes",
+      "dedupRecentSourceAdoptedBytes"
+    ],
+    "remoteCommit": "5f9cea2e41020fd32f1f53a67655005b65ae80cf",
+    "remoteBranch": "perf/jmdict-owned-source-20261120-ccf816"
+  },
+  "flush-publication-20261120.json": {
+    "candidate": "index-flush-8MiB",
+    "parent": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "files": [
+      {
+        "path": "ext/js/dictionary/term-record-import-index-writer.js",
+        "bytes": 10557,
+        "sha256": "94ee9bd1883a67e0fbe3e0e00b25ca29540e28cb8dd5ee977f1a1ded06703814",
+        "blob": "e48fd339ac4f37af5281e9edb4223861240348e6"
+      },
+      {
+        "path": "test/term-record-import-index-writer.test.js",
+        "bytes": 17521,
+        "sha256": "f0068035ea4bafd1c4c601219719032bc5fdf8a5acbdb865c046896b48deeb5b",
+        "blob": "0c0136f716e71e54cd32a1cec4c9ff5c3573db42"
+      }
+    ],
+    "hypothesis": "Move some synchronous OPFS body-flush latency into the interval where parser and compression workers remain active, retaining final flush and all failure handling.",
+    "parameters": {
+      "flushIntervalBytes": 8388608,
+      "writeMaxBytes": 524288,
+      "writeYieldBudgetMs": 6
+    },
+    "tests": {
+      "focusedStorageTests": 214,
+      "importCleanupTests": 66,
+      "lint": "passed",
+      "mainTypes": "passed",
+      "testTypes": "passed"
+    },
+    "timingStatus": "not measured",
+    "localCommit": "296295b6c0e20c62d0aef6499b5b4e226c44a20d",
+    "product": "0c63c2ba0e582ce02f61dca6a5d52c93742302d6",
+    "tree": "5aee97050b42ed5f2878e226e6e122235d602709",
+    "branch": "perf/jmdict-index-flush-overlap-20261120-ccf816"
+  },
+  "benchmark-receipt-fix-publication-20261120.json": {
+    "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "product": "aaec273c3f035f0da9d5eef29c25e3c1e352c57c",
+    "tree": "c6068eb292d6a302117c34ef3c80443b0dc38ea9",
+    "branch": "test/import-native-receipts-20261120-ccf816",
+    "files": [
+      {
+        "path": "dev/perf/benchmark-support.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "32d5dd026cc5f7143e870020a9dbb5c0e49488cc"
+      },
+      {
+        "path": "test/perf-experiment-receipts.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "47520f2bc432ac549ff4908751e372d6eca6a879"
+      }
+    ],
+    "pr": 785,
+    "url": "https://github.com/ManabiIO/manabitan/pull/785"
+  },
+  "qualification-final-20261120/publication-combined.json": {
+    "product": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+    "productTree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+    "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "files": [
+      {
+        "path": ".github/workflows/jmdict-final-20261120.yml",
+        "sha256": "bd788ccdbe69ad363ad54030ad5355467a97888673879336bd891b9e05255684",
+        "bytes": 4249,
+        "blob": "9f39dd6547baf4af1fb184678491126a3dd9c6af"
+      },
+      {
+        "path": "dev/perf/benchmark-support.js",
+        "sha256": "b9099006dc42b013dec44dbcff91f4a1e7b8ba03f0cd3ac1b0e512176d7ec525",
+        "bytes": 13600,
+        "blob": "32d5dd026cc5f7143e870020a9dbb5c0e49488cc"
+      },
+      {
+        "path": "dev/perf/jmdict-final-20261120.py",
+        "sha256": "12c68b10e7d3e506622732cb0f8fe3cadaab3793cee2ccb31d7402e7eea6e557",
+        "bytes": 47540,
+        "blob": "4b21fcd50d52db6db71efff924989245d387bdd9"
+      },
+      {
+        "path": "dev/perf/jmdict-firefox-runtime/firefox-runtime.py",
+        "sha256": "3a041734698253fec4bad60c02b4e102955370bee82e0f6780dd981c95cf0950",
+        "bytes": 6704,
+        "blob": "288e9045fc38e368b155616432d944447c4582dd"
+      },
+      {
+        "path": "dev/perf/jmdict-firefox-runtime/manifest.json",
+        "sha256": "031d7036accbc0d6beed9c2830ec0dc84a834f971915e752a677f24d04892c98",
+        "bytes": 3085,
+        "blob": "89a6ce17d489b70e5a6934e3c3d027cf2c37a4b9"
+      },
+      {
+        "path": "test/firefox/jmdict-import-observation.js",
+        "sha256": "a82d29849987780c5f93202190a8c65312764a08e900466eaf190613b64f1662",
+        "bytes": 36059,
+        "blob": "2f65cf489bc9643b48d1d8d3eb31322db9163cd5"
+      },
+      {
+        "path": "test/firefox/jmdict-import-observation.test.js",
+        "sha256": "01b7989dedcec154eea5b6b82c20436032d5f075b0d4be46884ebac050feff13",
+        "bytes": 8797,
+        "blob": "7e109bfbc494fee504d4ff9b352ec5a41b1f013a"
+      },
+      {
+        "path": "test/perf-experiment-receipts.test.js",
+        "sha256": "c9e35351ba534a8eab33313d0273c52618eb94015fea510d782b8005ea8cbff0",
+        "bytes": 7341,
+        "blob": "47520f2bc432ac549ff4908751e372d6eca6a879"
+      }
+    ],
+    "expectedQualifierTree": "a43adbf33bfb8c3dabbb0bae91f2849dea4fd836",
+    "qualifier": "a85079bae287ff799fbdebc169cd08e16edd9943",
+    "qualifierTree": "a43adbf33bfb8c3dabbb0bae91f2849dea4fd836",
+    "branch": "perf/jmdict-final-20261120-ccf816-combined",
+    "publishedFiles": [
+      {
+        "path": ".github/workflows/jmdict-final-20261120.yml",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9f39dd6547baf4af1fb184678491126a3dd9c6af"
+      },
+      {
+        "path": "dev/perf/benchmark-support.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "32d5dd026cc5f7143e870020a9dbb5c0e49488cc"
+      },
+      {
+        "path": "dev/perf/jmdict-final-20261120.py",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4b21fcd50d52db6db71efff924989245d387bdd9"
+      },
+      {
+        "path": "dev/perf/jmdict-firefox-runtime/firefox-runtime.py",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "288e9045fc38e368b155616432d944447c4582dd"
+      },
+      {
+        "path": "dev/perf/jmdict-firefox-runtime/manifest.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "89a6ce17d489b70e5a6934e3c3d027cf2c37a4b9"
+      },
+      {
+        "path": "test/firefox/jmdict-import-observation.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2f65cf489bc9643b48d1d8d3eb31322db9163cd5"
+      },
+      {
+        "path": "test/firefox/jmdict-import-observation.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7e109bfbc494fee504d4ff9b352ec5a41b1f013a"
+      },
+      {
+        "path": "test/perf-experiment-receipts.test.js",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "47520f2bc432ac549ff4908751e372d6eca6a879"
+      }
+    ]
+  }
+}

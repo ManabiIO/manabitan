@@ -1,0 +1,245 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "history_refresh",
+  "recordedAtUtc": "2026-11-20T22:36:04.540248Z",
+  "status": "passed; corrected substantive report and final additions confirmed",
+  "inputReport": {
+    "path": "/workspace/scratch/ccf816230d73/manabitan-findings-20261120/dev/perf/jmdict-import-iteration-20261120.md",
+    "bytes": 25729,
+    "sha256": "f5d49c5551acef388c6c9edaef530ba62a67ff2c1be4e2f22a2c5a2746e08601"
+  },
+  "auditScope": "Completed read-only substantive review against original cohort JSON, final receipts, product source, component oracles, CI and persisted-payload evidence. Follow-ups confirmed corrected passages and final cross-dictionary/evidence-package additions. No benchmarks, tests, analyzer reruns, product edits, report edits or original-evidence mutations.",
+  "correctedPassages": {
+    "flushFirefoxRounding": {
+      "confirmed": true,
+      "exactText": "Firefox was +0.72% and JMnedict +2.11%."
+    },
+    "baselineOwnershipInference": {
+      "confirmed": true,
+      "exactText": "The baseline does not expose the new adoption counter. Its zero adopted bytes and 100,724,405 copied bytes are derived from the measured retained-byte total and the baseline's unconditional copy path. Candidate adoption is explicitly measured."
+    },
+    "firefoxReleasePackageScope": {
+      "confirmed": true,
+      "exactText": "A separate Firefox diagnostic using release extension packages"
+    },
+    "segmentedPlanBrowserScope": {
+      "confirmed": true,
+      "exactText": "The five segmented-plan sites were not exercised by the pinned JMdict browser import path"
+    },
+    "compactOwnedMemoryScope": {
+      "confirmed": true,
+      "exactText": "This applies only to admitted compact-owned plain groups, including the active sink; it excludes the preexisting large projected-output path."
+    }
+  },
+  "independentCohortArithmetic": {
+    "method": "Read all 20 original cohort.json and analysis.json files; checked complete planned label order and original result/error dispositions; independently recomputed paired medians, equal-work changes, mean savings and faster-pair counts for both comparisons in every valid cell. Each matched archived analysis at absolute tolerance 1e-8.",
+    "cells": 20,
+    "validCells": 17,
+    "invalidCells": 3,
+    "plannedRecords": 576,
+    "validRecords": 504,
+    "invalidRecords": 72,
+    "campaigns": [
+      {
+        "name": "constructor initial",
+        "runId": 44822987274,
+        "cells": 4,
+        "planned": 96,
+        "valid": 72,
+        "invalid": 24
+      },
+      {
+        "name": "ownership initial",
+        "runId": 44822991557,
+        "cells": 4,
+        "planned": 96,
+        "valid": 72,
+        "invalid": 24
+      },
+      {
+        "name": "flush initial",
+        "runId": 44823809974,
+        "cells": 4,
+        "planned": 96,
+        "valid": 72,
+        "invalid": 24
+      },
+      {
+        "name": "constructor confirmation",
+        "runId": 44824128941,
+        "cells": 2,
+        "planned": 72,
+        "valid": 72,
+        "invalid": 0
+      },
+      {
+        "name": "ownership confirmation",
+        "runId": 44824275564,
+        "cells": 2,
+        "planned": 72,
+        "valid": 72,
+        "invalid": 0
+      },
+      {
+        "name": "combined final",
+        "runId": 44827149924,
+        "cells": 4,
+        "planned": 144,
+        "valid": 144,
+        "invalid": 0
+      }
+    ],
+    "invalidDisposition": "Three initial Jitendex cells retain all 24 invalid records each and null comparisons; no reclassification or exclusion.",
+    "displayedStatistics": "All report statistics matched except flush Firefox rounding (+0.724788% to +0.72%), now corrected. Final JMdict B/A medians are -6.016958% Chromium and -4.149387% Firefox; equal-work changes -5.564041% and -3.251113%; faster pairs 11/12 and 10/12."
+  },
+  "sourceRuntimeAndScope": {
+    "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "product": "a0f8e8e00d30823b8451248b3e6bab20b4640eb8",
+    "productAndTestedMergeTree": "b0d18a0f0bbd096ebe9a18d09bf284d2684d4a65",
+    "testedMerge": "ef8b8e242e8fbeef260d23db05827896f2320323",
+    "finalQualifier": "a85079bae287ff799fbdebc169cd08e16edd9943",
+    "chromiumVersion": "153.0.8010.12",
+    "firefox": "Developer Edition 161.0b5; application capability version 161.0; test preferences and release extension package.",
+    "persistence": "Chromium browser restart; Firefox AddonManager extension reload with changed background realm, not Firefox process restart.",
+    "segmentedLookup": "All final A/B JMdict raw receipts in both browsers report zero ordinary and fast-path segmented lookup segments; separate fixed-group component oracle reports 21.",
+    "ownership": "Baseline source unconditionally copies retained spans; adopted=0 and copied=100724405 are source-derived from measured retained bytes. Candidate adoption is explicitly measured."
+  },
+  "ciAndCorrectnessArithmetic": {
+    "combinedCi": {
+      "successfulWorkflows": 7,
+      "successfulExecutedJobs": 21,
+      "conditionalSkips": 4,
+      "unitFilesPassed": 622,
+      "unitTestsPassed": 13854,
+      "unitTestsSkipped": 47,
+      "chromiumPhases": 90,
+      "firefoxPhases": 63,
+      "ankiScenarios": 10,
+      "unitLogSha256IndependentlyRehashed": "b6df592cb19349aba93c1bfe3c5a4bbd79aee19ed44db6736f73eba0b3faa02e"
+    },
+    "verifierCi": {
+      "successfulWorkflows": 6,
+      "successfulExecutedJobs": 20,
+      "conditionalSkips": 4,
+      "packagedSourceChanged": false
+    },
+    "localFocusedTests": 651,
+    "fixtureSchedules": 62,
+    "componentOracle": "Source-bound in-memory oracle matches all three complete fixtures; distinct from parallel ownership and persisted-storage validation.",
+    "persistedPayload": {
+      "runId": 44826746012,
+      "rowsPerArm": 526942,
+      "filesPerArm": 3,
+      "bytesPerArm": 43176166,
+      "normalizedGenerationBytes": 32,
+      "rawEqualityAcrossReload": true,
+      "normalizedEqualityAcrossArms": true,
+      "normalizedManifestSha256": "a96c7590672d8e6260b225e336112b9da92fcc07b3352aa57a089793159ac3ef",
+      "excluded": "SQLite metadata and media"
+    }
+  },
+  "memoryArithmetic": {
+    "scope": "One separate post-cohort Chromium trace per arm; wrapper plus descendants; complete samples inside worker-import interval; not authoritative elapsed observations.",
+    "finalPeakPss": [
+      {
+        "dictionary": "jmdict",
+        "baselineBytes": 1308678144,
+        "candidateBytes": 1345863680,
+        "deltaBytes": 37185536,
+        "samplesA": 21,
+        "samplesB": 18
+      },
+      {
+        "dictionary": "jmnedict",
+        "baselineBytes": 1183982592,
+        "candidateBytes": 1239782400,
+        "deltaBytes": 55799808,
+        "samplesA": 22,
+        "samplesB": 22
+      },
+      {
+        "dictionary": "jitendex",
+        "baselineBytes": 1662792704,
+        "candidateBytes": 1676076032,
+        "deltaBytes": 13283328,
+        "samplesA": 37,
+        "samplesB": 36
+      }
+    ],
+    "sampleErrors": 0,
+    "plainPathBound": "12 admitted compact-owned groups times 48 MiB = 576 MiB; includes active sink; excludes preexisting projected-output path and other memory."
+  },
+  "remainingLimitations": [
+    "Descriptive hosted Linux results; no macOS performance measurement or unmodified consumer-profile Firefox qualification.",
+    "JMnedict is slower in the raw final comparison; larger same-code drift limits attribution. Jitendex is within observed control variation. No significance or control-adjusted gain is claimed.",
+    "Concurrent phase counters are not additive wall-clock savings; component percentages are not added.",
+    "Memory measurements are sampled diagnostics, not replicated uninstrumented peaks. Queue counters exclude undelivered workers, retained cache and native heaps. No corresponding Firefox import-peak process-memory measurement.",
+    "Routine cohort correctness probes are sampled; exhaustive stored-byte validation is separate with the stated exclusions.",
+    "Original extension and revision-two fixture ZIPs are absent from the interruption artifact, as disclosed; their reported ZIP hashes cannot be independently rehashed.",
+    "Final packaging text and producer replay metadata were inspected, including a count of 27 selected original ZIPs. Actual full-archive assembly/hash verification and final destination copies occur after this review; raw-archive.json is intentionally pending. The portable verifier was not rerun during this addendum."
+  ],
+  "reviewHistory": [
+    {
+      "inputReport": {
+        "path": "/workspace/scratch/ccf816230d73/manabitan-findings-20261120/dev/perf/jmdict-import-iteration-20261120.md",
+        "bytes": 24335,
+        "sha256": "1d3900aceb44286397353920f305d49450f6c19c156eaac1656c60e93ae84b69"
+      },
+      "receiptSha256": "2bb34f1d00314743bdfd6fe98f32bf3218b1dd914cd4ef94a52cc3a3a780a111"
+    }
+  ],
+  "finalAdditionsReview": {
+    "crossDictionary": {
+      "exactParagraph": "The [cross-dictionary analysis](jmdict-iteration-20261120/cross-dictionary-tradeoff.md) finds that JMnedict adopts only 55.59% of retained bytes and finishes parsing earlier without shortening its busy sink. Its sampled memory increase exceeds its entire owned-content volume, so the content queue alone cannot explain the difference. A useful next experiment would budget complete queued outputs while keeping input partitioning constant: the current lead parameter also changes group count. No such alternative is validated here, and a size threshold selected merely to separate these two fixtures is not included.",
+      "status": "confirmed; no correction required",
+      "independentArithmetic": {
+        "jmnedictAdoptionPercent": 55.59088167253532,
+        "ownedContentMiB": 21.732946395874023,
+        "sampledPssIncreaseMiB": 53.21484375
+      },
+      "scopeAssessment": "The paragraph presents the raw adverse comparison and limits causality, distinguishes the small content queue from wider process memory, and identifies a future complete-output queue hypothesis without claiming that it was implemented or validated.",
+      "linkedAnalysisSha256": "e136bf0173a82b1a33c7df520f36075e800a895407e2d57e3a0a470aa305fb47"
+    },
+    "evidencePackage": {
+      "status": "description and producer packet metadata confirmed; archive-generation link intentionally pending",
+      "compactSubsetRequiresFullPacket": true,
+      "observationsJsonlCount": 576,
+      "pairsJsonlCount": 288,
+      "originalArtifactZipCount": 27,
+      "zipCountBySource": {
+        "constructor-initial": 4,
+        "constructor-confirmation": 2,
+        "owned-initial": 4,
+        "owned-confirmation": 2,
+        "flush-initial": 4,
+        "combined-final": 4,
+        "payload-component": 1,
+        "payload-combined": 1,
+        "product-ci": 4,
+        "baseline-control": 1
+      },
+      "zipCountMethod": "Read-only count using the assembly script selection rules; no archive creation or re-extraction.",
+      "fullPacketManifestSha256": "f98886253e1647479ac8a8a07545bbe427521f1790914f9083f4c06909e979b0",
+      "relocatedReplayReceiptSha256": "8e50ee8d1ed57e74ee3ac72386bb1c80d82db168d93070a796a0d34129b64937",
+      "producerReplayReceipt": {
+        "allArchivedAnalysesExactlyReproduced": true,
+        "allSummariesRecomputedFromRawTimers": true,
+        "cells": 20,
+        "validCells": 17,
+        "expectedInvalidCells": 3,
+        "observations": 576,
+        "qualifiedObservations": 504,
+        "invalidObservationsPreserved": 72,
+        "pairs": 288,
+        "browserRuns": 0,
+        "networkOperations": 0,
+        "otherWorkspaceFilesReadByAnalyzers": 0
+      },
+      "reviewerReranPortableVerifier": false,
+      "pendingAtReview": {
+        "compactLinks": "All six not-yet-copied summary/instruction targets exist in producer git-summary; destination copy pending root packaging. Other referenced evidence files are present.",
+        "raw-archive.json": "Expected to be generated after full archive assembly; not independently verified by this receipt."
+      }
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "file": "jmdict-import-evidence-20261120.tar.gz",
+  "bytes": 87271438,
+  "sha256": "ae1b59fda194d5196be6432ed8db04fe0ab2dac39e5f90d8ea56aa92d718d87d",
+  "originalArtifactZips": 27,
+  "manifestFiles": 3728,
+  "verifiedArchiveMembers": 3731,
+  "verification": "Every stored member was read back; size, SHA256 and inventory matched.",
+  "manifestSha256": "78345d41dbc74ff6d01a441422baeef7499e42c103a7db164dfb4392c453dfbc",
+  "artifacts": [
+    {
+      "path": "constructor-confirmation-results-20261120/chromium-jmdict/artifact.zip",
+      "bytes": 2990656,
+      "sha256": "e93355fb98829c3855b907ee4a1ae010e41777e38b8d1d92672394505d20a210"
+    },
+    {
+      "path": "constructor-confirmation-results-20261120/firefox-jmdict/artifact.zip",
+      "bytes": 1153706,
+      "sha256": "6de32169562a7d14d9249862035e39e25b688bc3b754a3c9e814c6f07f247f42"
+    },
+    {
+      "path": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-chromium-jitendex-44822987274-1.zip",
+      "bytes": 1166246,
+      "sha256": "517d1a13a3f394f842d814a52f0fad5313a43a8508932754f8c76dbaf7491a91"
+    },
+    {
+      "path": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-chromium-jmdict-44822987274-1.zip",
+      "bytes": 2517736,
+      "sha256": "e4f72fdb3b16b3c2abc449ccebb81001f65258bfc967d1cfb5adc57be28da1dc"
+    },
+    {
+      "path": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-chromium-jmnedict-44822987274-1.zip",
+      "bytes": 2312677,
+      "sha256": "fa7d73e05e6f4a9f43edf2bba2503608fc67ab2bea4115ebd0586b9617d88537"
+    },
+    {
+      "path": "constructor-results-20261120/artifacts/jmdict-qualification-20261120-firefox-jmdict-44822987274-1.zip",
+      "bytes": 954701,
+      "sha256": "80796fbe5e3fb6e09e962065ea14361410f4be612759be1f5aeb53ca9264a24c"
+    },
+    {
+      "path": "current-control/artifact.zip",
+      "bytes": 820642,
+      "sha256": "c4ea5fa7af687effe96758d6f09c02b0f73cfc391dd63035b9049d9b6eaeda77"
+    },
+    {
+      "path": "final-results-20261120/artifacts/jmdict-final-20261120-chromium-jitendex-44827149924-1.zip",
+      "bytes": 3852573,
+      "sha256": "fea6eef2def13ae6d345f52af6decab08ea0b188ed09cef93093b475b29f47ef"
+    },
+    {
+      "path": "final-results-20261120/artifacts/jmdict-final-20261120-chromium-jmdict-44827149924-1.zip",
+      "bytes": 3019580,
+      "sha256": "657d014bcdec832ae4a28c0fed0aaf38e08a2b926931ec1a22ed36982f7e9565"
+    },
+    {
+      "path": "final-results-20261120/artifacts/jmdict-final-20261120-chromium-jmnedict-44827149924-1.zip",
+      "bytes": 2948044,
+      "sha256": "52796523eab7b5f56e696afe3492b264282ab49fab96a82cd3345bbd6e4b6a47"
+    },
+    {
+      "path": "final-results-20261120/artifacts/jmdict-final-20261120-firefox-jmdict-44827149924-1.zip",
+      "bytes": 1182725,
+      "sha256": "3edb51607ec2a916bfb08990ce89e66e02a7ad0c352086fa0ae9421594b8d7ee"
+    },
+    {
+      "path": "flush-results-20261120/artifacts/chromium-jitendex.zip",
+      "bytes": 1166750,
+      "sha256": "663c399348ba73c237c72fd2bf2abd7795ed35c6c16b7180e67bdce397264748"
+    },
+    {
+      "path": "flush-results-20261120/artifacts/chromium-jmdict.zip",
+      "bytes": 2495292,
+      "sha256": "fe0cccd3cd518abb76c3175738f94dbbcff8073445fd643f809c9ad44cae63b2"
+    },
+    {
+      "path": "flush-results-20261120/artifacts/chromium-jmnedict.zip",
+      "bytes": 2357876,
+      "sha256": "14b2d4f94d4b2970ebc5a02ad8fdd31dc42a202e808945e9353f6f0daea3595f"
+    },
+    {
+      "path": "flush-results-20261120/artifacts/firefox-jmdict.zip",
+      "bytes": 953620,
+      "sha256": "00e7db68604cfa90e5fd96fc2f3317d02dd44335636c5b94a28c619379cad8ae"
+    },
+    {
+      "path": "owned-confirmation-results-20261120/jmdict-confirmation-20261120-chromium-jmdict-44824275564-1.zip",
+      "bytes": 3008869,
+      "sha256": "744bed9a2857c27d9c37dd540d95c855e2dd690cc482f073cdad69fb000c86fc"
+    },
+    {
+      "path": "owned-confirmation-results-20261120/jmdict-confirmation-20261120-firefox-jmdict-44824275564-1.zip",
+      "bytes": 1165325,
+      "sha256": "db1f2ec460abfdb7a635849cbfd977aaa1899ba7e6ae02fb4543b243f19e0a84"
+    },
+    {
+      "path": "owned-results-20261120/jmdict-qualification-20261120-chromium-jitendex-44822991557-1.zip",
+      "bytes": 1179159,
+      "sha256": "554b540ccb82a2132726c3208af67a1969fa90f0d59b4814718d26599be548e9"
+    },
+    {
+      "path": "owned-results-20261120/jmdict-qualification-20261120-chromium-jmdict-44822991557-1.zip",
+      "bytes": 2535117,
+      "sha256": "7e149d378bb3fa6ad4b2218565bb3fbe35c23c28dbe4b420f15c710bd6058bc9"
+    },
+    {
+      "path": "owned-results-20261120/jmdict-qualification-20261120-chromium-jmnedict-44822991557-1.zip",
+      "bytes": 2564661,
+      "sha256": "101b1199e85bb1ec94f8dc97f5ee95d70f775257838f7f80e20a6c66e03cb086"
+    },
+    {
+      "path": "owned-results-20261120/jmdict-qualification-20261120-firefox-jmdict-44822991557-1.zip",
+      "bytes": 964753,
+      "sha256": "5354e77ec2efb79a1f06f09b00d54132c3123945e2a8a63d176832f90625631a"
+    },
+    {
+      "path": "payload-combined-results-20261120/artifact.zip",
+      "bytes": 410898,
+      "sha256": "5a6112b49cd0a058d5f2c448e19f8bb0d0b1ffa0ca45771e2469ce729e5d69b7"
+    },
+    {
+      "path": "payload-results-20261120/artifact.zip",
+      "bytes": 408941,
+      "sha256": "a179d5d3e7c46065f62766955b060859c5793dd8014ca97a5221bac134d4dc42"
+    },
+    {
+      "path": "pr784-ci-results-20261120/anki-deduplication/artifact.zip",
+      "bytes": 9182,
+      "sha256": "c7dfc1a19585f984a8439c921079ab47d01d01920e24dfc19aa703433073e65a"
+    },
+    {
+      "path": "pr784-ci-results-20261120/chromium-e2e/artifact.zip",
+      "bytes": 157975,
+      "sha256": "be9f4825a959973496b3d90ecfda08e64b0693f214b1518acc4f7611a5478022"
+    },
+    {
+      "path": "pr784-ci-results-20261120/firefox-e2e/artifact.zip",
+      "bytes": 40736,
+      "sha256": "ceae5bf83f4fd4754292fac9c9eaaae00a139706022d314a93d2d8dca0797167"
+    },
+    {
+      "path": "pr784-ci-results-20261120/restart-interruption/artifact.zip",
+      "bytes": 34279689,
+      "sha256": "fa961d1ba7c62cf6c85e9e0f70edef7d5aae878c4365c39e3680857804ba3a06"
+    }
+  ]
+}

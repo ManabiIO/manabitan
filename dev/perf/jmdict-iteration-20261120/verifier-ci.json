@@ -1,0 +1,280 @@
+{
+  "complete": true,
+  "pullRequest": 785,
+  "workflowCount": 6,
+  "allWorkflowConclusions": "success",
+  "jobCount": 24,
+  "successfulJobs": 20,
+  "conditionalSkippedJobs": 4,
+  "allJobsLinux": true,
+  "sourceBinding": {
+    "complete": true,
+    "pullRequest": 785,
+    "head": "aaec273c3f035f0da9d5eef29c25e3c1e352c57c",
+    "tree": "c6068eb292d6a302117c34ef3c80443b0dc38ea9",
+    "base": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "merge": "c8c3fa1f0069e5f7286423d217a0d90e940b0299",
+    "mergeTreeEqualsHeadTree": true,
+    "changedFiles": [
+      {
+        "path": "dev/perf/benchmark-support.js",
+        "blob": "32d5dd026cc5f7143e870020a9dbb5c0e49488cc",
+        "status": "modified"
+      },
+      {
+        "path": "test/perf-experiment-receipts.test.js",
+        "blob": "47520f2bc432ac549ff4908751e372d6eca6a879",
+        "status": "added"
+      }
+    ],
+    "packagedSourceChanged": false,
+    "checkoutWitnessJob": 136603265010,
+    "checkoutJobLogSha256": "a6e5f805798bfca42c92b43ecab32686feb23498ae38108c2b546a030b280fbc",
+    "runtimeArtifactAnalysisRepeated": false
+  },
+  "jobs": [
+    {
+      "runId": 44827367803,
+      "workflow": "Lint GitHub Actions workflows",
+      "jobId": 136603264882,
+      "job": "actionlint",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367978,
+      "workflow": "Auto-Approve Safe PRs",
+      "jobId": 136603266172,
+      "job": "auto-approve",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827368067,
+      "workflow": "Dependency Review",
+      "jobId": 136603266445,
+      "job": "dependency-review",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367920,
+      "workflow": "Chromium Restart Interruption",
+      "jobId": 136603265484,
+      "job": "Restart and interruption recovery (Chromium)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367759,
+      "workflow": "CodeQL",
+      "jobId": 136603264970,
+      "job": "Analyze (javascript)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265010,
+      "job": "Full Extension E2E (Firefox)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265314,
+      "job": "Anki Deduplication Matrix (Chromium)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265332,
+      "job": "JSON",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265460,
+      "job": "TypeScript (dev)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265466,
+      "job": "Test Build",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-26.04"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265492,
+      "job": "TypeScript (test)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265557,
+      "job": "Full Extension E2E (Chromium)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265574,
+      "job": "Unit Tests",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265613,
+      "job": "TypeScript (main)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265695,
+      "job": "Unit Tests (options)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265727,
+      "job": "Markdown",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265782,
+      "job": "CSS",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265835,
+      "job": "HTML",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265837,
+      "job": "TypeScript (bench)",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603265962,
+      "job": "JavaScript",
+      "conclusion": "success",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603267712,
+      "job": "Full Extension E2E (Edge)",
+      "conclusion": "skipped",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603267775,
+      "job": "Firefox Android Gecko RDP Capability Probe (manual)",
+      "conclusion": "skipped",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603268021,
+      "job": "Published release upgrade and reimport",
+      "conclusion": "skipped",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    },
+    {
+      "runId": 44827367736,
+      "workflow": "CI",
+      "jobId": 136603268082,
+      "job": "Firefox Android Installation Smoke (blocking)",
+      "conclusion": "skipped",
+      "labels": [
+        "ubuntu-latest"
+      ]
+    }
+  ],
+  "runtimeArtifactAnalysisRepeated": false,
+  "rerunsLaunched": false,
+  "sourceChangesMade": false
+}

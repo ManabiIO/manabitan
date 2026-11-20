@@ -1,0 +1,31 @@
+{
+  "complete": true,
+  "frozen": true,
+  "fullPacketManifestSha256": "f98886253e1647479ac8a8a07545bbe427521f1790914f9083f4c06909e979b0",
+  "fullPacketBytesExcludingThisReceipt": 21203629,
+  "filesExcludingThisReceipt": 3243,
+  "compressedContentBytes": 17142666,
+  "uniqueOriginalContentBytes": 135299496,
+  "uniqueBlobs": 3126,
+  "originalArchiveFiles": 5107,
+  "retainedOriginalFiles": 4653,
+  "omittedFilesIndexed": 454,
+  "gitSubsetFiles": 11,
+  "gitSubsetBytes": 410906,
+  "gitSubsetManifestSha256": "000622cd77a1ba0eaf540a2e1362adcf4738721ce551c69058e5244da0400830",
+  "verificationReceiptSha256": "5d70fd8c502b7bc58d0ccc3d70562e8817863a95c04388603c901aa32283fbba",
+  "relocatedReceiptSha256": "8e50ee8d1ed57e74ee3ac72386bb1c80d82db168d93070a796a0d34129b64937",
+  "integrityReceiptSha256": "b26ea3c72602536e12803a4beff82502b0c93368b723fb13cb15c70a5c9b5af7",
+  "coverage": {
+    "invalidCells": 3,
+    "invalidObservationsPreserved": 72,
+    "observations": 576,
+    "pairs": 288,
+    "qualifiedObservations": 504,
+    "validCells": 17
+  },
+  "standardLibraryOnly": true,
+  "sourceEvidenceModified": false,
+  "browserRuns": 0,
+  "publicationPerformed": false
+}

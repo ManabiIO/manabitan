@@ -1,0 +1,1298 @@
+[
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B1/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B2/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B3/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B4/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A5",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A5/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B5",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B5/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B6",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B6/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A6",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A6/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A7",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A7/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B7",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B7/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B8",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B8/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "constructor-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A8",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A8/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B1/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B2/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B3/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B4/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A5",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A5/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B5",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B5/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B6",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B6/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A6",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A6/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A7",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A7/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B7",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B7/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B8",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B8/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "owned-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A8",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A8/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B1/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D1",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D1/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B2/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B3/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C2",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C2/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B4/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A5",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A5/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B5",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B5/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D3",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D3/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B6",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B6/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A6",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A6/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A7",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A7/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B7",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B7/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "D4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/D4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "C4",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/C4/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "B8",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/B8/stderr.log",
+    "stderrSha256": "3060267038d8a81102044e2cfb0e6929a03cd7743c3e305d3583ca3db1364a75",
+    "summaryPresent": false
+  },
+  {
+    "cell": "flush-initial--chromium-jitendex",
+    "commandExitCode": 1,
+    "disposition": "invalid_original_cohort_not_reclassified",
+    "eligibleForPerformanceClaim": false,
+    "label": "A8",
+    "originalAnalysisError": "Command failed",
+    "originalCohortError": "Observation command failed",
+    "rawElapsedAvailable": true,
+    "rawStatus": "success",
+    "stderrErrorLines": [
+      "                throw new Error(`Import experiment receipt mismatch: ${key}`);",
+      "Error: Import experiment receipt mismatch: parserExperiments"
+    ],
+    "stderrFile": "commands/A8/stderr.log",
+    "stderrSha256": "49a1c1ae3353af417d48c40e41744135ac8e45abbf277df6c6336a6e5d92e080",
+    "summaryPresent": false
+  }
+]
