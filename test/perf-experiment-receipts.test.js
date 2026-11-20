@@ -137,6 +137,15 @@ describe('requested versus effective parser receipt policy', () => {
         const flags = {experimentalNativeEscapedKeys: true}
         expect(extract(report(171092992, false, flags), flags).totalImportMs).toBe(200)
     })
+    test('requires an effective parser receipt when requested and compression receipts match', () => {
+        const flags = {experimentalNativeEscapedKeys: true}
+        const value = report(171092992, false, flags)
+        for (const receipt of details(value)) {
+            delete receipt.parserExperiments
+            delete receipt.fastPathParserEffectiveExperiments
+        }
+        expect(() => extract(value, flags)).toThrow('Missing import experiment worker receipts')
+    })
     test('allows explicit false to receive the same existing large-source production override', () => {
         const flags = {experimentalNativeEscapedKeys: false}
         expect(extract(report(threshold, true, flags), flags).totalImportMs).toBe(200)

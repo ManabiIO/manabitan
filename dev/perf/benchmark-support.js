@@ -106,8 +106,8 @@ function validateExperimentReceipts(debug, importFlags) {
         if (details === null) { continue; }
         for (const key of ['parserExperiments', 'fastPathParserEffectiveExperiments', 'fastPathParserExperiments', 'compressionExperiments']) {
             if (!Object.hasOwn(details, key)) { continue; }
-            ++receipts;
             const effective = key === 'parserExperiments' || key === 'fastPathParserEffectiveExperiments';
+            if (effective) { ++receipts; }
             const prefix = key === 'parserExperiments' ? 'parser' : 'fastPathParser';
             const sourceBytes = details[`${prefix}SourceUncompressedBytes`];
             const workerCount = details[`${prefix}ParallelWorkerCount`];
