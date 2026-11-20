@@ -126,6 +126,10 @@ test('a dictionary storage failure leaves backend startup and explicit reset ava
         expect(options).toEqual(savedOptions);
         expect(saveOptions).not.toHaveBeenCalled();
         expect(sendMessagePromise).not.toHaveBeenCalled();
+        await expect(backend._onApiGetDictionaryInfo(void 0, {})).rejects.toMatchObject({
+            message: 'Cannot safely recover invalid dictionary import journal',
+            data: {code: 'DICTIONARY_STORAGE_UNAVAILABLE'},
+        });
         await expect(backend._onApiPurgeDatabase(void 0, {})).resolves.toBeUndefined();
         expect(sendMessagePromise).toHaveBeenCalledExactlyOnceWith({action: 'databasePurgeOffscreen'});
         expect(updated).toHaveBeenCalledExactlyOnceWith('dictionary', 'purge');

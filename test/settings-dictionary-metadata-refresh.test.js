@@ -17,6 +17,7 @@
 
 import {afterEach, describe, expect, vi} from 'vitest';
 import {createDictionaryImportBusyError} from '../ext/js/core/dictionary-import-busy-error.js';
+import {createDictionaryStorageUnavailableError} from '../ext/js/core/dictionary-storage-unavailable-error.js';
 import {EventDispatcher} from '../ext/js/core/event-dispatcher.js';
 import {ExtensionError} from '../ext/js/core/extension-error.js';
 import {log} from '../ext/js/core/log.js';
@@ -136,6 +137,19 @@ for (const Controller of controllers) {
             expect(h.events.hasListeners('optionsChanged')).toBe(true);
             expect(h.getOptions).not.toHaveBeenCalled();
             expect(Reflect.get(h.controller, '_getDictionaryInfoToken')).toBeNull();
+            h.publish();
+            await vi.waitFor(() => { expect(h.container.textContent).toContain('Old'); });
+            expect(h.getDictionaryInfo).toHaveBeenCalledTimes(2);
+        });
+
+        test('storage startup failure keeps the section subscribed for recovery', async ({window}) => {
+            const h = createHarness(Controller, window);
+            const logError = vi.spyOn(log, 'error').mockImplementation(() => {});
+            const failure = ExtensionError.deserialize(ExtensionError.serialize(createDictionaryStorageUnavailableError(new Error('Dictionary storage failed to open'))));
+            h.getDictionaryInfo.mockRejectedValueOnce(failure);
+            await expect(h.controller.prepare()).resolves.toBeUndefined();
+            expect(logError).toHaveBeenCalledWith(failure);
+            expect(h.getOptions).not.toHaveBeenCalled();
             h.publish();
             await vi.waitFor(() => { expect(h.container.textContent).toContain('Old'); });
             expect(h.getDictionaryInfo).toHaveBeenCalledTimes(2);

@@ -16,6 +16,7 @@
  */
 
 import {isDictionaryImportBusyError} from '../../core/dictionary-import-busy-error.js';
+import {isDictionaryStorageUnavailableError} from '../../core/dictionary-storage-unavailable-error.js';
 import {log} from '../../core/log.js';
 import {querySelectorNotNull} from '../../dom/query-selector.js';
 
@@ -55,6 +56,11 @@ export class PopupFrequencyBlurController {
                 // Mutation owns metadata until its databaseUpdated publication.
                 // Keep the last usable controls and wait for that event.
                 if (isDictionaryImportBusyError(error)) { return; }
+                if (isDictionaryStorageUnavailableError(error)) {
+                    // A later database update can refresh this section after reset.
+                    log.error(error);
+                    return;
+                }
                 throw error;
             }
             if (this._getDictionaryInfoToken !== token) { return; }

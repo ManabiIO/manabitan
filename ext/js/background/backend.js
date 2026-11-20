@@ -23,6 +23,8 @@ import {Mecab} from '../comm/mecab.js';
 import {YomitanApi} from '../comm/yomitan-api.js';
 import {createApiMap, invokeApiMapHandler} from '../core/api-map.js';
 import {EventListenerCollection} from '../core/event-listener-collection.js';
+import {isDictionaryImportBusyError} from '../core/dictionary-import-busy-error.js';
+import {createDictionaryStorageUnavailableError} from '../core/dictionary-storage-unavailable-error.js';
 import {ExtensionError} from '../core/extension-error.js';
 import {fetchText} from '../core/fetch-utilities.js';
 import {parseJson, readResponseJson} from '../core/json.js';
@@ -2006,8 +2008,13 @@ export class Backend {
     async _onApiGetDictionaryInfo() {
         await this._awaitDictionaryMutationSettled();
         await this._awaitDictionaryRefreshSettled();
-        await this._ensureDictionaryDatabaseReady();
-        return await this._dictionaryDatabase.getDictionaryInfo();
+        try {
+            await this._ensureDictionaryDatabaseReady();
+            return await this._dictionaryDatabase.getDictionaryInfo();
+        } catch (error) {
+            if (isDictionaryImportBusyError(error)) { throw error; }
+            throw createDictionaryStorageUnavailableError(error);
+        }
     }
 
     /** @type {import('api').ApiHandler<'deleteDictionaryByTitle'>} */
