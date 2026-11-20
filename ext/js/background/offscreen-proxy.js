@@ -745,11 +745,6 @@ export class TranslatorProxy {
         this._offscreen = offscreen;
     }
 
-    /** */
-    async prepare() {
-        await this._offscreen.sendMessagePromise({action: 'translatorPrepareOffscreen'});
-    }
-
     /**
      * @param {string} text
      * @param {import('translation').FindKanjiOptions} options

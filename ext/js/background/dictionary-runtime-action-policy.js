@@ -99,7 +99,6 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     // Media reads release their SQLite cursor before awaiting OPFS. Allow them
     // alongside warmup so a popup's stylesheet or image lookup can proceed.
     databaseGetMediaOffscreen: concurrentStandardReadPolicy,
-    translatorPrepareOffscreen: standardReadPolicy,
     findKanjiOffscreen: interactiveLookupPolicy,
     findTermsOffscreen: interactiveLookupPolicy,
     findTermsStructuredOffscreen: interactiveLookupPolicy,

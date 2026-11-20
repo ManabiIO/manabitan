@@ -1075,7 +1075,10 @@ export class Backend {
                 recordPhase('dictionaryDatabase.prepare', startedAt);
             }
 
-            void this._translator.prepare();
+            // Preparing the worker database also prepares its translator.
+            if (this._translator instanceof Translator) {
+                this._translator.prepare();
+            }
 
             await optionsUtilPreparePromise;
             this._defaultAnkiFieldTemplates = await defaultTemplatesPromise;
