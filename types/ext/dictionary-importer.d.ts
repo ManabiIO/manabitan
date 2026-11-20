@@ -115,11 +115,21 @@ export type DictionaryAutoUpdateInfo = {
 
 export type DictionaryStorageHealth = 'available' | 'repairPending' | 'repairing' | 'temporarilyUnavailable' | 'reimportRequired';
 
+export type GenerationMediaDescriptor = {
+    version: 2;
+    prefix: string;
+    suffix: string;
+    firstId: number;
+    slotCount: number;
+    count: number;
+    dataBytes: number;
+};
+
 export type Summary = {
     title: string;
     termRecordStorageName?: string;
     storageGenerationId?: string;
-    generationMedia?: import('../../ext/js/dictionary/dictionary-generation-media-store.js').GenerationMediaDescriptor;
+    generationMedia?: GenerationMediaDescriptor;
     storageImportOperationId?: string;
     sourceTitle?: string | null;
     replacedDictionaryTitle?: string | null;

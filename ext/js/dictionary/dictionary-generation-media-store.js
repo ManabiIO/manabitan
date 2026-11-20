@@ -31,7 +31,7 @@ const MAX_DATA_BYTES = 256 * 1024 * 1024;
 const MAX_CONTENT_BYTES = 4 * 1024 * 1024;
 const DEFLATE_FLAG = 0x80000000;
 
-/** @typedef {{version: 2, prefix: string, suffix: string, firstId: number, slotCount: number, count: number, dataBytes: number}} GenerationMediaDescriptor */
+/** @typedef {import('dictionary-importer').GenerationMediaDescriptor} GenerationMediaDescriptor */
 /** @typedef {{path: string, packedOffset: number, packedLength: number, compressionMethod: number, uncompressedLength: number, signature: number}} SourceMediaRange */
 /** @typedef {{descriptor: GenerationMediaDescriptor, index: Uint8Array<ArrayBuffer>}} GenerationMediaIndex */
 /** @typedef {{descriptor: GenerationMediaDescriptor, descriptorKey: string, prefix: Blob}} GenerationMediaPrefix */
