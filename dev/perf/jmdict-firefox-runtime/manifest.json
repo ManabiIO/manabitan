@@ -1,0 +1,77 @@
+{
+  "browserRuntimes": {
+    "firefox": {
+      "repository": "ManabiIO/manabitan",
+      "sourceRunId": 44720953991,
+      "sourceArtifactId": 14621448317,
+      "sourceArtifactName": "jmdict-validation-study-official-firefox",
+      "sourceArtifactBytes": 94953342,
+      "sourceArtifactSha256": "12d2db231fd9909f0b0666d04bfe1da3568a6edaa367313d095ec1e6203828df",
+      "sourceToolingCommit": "007f16306b9f8036a9930b653fbffca3c750068e",
+      "receiptSha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826",
+      "binarySha256": "87032e80d53e57ae469ee15cbb789db6927cc103b0f89e498d713a79ef3a38f5",
+      "version": "161.0b5"
+    },
+    "chromium": {
+      "version": "153.0.8010.12",
+      "binarySha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e"
+    }
+  },
+  "qualification": {
+    "baseline": "d733d0efe53398bfc2b45985aa709ade54f5710a",
+    "candidate": "2410799f2ce8e918576fcfa2f340d75060361aae",
+    "sourcePaths": [
+      "ext/js/dictionary/term-bank-wasm-parser.js",
+      "test/lookup-construction-experiments.test.js"
+    ],
+    "packagePaths": [
+      "js/dictionary/term-bank-wasm-parser.js"
+    ],
+    "order": [
+      "B1",
+      "A1",
+      "D1",
+      "C1",
+      "A2",
+      "B2",
+      "B3",
+      "A3",
+      "C2",
+      "D2",
+      "A4",
+      "B4",
+      "B5",
+      "A5",
+      "D3",
+      "C3",
+      "A6",
+      "B6",
+      "B7",
+      "A7",
+      "C4",
+      "D4",
+      "A8",
+      "B8",
+      "B9",
+      "A9",
+      "D5",
+      "C5",
+      "A10",
+      "B10",
+      "B11",
+      "A11",
+      "C6",
+      "D6",
+      "A12",
+      "B12"
+    ],
+    "candidateTree": "fd68379069afb6cc13808ae9c904ef82dd85f1e2",
+    "protocol": "jmdict-confirmation-20261120-v1",
+    "pairCounts": {
+      "B/A": 12,
+      "D/C": 6
+    },
+    "plannedAtUtc": "2026-11-20T21:46:10Z",
+    "plannedWithoutCandidateResults": true
+  }
+}
