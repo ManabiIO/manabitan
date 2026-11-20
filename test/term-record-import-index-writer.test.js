@@ -160,6 +160,59 @@ describe('fresh import index writer', () => {
         expect(file.calls.closes).toBe(1);
     });
 
+    test('checkpoints completed body bytes and still flushes a rewritten header on close', async () => {
+        vi.spyOn(safePerformance, 'now').mockReturnValue(0);
+        const file = memoryFile({shortWrite: 256 * 1024});
+        const writer = await writerFor(file);
+        const interval = 8 * 1024 * 1024;
+        await writer.write(new Uint8Array(interval - 1).fill(17));
+        expect(file.calls.flushes).toBe(0);
+        await writer.write(new Uint8Array([31]));
+        expect(file.calls.flushes).toBe(1);
+        await writer.write(new Uint8Array([47, 53]));
+        await writer.seek(0);
+        await writer.write(new Uint8Array([61]));
+        expect(file.calls.flushes).toBe(1);
+        await writer.close();
+        expect(file.calls.flushes).toBe(2);
+        expect(file.calls.closes).toBe(1);
+        expect(file.bytes.byteLength).toBe(interval + 2);
+        expect([...file.bytes.subarray(0, 3)]).toEqual([61, 17, 17]);
+        expect([...file.bytes.subarray(interval - 2)]).toEqual([17, 31, 47, 53]);
+    });
+
+    test('a checkpoint failure stops queued writes and remains the finalization failure', async () => {
+        vi.spyOn(safePerformance, 'now').mockReturnValue(0);
+        const failure = new Error('body checkpoint witness');
+        const file = memoryFile({flushError: failure});
+        const writer = await writerFor(file);
+        const first = writer.write(new Uint8Array(8 * 1024 * 1024));
+        const second = writer.write(new Uint8Array([1]));
+        const results = await Promise.allSettled([first, second]);
+        expect(results).toEqual([
+            {status: 'rejected', reason: failure},
+            {status: 'rejected', reason: failure},
+        ]);
+        await expect(writer.close()).rejects.toBe(failure);
+        await expect(writer.abort()).rejects.toBe(failure);
+        expect(file.calls.flushes).toBe(1);
+        expect(file.calls.closes).toBe(1);
+        expect(file.bytes.byteLength).toBe(8 * 1024 * 1024);
+    });
+
+    test('abort after a checkpoint closes once without flushing subsequent bytes', async () => {
+        vi.spyOn(safePerformance, 'now').mockReturnValue(0);
+        const file = memoryFile();
+        const writer = await writerFor(file);
+        await writer.write(new Uint8Array(8 * 1024 * 1024 + 1));
+        expect(file.calls.flushes).toBe(1);
+        await writer.abort();
+        await writer.abort();
+        await expect(writer.close()).rejects.toMatchObject({name: 'AbortError'});
+        expect(file.calls.flushes).toBe(1);
+        expect(file.calls.closes).toBe(1);
+    });
+
     test('abort joins queued bytes without flushing or claiming durable close', async () => {
         const file = memoryFile();
         const writer = await writerFor(file);

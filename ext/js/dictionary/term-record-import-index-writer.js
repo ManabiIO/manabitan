@@ -20,6 +20,7 @@ import {toError} from '../core/to-error.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
 const WRITE_TIME_BUDGET_MS = 6;
+const FLUSH_INTERVAL_BYTES = 8 * 1024 * 1024;
 
 /**
  * @typedef {object} SyncAccessHandle
@@ -64,6 +65,8 @@ export class SyncImportIndexWriter {
         this._access = access;
         /** @type {number} */
         this._position = 0;
+        /** @type {number} */
+        this._bytesSinceFlush = 0;
         /** @type {boolean} */
         this._closing = false;
         /** @type {boolean} */
@@ -253,6 +256,13 @@ export class SyncImportIndexWriter {
             }
             offset += written;
             this._position += written;
+            this._bytesSinceFlush += written;
+            if (this._bytesSinceFlush >= FLUSH_INTERVAL_BYTES) {
+                // Persist completed body ranges while parser/compression workers
+                // can still run. Final close always flushes the rewritten header.
+                this._access.flush();
+                this._bytesSinceFlush = 0;
+            }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
         }
     }
