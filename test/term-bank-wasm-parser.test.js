@@ -368,7 +368,9 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('bounds metadata allocation even when every media entry is empty', async () => {
         const empty = createCompressedTermBankSource('', 0);
-        await expect(inflateCompressedZipMediaBatchWasm(Array.from({length: 257}, () => empty))).rejects.toThrow('source count budget');
+        const result = await inflateCompressedZipMediaBatchWasm(Array.from({length: 1024}, () => empty));
+        expect(result.sources).toHaveLength(1024);
+        await expect(inflateCompressedZipMediaBatchWasm(Array.from({length: 1025}, () => empty))).rejects.toThrow('source count budget');
     });
 
     maybeTest.each([

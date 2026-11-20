@@ -192,6 +192,23 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload]);
     });
 
+    test('coalesces the full deferred media entry limit in a bounded Blob range', async () => {
+        const entries = Array.from({length: 1024}, (_, index) => {
+            const result = entry(0);
+            result.file.filename = 'image-' + String(index).padStart(5, '0') + '.webp';
+            result.file.rawFilename = encoder.encode(result.file.filename);
+            result.file.offset = index * (result.header.length + result.payload.length);
+            result.header.set(result.file.rawFilename, 30);
+            return result;
+        });
+        const archive = new TrackedBlob([...entries.flatMap(({header, payload}) => [header, payload]), padding]);
+        const batch = await new RawZipPayloadReader(archive).readBatch(entries.map(({file}) => file), signal());
+
+        expect(batch?.rangeReadCount).toBe(1);
+        expect(batch?.sources.map(({filename}) => filename)).toEqual(entries.map(({file}) => file.filename));
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(entries.map(({payload}) => payload));
+    });
+
     test('validates each batched filename against its ZIP central metadata', async () => {
         const first = entry(8);
         const second = entry(8);
@@ -236,7 +253,7 @@ describe('bounded large ZIP entry reads', () => {
             first.file.uncompressedSize = 3 * 1024 * 1024;
             second.file.uncompressedSize = 3 * 1024 * 1024;
         }
-        if (kind === 'source-count') { files = Array.from({length: 257}, () => first.file); }
+        if (kind === 'source-count') { files = Array.from({length: 1025}, () => first.file); }
         if (kind === 'unsafe-offset') { second.file.offset = Number.MAX_SAFE_INTEGER; }
         const archive = new TrackedBlob([first.header, first.payload, padding]);
 

@@ -69,7 +69,7 @@ import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-
 import {DictionaryImportSession} from './dictionary-import-session.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
-import {RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
+import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 
 const BlobReader = /** @type {typeof import('@zip.js/zip.js').BlobReader} */ (/** @type {unknown} */ (BlobReader0));
@@ -3435,7 +3435,7 @@ export class DictionaryImporter {
      * @returns {Promise<number>}
      */
     async _importDeferredMediaRequirements(requirements, prefetched, fileMap, writeMedia, rawZipPayloadReader = null, mediaMetrics = null) {
-        const maxBatchEntries = 256;
+        const maxBatchEntries = RAW_ZIP_BATCH_MAX_FILES;
         const maxBatchBytes = 4 * 1024 * 1024;
         const total = requirements.length + prefetched.length;
         let processed = 0;

@@ -23,6 +23,7 @@ import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-
 import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
+import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -59,7 +60,6 @@ const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
-const MAX_WASM_MEDIA_BATCH_SOURCES = 256;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -318,7 +318,7 @@ export async function inflateCompressedZipMediaBatchWasm(sources) {
     if (!Array.isArray(sources) || sources.length === 0) {
         throw new TypeError('Compressed ZIP media sources are empty');
     }
-    if (sources.length > MAX_WASM_MEDIA_BATCH_SOURCES) {
+    if (sources.length > RAW_ZIP_BATCH_MAX_FILES) {
         throw new TermBankWasmResourceError('Compressed ZIP media batch exceeds its source count budget');
     }
     let compressedBytes = 0;

@@ -386,7 +386,7 @@ describe('bounded referenced-media prefetch', () => {
         const requirements = [];
         /** @type {import('dictionary-importer').ArchiveFileMap} */
         const files = new Map();
-        for (let i = 0; i < 600; ++i) {
+        for (let i = 0; i < 1100; ++i) {
             const path = `image${i}.png`;
             files.set(path, {filename: path, bytes: Uint8Array.of(i >>> 8, i & 255), uncompressedSize: 2});
             requirements.push({type: 'image', source: {type: 'image', path}, target: {type: 'image', path: ''}, entry});
@@ -399,10 +399,10 @@ describe('bounded referenced-media prefetch', () => {
             batches.push(media.length);
             persisted.push(...media);
             expect(processed).toBe(persisted.length);
-            expect(total).toBe(600);
+            expect(total).toBe(1100);
         });
-        expect(batches).toEqual([256, 256, 88]);
-        expect(count).toBe(600);
+        expect(batches).toEqual([1024, 76]);
+        expect(count).toBe(1100);
         expect(persisted.map(({path}) => path)).toEqual(requirements.map(({source}) => Reflect.get(source, 'path')));
         for (let i = 0; i < persisted.length; ++i) {
             expect(new Uint8Array(persisted[i].content)).toEqual(Uint8Array.of(i >>> 8, i & 255));
