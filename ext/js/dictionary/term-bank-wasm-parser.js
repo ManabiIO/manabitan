@@ -1037,7 +1037,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
 void 0,
             contentMetasPtr: contentMetaPtr,
             contentUniqueIndexesPtr,
-            contentUniqueSignatures: Uint32Array.from(new Uint32Array(
+            contentUniqueSignatures: new Uint32Array(new Uint32Array(
                 wasm.memory.buffer,
                 contentUniqueSignaturesPtr,
                 contentUniqueCount * CONTENT_SIGNATURE_U32_FIELDS,
@@ -1505,7 +1505,7 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
         scratch.sequenceSlotsPtr,
         scratch.sequenceSlotsCount,
     );
-    return length > 0 ? Uint8Array.from(new Uint8Array(wasm.memory.buffer, scratch.outputPtr, length)) : null;
+    return length > 0 ? new Uint8Array(new Uint8Array(wasm.memory.buffer, scratch.outputPtr, length)) : null;
 }
 
 /**
@@ -1595,13 +1595,13 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
             indexScratch,
         );
         if (bytes === null) { return null; }
-        const ownedPlan = {stringLengths: Uint16Array.from(runPlan.stringLengths),
-            stringOffsets: Uint32Array.from(runPlan.stringOffsets),
-            stringHashes: Uint32Array.from(runPlan.stringHashes),
+        const ownedPlan = {stringLengths: new Uint16Array(runPlan.stringLengths),
+            stringOffsets: new Uint32Array(runPlan.stringOffsets),
+            stringHashes: new Uint32Array(runPlan.stringHashes),
             // v7: 16-byte container header, then the 32-byte base header.
             stringsBuffer: bytes.subarray(48, 48 + length),
-            expressionIndexes: Uint32Array.from(runPlan.expressionIndexes),
-            readingIndexes: Uint32Array.from(runPlan.readingIndexes)};
+            expressionIndexes: new Uint32Array(runPlan.expressionIndexes),
+            readingIndexes: new Uint32Array(runPlan.readingIndexes)};
         indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan});
     }
     return indexes;
