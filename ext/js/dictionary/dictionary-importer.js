@@ -3424,8 +3424,8 @@ export class DictionaryImporter {
     }
 
     /**
-     * Drain media before reading the next bounded batch. In particular, do not
-     * retain the entire image corpus until one final database bulkAdd.
+     * Resolve and store bounded media batches in order. One raw ZIP read
+     * may overlap the preceding batch’s write.
      * @param {import('dictionary-importer').ImportRequirement[]} requirements
      * @param {import('dictionary-database').MediaDataArrayBufferContent[]} prefetched
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
@@ -3448,7 +3448,8 @@ export class DictionaryImporter {
             mediaCount += media.length;
         }
         prefetched.length = 0;
-        for (let start = 0; start < requirements.length;) {
+        const controller = new AbortController();
+        const prepareBatch = async (/** @type {number} */ start) => {
             this._throwIfCancelled();
             let end = start;
             let batchBytes = 0;
@@ -3463,7 +3464,6 @@ export class DictionaryImporter {
                 ++end;
             }
             const batchRequirements = requirements.slice(start, end);
-            let rawMediaBytesByPath;
             if (rawZipPayloadReader !== null && rawZipPayloadReader.supportsBatchReads() && batchBytes <= maxBatchBytes) {
                 /** @type {Map<string, import('dictionary-importer').ImportFileEntry>} */
                 const filesByPath = new Map();
@@ -3501,7 +3501,7 @@ export class DictionaryImporter {
                     const readStart = Date.now();
                     const rawBatch = await rawZipPayloadReader.readBatch(
                         /** @type {import('@zip.js/zip.js').Entry[]} */ (files),
-                        void 0,
+                        controller.signal,
                         () => !this._ignoreCancellation && this._isCancelled(),
                     );
                     if (rawBatch !== null && rawBatch.sources.length === files.length) {
@@ -3512,29 +3512,53 @@ export class DictionaryImporter {
                             mediaMetrics.mediaZipBatchEntryCount += rawBatch.sources.length;
                             mediaMetrics.mediaZipBatchRangeBytes += rawBatch.rangeReadBytes;
                         }
-                        const inflateStart = Date.now();
-                        const inflated = await inflateCompressedZipMediaBatchWasm(rawBatch.sources);
-                        this._throwIfCancelled();
-                        rawMediaBytesByPath = new Map();
-                        for (let i = 0; i < rawBatch.sources.length; ++i) {
-                            const source = rawBatch.sources[i];
-                            const path = pathByFile.get(/** @type {import('@zip.js/zip.js').Entry} */ (source.file));
-                            if (typeof path !== 'undefined') { rawMediaBytesByPath.set(path, inflated.sources[i]); }
-                        }
-                        if (mediaMetrics !== null) {
-                            mediaMetrics.mediaZipBatchInflateMs += Math.max(0, Date.now() - inflateStart);
-                            mediaMetrics.mediaZipBatchCompressedBytes += inflated.compressedBytes;
-                            mediaMetrics.mediaZipBatchUncompressedBytes += inflated.uncompressedBytes;
-                        }
+                        return {batchRequirements, end, rawBatch, pathByFile};
                     }
                 }
             }
-            const {media} = await this._resolveAsyncRequirements(batchRequirements, fileMap, rawMediaBytesByPath);
-            this._throwIfCancelled();
-            processed += end - start;
-            await writeMedia(media, processed, total);
-            mediaCount += media.length;
-            start = end;
+            return {batchRequirements, end, rawBatch: null, pathByFile: null};
+        };
+
+        /** @type {ReturnType<typeof prepareBatch>|null} */
+        let pending = requirements.length === 0 ? null : prepareBatch(0);
+        let start = 0;
+        try {
+            while (pending !== null) {
+                const {batchRequirements, end, rawBatch, pathByFile} = await pending;
+                this._throwIfCancelled();
+                let rawMediaBytesByPath;
+                if (rawBatch !== null && pathByFile !== null) {
+                    const inflateStart = Date.now();
+                    const inflated = await inflateCompressedZipMediaBatchWasm(rawBatch.sources);
+                    this._throwIfCancelled();
+                    rawMediaBytesByPath = new Map();
+                    for (let i = 0; i < rawBatch.sources.length; ++i) {
+                        const source = rawBatch.sources[i];
+                        const path = pathByFile.get(/** @type {import('@zip.js/zip.js').Entry} */ (source.file));
+                        if (typeof path !== 'undefined') { rawMediaBytesByPath.set(path, inflated.sources[i]); }
+                    }
+                    if (mediaMetrics !== null) {
+                        mediaMetrics.mediaZipBatchInflateMs += Math.max(0, Date.now() - inflateStart);
+                        mediaMetrics.mediaZipBatchCompressedBytes += inflated.compressedBytes;
+                        mediaMetrics.mediaZipBatchUncompressedBytes += inflated.uncompressedBytes;
+                    }
+                }
+                const {media} = await this._resolveAsyncRequirements(batchRequirements, fileMap, rawMediaBytesByPath);
+                this._throwIfCancelled();
+                processed += end - start;
+                // Start only the next raw read. The current resolver has
+                // settled so its cache updates are visible to the next plan.
+                pending = end < requirements.length ? prepareBatch(end) : null;
+                void pending?.catch(() => {});
+                await writeMedia(media, processed, total);
+                mediaCount += media.length;
+                start = end;
+            }
+        } finally {
+            // Blob reads themselves cannot be cancelled mid-flight. Join
+            // the lookahead before the import session can close the archive.
+            controller.abort();
+            await pending?.catch(() => {});
         }
         return mediaCount;
     }
