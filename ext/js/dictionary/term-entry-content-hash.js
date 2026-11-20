@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+/* eslint @stylistic/semi: ["error", "never"] */
 
-
-const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
+const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'))
 
 /**
  * @param {number} h1
@@ -24,8 +24,8 @@ const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padSta
  * @returns {string}
  */
 export function hashPairToHex(h1, h2) {
-    const a = h1 >>> 0;
-    const b = h2 >>> 0;
+    const a = h1 >>> 0
+    const b = h2 >>> 0
     return (
         HEX_BYTE_TABLE[(a >>> 24) & 0xff] +
         HEX_BYTE_TABLE[(a >>> 16) & 0xff] +
@@ -35,7 +35,7 @@ export function hashPairToHex(h1, h2) {
         HEX_BYTE_TABLE[(b >>> 16) & 0xff] +
         HEX_BYTE_TABLE[(b >>> 8) & 0xff] +
         HEX_BYTE_TABLE[b & 0xff]
-    );
+    )
 }
 
 /**
@@ -43,12 +43,7 @@ export function hashPairToHex(h1, h2) {
  * @returns {[number, number]}
  */
 export function hashTermEntryContentBytesPair(bytes) {
-    let h1 = hashContentXxh32(bytes, 0x811c9dc5);
-    const h2 = hashContentXxh32(bytes, 0x9e3779b9);
-    if ((h1 | h2) === 0) {
-        h1 = 1;
-    }
-    return [h1 >>> 0, h2 >>> 0];
+    return hashContentXxh32Pair(bytes)
 }
 
 /**
@@ -56,8 +51,8 @@ export function hashTermEntryContentBytesPair(bytes) {
  * @returns {string}
  */
 export function hashTermEntryContentBytes(bytes) {
-    const [h1, h2] = hashTermEntryContentBytesPair(bytes);
-    return hashPairToHex(h1, h2);
+    const [h1, h2] = hashTermEntryContentBytesPair(bytes)
+    return hashPairToHex(h1, h2)
 }
 
 /**
@@ -66,7 +61,7 @@ export function hashTermEntryContentBytes(bytes) {
  * @returns {number}
  */
 function rotateLeft32(value, amount) {
-    return (((value << amount) >>> 0) | (value >>> (32 - amount))) >>> 0;
+    return (((value << amount) >>> 0) | (value >>> (32 - amount))) >>> 0
 }
 
 /**
@@ -80,65 +75,104 @@ function readUint32Le(bytes, offset) {
         (bytes[offset + 1] << 8) |
         (bytes[offset + 2] << 16) |
         (bytes[offset + 3] << 24)
-    ) >>> 0;
-}
-
-/**
- * @param {number} accumulator
- * @param {number} input
- * @returns {number}
- */
-function xxh32Round(accumulator, input) {
-    accumulator = (accumulator + Math.imul(input >>> 0, 2246822519)) >>> 0;
-    accumulator = rotateLeft32(accumulator, 13);
-    return Math.imul(accumulator, 2654435761) >>> 0;
+    ) >>> 0
 }
 
 /**
  * @param {Uint8Array} bytes
- * @param {number} seed
- * @returns {number}
+ * @returns {[number, number]}
  */
-function hashContentXxh32(bytes, seed) {
-    let offset = 0;
-    const length = bytes.length;
-    let h32;
+function hashContentXxh32Pair(bytes) {
+    // Share the input load and first multiplication while keeping each seed's
+    // accumulator independent. Inline rounds avoid repeated helper calls.
+    let offset = 0
+    const length = bytes.length
+    const seed1 = 0x811c9dc5
+    const seed2 = 0x9e3779b9
+    let h1
+    let h2
     if (length >= 16) {
-        const limit = length - 16;
-        let v1 = (seed + 2654435761 + 2246822519) >>> 0;
-        let v2 = (seed + 2246822519) >>> 0;
-        let v3 = seed >>> 0;
-        let v4 = (seed - 2654435761) >>> 0;
+        const limit = length - 16
+        let a1 = (seed1 + 2654435761 + 2246822519) >>> 0
+        let a2 = (seed1 + 2246822519) >>> 0
+        let a3 = seed1 >>> 0
+        let a4 = (seed1 - 2654435761) >>> 0
+        let b1 = (seed2 + 2654435761 + 2246822519) >>> 0
+        let b2 = (seed2 + 2246822519) >>> 0
+        let b3 = seed2 >>> 0
+        let b4 = (seed2 - 2654435761) >>> 0
         do {
-            v1 = xxh32Round(v1, readUint32Le(bytes, offset)); offset += 4;
-            v2 = xxh32Round(v2, readUint32Le(bytes, offset)); offset += 4;
-            v3 = xxh32Round(v3, readUint32Le(bytes, offset)); offset += 4;
-            v4 = xxh32Round(v4, readUint32Le(bytes, offset)); offset += 4;
-        } while (offset <= limit);
-        h32 = (
-            rotateLeft32(v1, 1) +
-            rotateLeft32(v2, 7) +
-            rotateLeft32(v3, 12) +
-            rotateLeft32(v4, 18)
-        ) >>> 0;
+            const input1 = Math.imul(readUint32Le(bytes, offset), 2246822519)
+            a1 = (a1 + input1) >>> 0
+            b1 = (b1 + input1) >>> 0
+            a1 = Math.imul((a1 << 13) | (a1 >>> 19), 2654435761) >>> 0
+            b1 = Math.imul((b1 << 13) | (b1 >>> 19), 2654435761) >>> 0
+            const input2 = Math.imul(readUint32Le(bytes, offset + 4), 2246822519)
+            a2 = (a2 + input2) >>> 0
+            b2 = (b2 + input2) >>> 0
+            a2 = Math.imul((a2 << 13) | (a2 >>> 19), 2654435761) >>> 0
+            b2 = Math.imul((b2 << 13) | (b2 >>> 19), 2654435761) >>> 0
+            const input3 = Math.imul(readUint32Le(bytes, offset + 8), 2246822519)
+            a3 = (a3 + input3) >>> 0
+            b3 = (b3 + input3) >>> 0
+            a3 = Math.imul((a3 << 13) | (a3 >>> 19), 2654435761) >>> 0
+            b3 = Math.imul((b3 << 13) | (b3 >>> 19), 2654435761) >>> 0
+            const input4 = Math.imul(readUint32Le(bytes, offset + 12), 2246822519)
+            a4 = (a4 + input4) >>> 0
+            b4 = (b4 + input4) >>> 0
+            a4 = Math.imul((a4 << 13) | (a4 >>> 19), 2654435761) >>> 0
+            b4 = Math.imul((b4 << 13) | (b4 >>> 19), 2654435761) >>> 0
+            offset += 16
+        } while (offset <= limit)
+        h1 = (
+            rotateLeft32(a1, 1) +
+            rotateLeft32(a2, 7) +
+            rotateLeft32(a3, 12) +
+            rotateLeft32(a4, 18)
+        ) >>> 0
+        h2 = (
+            rotateLeft32(b1, 1) +
+            rotateLeft32(b2, 7) +
+            rotateLeft32(b3, 12) +
+            rotateLeft32(b4, 18)
+        ) >>> 0
     } else {
-        h32 = (seed + 374761393) >>> 0;
+        h1 = (seed1 + 374761393) >>> 0
+        h2 = (seed2 + 374761393) >>> 0
     }
-    h32 = (h32 + length) >>> 0;
+    h1 = (h1 + length) >>> 0
+    h2 = (h2 + length) >>> 0
     while ((offset + 4) <= length) {
-        h32 = (h32 + Math.imul(readUint32Le(bytes, offset), 3266489917)) >>> 0;
-        h32 = Math.imul(rotateLeft32(h32, 17), 668265263) >>> 0;
-        offset += 4;
+        const input = Math.imul(readUint32Le(bytes, offset), 3266489917)
+        h1 = (h1 + input) >>> 0
+        h2 = (h2 + input) >>> 0
+        h1 = Math.imul(rotateLeft32(h1, 17), 668265263) >>> 0
+        h2 = Math.imul(rotateLeft32(h2, 17), 668265263) >>> 0
+        offset += 4
     }
     while (offset < length) {
-        h32 = (h32 + Math.imul(bytes[offset], 374761393)) >>> 0;
-        h32 = Math.imul(rotateLeft32(h32, 11), 2654435761) >>> 0;
-        ++offset;
+        const input = Math.imul(bytes[offset], 374761393)
+        h1 = (h1 + input) >>> 0
+        h2 = (h2 + input) >>> 0
+        h1 = Math.imul(rotateLeft32(h1, 11), 2654435761) >>> 0
+        h2 = Math.imul(rotateLeft32(h2, 11), 2654435761) >>> 0
+        ++offset
     }
-    h32 ^= h32 >>> 15;
-    h32 = Math.imul(h32, 2246822519) >>> 0;
-    h32 ^= h32 >>> 13;
-    h32 = Math.imul(h32, 3266489917) >>> 0;
-    h32 ^= h32 >>> 16;
-    return h32 >>> 0;
+    h1 = finishHash(h1)
+    h2 = finishHash(h2)
+    if ((h1 | h2) === 0) { h1 = 1 }
+    return [h1, h2]
+}
+
+/**
+ * @param {number} h32
+ * @returns {number}
+ */
+function finishHash(h32) {
+    h32 ^= h32 >>> 15
+    h32 = Math.imul(h32, 2246822519) >>> 0
+    h32 ^= h32 >>> 13
+    h32 = Math.imul(h32, 3266489917) >>> 0
+    h32 ^= h32 >>> 16
+    return h32 >>> 0
 }
