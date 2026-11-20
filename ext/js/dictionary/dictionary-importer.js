@@ -3392,7 +3392,6 @@ export class DictionaryImporter {
             return {batchRequirements, end, rawBatch: null, pathByFile: null};
         };
 
-        /** @type {ReturnType<typeof prepareBatch>|null} */
         let pending = requirements.length === 0 ? null : prepareBatch(0);
         let start = 0;
         try {
