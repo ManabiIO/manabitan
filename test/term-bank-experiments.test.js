@@ -637,6 +637,10 @@ describe('actual parser worker flag propagation', () => {
             const oracle = await parse([source])
             let previousOwnedKeys
             let previousOwnedKeysCopy
+            /** @type {Uint8Array|undefined} */
+            let previousOwnedContent
+            /** @type {Uint8Array|undefined} */
+            let previousOwnedContentCopy
             /** @type {Map<string, Uint8Array>|undefined} */
             let priorIndexes
             for (const mask of [15, 0, 15, 0]) {
@@ -659,10 +663,11 @@ describe('actual parser worker flag propagation', () => {
                 const chunk = reply.chunk
                 if (!chunk) { throw new Error('Missing worker chunk') }
                 expect(snapshotChunk(chunk)).toEqual(oracle.rows)
-                if (mask === 15) {
-                    expect(reply.borrowsWorkerMemory).toBe(false)
-                    expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(ArrayBuffer)
-                }
+                expect(reply.borrowsWorkerMemory).toBe(false)
+                expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(mask === 15 ? ArrayBuffer : SharedArrayBuffer)
+                if (previousOwnedContent) { expect(previousOwnedContent).toEqual(previousOwnedContentCopy) }
+                previousOwnedContent = chunk.contentBytesBuffer
+                previousOwnedContentCopy = chunk.contentBytesBuffer?.slice()
                 expect(reply.profile?.experiments).toEqual(flags(mask))
                 expect(reply.profile?.bankSpanCount).toBe(mask === 15 ? 1 : 0)
                 expect(reply.profile?.fusedSingleBankGroups).toBe(mask === 15 ? 1 : 0)

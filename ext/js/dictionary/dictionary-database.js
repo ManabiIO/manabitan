@@ -75,6 +75,7 @@ import {
     scoreGlossarySearchMatch,
 } from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
+import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
@@ -113,9 +114,7 @@ const TERM_CONTENT_META_SLOT_PUBLISHED = 1;
 const TERM_CONTENT_META_SLOT_PENDING = 2;
 const TERM_CONTENT_META_PREALLOC_MAX_ENTRIES = 1024 * 1024;
 const TERM_CONTENT_EXACT_DEDUP_BATCH_SIZE = 4096;
-const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 48 * 1024 * 1024;
 const HIGH_MEMORY_TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES = 96 * 1024 * 1024;
-const TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES = 512;
 const TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT = 64;
 const BULK_IMPORT_STATE_IDLE = 'idle';
 const BULK_IMPORT_STATE_ACTIVE = 'active';
@@ -6731,13 +6730,15 @@ null;
     }
 
     /**
-     * Retains a bounded owned copy so the next parser groups can verify exact
-     * duplicates without reading recently written OPFS blocks.
+     * Retains bounded owned bytes so the next parser groups can verify exact
+     * duplicates without reading recently written OPFS blocks. Complete compact
+     * parser slabs can be adopted without changing cache coverage or cost.
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
+     * @param {Record<string, number>|null} [importMetrics]
      * @returns {number} Number of owned source bytes retained.
      */
-    _cacheRecentPublishedTermContentSources(staged, spans) {
+    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null) {
         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
         if (
             !(spans.buffer instanceof Uint8Array) ||
@@ -6808,15 +6809,24 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
+        const adoptTransferredSource = (
+            minimumOffset === 0 && maximumEnd === source.byteLength &&
+            takeOwnedTermContent(source)
+        );
         // Match the source alignment so the shared bytes need only one copy.
-        const owned = sharedSource ?
-            new Uint8Array(byteLength).subarray(padding) :
-            source.slice(minimumOffset, maximumEnd);
-        if (sharedSource) {
+        const owned = adoptTransferredSource ?
+            source :
+            (sharedSource ?
+                new Uint8Array(byteLength).subarray(padding) :
+                source.slice(minimumOffset, maximumEnd));
+        if (sharedSource && !adoptTransferredSource) {
             owned.set(source.subarray(minimumOffset, maximumEnd));
         }
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.buffer.byteLength;
+        if (adoptTransferredSource && importMetrics !== null) {
+            importMetrics.dedupRecentSourceAdoptedBytes = (importMetrics.dedupRecentSourceAdoptedBytes ?? 0) + owned.byteLength;
+        }
         const firstIndex = staged.indexes[0];
         const endIndex = firstIndex + staged.indexes.length;
         let contiguousPublished = (
@@ -9794,6 +9804,7 @@ null :
         const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
             stagedContentMetadata,
             pendingContentSpans,
+            importMetrics,
         );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;

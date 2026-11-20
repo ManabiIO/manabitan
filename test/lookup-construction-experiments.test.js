@@ -133,6 +133,21 @@ async function parse(banks, flags = {}, preload = false) {
 }
 
 describe('lookup construction experiments', () => {
+    test('owned content signatures survive a later native heap reset', async () => {
+        const result = await parse(makeBanks(128), {experimentalNativeSegmentedLookup: true})
+        const signatures = result.chunk.contentDedupPlan?.uniqueSignatures
+        expect(signatures).toBeInstanceOf(Uint32Array)
+        expect(signatures.buffer).toBeInstanceOf(ArrayBuffer)
+        expect(signatures.byteLength).toBeGreaterThan(0)
+        const expected = new Uint32Array(signatures)
+        const replacement = makeBanks(512).map((bank) => {
+            const rows = JSON.parse(new TextDecoder().decode(bank))
+            for (const row of rows) { row[5] = [`replacement ${row[0]}`] }
+            return encoder.encode(JSON.stringify(rows))
+        })
+        await parse(replacement, {experimentalNativeSegmentedLookup: true})
+        expect(signatures).toStrictEqual(expected)
+    })
     test('retired scratch planning is disjoint, bounded, aligned and non-mutating', () => {
         const regions = [{pointer: 8, byteLength: 64}, {pointer: 128, byteLength: 16}]
         const allocator = createRetiredLookupScratchAllocator(regions, 144)
@@ -203,6 +218,27 @@ describe('lookup construction experiments', () => {
         const baseline = await parse(banks)
         const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true}, true)
         expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(Math.ceil(count / 30000))
+        for (const {bytes, preinternedPlan} of candidate.indexes.values()) {
+            expect(bytes).toBeInstanceOf(Uint8Array)
+            expect(preinternedPlan.stringLengths).toBeInstanceOf(Uint16Array)
+            for (const view of [preinternedPlan.stringOffsets,
+                preinternedPlan.stringHashes,
+                preinternedPlan.expressionIndexes,
+                preinternedPlan.readingIndexes]) {
+                expect(view).toBeInstanceOf(Uint32Array)
+            }
+            for (const view of [bytes,
+                preinternedPlan.stringLengths,
+                preinternedPlan.stringOffsets,
+                preinternedPlan.stringHashes,
+                preinternedPlan.expressionIndexes,
+                preinternedPlan.readingIndexes]) {
+                if (!ArrayBuffer.isView(view)) { throw new Error('Missing owned lookup column') }
+                expect(view.buffer).toBeInstanceOf(ArrayBuffer)
+                expect(view.byteOffset).toBe(0)
+                expect(view.byteLength).toBe(view.buffer.byteLength)
+            }
+        }
         expect(candidate.profile?.nativeLookupScratchReuseGroups).toBe(1)
         expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
         expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
