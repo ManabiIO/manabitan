@@ -27,9 +27,12 @@ afterEach(() => {
 /** @returns {Promise<void>} */
 async function resolveVoid() {}
 
-/** @returns {{database: DictionaryDatabase, connection: import('@sqlite.org/sqlite-wasm').Database}} */
-function createDatabase() {
-    const connection = new sqlite3.oo1.DB(':memory:');
+/**
+ * @param {string} [filename]
+ * @returns {{database: DictionaryDatabase, connection: import('@sqlite.org/sqlite-wasm').Database}}
+ */
+function createDatabase(filename = ':memory:') {
+    const connection = new sqlite3.oo1.DB(filename, 'c');
     connections.push(connection);
     connection.exec(`
         CREATE TABLE dictionaries(id INTEGER PRIMARY KEY, title TEXT, version INTEGER, summaryJson TEXT);
@@ -184,6 +187,59 @@ describe('importer reports durable publication to the settings UI', () => {
 });
 
 describe('committed dictionary cleanup uses real SQLite metadata', () => {
+    test('keeps committed files and reconciles the receipt after runtime map publication fails', async () => {
+        const filename = '/dictionary-post-commit-map-failure.sqlite3';
+        const {database, connection} = createDatabase(filename);
+        /** @type {import('dictionary-import-journal').DictionaryImportJournalRecord|null} */
+        let durableRecord = null;
+        const journal = {
+            read: vi.fn(async () => durableRecord),
+            write: vi.fn(async (/** @type {import('dictionary-import-journal').DictionaryImportJournalRecord} */ record) => { durableRecord = record; }),
+            clear: vi.fn(async () => { durableRecord = null; }),
+        };
+        Reflect.set(database, '_importJournal', journal);
+        const contentRollback = Reflect.get(database, '_termContentStore').rollbackImportSession;
+        const recordRollback = Reflect.get(database, '_termRecordStore').rollbackImportSession;
+        insertSummary(connection, 42, {importSuccess: false});
+        const owner = await database.startBulkImport();
+        const failure = new Error('Injected post-COMMIT generation map failure');
+        vi.spyOn(Reflect.get(database, '_termRecordGenerationByStorage'), 'set').mockImplementationOnce(() => { throw failure; });
+        const result = await database.finishBulkImport(null, {summary: {...summary}, primaryKey: 42}, owner);
+
+        expect(result).toMatchObject({published: true, housekeepingErrors: [failure]});
+        expect(Reflect.get(database, '_bulkImportJournalRecord')).toBeNull();
+        expect(Reflect.get(database, '_importJournalRecoveryPending')).toBe(true);
+        expect(journal.clear).not.toHaveBeenCalled();
+        expect(durableRecord).toMatchObject({sessionId: owner});
+        expect(connection.selectValue('SELECT sessionId FROM dictionaryImportPublications')).toBe(owner);
+
+        await database.close();
+        expect(database.isPrepared()).toBe(false);
+        expect(contentRollback).not.toHaveBeenCalled();
+        expect(recordRollback).not.toHaveBeenCalled();
+        expect(durableRecord).toMatchObject({sessionId: owner});
+
+        const reopened = new sqlite3.oo1.DB(filename, 'w');
+        connections.push(reopened);
+        expect(reopened.selectValue('SELECT sessionId FROM dictionaryImportPublications')).toBe(owner);
+        const recovered = new DictionaryDatabase();
+        Reflect.set(recovered, '_db', reopened);
+        Reflect.set(recovered, '_importJournal', journal);
+        const reopenContentRollback = vi.spyOn(Reflect.get(recovered, '_termContentStore'), 'rollbackImportSession');
+        const reopenRecordRollback = vi.spyOn(Reflect.get(recovered, '_termRecordStore'), 'rollbackImportSession');
+        await recovered._recoverInterruptedImportSession();
+
+        expect(journal.read).toHaveBeenCalledOnce();
+        expect(journal.clear).toHaveBeenCalledOnce();
+        expect(durableRecord).toBeNull();
+        expect(reopenContentRollback).not.toHaveBeenCalled();
+        expect(reopenRecordRollback).not.toHaveBeenCalled();
+        expect(Reflect.get(recovered, '_importJournalRecoveryPending')).toBe(false);
+        expect(reopened.selectValue('SELECT COUNT(*) FROM dictionaryImportPublications')).toBe(0);
+        expect(reopened.selectValue("SELECT json_type(summaryJson, '$.importSuccess') FROM dictionaries WHERE id = 42")).toBe('true');
+        expect(reopened.selectValue("SELECT json_extract(summaryJson, '$.storageGenerationId') FROM dictionaries WHERE id = 42")).toBe(owner);
+    });
+
     test('a failed SQLite rollback cannot expose staged receipts during asynchronous storage cleanup', async () => {
         const {database, connection} = createDatabase();
         activateImport(database, connection);
