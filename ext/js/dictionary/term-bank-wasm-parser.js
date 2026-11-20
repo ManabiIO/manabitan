@@ -40,6 +40,7 @@ const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const INITIAL_META_ROWS_PER_SOURCE = 10_000;
 const SPARSE_STRUCTURED_BANK_ROWS_PER_SOURCE = 2500;
 const SPARSE_STRUCTURED_BANK_MIN_BYTES = 1024 * 1024;
+const SPARSE_STRUCTURED_BANK_MAX_BYTES = 5 * 1024 * 1024;
 const SPARSE_STRUCTURED_BANK_SAMPLE_BYTES = 512;
 const SPACED_STRUCTURED_GLOSSARY_MARKER = new TextEncoder().encode('"type": "structured-content"');
 const OVERLAPPED_SOURCE_GROUP_COUNT = 1;
@@ -664,9 +665,10 @@ function tokenBytesEqual(source, startA, lengthA, startB, lengthB) {
 }
 
 /**
- * Use the current Jitendex bank shape only as an allocation hint. Each bank
- * is still parsed and validated. An underestimated group takes the existing
- * uncapped-by-estimate fallback.
+ * Use the sparse structured bank shape only as an allocation hint. Larger
+ * banks retain the normal capacity because the same marker occurs in dense
+ * banks. An underestimated group takes the existing uncapped-by-estimate
+ * fallback.
  * @param {PreloadedTermBankSource|null} source
  * @param {number} defaultCapacity
  * @returns {number}
@@ -680,7 +682,12 @@ function estimateFusedTermBankMetaCapacity(source, defaultCapacity) {
     const spans = new Uint32Array(wasm.memory.buffer, bankSpansPtr, bankSpanCount * 2);
     const marker = SPACED_STRUCTURED_GLOSSARY_MARKER;
     for (let i = 0; i < spans.length; i += 2) {
-        if (spans[i + 1] < SPARSE_STRUCTURED_BANK_MIN_BYTES || spans[i + 1] > jsonLength - spans[i]) {
+        const bankBytes = spans[i + 1];
+        if (
+            bankBytes < SPARSE_STRUCTURED_BANK_MIN_BYTES ||
+            bankBytes > SPARSE_STRUCTURED_BANK_MAX_BYTES ||
+            bankBytes > jsonLength - spans[i]
+        ) {
             return defaultCapacity;
         }
         const sample = new Uint8Array(wasm.memory.buffer, jsonPtr + spans[i], SPARSE_STRUCTURED_BANK_SAMPLE_BYTES);
