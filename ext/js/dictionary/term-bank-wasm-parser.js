@@ -25,6 +25,7 @@ import {createRetiredLookupScratchAllocator} from './term-lookup-scratch.js';
 import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparation.js';
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
+import {registerOwnedTermContent} from './term-content-ownership.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -67,7 +68,7 @@ const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
-/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
+/** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
@@ -106,7 +107,7 @@ const glossaryJsonDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
-/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number})|null} */
+/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number})|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -2737,7 +2738,7 @@ class ParallelTermBankPipelineRun {
         this._poolLease = poolLease;
         /** @type {number} */
         this._pipelineGroupsPerWorker = pipelineGroupsPerWorker;
-        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, consume: (() => void)|null}) => void}>} */
+        /** @type {Array<{promise: Promise<{chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}>, resolve: (value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void}>} */
         this._resultSlots = [];
         /** @type {Set<() => void>} */
         this._pendingResultConsumers = new Set();
@@ -2757,6 +2758,12 @@ class ParallelTermBankPipelineRun {
         this._nextWorkerGroupIndex = 0;
         /** @type {number} */
         this._maxLeadGroups = 1;
+        /** @type {number} */
+        this._ownedContentBytes = 0;
+        /** @type {number} */
+        this._queuedOwnedContentBytes = 0;
+        /** @type {number} */
+        this._peakQueuedOwnedContentBytes = 0;
         /** @type {Set<() => void>} */
         this._leadWaiters = new Set();
     }
@@ -2837,6 +2844,7 @@ class ParallelTermBankPipelineRun {
                     } finally {
                         consume?.();
                         delete chunk.releaseBorrowedContent;
+                        this._queuedOwnedContentBytes -= result.ownedContentBytes ?? 0;
                     }
                 }
                 this._throwIfStopped();
@@ -2862,6 +2870,8 @@ class ParallelTermBankPipelineRun {
                 parallelGroupCount: this._groups.length,
                 parallelWorkerWallMs: Math.max(0, workersFinishedAt - this._startedAt),
                 parallelSourceReadWallMs: getParallelSourceReadWallMs(this._sources, this._startedAt),
+                parallelOwnedContentBytes: this._ownedContentBytes,
+                parallelPeakQueuedOwnedContentBytes: this._peakQueuedOwnedContentBytes,
             };
         } catch (error) {
             this._fail(error);
@@ -2873,7 +2883,7 @@ class ParallelTermBankPipelineRun {
     /** Creates one ordered result slot per byte-balanced source group. */
     _createSlots() {
         this._resultSlots = this._groups.map(() => {
-            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, consume: (() => void)|null}) => void} */
+            /** @type {(value: {chunk: TermBankColumnChunk|null, profile: NonNullable<typeof lastTermBankWasmParseProfile>|null, error: unknown, finishedAt: number, rowCount: number, sourceBytes: number, ownedContentBytes?: number, consume: (() => void)|null}) => void} */
             let resolve = () => {};
             const promise = new Promise((value) => { resolve = value; });
             return {promise, resolve};
@@ -2942,7 +2952,11 @@ class ParallelTermBankPipelineRun {
                     this._pendingResultConsumers.add(consume);
                     if (this._failed) { consumeResult(); }
                 }
-                this._resultSlots[groupIndex].resolve({...result, sourceBytes, consume});
+                const ownedContentBytes = result.borrowsWorkerMemory ? 0 : result.chunk?.contentBytesBuffer?.buffer.byteLength ?? 0;
+                this._ownedContentBytes += ownedContentBytes;
+                this._queuedOwnedContentBytes += ownedContentBytes;
+                this._peakQueuedOwnedContentBytes = Math.max(this._peakQueuedOwnedContentBytes, this._queuedOwnedContentBytes);
+                this._resultSlots[groupIndex].resolve({...result, sourceBytes, ownedContentBytes, consume});
                 if (consumed !== null) { await consumed; }
             }
         } catch (error) {
@@ -3540,6 +3554,10 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
                     profile.resultDeliveryMs = Math.max(0, Date.now() - /** @type {number} */ (data.resultSentEpochMs));
                 }
                 const chunk = /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null);
+                const ownsContentBytes = (
+                    data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&
+                    registerOwnedTermContent(chunk?.contentBytesBuffer)
+                );
                 resolve({
                     chunk,
                     profile,
@@ -3550,7 +3568,7 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
                         data.borrowsWorkerMemory === true ||
                         (
                             typeof SharedArrayBuffer === 'function' &&
-                            chunk?.contentBytesBuffer?.buffer instanceof SharedArrayBuffer
+                            chunk?.contentBytesBuffer?.buffer instanceof SharedArrayBuffer && !ownsContentBytes
                         )
                     ),
                 });

@@ -26,6 +26,7 @@ import {
 import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
+import {shouldOwnTermContentBytes} from './term-content-ownership.js';
 
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
@@ -120,6 +121,7 @@ async function parse(data) {
         let resultRowCount = 0;
         let resultCopyMs = 0;
         let borrowsWorkerMemory = false;
+        let ownsContentBytes = false;
         await parseTermBankWithWasmColumnChunks(
             typeof preloadedSource === 'undefined' ? sourceBytes : new Uint8Array(0),
             data.version,
@@ -129,10 +131,28 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                // Large projected imports transfer a compact copy so the worker
-                // can parse its next group while the ordered sink writes this one.
+                // Compact cacheable slabs and large projected imports transfer
+                // ownership so the next parse can overlap the ordered sink.
+                const ownCacheableContent = options.ownContentBytes !== true && typeof SharedArrayBuffer === 'function' && shouldOwnTermContentBytes(
+                    chunk.contentBytesLength,
+                    chunk.contentDedupPlan?.uniqueCount,
+                    chunk.contentDedupPlan?.sourceRowCount,
+                    chunk.rowCount,
+                );
                 const shareContentBytes = options.ownContentBytes !== true;
                 resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
+                if (
+                    ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
+                    resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
+                ) {
+                    // Compression workers retain the shared-span path. This slab
+                    // is independent of the reusable parser heap and is never
+                    // written again after the result is posted.
+                    const owned = new Uint8Array(new SharedArrayBuffer(resultChunk.contentBytesBuffer.byteLength));
+                    owned.set(resultChunk.contentBytesBuffer);
+                    resultChunk.contentBytesBuffer = owned;
+                }
+                ownsContentBytes = ownCacheableContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
@@ -185,6 +205,7 @@ async function parse(data) {
             rowCount: resultRowCount,
             resultSentEpochMs: Date.now(),
             borrowsWorkerMemory,
+            ownsContentBytes,
             chunk: stableResultChunk,
             profile,
         }, transfer);
