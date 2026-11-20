@@ -1,0 +1,31 @@
+{
+  "sourceCommit": "846d9aedf29dfe787c154b9016ec4ec279b5a0a4",
+  "sourceTree": "3eb378860d6462a7297aef1c43c2829595058b0a",
+  "baselinePrerequisite": "bde55dfbee1451edc32051f8bf51e8a870d5c72c",
+  "sourceRef": "refs/heads/perf/jmdict-canonical-diagnostic-20261120-f34c9c9",
+  "bundle": "canonical-diagnostic-846d9aed.bundle",
+  "bundleBytes": 13136,
+  "bundleSha256": "e1c1320c088e5d8650477b1ead2cc3288ec322c24aabd9e384827d5c676af2c9",
+  "bundleCommand": [
+    "git",
+    "-C",
+    "/workspace/scratch/f34c9c9fae89/manabitan-validation-study",
+    "bundle",
+    "create",
+    "/workspace/scratch/f34c9c9fae89/manabitan-validation-study/builds/perf/20261120-validation-study/packing-extras/canonical-diagnostic-846d9aed.bundle",
+    "refs/heads/perf/jmdict-canonical-diagnostic-20261120-f34c9c9",
+    "^bde55dfbee1451edc32051f8bf51e8a870d5c72c"
+  ],
+  "bundleVerifyStdout": "The bundle contains this ref:\n846d9aedf29dfe787c154b9016ec4ec279b5a0a4 refs/heads/perf/jmdict-canonical-diagnostic-20261120-f34c9c9\nThe bundle requires this ref:\nbde55dfbee1451edc32051f8bf51e8a870d5c72c \nThe bundle uses this hash algorithm: sha1\n",
+  "bundleVerifyStderr": "/workspace/scratch/f34c9c9fae89/manabitan-validation-study/builds/perf/20261120-validation-study/packing-extras/canonical-diagnostic-846d9aed.bundle is okay\n",
+  "bundleHeads": "846d9aedf29dfe787c154b9016ec4ec279b5a0a4 refs/heads/perf/jmdict-canonical-diagnostic-20261120-f34c9c9\n",
+  "exactMeasuredRunner": {
+    "path": "canonical-source/dev/perf/import-dedup-screen.js",
+    "sha256": "b8dd2a33b6a579c63cb8a90e6ab2dbc0fd43a3b09da85743d62e85dc2f04f391",
+    "bytes": 44590
+  },
+  "packerSourceCommit": "cf7efa0229562798f54cb0009a3ba85ee3b16369",
+  "packerPath": "dev/perf/import-study-evidence.py",
+  "packerSha256": "a71f64e2bd74e5e69737878f619159dd7d6a3059059ab3180d41e4de94c453a6",
+  "scope": "Separate diagnostic source bundle with explicit baseline prerequisite; diagnostic instrumentation is not a runtime optimization and no measured source was edited."
+}

@@ -1,0 +1,72 @@
+{
+  "originalZipContainers": {
+    "reason": "All 2,688 original ZIP file payloads are preserved byte-for-byte under separate cell prefixes. Container metadata is not reconstructed; original container SHA256 and byte counts are retained in the index and download receipts. Original ZIPs remain untouched outside the public tarball."
+  },
+  "extractedDuplicates": {
+    "paths": [
+      "round3-browser/*/evidence",
+      "round3-browser-analysis"
+    ],
+    "reason": "Duplicates of the four original artifact payload sets; exclude redundant extraction copies."
+  },
+  "priorSchemaExample": {
+    "path": "round3-browser/prior-schema-example",
+    "reason": "Old schema reference material, not an observation from this fixed study."
+  },
+  "caches": {
+    "patterns": [
+      "*/__pycache__/*",
+      "*.pyc"
+    ],
+    "reason": "Interpreter caches are reproducible and contain no independent measurement evidence."
+  },
+  "reproducibleChecksumStore": {
+    "path": "manabitan-hash-pair/builds/perf/20261120-hash-pair/real-fixture/store.bin",
+    "archivePathExcluded": "checksum/real-fixture/store.bin",
+    "bytes": 19548576,
+    "sha256": "4cee541ed8c6869e9ad8ec4c400f9fb61fcbf00f6e995a0a5df6d274fcd586f0",
+    "reason": "Preserve the measured manifest, untouched generator, relocation adapter and successful byte-identical regeneration receipt instead of the 19.5 MB reproducible store image.",
+    "regenerationCommand": [
+      "python3",
+      "<extracted-evidence>/checksum-reproduction/regenerate-store.py",
+      "--evidence-dir",
+      "<extracted-evidence>/checksum",
+      "--source-root",
+      "<baseline-checkout>",
+      "--archive",
+      "<pinned-JMdict.zip>",
+      "--output-dir",
+      "<baseline-checkout>/builds/perf/checksum-corpus-regenerated"
+    ],
+    "baselineCommit": "bde55dfbee1451edc32051f8bf51e8a870d5c72c",
+    "requiredJmdictArchiveBytes": 15587032,
+    "requiredJmdictArchiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+    "regenerationReceipt": "checksum-reproduction/regeneration-receipt.json"
+  },
+  "externalReproducibleInputs": {
+    "paths": [
+      "fixtures/JMdict.zip",
+      "toolchains/llvm21-debs",
+      "toolchains/llvm21",
+      "toolchains/actionlint/actionlint",
+      "node_modules",
+      "full source checkouts"
+    ],
+    "reason": "Source/fixture locks, exact binary/package identities, setup receipts, candidate bundles and baseline prerequisites are preserved; dependency installations and the large official Firefox runtime archive are not duplicated."
+  },
+  "otherOperationalState": {
+    "paths": [
+      "round3-publication-export.json",
+      "round3-publication-state.json",
+      "round3-state.json"
+    ],
+    "reason": "Mutable orchestration/export state is outside the frozen measurements. Required setup fields are snapshotted in root-setup-provenance.json, and measured browser/tooling identities are retained in browser-provenance."
+  },
+  "postPublicationOutputs": {
+    "reason": "The final source report and later publication CI receipt remain separate so changing documentation/CI cannot create an evidence-hash cycle."
+  },
+  "redactions": {
+    "needed": false,
+    "reason": "Confirmed private transfer credentials were absent; original payloads and complete job logs remain unchanged."
+  }
+}
