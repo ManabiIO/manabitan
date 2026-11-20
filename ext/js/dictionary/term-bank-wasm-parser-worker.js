@@ -129,10 +129,10 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                // Only the content slab has an explicit release contract. Record
-                // fields and lookup metadata can outlive content persistence
-                // while record/index writes are still running.
-                resultChunk = copyWasmBackedColumnChunk(chunk, true);
+                // Large projected imports transfer a compact copy so the worker
+                // can parse its next group while the ordered sink writes this one.
+                const shareContentBytes = options.ownContentBytes !== true;
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&

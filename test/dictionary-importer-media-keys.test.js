@@ -56,6 +56,22 @@ describe('media headwords with omitted native byte columns', () => {
         expect(observed[0].entry).toMatchObject({expression, reading: reading || expression, dictionary: 'media-fixture'})
     })
 
+    test('collects escaped structured image paths and ignores path-like text and links', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+        Reflect.set(importer, '_skipImageMetadata', true)
+        const glossary = String.raw`["an image.png path in text", {"type":"structured-content","content":[{"tag":"a","path":"unrelated.webp","content":"link"},{"tag":"\u0069mg","pa\u0074h":"img/\u732b.webp"}]}]`
+        const bytes = new TextEncoder().encode(`[["term","","","",0,${glossary},0,""]]`)
+        const entry = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'}))
+        /** @type {string[]} */
+        const paths = []
+        await importer._readTermBankFileFast(entry, 3, 'media-fixture', false, true, true, 'raw-bytes', (_terms, requirements) => {
+            for (const requirement of requirements ?? []) {
+                paths.push(requirement.source.path)
+            }
+        }, bytes)
+        expect(paths).toEqual(['img/猫.webp'])
+    })
+
     test('accumulates oversized media requirement chunks without spread overflow', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
         Reflect.set(importer, '_skipImageMetadata', true)

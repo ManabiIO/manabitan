@@ -5,6 +5,7 @@
 import {TextReader, Uint8ArrayReader, Uint8ArrayWriter, ZipWriter} from '@zip.js/zip.js';
 import {beforeEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 
 const state = vi.hoisted(() => ({
@@ -407,6 +408,50 @@ describe('bounded referenced-media prefetch', () => {
         for (let i = 0; i < persisted.length; ++i) {
             expect(new Uint8Array(persisted[i].content)).toEqual(Uint8Array.of(i >>> 8, i & 255));
         }
+    });
+
+    test('joins the next ZIP read when the preceding media write fails', async () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
+        const source = new RawZipPayloadReader(new ArrayBuffer(64));
+        const nextRead = gate();
+        const writeEntered = gate();
+        const next = {signal: /** @type {AbortSignal|undefined} */ (void 0)};
+        const readBatch = vi.spyOn(source, 'readBatch').mockImplementation(async (files, signal) => {
+            if (files[0].filename === 'next.png') {
+                next.signal = signal;
+                await nextRead.promise;
+                signal?.throwIfAborted();
+            }
+            return null;
+        });
+        vi.spyOn(importer, '_resolveAsyncRequirements').mockResolvedValue({media: []});
+        const row = {dictionary: 'Media test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
+        /** @type {import('dictionary-importer').ImportRequirement[]} */
+        const requests = ['first.png', 'next.png'].map((path) => ({
+            type: 'image', source: {type: 'image', path}, target: {type: 'image', path: ''}, entry: row,
+        }));
+        const files = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (
+            new Map(requests.map(({source: {path}}) => [path, {filename: path, uncompressedSize: 3 * 1024 * 1024, compressedSize: 10}]))
+        ));
+        const failure = new Error('media write failure');
+        const writeMedia = vi.fn(async () => {
+            writeEntered.release();
+            throw failure;
+        });
+        let settled = false;
+        const pending = importer._importDeferredMediaRequirements(requests, [], files, writeMedia, source).finally(() => { settled = true; });
+        const rejected = expect(pending).rejects.toBe(failure);
+        await writeEntered.promise;
+        try {
+            expect(readBatch).toHaveBeenCalledTimes(2);
+            await Promise.resolve();
+            expect(next.signal?.aborted).toBe(true);
+            expect(settled).toBe(false);
+        } finally {
+            nextRead.release();
+            await rejected;
+        }
+        expect(writeMedia).toHaveBeenCalledOnce();
     });
 
     test('advances progress after each persisted deferred-media batch', async () => {

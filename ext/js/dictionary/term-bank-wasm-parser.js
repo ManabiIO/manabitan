@@ -17,6 +17,7 @@
 
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {parseJson} from '../core/json.js';
+import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -57,6 +58,7 @@ const LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES = 24 * 1024 * 1024;
 const PARALLEL_WORKER_READY_TIMEOUT_MS = 60_000;
 const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
+const OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES = 512 * 1024 * 1024;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
@@ -64,7 +66,7 @@ const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -77,6 +79,8 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * initialContentBytesPerRow?: number,
  * mediaHintFastScan?: boolean,
  * validateGlossaryTypes?: boolean,
+ * projectImagePaths?: boolean,
+ * ownContentBytes?: boolean,
  * maxPendingChunks?: number,
  * computeContentHashes?: boolean,
  * emitContentSlab?: boolean,
@@ -98,6 +102,7 @@ let suppliedWasmModule = null;
 // Tokens are fields within JSON, not standalone documents with a BOM.
 /** @type {TextDecoder} */
 const textDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
+const glossaryJsonDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
@@ -315,6 +320,25 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
  * @returns {Promise<{sources: Uint8Array[], inflateMs: number, compressedBytes: number, uncompressedBytes: number}>}
  */
 export async function inflateCompressedZipMediaBatchWasm(sources) {
+    return await processCompressedZipMediaBatchWasm(sources, true);
+}
+
+/**
+ * Validates all CRCs and decoded lengths without copying each decoded payload
+ * out of the WASM arena.
+ * @param {CompressedTermBankSource[]} sources
+ * @returns {Promise<void>}
+ */
+export async function validateCompressedZipMediaBatchWasm(sources) {
+    await processCompressedZipMediaBatchWasm(sources, false);
+}
+
+/**
+ * @param {CompressedTermBankSource[]} sources
+ * @param {boolean} retainDecodedSources
+ * @returns {Promise<{sources: Uint8Array[], inflateMs: number, compressedBytes: number, uncompressedBytes: number}>}
+ */
+async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources) {
     if (!Array.isArray(sources) || sources.length === 0) {
         throw new TypeError('Compressed ZIP media sources are empty');
     }
@@ -393,6 +417,9 @@ export async function inflateCompressedZipMediaBatchWasm(sources) {
     }
     if (outputLength !== uncompressedBytes) {
         throw new Error('Compressed ZIP media batch returned an invalid byte length');
+    }
+    if (!retainDecodedSources) {
+        return {sources: [], inflateMs, compressedBytes, uncompressedBytes};
     }
     const output = new Uint8Array(wasm.memory.buffer, outputPtr, outputLength);
     const decoded = sources.map((source, index) => output.slice(outputOffsets[index], outputOffsets[index] + source.uncompressedSize));
@@ -2696,8 +2723,14 @@ class ParallelTermBankPipelineRun {
         this._version = version;
         /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
+        const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
-        this._options = {...options, ...snapshotTermBankExperiments(options)};
+        this._options = {
+            ...options,
+            ...snapshotTermBankExperiments(options),
+            ownContentBytes: largeProjectedImport,
+            experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true || largeProjectedImport,
+        };
         /** @type {() => boolean} */
         this._shouldCancel = shouldCancel;
         /** @type {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} */
@@ -2782,8 +2815,12 @@ class ParallelTermBankPipelineRun {
                 if (result.profile === null) {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
-                const chunk = result.chunk;
-                if (chunk !== null && result.consume !== null) { chunk.releaseBorrowedContent = result.consume; }
+                const {chunk, consume} = result;
+                // Settled slot promises live until the pipeline drains. Keep
+                // the chunk alive only through its ordered sink callback.
+                result.chunk = null;
+                result.consume = null;
+                if (chunk !== null && consume !== null) { chunk.releaseBorrowedContent = consume; }
                 result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
                 profiles.push(result.profile);
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
@@ -2798,7 +2835,7 @@ class ParallelTermBankPipelineRun {
                             chunkCount: this._resultSlots.length,
                         });
                     } finally {
-                        result.consume?.();
+                        consume?.();
                         delete chunk.releaseBorrowedContent;
                     }
                 }
@@ -3812,10 +3849,11 @@ function isCompressedTermBankSource(value) {
 /**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
+ * @param {boolean} [projectImagePaths=false]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -3850,16 +3888,27 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false) {
     if (!(stringOffsets instanceof Uint32Array)) {
         throw new Error('Term record string offsets are unavailable');
     }
-    const mediaRows = chunk.mediaRows.map(({index, row}) => ({
-        index,
-        row: {
-            ...row,
-            expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
-            readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
-            glossaryJsonBytes: row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
-            termEntryContentBytes: new Uint8Array(row.termEntryContentBytes),
-        },
-    }));
+    const mediaRows = chunk.mediaRows.map(({index, row}) => {
+        const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
+            tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
+                row.glossaryJson :
+                glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
+                    row.glossaryJsonBytes :
+                    Uint8Array.from(row.glossaryJsonBytes))) :
+            [];
+        const useProjectedPaths = imagePaths.length > 0;
+        return {
+            index,
+            ...(useProjectedPaths ? {imagePaths} : {}),
+            row: {
+                ...row,
+                expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
+                readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
+                glossaryJsonBytes: !useProjectedPaths && row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
+                termEntryContentBytes: useProjectedPaths ? EMPTY_UINT8_ARRAY : new Uint8Array(row.termEntryContentBytes),
+            },
+        };
+    });
     const stablePlan = {
         stringLengths: new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?

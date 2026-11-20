@@ -1976,7 +1976,20 @@ static int content_bytes_equal_between(
     uint32_t length
 ) {
     uint32_t i = 0u;
-    while (i + 8u <= length) {
+#if defined(__wasm_simd128__)
+    // Validated glossary witnesses repeatedly compare long equal ranges.
+    // Read complete blocks only and retain the scalar path for short keys
+    // and the final partial block.
+    while (length - i >= 32u) {
+        const uint8_t* first = first_bytes + first_offset + i;
+        const uint8_t* second = second_bytes + second_offset + i;
+        const v128_t low_difference = wasm_v128_xor(wasm_v128_load(first), wasm_v128_load(second));
+        const v128_t high_difference = wasm_v128_xor(wasm_v128_load(first + 16u), wasm_v128_load(second + 16u));
+        if (wasm_v128_any_true(wasm_v128_or(low_difference, high_difference))) { return 0; }
+        i += 32u;
+    }
+#endif
+    while (length - i >= 8u) {
         uint64_t first;
         uint64_t second;
         __builtin_memcpy(&first, first_bytes + first_offset + i, sizeof(first));
