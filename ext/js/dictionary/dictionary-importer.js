@@ -129,8 +129,6 @@ const ARCHIVE_BANK_QUERY_DETAILS = [
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
-const GLOSSARY_IMAGE_PATH_PATTERN = /"path"\s*:\s*"((?:\\.|[^"\\])*)"/g;
-const JSON_PATH_KEY_BYTES = new Uint8Array([0x22, 0x70, 0x61, 0x74, 0x68, 0x22]);
 const FREQUENCY_DATA_KEYS = ['value', 'displayValue'];
 const TERM_FREQUENCY_DATA_KEYS = ['reading', 'frequency'];
 const PITCH_DATA_KEYS = ['reading', 'pitches'];
@@ -3149,32 +3147,16 @@ export class DictionaryImporter {
     }
 
     /**
-     * @param {string} glossaryJson
+     * Read semantic image references from rows already selected by the media hint.
+     * @param {{glossaryJson?: string, glossaryJsonBytes?: Uint8Array}} row
      * @param {import('dictionary-database').DatabaseTermEntry} entry
      * @param {import('dictionary-importer').ImportRequirement[]} requirements
      * @returns {boolean}
      */
-    _tryAddFastMediaRequirementsFromGlossaryJson(glossaryJson, entry, requirements) {
-        // Escaped property names require semantic traversal, not a partial path scan.
-        if (glossaryJson.includes('\\u')) { return false; }
-        GLOSSARY_IMAGE_PATH_PATTERN.lastIndex = 0;
-        let hasImagePathCandidate = false;
-        for (const match of glossaryJson.matchAll(GLOSSARY_IMAGE_PATH_PATTERN)) {
-            let path;
-            try {
-                path = /** @type {string} */ (parseJson(`"${match[1]}"`));
-            } catch (_) {
-                return false;
-            }
-            if (typeof path === 'string' && getImageMediaTypeFromFileName(path) !== null) {
-                hasImagePathCandidate = true;
-                break;
-            }
-        }
-        if (!hasImagePathCandidate) { return false; }
+    _tryAddFastMediaRequirementsFromFastRow(row, entry, requirements) {
         let glossary;
         try {
-            glossary = /** @type {unknown} */ (parseJson(glossaryJson));
+            glossary = /** @type {unknown} */ (parseJson(this._getFastRowGlossaryJson(row)));
         } catch (_) {
             return false;
         }
@@ -3183,33 +3165,6 @@ export class DictionaryImporter {
             this._addFastMediaRequirement(path, entry, requirements);
         }
         return paths.length > 0;
-    }
-
-    /**
-     * @param {{glossaryJson?: string, glossaryJsonBytes?: Uint8Array}} row
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
-     * @param {import('dictionary-importer').ImportRequirement[]} requirements
-     * @returns {boolean}
-     */
-    _tryAddFastMediaRequirementsFromFastRow(row, entry, requirements) {
-        if (row.glossaryJsonBytes instanceof Uint8Array) {
-            const candidatePaths = this._extractImagePathsFromGlossaryJsonBytes(row.glossaryJsonBytes);
-            if (candidatePaths === null || candidatePaths.length === 0) {
-                return false;
-            }
-            let glossary;
-            try {
-                glossary = /** @type {unknown} */ (parseJson(decodeUtf8Bytes(this._textDecoder, row.glossaryJsonBytes)));
-            } catch (_) {
-                return false;
-            }
-            const paths = this._collectGlossaryImagePaths(glossary);
-            for (const path of paths) {
-                this._addFastMediaRequirement(path, entry, requirements);
-            }
-            return paths.length > 0;
-        }
-        return this._tryAddFastMediaRequirementsFromGlossaryJson(this._getFastRowGlossaryJson(row), entry, requirements);
     }
 
     /**
@@ -3257,88 +3212,6 @@ export class DictionaryImporter {
         if (typeof value.content !== 'undefined') {
             this._collectStructuredContentImagePaths(value.content, paths);
         }
-    }
-
-    /**
-     * @param {Uint8Array} bytes
-     * @returns {string[]|null}
-     */
-    _extractImagePathsFromGlossaryJsonBytes(bytes) {
-        /** @type {string[]} */
-        const paths = [];
-        for (let i = 0, ii = bytes.length - JSON_PATH_KEY_BYTES.length; i <= ii; ++i) {
-            // No caller-visible requirements have been added yet; discard partial results.
-            if (bytes[i] === 0x5c && bytes[i + 1] === 0x75) { return null; }
-            if (!this._bytesMatch(bytes, i, JSON_PATH_KEY_BYTES)) { continue; }
-            let cursor = i + JSON_PATH_KEY_BYTES.length;
-            cursor = this._skipJsonWhitespaceBytes(bytes, cursor);
-            if (bytes[cursor] !== 0x3a) { continue; }
-            cursor = this._skipJsonWhitespaceBytes(bytes, cursor + 1);
-            if (bytes[cursor] !== 0x22) { continue; }
-            const tokenStart = cursor + 1;
-            cursor = tokenStart;
-            let hasEscape = false;
-            while (cursor < bytes.length) {
-                const value = bytes[cursor];
-                if (value === 0x5c) {
-                    hasEscape = true;
-                    cursor += 2;
-                    continue;
-                }
-                if (value === 0x22) { break; }
-                ++cursor;
-            }
-            if (cursor >= bytes.length) {
-                return null;
-            }
-            const tokenBytes = bytes.subarray(tokenStart, cursor);
-            let path;
-            if (hasEscape) {
-                try {
-                    path = /** @type {string} */ (parseJson(`"${decodeUtf8Bytes(this._textDecoder, tokenBytes)}"`));
-                } catch (_) {
-                    return null;
-                }
-            } else {
-                path = decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, tokenBytes);
-            }
-            if (getImageMediaTypeFromFileName(path) !== null) {
-                paths.push(path);
-            }
-            i = cursor;
-        }
-        return paths;
-    }
-
-    /**
-     * @param {Uint8Array} bytes
-     * @param {number} offset
-     * @param {Uint8Array} needle
-     * @returns {boolean}
-     */
-    _bytesMatch(bytes, offset, needle) {
-        for (let i = 0, ii = needle.length; i < ii; ++i) {
-            if (bytes[offset + i] !== needle[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @param {Uint8Array} bytes
-     * @param {number} offset
-     * @returns {number}
-     */
-    _skipJsonWhitespaceBytes(bytes, offset) {
-        while (offset < bytes.length) {
-            const value = bytes[offset];
-            if (value !== 0x20 && value !== 0x0a && value !== 0x0d && value !== 0x09) {
-                break;
-            }
-            ++offset;
-        }
-        return offset;
     }
 
     /**
