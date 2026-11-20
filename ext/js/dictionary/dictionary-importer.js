@@ -2826,7 +2826,7 @@ export class DictionaryImporter {
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
         try {
             if (archiveContent instanceof Blob) {
-                const entries = await readDenseZipDirectory(archiveContent);
+                const entries = await readDenseZipDirectory(archiveContent, () => this._throwIfCancelled());
                 if (entries !== null) {
                     const rawReader = new RawZipPayloadReader(archiveContent);
                     const textDecoder = new TextDecoder();
@@ -2838,7 +2838,7 @@ export class DictionaryImporter {
                      * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
                      * @returns {Promise<unknown>}
                      */
-                    const getData = async function (writer, options = {}) {
+                    const getData = async function getDenseEntryData(writer, options = {}) {
                         if (
                             this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
                             this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&

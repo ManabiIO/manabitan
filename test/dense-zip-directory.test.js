@@ -80,6 +80,15 @@ describe('dense ZIP directory', () => {
         expect(entries?.at(-1)?.filename).toBe('8191.png');
     });
 
+    test('checks cancellation before reading the bounded central directory', async () => {
+        let checks = 0;
+        const error = new DOMException('Dictionary import cancelled', 'AbortError');
+        await expect(readDenseZipDirectory(new SparseZipDirectory(), () => {
+            if (++checks === 2) { throw error; }
+        })).rejects.toBe(error);
+        expect(checks).toBe(2);
+    });
+
     test.each(['filename', 'length', 'overlap', 'descriptor', 'locator'])('defers unsupported %s to the generic reader', async (corrupt) => {
         expect(await readDenseZipDirectory(new SparseZipDirectory({zip64: true, corrupt}))).toBeNull();
     });

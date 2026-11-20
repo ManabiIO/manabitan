@@ -1,6 +1,18 @@
 /*
  * Copyright (C) 2026 Manabitan authors
- * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 const SEARCH_BYTES = 98;
@@ -19,12 +31,15 @@ const decoder = new TextDecoder();
  * Read a narrow single-disk ZIP directory with plain printable ASCII names.
  * The ordinary reader still handles ZIP variants and all local payload checks.
  * @param {Blob} archive
+ * @param {() => void} [checkCancellation]
  * @returns {Promise<DenseZipEntry[]|null>}
  */
-export async function readDenseZipDirectory(archive) {
+export async function readDenseZipDirectory(archive, checkCancellation = () => {}) {
     if (archive.size < MIN_ARCHIVE_BYTES) { return null; }
     const tailStart = archive.size - SEARCH_BYTES;
+    checkCancellation();
     const tail = new DataView(await archive.slice(tailStart).arrayBuffer());
+    checkCancellation();
     const eocd = tail.byteLength - 22;
     if (
         tail.byteLength !== SEARCH_BYTES ||
@@ -75,6 +90,7 @@ export async function readDenseZipDirectory(archive) {
     ) { return null; }
 
     const dir = await archive.slice(offset, directoryEnd).arrayBuffer();
+    checkCancellation();
     if (dir.byteLength !== length) { return null; }
     const view = new DataView(dir);
     const bytes = new Uint8Array(dir);
