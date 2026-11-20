@@ -231,3 +231,53 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## November 20 continuation: current-develop validation and checksum costs
+
+This continuation starts from `bde55dfbee1451edc32051f8bf51e8a870d5c72c`, including the metadata-publication, shared-content-cache, key-escape-hint and adjacent-key-reuse changes merged in PRs #759, #766, #768 and #769. The earlier [source-copy/prefetch study](https://github.com/ManabiIO/manabitan/pull/765) and [task-turn study](https://github.com/ManabiIO/manabitan/pull/767) retained 832 imports and qualified no repeatable complete-import gain. Those observations remain separate; this round does not reuse their timings as a current baseline.
+
+### Candidate plan and gates
+
+- **Resolved-reference validation:** remove repeated descriptor dispatch and repeated row-to-unique-index loads inside each synchronous record-validation run. Preserve independent offset/length bounds, numeric validation, fixed-length precedence, run splitting, generic fallback and descriptor selection after each awaited append.
+- **Compressed-block checksum:** screen a single-pass implementation of the existing two-seed XXH32 pair against independent vectors and production envelope reads. Keep checksums, stored bytes, ownership, cache capacities and compression settings unchanged. Reject implementations that regress realistic payloads before browser qualification.
+- **Measurement:** freeze candidate source commits after component screening. Use two identical baseline arms plus either two independent candidates or a duplicate selected candidate; declare comparisons explicitly. Retain fresh browser profiles, 24 balanced four-arm blocks per browser/order cell, two excluded warmups per arm, and an independent reversed-order cell. Do not add, retry, pool or exclude observations after seeing results.
+- **Decision:** require complete-import evidence before describing any component improvement as an import speedup. Recheck relevant correctness, memory/storage and normal-lookup behavior before a runtime promotion.
+
+### Recovered inputs and environment
+
+The locked JMdict archive is `JMdict.2026-09-06`, 526,942 rows, 15,587,032 archive bytes, SHA256 `7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a`. Its compressed term-bank payload is separately 15,574,114 bytes. Dependency installation and library generation use the unchanged lockfile. Local checks use Node 24.22.3; browser jobs retain Node 22.22.0.
+
+Clang and LLD 21.1.8 were extracted from seven SHA256-verified official LLVM Debian packages. `npm run build:dictionary-wasm -- --check` passed on the baseline: parser SHA256 `7021e66558ce7efe8162ea3030f2ebe2d63434d10171a7cffe45726f7ff9fb27`, canonical scanner SHA256 `40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af`.
+
+### Frozen sources and component screen
+
+| Browser arm | Source commit                              | Role                                                    |
+| ----------- | ------------------------------------------ | ------------------------------------------------------- |
+| A/C         | `bde55dfbee1451edc32051f8bf51e8a870d5c72c` | Baseline and independently packaged baseline control    |
+| B           | `9b947eb6130020bdd2986787cb42df3a7eb72d73` | Resolve validation descriptors once per synchronous run |
+| D           | `025596858e4e176d92c8f7f016057317c60c2793` | Compute both existing checksum seeds in one pass        |
+
+The new browser [manifest](jmdict-validation-study/manifest.json) was frozen before any browser observation, SHA256 `6b95afafe06e522bd05375541eaa765236e7df32c77a8f8808448789663c2b6a`. Its 7,729-byte source bundle has SHA256 `9c62046f2ea9823faf0f5e8391785cd35ed1fc8d739ddd03d3488f32b17f1aa8`. Comparisons are C/A, B/A and D/A; B/D are distinct candidates. The exact source trees, 46 archived harness inputs and 34 shared product inputs are pinned. This diagnostic branch does not apply either runtime change.
+
+The component cohorts used separate quiet-host intervals, frozen sources, complete planned observations, and post-timing validation. Negative changes mean faster. Component arm letters below are local to their own protocol; the checksum screen uses B/D as two copies of its checksum candidate.
+
+| Component comparison             | Median paired change | Faster blocks | Scope                                                                   |
+| -------------------------------- | -------------------: | ------------: | ----------------------------------------------------------------------- |
+| Record validation, candidate     |            -21.2485% |         24/24 | Validation phase, 24 ABBA blocks; wall change -20.0628%                 |
+| Record validation, separate A/A  |             +0.2157% |          9/24 | Same baseline method; wall change +0.06585%                             |
+| Real-block checksum, B/A         |            -46.9310% |         23/24 | Both existing hash seeds over 28 production-packed payloads             |
+| Real-block checksum, D/A         |            -46.4916% |         24/24 | Second candidate arm in the same four-arm cohort                        |
+| Production reader component, B/A |             -8.8621% |         21/24 | Memory-backed block storage, checksum, decompression and selected reads |
+| Production reader component, D/A |             -6.4562% |         19/24 | Same component boundary                                                 |
+
+The validation replay checks all 526,942 native-parser row descriptors and compares every emitted record/index byte outside timing. The byte digest is `8990393a6d8a90d3896a983718b2468c75ad77481ba91076d7f9c9d6018d93f1`. Its median validation cost falls from 8.6348 to 6.8052 ms per dictionary replay, about 1.8 ms. Timed encoding/appending are constant sinks, offsets are native canonical-content spans without cross-group persisted dedup, and seven-bank grouping follows the earlier component runner rather than the browser planner. Both candidate and separate A/A cohorts retain 104 observations (96 timed plus eight warmups), with 12 full-dictionary replays per observation. This is not a complete-import saving.
+
+The checksum reader checks every byte of all 28 decoded blocks (100,671,677 bytes) against original parser content spans, 725 selected references, and five corrupted-envelope/frame cases. Its timed store is memory-backed; no OPFS file I/O or production cache-miss frequency is represented. Reader arm medians are A 91.4901, B 83.4416, C 86.4291 and D 84.2176 ms. C/A control changes are -1.0428% for hashing and -2.7780% for the reader; D/B candidate controls are -2.4248% and +0.0161%. All 208 observations across the two stages are retained. Do not subtract these controls or transfer the component percentage to browser imports. The initial helper-based fused prototype was 2.1–5.2 times slower on synthetic frames and was rejected before this candidate.
+
+### Validation and pending gates
+
+The validation candidate passed 217 focused tests, including 21 new cases, scoped ESLint and main/test type checks. The checksum candidate passed 353 focused tests across six files, including independent XXH32 vectors, unaligned/stable-shared views and native-envelope compatibility. Both full suites and seven-target dry builds are running; no runtime promotion is claimed.
+
+The frozen study tooling passed 15 Python contracts, 20 Firefox helper tests, 152 JSON type tests, JSON/README formatting, scoped ESLint, dev/test types and plan verification. Pinned actionlint 1.7.12 passed locally. The initial missing-generated-library lint failure is retained with its normal build correction. The unchanged Firefox helper retains exact expected-content probes and reload checks; Chromium retains sampled previews and a full browser restart. Neither is a whole-dictionary persisted-byte oracle, and untimed RSS snapshots do not establish peak memory.
+
+Browser qualification remains outstanding. Generic/fixed-format validation performance and short-input checksum performance are separate remaining regression risks; a fixed short-input screen is planned after correctness jobs leave the host quiet. Memory/storage and normal-lookup qualification remain required if a browser gain supports promotion.
