@@ -132,7 +132,7 @@ async function parse(data) {
                 // Only the content slab has an explicit release contract. Record
                 // fields and lookup metadata can outlive content persistence
                 // while record/index writes are still running.
-                resultChunk = copyWasmBackedColumnChunk(chunk, true);
+                resultChunk = copyWasmBackedColumnChunk(chunk, true, options.projectImagePaths === true);
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
