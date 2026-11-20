@@ -39,6 +39,16 @@
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
 
         {
+            "path": "dev/perf/jmdict-native-config-study-v2/manifest.json",
+            "typeFile": "types/dev/jmdict-native-config-study-v2.d.ts",
+            "type": "JmdictNativeConfigStudyV2Manifest"
+        },
+        {
+            "path": "dev/perf/jmdict-native-config-study-v2/package-map-fixture.json",
+            "typeFile": "types/dev/jmdict-native-config-study-v2.d.ts",
+            "type": "JmdictNativeConfigStudyV2PackageFixture"
+        },
+        {
             "path": "dev/perf/jmdict-native-config-study/manifest.json",
             "typeFile": "types/dev/jmdict-native-config-study.d.ts",
             "type": "JmdictNativeConfigStudyManifest"

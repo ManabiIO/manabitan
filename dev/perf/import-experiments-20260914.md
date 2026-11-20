@@ -258,3 +258,30 @@ Only the packaged canonical scanner WASM may differ; the parser module, build
 recipes and product policies remain unchanged. The source bundle and full patch
 preserve the C, generated manifest/WASM and direct ABI tests. Browser outcomes are
 pending; no product adoption is authorized or implied by this diagnostic.
+
+## 2026-11-20 native configuration diagnostic v2
+
+The v1 browser attempt at tooling `5e2dea241ac11ef7b75c407c2ee1c878e1fd4091`
+([run 44727365554](https://github.com/ManabiIO/manabitan/actions/runs/44727365554))
+failed preparation in every cell before any warmup or import. The ordinary
+packages contain both native C source and compiled WASM; v1's package map omitted
+the changed C entry. Its artifacts, original ZIPs, logs and independent failure
+audits are retained. No performance observations or browser correctness probes
+were produced by v1.
+
+A separately frozen v2 protocol lives in
+`dev/perf/jmdict-native-config-study-v2/README.md`, with its own manifest,
+workflow, evidence namespace and analysis entry point. It permits exactly
+`js/dictionary/wasm/term-content-canonical-scan-v1.c` and
+`lib/term-content-canonical-scan-v1.wasm` to differ. The full 538-entry A/B maps
+retained from v1 are a regression fixture: they reproduce the original rejection,
+accept the corrected declaration, and reject unrelated added, removed or changed
+entries. Both same-source controls must retain complete entry equality.
+
+The candidate remains `19b13a550d9b7f2a53f37d74aa36b2ee9c3e7472`, with the same
+four tracked source changes and baseline `bde55dfbee1451edc32051f8bf51e8a870d5c72c`.
+All four cells, 24 blocks, two warmups per arm, runtime identities, external timing
+and failure policies are unchanged. The component result remains inconclusive;
+v2 is an unqualified diagnostic, not a passed performance gate. The correction
+contains no source or performance tuning, retries or appended samples. The v1
+files remain unchanged, and only the new v2 workflow paths trigger this attempt.
