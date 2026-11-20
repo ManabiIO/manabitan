@@ -98,13 +98,34 @@ function validateExperimentReceipts(debug, importFlags) {
     }
     let receipts = 0;
     const phases = Array.isArray(debug.importerPhaseTimings) ? debug.importerPhaseTimings : [];
+    const bankPhases = phases.map(asRecord).filter((phase) => phase?.phase === 'import-data-banks');
+    if (bankPhases.length > 1) { throw new Error('Duplicate parser policy context'); }
+    const bankDetails = asRecord(bankPhases[0]?.details);
     for (const phase of phases) {
         const details = asRecord(asRecord(phase)?.details);
         if (details === null) { continue; }
-        for (const key of ['parserExperiments', 'fastPathParserEffectiveExperiments']) {
+        for (const key of ['parserExperiments', 'fastPathParserEffectiveExperiments', 'fastPathParserExperiments', 'compressionExperiments']) {
             if (!Object.hasOwn(details, key)) { continue; }
             ++receipts;
-            if (!isDeepStrictEqual(details[key], expected)) {
+            const effective = key === 'parserExperiments' || key === 'fastPathParserEffectiveExperiments';
+            const prefix = key === 'parserExperiments' ? 'parser' : 'fastPathParser';
+            const sourceBytes = details[`${prefix}SourceUncompressedBytes`];
+            const workerCount = details[`${prefix}ParallelWorkerCount`];
+            // ParallelTermBankPipelineRun enables this key for image projection
+            // at >=512 MiB. Establish that production path from independent
+            // media/source/native receipts, never from the flag being checked.
+            const largeProjectedNativeImport = (
+                effective &&
+                bankDetails?.useMediaPipeline === true &&
+                bankDetails.hasArchiveImageMediaFiles === true &&
+                flags.skipImageMetadata !== false &&
+                flags.skipMediaImport !== true &&
+                Number.isSafeInteger(workerCount) && Number(workerCount) > 0 &&
+                details[`${prefix}ParallelSkipReason`] === null &&
+                Number.isSafeInteger(sourceBytes) && Number(sourceBytes) >= 512 * 1024 * 1024
+            );
+            const roleExpected = largeProjectedNativeImport ? {...expected, experimentalNativeEscapedKeys: true} : expected;
+            if (!isDeepStrictEqual(details[key], roleExpected)) {
                 throw new Error(`Import experiment receipt mismatch: ${key}`);
             }
         }
