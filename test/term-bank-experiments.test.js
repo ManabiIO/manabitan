@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
     })
 })
 
-/** @typedef {{type: string, id?: number, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown}} WorkerReply */
+/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown}} WorkerReply */
 /**
  * One request at a time, as required by the production parser worker's lease.
  * @param {Worker} worker
@@ -652,11 +652,17 @@ describe('actual parser worker flag propagation', () => {
                         emitContentSlab: true,
                         emitTokenBinaryContent: true,
                         mediaHintFastScan: true,
+                        projectImagePaths: mask === 15,
+                        ownContentBytes: mask === 15,
                         prepareLookupIndexes: true}})
                 expect(reply.type, JSON.stringify(reply.error)).toBe('result')
                 const chunk = reply.chunk
                 if (!chunk) { throw new Error('Missing worker chunk') }
                 expect(snapshotChunk(chunk)).toEqual(oracle.rows)
+                if (mask === 15) {
+                    expect(reply.borrowsWorkerMemory).toBe(false)
+                    expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(ArrayBuffer)
+                }
                 expect(reply.profile?.experiments).toEqual(flags(mask))
                 expect(reply.profile?.bankSpanCount).toBe(mask === 15 ? 1 : 0)
                 expect(reply.profile?.fusedSingleBankGroups).toBe(mask === 15 ? 1 : 0)

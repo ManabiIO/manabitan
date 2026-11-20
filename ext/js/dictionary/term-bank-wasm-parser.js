@@ -58,6 +58,7 @@ const LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES = 24 * 1024 * 1024;
 const PARALLEL_WORKER_READY_TIMEOUT_MS = 60_000;
 const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
+const OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES = 512 * 1024 * 1024;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
@@ -79,6 +80,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * mediaHintFastScan?: boolean,
  * validateGlossaryTypes?: boolean,
  * projectImagePaths?: boolean,
+ * ownContentBytes?: boolean,
  * maxPendingChunks?: number,
  * computeContentHashes?: boolean,
  * emitContentSlab?: boolean,
@@ -2700,7 +2702,11 @@ class ParallelTermBankPipelineRun {
         /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
         /** @type {Record<string, unknown>} */
-        this._options = {...options, ...snapshotTermBankExperiments(options)};
+        this._options = {
+            ...options,
+            ...snapshotTermBankExperiments(options),
+            ownContentBytes: options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES,
+        };
         /** @type {() => boolean} */
         this._shouldCancel = shouldCancel;
         /** @type {{getWorkers: () => Promise<{workers: Worker[]}>, release: (keepWorkers: boolean) => Promise<void>}} */
@@ -2785,8 +2791,12 @@ class ParallelTermBankPipelineRun {
                 if (result.profile === null) {
                     throw new Error('Parallel term-bank parser returned an incomplete result');
                 }
-                const chunk = result.chunk;
-                if (chunk !== null && result.consume !== null) { chunk.releaseBorrowedContent = result.consume; }
+                const {chunk, consume} = result;
+                // Settled slot promises live until the pipeline drains. Keep
+                // the chunk alive only through its ordered sink callback.
+                result.chunk = null;
+                result.consume = null;
+                if (chunk !== null && consume !== null) { chunk.releaseBorrowedContent = consume; }
                 result.profile.orderedSinkWaitMs = Math.max(0, safePerformance.now() - result.finishedAt);
                 profiles.push(result.profile);
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
@@ -2801,7 +2811,7 @@ class ParallelTermBankPipelineRun {
                             chunkCount: this._resultSlots.length,
                         });
                     } finally {
-                        result.consume?.();
+                        consume?.();
                         delete chunk.releaseBorrowedContent;
                     }
                 }
