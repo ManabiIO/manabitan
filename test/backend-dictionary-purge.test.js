@@ -6,6 +6,7 @@
 import {describe, expect, test, vi} from 'vitest';
 import {Backend} from '../ext/js/background/backend.js';
 import {DictionaryDatabaseProxy} from '../ext/js/background/offscreen-proxy.js';
+import {log} from '../ext/js/core/log.js';
 
 /**
  * @param {{secondPurgeFails?: boolean, preparationFails?: boolean, stateFails?: boolean, purgeFails?: boolean, purgeResult?: boolean}} [options]
@@ -83,4 +84,57 @@ describe('DictionaryDatabaseProxy purge acknowledgement', () => {
         expect(sendMessagePromise).toHaveBeenCalledExactlyOnceWith({action: 'databasePurgeOffscreen'});
         expect(updated).not.toHaveBeenCalled();
     });
+});
+
+test('a dictionary storage failure leaves backend startup and explicit reset available', async () => {
+    const {backend, prepare, sendMessagePromise, updated} = fixture({preparationFails: true});
+    const signalReady = vi.fn();
+    const saveOptions = vi.fn();
+    const options = {profiles: [{options: {
+        dictionaries: [{name: 'Installed dictionary', enabled: true}],
+        general: {mainDictionary: 'Installed dictionary', sortFrequencyDictionary: 'Installed dictionary'},
+    }}]};
+    const savedOptions = structuredClone(options);
+    Object.assign(backend, {
+        _prepareInternalSyncComplete: true,
+        _offscreen: null,
+        _requestBuilder: {prepare: vi.fn(async () => {})},
+        _environment: {prepare: vi.fn(async () => {}), getInfo: () => ({browser: 'chrome'})},
+        _clipboardReader: {},
+        _clipboardMonitor: {on: vi.fn()},
+        _optionsUtil: {prepare: vi.fn(async () => {}), load: vi.fn(async () => options), save: saveOptions},
+        _getBrowserIconTitle: () => 'Manabitan',
+        _updateBadge: vi.fn(),
+        _isWindowBackgroundRuntime: () => false,
+        _applyOptions: vi.fn(),
+        _attachOmniboxListener: vi.fn(),
+        _getProfileOptions: () => ({general: {showGuide: false}}),
+        _sendMessageAllTabsIgnoreResponse: signalReady,
+        _sendMessageIgnoreResponse: vi.fn(),
+    });
+    vi.stubGlobal('self', {});
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('{}')));
+    vi.stubGlobal('chrome', {runtime: {}, permissions: {getAll: (/** @type {(value: object) => void} */ callback) => callback({})}});
+    vi.spyOn(log, 'on').mockImplementation(() => {});
+    const errorLog = vi.spyOn(log, 'error').mockImplementation(() => {});
+    vi.spyOn(log, 'warn').mockImplementation(() => {});
+    try {
+        await expect(backend._prepareInternal()).resolves.toBeUndefined();
+        expect(prepare).toHaveBeenCalledOnce();
+        expect(signalReady).toHaveBeenCalledExactlyOnceWith({action: 'applicationBackendReady'});
+        expect(errorLog).toHaveBeenCalledWith(expect.objectContaining({message: 'Cannot safely recover invalid dictionary import journal'}));
+        expect(options).toEqual(savedOptions);
+        expect(saveOptions).not.toHaveBeenCalled();
+        expect(sendMessagePromise).not.toHaveBeenCalled();
+        await expect(backend._onApiGetDictionaryInfo(void 0, {})).rejects.toMatchObject({
+            message: 'Cannot safely recover invalid dictionary import journal',
+            data: {code: 'DICTIONARY_STORAGE_UNAVAILABLE'},
+        });
+        await expect(backend._onApiPurgeDatabase(void 0, {})).resolves.toBeUndefined();
+        expect(sendMessagePromise).toHaveBeenCalledExactlyOnceWith({action: 'databasePurgeOffscreen'});
+        expect(updated).toHaveBeenCalledExactlyOnceWith('dictionary', 'purge');
+    } finally {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    }
 });
