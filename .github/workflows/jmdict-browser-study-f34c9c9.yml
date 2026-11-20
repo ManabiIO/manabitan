@@ -104,4 +104,5 @@ jobs:
           name: jmdict-study-${{ matrix.browser }}-${{ matrix.replication }}
           retention-days: 7
           if-no-files-found: error
+          include-hidden-files: true
           path: builds/perf/jmdict-study-evidence

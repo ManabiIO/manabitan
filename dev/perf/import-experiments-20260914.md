@@ -460,7 +460,11 @@ Initial workflow run `44633439009` was rejected before any job or observation be
 
 Local receipts also retain the initial wrong test TypeScript invocation, a nonmatching test-name filter that skipped every test, subsequent correct passing commands, and an ESLint declaration-format correction. The skipped invocation is not counted as a pass. Temporary ENOSPC was resolved by moving only the extracted compiler installation and preserving its path; no source or observations were removed.
 
-[The evidence archive](../../builds/perf/20261119-round2/browser-evidence.tar.xz) preserves every file payload from all four original GitHub artifacts, plus independent auditors, raw job logs, local validation, failure records and publication receipts. [Its receipt](../../builds/perf/20261119-round2/browser-evidence.tar.xz.json) records original ZIP identities and the complete archive hash. An internal index hashes every member. ZIP container metadata is not reconstructed; the original payload bytes are preserved. Verify without extraction:
+[The evidence archive](../../builds/perf/20261119-round2/browser-evidence.tar.xz) preserves every file payload from all four original GitHub artifacts, plus independent auditors, raw job logs, local validation, failure records and publication receipts. [Its receipt](../../builds/perf/20261119-round2/browser-evidence.tar.xz.json) records original ZIP identities and the complete archive hash. An internal index hashes every member. ZIP container metadata is not reconstructed; the original payload bytes are preserved.
+
+The original upload action omitted two hidden tooling copies: `.github/actions/setup/action.yml` and the study workflow under `.github/workflows/`. All 42 other declared tooling inputs are embedded, and top-level `workflow.yml` already contains the exact workflow bytes. [The coverage receipt](../../builds/perf/20261119-round2/artifact-coverage.json) records this for all four ZIPs. [A separate source supplement](../../builds/perf/20261119-round2/tooling-supplement/receipt.json) reconstructs the two omitted copies from the measured immutable Git commit, verifying both Git blob and SHA256 identities. It does not modify or pretend to be part of the original artifacts. Future evidence uploads explicitly include hidden files. The historical sources, observations and original archive hash remain unchanged.
+
+Verify without extraction:
 
 ```sh
 python3 dev/perf/import-study-evidence.py verify \

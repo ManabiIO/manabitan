@@ -1,0 +1,15 @@
+{
+  "action": "actions/upload-artifact",
+  "commit": "b7c566a772e6b6bfb58ed0dc250532a479d7789f",
+  "sourceUrl": "https://github.com/actions/upload-artifact/blob/b7c566a772e6b6bfb58ed0dc250532a479d7789f/action.yml",
+  "metadataSha256": "3760874f860e631be3d785d0589ade7cecb541eeac6f581989a814a2c99fc94f",
+  "input": "include-hidden-files",
+  "declaredDefault": "false",
+  "futureEvidenceValue": true,
+  "scope": "Only the declared evidence directory; no original artifact or measured source changed",
+  "validation": [
+    "Pinned action metadata declares the input",
+    "Frozen-plan validation passed after recording new workflow hash",
+    "Whitespace check passed"
+  ]
+}
