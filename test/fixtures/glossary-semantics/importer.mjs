@@ -34,12 +34,12 @@ for (const fast of [false, true]) {
     })
 }
 for (const bytes of [false, true]) {
-    await check(`partial raw/escaped path scan declines; bytes=${bytes}`, () => {
+    await check(`literal and escaped path keys are both collected; bytes=${bytes}`, () => {
         const importer = makeImporter()
         const requirements = []
         const row = bytes ? {glossaryJsonBytes: encoder.encode(mixedPaths)} : {glossaryJson: mixedPaths}
-        assert.equal(importer._tryAddFastMediaRequirementsFromFastRow(row, {}, requirements), false)
-        assert.deepEqual(requirements, [])
+        assert.equal(importer._tryAddFastMediaRequirementsFromFastRow(row, {}, requirements), true)
+        assert.deepEqual(requirements.map(({source}) => source.path), ['one.png', 'two.png'])
     })
     await check(`ordinary path scan stays fast; bytes=${bytes}`, () => {
         const importer = makeImporter()

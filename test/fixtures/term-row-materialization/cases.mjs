@@ -95,10 +95,15 @@ export function createCases(parser, DictionaryImporter, lookup) {
 
     for (const path of ['plain.png', '\uFEFFpicture.png', '\uFEFF\uFEFFpicture.png', 'dir/\uFEFFpicture.png', 'é/𠮷.png']) {
         for (const escaped of [false, true]) {
-            add(`image path token: ${JSON.stringify(path)}, escaped=${escaped}`, () => {
+            add(`image path token: ${JSON.stringify(path)}, escaped=${escaped}`, async () => {
                 const importer = makeImporter()
-                const bytes = sourceRows([{type: 'image', path}], escaped)
-                equal(importer._extractImagePathsFromGlossaryJsonBytes(bytes), [path], 'exact asset path')
+                importer._skipImageMetadata = true
+                const bytes = sourceRows([['word', '', '', '', 0, [{type: 'image', path}], 0, '']], escaped)
+                const requirements = []
+                await importer._readTermBankFileFast(file, 3, 'fixture', false, true, true, 'raw-bytes', (_chunk, requested) => {
+                    requirements.push(...requested)
+                }, bytes)
+                equal(requirements.map(({source}) => source.path), [path], 'exact asset path')
             })
         }
     }

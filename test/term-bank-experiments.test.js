@@ -427,9 +427,9 @@ describe('span boundaries and validated glossary witnesses', () => {
         await expect(candidate).rejects.toThrow()
     })
 
-    test('admits only after dense exact duplicates and rejects an unsampled same-length near miss', async () => {
-        const text = 'x'.repeat(300)
-        const altered = text.slice(0, 40) + 'y' + text.slice(41)
+    test.each([13, 28, 44, 71, 1008])('rejects an unsampled same-length glossary mismatch at offset %i', async (mismatchOffset) => {
+        const text = 'x'.repeat(1024)
+        const altered = text.slice(0, mismatchOffset) + 'y' + text.slice(mismatchOffset + 1)
         const sources = [JSON.stringify([
             ...Array.from({length: 6}, (_, i) => row(`duplicate-${i}`, [text])),
             row('near-miss', [altered]),
