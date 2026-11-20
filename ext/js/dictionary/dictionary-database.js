@@ -100,6 +100,8 @@ const DEFAULT_RAW_TERM_CONTENT_PACK_TARGET_BYTES = 4 * 1024 * 1024;
 const TERM_CONTENT_BLOCK_TARGET_BYTES = 1024 * 1024;
 const DEFAULT_ARTIFACT_FIXED_PACK_MIN_TOTAL_ROWS = 0;
 const EXTERNAL_MEDIA_BULK_INSERT_BATCH_SIZE = 512;
+const MEDIA_BULK_INSERT_BATCH_SIZE = 64;
+const MEDIA_BULK_INSERT_BATCH_MAX_BYTES = 4 * 1024 * 1024;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
 const TERM_CONTENT_META_U32_NULL = 0xffffffff;
@@ -4802,6 +4804,18 @@ null;
             return;
         }
         const descriptor = this._getBulkInsertDescriptor(objectStoreName);
+        if (objectStoreName === 'media' && count >= MEDIA_BULK_INSERT_BATCH_SIZE) {
+            // Limit the amount of blob data SQLite can hold in bound parameters.
+            // Keep the normal small statements for a batch with large payloads.
+            let bytes = 0;
+            for (let i = start, end = start + count; i < end; ++i) {
+                bytes += (/** @type {import('dictionary-database').MediaDataArrayBufferContent} */ (items[i])).content.byteLength;
+                if (bytes > MEDIA_BULK_INSERT_BATCH_MAX_BYTES) { break; }
+            }
+            if (bytes <= MEDIA_BULK_INSERT_BATCH_MAX_BYTES) {
+                descriptor.batchSize = MEDIA_BULK_INSERT_BATCH_SIZE;
+            }
+        }
         const useLocalTransaction = !this._bulkImportTransactionOpen;
 
         if (useLocalTransaction) {

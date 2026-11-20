@@ -226,3 +226,30 @@ describe('DictionaryDatabase compressed external media', () => {
         expect(constructorSpy).not.toHaveBeenCalled();
     });
 });
+
+describe('DictionaryDatabase media bulk inserts', () => {
+    test.each([
+        {bytesPerRow: 128, expectedBatchSizes: [64, 1]},
+        {bytesPerRow: 64 * 1024, expectedBatchSizes: [8, 8, 8, 8, 8, 8, 8, 8, 1]},
+    ])('uses bounded statement batches for $bytesPerRow-byte images', async ({bytesPerRow, expectedBatchSizes}) => {
+        const database = new DictionaryDatabase();
+        const bind = vi.fn();
+        Reflect.set(database, '_requireDb', () => ({}));
+        Reflect.set(database, '_bulkImportTransactionOpen', true);
+        Reflect.set(database, '_getCachedStatement', () => ({bind, reset: vi.fn(), step: vi.fn()}));
+        const content = new ArrayBuffer(bytesPerRow);
+        const items = Array.from({length: 67}, (_, index) => ({
+            dictionary: 'image-test', path: `${index}.webp`, mediaType: 'image/webp', width: index, height: 0, content,
+        }));
+
+        await database.bulkAdd('media', items, 1, 65);
+        expect(bind.mock.calls.map(([values]) => values.length / 10)).toEqual(expectedBatchSizes);
+        const bound = bind.mock.calls.flatMap(([values]) => values);
+        for (let i = 0; i < 65; ++i) {
+            const {dictionary, path, mediaType, width, height} = items[i + 1];
+            expect(bound.slice(i * 10, (i + 1) * 10)).toEqual([
+                dictionary, path, mediaType, width, height, content, 0, 0, 0, 0,
+            ]);
+        }
+    });
+});
