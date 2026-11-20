@@ -79,10 +79,10 @@ export async function runSettlementCases(parser, {assert, makeSources, setInterc
             const calls = []
             setIntercept((data, deliver) => {
                 if (data.type === 'parse-error' && data.id === 3) {
-                    // With three workers, the failure can arrive before the
-                    // first result. Deliver it only after the sink has started
-                    // so this schedule exercises failure during an active write.
-                    void firstSink.promise.then(() => {
+                    // Receive the peer result before cancelling its producer;
+                    // otherwise the fixture can block on its own secondReady
+                    // gate. The active sink still awaits finishSink here.
+                    void Promise.all([firstSink.promise, secondReady.promise]).then(() => {
                         deliver(data)
                         failureReady.resolve()
                     })

@@ -1601,9 +1601,17 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('does not reuse borrowed worker memory before the ordered sink consumes it', async () => {
+    maybeTest.each([
+        {ownership: 'borrowed', media: false, cancel: false},
+        {ownership: 'owned', media: false, cancel: false},
+        {ownership: 'owned', media: true, cancel: false},
+        {ownership: 'owned', media: true, cancel: true},
+        {ownership: 'conflicting', media: false, cancel: false},
+        {ownership: 'partial', media: false, cancel: false},
+    ])('bounds parser lead with $ownership ownership, media=$media, cancel=$cancel', async ({ownership, media, cancel}) => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let parseCount = 0;
+        let cancelled = false;
         const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
         /** @implements {WorkerMock} */
         class BorrowingWorker {
@@ -1627,13 +1635,18 @@ describe('term-bank WASM parser', () => {
                         return;
                     }
                     ++parseCount;
+                    const content = ownership === 'owned' ?
+                        new Uint8Array(new SharedArrayBuffer(1)) :
+                        (ownership === 'partial' ? new Uint8Array(new SharedArrayBuffer(2)).subarray(1) : sharedContent);
+                    content[0] = parseCount;
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
                         id: message.id,
                         rowCount: 1,
                         resultSentEpochMs: Date.now(),
-                        borrowsWorkerMemory: false,
-                        chunk: {rowCount: 1, contentBytesBuffer: sharedContent},
+                        borrowsWorkerMemory: ownership === 'conflicting',
+                        ownsContentBytes: ownership !== 'borrowed',
+                        chunk: {rowCount: 1, contentBytesBuffer: content},
                         profile: {chunkDispatchMs: 0},
                     });
                 };
@@ -1651,23 +1664,34 @@ describe('term-bank WASM parser', () => {
         let firstSinkStarted = () => {};
         const firstSinkStart = new Promise((resolve) => { firstSinkStarted = resolve; });
         try {
-            const sourceBanks = Array.from({length: workerCount * 4}, () => textEncoder.encode('[]'));
-            const parsing = parseTermBankWithWasmColumnChunksParallel(
-                sourceBanks,
+            const sourceBanks = Array.from({length: workerCount * 6}, () => textEncoder.encode('[]'));
+            const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
+                sourceBanks.map((source) => async () => source),
+                sourceBanks.map(() => 24 * 1024 * 1024),
                 3,
                 async (_chunk, progress) => {
                     if (progress.chunkIndex !== 1) { return; }
                     firstSinkStarted();
                     await firstSinkGate;
                 },
-                {emitContentSlab: true},
+                {emitContentSlab: true, mediaHintFastScan: media},
+                () => cancelled,
             );
             await firstSinkStart;
-            await new Promise((resolve) => { setTimeout(resolve, 10); });
-            expect(parseCount).toBe(workerCount);
+            const leadGroups = workerCount * (media ? 3 : 4);
+            await vi.waitFor(() => { expect(parseCount).toBe(ownership === 'owned' ? leadGroups : workerCount); });
+            cancelled = cancel;
             releaseFirstSink();
-            await expect(parsing).resolves.toBe(true);
-            expect(parseCount).toBe(workerCount * 4);
+            if (cancel) {
+                await expect(parsing).rejects.toThrow(/cancel/i);
+                expect(parseCount).toBe(leadGroups);
+            } else {
+                await expect(parsing).resolves.toBe(true);
+                expect(parseCount).toBe(workerCount * 6);
+                const profile = consumeLastTermBankWasmParseProfile();
+                expect(profile?.parallelOwnedContentBytes).toBe(ownership === 'owned' ? workerCount * 6 : 0);
+                expect(profile?.parallelPeakQueuedOwnedContentBytes).toBe(ownership === 'owned' ? leadGroups : 0);
+            }
         } finally {
             releaseFirstSink();
             await disposeParallelTermBankParser();

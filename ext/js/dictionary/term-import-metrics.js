@@ -49,6 +49,7 @@ export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
     'dedupRecentSourceHitCount',
     'dedupRecentSourceCacheMs',
     'dedupRecentSourceCacheBytes',
+    'dedupRecentSourceAdoptedBytes',
     'termRecordBuildMs',
     'termRecordEncodeMs',
     'termRecordWriteMs',

@@ -23,6 +23,7 @@ import {
 } from '../ext/js/dictionary/raw-term-content.js';
 import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
+import {registerOwnedTermContent, takeOwnedTermContent} from '../ext/js/dictionary/term-content-ownership.js';
 
 /**
  * @typedef {object} TermContentMeta
@@ -3072,6 +3073,104 @@ describe('TermRecordOpfsStore batch dictionary indexes', () => {
 
 
 describe('recent-source cache metadata mapping', () => {
+    test('adopts independently owned shared memory while unmarked shared memory is copied', () => {
+        const database = new DictionaryDatabase();
+        const owned = new Uint8Array(new SharedArrayBuffer(4));
+        owned.set([1, 2, 3, 4]);
+        registerOwnedTermContent(owned);
+        const adopted = publishSlabMeta(database, owned, 0, owned.length, 10, 20);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        expect(findRecent(adopted.meta)?.buffer).toBe(owned);
+        const borrowed = new Uint8Array(new SharedArrayBuffer(4));
+        borrowed.set([5, 6, 7, 8]);
+        const copied = publishSlabMeta(database, borrowed, 0, borrowed.length, 30, 40);
+        borrowed.fill(0);
+        expect(findRecent(copied.meta)?.buffer).toEqual(Uint8Array.of(5, 6, 7, 8));
+        expect(findRecent(copied.meta)?.buffer.buffer).not.toBe(borrowed.buffer);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(8);
+    });
+
+    test('adopts the entire transferred slab and releases it on rollback', () => {
+        const database = new DictionaryDatabase();
+        const source = Uint8Array.of(1, 2, 3, 4);
+        const transferred = structuredClone(source, {transfer: [source.buffer]});
+        registerOwnedTermContent(transferred);
+        const published = publishSlabMeta(database, transferred, 0, transferred.length, 10, 20);
+        const cached = Reflect.get(database, '_findRecentTermContentSource').call(database, published.meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected adopted content'); }
+        expect(source.byteLength).toBe(0);
+        expect(cached.buffer).toBe(transferred);
+        expect([...cached.buffer]).toEqual([1, 2, 3, 4]);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(4);
+        expect(takeOwnedTermContent(transferred)).toBe(false);
+        Reflect.get(database, '_rollbackStagedArtifactTermContentMetadata').call(database, published.staged);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(0);
+    });
+
+    test('copies a partial retained range rather than changing cache byte coverage', () => {
+        const database = new DictionaryDatabase();
+        const source = Uint8Array.of(1, 2, 3, 4, 5, 6);
+        registerOwnedTermContent(source);
+        const {meta} = publishSlabMeta(database, source, 1, 4, 10, 20);
+        const cached = Reflect.get(database, '_findRecentTermContentSource').call(database, meta);
+        if (typeof cached === 'undefined') { throw new Error('Expected copied content'); }
+        expect(cached.buffer.buffer).not.toBe(source.buffer);
+        expect(cached.buffer).toEqual(Uint8Array.of(2, 3, 4, 5));
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(4);
+        expect(takeOwnedTermContent(source)).toBe(true);
+        source.fill(0);
+        expect(cached.buffer).toEqual(Uint8Array.of(2, 3, 4, 5));
+    });
+
+    test('preserves exact admission and FIFO eviction for adopted slabs', () => {
+        const database = new DictionaryDatabase();
+        Reflect.set(database, '_recentTermContentSourceCacheMaxBytes', 6);
+        const first = Uint8Array.of(1, 2, 3, 4);
+        registerOwnedTermContent(first);
+        const firstPublished = publishSlabMeta(database, first, 0, first.length, 10, 20);
+        const second = Uint8Array.of(5, 6, 7, 8);
+        registerOwnedTermContent(second);
+        const secondPublished = publishSlabMeta(database, second, 0, second.length, 30, 40);
+        const findRecent = Reflect.get(database, '_findRecentTermContentSource').bind(database);
+        expect(findRecent(firstPublished.meta)).toBeUndefined();
+        expect(findRecent(secondPublished.meta)?.buffer).toBe(second);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(4);
+        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(1);
+        const oversized = new Uint8Array(7).fill(9);
+        registerOwnedTermContent(oversized);
+        const oversizedPublished = publishSlabMeta(database, oversized, 0, oversized.length, 50, 60);
+        expect(findRecent(oversizedPublished.meta)).toBeUndefined();
+        expect(findRecent(secondPublished.meta)?.buffer).toBe(second);
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(4);
+        expect(takeOwnedTermContent(oversized)).toBe(true);
+    });
+
+    test('joins in-flight storage readers before rolling back adopted content', async () => {
+        const harness = createArtifactOverlapHarness();
+        const source = new Uint8Array(new SharedArrayBuffer(3));
+        source.set([1, 2, 3]);
+        registerOwnedTermContent(source);
+        harness.chunk.contentBytesBuffer = source;
+        Reflect.deleteProperty(harness.chunk, 'releaseBorrowedContent');
+        const outcome = harness.run().then(() => null, (error) => error);
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').get(1)).toBe(source);
+        harness.rejectContent(new Error('cancelled owned content write'));
+        let settled = false;
+        void outcome.then(() => { settled = true; });
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        expect(source).toEqual(Uint8Array.of(1, 2, 3));
+        harness.resolveRecords();
+        expect(await outcome).toMatchObject({message: 'cancelled owned content write'});
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatches').size).toBe(0);
+        expect(Reflect.get(harness.database, '_recentTermContentSourceBatchBytes')).toBe(0);
+        expect(harness.plan.resolvedFlags[0]).toBe(0);
+        expect(harness.releaseBorrowedContent).not.toHaveBeenCalled();
+    });
+
     test.each([
         [null, 48],
         [4, 48],
