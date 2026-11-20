@@ -1,0 +1,54 @@
+{
+  "archive": "failed-v1-evidence.tar.xz",
+  "archiveSha256": "955c27d3037370dfb8e8ee27252467a5dcc4ec31105dc4dab299c84f74c5749f",
+  "allPackedPayloadHashesVerified": true,
+  "originalZipPayloads": 416,
+  "matchingPackedOriginalZipPayloads": 416,
+  "attemptedImports": 0,
+  "cells": [
+    {
+      "cell": "chromium-forward",
+      "artifactId": 14624378243,
+      "originalZipBytes": 565828,
+      "originalZipSha256": "2cc40fe3e968b64b6c03e9074faed49e228b14f3be8e6ca3dca09caa2635244c",
+      "expectedFilePayloads": 104,
+      "matchingPackedPayloads": 104,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    {
+      "cell": "chromium-reverse",
+      "artifactId": 14624951264,
+      "originalZipBytes": 565798,
+      "originalZipSha256": "70fd14ee3a4ad2932ccaedd8e48ac6d1438ae5d705e366e0631305a45a0509dc",
+      "expectedFilePayloads": 104,
+      "matchingPackedPayloads": 104,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    {
+      "cell": "firefox-forward",
+      "artifactId": 14624787018,
+      "originalZipBytes": 565321,
+      "originalZipSha256": "abece7988566f2ba066adf8407621f2266e2194995b74849147445ca7e146076",
+      "expectedFilePayloads": 104,
+      "matchingPackedPayloads": 104,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    {
+      "cell": "firefox-reverse",
+      "artifactId": 14624263633,
+      "originalZipBytes": 565321,
+      "originalZipSha256": "900ac5fe1a4018b11ed57d35d5d1f5870f040302cbe1a65aa8a1c84297870da3",
+      "expectedFilePayloads": 104,
+      "matchingPackedPayloads": 104,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    }
+  ]
+}

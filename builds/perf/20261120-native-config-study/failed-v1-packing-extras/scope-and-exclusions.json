@@ -1,0 +1,37 @@
+{
+  "scope": "Native study v1, run44727365554, failed during preparation before any browser import or warmup. This archive is separate from every subsequent versioned attempt.",
+  "sourceToolingCommit": "5e2dea241ac11ef7b75c407c2ee1c878e1fd4091",
+  "sourceToolingTree": "0918840aa460073311dc15fed9e693e82c4c9546",
+  "candidateCommit": "19b13a550d9b7f2a53f37d74aa36b2ee9c3e7472",
+  "failure": "The frozen packagePaths list omitted the normally packaged C source; the preparation guard rejected the C+WASM delta. All15 setup commands succeeded in each cell; no imports began.",
+  "audits": {
+    "chromium-forward": {
+      "path": "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/independent-audit-001.json",
+      "sha256": "e883dcfca4b6875a120e9c92dd3faf566b5a051e642a4712e5b0f5ce6e075d69",
+      "attemptedObservations": 0
+    },
+    "chromium-reverse": {
+      "path": "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/independent-audit-001.json",
+      "sha256": "560d675df1efc3d6aecb989f0b12a0af5c8f9796d6c3373683e77eeee1427b06",
+      "attemptedObservations": 0
+    },
+    "firefox-forward": {
+      "path": "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/failure-audit-001.json",
+      "sha256": "fe8e6023a3528618c01d4519f11f37a552bf47b194841e01b37231b0b1add997",
+      "attemptedObservations": 0
+    },
+    "firefox-reverse": {
+      "path": "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/failure-audit-001.json",
+      "sha256": "82622bdb07770fb3c5802cd2cc5d0fa0753594467521ae51d82b03206bae9994",
+      "attemptedObservations": 0
+    }
+  },
+  "exclusions": {
+    "originalZipContainers": "All416 original file payloads are included byte-for-byte; outer ZIP hashes and sizes are retained. Original ZIP files remain untouched outside this tarball.",
+    "extractedDuplicates": "Exclude */evidence copies; original ZIP payloads are the authoritative source.",
+    "cachesAndPriorExamples": "Exclude interpreter caches and non-study prior-schema examples.",
+    "largeRuntimeArchive": "Never downloaded locally. The successful hosted reuse/install checks, exact verified runtime.json bytes, source artifact metadata and scope-limited receipts are included.",
+    "laterAttempts": "Versioned v2 source, jobs and observations are not part of this failed v1 evidence set."
+  },
+  "runtimeScope": "The hosted reuse job checked the exact prior runtime receipt hash and immutable source artifact metadata. All Firefox install steps succeeded. Preparation stopped before runtime/source-artifact copies were placed in result archives; no executed browser import path or persistence proof is claimed."
+}

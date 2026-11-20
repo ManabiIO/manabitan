@@ -1,0 +1,244 @@
+{
+  "startedAt": "2026-11-20T11:35:59.508606+00:00",
+  "completedAt": "2026-11-20T11:36:02.285910+00:00",
+  "recipeSha256": "e9ff120ac2babc75812fcac429fdd105bad7a180aeb7a1debaa66fd627b441b6",
+  "packerSha256": "a71f64e2bd74e5e69737878f619159dd7d6a3059059ab3180d41e4de94c453a6",
+  "packCommand": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/workspace/scratch/f34c9c9fae89/manabitan-validation-study/dev/perf/import-study-evidence.py",
+    "pack",
+    "--output",
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-evidence.tar.xz",
+    "--zip",
+    "chromium-forward=/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/original-14624378243.zip",
+    "--zip",
+    "chromium-reverse=/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/original-14624951264.zip",
+    "--zip",
+    "firefox-forward=/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/original-14624787018.zip",
+    "--zip",
+    "firefox-reverse=/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/original-14624263633.zip",
+    "--directory",
+    "browser-provenance=/workspace/scratch/f34c9c9fae89/round4-browser",
+    "--directory",
+    "extras=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-packing-extras",
+    "--file",
+    "packing/pack-failed-v1.py=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/pack-failed-v1.py",
+    "--file",
+    "packing/import-study-evidence.py=/workspace/scratch/f34c9c9fae89/manabitan-validation-study/dev/perf/import-study-evidence.py",
+    "--exclude",
+    "browser-provenance/prior-schema-example/*",
+    "--exclude",
+    "browser-provenance/*/evidence/*",
+    "--exclude",
+    "browser-provenance/*/original-*.zip",
+    "--exclude",
+    "*/__pycache__/*",
+    "--exclude",
+    "*.pyc"
+  ],
+  "packExitCode": 0,
+  "verifyCommand": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "/workspace/scratch/f34c9c9fae89/manabitan-validation-study/dev/perf/import-study-evidence.py",
+    "verify",
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-evidence.tar.xz"
+  ],
+  "verifyExitCode": 0,
+  "inputIdentitiesBefore": {
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-packing-extras/credential-scan.json": {
+      "bytes": 594,
+      "sha256": "2810e028ef806687eba64c380e0e39838d9c470421247263cdf6d7e0d898c9c3"
+    },
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-packing-extras/scope-and-exclusions.json": {
+      "bytes": 2664,
+      "sha256": "107447616d332c55cad3cb6b4863b90b2cfac243b7007f77d6203433d30c893c"
+    },
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/pack-failed-v1.py": {
+      "bytes": 11836,
+      "sha256": "e9ff120ac2babc75812fcac429fdd105bad7a180aeb7a1debaa66fd627b441b6"
+    },
+    "/workspace/scratch/f34c9c9fae89/manabitan-validation-study/dev/perf/import-study-evidence.py": {
+      "bytes": 7125,
+      "sha256": "a71f64e2bd74e5e69737878f619159dd7d6a3059059ab3180d41e4de94c453a6"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/acquire-firefox-artifact.py": {
+      "bytes": 3309,
+      "sha256": "2d2ecd440f652dcce81aca275571541c63c220275a47cbce2a2036bd14a4ad46"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/audit-chromium-failure.py": {
+      "bytes": 12677,
+      "sha256": "8f80890995e52cc0a99be4bbf0fc44bac32d00a3cfced5cd821ce982e88e46cf"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/audit-firefox-failure.py": {
+      "bytes": 13773,
+      "sha256": "6f2f545f3887c6ac2b110352fd2c411ad5c47f9b8bd222d86f8b847900bfe58b"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-failure-summary.json": {
+      "bytes": 1845,
+      "sha256": "87bb496af0619ecb36b8c5b3656b8050985d4a44ae788daff6e6cedbe6113730"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/download.json": {
+      "bytes": 1404,
+      "sha256": "ae2842a5074f101d88df2ae15fd2c7a780cb3a4bad737bbbdd80ce58915c8fa2"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/independent-audit-001.json": {
+      "bytes": 9189,
+      "sha256": "e883dcfca4b6875a120e9c92dd3faf566b5a051e642a4712e5b0f5ce6e075d69"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/independent-audit-001.py": {
+      "bytes": 12677,
+      "sha256": "8f80890995e52cc0a99be4bbf0fc44bac32d00a3cfced5cd821ce982e88e46cf"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/job-136258192364.log": {
+      "bytes": 227361,
+      "sha256": "b1fe8223393ca9e39759a96019534c0de7937749f21de8fb351bf87eeb30c2d6"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/job.json": {
+      "bytes": 4815,
+      "sha256": "754b503015949724de3d751492a65f646e666dfc6c8256d596d29c807d776e75"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/original-14624378243.zip": {
+      "bytes": 565828,
+      "sha256": "2cc40fe3e968b64b6c03e9074faed49e228b14f3be8e6ca3dca09caa2635244c"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/download.json": {
+      "bytes": 1404,
+      "sha256": "8f119e3cc77eb7e924e775bc099b1bfa95b3925893a2060c7dc42d4f32e66611"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/independent-audit-001.json": {
+      "bytes": 9189,
+      "sha256": "560d675df1efc3d6aecb989f0b12a0af5c8f9796d6c3373683e77eeee1427b06"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/independent-audit-001.py": {
+      "bytes": 12677,
+      "sha256": "8f80890995e52cc0a99be4bbf0fc44bac32d00a3cfced5cd821ce982e88e46cf"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/job-136258192573.log": {
+      "bytes": 227068,
+      "sha256": "b849ebc8535276cbc1d20ffefb825a586a04e56740ebce1f23446b9e82c2ae48"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/job.json": {
+      "bytes": 4815,
+      "sha256": "67fe1dd53f95cb2ae501c75e7631210d1aaea7ce03eed259be20d87180972cf6"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/original-14624951264.zip": {
+      "bytes": 565798,
+      "sha256": "70fd14ee3a4ad2932ccaedd8e48ac6d1438ae5d705e366e0631305a45a0509dc"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-failure-summary.json": {
+      "bytes": 2753,
+      "sha256": "bc71e4fb1b47ec669b5b0b99fe2c514d9394a2261f5e82eec14b93ad02a4e57d"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/download.json": {
+      "bytes": 6725,
+      "sha256": "310ee7440ab0bea418d101fb5cf313bd88b2fe8ed83d468036ba69ca8d9cca47"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/failure-audit-001.json": {
+      "bytes": 9471,
+      "sha256": "fe8e6023a3528618c01d4519f11f37a552bf47b194841e01b37231b0b1add997"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/failure-audit-001.py": {
+      "bytes": 13773,
+      "sha256": "6f2f545f3887c6ac2b110352fd2c411ad5c47f9b8bd222d86f8b847900bfe58b"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/job-136258192398.log": {
+      "bytes": 238558,
+      "sha256": "0aaa4974206e02cec9434994bdff835fe8ce6498db7f830924817f7b234961e8"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/job.json": {
+      "bytes": 4814,
+      "sha256": "2fcb9e687d942c02d7a466712f08629839da92a807ab91a391456a7a3cc02e56"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/original-14624787018.zip": {
+      "bytes": 565321,
+      "sha256": "abece7988566f2ba066adf8407621f2266e2194995b74849147445ca7e146076"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/download.json": {
+      "bytes": 6725,
+      "sha256": "1dabb64dae0b34965635b90aaa39748133716122d33f0c7770ea5366107fdf8e"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/failure-audit-001.json": {
+      "bytes": 9471,
+      "sha256": "82622bdb07770fb3c5802cd2cc5d0fa0753594467521ae51d82b03206bae9994"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/failure-audit-001.py": {
+      "bytes": 13773,
+      "sha256": "6f2f545f3887c6ac2b110352fd2c411ad5c47f9b8bd222d86f8b847900bfe58b"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/job-136258192390.log": {
+      "bytes": 238561,
+      "sha256": "fd1fe7274974d11edd65e22b0bb39e201f6bb8d09ab7f956010c519797986415"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/job.json": {
+      "bytes": 4814,
+      "sha256": "0f727f0b423477f9164d2ea777d6961f349285e9b97b3f58e91c47b47fb9e20e"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/original-14624263633.zip": {
+      "bytes": 565321,
+      "sha256": "900ac5fe1a4018b11ed57d35d5d1f5870f040302cbe1a65aa8a1c84297870da3"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-runtime-reuse-job-136258066706.log": {
+      "bytes": 22631,
+      "sha256": "e4c4b9c07a35f8c6fe10bbebd29cc6b0debcd40105758b2ca237a71ab12fadb5"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-runtime-reuse-metadata.json": {
+      "bytes": 5667,
+      "sha256": "86a1b380980898e04f94b573f922da8b092d655156241db68b90e312123f59a0"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-runtime-reuse-receipt.json": {
+      "bytes": 4371,
+      "sha256": "eb3bca70445a9f0b0219b3be9df42917cd0b46320d3677b6a7886021acf35a48"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-runtime-verified.json": {
+      "bytes": 1513,
+      "sha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826"
+    },
+    "/workspace/scratch/f34c9c9fae89/round4-browser/tooling-identity.json": {
+      "bytes": 553,
+      "sha256": "be479435587bd1028f9ebb71d565eb6a846fe0e6d17a5ac7811289832cc0c183"
+    }
+  },
+  "allInputIdentitiesUnchangedAfter": true,
+  "archiveReceipt": {
+    "schemaVersion": 1,
+    "archive": "failed-v1-evidence.tar.xz",
+    "archiveBytes": 428276,
+    "archiveSha256": "955c27d3037370dfb8e8ee27252467a5dcc4ec31105dc4dab299c84f74c5749f",
+    "indexMember": "evidence-index.json",
+    "payloadFiles": 450,
+    "payloadBytes": 10026376,
+    "sourceZips": [
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-forward/original-14624378243.zip",
+        "prefix": "chromium-forward",
+        "bytes": 565828,
+        "sha256": "2cc40fe3e968b64b6c03e9074faed49e228b14f3be8e6ca3dca09caa2635244c"
+      },
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round4-browser/chromium-reverse/original-14624951264.zip",
+        "prefix": "chromium-reverse",
+        "bytes": 565798,
+        "sha256": "70fd14ee3a4ad2932ccaedd8e48ac6d1438ae5d705e366e0631305a45a0509dc"
+      },
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-forward/original-14624787018.zip",
+        "prefix": "firefox-forward",
+        "bytes": 565321,
+        "sha256": "abece7988566f2ba066adf8407621f2266e2194995b74849147445ca7e146076"
+      },
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round4-browser/firefox-reverse/original-14624263633.zip",
+        "prefix": "firefox-reverse",
+        "bytes": 565321,
+        "sha256": "900ac5fe1a4018b11ed57d35d5d1f5870f040302cbe1a65aa8a1c84297870da3"
+      }
+    ],
+    "verification": "Use this script's verify command; it reads every payload and rejects missing, extra, duplicate or changed files."
+  },
+  "coverageSha256": "6203927467212d2cb5af839b42eeeec83509413b2b7978db9e29089fa4ebdf16",
+  "credentialScanSha256": "2810e028ef806687eba64c380e0e39838d9c470421247263cdf6d7e0d898c9c3"
+}

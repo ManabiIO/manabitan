@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "archive": "native-evidence.tar.xz",
+  "archiveBytes": 3117032,
+  "archiveSha256": "1f9c3822d610c96c83b9d1e3136e6e859db1f491a89efeb3c368bef7cbeabafe",
+  "indexMember": "evidence-index.json",
+  "payloadFiles": 2858,
+  "payloadBytes": 96599492,
+  "sourceZips": [
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/original-14627490223.zip",
+      "prefix": "chromium-forward",
+      "bytes": 3989429,
+      "sha256": "f718a067d6dfc4c823b9c25c76659b4e34bcf59853fe0b6fc76a7af32500b3b0"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/original-14626318108.zip",
+      "prefix": "chromium-reverse",
+      "bytes": 3979720,
+      "sha256": "6b931369e3e10896bc0b33e4cfe76cba260a49ef1e32643567829180e583c6da"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/original-14627208758.zip",
+      "prefix": "firefox-forward",
+      "bytes": 2402097,
+      "sha256": "08527d3626a5adabb723add442c7c1cfb4d0dd57a959ed2bdc94b048aceaf868"
+    },
+    {
+      "kind": "zip",
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/original-14627972249.zip",
+      "prefix": "firefox-reverse",
+      "bytes": 2398251,
+      "sha256": "f106b58ec22a995fb712fe91d5fea63a0443bcf48e068480c688216d788aa604"
+    }
+  ],
+  "verification": "Use this script's verify command; it reads every payload and rejects missing, extra, duplicate or changed files."
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final native-v2 evidence assembly; four fixed browser/order cells remain separate. No runtime edits, new measurements, retries, tail exclusions or pooling.",
+  "measuredToolingCommit": "72b8ab5471fc68e369a54d884efbbea933699d7c",
+  "manifestSha256": "66062489217d31a117ee7892c4f51190ccb51b837886f2c1cdaef857e6b2afa7",
+  "workflowRunId": 44729808376,
+  "originalZipContainers": {
+    "reason": "Every original regular-file payload is retained byte-for-byte under its browser/order prefix. Original ZIP container hashes, lengths and member mappings are retained; container metadata is not reconstructed. No original ZIP is modified or downloaded again."
+  },
+  "extractedDuplicates": {
+    "paths": ["round5-browser/*/evidence", "round5-browser-analysis"],
+    "reason": "Separate analysis/extraction copies duplicate original ZIP payloads. Their verification receipts are retained in browser provenance."
+  },
+  "caches": {
+    "patterns": ["*/__pycache__/*", "*.pyc"],
+    "reason": "Reproducible interpreter caches are not measurement evidence."
+  },
+  "failedV1": {
+    "archive": "../20261120-native-config-study/failed-v1-evidence.tar.xz",
+    "bytes": 428276,
+    "sha256": "955c27d3037370dfb8e8ee27252467a5dcc4ec31105dc4dab299c84f74c5749f",
+    "reason": "Preserved separately with all failed-before-import evidence; its identity/coverage/packing receipts are included here without duplicating or modifying that archive. V1 produced zero performance observations."
+  },
+  "packagingErratum": {
+    "prefix": "packaging-erratum-and-reviews",
+    "correctPackageDelta": ["js/dictionary/wasm/term-content-canonical-scan-v1.c", "lib/term-content-canonical-scan-v1.wasm"],
+    "reason": "Original frozen native notes and receipts contained a WASM-only package declaration. The separate erratum corrects that claim while preserving those originals unchanged."
+  },
+  "externalReproducibleInputs": {
+    "paths": ["fixtures/JMdict.zip", "toolchains/llvm21-debs", "toolchains/llvm21", "toolchains/actionlint/actionlint", "node_modules", "full Git checkouts", "official Firefox runtime archive"],
+    "reason": "Pinned source/fixture/runtime/package identities, observed verification receipts, toolchain metadata and the exact candidate bundle are retained. Reproducible installations and large runtime archives are not duplicated."
+  },
+  "priorValidationChecksumStudy": {
+    "sourceCommit": "86bdc139eee5fe1af07e42521cec1a7867b30571",
+    "archive": "builds/perf/20261120-validation-study/validation-evidence.tar.xz",
+    "sha256": "e3daca84f120a35a6a60df127be88dd2a4ce754b8142b8ce5538f73a8a579496",
+    "reason": "The previous independently preserved study remains separate. The compression source snapshot includes the exact fixture manifest needed for offline classification; no generated checksum store image is required or included here."
+  },
+  "mutableOperationalState": {
+    "reason": "Publication payloads, transfer URLs and mutable orchestration state are outside the frozen evidence selection. Safe artifact/job metadata and all browser audit/acquisition receipts are retained."
+  },
+  "postAssemblyOutputs": {
+    "reason": "Final documentation, packing/coverage receipts and later publication CI remain alongside the archive to avoid self-referential hash cycles. Root analysis and its assembly-attempt receipt are included before packing."
+  },
+  "redactions": {
+    "planned": false,
+    "policy": "A new credential-pattern finding stops assembly for review; no original payload is silently redacted or omitted."
+  }
+}
