@@ -24,6 +24,14 @@ import {encodeRawTermContentBlockReference} from '../ext/js/dictionary/raw-term-
 
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
     decompressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
+    decompressWrappedTermContentZstd: (
+        /** @type {Uint8Array} */ bytes,
+        /** @type {string|null} */ _dictName,
+        /** @type {(hashes: [number, number]|null) => void} */ validateEnvelope,
+    ) => {
+        validateEnvelope(null);
+        return Uint8Array.from(bytes.subarray(12));
+    },
 }));
 
 /**

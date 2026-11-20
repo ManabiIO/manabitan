@@ -15,6 +15,17 @@ import {TermContentIntegrityError, TermContentOpfsStore} from '../ext/js/diction
 import {encodeRawTermContentBlockReference, encodeRawTermContentCompactBlockReference} from '../ext/js/dictionary/raw-term-content.js';
 import {beginCompressWrappedTermContentZstdSpansBatch, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from '../ext/js/dictionary/zstd-term-content.js';
 
+const decode = vi.hoisted(() => {
+    /** @type {typeof decompressTermContentZstd} */
+    const implementation = (bytes, _dictName, options = {}) => {
+        if (typeof options.maxOutputSize === 'number' && bytes.byteLength > options.maxOutputSize) {
+            throw new RangeError(`Zstd frame output size ${bytes.byteLength} exceeds configured output limit ${options.maxOutputSize}`);
+        }
+        return Uint8Array.from(bytes);
+    };
+    return vi.fn(implementation);
+});
+
 vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
     resolveTermContentZstdDictName: () => 'jmdict',
     compressTermContentZstd: (/** @type {Uint8Array} */ bytes) => Uint8Array.from(bytes),
@@ -64,16 +75,16 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         });
         return {sourceConsumed: completion.then(() => {}), completion};
     }),
-    decompressTermContentZstd: vi.fn((
+    decompressTermContentZstd: decode,
+    decompressWrappedTermContentZstd: (
         /** @type {Uint8Array} */ bytes,
-        /** @type {string|null} */ _dictName,
+        /** @type {string|null} */ dictName,
+        /** @type {(hashes: [number, number]|null) => void} */ validateEnvelope,
         /** @type {{defaultHeapSize?: number, maxOutputSize?: number}} */ options = {},
     ) => {
-        if (typeof options.maxOutputSize === 'number' && bytes.byteLength > options.maxOutputSize) {
-            throw new RangeError(`Zstd frame output size ${bytes.byteLength} exceeds configured output limit ${options.maxOutputSize}`);
-        }
-        return Uint8Array.from(bytes);
-    }),
+        validateEnvelope(null);
+        return decode(bytes.subarray(12), dictName, options);
+    },
 }));
 
 /** @typedef {NonNullable<Awaited<ReturnType<TermContentBlockStore['_tryAppendPacked']>>>} TermContentBlockAppendResult */

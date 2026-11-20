@@ -457,21 +457,71 @@ export function decompressUsingDict(context, content, dictionary, options = {}) 
 }
 
 /**
+ * Verifies an existing block envelope in the same native input allocation used
+ * for decompression. The caller validates the envelope magic and length first.
+ * The validator receives null when native input allocation is unavailable, so
+ * it can preserve checksum rejection before reporting the resource failure.
+ * @param {number} context
+ * @param {Uint8Array} content
+ * @param {Uint8Array|null} dictionary
+ * @param {(hashes: [number, number]|null) => void} validateEnvelope
+ * @param {{defaultHeapSize?: number, maxOutputSize?: number}} [options]
+ * @returns {Uint8Array}
+ * @throws {RangeError} If the envelope does not contain a compressed frame.
+ */
+export function decompressUsingDictWithEnvelope(context, content, dictionary, validateEnvelope, options = {}) {
+    if (content.byteLength <= TERM_CONTENT_BLOCK_ENVELOPE_BYTES) {
+        throw new RangeError('Compressed term content block is empty');
+    }
+    return decompressUsingContext(
+        context,
+        content,
+        dictionary,
+        options.defaultHeapSize ?? 1024 * 1024,
+        options.maxOutputSize ?? null,
+        validateEnvelope,
+    );
+}
+
+/**
  * @param {number} context
  * @param {Uint8Array} content
  * @param {Uint8Array|null} dictionary
  * @param {number} defaultHeapSize
  * @param {number|null} maxOutputSize
+ * @param {((hashes: [number, number]|null) => void)|null} [validateEnvelope]
  * @returns {Uint8Array}
  * @throws {Error} If the frame is invalid or allocation or decompression fails.
  */
-function decompressUsingContext(context, content, dictionary, defaultHeapSize, maxOutputSize) {
+function decompressUsingContext(context, content, dictionary, defaultHeapSize, maxOutputSize, validateEnvelope = null) {
+    if (moduleInstance === null) { validateEnvelope?.(null); }
     const module = getModule();
-    const source = module._malloc(content.byteLength);
-    if (source === 0) { throw new Error('Failed to allocate Zstd input buffer'); }
+    let source;
+    try {
+        source = module._malloc(content.byteLength);
+    } catch (error) {
+        validateEnvelope?.(null);
+        throw error;
+    }
+    if (source === 0) {
+        validateEnvelope?.(null);
+        throw new Error('Failed to allocate Zstd input buffer');
+    }
     try {
         module.HEAPU8.set(content, source);
-        const frameSizeValue = module._ZSTD_getFrameContentSize(source, content.byteLength);
+        let frameSource = source;
+        let frameLength = content.byteLength;
+        if (validateEnvelope !== null) {
+            if (module._manabitan_write_block_envelope(source, content.byteLength) !== 1) {
+                validateEnvelope(null);
+                throw new Error('Failed to verify Zstd block integrity envelope');
+            }
+            const envelope = new DataView(module.HEAPU8.buffer, source, TERM_CONTENT_BLOCK_ENVELOPE_BYTES);
+            validateEnvelope([envelope.getUint32(4, true), envelope.getUint32(8, true)]);
+            frameSource += TERM_CONTENT_BLOCK_ENVELOPE_BYTES;
+            frameLength -= TERM_CONTENT_BLOCK_ENVELOPE_BYTES;
+        }
+        const frameSizeValue = module._ZSTD_getFrameContentSize(frameSource, frameLength);
         const frameSize = typeof frameSizeValue === 'bigint' ? Number(frameSizeValue) : frameSizeValue;
         const outputSize = frameSize < 0 ? defaultHeapSize : frameSize;
         if (!Number.isSafeInteger(outputSize) || outputSize <= 0) {
@@ -501,13 +551,13 @@ function decompressUsingContext(context, content, dictionary, defaultHeapSize, m
             }
             if (dictionary !== null) { module.HEAPU8.set(dictionary, dictionaryPointer); }
             const size = dictionary === null ?
-                module._ZSTD_decompress(destination, outputSize, source, content.byteLength) :
+                module._ZSTD_decompress(destination, outputSize, frameSource, frameLength) :
                 module._ZSTD_decompress_usingDict(
                     context,
                     destination,
                     outputSize,
-                    source,
-                    content.byteLength,
+                    frameSource,
+                    frameLength,
                     dictionaryPointer,
                     dictionary.byteLength,
                 );

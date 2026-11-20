@@ -168,6 +168,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
  * @property {boolean} [useResolvedContentReferences]
+ * @property {boolean} [isFinalTermChunk] The importer proved both source exhaustion and the final parser chunk.
  * @property {(string|null)[]|null} contentDictNameList
  * @property {string|null} [uniformContentDictName]
  * @property {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>} [preparedLookupIndexes]
@@ -205,7 +206,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {number} hash1
  * @property {number} hash2
  * @property {Uint8Array} contentBytes
- * @property {TermContentMeta} primary
+ * @property {TermContentMeta|undefined} primary
  */
 
 /**
@@ -5020,7 +5021,7 @@ null;
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number, isFinalTermChunk?: boolean}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -6525,32 +6526,47 @@ null;
         const count = descriptors.length;
         /** @type {ExactTermContentResult[]} */
         const results = new Array(count);
-        /** @type {Array<TermContentMeta[]|null>} */
-        const candidateLists = new Array(count);
-        const nextCandidateIndexes = new Uint32Array(count);
-        const completed = new Uint8Array(count);
-        let remaining = count;
+        /** @type {Array<TermContentMeta[]>|null} */
+        let candidateLists = null;
+        let remaining = 0;
         for (let i = 0; i < count; ++i) {
             const {hash1, hash2, contentBytes, primary} = descriptors[i];
+            // A complete comparison of the owned source proves the match without
+            // constructing a collision list or sampling rejection signatures.
+            // Misses still use the ordered storage/collision path below.
+            if (
+                typeof primary !== 'undefined' && primary.length === contentBytes.byteLength &&
+                contentBytes.byteLength !== 0 && this._canExactlyComparePersistedTermContent(primary.dictName)
+            ) {
+                const recentSource = this._findRecentTermContentSource(primary);
+                if (
+                    typeof recentSource !== 'undefined' &&
+                    this._termContentBytesEqualSpan(contentBytes, recentSource.buffer, recentSource.offset, recentSource.length)
+                ) {
+                    results[i] = {existingMeta: primary, exactFallback: true, recentSourceHit: true};
+                    continue;
+                }
+            }
             const candidates = this._getMatchingPersistedTermEntryContentMetaCandidates(
                 hash1,
                 hash2,
                 contentBytes,
                 primary,
             );
-            candidateLists[i] = candidates;
             if (candidates === null) {
                 results[i] = {existingMeta: void 0, exactFallback: false};
-                completed[i] = 1;
-                --remaining;
             } else if (contentBytes.byteLength === 0) {
                 // Candidate selection already required the same length.
                 results[i] = {existingMeta: candidates[0], exactFallback: true};
-                completed[i] = 1;
-                --remaining;
+            } else {
+                if (candidateLists === null) { candidateLists = new Array(count); }
+                candidateLists[i] = candidates;
+                ++remaining;
             }
         }
+        if (candidateLists === null) { return results; }
 
+        const nextCandidateIndexes = new Uint32Array(count);
         /** @type {Error[]} */
         const errors = [];
         while (remaining > 0) {
@@ -6559,7 +6575,7 @@ null;
             /** @type {Array<{descriptorIndex: number, meta: TermContentMeta}>} */
             const requestOwners = [];
             for (let i = 0; i < count; ++i) {
-                if (completed[i] === 1) { continue; }
+                if (typeof results[i] !== 'undefined') { continue; }
                 const candidates = candidateLists[i];
                 const contentBytes = descriptors[i].contentBytes;
                 let queued = false;
@@ -6576,7 +6592,6 @@ null;
                             )
                         ) {
                             results[i] = {existingMeta: meta, exactFallback: true, recentSourceHit: true};
-                            completed[i] = 1;
                             --remaining;
                             break;
                         }
@@ -6593,7 +6608,6 @@ null;
                             )
                         ) {
                             results[i] = {existingMeta: meta, exactFallback: true};
-                            completed[i] = 1;
                             --remaining;
                             break;
                         }
@@ -6608,9 +6622,8 @@ null;
                     queued = true;
                     break;
                 }
-                if (!queued && completed[i] === 0 && nextCandidateIndexes[i] >= candidates.length) {
+                if (!queued && typeof results[i] === 'undefined' && nextCandidateIndexes[i] >= candidates.length) {
                     results[i] = {existingMeta: void 0, exactFallback: true};
-                    completed[i] = 1;
                     --remaining;
                 }
             }
@@ -6624,7 +6637,7 @@ null;
                 const {descriptorIndex, meta} = requestOwners[i];
                 if (readResult.status !== 'ok') {
                     errors.push(this._createExactDedupeReadError(meta, readResult));
-                    completed[descriptorIndex] = 1;
+                    results[descriptorIndex] = {existingMeta: void 0, exactFallback: true};
                     --remaining;
                     continue;
                 }
@@ -6632,7 +6645,6 @@ null;
                 this._setTermContentSignatures(meta, existingBytes);
                 if (this._termContentBytesEqual(existingBytes, descriptors[descriptorIndex].contentBytes)) {
                     results[descriptorIndex] = {existingMeta: meta, exactFallback: true};
-                    completed[descriptorIndex] = 1;
                     --remaining;
                 }
             }
@@ -8460,6 +8472,7 @@ this._readTermContentSignature(
                         importMetrics,
                         metadataValidated: persistenceResult[VALIDATED_TERM_CONTENT_METADATA] === true,
                         useResolvedContentReferences,
+                        isFinalTermChunk: chunk.isFinalTermChunk === true,
                     });
                     const contentMetadataPublishMs = safePerformance.now() - tContentMetadataStart;
                     importMetrics.contentMetadataPublishMs += contentMetadataPublishMs;
@@ -9633,9 +9646,128 @@ null :
     }
     /* eslint-enable @stylistic/semi */
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Publishes a fully checked consecutive reservation without per-row table
+     * writes. The witness is local to this synchronous call. An unsupported or
+     * invalid row leaves every table untouched so the scalar path preserves its
+     * original partial-publication and error behavior.
+     * @param {{indexes: Int32Array, active: boolean}|null} staged
+     * @param {number[]|Uint32Array} hash1s
+     * @param {number[]|Uint32Array} hash2s
+     * @param {number[]|Float64Array} offsets
+     * @param {number[]|Uint32Array} lengths
+     * @param {number} dictNameId
+     * @param {boolean} metadataValidated
+     * @returns {boolean} Whether the complete range was published.
+     */
+    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated) {
+        if (
+            staged === null ||
+            !(staged.indexes instanceof Int32Array) ||
+            !(hash1s instanceof Uint32Array) ||
+            !(hash2s instanceof Uint32Array) ||
+            !(offsets instanceof Float64Array) ||
+            !(lengths instanceof Uint32Array) ||
+            !(staged.indexes.buffer instanceof ArrayBuffer) ||
+            !(hash1s.buffer instanceof ArrayBuffer) ||
+            !(hash2s.buffer instanceof ArrayBuffer) ||
+            !(offsets.buffer instanceof ArrayBuffer) ||
+            !(lengths.buffer instanceof ArrayBuffer)
+        ) {
+            return false
+        }
+        const count = offsets.length
+        const firstIndex = staged.indexes[0]
+        const endIndex = firstIndex + count
+        if (
+            count === 0 ||
+            staged.indexes.length !== count ||
+            hash1s.length < count || hash2s.length < count || lengths.length < count ||
+            firstIndex < 0 ||
+            endIndex > this._termEntryContentMetaStateTable.length ||
+            endIndex > this._termEntryContentMetaHash1Table.length ||
+            endIndex > this._termEntryContentMetaHash2Table.length ||
+            endIndex > this._termEntryContentMetaLengthTable.length ||
+            endIndex > this._termEntryContentMetaIdTable.length ||
+            endIndex > this._termEntryContentMetaOffsetTable.length ||
+            endIndex > this._termEntryContentMetaDictNameIdTable.length
+        ) {
+            return false
+        }
+        const indexes = staged.indexes
+        const stateTable = this._termEntryContentMetaStateTable
+        const hash1Table = this._termEntryContentMetaHash1Table
+        const hash2Table = this._termEntryContentMetaHash2Table
+        const lengthTable = this._termEntryContentMetaLengthTable
+        // Caller-owned columns may be views into metadata storage. Scalar
+        // publication interleaves its reads and writes; bulk operations require
+        // every input to remain unchanged until all writes finish. Native arena
+        // tables share one buffer but occupy disjoint byte ranges.
+        const reads = [
+            {values: indexes, start: 0},
+            {values: hash1s, start: 0},
+            {values: hash2s, start: 0},
+            {values: offsets, start: 0},
+            {values: lengths, start: 0},
+            {values: hash1Table, start: firstIndex},
+            {values: hash2Table, start: firstIndex},
+            {values: lengthTable, start: firstIndex},
+        ]
+        const writes = [
+            this._termEntryContentMetaIdTable,
+            this._termEntryContentMetaOffsetTable,
+            this._termEntryContentMetaDictNameIdTable,
+            stateTable,
+        ]
+        for (let i = 0; i < writes.length; ++i) {
+            const target = writes[i]
+            const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
+            const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
+            for (const {values, start} of reads) {
+                if (values.buffer !== target.buffer) { continue }
+                const inputStart = values.byteOffset + start * values.BYTES_PER_ELEMENT
+                const inputEnd = inputStart + count * values.BYTES_PER_ELEMENT
+                if (inputStart < targetEnd && targetStart < inputEnd) { return false }
+            }
+            for (let j = i + 1; j < writes.length; ++j) {
+                const other = writes[j]
+                if (other.buffer !== target.buffer) { continue }
+                const otherStart = other.byteOffset + firstIndex * other.BYTES_PER_ELEMENT
+                const otherEnd = other.byteOffset + endIndex * other.BYTES_PER_ELEMENT
+                if (otherStart < targetEnd && targetStart < otherEnd) { return false }
+            }
+        }
+        for (let i = 0; i < count; ++i) {
+            const index = firstIndex + i
+            const offset = offsets[i]
+            const length = lengths[i]
+            if (
+                indexes[i] !== index ||
+                stateTable[index] !== TERM_CONTENT_META_SLOT_PENDING ||
+                hash1Table[index] !== hash1s[i] || hash2Table[index] !== hash2s[i] ||
+                lengthTable[index] !== length ||
+                (!metadataValidated && (
+                    !Number.isSafeInteger(offset) || offset < 0 || length >= TERM_CONTENT_META_U32_NULL
+                ))
+            ) {
+                return false
+            }
+        }
+        this._termEntryContentMetaIdTable.fill(0, firstIndex, endIndex)
+        this._termEntryContentMetaOffsetTable.set(offsets, firstIndex)
+        this._termEntryContentMetaDictNameIdTable.fill(dictNameId, firstIndex, endIndex)
+        stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, firstIndex, endIndex)
+        this._termEntryContentMetaHashPairPendingCount -= count
+        this._termEntryContentMetaHashPairCount += count
+        return true
+    }
+
+    /* eslint-enable @stylistic/semi */
+
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
-     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
+     * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean, isFinalTermChunk?: boolean}} state
      * @returns {string|(string|null)[]}
      * @throws {Error} If dedup projections or persisted metadata are invalid.
      */
@@ -9658,6 +9790,7 @@ null :
             importMetrics = null,
             metadataValidated = false,
             useResolvedContentReferences = false,
+            isFinalTermChunk = false,
         } = state;
         let {resolvedContentDictNames} = state;
         /**
@@ -9722,7 +9855,18 @@ null :
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        for (let i = 0; i < pendingOffsets.length; ++i) {
+        /* eslint-disable @stylistic/semi */
+        const publishedContiguous = typeof uniformPendingDictName === 'string' && this._tryPublishContiguousArtifactTermContentMetadata(
+            stagedContentMetadata,
+            pendingContentHash1s,
+            pendingContentHash2s,
+            pendingOffsets,
+            pendingLengths,
+            uniformPendingDictNameId,
+            metadataValidated,
+        )
+        /* eslint-enable @stylistic/semi */
+        for (let i = publishedContiguous ? pendingOffsets.length : 0; i < pendingOffsets.length; ++i) {
             const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
@@ -9791,10 +9935,14 @@ null :
             );
         }
         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
-        const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
-            stagedContentMetadata,
-            pendingContentSpans,
-        );
+        // Canonical metadata above remains available to every later reader.
+        // Only the final chunk's speculative owned source copy is unnecessary.
+        const recentSourceCacheBytes = isFinalTermChunk ?
+            0 :
+            this._cacheRecentPublishedTermContentSources(
+                stagedContentMetadata,
+                pendingContentSpans,
+            );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
             importMetrics.dedupRecentSourceCacheBytes += recentSourceCacheBytes;
