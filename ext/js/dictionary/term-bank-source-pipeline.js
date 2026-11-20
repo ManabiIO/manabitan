@@ -103,8 +103,14 @@ export class RawZipPayloadReader {
         // Keep the existing small-archive path. Large Files/Blobs read only
         // validated entry ranges; an already-owned ArrayBuffer needs no copy.
         const ranged = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
+        const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
+        const expectedFilenameLength = rawFilename instanceof Uint8Array && rawFilename.byteLength <= 0xffff ?
+            rawFilename.byteLength : 0;
+        // The central filename length bounds the local name read. The local
+        // header still has to agree before any payload is read.
+        const metadataLength = Math.min(archiveSize - offset, ZIP_LOCAL_FILE_HEADER_LENGTH + expectedFilenameLength);
         const archiveBytes = ranged ?
-            await this._readBlobRange(offset, ZIP_LOCAL_FILE_HEADER_LENGTH, signal) :
+            await this._readBlobRange(offset, metadataLength, signal) :
             await this._getArchiveBytes();
         signal.throwIfAborted();
         const headerOffset = ranged ? 0 : offset;
@@ -123,17 +129,13 @@ export class RawZipPayloadReader {
         if (!Number.isSafeInteger(dataOffset) || dataOffset > archiveSize || compressedSize > archiveSize - dataOffset) {
             throw new DictionarySourceIntegrityError(`Raw ZIP payload is out of bounds for '${file.filename}'`);
         }
-        const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
         if (rawFilename instanceof Uint8Array) {
             if (filenameLength !== rawFilename.byteLength) {
                 throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
             }
-            const localFilenameOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH;
-            const localFilename = ranged ?
-                await this._readBlobRange(localFilenameOffset, filenameLength, signal) :
-                archiveBytes.subarray(localFilenameOffset, localFilenameOffset + filenameLength);
+            const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH;
             for (let i = 0; i < filenameLength; ++i) {
-                if (localFilename[i] !== rawFilename[i]) {
+                if (archiveBytes[localFilenameOffset + i] !== rawFilename[i]) {
                     throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${file.filename}'`);
                 }
             }
