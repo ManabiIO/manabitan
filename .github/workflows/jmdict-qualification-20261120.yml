@@ -1,0 +1,113 @@
+name: JMdict browser qualification (2026-11-20)
+
+on:
+  push:
+    branches:
+      - 'perf/jmdict-qualify-20261120-ccf816-*'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qualify:
+    name: ${{ matrix.browser }} / ${{ matrix.dictionary }}
+    if: >-
+      github.repository == 'ManabiIO/manabitan' &&
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/heads/perf/jmdict-qualify-20261120-ccf816-')
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {browser: chromium, dictionary: jmdict}
+          - {browser: chromium, dictionary: jmnedict}
+          - {browser: chromium, dictionary: jitendex}
+          - {browser: firefox, dictionary: jmdict}
+    env:
+      QUALIFICATION_EVIDENCE: ${{ github.workspace }}/builds/jmdict-qualification-20261120/${{ matrix.browser }}-${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Record fixed plan before preparation
+        run: >-
+          python3 dev/perf/jmdict-qualification-20261120.py init
+          --browser '${{ matrix.browser }}' --dictionary '${{ matrix.dictionary }}'
+          --evidence "$QUALIFICATION_EVIDENCE"
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+
+      - name: Install locked Chromium
+        if: matrix.browser == 'chromium'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Firefox runtime dependencies
+        if: matrix.browser == 'firefox'
+        run: npx playwright install-deps firefox
+
+      - name: Verify pinned Firefox artifact metadata
+        if: matrix.browser == 'firefox'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 dev/perf/jmdict-firefox-runtime/firefox-runtime.py verify-source
+          --output "$RUNNER_TEMP/official-firefox-artifact"
+
+      - name: Retrieve pinned Firefox runtime
+        if: matrix.browser == 'firefox'
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          artifact-ids: '14621448317'
+          run-id: '44720953991'
+          github-token: ${{ github.token }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/official-firefox-artifact
+
+      - name: Verify and install pinned Firefox runtime
+        if: matrix.browser == 'firefox'
+        run: >-
+          python3 dev/perf/jmdict-firefox-runtime/firefox-runtime.py install
+          --artifact "$RUNNER_TEMP/official-firefox-artifact"
+          --output "$RUNNER_TEMP/official-firefox"
+
+      - name: Restore locked dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Freeze source and build both release packages
+        run: >-
+          python3 dev/perf/jmdict-qualification-20261120.py prepare
+          --browser '${{ matrix.browser }}' --dictionary '${{ matrix.dictionary }}'
+          --evidence "$QUALIFICATION_EVIDENCE"
+
+      - name: Run full Chromium cohort and separate diagnostics
+        if: matrix.browser == 'chromium'
+        run: >-
+          python3 dev/perf/jmdict-qualification-20261120.py measure
+          --browser chromium --dictionary '${{ matrix.dictionary }}'
+          --evidence "$QUALIFICATION_EVIDENCE"
+
+      - name: Run full Firefox cohort
+        if: matrix.browser == 'firefox'
+        run: >-
+          xvfb-run -a python3 dev/perf/jmdict-qualification-20261120.py measure
+          --browser firefox --dictionary jmdict --evidence "$QUALIFICATION_EVIDENCE"
+
+      - name: Preserve all raw evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: jmdict-qualification-20261120-${{ matrix.browser }}-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.QUALIFICATION_EVIDENCE }}
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 14
