@@ -42,6 +42,14 @@ const standardReadPolicy = Object.freeze({
     rejectDuringImport: true,
 });
 
+const concurrentStandardReadPolicy = Object.freeze({
+    concurrency: /** @type {const} */ ('lookup'),
+    timeoutClass: /** @type {const} */ ('standard'),
+    retryable: false,
+    requiresDatabase: true,
+    rejectDuringImport: true,
+});
+
 const maintenancePolicy = Object.freeze({
     concurrency: /** @type {const} */ ('exclusive'),
     timeoutClass: /** @type {const} */ ('maintenance'),
@@ -72,9 +80,7 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     // state. An exclusive metadata read would wait for active cache warming,
     // then make later foreground lookups wait behind that best-effort warm.
     // Keep mutation ordering and import rejection through the read scheduler.
-    getDictionaryInfoOffscreen: Object.freeze({
-        concurrency: 'lookup', timeoutClass: 'standard', retryable: false, requiresDatabase: true, rejectDuringImport: true,
-    }),
+    getDictionaryInfoOffscreen: concurrentStandardReadPolicy,
     deleteDictionaryOffscreen: maintenancePolicy,
     replaceDictionaryTitleOffscreen: maintenancePolicy,
     getDictionaryCountsOffscreen: standardReadPolicy,
@@ -90,7 +96,9 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     debugDictionaryLookupStateOffscreen: maintenancePolicy,
     databasePurgeOffscreen: maintenancePolicy,
     databaseRefreshOffscreen: maintenancePolicy,
-    databaseGetMediaOffscreen: standardReadPolicy,
+    // Media reads release their SQLite cursor before awaiting OPFS. Allow them
+    // alongside warmup so a popup's stylesheet or image lookup can proceed.
+    databaseGetMediaOffscreen: concurrentStandardReadPolicy,
     translatorPrepareOffscreen: standardReadPolicy,
     findKanjiOffscreen: interactiveLookupPolicy,
     findTermsOffscreen: interactiveLookupPolicy,
