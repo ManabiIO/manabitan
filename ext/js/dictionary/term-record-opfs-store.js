@@ -3712,19 +3712,22 @@ export class TermRecordOpfsStore {
                 // read avoids separate OPFS range requests for each chunk.
                 // Keep larger files on the streaming range path to bound the
                 // extra temporary memory to 32 MiB.
-                const [wholeIndexRead, recordHeader] = await Promise.all([
-                    indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES ?
-                        this._readFileRange(indexFile, 0, indexFile.size) :
-                        Promise.resolve(null),
+                const shouldReadWholeIndex = indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES;
+                const [indexRead, recordHeader] = await Promise.all([
+                    this._readFileRange(
+                        indexFile,
+                        0,
+                        shouldReadWholeIndex ? indexFile.size : LOOKUP_INDEX_FILE_HEADER_BYTES,
+                    ),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
-                if (wholeIndexRead !== null && wholeIndexRead.byteLength !== indexFile.size) {
+                if (shouldReadWholeIndex && indexRead.byteLength !== indexFile.size) {
                     throw new PersistentLookupIndexError('transient', `Short lookup index read for ${state.fileName}`);
                 }
-                const wholeIndexBytes = wholeIndexRead;
-                const indexHeader = wholeIndexBytes === null ?
-                    await this._readFileRange(indexFile, 0, LOOKUP_INDEX_FILE_HEADER_BYTES) :
-                    wholeIndexBytes.subarray(0, LOOKUP_INDEX_FILE_HEADER_BYTES);
+                const wholeIndexBytes = shouldReadWholeIndex ? indexRead : null;
+                const indexHeader = shouldReadWholeIndex ?
+                    indexRead.subarray(0, LOOKUP_INDEX_FILE_HEADER_BYTES) :
+                    indexRead;
                 if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
                 const headerView = new DataView(indexHeader.buffer, indexHeader.byteOffset, indexHeader.byteLength);
                 if (this._textDecoder.decode(indexHeader.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {

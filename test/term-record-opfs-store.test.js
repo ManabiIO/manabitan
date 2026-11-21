@@ -4111,6 +4111,38 @@ void 0,
                 }),
             ],
         ]));
+
+        const overCapRanges = /** @type {[number, number][]} */ ([]);
+        const overCapFileSize = indexBytes.byteLength + (32 * 1024 * 1024) + 1;
+        const overCapDirectory = createFakeDirectoryHandle(fileBytesByName, {
+            fileFactory(name, bytes) {
+                if (name !== indexFileName) { return null; }
+                return /** @type {File} */ (/** @type {unknown} */ ({
+                    size: overCapFileSize,
+                    arrayBuffer: vi.fn(async () => new Uint8Array(bytes)),
+                    /**
+                     * @param {number} start
+                     * @param {number} end
+                     * @returns {Blob}
+                     */
+                    slice(start, end) {
+                        overCapRanges.push([start, end]);
+                        return new Blob([bytes.subarray(start, end)]);
+                    },
+                }));
+            },
+        });
+        const overCapReader = new TermRecordOpfsStore();
+        Reflect.set(overCapReader, '_recordsDirectoryHandle', overCapDirectory);
+        await overCapReader._loadShardFiles(false);
+        const overCapLoaded = await overCapReader._loadPersistentDictionaryIndex(
+            dictionaryName,
+            Reflect.get(overCapReader, '_persistentLookupGeneration'),
+            overCapReader._getPersistentLookupGeneration(dictionaryName),
+        );
+        expect(overCapLoaded).toBe(false);
+        expect(overCapRanges[0]).toEqual([0, 40]);
+        expect(overCapRanges).not.toContainEqual([0, overCapFileSize]);
     });
 
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
