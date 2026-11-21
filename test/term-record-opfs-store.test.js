@@ -4120,6 +4120,11 @@ void 0,
                 return /** @type {File} */ (/** @type {unknown} */ ({
                     size: overCapFileSize,
                     arrayBuffer: vi.fn(async () => new Uint8Array(bytes)),
+                    /**
+                     * @param {number} start
+                     * @param {number} end
+                     * @returns {Blob}
+                     */
                     slice(start, end) {
                         overCapRanges.push([start, end]);
                         return new Blob([bytes.subarray(start, end)]);
