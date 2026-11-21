@@ -4141,8 +4141,12 @@ void 0,
             overCapReader._getPersistentLookupGeneration(dictionaryName),
         );
         expect(overCapLoaded).toBe(false);
-        expect(overCapRanges[0]).toEqual([0, 40]);
-        expect(overCapRanges).not.toContainEqual([0, overCapFileSize]);
+        expect(overCapRanges).toEqual([[0, 40], [40, 40 + 16 * 1024 * 1024]]);
+        expect(Reflect.get(overCapReader, '_persistentIndexFailureByDictionary').get(dictionaryName)).toMatchObject({
+            kind: 'transient',
+            message: expect.stringContaining('Short lookup index read'),
+        });
+        expect(overCapReader.findTermIds(dictionaryName, '二', 'expression')).toEqual([]);
     });
 
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {

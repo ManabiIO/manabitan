@@ -109,6 +109,7 @@ const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
+const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
 const EMPTY_BYTES = new Uint8Array(0);
 
 /**
@@ -3708,23 +3709,38 @@ export class TermRecordOpfsStore {
                 if (recordFile.size < (BINARY_HEADER_PREFIX_BYTES + 2) || indexFile.size < LOOKUP_INDEX_FILE_HEADER_BYTES) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index is truncated for ${state.fileName}`);
                 }
-                // A small sidecar is fully consumed below, so one bounded
-                // read avoids separate OPFS range requests for each chunk.
-                // Keep larger files on the streaming range path to bound the
-                // extra temporary memory to 32 MiB.
+                // Read small indexes in one pass. For larger files, check the
+                // descriptor before prefetching a bounded window of chunks.
                 const shouldReadWholeIndex = indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES;
+                const initialReadLength = shouldReadWholeIndex ? indexFile.size : LOOKUP_INDEX_FILE_HEADER_BYTES;
                 const [indexRead, recordHeader] = await Promise.all([
                     this._readFileRange(
                         indexFile,
                         0,
-                        shouldReadWholeIndex ? indexFile.size : LOOKUP_INDEX_FILE_HEADER_BYTES,
+                        initialReadLength,
                     ),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
-                if (shouldReadWholeIndex && indexRead.byteLength !== indexFile.size) {
+                if (indexRead.byteLength !== initialReadLength) {
                     throw new PersistentLookupIndexError('transient', `Short lookup index read for ${state.fileName}`);
                 }
-                const wholeIndexBytes = shouldReadWholeIndex ? indexRead : null;
+                // Retain a bounded window over large immutable index snapshots.
+                // Use the chunk start as the origin so its fields header and
+                // body share the same window even when a chunk crosses a boundary.
+                let window = indexRead;
+                let windowStart = 0;
+                const readIndexRange = async (/** @type {number} */ start, /** @type {number} */ end, /** @type {number} */ chunkStart) => {
+                    if (start < windowStart || end > windowStart + window.byteLength) {
+                        const readEnd = Math.min(indexFile.size, Math.max(chunkStart + LOOKUP_INDEX_READ_AHEAD_BYTES, end));
+                        const bytes = await this._readFileRange(indexFile, chunkStart, readEnd);
+                        if (bytes.byteLength !== readEnd - chunkStart) {
+                            throw new PersistentLookupIndexError('transient', `Short lookup index read for ${state.fileName}`);
+                        }
+                        window = bytes;
+                        windowStart = chunkStart;
+                    }
+                    return window.subarray(start - windowStart, end - windowStart);
+                };
                 const indexHeader = shouldReadWholeIndex ?
                     indexRead.subarray(0, LOOKUP_INDEX_FILE_HEADER_BYTES) :
                     indexRead;
@@ -3782,9 +3798,9 @@ export class TermRecordOpfsStore {
                     if (!Number.isSafeInteger(chunkHeaderEnd) || chunkHeaderEnd > indexFile.size) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk header is truncated for ${state.fileName}`);
                     }
-                    const chunkHeader = wholeIndexBytes === null ?
-                        await this._readFileRange(indexFile, chunkHeaderStart, chunkHeaderEnd) :
-                        wholeIndexBytes.subarray(chunkHeaderStart, chunkHeaderEnd);
+                    const chunkHeader = shouldReadWholeIndex ?
+                        indexRead.subarray(chunkHeaderStart, chunkHeaderEnd) :
+                        await readIndexRange(chunkHeaderStart, chunkHeaderEnd, chunkHeaderStart);
                     if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
                     const chunkView = new DataView(chunkHeader.buffer, chunkHeader.byteOffset, chunkHeader.byteLength);
                     const firstId = chunkView.getUint32(0, true);
@@ -3831,9 +3847,9 @@ export class TermRecordOpfsStore {
                         }
                         // Keep I/O outside the format-validation catch. A failed
                         // snapshot read is retryable, not evidence for repair.
-                        recordFieldsHeader = wholeIndexBytes === null ?
-                                await this._readFileRange(indexFile, recordFieldsStart, compactHeaderEnd) :
-                                wholeIndexBytes.subarray(recordFieldsStart, compactHeaderEnd);
+                        recordFieldsHeader = shouldReadWholeIndex ?
+                            indexRead.subarray(recordFieldsStart, compactHeaderEnd) :
+                            await readIndexRange(recordFieldsStart, compactHeaderEnd, chunkHeaderStart);
                     }
                     let recordFieldsLength;
                     try {
@@ -3845,9 +3861,9 @@ export class TermRecordOpfsStore {
                     if (!Number.isSafeInteger(chunkBodyEnd) || chunkBodyEnd > indexFile.size) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
-                    const chunkBody = wholeIndexBytes === null ?
-                        await this._readFileRange(indexFile, payloadStart, chunkBodyEnd) :
-                        wholeIndexBytes.subarray(payloadStart, chunkBodyEnd);
+                    const chunkBody = shouldReadWholeIndex ?
+                        indexRead.subarray(payloadStart, chunkBodyEnd) :
+                        await readIndexRange(payloadStart, chunkBodyEnd, chunkHeaderStart);
                     if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
                     const payload = chunkBody.subarray(0, payloadLength);
                     let sections;
