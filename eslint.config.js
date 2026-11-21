@@ -62,6 +62,8 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/term-key-hash.js',
     'types/ext/dictionary-import-journal.d.ts',
     'types/dev/dictionary-wasm.d.ts',
+    'types/dev/jmdict-native-config-study.d.ts',
+    'types/dev/jmdict-native-config-study-v2.d.ts',
     'ext/js/dictionary/sqlite-wasm.js',
     'ext/js/dictionary/raw-term-content.js',
     'dev/bin/run-playwright.js',

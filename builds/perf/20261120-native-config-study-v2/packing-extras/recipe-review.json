@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-20T12:16:19.697102+00:00",
+  "recipeSha256": "9075c843b0e9e9a94caa4181f65fe9a7078f0ef66420f1c60a0aa1b02e3ff2b2",
+  "reviewers": [
+    "/root/validation_candidate",
+    "/root"
+  ],
+  "independentReadOnlyReview": {
+    "passed": true,
+    "checked": [
+      "Current Chromium download/audit receipt schema",
+      "Prepared Firefox audit and extraction receipt keys",
+      "Exact original ZIP member to archive-index coverage mapping",
+      "Credential-pattern review scope",
+      "Extraction/original-ZIP/cache exclusions",
+      "Before/after file-set and byte-hash boundaries",
+      "New packing outputs kept outside selected inputs"
+    ],
+    "executed": false,
+    "sourceEdits": false,
+    "note": "Both Chromium original ZIPs contain 732 payloads; Firefox payload counts will be derived from completed artifacts and receipts rather than assumed."
+  },
+  "parentReview": {
+    "passed": true,
+    "condition": "All round5-browser files, including Firefox extraction receipts and browser summary, must be frozen; root will explicitly authorize execution after the four-cell analyzer completes."
+  },
+  "postPackReviewLocation": "Write independent coverage review beside the final archive, outside browser-provenance and other selected input directories.",
+  "archiveCreated": false,
+  "measurementChanges": false
+}

@@ -1,0 +1,825 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-11-20T12:20:29.594534+00:00",
+  "completedAt": "2026-11-20T12:20:47.522489+00:00",
+  "measuredToolingCommit": "72b8ab5471fc68e369a54d884efbbea933699d7c",
+  "measuredToolingTree": "e50ac7c7f7cf892a0e8dc666f5176f97e8800455",
+  "manifestSha256": "66062489217d31a117ee7892c4f51190ccb51b837886f2c1cdaef857e6b2afa7",
+  "workflowRunId": 44729808376,
+  "recipeSha256": "9075c843b0e9e9a94caa4181f65fe9a7078f0ef66420f1c60a0aa1b02e3ff2b2",
+  "packerSha256": "a71f64e2bd74e5e69737878f619159dd7d6a3059059ab3180d41e4de94c453a6",
+  "packCommand": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/dev/perf/import-study-evidence.py",
+    "pack",
+    "--output",
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/native-evidence.tar.xz",
+    "--zip",
+    "chromium-forward=/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/original-14627490223.zip",
+    "--zip",
+    "chromium-reverse=/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/original-14626318108.zip",
+    "--zip",
+    "firefox-forward=/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/original-14627208758.zip",
+    "--zip",
+    "firefox-reverse=/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/original-14627972249.zip",
+    "--directory",
+    "browser-provenance=/workspace/scratch/f34c9c9fae89/round5-browser",
+    "--directory",
+    "native-component-validation=/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config",
+    "--directory",
+    "packaging-erratum-and-reviews=/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config-packaging-erratum",
+    "--directory",
+    "study-tooling-v2=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling",
+    "--directory",
+    "compression-audit=/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-audit",
+    "--directory",
+    "compression-source-snapshot=/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot",
+    "--directory",
+    "extras=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/packing-extras",
+    "--file",
+    "packing/pack-evidence.py=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/pack-evidence.py",
+    "--file",
+    "packing/import-study-evidence.py=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/dev/perf/import-study-evidence.py",
+    "--file",
+    "packing/packing-plan.md=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/packing-plan.md",
+    "--file",
+    "analysis/all-browser-analysis.json=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/all-browser-analysis.json",
+    "--file",
+    "analysis/analysis.log=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/analysis.log",
+    "--file",
+    "analysis/report-assembly-attempts.json=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/report-assembly-attempts.json",
+    "--file",
+    "local-toolchain/llvm21-packages.json=/workspace/scratch/f34c9c9fae89/toolchains/llvm21-packages.json",
+    "--file",
+    "local-toolchain/llvm21-Packages.txt=/workspace/scratch/f34c9c9fae89/toolchains/llvm21-Packages.txt",
+    "--file",
+    "local-toolchain/llvm21-env.sh=/workspace/scratch/f34c9c9fae89/toolchains/llvm21-env.sh",
+    "--file",
+    "local-toolchain/actionlint.json=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-tooling/actionlint.json",
+    "--file",
+    "setup/npm-ci.log=/workspace/scratch/f34c9c9fae89/npm-ci.log",
+    "--file",
+    "setup/build-libs.log=/workspace/scratch/f34c9c9fae89/build-libs.log",
+    "--file",
+    "prior-v1/failed-v1-evidence.tar.xz.json=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-evidence.tar.xz.json",
+    "--file",
+    "prior-v1/failed-v1-artifact-coverage.json=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-artifact-coverage.json",
+    "--file",
+    "prior-v1/failed-v1-packing-receipt.json=/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-packing-receipt.json",
+    "--exclude",
+    "browser-provenance/*/evidence/*",
+    "--exclude",
+    "browser-provenance/*/original-*.zip",
+    "--exclude",
+    "*/__pycache__/*",
+    "--exclude",
+    "*.pyc"
+  ],
+  "packExitCode": 0,
+  "verifyCommand": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/dev/perf/import-study-evidence.py",
+    "verify",
+    "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/native-evidence.tar.xz"
+  ],
+  "verifyExitCode": 0,
+  "inputIdentitiesBefore": {
+    "browser-provenance/acquire-firefox-artifact.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/acquire-firefox-artifact.py",
+      "bytes": 3312,
+      "sha256": "e44153acd3f489ec908cfe2ea9ec5c661b5790a4d70d25ae29cfe83ee7999b23"
+    },
+    "browser-provenance/audit-chromium.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/audit-chromium.py",
+      "bytes": 28417,
+      "sha256": "b79681da76a1760d63cdc9051c61778e9f67218e28ae1149abb1c9290adf5fc8"
+    },
+    "browser-provenance/audit-firefox.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/audit-firefox.py",
+      "bytes": 32714,
+      "sha256": "dc13e53492dad8f64af0f4814e4758e8147fdaefdb2ee027963b3e1bf4f996e2"
+    },
+    "browser-provenance/chromium-auditor-preparation.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-auditor-preparation.json",
+      "bytes": 1154,
+      "sha256": "d2479a17f6ea9ff830b7a2c83a595f8a02887b2f8d9b44d651db56cbe1d7d629"
+    },
+    "browser-provenance/chromium-forward/download.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/download.json",
+      "bytes": 1406,
+      "sha256": "efda5e18570117c168661afd09a6f24858fbcbe8eac07aa9c7e1fd9beb1902ab"
+    },
+    "browser-provenance/chromium-forward/independent-audit-001.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/independent-audit-001.json",
+      "bytes": 25467,
+      "sha256": "532b222736e8e0c9df1cd08bcb984e12f5de5c8ba6e2aecfdfe1c967d024cc3b"
+    },
+    "browser-provenance/chromium-forward/independent-audit-001.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/independent-audit-001.py",
+      "bytes": 28417,
+      "sha256": "b79681da76a1760d63cdc9051c61778e9f67218e28ae1149abb1c9290adf5fc8"
+    },
+    "browser-provenance/chromium-forward/job-136266496368.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/job-136266496368.log",
+      "bytes": 252133,
+      "sha256": "5cd2b5368c7711251ead71a53d59a5d40f237a8c716d62fcf1e5bcdaefe268a2"
+    },
+    "browser-provenance/chromium-forward/job.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/job.json",
+      "bytes": 4818,
+      "sha256": "039a56392d58980b883d540927c5528c7eb2aee824c94d05ae4bda0d00b0b428"
+    },
+    "browser-provenance/chromium-reverse/download.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/download.json",
+      "bytes": 1406,
+      "sha256": "6d013aa549df4a372e672a2730fd07d449319f736983dacc23ec75ac53868568"
+    },
+    "browser-provenance/chromium-reverse/independent-audit-001.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/independent-audit-001.json",
+      "bytes": 25449,
+      "sha256": "d76d7ff177f5e5a56772b162d7fd44d5c54d9c91ea09e1e53141874abde6db31"
+    },
+    "browser-provenance/chromium-reverse/independent-audit-001.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/independent-audit-001.py",
+      "bytes": 28417,
+      "sha256": "b79681da76a1760d63cdc9051c61778e9f67218e28ae1149abb1c9290adf5fc8"
+    },
+    "browser-provenance/chromium-reverse/job-136266496357.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/job-136266496357.log",
+      "bytes": 252145,
+      "sha256": "6d6a43a6ff6f788c9f75677ec193d29ff5d7646b53293dd281d4c1738d9c730c"
+    },
+    "browser-provenance/chromium-reverse/job.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/job.json",
+      "bytes": 4818,
+      "sha256": "72df513ae0ffa298a1b7c0947016948d2c44fc087107777093955d838e8459c1"
+    },
+    "browser-provenance/chromium-summary.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-summary.json",
+      "bytes": 46695,
+      "sha256": "1bb95c40f8fca19004570e9824ab14faf70222e042f55494813e57cb7090d529"
+    },
+    "browser-provenance/derive-chromium-probes.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/derive-chromium-probes.py",
+      "bytes": 2116,
+      "sha256": "76ed0dabab66789140505205bd99cd914633fd2fd19c916ffe35ab23ade0b64d"
+    },
+    "browser-provenance/expected-firefox-probes.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/expected-firefox-probes.json",
+      "bytes": 5076,
+      "sha256": "57df3396895debe960ea4357c491822a8dfc360213f621b8695694820b2e9ab2"
+    },
+    "browser-provenance/extract-firefox-artifact.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/extract-firefox-artifact.py",
+      "bytes": 5398,
+      "sha256": "36743cb3d1d8b4bce15311b12a9daabe162d1331e44ea0b4c0e53ea31bec6e22"
+    },
+    "browser-provenance/firefox-audit-binding.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-audit-binding.json",
+      "bytes": 730,
+      "sha256": "ee407226fe8dc3abbb2327c23c0554466101aa0f36f00e26431fb3856db1cdcc"
+    },
+    "browser-provenance/firefox-audits-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-audits-receipt.json",
+      "bytes": 9446,
+      "sha256": "6718559c481f67ccecbb166bf259c0ecd958c05e9739e0cbbd7f441b3e838c87"
+    },
+    "browser-provenance/firefox-forward/analysis-extraction-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/analysis-extraction-receipt.json",
+      "bytes": 141563,
+      "sha256": "6cd80eedfee387b86ebebdccfb4ff049becc54e4559a919b8a29d6446f0f16ea"
+    },
+    "browser-provenance/firefox-forward/audit-execution-001.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/audit-execution-001.json",
+      "bytes": 974,
+      "sha256": "c4ea95d402b69697374ed838fa9f0b0ec4d8e7cc3257ab6593ecc4e33351d837"
+    },
+    "browser-provenance/firefox-forward/download.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/download.json",
+      "bytes": 6734,
+      "sha256": "bbe275574e240763a5518e76f6abf28e8d73b5f562b2ac2d1c8a6e3a42517e8b"
+    },
+    "browser-provenance/firefox-forward/independent-audit-001.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/independent-audit-001.json",
+      "bytes": 32153,
+      "sha256": "e4ef67cdf382d0a481b0f4626fa696a12e52032ee696046de7775a5c8633690b"
+    },
+    "browser-provenance/firefox-forward/independent-audit-001.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/independent-audit-001.log",
+      "bytes": 4406,
+      "sha256": "a01e1a967fac69d9d430c200edd10a55a45128413879ec1b412ad8f518343111"
+    },
+    "browser-provenance/firefox-forward/independent-audit-001.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/independent-audit-001.py",
+      "bytes": 32714,
+      "sha256": "dc13e53492dad8f64af0f4814e4758e8147fdaefdb2ee027963b3e1bf4f996e2"
+    },
+    "browser-provenance/firefox-forward/job-136266496360.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/job-136266496360.log",
+      "bytes": 263030,
+      "sha256": "384d279ff569a82f058457b6bad9e70a76401ea251106eb98201e254e30986ea"
+    },
+    "browser-provenance/firefox-forward/job-log-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/job-log-receipt.json",
+      "bytes": 470,
+      "sha256": "17a5c8a916a7d9da2105bb551e65444e93170ddea81330b4b95070d86878dd14"
+    },
+    "browser-provenance/firefox-reverse/analysis-extraction-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/analysis-extraction-receipt.json",
+      "bytes": 141563,
+      "sha256": "be1716fd78e5b7f25f3a42d6d7a3339d71fbd755b21a1f77fd59525186125a04"
+    },
+    "browser-provenance/firefox-reverse/audit-execution-001.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/audit-execution-001.json",
+      "bytes": 974,
+      "sha256": "baff0165e4bab0f6b5c82126a8584324321f6794fbc66f0e3f87f9029f112a93"
+    },
+    "browser-provenance/firefox-reverse/download.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/download.json",
+      "bytes": 6734,
+      "sha256": "3a5b7d2802bf2ba6914b52a6ebf3b5f39e4905e251a6d3cb89464f488eabeb7a"
+    },
+    "browser-provenance/firefox-reverse/independent-audit-001.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/independent-audit-001.json",
+      "bytes": 32089,
+      "sha256": "e9e57b5cc3e849755240cdbf46be8615e668568871cf6048e5f532bca4a37d7b"
+    },
+    "browser-provenance/firefox-reverse/independent-audit-001.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/independent-audit-001.log",
+      "bytes": 4411,
+      "sha256": "c0652f80f77cba07b3810e1fb0ff2fca1df74b0029bb7485fe53c13d1e857602"
+    },
+    "browser-provenance/firefox-reverse/independent-audit-001.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/independent-audit-001.py",
+      "bytes": 32714,
+      "sha256": "dc13e53492dad8f64af0f4814e4758e8147fdaefdb2ee027963b3e1bf4f996e2"
+    },
+    "browser-provenance/firefox-reverse/job-136266496436.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/job-136266496436.log",
+      "bytes": 263286,
+      "sha256": "5ae0793258f175ca3ffb5be5b91433248c71b557bf14225730a68f07215580ae"
+    },
+    "browser-provenance/firefox-reverse/job-log-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/job-log-receipt.json",
+      "bytes": 470,
+      "sha256": "3543486086b4be37f6d40226ce87677a003717575df5cc1eba28f5e9f86d7ba9"
+    },
+    "browser-provenance/firefox-runtime-reuse-job-136266366116.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-runtime-reuse-job-136266366116.log",
+      "bytes": 22658,
+      "sha256": "fa6df6665e450e9c0a9dc5148a0173ea37065e365332ba30dfa0c70a95b66f76"
+    },
+    "browser-provenance/firefox-runtime-reuse-metadata.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-runtime-reuse-metadata.json",
+      "bytes": 5408,
+      "sha256": "3ee8f22f37c46b55e15aa5930f8e9d5255361e4561abf9b5415f2bdb2410acb6"
+    },
+    "browser-provenance/firefox-runtime-reuse-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-runtime-reuse-receipt.json",
+      "bytes": 4399,
+      "sha256": "2e8ac72e351194eb24e9476f07cdb538ff1160d9efa726482ae9125b7ee144de"
+    },
+    "browser-provenance/firefox-runtime-verified.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-runtime-verified.json",
+      "bytes": 1513,
+      "sha256": "42ada420f9c7ab4e395a7de94c8a9ec5d435b0e359a5efb4af7fffbac7f2b826"
+    },
+    "browser-provenance/source-probes.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/source-probes.json",
+      "bytes": 1749,
+      "sha256": "8dc916fa7746c5aa188b67ed00328f69a1c780b91d50a01dd752a0f3504f9edb"
+    },
+    "browser-provenance/summarize-chromium.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/summarize-chromium.py",
+      "bytes": 6910,
+      "sha256": "41f844ee98e1960cc55034768cd54e79a04c6a32363de87a2b3274017f1f7dcb"
+    },
+    "browser-provenance/summarize-firefox-audits.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/summarize-firefox-audits.py",
+      "bytes": 6241,
+      "sha256": "83a8ba503226df29f6adcbbe93e186b04eef2744d19307f20f3d9559bb5c5482"
+    },
+    "browser-provenance/tooling-identity.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/tooling-identity.json",
+      "bytes": 565,
+      "sha256": "4f4aeb12a373e718abedc0a78a3255fbd1964d5088960b8384894032277f0496"
+    },
+    "native-component-validation/baseline-canonical.s": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/baseline-canonical.s",
+      "bytes": 18812,
+      "sha256": "e3babb61d579bf22182d8e412c45641b154ff6378623a1726685bd5c50fdb447"
+    },
+    "native-component-validation/candidate-canonical.s": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/candidate-canonical.s",
+      "bytes": 20269,
+      "sha256": "5bb15a618b687f2ab1739aba57193562d333172c64671a5879e36d37cb0479a6"
+    },
+    "native-component-validation/candidate-freeze.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/candidate-freeze.json",
+      "bytes": 1472,
+      "sha256": "5e1676d5208c435221a87dd5561ec41cbd954e2285fae58c365a7b76cc8247d2"
+    },
+    "native-component-validation/candidate.patch": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/candidate.patch",
+      "bytes": 16771,
+      "sha256": "983b2dd337362734e05ec9c82bfd9d2d30a805fe56cceffcba1efdacf6165140"
+    },
+    "native-component-validation/cohort-preflight.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/cohort-preflight.json",
+      "bytes": 32285,
+      "sha256": "7d04b4cf010fb566339f75aff0ecc7b85206a2e1fe28689442eb26812820261e"
+    },
+    "native-component-validation/cohort-preflight.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/cohort-preflight.log",
+      "bytes": 146,
+      "sha256": "5caee9b2114db9fe0a66662258a5c0e0b257eb219beee97cbc1ec01d85c7aa6e"
+    },
+    "native-component-validation/compiler-version.txt": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/compiler-version.txt",
+      "bytes": 217,
+      "sha256": "92bcc39c8a85cd78b44065f1bb9b2cbdc54b4b86548264afc00f9dd2949e9db6"
+    },
+    "native-component-validation/component-cohort.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/component-cohort.log",
+      "bytes": 7281,
+      "sha256": "1b27036597d2e98ffc0d53533a347b88d035126a25028b281fd7db18cb5db8e0"
+    },
+    "native-component-validation/component-results.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/component-results.json",
+      "bytes": 960544,
+      "sha256": "0e19a6c7aaf33cc5aea9a25323aeb1e6539d0114d5c404cb673b798b72515e55"
+    },
+    "native-component-validation/component-summary.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/component-summary.json",
+      "bytes": 33253,
+      "sha256": "d8f76860c304e331d16381f474bd379f8c849354f692c82a44b81db05a7caa7f"
+    },
+    "native-component-validation/component-summary.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/component-summary.log",
+      "bytes": 4493,
+      "sha256": "1001384f48954e75810dfa4b2bbbcc3821604ee36774db1cc01990665587d6b7"
+    },
+    "native-component-validation/copy-wasm.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/copy-wasm.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-component-validation/dry-builds.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/dry-builds.log",
+      "bytes": 210,
+      "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a"
+    },
+    "native-component-validation/focused-tests.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/focused-tests.log",
+      "bytes": 398,
+      "sha256": "e3684a3c1bb76405ed4e286e60c9a0cf9d96a7ccef83db2b64c00edeb8eee9b6"
+    },
+    "native-component-validation/frozen-cohort.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/frozen-cohort.json",
+      "bytes": 14453,
+      "sha256": "58259cda252a1434b1f924d5d24956a4f6785ba362436db6f9887a35afd11c21"
+    },
+    "native-component-validation/full-unit.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/full-unit.log",
+      "bytes": 13785,
+      "sha256": "ec60b8bdecef274b882ee5689f8b34454b4ec8d07d02734daa34bf835114d337"
+    },
+    "native-component-validation/header-all-baseline-tests.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/header-all-baseline-tests.log",
+      "bytes": 393,
+      "sha256": "fdc1e495ea8cb86fd82deb2b23bdcdc7384ae70479e2abfa81dcfc20de67757b"
+    },
+    "native-component-validation/header-baseline-tests.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/header-baseline-tests.log",
+      "bytes": 391,
+      "sha256": "5417dfb51d4b9c8c8786b0b15bc7c87dc2fe684fb2e840fff5822d4ad8ad00e1"
+    },
+    "native-component-validation/instruction-delta.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/instruction-delta.json",
+      "bytes": 1244,
+      "sha256": "a23b33f923a6822d3a0d466e8c37d15c6893db6847cbfd631765c99220b73fc9"
+    },
+    "native-component-validation/lint-first.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/lint-first.log",
+      "bytes": 2618,
+      "sha256": "79ec81173a835dd0793058037a0f6cbd920de56d18d10507fe68bbf6b5a56768"
+    },
+    "native-component-validation/lint.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/lint.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    "native-component-validation/native-candidate-notes.md": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/native-candidate-notes.md",
+      "bytes": 7203,
+      "sha256": "fd8e4e26d671e1081da4b418a41565f9ac10aeeae7cf91a863d973bd54ae790e"
+    },
+    "native-component-validation/native-config-screen.mjs": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/native-config-screen.mjs",
+      "bytes": 40452,
+      "sha256": "8f698f6dd543beb880baef79ccf1209d9bb9ffe042057d186835224eda2fd4fb"
+    },
+    "native-component-validation/native-evidence-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/native-evidence-receipt.json",
+      "bytes": 5700,
+      "sha256": "4078175886a361a1cc09043d26e8372ea910b302959c18bcb7651e95aa803852"
+    },
+    "native-component-validation/pinned-wasm-check.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/pinned-wasm-check.log",
+      "bytes": 410,
+      "sha256": "07c295b4235b2ac653d7544eddd52d4d10dc9ff2c9cbbdd7074a2be97a8d452d"
+    },
+    "native-component-validation/pinned-wasm-write.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/pinned-wasm-write.log",
+      "bytes": 650,
+      "sha256": "8580c48caf56956e4dedf9609c80a6f183046fa10ae564a09cc3cd9d9bc10c42"
+    },
+    "native-component-validation/required-validation.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/required-validation.json",
+      "bytes": 7540,
+      "sha256": "44ea5a4e0d787ae46a944d8a46aad71fd451e8b1d71efe96ec1754173c227bff"
+    },
+    "native-component-validation/setup-attempts.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/setup-attempts.json",
+      "bytes": 531,
+      "sha256": "70a5d0ad4997b2f6825f80a28892a83719f8fa2235aefb2fafcbee3445d3b7a7"
+    },
+    "native-component-validation/summarize-component.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/summarize-component.py",
+      "bytes": 5180,
+      "sha256": "a6b63b60b0523634fb6abaf4120cee0fdd1883843c32f6803daa239a64966725"
+    },
+    "native-component-validation/types-main.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/types-main.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-component-validation/types-test.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config/types-test.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "packaging-erratum-and-reviews/packaging-erratum.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config-packaging-erratum/packaging-erratum.json",
+      "bytes": 6851,
+      "sha256": "b83dfa7e2fad86f8b9413f8a2a20426025998f720e0f11b3dcf871628c931eff"
+    },
+    "packaging-erratum-and-reviews/packaging-erratum.md": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config-packaging-erratum/packaging-erratum.md",
+      "bytes": 2255,
+      "sha256": "710d16fe352c0c9d72dfffbf2306bc704fca77ad4fc51a94fb37c85461aedfe7"
+    },
+    "packaging-erratum-and-reviews/v2-pre-freeze-review.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config-packaging-erratum/v2-pre-freeze-review.json",
+      "bytes": 4360,
+      "sha256": "6e3bbad4397d7ea2a430d69040bb82501725243059c872d1a5ad5899ac0fa7ae"
+    },
+    "packaging-erratum-and-reviews/v2-sealed-review.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-canonical-config-packaging-erratum/v2-sealed-review.json",
+      "bytes": 1454,
+      "sha256": "2761f2a37dcc3170414b188bd61c14f665adf0a6422536e348c90986a7ede1dc"
+    },
+    "study-tooling-v2/final-checks/actionlint.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study-tooling-v2/final-checks/contracts.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/contracts.log",
+      "bytes": 118,
+      "sha256": "f10bbde8274c0ab79dcdc45c7ac61ea4c2c23ab81182f149828a2ade59eb9538"
+    },
+    "study-tooling-v2/final-checks/dev-types.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/dev-types.log",
+      "bytes": 150,
+      "sha256": "9aac3da9a7039a99c345545c32f286aa65c358d571bfce7e00d94625d095c829"
+    },
+    "study-tooling-v2/final-checks/diff-whitespace.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/diff-whitespace.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "study-tooling-v2/final-checks/eslint.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/eslint.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    "study-tooling-v2/final-checks/json-format.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/json-format.log",
+      "bytes": 909,
+      "sha256": "b435567652d7f590931e7ee9c040b31404ed3b418c32be6553114f6003ca8891"
+    },
+    "study-tooling-v2/final-checks/json-types.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/json-types.log",
+      "bytes": 506,
+      "sha256": "f9cccb508be63122ea4a4b98466ecb3bed5243e1aa1627853c74af3b4caf139f"
+    },
+    "study-tooling-v2/final-checks/markdown-format.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/markdown-format.log",
+      "bytes": 216,
+      "sha256": "1d3068988125522af942828d2410a146b462da9ed087b63b214558689eec5930"
+    },
+    "study-tooling-v2/final-checks/package-map-preflight.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/package-map-preflight.log",
+      "bytes": 817,
+      "sha256": "2d0e05ed1c4da92ab1e18a80f9ab9c415037d8a0e9e2ad4abd4461e780140a52"
+    },
+    "study-tooling-v2/final-checks/receipts.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/receipts.json",
+      "bytes": 3929,
+      "sha256": "9cf97d0d80ee11fe32407e0cb9aba5e659c0e333d2b70ca00a2816c818dcad77"
+    },
+    "study-tooling-v2/final-checks/test-types.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/test-types.log",
+      "bytes": 150,
+      "sha256": "9aac3da9a7039a99c345545c32f286aa65c358d571bfce7e00d94625d095c829"
+    },
+    "study-tooling-v2/final-checks/v2-contracts.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/v2-contracts.json",
+      "bytes": 416,
+      "sha256": "ce5daa7052ca97e0aa030c084b6aa7883d4daea9acd6018b3fd03fc55cb0f24e"
+    },
+    "study-tooling-v2/final-checks/v2-contracts.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/v2-contracts.log",
+      "bytes": 122,
+      "sha256": "f12a26a6a2a15bb5d152b42233fb2c12ed02f192fe9a869516b883e61a7b9159"
+    },
+    "study-tooling-v2/final-checks/validate-plan.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/final-checks/validate-plan.log",
+      "bytes": 62,
+      "sha256": "67ff539df6aa5e115576e51381eafb3cae4826fc51ae6eb6184e3a2f64e2e041"
+    },
+    "study-tooling-v2/freeze.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/freeze.json",
+      "bytes": 3819,
+      "sha256": "ec58935f2825fb0148e200ed3f8ced3c709262a86788aed54de2046763d5b278"
+    },
+    "study-tooling-v2/measured-source-ci.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/measured-source-ci.json",
+      "bytes": 7519,
+      "sha256": "0cf02e240a07e86a6ac327509388f54f81714527d1aaee06ef854e5ca8f268e2"
+    },
+    "study-tooling-v2/package-map-preflight.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/package-map-preflight.json",
+      "bytes": 1704,
+      "sha256": "98d869e96da2d738ddd99931c51bd5395c1e0c9f0d8a28f4ff39b06ba1e3aee9"
+    },
+    "study-tooling-v2/pending-manifest.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/pending-manifest.json",
+      "bytes": 13590,
+      "sha256": "8ee003fdbc9f35ea55b291965eaf94ad23cb599773f13a6d9c3b3e4dd821b057"
+    },
+    "study-tooling-v2/preserved-v1-files.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/preserved-v1-files.json",
+      "bytes": 1594,
+      "sha256": "61166ea579a07b5e2e5efa0f9397a7eef338719257968ac023c3dc0197b6680c"
+    },
+    "study-tooling-v2/workflow-path-preflight.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-v2-tooling/workflow-path-preflight.json",
+      "bytes": 1959,
+      "sha256": "ba5ab0a7938ed074088fc802a875351b6dfceac8a216387f76eebea493a1b711"
+    },
+    "compression-audit/compression-audit-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-audit/compression-audit-receipt.json",
+      "bytes": 25248,
+      "sha256": "4cc154c39c18683d32dfb66e25d1e48457ab7eca60a7326b688cafd2b7b04c5b"
+    },
+    "compression-audit/compression-audit.md": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-audit/compression-audit.md",
+      "bytes": 13682,
+      "sha256": "9adc55eb302feca744305679f477b3eca0a1d610ca2155c5d159527eb2621851"
+    },
+    "compression-audit/record-compression-audit.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-audit/record-compression-audit.py",
+      "bytes": 8044,
+      "sha256": "7364b654ac31914055e3c5a841d7102c5bf3c4b4f298dae0503b843c13ea6d6e"
+    },
+    "compression-source-snapshot/README.md": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/README.md",
+      "bytes": 2549,
+      "sha256": "959e341b655c9c34f2d9fd4ee583cc82a2bd25741ce11e59813b616b178869d0"
+    },
+    "compression-source-snapshot/inputs/original-compression-audit-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/inputs/original-compression-audit-receipt.json",
+      "bytes": 25248,
+      "sha256": "4cc154c39c18683d32dfb66e25d1e48457ab7eca60a7326b688cafd2b7b04c5b"
+    },
+    "compression-source-snapshot/inputs/real-fixture-manifest.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/inputs/real-fixture-manifest.json",
+      "bytes": 232446,
+      "sha256": "4629920d51385465dfa1d5afd3230c88d0bc3a7d3ccf23d5e0379d1b1425ab39"
+    },
+    "compression-source-snapshot/offline-threshold-reproduction.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/offline-threshold-reproduction.py",
+      "bytes": 8571,
+      "sha256": "b682cd2e7fe8482cf77df340f39faef28d1686333609ee79747b6ca3ad4c6fe0"
+    },
+    "compression-source-snapshot/posthoc-reproduction.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/posthoc-reproduction.json",
+      "bytes": 18370,
+      "sha256": "216fef44694c930a14c96db5be45bb2fcf4f487a25b0069fbfb4ecaeb9bfb3f9"
+    },
+    "compression-source-snapshot/source-snapshot-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/source-snapshot-receipt.json",
+      "bytes": 8091,
+      "sha256": "fc595bcbd80e3e44aaffaacde04a085efdf364b7e4702d29ffd676b128af51f5"
+    },
+    "compression-source-snapshot/upstream/COPYING": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/COPYING",
+      "bytes": 18091,
+      "sha256": "f9c375a1be4a41f7b70301dd83c91cb89e41567478859b77eef375a52d782505"
+    },
+    "compression-source-snapshot/upstream/LICENSE": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/LICENSE",
+      "bytes": 1549,
+      "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8"
+    },
+    "compression-source-snapshot/upstream/build/single_file_libs/create_single_file_library.sh": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/build/single_file_libs/create_single_file_library.sh",
+      "bytes": 541,
+      "sha256": "efd4967d751a9429b23b7b4b74e9cfc7bb6aa63d041c1645a746aad30a7ba960"
+    },
+    "compression-source-snapshot/upstream/lib/compress/clevels.h": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/lib/compress/clevels.h",
+      "bytes": 6860,
+      "sha256": "d764daa89b7a636d26fe96ff3536c5075e9867fb5dddbf8c9d57023a8ff4a155"
+    },
+    "compression-source-snapshot/upstream/lib/compress/zstd_compress.c": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/lib/compress/zstd_compress.c",
+      "bytes": 368435,
+      "sha256": "645d6c6a7b94fa6cc7d0baea51dfa355dc0e436bc074ff2ddf08cf3e53d35fe1"
+    },
+    "compression-source-snapshot/upstream/lib/compress/zstd_compress_internal.h": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/lib/compress/zstd_compress_internal.h",
+      "bytes": 68498,
+      "sha256": "e99de778a2a733bde856172057fe380256c379f082bd3513cac600b005ac2b98"
+    },
+    "compression-source-snapshot/upstream/lib/compress/zstd_fast.c": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/lib/compress/zstd_fast.c",
+      "bytes": 38104,
+      "sha256": "8037320f321836652e73ab6cbf7b8f1f4c97cef38835ac6b4aaf0af716aa398d"
+    },
+    "compression-source-snapshot/upstream/lib/zstd.h": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-canonical-config/builds/perf/20261120-compression-source-snapshot/upstream/lib/zstd.h",
+      "bytes": 182200,
+      "sha256": "17d279cd45a6881e87eb1801e08d2d29be200ff47811a1ff3168947cad2029bd"
+    },
+    "extras/credential-scan.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/packing-extras/credential-scan.json",
+      "bytes": 587,
+      "sha256": "32e9f2fb2db59e161c133235a2322660406e62ae450a33bf42de9aa53f2ee0c2"
+    },
+    "extras/recipe-review.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/packing-extras/recipe-review.json",
+      "bytes": 1373,
+      "sha256": "2dab4d0fb8e0c2ffabd950344c1b8f8fdaae661ead0627a86013c058da5309f1"
+    },
+    "extras/scope-and-exclusions.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/packing-extras/scope-and-exclusions.json",
+      "bytes": 3570,
+      "sha256": "3d20dedb03a98ec60e7c5f1a877bab5ce38fcb6d8732135fba3f78c84741a1a8"
+    },
+    "packing/pack-evidence.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/pack-evidence.py",
+      "bytes": 23849,
+      "sha256": "9075c843b0e9e9a94caa4181f65fe9a7078f0ef66420f1c60a0aa1b02e3ff2b2"
+    },
+    "packing/import-study-evidence.py": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/dev/perf/import-study-evidence.py",
+      "bytes": 7125,
+      "sha256": "a71f64e2bd74e5e69737878f619159dd7d6a3059059ab3180d41e4de94c453a6"
+    },
+    "packing/packing-plan.md": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/packing-plan.md",
+      "bytes": 4753,
+      "sha256": "8b441fba13b3f3b8a0db518c69f17ccfcc14116feeb3d19a7972fc58dd453b5b"
+    },
+    "analysis/all-browser-analysis.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/all-browser-analysis.json",
+      "bytes": 31341,
+      "sha256": "2701cba55403dcb16564680dabe737a6cc4930406514a83077e01258dd6fe219"
+    },
+    "analysis/analysis.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/analysis.log",
+      "bytes": 1580,
+      "sha256": "20ef8ccd1e825cb5b575d27c7a25ff188f600766f8d025c2c14ab16fd770c235"
+    },
+    "analysis/report-assembly-attempts.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/report-assembly-attempts.json",
+      "bytes": 2185,
+      "sha256": "ce5859a55dffa8c69a9c58c13528c2ddc360a6a8f607f090ef9a157421fd6683"
+    },
+    "local-toolchain/llvm21-packages.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21-packages.json",
+      "bytes": 4071,
+      "sha256": "d85b5a3b24542cfce77acd8c4383d95479d08e99ba51b6010f9e4491728aeef7"
+    },
+    "local-toolchain/llvm21-Packages.txt": {
+      "path": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21-Packages.txt",
+      "bytes": 99401,
+      "sha256": "2792c5379ee9cd5f590f6d40c1044cbb85e0e1ca551dfb2b973dfabeb2f8abbd"
+    },
+    "local-toolchain/llvm21-env.sh": {
+      "path": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21-env.sh",
+      "bytes": 497,
+      "sha256": "37e51a638e458e39670d264ddad044858118ad4de2a4d517b4cb9d8968cb0ce7"
+    },
+    "local-toolchain/actionlint.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-study-tooling/actionlint.json",
+      "bytes": 266,
+      "sha256": "167dc9018e4aeeab7d58cfafd30a29d5766f69739d2dd9aaedacdedc4467734f"
+    },
+    "setup/npm-ci.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/npm-ci.log",
+      "bytes": 963,
+      "sha256": "da87561d72f7dbb2cff5aef2459ebe0495178365697ea2d983ccb5650965e392"
+    },
+    "setup/build-libs.log": {
+      "path": "/workspace/scratch/f34c9c9fae89/build-libs.log",
+      "bytes": 210,
+      "sha256": "f3135a8c6b79c3aeb7392b88e5ff3d381c4197173402a3db176cb5bbec1e650d"
+    },
+    "prior-v1/failed-v1-evidence.tar.xz.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-evidence.tar.xz.json",
+      "bytes": 1551,
+      "sha256": "de5f2c5bba5307aff2989e2a7118fd5dfeb54152ad3dce42df53758350a78bfb"
+    },
+    "prior-v1/failed-v1-artifact-coverage.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-artifact-coverage.json",
+      "bytes": 1652,
+      "sha256": "6203927467212d2cb5af839b42eeeec83509413b2b7978db9e29089fa4ebdf16"
+    },
+    "prior-v1/failed-v1-packing-receipt.json": {
+      "path": "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study/failed-v1-packing-receipt.json",
+      "bytes": 12141,
+      "sha256": "8a4b703c4ee8d7beb48021923ad985d100790d5b4ca1a1d32a63c01593697ac8"
+    },
+    "original-zip/chromium-forward": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/original-14627490223.zip",
+      "bytes": 3989429,
+      "sha256": "f718a067d6dfc4c823b9c25c76659b4e34bcf59853fe0b6fc76a7af32500b3b0"
+    },
+    "original-zip/chromium-reverse": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/original-14626318108.zip",
+      "bytes": 3979720,
+      "sha256": "6b931369e3e10896bc0b33e4cfe76cba260a49ef1e32643567829180e583c6da"
+    },
+    "original-zip/firefox-forward": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/original-14627208758.zip",
+      "bytes": 2402097,
+      "sha256": "08527d3626a5adabb723add442c7c1cfb4d0dd57a959ed2bdc94b048aceaf868"
+    },
+    "original-zip/firefox-reverse": {
+      "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/original-14627972249.zip",
+      "bytes": 2398251,
+      "sha256": "f106b58ec22a995fb712fe91d5fea63a0443bcf48e068480c688216d788aa604"
+    }
+  },
+  "allInputIdentitiesUnchangedAfter": true,
+  "archiveReceipt": {
+    "schemaVersion": 1,
+    "archive": "native-evidence.tar.xz",
+    "archiveBytes": 3117032,
+    "archiveSha256": "1f9c3822d610c96c83b9d1e3136e6e859db1f491a89efeb3c368bef7cbeabafe",
+    "indexMember": "evidence-index.json",
+    "payloadFiles": 2858,
+    "payloadBytes": 96599492,
+    "sourceZips": [
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/original-14627490223.zip",
+        "prefix": "chromium-forward",
+        "bytes": 3989429,
+        "sha256": "f718a067d6dfc4c823b9c25c76659b4e34bcf59853fe0b6fc76a7af32500b3b0"
+      },
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/original-14626318108.zip",
+        "prefix": "chromium-reverse",
+        "bytes": 3979720,
+        "sha256": "6b931369e3e10896bc0b33e4cfe76cba260a49ef1e32643567829180e583c6da"
+      },
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-forward/original-14627208758.zip",
+        "prefix": "firefox-forward",
+        "bytes": 2402097,
+        "sha256": "08527d3626a5adabb723add442c7c1cfb4d0dd57a959ed2bdc94b048aceaf868"
+      },
+      {
+        "kind": "zip",
+        "path": "/workspace/scratch/f34c9c9fae89/round5-browser/firefox-reverse/original-14627972249.zip",
+        "prefix": "firefox-reverse",
+        "bytes": 2398251,
+        "sha256": "f106b58ec22a995fb712fe91d5fea63a0443bcf48e068480c688216d788aa604"
+      }
+    ],
+    "verification": "Use this script's verify command; it reads every payload and rejects missing, extra, duplicate or changed files."
+  },
+  "coverageSha256": "89ed6eb7414ca11b0247fb34ecb44e0c40f9a9de99ed8c45f93d396a5f7752de",
+  "credentialScanSha256": "32e9f2fb2db59e161c133235a2322660406e62ae450a33bf42de9aa53f2ee0c2",
+  "scopeAndExclusionsSha256": "3d20dedb03a98ec60e7c5f1a877bab5ce38fcb6d8732135fba3f78c84741a1a8",
+  "analysisSha256": "2701cba55403dcb16564680dabe737a6cc4930406514a83077e01258dd6fe219",
+  "reportAssemblyAttemptsSha256": "ce5859a55dffa8c69a9c58c13528c2ddc360a6a8f607f090ef9a157421fd6683",
+  "failedV1ArchiveUnmodified": true
+}

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "archive": "native-evidence.tar.xz",
+  "archiveSha256": "1f9c3822d610c96c83b9d1e3136e6e859db1f491a89efeb3c368bef7cbeabafe",
+  "allPackedPayloadHashesVerified": true,
+  "originalZipPayloads": 2724,
+  "matchedOriginalZipPayloads": 2724,
+  "cells": [
+    {
+      "cell": "chromium-forward",
+      "artifactId": 14627490223,
+      "archiveSha256": "f718a067d6dfc4c823b9c25c76659b4e34bcf59853fe0b6fc76a7af32500b3b0",
+      "archiveBytes": 3989429,
+      "originalFilePayloads": 732,
+      "downloadReceiptSha256": "efda5e18570117c168661afd09a6f24858fbcbe8eac07aa9c7e1fd9beb1902ab",
+      "auditReceiptSha256": "532b222736e8e0c9df1cd08bcb984e12f5de5c8ba6e2aecfdfe1c967d024cc3b",
+      "cohortSha256": "622b5b166e88128125e1c62763a0a697c43ac6ac526368fe68a0f044e5be29d4",
+      "matchingPackedPayloads": 732,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    {
+      "cell": "chromium-reverse",
+      "artifactId": 14626318108,
+      "archiveSha256": "6b931369e3e10896bc0b33e4cfe76cba260a49ef1e32643567829180e583c6da",
+      "archiveBytes": 3979720,
+      "originalFilePayloads": 732,
+      "downloadReceiptSha256": "6d013aa549df4a372e672a2730fd07d449319f736983dacc23ec75ac53868568",
+      "auditReceiptSha256": "d76d7ff177f5e5a56772b162d7fd44d5c54d9c91ea09e1e53141874abde6db31",
+      "cohortSha256": "74693927e99694ce91535aa36113aeb16f7c6ddff34ad78ec63729478eeee925",
+      "matchingPackedPayloads": 732,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    {
+      "cell": "firefox-forward",
+      "artifactId": 14627208758,
+      "archiveSha256": "08527d3626a5adabb723add442c7c1cfb4d0dd57a959ed2bdc94b048aceaf868",
+      "archiveBytes": 2402097,
+      "originalFilePayloads": 630,
+      "downloadReceiptSha256": "bbe275574e240763a5518e76f6abf28e8d73b5f562b2ac2d1c8a6e3a42517e8b",
+      "auditReceiptSha256": "e4ef67cdf382d0a481b0f4626fa696a12e52032ee696046de7775a5c8633690b",
+      "cohortSha256": "d4271b3712920bc2e8dfe12ec856afe4c1206d3455c0d091064b856447d5fb1b",
+      "matchingPackedPayloads": 630,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    },
+    {
+      "cell": "firefox-reverse",
+      "artifactId": 14627972249,
+      "archiveSha256": "f106b58ec22a995fb712fe91d5fea63a0443bcf48e068480c688216d788aa604",
+      "archiveBytes": 2398251,
+      "originalFilePayloads": 630,
+      "downloadReceiptSha256": "3a5b7d2802bf2ba6914b52a6ebf3b5f39e4905e251a6d3cb89464f488eabeb7a",
+      "auditReceiptSha256": "e9e57b5cc3e849755240cdbf46be8615e668568871cf6048e5f532bca4a37d7b",
+      "cohortSha256": "a8586effd65fb56db3daac4a52d76c4ba4fcafb1673c02a3b8d292876dcba319",
+      "matchingPackedPayloads": 630,
+      "missing": [],
+      "extra": [],
+      "changed": []
+    }
+  ],
+  "limitations": "Every original regular-file payload is preserved. Original ZIP container metadata is represented by exact SHA256 and byte count; it is not reconstructed. Failed-v1 evidence is preserved in its separate archive."
+}

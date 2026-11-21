@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-11-20T12:21:18.806155+00:00",
+  "scriptSha256": "76269227d380f0099d7825e04ed5f4d38d458c1e1bb739e9284c9779c48cf93c",
+  "scope": "Read-only independent archive review. Compare every actual tar payload byte-for-byte with the original ZIP member or selected source file; verify index, receipts and complete member sets. No evidence download, extraction, modification, timing or control pooling.",
+  "packedPayloadFiles": 2858,
+  "packedPayloadBytes": 96599492,
+  "supplementalFilesComparedByteForByte": 134,
+  "ok": true,
+  "archiveAndReceipts": {
+    "native-evidence.tar.xz": {
+      "bytes": 3117032,
+      "sha256": "1f9c3822d610c96c83b9d1e3136e6e859db1f491a89efeb3c368bef7cbeabafe"
+    },
+    "native-evidence.tar.xz.json": {
+      "bytes": 1554,
+      "sha256": "3391cd2e15948db9b7e4148900227ea42dd5b3bcf0623ba41642229dae7594d2"
+    },
+    "artifact-coverage.json": {
+      "bytes": 2984,
+      "sha256": "89ed6eb7414ca11b0247fb34ecb44e0c40f9a9de99ed8c45f93d396a5f7752de"
+    },
+    "packing-receipt.json": {
+      "bytes": 48201,
+      "sha256": "7cc23c51cf4173a5195c6e7988c4cab36c26df178fa7f7d9bcc549aa1841daac"
+    },
+    "pack-evidence.py": {
+      "bytes": 23849,
+      "sha256": "9075c843b0e9e9a94caa4181f65fe9a7078f0ef66420f1c60a0aa1b02e3ff2b2"
+    }
+  },
+  "originalZipPayloadsComparedByteForByte": 2724,
+  "perCellPayloadsComparedByteForByte": {
+    "chromium-forward": 732,
+    "chromium-reverse": 732,
+    "firefox-forward": 630,
+    "firefox-reverse": 630
+  },
+  "allExpectedMemberSetsExact": true,
+  "allOriginalZipsUnchangedAfter": true,
+  "archiveAndReceiptsUnchangedAfter": true,
+  "separateFailedV1ArchiveUnchanged": true,
+  "endedAt": "2026-11-20T12:21:19.794782+00:00"
+}

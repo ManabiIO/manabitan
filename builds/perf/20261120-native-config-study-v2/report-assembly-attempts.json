@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "scope": "Post-measurement recomputation from four complete original cohorts; no measurements rerun or altered.",
+  "attempts": [
+    {
+      "startedAt": "2026-11-20T12:20:08.238358+00:00",
+      "completedAt": "2026-11-20T12:20:08.877370+00:00",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/dev/perf/jmdict-native-config-study-v2-analyze.py",
+        "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/evidence",
+        "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/evidence",
+        "/workspace/scratch/f34c9c9fae89/round5-browser-analysis/firefox-forward",
+        "/workspace/scratch/f34c9c9fae89/round5-browser-analysis/firefox-reverse",
+        "--output",
+        "/workspace/scratch/f34c9c9fae89/manabitan-native-config-study/builds/perf/20261120-native-config-study-v2/all-browser-analysis.json"
+      ],
+      "exitCode": 0,
+      "analysisLogSha256": "20ef8ccd1e825cb5b575d27c7a25ff188f600766f8d025c2c14ab16fd770c235",
+      "analysisSha256": "2701cba55403dcb16564680dabe737a6cc4930406514a83077e01258dd6fe219",
+      "cohortIdentitiesBefore": {
+        "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-forward/evidence/cohort.json": "622b5b166e88128125e1c62763a0a697c43ac6ac526368fe68a0f044e5be29d4",
+        "/workspace/scratch/f34c9c9fae89/round5-browser/chromium-reverse/evidence/cohort.json": "74693927e99694ce91535aa36113aeb16f7c6ddff34ad78ec63729478eeee925",
+        "/workspace/scratch/f34c9c9fae89/round5-browser-analysis/firefox-forward/cohort.json": "d4271b3712920bc2e8dfe12ec856afe4c1206d3455c0d091064b856447d5fb1b",
+        "/workspace/scratch/f34c9c9fae89/round5-browser-analysis/firefox-reverse/cohort.json": "a8586effd65fb56db3daac4a52d76c4ba4fcafb1673c02a3b8d292876dcba319"
+      },
+      "allCohortIdentitiesUnchangedAfter": true
+    }
+  ],
+  "excludedObservations": [],
+  "retries": [],
+  "note": "Chromium originals were audited in their original evidence roots; Firefox uses independently hashed safe extraction copies. All four cells remain separate."
+}

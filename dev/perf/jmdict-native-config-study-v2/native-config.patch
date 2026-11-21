@@ -1,0 +1,337 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index f9f37461..4f646847 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "0f3edf5f7e781f6ecd2089cebd257584bec65612d91b382c42c8e051e8edc040",
++    "sourceDigest": "dfbee4902dfb44965548703e56eee861d03c605015de0e35a3914e977254ef60",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -21,7 +21,7 @@
+                 "-Wl,-z,stack-size=65536",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
++            "sha256": "3bfd2ea83fdd8f3397cc5eafa1d4e5fa6f20afa1e4f3251fce4a858b030e959c"
+         },
+         {
+             "name": "term-bank-parser.wasm",
+diff --git a/dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm b/dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm
+index e81f92e8aca60a10dbb753777eef1df6a9862f02..45f712d386ddb058f984b97799d901b9d07cf202 100644
+GIT binary patch
+literal 1709
+zcmZ`(J#1T56u$R9Kl|Fx&vESh)J-Yp-Yi)<)&m3NMrx{xAzN4D79-hB>?RJOQPcXV
+ziYiwMQicqu3m!Uj$xyLZ3?PtTV93BgB~TdvF@Va@AyWID=U-LD9?rer`Oe>Wt}UwV
+z4Jm|>zWhkYj+&BQt+|ujsBN^ic9l?G(uY@wgfDMODU(`uq>H+VAl33`uUDI`X8n3~
+zy;8kauk6&e+Vxgbh?z0IUfpedx?QO?KNhkuhBvCWDqF43+Ct5Z!JAvPPwKZS*LJsS
+zZQ<qG@Ki=#k;p_@KOvk9Qo{9~y!3)3?B_|oMp2Xqeha)z$Gbb<`9K)q@GYw^bl)Bh
+z?7_fx2R4fBk~-C8wLdujt*tDpBkejysbwdY)IZvKT<OCQNte`1Z4+$&)7HNd3QCZF
+z1IU<gs%?@I1NJxCrY<26*(gOR*J*4b1}#g(a+>e8)$stFOFIv4hX2queQYx;>b?y~
+zAMcSkUdi9L*{gl`kJ|Rf<|q+IQ2@>!4H-Xa8;<g3D4cMeXqy|ka>L-<1mkCIr$&qn
+zO-;Cd(KbJF<%hxf3C6G5PLCMVL&o$3<9BTfBSvA!C`>TE*0wle6#I<SG1Q>qfJKth
+zvBnS<a<4%LR@cn1dPiw9%Qi}zIVUcvZrTKF_tPfB_+i@2vpq<gGv2bh%Q<YxscnQj
+zxF@ZoxhtVWiMbm%dux2|dr#_ABEMnJUJj)bRC2Omll*$rvRbCn1ra@aE}gv0Yl<sr
+zFv{vsXJz2-ppJBjZM$$$MUke=p3Tz2lG=~7J%_o1tD&Oo$}4=PaO9M6+9EBugGe{*
+zJ4;H~^X|!uXaDZ51MD*RE`!vz%H?-RwP|M4a<dJF4fkOzile(T{19=Ylv%{od+5eM
+zGHWQk7N%&C&x@DB6sQ^=wQUtAA;L5ysDC-nqe&zQ$uuqqoL9p{Kt&8D8*kRmssOtG
+zPsQY@V)AVjog_Q1y1HQSLwI`?)aV$49P=2EEc&}`6pMeP`?L9U&UIEpKknHsa@Viq
+zX6Q2q(v!=sTWqGRdXG<4Tm<r2i`k7N<sJiVkSRk7<sQWsa3Lj8yj*N@q!;lvn8|t(
+z?~5-vzAQNGnFVDe&q#?2OZ4#cAt$712Bq7_b;v99q3#4U1>v21PYCFz*jOwJ&rl%+
+zdV)F9G#l@l$D`TRP+<!^Y**uz@O$iPjKT}1?E9+s*PlFQ@5_5{b_ww0A;95KJWni1
+z@5OV#14(*Mf57D|Pk?|2U*W>zVEJ700Dq{?<5HkM`tDng6qO(~PIyPyQ~Ywu;Pu%q
+V!h4fhFA)56;vYBu<br@y@ETedN^AfC
+
+literal 1624
+zcmZ8hF>G5^6n*dh@9$@S|JaG+P|^(7Z}QTy9vC1m5{VE)wywr4MzTrbCU!$3Lj6@m
+zl`93QLkH9a4;?C@3>ACDPy`YT3>g@xgj5DV3`J$=5UHH|zwKDHhx_lj=iPVjx$iyI
+z>}_kMl+Ngnlpat~d##=QV7s;5-8&#fUXVdlDL<pHYpnyL2inC$Kg@PBm21tN?oRt!
+zbF0z3+HUN(_ImB^j#7)~_*V0vd!yfI?R>2C!a2O%yxG|6e%4d8bPitMYkktb*|>Vp
+zZ}pTn*F&T+jVeF?O_=eO(_vP*(c@QM7{GoRh#SYTA0CIE8F;rA2Jfk=a`@NjE0fxL
+zV|zTd!?BGMTca~mr=#)rKgQ}h-8XJfC0cc=MlX!)^I?RPHF{;NC-y&M{SP9=9{ZmH
+zIVYSMn_+LvehSw6ScqKgv+o9-U93UD8fzuZkH!W``I0Me9>N0uX>9hynl-v(a~zx;
+zvN~BS-Ld&AY4~Sj)23yWN>*_WoI{>4ela$j<~1D7giehuOhbjq;=&B$S7W0o!*Dbc
+z`pww6X=rY;cy5OAyRpS7qc~v{XBdANTbeRT6Gmx<@tv{rQ^tJC@K2xy&yQKGIh$w<
+zVIlV>bP#o`3*M@`C73Nc>enc~ds|yAlEyh1n8rd3EJ0qFP4QFSX*-=NmpgWGBLacT
+zPIqiZP6n;gDwi**_}O#q^o9&U*f>_YQ->+&(0zejwe$P7a+zW|SeNN2cWComsnJnv
+z?9$1hV8h&%h&aFY8owewC3TX1o-6J+HXZv`jg-CM9>09{@4*(pp@44-xZJbkO8ZPb
+zUf4ws)b9xFOFdPRB2@KadVH!Y_|8I%Lpga+#`?Un83mk`rm{kMiuMEa6(CN1OOlJ1
+z(HtvIoeOZ%D{!2{9=du__JHA#{mvx?Xg%^mo=4-l^JYyUqn3>-g*g3wn&w^(mw^en
+zKChD0a3A+0EqF7^@RA#>!$@+QmGrOmZj_NY^jmR-Eenb3G<tMK$)4!nE~DzIW^#{!
+zcG$0@333k;2V5w_E6J2%bKWV7oWhh&Sp*lSAWp?$SR#cWbAps*V~rY~JdlK36i~Y(
+zxD#F}g@!XwgeIJRM=2;yVwNE@q$i|6O)z+3M1h<oc_ES}nbsrdm3TvgVaxFv8Z;yW
+z;{3Zb`ui_wcJ%e_H){oW`T*dhHR&o5X7uto;IS~HCqKbils>TF?zeEHse<fUqhq{%
+t&XcV`fB3`q9ut=#IKD7;Oe`669lVt7V#ZY|c%hP`m)u0WNMXnn{tq1?JfHvo
+
+diff --git a/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c b/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
+index 2035b8e2..d5a5a1b6 100644
+--- a/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
++++ b/ext/js/dictionary/wasm/term-content-canonical-scan-v1.c
+@@ -86,11 +86,17 @@ int32_t scan_canonical(void) {
+     const uint32_t *meta = U32(META), *identity = U32(IDENT), *rows = U32(ROWS), *sigs = U32(SIGS);
+     const uint8_t *flags = U8(FLAGS);
+     uint32_t *out = U32(OUT), *journal = U32(JOURNAL), *exact = U32(EXACT);
+-    const uint32_t n = c[14] - c[13], mask = c[1] - 1;
++    // Config lives below PREFIX; validated authoritative writes cannot alias it.
++    // Capture call-invariant values before the insertion memory barrier so they
++    // stay local while every volatile header/journal publication remains intact.
++    const uint32_t first = c[13], n = c[14] - first, slotCount = c[1], mask = slotCount - 1;
++    const uint32_t capacity = c[10], rowCount = c[12], rowStart = c[16];
++    const uint32_t baseOffset = c[17], bufferLength = c[18];
++    const uint32_t lookup = c[19], reserve = c[20], trapAfter = c[21];
+     for (uint32_t i = c[15]; i < n; ++i) {
+-        const uint32_t unique = c[13] + i, global = rows[i];
+-        if (global < c[16] || (uint64_t)global - c[16] >= c[12]) { return -2; }
+-        const uint32_t row = global - c[16];
++        const uint32_t unique = first + i, global = rows[i];
++        if (global < rowStart || (uint64_t)global - rowStart >= rowCount) { return -2; }
++        const uint32_t row = global - rowStart;
+         if (identity[row] != unique) { return -2; }
+         h[1] = i + 1;
+         if (flags[i] == 1) {
+@@ -98,17 +104,17 @@ int32_t scan_canonical(void) {
+             continue;
+         }
+         const uint32_t *m = meta + row * 4;
+-        const uint64_t offset = (uint64_t)c[17] + m[0], end = offset + m[1];
+-        if (end > c[18] || offset > 0xffffffffu) { return -3; }
++        const uint64_t offset = (uint64_t)baseOffset + m[0], end = offset + m[1];
++        if (end > bufferLength || offset > 0xffffffffu) { return -3; }
+         uint32_t hash = m[2] ^ (m[3] * 0x9e3779b1u);
+         hash ^= hash >> 16;
+         uint32_t slot = hash & mask, probes = 0, existing = 0xffffffffu, pair = 0;
+         while (slots[slot]) {
+             uint32_t index = slots[slot] - 1;
+-            if (index >= c[10] || ++probes >= c[1]) { return -4; }
++            if (index >= capacity || ++probes >= slotCount) { return -4; }
+             if (hash1[index] == m[2] && hash2[index] == m[3]) {
+                 pair = 1;
+-                if (c[19] && state[index] == 1) {
++                if (lookup && state[index] == 1) {
+                     existing = index;
+                     break;
+                 }
+@@ -125,9 +131,9 @@ int32_t scan_canonical(void) {
+             continue;
+         }
+         uint32_t staged = 0xffffffffu;
+-        if (c[20] && !pair) {
++        if (reserve && !pair) {
+             const uint32_t index = h[5];
+-            if (index >= c[10] || state[index] != 0 || m[1] == 0xffffffffu) { return -5; }
++            if (index >= capacity || state[index] != 0 || m[1] == 0xffffffffu) { return -5; }
+             uint32_t j = h[0];
+             journal[j * 3] = slot;
+             journal[j * 3 + 1] = slots[slot];
+@@ -145,7 +151,7 @@ int32_t scan_canonical(void) {
+             slots[slot] = index + 1;
+             staged = index;
+             h[5] = index + 1;
+-            if (c[21] && h[0] == c[21]) { __builtin_trap(); }
++            if (trapAfter && h[0] == trapAfter) { __builtin_trap(); }
+         }
+         uint32_t j = h[2]++;
+         out[j] = (uint32_t)offset;
+diff --git a/test/term-content-canonical-scan-header.test.js b/test/term-content-canonical-scan-header.test.js
+new file mode 100644
+index 00000000..58c5f17e
+--- /dev/null
++++ b/test/term-content-canonical-scan-header.test.js
+@@ -0,0 +1,194 @@
++/*
++ * Copyright (C) 2026  Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import assert from 'node:assert/strict'
++import fs from 'node:fs/promises'
++import {test} from 'vitest'
++import {CANONICAL_SCAN_LAYOUT as layout} from '../ext/js/dictionary/term-content-canonical-layout.js'
++import {TermContentMetadataArena} from '../ext/js/dictionary/term-content-metadata-arena.js'
++
++const module = await WebAssembly.compile(await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)))
++
++/**
++ * Call the production kernel directly so trap-visible state is observed before
++ * the JS owner can roll back the committed journal.
++ * @param {number} count
++ * @param {{trapAfter?: number, reserve?: boolean, denseCapacity?: number}} [options]
++ * @returns {{arena: TermContentMetadataArena, header: Uint32Array, config: Uint32Array, meta: Uint32Array, identity: Uint32Array, rows: Uint32Array, signatures: Uint32Array, scan: () => number}}
++ */
++function fixture(count, {trapAfter = 0, reserve = true, denseCapacity = count} = {}) {
++    const arena = new TermContentMetadataArena(denseCapacity, 2 ** Math.ceil(Math.log2(Math.max(8, count * 2))))
++    const buffer = arena.memory.buffer
++    const header = new Uint32Array(buffer, 1024, 7)
++    const config = new Uint32Array(buffer, 1088, 22)
++    const meta = new Uint32Array(buffer, layout.META, count * 4)
++    const identity = new Uint32Array(buffer, layout.IDENT, count)
++    const rows = new Uint32Array(buffer, layout.ROWS, count)
++    const signatures = new Uint32Array(buffer, layout.SIGS, count * 3)
++    const first = 5
++    const rowStart = 37
++    const baseOffset = 11
++    header.fill(0xfafafafa)
++    config.set([
++        arena.slots.byteOffset,
++        arena.slots.length,
++        arena.hash1.byteOffset,
++        arena.hash2.byteOffset,
++        arena.state.byteOffset,
++        arena.length.byteOffset,
++        arena.signaturePresent.byteOffset,
++        arena.signature1.byteOffset,
++        arena.signature2.byteOffset,
++        arena.signature3.byteOffset,
++        denseCapacity,
++        0,
++        count,
++        first,
++        first + count,
++        0,
++        rowStart,
++        baseOffset,
++        baseOffset + count * 4,
++        1,
++reserve ? 1 : 0,
++trapAfter,
++    ])
++    for (let i = 0; i < count; ++i) {
++        meta.set([i * 4, 4, i + 1, 0], i * 4)
++        identity[i] = first + i
++        rows[i] = rowStart + i
++        signatures.set([0xa0 + i, 0xb0 + i, 0xc0 + i], i * 3)
++    }
++    const scan = new WebAssembly.Instance(module, {env: {memory: arena.memory}}).exports.scan_canonical
++    assert.equal(typeof scan, 'function')
++    return {arena, header, config, meta, identity, rows, signatures, scan: /** @type {() => number} */ (scan)}
++}
++
++test.each([1, 2, 3])('native trap after insertion %i exposes the committed journal and exact header progress', (trapAfter) => {
++    const {arena, header, config, signatures, scan} = fixture(3, {trapAfter})
++    const originalConfig = new Uint32Array(config)
++    assert.throws(scan, WebAssembly.RuntimeError)
++    // journal, cursor, pending, exact, resolved, dense, reserved
++    assert.deepEqual([...header], [trapAfter, trapAfter, trapAfter - 1, 0, 0, trapAfter, 0])
++    assert.deepEqual(config, originalConfig)
++    const journal = new Uint32Array(arena.memory.buffer, layout.JOURNAL, trapAfter * 3)
++    for (let index = 0; index < trapAfter; ++index) {
++        const slot = journal[index * 3]
++        assert.equal(journal[index * 3 + 1], 0)
++        assert.equal(journal[index * 3 + 2], index)
++        assert.equal(arena.slots[slot], index + 1)
++        assert.equal(arena.hash1[index], index + 1)
++        assert.equal(arena.hash2[index], 0)
++        assert.equal(arena.length[index], 4)
++        assert.equal(arena.state[index], 2)
++        assert.equal(arena.signaturePresent[index], 1)
++        assert.deepEqual([arena.signature1[index], arena.signature2[index], arena.signature3[index]], [...signatures.subarray(index * 3, index * 3 + 3)])
++    }
++    assert.ok(arena.state.subarray(trapAfter).every((state) => state === 0))
++})
++
++test.each(['row', 'identity', 'source'])('late %s error preserves earlier journal entries and the original cursor boundary', (fault) => {
++    const {arena, header, config, meta, identity, rows, scan} = fixture(3)
++    if (fault === 'row') { rows[2] = 40 }
++    if (fault === 'identity') { identity[2] = 0 }
++    if (fault === 'source') { meta[8] = 0xffffffff - 10 }
++    const originalConfig = new Uint32Array(config)
++    assert.equal(scan(), fault === 'source' ? -3 : -2)
++    assert.deepEqual([...header], [2, fault === 'source' ? 3 : 2, 2, 0, 0, 2, 0])
++    assert.deepEqual(config, originalConfig)
++    assert.deepEqual([...arena.state], [2, 2, 0])
++    const journal = new Uint32Array(arena.memory.buffer, layout.JOURNAL, 6)
++    assert.equal(journal[2], 0)
++    assert.equal(journal[5], 1)
++    assert.equal(arena.slots[journal[0]], 1)
++    assert.equal(arena.slots[journal[3]], 2)
++})
++
++test('non-reserving scan publishes pending output without authoritative mutation', () => {
++    const {arena, header, config, scan} = fixture(3, {reserve: false})
++    const originalConfig = new Uint32Array(config)
++    assert.equal(scan(), 0)
++    assert.deepEqual([...header], [0, 3, 3, 0, 0, 0, 0])
++    assert.deepEqual(config, originalConfig)
++    assert.ok(arena.state.every((state) => state === 0))
++    assert.ok(arena.slots.every((slot) => slot === 0))
++    assert.deepEqual([...new Uint32Array(arena.memory.buffer, layout.OUT, 3)], [11, 15, 19])
++    assert.deepEqual([...new Uint32Array(arena.memory.buffer, layout.OUT + 5 * layout.MAX * 4, 3)], [0xffffffff, 0xffffffff, 0xffffffff])
++})
++
++test('invalid config initializes the header before returning without mutation', () => {
++    const {arena, header, config, scan} = fixture(3)
++    config[1] = 3
++    config[11] = 2
++    config[15] = 1
++    const originalConfig = new Uint32Array(config)
++    assert.equal(scan(), -1)
++    assert.deepEqual([...header], [0, 1, 0, 0, 0, 2, 0])
++    assert.deepEqual(config, originalConfig)
++    assert.ok(arena.state.every((state) => state === 0))
++})
++
++test('invalid hash-table index keeps the current cursor and an empty journal', () => {
++    const {arena, header, scan} = fixture(3)
++    arena.slots[1] = 4
++    assert.equal(scan(), -4)
++    assert.deepEqual([...header], [0, 1, 0, 0, 0, 0, 0])
++    assert.ok(arena.state.every((state) => state === 0))
++})
++
++test('capacity failure preserves the committed prefix without publishing the failed insertion', () => {
++    const {arena, header, scan} = fixture(3, {denseCapacity: 2})
++    assert.equal(scan(), -5)
++    assert.deepEqual([...header], [2, 3, 2, 0, 0, 2, 0])
++    assert.deepEqual([...arena.state], [2, 2])
++    const journal = new Uint32Array(arena.memory.buffer, layout.JOURNAL, 6)
++    assert.equal(journal[2], 0)
++    assert.equal(journal[5], 1)
++})
++
++test('resolved rows preserve the separate resolved and pending header counts', () => {
++    const {arena, header, scan} = fixture(3)
++    new Uint8Array(arena.memory.buffer, layout.FLAGS, 3)[0] = 1
++    assert.equal(scan(), 0)
++    assert.deepEqual([...header], [2, 3, 2, 0, 1, 2, 0])
++    assert.deepEqual([...arena.hash1], [2, 3, 0])
++})
++
++test('exact descriptor boundary stops before the next row and resumes from the original cursor', () => {
++    const {arena, header, config, meta, rows, scan} = fixture(4097, {denseCapacity: 1})
++    arena.hash1[0] = 1
++    arena.state[0] = 1
++    arena.length[0] = 4
++    arena.slots[1] = 1
++    config[11] = 1
++    for (let row = 0; row < 4097; ++row) { meta[row * 4 + 2] = 1 }
++    // An invalid next row must remain unobserved until the next native call.
++    rows[4096] = 0xffffffff
++    assert.equal(scan(), 1)
++    assert.deepEqual([...header], [0, 4096, 0, 4096, 0, 1, 0])
++    const exact = new Uint32Array(arena.memory.buffer, layout.EXACT, 4096 * 2)
++    assert.deepEqual([...exact.subarray(0, 2)], [0, 0])
++    assert.deepEqual([...exact.subarray(-2)], [4095, 0])
++    config[15] = 4096
++    assert.equal(scan(), -2)
++    assert.deepEqual([...header], [0, 4096, 0, 0, 0, 1, 0])
++    rows[4096] = 37 + 4096
++    assert.equal(scan(), 0)
++    assert.deepEqual([...header], [0, 4097, 0, 1, 0, 1, 0])
++    assert.deepEqual([...new Uint32Array(arena.memory.buffer, layout.EXACT, 2)], [4096, 0])
++})
