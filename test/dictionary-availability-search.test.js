@@ -210,7 +210,7 @@ describe('Translator request-owned dictionary availability', () => {
         const fresh = await translator.findTerms('simple', '日本', lookupOptions());
         expect(fresh.dictionaryEntries).toHaveLength(2);
         expect(fresh).not.toHaveProperty('dictionaryAvailability');
-        expect(findTermsBulk.mock.calls[0][3]).not.toBe(findTermsBulk.mock.calls[2][3]);
+        expect(findTermsBulk.mock.calls[0][3]).not.toBe(findTermsBulk.mock.calls[1][3]);
     });
 
     test('deduplicates observations and final health by dictionary and generation without losing observed exclusions', async () => {

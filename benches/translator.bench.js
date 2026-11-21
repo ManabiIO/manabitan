@@ -38,6 +38,16 @@ describe('Translator', () => {
     const findKanjiTests = tests.filter((data) => data.options === 'kanji');
     const findTermTests = tests.filter((data) => data.options !== 'kanji');
 
+    const defaultOptions = createFindTermsOptions(dictionaryName, optionsPresets, 'default');
+    bench('Translator.prototype.findTerms - scanner text with deinflection', async () => {
+        await translator.findTerms('split', '打ち込んだので', defaultOptions);
+    });
+
+    const prefixOptions = {...defaultOptions, matchType: /** @type {const} */ ('prefix'), deinflect: false};
+    bench('Translator.prototype.findTerms - explicit prefix', async () => {
+        await translator.findTerms('split', '打ち', prefixOptions);
+    });
+
     bench(`Translator.prototype.findTerms - (n=${findTermTests.length})`, async () => {
         for (const data of /** @type {import('test/translator').TestInputFindTerm[]} */ (findTermTests)) {
             const {mode, text} = data;
