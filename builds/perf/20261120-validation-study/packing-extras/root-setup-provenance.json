@@ -1,0 +1,26 @@
+{
+  "scope": "Snapshot of root setup/provenance fields; this adds no validation execution or timing. Mutable publication/continuation state is outside this evidence package.",
+  "capturedAt": "2026-11-20T11:23:18.430198+00:00",
+  "sourceStateSha256": "b71abebc8009b2a0d7b9c2bf7c7e5cd2221382c997a7484fcbf16c5930e4827b",
+  "setup": {
+    "startedAt": "2026-11-20 10:10:44 UTC",
+    "baseline": "bde55dfbee1451edc32051f8bf51e8a870d5c72c",
+    "baselineTree": "d6df511865f88246b21aa4688ff40cc455c719c4",
+    "node": "v24.22.3",
+    "host": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "files": {
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/perf/dictionaries.lock.json": "4e3e98dfd2bf06968aefaa4f72328ec3736121124e57752e374c7ee507975b13",
+      "dev/data/dictionary-wasm/manifest.json": "5a0ad5c11a6c749e961e0011db7885d71f10f6f5aa65832143a9a39a2f70ece6",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": "7021e66558ce7efe8162ea3030f2ebe2d63434d10171a7cffe45726f7ff9fb27",
+      "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    "fixture": {
+      "path": "/workspace/scratch/f34c9c9fae89/fixtures/JMdict.zip",
+      "bytes": 15587032,
+      "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a"
+    },
+    "toolchainReceipt": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21-packages.json",
+    "pinnedWasmRebuildCheck": "passed"
+  }
+}

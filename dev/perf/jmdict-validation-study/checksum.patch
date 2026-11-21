@@ -1,0 +1,361 @@
+diff --git a/ext/js/dictionary/term-entry-content-hash.js b/ext/js/dictionary/term-entry-content-hash.js
+index 77344142..b9a01b05 100644
+--- a/ext/js/dictionary/term-entry-content-hash.js
++++ b/ext/js/dictionary/term-entry-content-hash.js
+@@ -14,9 +14,9 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  */
++/* eslint @stylistic/semi: ["error", "never"] */
+ 
+-
+-const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'));
++const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padStart(2, '0'))
+ 
+ /**
+  * @param {number} h1
+@@ -24,8 +24,8 @@ const HEX_BYTE_TABLE = Array.from({length: 256}, (_, i) => i.toString(16).padSta
+  * @returns {string}
+  */
+ export function hashPairToHex(h1, h2) {
+-    const a = h1 >>> 0;
+-    const b = h2 >>> 0;
++    const a = h1 >>> 0
++    const b = h2 >>> 0
+     return (
+         HEX_BYTE_TABLE[(a >>> 24) & 0xff] +
+         HEX_BYTE_TABLE[(a >>> 16) & 0xff] +
+@@ -35,7 +35,7 @@ export function hashPairToHex(h1, h2) {
+         HEX_BYTE_TABLE[(b >>> 16) & 0xff] +
+         HEX_BYTE_TABLE[(b >>> 8) & 0xff] +
+         HEX_BYTE_TABLE[b & 0xff]
+-    );
++    )
+ }
+ 
+ /**
+@@ -43,12 +43,7 @@ export function hashPairToHex(h1, h2) {
+  * @returns {[number, number]}
+  */
+ export function hashTermEntryContentBytesPair(bytes) {
+-    let h1 = hashContentXxh32(bytes, 0x811c9dc5);
+-    const h2 = hashContentXxh32(bytes, 0x9e3779b9);
+-    if ((h1 | h2) === 0) {
+-        h1 = 1;
+-    }
+-    return [h1 >>> 0, h2 >>> 0];
++    return hashContentXxh32Pair(bytes)
+ }
+ 
+ /**
+@@ -56,8 +51,8 @@ export function hashTermEntryContentBytesPair(bytes) {
+  * @returns {string}
+  */
+ export function hashTermEntryContentBytes(bytes) {
+-    const [h1, h2] = hashTermEntryContentBytesPair(bytes);
+-    return hashPairToHex(h1, h2);
++    const [h1, h2] = hashTermEntryContentBytesPair(bytes)
++    return hashPairToHex(h1, h2)
+ }
+ 
+ /**
+@@ -66,7 +61,7 @@ export function hashTermEntryContentBytes(bytes) {
+  * @returns {number}
+  */
+ function rotateLeft32(value, amount) {
+-    return (((value << amount) >>> 0) | (value >>> (32 - amount))) >>> 0;
++    return (((value << amount) >>> 0) | (value >>> (32 - amount))) >>> 0
+ }
+ 
+ /**
+@@ -80,65 +75,104 @@ function readUint32Le(bytes, offset) {
+         (bytes[offset + 1] << 8) |
+         (bytes[offset + 2] << 16) |
+         (bytes[offset + 3] << 24)
+-    ) >>> 0;
+-}
+-
+-/**
+- * @param {number} accumulator
+- * @param {number} input
+- * @returns {number}
+- */
+-function xxh32Round(accumulator, input) {
+-    accumulator = (accumulator + Math.imul(input >>> 0, 2246822519)) >>> 0;
+-    accumulator = rotateLeft32(accumulator, 13);
+-    return Math.imul(accumulator, 2654435761) >>> 0;
++    ) >>> 0
+ }
+ 
+ /**
+  * @param {Uint8Array} bytes
+- * @param {number} seed
+- * @returns {number}
++ * @returns {[number, number]}
+  */
+-function hashContentXxh32(bytes, seed) {
+-    let offset = 0;
+-    const length = bytes.length;
+-    let h32;
++function hashContentXxh32Pair(bytes) {
++    // Share the input load and first multiplication while keeping each seed's
++    // accumulator independent. Inline rounds avoid repeated helper calls.
++    let offset = 0
++    const length = bytes.length
++    const seed1 = 0x811c9dc5
++    const seed2 = 0x9e3779b9
++    let h1
++    let h2
+     if (length >= 16) {
+-        const limit = length - 16;
+-        let v1 = (seed + 2654435761 + 2246822519) >>> 0;
+-        let v2 = (seed + 2246822519) >>> 0;
+-        let v3 = seed >>> 0;
+-        let v4 = (seed - 2654435761) >>> 0;
++        const limit = length - 16
++        let a1 = (seed1 + 2654435761 + 2246822519) >>> 0
++        let a2 = (seed1 + 2246822519) >>> 0
++        let a3 = seed1 >>> 0
++        let a4 = (seed1 - 2654435761) >>> 0
++        let b1 = (seed2 + 2654435761 + 2246822519) >>> 0
++        let b2 = (seed2 + 2246822519) >>> 0
++        let b3 = seed2 >>> 0
++        let b4 = (seed2 - 2654435761) >>> 0
+         do {
+-            v1 = xxh32Round(v1, readUint32Le(bytes, offset)); offset += 4;
+-            v2 = xxh32Round(v2, readUint32Le(bytes, offset)); offset += 4;
+-            v3 = xxh32Round(v3, readUint32Le(bytes, offset)); offset += 4;
+-            v4 = xxh32Round(v4, readUint32Le(bytes, offset)); offset += 4;
+-        } while (offset <= limit);
+-        h32 = (
+-            rotateLeft32(v1, 1) +
+-            rotateLeft32(v2, 7) +
+-            rotateLeft32(v3, 12) +
+-            rotateLeft32(v4, 18)
+-        ) >>> 0;
++            const input1 = Math.imul(readUint32Le(bytes, offset), 2246822519)
++            a1 = (a1 + input1) >>> 0
++            b1 = (b1 + input1) >>> 0
++            a1 = Math.imul((a1 << 13) | (a1 >>> 19), 2654435761) >>> 0
++            b1 = Math.imul((b1 << 13) | (b1 >>> 19), 2654435761) >>> 0
++            const input2 = Math.imul(readUint32Le(bytes, offset + 4), 2246822519)
++            a2 = (a2 + input2) >>> 0
++            b2 = (b2 + input2) >>> 0
++            a2 = Math.imul((a2 << 13) | (a2 >>> 19), 2654435761) >>> 0
++            b2 = Math.imul((b2 << 13) | (b2 >>> 19), 2654435761) >>> 0
++            const input3 = Math.imul(readUint32Le(bytes, offset + 8), 2246822519)
++            a3 = (a3 + input3) >>> 0
++            b3 = (b3 + input3) >>> 0
++            a3 = Math.imul((a3 << 13) | (a3 >>> 19), 2654435761) >>> 0
++            b3 = Math.imul((b3 << 13) | (b3 >>> 19), 2654435761) >>> 0
++            const input4 = Math.imul(readUint32Le(bytes, offset + 12), 2246822519)
++            a4 = (a4 + input4) >>> 0
++            b4 = (b4 + input4) >>> 0
++            a4 = Math.imul((a4 << 13) | (a4 >>> 19), 2654435761) >>> 0
++            b4 = Math.imul((b4 << 13) | (b4 >>> 19), 2654435761) >>> 0
++            offset += 16
++        } while (offset <= limit)
++        h1 = (
++            rotateLeft32(a1, 1) +
++            rotateLeft32(a2, 7) +
++            rotateLeft32(a3, 12) +
++            rotateLeft32(a4, 18)
++        ) >>> 0
++        h2 = (
++            rotateLeft32(b1, 1) +
++            rotateLeft32(b2, 7) +
++            rotateLeft32(b3, 12) +
++            rotateLeft32(b4, 18)
++        ) >>> 0
+     } else {
+-        h32 = (seed + 374761393) >>> 0;
++        h1 = (seed1 + 374761393) >>> 0
++        h2 = (seed2 + 374761393) >>> 0
+     }
+-    h32 = (h32 + length) >>> 0;
++    h1 = (h1 + length) >>> 0
++    h2 = (h2 + length) >>> 0
+     while ((offset + 4) <= length) {
+-        h32 = (h32 + Math.imul(readUint32Le(bytes, offset), 3266489917)) >>> 0;
+-        h32 = Math.imul(rotateLeft32(h32, 17), 668265263) >>> 0;
+-        offset += 4;
++        const input = Math.imul(readUint32Le(bytes, offset), 3266489917)
++        h1 = (h1 + input) >>> 0
++        h2 = (h2 + input) >>> 0
++        h1 = Math.imul(rotateLeft32(h1, 17), 668265263) >>> 0
++        h2 = Math.imul(rotateLeft32(h2, 17), 668265263) >>> 0
++        offset += 4
+     }
+     while (offset < length) {
+-        h32 = (h32 + Math.imul(bytes[offset], 374761393)) >>> 0;
+-        h32 = Math.imul(rotateLeft32(h32, 11), 2654435761) >>> 0;
+-        ++offset;
++        const input = Math.imul(bytes[offset], 374761393)
++        h1 = (h1 + input) >>> 0
++        h2 = (h2 + input) >>> 0
++        h1 = Math.imul(rotateLeft32(h1, 11), 2654435761) >>> 0
++        h2 = Math.imul(rotateLeft32(h2, 11), 2654435761) >>> 0
++        ++offset
+     }
+-    h32 ^= h32 >>> 15;
+-    h32 = Math.imul(h32, 2246822519) >>> 0;
+-    h32 ^= h32 >>> 13;
+-    h32 = Math.imul(h32, 3266489917) >>> 0;
+-    h32 ^= h32 >>> 16;
+-    return h32 >>> 0;
++    h1 = finishHash(h1)
++    h2 = finishHash(h2)
++    if ((h1 | h2) === 0) { h1 = 1 }
++    return [h1, h2]
++}
++
++/**
++ * @param {number} h32
++ * @returns {number}
++ */
++function finishHash(h32) {
++    h32 ^= h32 >>> 15
++    h32 = Math.imul(h32, 2246822519) >>> 0
++    h32 ^= h32 >>> 13
++    h32 = Math.imul(h32, 3266489917) >>> 0
++    h32 ^= h32 >>> 16
++    return h32 >>> 0
+ }
+diff --git a/test/term-entry-content-hash.test.js b/test/term-entry-content-hash.test.js
+new file mode 100644
+index 00000000..c8954ec5
+--- /dev/null
++++ b/test/term-entry-content-hash.test.js
+@@ -0,0 +1,132 @@
++/* SPDX-License-Identifier: GPL-3.0-or-later */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {describe, expect, test} from 'vitest'
++
++import {hashTermEntryContentBytes, hashTermEntryContentBytesPair, hashPairToHex} from '../ext/js/dictionary/term-entry-content-hash.js'
++
++// Independent vectors generated with upstream libxxhash 0.8.3 XXH32,
++// seeds 0x811c9dc5 and 0x9e3779b9, over byte(i) = (131*i + 17*length + (i >> 3)) & 255.
++// Keeping fixed values protects persisted hashes when writer and reader share code.
++const VECTORS = [
++    [0, 1786691832, 3449911982],
++    [1, 369118841, 1959344397],
++    [2, 164109134, 1343756741],
++    [3, 3442112906, 1616667414],
++    [4, 265225298, 4230702640],
++    [5, 4218716495, 1111030367],
++    [6, 1888358984, 3764009445],
++    [7, 1538831536, 3501830257],
++    [8, 3658161665, 59955230],
++    [9, 957509007, 886787925],
++    [10, 774206446, 3436596958],
++    [11, 4183459966, 1361589584],
++    [12, 3120621086, 1767060274],
++    [13, 2222386417, 1645421151],
++    [14, 3914993701, 3964271096],
++    [15, 3345665980, 51304357],
++    [16, 2490509838, 344898396],
++    [17, 812069692, 3821045881],
++    [18, 1298953353, 606526474],
++    [19, 2149853067, 1024892620],
++    [20, 533293981, 786514678],
++    [21, 2752422408, 800790058],
++    [22, 1999356383, 3042627334],
++    [23, 2345606411, 1764291716],
++    [24, 3076940038, 3219253240],
++    [25, 2458795988, 2311775305],
++    [26, 127585539, 1347543485],
++    [27, 3795108320, 1860481843],
++    [28, 2530338641, 3348215516],
++    [29, 3827372625, 804960503],
++    [30, 943556284, 2807440521],
++    [31, 3906497626, 480948925],
++    [32, 3190204536, 2531867521],
++    [33, 973548187, 3992484357],
++    [34, 1985902724, 2249197982],
++    [35, 3552862528, 4135448312],
++    [36, 1044763794, 1677076941],
++    [37, 2144948534, 3418373505],
++    [38, 3193206093, 1951125289],
++    [39, 1668100076, 1639832893],
++    [40, 138123329, 1499860864],
++    [41, 2046231038, 3464796595],
++    [42, 856527869, 32811631],
++    [43, 3714928671, 3951482742],
++    [44, 2328650826, 4243616624],
++    [45, 2946891474, 3986807601],
++    [46, 588914063, 3992507927],
++    [47, 656165188, 178770041],
++    [48, 1949753843, 1851852701],
++    [49, 1377329518, 3172825962],
++    [50, 1394931538, 3964102138],
++    [51, 3283309306, 4084296057],
++    [52, 1180099624, 657905399],
++    [53, 1473809330, 3224219291],
++    [54, 4091027690, 389086533],
++    [55, 3607277603, 2770684348],
++    [56, 2856056866, 2255171438],
++    [57, 3356097603, 1861057748],
++    [58, 2659771539, 1576113286],
++    [59, 1359275190, 706612278],
++    [60, 1205962954, 1421169785],
++    [61, 1619319728, 1471165281],
++    [62, 1234697087, 4118947692],
++    [63, 632821226, 1450936541],
++    [64, 3357809390, 2635564702],
++    [127, 705630276, 1682537934],
++    [128, 1939212314, 3463796822],
++    [129, 3822030257, 2114471508],
++    [255, 2573524543, 1128257793],
++    [256, 2038453622, 500977205],
++    [257, 2933553784, 340930876],
++    [1023, 3920166034, 74589486],
++    [1024, 2253831291, 349196577],
++    [1025, 3017761286, 3051739601],
++    [4095, 163658466, 1246015152],
++    [4096, 3201798487, 4208199412],
++    [4097, 4106331520, 2195097885],
++    [65535, 562557757, 3944002416],
++    [65536, 1582887585, 1821502994],
++    [65537, 646967687, 1157557105],
++    [262143, 2485207635, 3665706949],
++    [262144, 1562283659, 4078881355],
++    [262145, 2472867350, 114036469],
++]
++
++/**
++ * @param {number} length
++ * @returns {Uint8Array}
++ */
++function createPayload(length) {
++    return Uint8Array.from({length}, (_, index) => (index * 131 + length * 17 + (index >> 3)) & 0xff)
++}
++
++describe('term content XXH32 pair', () => {
++    test.each(VECTORS)('matches both independent hashes at %i bytes', (length, h1, h2) => {
++        const payload = createPayload(length)
++        expect(hashTermEntryContentBytesPair(payload)).toEqual([h1, h2])
++        expect(hashTermEntryContentBytes(payload)).toBe(hashPairToHex(h1, h2))
++    })
++
++    test.each([1, 2, 3, 7, 15, 31])('respects a byte offset of %i and leaves the backing buffer unchanged', (offset) => {
++        for (const [length, h1, h2] of VECTORS) {
++            const owner = new Uint8Array(offset + length + 19).fill(0xa7)
++            owner.set(createPayload(length), offset)
++            const before = new Uint8Array(owner)
++            const bytes = owner.subarray(offset, offset + length)
++            expect(hashTermEntryContentBytesPair(bytes)).toEqual([h1, h2])
++            expect(owner).toEqual(before)
++        }
++    })
++
++    test('reads a stable shared subrange without changing its owner', () => {
++        for (const [length, h1, h2] of VECTORS) {
++            const owner = new Uint8Array(new SharedArrayBuffer(length + 27)).fill(0xd3)
++            owner.set(createPayload(length), 5)
++            const before = new Uint8Array(owner)
++            expect(hashTermEntryContentBytesPair(owner.subarray(5, length + 5))).toEqual([h1, h2])
++            expect(owner).toEqual(before)
++        }
++    })
++})

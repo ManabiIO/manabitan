@@ -1,0 +1,10 @@
+{
+  "attempts": [
+    {
+      "operation": "all-cell analysis",
+      "result": "failed before output creation",
+      "reason": "Root assumed Firefox artifacts had been extracted under each original ZIP directory; independent Firefox auditors read the ZIP directly. Corrected by safe extraction to a separate analysis directory. No source artifacts or measurement observations changed.",
+      "recordedAt": "2026-11-20T11:14:34.995596+00:00"
+    }
+  ]
+}

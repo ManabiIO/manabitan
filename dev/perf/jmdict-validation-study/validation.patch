@@ -1,0 +1,267 @@
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index 6dc9d5a0..721ae1d4 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -2262,6 +2262,7 @@ export class TermRecordOpfsStore {
+         return {encodeMs, appendWriteMs};
+     }
+ 
++    /* eslint-disable @stylistic/semi */
+     /**
+      * @param {TermRecordShardState} state
+      * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+@@ -2290,6 +2291,13 @@ export class TermRecordOpfsStore {
+             // across runs. The row loop itself is synchronous.
+             const tValidationStart = safePerformance.now();
+             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
++            const contentReferences = (
++                !useFixedContentSpan &&
++                typeof chunk.fixedContentLength !== 'number' &&
++                hasResolvedContentReferences(chunk, count)
++            ) ?
++                chunk.resolvedContentReferences ?? null :
++                null
+             let runEnd = runStart;
+             let minContentOffset = Number.POSITIVE_INFINITY;
+             let maxContentOffset = Number.NEGATIVE_INFINITY;
+@@ -2297,8 +2305,22 @@ export class TermRecordOpfsStore {
+                 if ((runEnd - runStart) >= runRowLimit) {
+                     break;
+                 }
+-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
+-                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
++                let contentOffset
++                let contentLength
++                if (contentReferences !== null) {
++                    const uniqueIndex = contentReferences.uniqueIndexList[runEnd]
++                    if (uniqueIndex >= contentReferences.offsets.length) {
++                        throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`)
++                    }
++                    contentOffset = contentReferences.offsets[uniqueIndex]
++                    if (uniqueIndex >= contentReferences.lengths.length) {
++                        throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`)
++                    }
++                    contentLength = contentReferences.lengths[uniqueIndex]
++                } else {
++                    contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan)
++                    contentLength = getArtifactContentLength(chunk, contentLengths, runEnd)
++                }
+                 validateContentOffset(contentOffset);
+                 validateContentLength(contentLength);
+                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
+@@ -2376,6 +2398,7 @@ export class TermRecordOpfsStore {
+         }
+         return {encodeMs, appendWriteMs, validationMs, recordFieldEncodeMs, lookupIndexEncodeMs};
+     }
++    /* eslint-enable @stylistic/semi */
+ 
+     /**
+      * Builds offset-independent lookup sidecars before term content persistence
+diff --git a/test/term-record-resolved-run-validation.test.js b/test/term-record-resolved-run-validation.test.js
+new file mode 100644
+index 00000000..23350fd9
+--- /dev/null
++++ b/test/term-record-resolved-run-validation.test.js
+@@ -0,0 +1,202 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {describe, expect, test, vi} from 'vitest'
++import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
++
++/** @typedef {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[1]} ArtifactChunk */
++/** @typedef {{firstId: number, count: number, base: number, lookup: Uint8Array|null, fields: Uint8Array|null, format: number}} EncodedRun */
++
++/**
++ * @param {number[]} indexes
++ * @param {number[]} offsets
++ * @param {number[]} lengths
++ * @returns {ArtifactChunk}
++ */
++function createChunk(indexes, offsets, lengths) {
++    const count = indexes.length
++    const expression = new TextEncoder().encode('食べる')
++    const reading = new TextEncoder().encode('たべる')
++    return {
++        dictionary: 'Resolved run validation',
++        rowCount: count,
++        expressionBytesList: new Array(count).fill(expression),
++        readingBytesList: new Array(count).fill(reading),
++        readingEqualsExpressionList: new Uint8Array(count),
++        scoreList: new Int32Array(count).fill(-10),
++        sequenceList: new Int32Array(count).fill(-1),
++        resolvedContentReferences: {
++            uniqueIndexList: Uint32Array.from(indexes),
++            offsets: Float64Array.from(offsets),
++            lengths: Uint32Array.from(lengths),
++        },
++    }
++}
++
++/**
++ * @param {ArtifactChunk} chunk
++ * @param {number[]} [offsets]
++ * @param {number[]} [lengths]
++ * @param {((count: number) => Promise<void>)|null} [afterAppend]
++ * @returns {{store: TermRecordOpfsStore, runs: EncodedRun[], append: import('vitest').MockInstance<TermRecordOpfsStore['_appendEncodedChunk']>, run: () => ReturnType<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>}}
++ */
++function createRecorder(chunk, offsets = [], lengths = [], afterAppend = null) {
++    const store = new TermRecordOpfsStore()
++    /** @type {EncodedRun[]} */
++    const runs = []
++    const append = vi.spyOn(store, '_appendEncodedChunk').mockImplementation(async (_state, firstId, count, _dictionary, base = 0, lookup = null, fields = null, format = 1) => {
++        runs.push({firstId, count, base, lookup, fields, format})
++        await afterAppend?.(runs.length)
++    })
++    const state = /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({})
++    return {
++        store,
++        runs,
++        append,
++        run: async () => await store._encodeAndAppendArtifactChunkForState(state, chunk, 7, offsets, lengths),
++    }
++}
++
++/**
++ * @param {ArtifactChunk} chunk
++ * @param {number[]} offsets
++ * @param {number[]} lengths
++ * @returns {Promise<EncodedRun[]>}
++ */
++async function expectDirectArrayEncoding(chunk, offsets, lengths) {
++    const resolved = createRecorder(chunk)
++    const direct = createRecorder({...chunk, resolvedContentReferences: void 0}, offsets, lengths)
++    await resolved.run()
++    await direct.run()
++    expect(resolved.runs).toStrictEqual(direct.runs)
++    return resolved.runs
++}
++
++describe('resolved artifact run validation', () => {
++    test('preserves every encoded byte for duplicates, null offsets, and large absolute offsets', async () => {
++        const base = 0x100000000 + 32
++        const indexes = [2, 0, 2, 1]
++        const offsets = [base + 16, -1, base]
++        const lengths = [65_535, 0, 31]
++        await expectDirectArrayEncoding(
++            createChunk(indexes, offsets, lengths),
++            indexes.map((index) => offsets[index]),
++            indexes.map((index) => lengths[index]),
++        )
++    })
++
++    test('keeps exact delta limits and offset-driven run boundaries', async () => {
++        const offsets = [0x100000000, 0x1fffffffe, 0x200000000, -1, 8]
++        const lengths = [17, 19, 23, 0, 29]
++        const indexes = [0, 1, 2, 3, 4]
++        const runs = await expectDirectArrayEncoding(createChunk(indexes, offsets, lengths), offsets, lengths)
++        expect(runs.map(({firstId, count, base}) => ({firstId, count, base}))).toStrictEqual([
++            {firstId: 7, count: 2, base: 0x100000000},
++            {firstId: 9, count: 2, base: 0x200000000},
++            {firstId: 11, count: 1, base: 8},
++        ])
++    })
++
++    test.each([
++        {name: 'offset table', offsets: [16], lengths: [7, 9]},
++        {name: 'length table', offsets: [16, 32], lengths: [7]},
++        {name: 'both tables', offsets: [16], lengths: [7]},
++    ])('rejects an index outside the $name before encoding or append', async ({offsets, lengths}) => {
++        const recorder = createRecorder(createChunk([1], offsets, lengths), [64], [13])
++        const encode = vi.spyOn(recorder.store, '_encodeArtifactChunkRecords')
++        await expect(recorder.run()).rejects.toThrow('Invalid resolved term content reference index: 1')
++        expect(encode).not.toHaveBeenCalled()
++        expect(recorder.append).not.toHaveBeenCalled()
++    })
++
++    test('does not substitute caller arrays for a truncated reference index list', async () => {
++        const chunk = createChunk([0], [16], [7])
++        chunk.rowCount = 2
++        const recorder = createRecorder(chunk, [16, 32], [7, 9])
++        await expect(recorder.run()).rejects.toThrow('Invalid term content offset: undefined')
++        expect(recorder.append).not.toHaveBeenCalled()
++    })
++
++    test.each([-2, 0.5, Number.MAX_SAFE_INTEGER + 1, Number.NaN, Number.POSITIVE_INFINITY])(
++        'rejects invalid resolved offset %s without writing',
++        async (offset) => {
++            const recorder = createRecorder(createChunk([0], [offset], [7]))
++            await expect(recorder.run()).rejects.toThrow(`Invalid term content offset: ${offset}`)
++            expect(recorder.append).not.toHaveBeenCalled()
++        },
++    )
++
++    test('retains the reserved u32 content-length check', async () => {
++        const recorder = createRecorder(createChunk([0], [16], [0xffffffff]))
++        await expect(recorder.run()).rejects.toThrow('Invalid term content length: 4294967295')
++        expect(recorder.append).not.toHaveBeenCalled()
++    })
++
++    test.each([void 0, -1, Number.NaN])('retains fixed-length precedence with base %s', async (base) => {
++        const chunk = createChunk([1, 0], [16, 32], [70000, 90000])
++        chunk.fixedContentOffsetBase = base
++        chunk.fixedContentLength = 11
++        await expectDirectArrayEncoding(chunk, [32, 16], [11, 11])
++    })
++
++    test('retains an invalid numeric fixed length instead of using valid resolved lengths', async () => {
++        const chunk = createChunk([0], [16], [7])
++        chunk.fixedContentLength = Number.NaN
++        const recorder = createRecorder(chunk)
++        await expect(recorder.run()).rejects.toThrow('Invalid term content length: NaN')
++        expect(recorder.append).not.toHaveBeenCalled()
++    })
++
++    test('fixed spans retain precedence over unusable resolved references', async () => {
++        const chunk = createChunk([99, 99], [], [])
++        chunk.fixedContentOffsetBase = 1024
++        chunk.fixedContentLength = 13
++        await expectDirectArrayEncoding(chunk, [1024, 1037], [13, 13])
++    })
++
++    test.each(['references', 'fixed length', 'fixed span'])('reselects %s after an awaited append', async (mode) => {
++        const chunk = createChunk(new Array(30_001).fill(0), [16], [7])
++        const recorder = createRecorder(chunk, [], [], async (appendCount) => {
++            if (appendCount !== 1) { return }
++            await Promise.resolve()
++            if (mode === 'references') {
++                chunk.resolvedContentReferences = {
++                    uniqueIndexList: new Uint32Array(chunk.rowCount),
++                    offsets: new Float64Array([4096]),
++                    lengths: new Uint32Array([29]),
++                }
++            } else {
++                chunk.fixedContentLength = 29
++                if (mode === 'fixed span') { chunk.fixedContentOffsetBase = 4096 }
++            }
++        })
++        await recorder.run()
++        expect(recorder.runs.map(({count}) => count)).toStrictEqual([30_000, 1])
++        const finalRun = recorder.runs[1]
++        expect(finalRun.base).toBe(mode === 'fixed span' ? 4096 + 30_000 * 29 : (mode === 'references' ? 4096 : 16))
++        const fields = finalRun.fields
++        expect(fields).toBeInstanceOf(Uint8Array)
++        if (fields === null) { throw new Error('Expected encoded term fields') }
++        const view = new DataView(fields.buffer, fields.byteOffset, fields.byteLength)
++        expect(view.getUint32(0, true)).toBe(0)
++        expect(view.getUint32(4, true)).toBe(29)
++    })
++
++    test('revalidates an invalid replacement descriptor after the first run', async () => {
++        const chunk = createChunk(new Array(30_001).fill(0), [16], [7])
++        const recorder = createRecorder(chunk, [], [], async (appendCount) => {
++            if (appendCount !== 1) { return }
++            await Promise.resolve()
++            chunk.resolvedContentReferences = {
++                uniqueIndexList: new Uint32Array(chunk.rowCount).fill(1),
++                offsets: new Float64Array([16, 32]),
++                lengths: new Uint32Array([7]),
++            }
++        })
++        await expect(recorder.run()).rejects.toThrow('Invalid resolved term content reference index: 1')
++        expect(recorder.append).toHaveBeenCalledTimes(1)
++    })
++})
