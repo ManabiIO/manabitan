@@ -584,6 +584,8 @@ export class Translator {
      * @param {import('translator').DictionaryAvailability[]} [observedAvailability]
      */
     async _addEntriesToDeinflections(language, deinflections, enabledDictionaryMap, matchType, observedAvailability = []) {
+        if (deinflections.length === 0) { return; }
+
         const uniqueDeinflectionsMap = this._groupDeinflectionsByTerm(deinflections);
         const uniqueDeinflectionArrays = [...uniqueDeinflectionsMap.values()];
         const uniqueDeinflectionTerms = [...uniqueDeinflectionsMap.keys()];
