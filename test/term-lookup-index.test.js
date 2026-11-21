@@ -611,6 +611,20 @@ describe('persisted term lookup index', () => {
         );
     });
 
+    test.each([
+        ['readingKeys', 'Incomplete persisted term lookup posting rows'],
+        ['sequenceRowKeys', 'Incomplete persisted sequence lookup postings'],
+    ])('rejects an extra optional row key in %s', (column, message) => {
+        const encoded = encodePersistedTermLookupIndex([
+            {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: 42},
+            {expressionBytes: bytes('beta'), readingBytes: null, sequence: null},
+        ]);
+        const index = parsePersistedTermLookupIndex(encoded);
+        index[column === 'readingKeys' ? 'readingKeys' : 'sequenceRowKeys'][1] = 0;
+
+        expect(() => parseChecksummedPersistedTermLookupIndex(encoded)).toThrow(message);
+    });
+
     test('rejects out-of-range posting rows through semantic validation', () => {
         const encoded = encodePersistedTermLookupIndex([
             {expressionBytes: bytes('alpha'), readingBytes: null, sequence: null},
