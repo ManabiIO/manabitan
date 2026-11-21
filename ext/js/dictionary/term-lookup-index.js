@@ -26,7 +26,6 @@ const DERIVED_HEADER_U32_COUNT = 8;
 const DERIVED_HEADER_BYTES = DERIVED_HEADER_U32_COUNT * 4;
 const CONTAINER_MAGIC = 0x37494c4d;
 const RADIX_SIZE = 257;
-const U32_NULL = 0xffffffff;
 const U16_NULL = 0xffff;
 const READING_EQUALS_EXPRESSION_U32 = 0xffffffff;
 const COMPACT_INDEX_FORMAT_VERSION = 7;
@@ -813,8 +812,6 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
     const sequenceNext = takeCompact(sequenceKeyCount);
     const sequencePostingOffsets = takeCompact(sequenceKeyCount + 1);
     const sequencePostingRows = takeCompact(sequencePostingCount);
-    validateOffsets(expressionPostingOffsets, expressionPostingRows.length);
-    validateOffsets(readingPostingOffsets, readingPostingRows.length);
     const index = {
         keyBytes,
         keyOffsets,
@@ -839,7 +836,7 @@ function parsePersistedTermLookupIndexInternal(bytes, validateKeyHashBuckets) {
         forwardReady: false,
         reverseReady: false,
     };
-    validateIndex(index, validateKeyHashBuckets, false);
+    validateIndex(index, validateKeyHashBuckets);
     return index;
 }
 
@@ -1106,27 +1103,13 @@ function appendPostingRows(index, key, field, output, rowOffset) {
 }
 
 /**
+ * Checks the lookup tables after the parser has established all dimensions and
+ * key boundaries.
  * @param {PersistedTermLookupIndex} index
- * @param {boolean} [validateKeyHashBuckets=true]
- * @param {boolean} [postingKeysValidated=false]
- * @throws {Error} If an index reference or boundary is invalid.
+ * @param {boolean} validateKeyHashBuckets
+ * @throws {Error} If a posting has an invalid, missing or duplicate row reference.
  */
-function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidated = false) {
-    const keyCount = index.keyOffsets.length - 1;
-    const rowCount = index.expressionKeys.length;
-    if (
-        index.keyOffsets[0] !== 0 ||
-        index.keyOffsets[keyCount] !== index.keyBytes.byteLength ||
-        index.readingKeys.length !== rowCount ||
-        index.sequenceRowKeys.length !== rowCount ||
-        index.sequenceNext.length !== index.sequenceKeys.length ||
-        index.sequencePostingOffsets.length !== index.sequenceKeys.length + 1
-    ) {
-        throw new Error('Invalid persisted term lookup index boundaries');
-    }
-    for (let key = 0; key < keyCount; ++key) {
-        if (index.keyOffsets[key] >= index.keyOffsets[key + 1]) { throw new Error('Invalid persisted term lookup key boundary'); }
-    }
+function validateIndex(index, validateKeyHashBuckets) {
     validateKeyHashChains(
         index.keyHeads,
         index.keyNext,
@@ -1134,29 +1117,22 @@ function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidate
         index.keyOffsets,
         validateKeyHashBuckets,
     );
-    if (!postingKeysValidated) {
-        validateOffsets(index.expressionPostingOffsets, index.expressionPostingRows.length);
-        validateOffsets(index.readingPostingOffsets, index.readingPostingRows.length);
-    }
+    const rowCount = index.expressionKeys.length;
     const rowSeen = new Uint8Array(rowCount);
-    if (!postingKeysValidated) {
-        validatePostingRows(
-            index.expressionPostingOffsets,
-            index.expressionPostingRows,
-            index.expressionKeys,
-            U16_NULL,
-            rowSeen,
-            1,
-        );
-        validatePostingRows(
-            index.readingPostingOffsets,
-            index.readingPostingRows,
-            index.readingKeys,
-            U16_NULL,
-            rowSeen,
-            2,
-        );
-    }
+    validatePostingRows(
+        index.expressionPostingOffsets,
+        index.expressionPostingRows,
+        index.expressionKeys,
+        rowSeen,
+        1,
+    );
+    validatePostingRows(
+        index.readingPostingOffsets,
+        index.readingPostingRows,
+        index.readingKeys,
+        rowSeen,
+        2,
+    );
     validateSequenceIndex(
         index.sequenceHeads,
         index.sequenceNext,
@@ -1167,14 +1143,20 @@ function validateIndex(index, validateKeyHashBuckets = true, postingKeysValidate
         rowSeen,
         3,
     );
-    if (index.forwardReady) {
-        validateForwardIndex(index);
+    // Every posting has a distinct row with the corresponding key. Expression
+    // postings already number exactly one per row. For optional columns, check
+    // that the posting counts cover every row where the key is present.
+    let readingKeyCount = 0;
+    let sequenceKeyCount = 0;
+    for (let row = 0; row < rowCount; ++row) {
+        if (index.readingKeys[row] !== U16_NULL) { ++readingKeyCount; }
+        if (index.sequenceRowKeys[row] !== U16_NULL) { ++sequenceKeyCount; }
     }
-    if (index.reverseReady) {
-        if (index.keyReverseOrder === null || index.keyReverseRadix === null) {
-            throw new Error('Invalid persisted reverse term lookup index');
-        }
-        validateReferences(index.keyReverseOrder, keyCount);
+    if (readingKeyCount !== index.readingPostingRows.length) {
+        throw new Error('Incomplete persisted term lookup posting rows');
+    }
+    if (sequenceKeyCount !== index.sequencePostingRows.length) {
+        throw new Error('Incomplete persisted sequence lookup postings');
     }
 }
 
@@ -1243,12 +1225,12 @@ function validateKeyHashChains(heads, next, keyBytes, keyOffsets, validateHashBu
  * @param {Uint16Array|Uint32Array} offsets
  * @param {Uint16Array|Uint32Array} rows
  * @param {Uint16Array|Uint32Array} keys
- * @param {number} skipKey
  * @param {Uint8Array} seen
  * @param {number} marker
  * @throws {Error} If a posting is duplicated, missing, or assigned to the wrong key.
  */
-function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
+function validatePostingRows(offsets, rows, keys, seen, marker) {
+    validateOffsets(offsets, rows.length);
     for (let key = 0; key < offsets.length - 1; ++key) {
         for (let i = offsets[key]; i < offsets[key + 1]; ++i) {
             const row = rows[i];
@@ -1256,11 +1238,6 @@ function validatePostingRows(offsets, rows, keys, skipKey, seen, marker) {
                 throw new Error('Invalid persisted term lookup posting row');
             }
             seen[row] = marker;
-        }
-    }
-    for (let row = 0; row < keys.length; ++row) {
-        if ((keys[row] !== skipKey) !== (seen[row] === marker)) {
-            throw new Error('Incomplete persisted term lookup posting rows');
         }
     }
 }
@@ -1318,53 +1295,6 @@ function validateSequenceIndex(heads, next, keys, postingOffsets, postingRows, r
             seen[row] = marker;
         }
     }
-    for (let row = 0; row < rowKeys.length; ++row) {
-        const key = Number(rowKeys[row]);
-        if (
-            (key === U16_NULL) !== (seen[row] !== marker) ||
-            (key !== U16_NULL && key >= keys.length)
-        ) {
-            throw new Error('Incomplete persisted sequence lookup postings');
-        }
-    }
-}
-
-/**
- * @param {PersistedTermLookupIndex} index
- * @throws {Error} If the persisted forward order is not a sorted permutation.
- */
-function validateForwardIndex(index) {
-    const {keyOrder, keyRadix, keyBytes, keyOffsets} = index;
-    const keyCount = keyOffsets.length - 1;
-    if (
-        !(keyOrder instanceof Uint16Array) ||
-        !(keyRadix instanceof Uint32Array) ||
-        keyOrder.length !== keyCount ||
-        keyRadix.length !== RADIX_SIZE
-    ) {
-        throw new Error('Invalid persisted forward term lookup index dimensions');
-    }
-    const seen = new Uint8Array(keyCount);
-    for (let i = 0; i < keyCount; ++i) {
-        const key = keyOrder[i];
-        if (key >= keyCount || seen[key] !== 0) {
-            throw new Error('Invalid persisted forward term lookup key order');
-        }
-        seen[key] = 1;
-        if (
-            i > 0 &&
-            compareKeyRanges(keyBytes, keyOffsets, keyOrder[i - 1], key, false) >= 0
-        ) {
-            throw new Error('Unsorted persisted forward term lookup key order');
-        }
-    }
-    const expectedRadix = new Uint32Array(RADIX_SIZE);
-    fillRadix(expectedRadix, keyOrder, keyBytes, keyOffsets, false);
-    for (let i = 0; i < RADIX_SIZE; ++i) {
-        if (keyRadix[i] !== expectedRadix[i]) {
-            throw new Error('Invalid persisted forward term lookup radix');
-        }
-    }
 }
 
 /**
@@ -1398,17 +1328,6 @@ function ensureReverseIndex(index) {
     index.keyReverseOrder = keyReverseOrder;
     index.keyReverseRadix = keyReverseRadix;
     index.reverseReady = true;
-}
-
-/**
- * @param {Uint16Array|Uint32Array} values
- * @param {number} limit
- * @throws {Error} If a reference is outside its valid range.
- */
-function validateReferences(values, limit) {
-    for (const value of values) {
-        if (value !== U32_NULL && value >= limit) { throw new Error('Invalid persisted term lookup reference'); }
-    }
 }
 
 /**
