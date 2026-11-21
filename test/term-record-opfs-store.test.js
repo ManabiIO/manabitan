@@ -1522,7 +1522,7 @@ describe('TermRecordOpfsStore', () => {
         const readRange = reader._readFileRange.bind(reader);
         let failedReads = 0;
         vi.spyOn(reader, '_readFileRange').mockImplementation(async (file, start, end) => {
-            if (file.name === indexName && start === fieldsStart && end === fieldsStart + 16 && failedReads < failureCount) {
+            if (file.name === indexName && start <= fieldsStart && end >= fieldsStart + 16 && failedReads < failureCount) {
                 ++failedReads;
                 throw new DOMException('Injected temporary compact header read failure', 'NotReadableError');
             }
@@ -4048,6 +4048,7 @@ void 0,
         const fullRead = vi.fn(async () => {
             throw new Error('full lookup-index materialization is forbidden');
         });
+        let shortReadCount = 0;
         const readerDirectory = createFakeDirectoryHandle(fileBytesByName, {
             fileFactory(name, bytes) {
                 if (name !== indexFileName) { return null; }
@@ -4061,6 +4062,9 @@ void 0,
                      */
                     slice(start, end) {
                         ranges.push([start, end]);
+                        if (start === 0 && end === bytes.byteLength && shortReadCount++ === 0) {
+                            return new Blob([bytes.subarray(start, end - 1)]);
+                        }
                         return new Blob([bytes.subarray(start, end)]);
                     },
                 }));
@@ -4072,10 +4076,12 @@ void 0,
         await readerStore.ensureDictionariesLoaded([dictionaryName]);
 
         expect(fullRead).not.toHaveBeenCalled();
-        expect(ranges.length).toBeGreaterThan(2);
-        expect(ranges[0]).toEqual([0, 40]);
+        expect(ranges).toEqual([
+            [0, indexBytes.byteLength],
+            [0, indexBytes.byteLength],
+        ]);
         expect(ranges.every(([start, end]) => start >= 0 && end > start && end <= indexBytes.byteLength)).toBe(true);
-        expect(Math.max(...ranges.map(([start, end]) => end - start))).toBeLessThan(indexBytes.byteLength);
+        expect(Math.max(...ranges.map(([start, end]) => end - start))).toBeLessThanOrEqual(32 * 1024 * 1024);
         expect(readerStore.getDictionaryRecordCount(dictionaryName)).toBe(5);
         const firstChunkId = readerStore.findTermIds(dictionaryName, '二', 'expression')[0] ?? -1;
         const secondChunkId = readerStore.findTermIds(dictionaryName, '五', 'expression')[0] ?? -1;
