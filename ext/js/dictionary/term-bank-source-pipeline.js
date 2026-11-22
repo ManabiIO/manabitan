@@ -109,11 +109,13 @@ export class RawZipPayloadReader {
         const expectedFilenameLength = rawFilename instanceof Uint8Array && rawFilename.byteLength <= 0xffff ?
             rawFilename.byteLength :
 0;
-        // The central filename length bounds the local name read. The local
-        // header still has to agree before any payload is read.
-        const metadataLength = Math.min(archiveSize - offset, ZIP_LOCAL_FILE_HEADER_LENGTH + expectedFilenameLength);
+        // Include a bounded payload in the header read for entries without a
+        // local extra field. A larger payload or extra field uses the exact read.
+        const prefetchedPayloadLength = ranged && expectedFilenameLength > 0 && compressedSize <= RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ?
+            compressedSize : 0;
+        const readLength = Math.min(archiveSize - offset, ZIP_LOCAL_FILE_HEADER_LENGTH + expectedFilenameLength + prefetchedPayloadLength);
         const archiveBytes = ranged ?
-            await this._readBlobRange(offset, metadataLength, signal) :
+            await this._readBlobRange(offset, readLength, signal) :
             await this._getArchiveBytes();
         signal.throwIfAborted();
         const headerOffset = ranged ? 0 : offset;
@@ -143,9 +145,14 @@ export class RawZipPayloadReader {
                 }
             }
         }
-        return ranged ?
-            await this._readBlobRange(dataOffset, compressedSize, signal) :
-            Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
+        if (ranged) {
+            const relativeDataOffset = dataOffset - offset;
+            if (relativeDataOffset <= archiveBytes.byteLength - compressedSize) {
+                return archiveBytes.slice(relativeDataOffset, relativeDataOffset + compressedSize);
+            }
+            return await this._readBlobRange(dataOffset, compressedSize, signal);
+        }
+        return Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
     }
 
     /**
