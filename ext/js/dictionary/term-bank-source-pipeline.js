@@ -150,17 +150,19 @@ export class RawZipPayloadReader {
 
     /**
      * Reads nearby ZIP entries through a bounded number of coalesced archive
-     * ranges. The returned byte arrays own their storage and preserve the
-     * source metadata needed by the native inflater.
+     * ranges. Returned byte arrays own their storage unless the media pack
+     * explicitly requests borrowed views into a bounded large-Blob range.
      * @param {TermBankSourceFile[]} files
      * @param {AbortSignal} [signal]
      * @param {() => boolean} [isCancelled]
+     * @param {boolean} [borrowPayloadViews]
      * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>, rangeReadCount: number, rangeReadBytes: number}|null>}
      */
-    async readBatch(files, signal = new AbortController().signal, isCancelled = () => false) {
+    async readBatch(files, signal = new AbortController().signal, isCancelled = () => false, borrowPayloadViews = false) {
         if (!Array.isArray(files) || files.length === 0) { return {sources: [], rangeReadCount: 0, rangeReadBytes: 0}; }
         if (files.length > RAW_ZIP_BATCH_MAX_FILES) { return null; }
         const archiveSize = this._archiveContent instanceof Blob ? this._archiveContent.size : this._archiveContent.byteLength;
+        if (borrowPayloadViews && (!(this._archiveContent instanceof Blob) || archiveSize <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES)) { return null; }
         /** @type {Array<{file: TermBankSourceFile, offset: number, rawFilename: Uint8Array, compressedSize: number, uncompressedSize: number, compressionMethod: 0|8, signature: number, filename: string}>} */
         const entries = [];
         let compressedBytes = 0;
@@ -268,7 +270,7 @@ export class RawZipPayloadReader {
                 result.push({
                     file: entry.file,
                     archiveOffset: absoluteDataOffset,
-                    bytes: Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
+                    bytes: borrowPayloadViews ? bytes.subarray(dataOffset, payloadEnd) : Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
                     compressionMethod: entry.compressionMethod,
                     compressedSize: entry.compressedSize,
                     uncompressedSize: entry.uncompressedSize,
