@@ -93,6 +93,8 @@ const TERM_EXACT_MATCH_CACHE_MAX_BYTES = 4 * 1024 * 1024;
 const TERM_EXACT_MATCH_CACHE_MAX_IDS_PER_TERM = 256;
 const GLOSSARY_SEARCH_INDEX_VERSION = 2;
 const GLOSSARY_SEARCH_BUILD_BATCH_SIZE = 192;
+// SQLite 3.51.2 in ext/lib/sqlite is built with MAX_VARIABLE_NUMBER=32766.
+const SQLITE_MAX_VARIABLE_NUMBER = 32766;
 const GLOSSARY_SEARCH_CANDIDATE_LIMIT = 400;
 const GLOSSARY_SEARCH_RESULT_LIMIT = 100;
 const TERM_BULK_ADD_STAGING_MAX_ROWS = 3000;
@@ -3959,8 +3961,16 @@ null;
         const results = [];
         const termIndexMap = this._buildTermIndexMap(termList);
         const dictionaryNames = this._getDictionaryNames(dictionaries);
-        const {clause: termInClause, bind: termBind} = this._buildTextInClause(termIndexMap.keys(), 'term');
-        const {clause: dictionaryInClause, bind: dictionaryBind} = this._buildTextInClause(dictionaryNames, 'dict');
+        const useJsonTerms = (termIndexMap.size + dictionaryNames.length) > SQLITE_MAX_VARIABLE_NUMBER;
+        // Keep the common path's existing SQL and bindings. A JSON table keeps
+        // large prefix metadata lookups in one statement, avoiding both the
+        // variable ceiling and any result-order changes from chunked queries.
+        const {clause: termInClause, bind: termBind} = useJsonTerms ?
+            {clause: 'SELECT value FROM json_each($termsJson)', bind: {$termsJson: JSON.stringify([...termIndexMap.keys()])}} :
+            this._buildTextInClause(termIndexMap.keys(), 'term');
+        const {clause: dictionaryInClause, bind: dictionaryBind} = useJsonTerms ?
+            {clause: 'SELECT value FROM json_each($dictionariesJson)', bind: {$dictionariesJson: JSON.stringify(dictionaryNames)}} :
+            this._buildTextInClause(dictionaryNames, 'dict');
         const sql = `SELECT * FROM termMeta WHERE expression IN (${termInClause}) AND dictionary IN (${dictionaryInClause})`;
         const stmt = this._getCachedStatement(sql);
         stmt.reset(true);
