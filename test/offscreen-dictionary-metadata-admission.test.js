@@ -39,7 +39,7 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-const cooperativeReadActions = ['getDictionaryInfoOffscreen', 'databaseGetMediaOffscreen'];
+const cooperativeReadActions = ['getDictionaryInfoOffscreen', 'databaseGetMediaOffscreen', 'clearDatabaseCachesOffscreen'];
 
 test.each(cooperativeReadActions)('%s during warmup does not make foreground lookups wait', async (action) => {
     const {worker, postMessage} = await createWorker();
