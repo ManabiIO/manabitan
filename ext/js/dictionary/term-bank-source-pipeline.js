@@ -106,13 +106,10 @@ export class RawZipPayloadReader {
         // validated entry ranges; an already-owned ArrayBuffer needs no copy.
         const ranged = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES;
         const rawFilename = /** @type {unknown} */ (Reflect.get(file, 'rawFilename'));
-        const expectedFilenameLength = rawFilename instanceof Uint8Array && rawFilename.byteLength <= 0xffff ?
-            rawFilename.byteLength :
-0;
+        const expectedFilenameLength = rawFilename instanceof Uint8Array && rawFilename.byteLength <= 0xffff ? rawFilename.byteLength : 0;
         // Include a bounded payload in the header read for entries without a
         // local extra field. A larger payload or extra field uses the exact read.
-        const prefetchedPayloadLength = ranged && expectedFilenameLength > 0 && compressedSize <= RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ?
-            compressedSize : 0;
+        const prefetchedPayloadLength = ranged && expectedFilenameLength > 0 && compressedSize <= RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ? compressedSize : 0;
         const readLength = Math.min(archiveSize - offset, ZIP_LOCAL_FILE_HEADER_LENGTH + expectedFilenameLength + prefetchedPayloadLength);
         const archiveBytes = ranged ?
             await this._readBlobRange(offset, readLength, signal) :
