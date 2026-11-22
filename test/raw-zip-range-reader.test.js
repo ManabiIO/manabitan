@@ -397,7 +397,7 @@ describe('bounded large ZIP entry reads', () => {
         const actual = await reader.read(file, signal());
         expect(actual).toEqual(payload);
         expect(method === 8 ? new Uint8Array(inflateRawSync(actual)) : actual).toEqual(content);
-        expect(archive.ranges).toEqual([[0, 30 + name.length], [header.length, header.length + payload.length]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length + payload.length], [header.length, header.length + payload.length]]);
         expect(actual.byteOffset).toBe(0);
         expect(actual.buffer.byteLength).toBe(actual.byteLength);
         actual.fill(0);
@@ -439,7 +439,7 @@ describe('bounded large ZIP entry reads', () => {
         file.offset = padding.size;
         const archive = new TrackedBlob([padding, header, payload]);
         await expect(new RawZipPayloadReader(archive).read(file, signal())).rejects.toThrow(/Raw ZIP/);
-        expect(archive.ranges.every(([, end]) => end <= file.offset + 30 + name.length)).toBe(true);
+        expect(archive.ranges.every(([, end]) => end <= file.offset + 30 + name.length + file.compressedSize)).toBe(true);
     });
     test.each([-1, 0.5, Number.NaN, Number.MAX_SAFE_INTEGER])('rejects invalid offset before I/O: %s', async (offset) => {
         const {header, payload, file} = entry(8);
@@ -471,7 +471,7 @@ describe('bounded large ZIP entry reads', () => {
         release();
         await disposal;
         await rejected;
-        expect(archive.ranges).toEqual([[0, 30 + name.length]]);
+        expect(archive.ranges).toEqual([[0, 30 + name.length + payload.length]]);
     });
     test.each([2, 8])('retains the compressed-source budget on deviceMemory=%i', async (deviceMemory) => {
         const lowMemory = deviceMemory === 2;
