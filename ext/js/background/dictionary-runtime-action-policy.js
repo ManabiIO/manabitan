@@ -103,8 +103,11 @@ export const dictionaryRuntimeActionPolicies = Object.freeze({
     findTermsOffscreen: interactiveLookupPolicy,
     findTermsStructuredOffscreen: interactiveLookupPolicy,
     getTermFrequenciesOffscreen: interactiveLookupPolicy,
+    // Pending tag loads only hold detached cache maps, and frequency cache
+    // fills check the identity of their pending promise before publishing.
+    // A cache clear need not block lookups while background warming finishes.
     clearDatabaseCachesOffscreen: Object.freeze({
-        concurrency: 'exclusive', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
+        concurrency: 'lookup', timeoutClass: 'standard', retryable: false, requiresDatabase: false, rejectDuringImport: true,
     }),
     cancelDictionaryImportOffscreen: Object.freeze({
         concurrency: 'cancellation', timeoutClass: 'standard', retryable: false, requiresDatabase: false,

@@ -18,6 +18,7 @@
 
 import {describe, expect, test, vi} from 'vitest';
 import {Translator} from '../ext/js/language/translator.js';
+import {deferPromise} from '../ext/js/core/utilities.js';
 
 /**
  * @returns {(translator: Translator, tagTargets: import('translator').TagExpansionTarget[]) => Promise<void>}
@@ -133,4 +134,34 @@ describe('Translator tag cache limits', () => {
         await expandTagGroups(translator, createTagTargets('dict-b', ['y']));
         expect(findTagMetaBulkImpl).toHaveBeenCalledTimes(4);
     });
+});
+
+test('clearing tag caches detaches an in-flight cache fill', async () => {
+    const pending = deferPromise();
+    const findTagMetaBulkImpl = createFindTagMetaBulkMock();
+    findTagMetaBulkImpl.mockReturnValueOnce(pending.promise);
+    const findTagMetaBulk = /** @type {import('../ext/js/dictionary/dictionary-database.js').DictionaryDatabase['findTagMetaBulk']} */ (/** @type {unknown} */ (findTagMetaBulkImpl));
+    const translator = createTranslator(findTagMetaBulk);
+    const expandTagGroups = getExpandTagGroupsMethod();
+    const oldFill = expandTagGroups(translator, createTagTargets('dict-a', ['x']));
+    const detachedDictionaryCache = getTagCache(translator).get('dict-a');
+    expect(detachedDictionaryCache).toBeDefined();
+
+    translator.clearDatabaseCaches();
+    expect(getTagCache(translator).size).toBe(0);
+    pending.resolve([{
+        name: 'x',
+        dictionary: 'dict-a',
+        category: 'default',
+        notes: 'old-note',
+        order: 0,
+        score: 0,
+    }]);
+    await oldFill;
+    expect(detachedDictionaryCache?.get('x')?.notes).toBe('old-note');
+    expect(getTagCache(translator).size).toBe(0);
+
+    await expandTagGroups(translator, createTagTargets('dict-a', ['x']));
+    expect(findTagMetaBulkImpl).toHaveBeenCalledTimes(2);
+    expect(getTagCache(translator).get('dict-a')?.get('x')?.notes).toBe('note-x');
 });
