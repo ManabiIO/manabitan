@@ -132,7 +132,10 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
 
         const readStart = Date.now();
         const files = byOffset.slice(start, end).map(({file}) => file);
-        const batch = await reader.readBatch(files, void 0, checkRawReadCancelled);
+        // Large-Blob reads use bounded coalesced ranges. Keep payload subviews
+        // into that range through validation instead of allocating one owned
+        // byte array per image; the validator copies bytes into its WASM arena.
+        const batch = await reader.readBatch(files, void 0, checkRawReadCancelled, true);
         if (batch === null || batch.sources.length !== files.length) { return null; }
         readMs += Math.max(0, Date.now() - readStart);
         rangeReadCount += batch.rangeReadCount;

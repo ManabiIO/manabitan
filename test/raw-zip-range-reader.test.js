@@ -193,6 +193,30 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload]);
     });
 
+    test('borrows payload subviews only from bounded large-Blob ranges', async () => {
+        const first = entry(8, 4);
+        const second = entry(0, 2);
+        second.file.filename = 'term_bank_2.json';
+        second.file.rawFilename = encoder.encode(second.file.filename);
+        const secondHeader = Uint8Array.from(second.header);
+        secondHeader.set(second.file.rawFilename, 30);
+        second.file.offset = first.header.length + first.payload.length;
+        const archive = new TrackedBlob([first.header, first.payload, secondHeader, second.payload, padding]);
+        const reader = new RawZipPayloadReader(archive);
+
+        const batch = await reader.readBatch([second.file, first.file], signal(), () => false, true);
+
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload]);
+        expect(batch?.sources[0].bytes.buffer).toBe(batch?.sources[1].bytes.buffer);
+        expect(batch?.sources[0].bytes.byteOffset).toBeGreaterThan(0);
+        expect(batch?.sources[0].bytes.buffer.byteLength).toBe(batch?.rangeReadBytes);
+        expect(archive.ranges).toHaveLength(1);
+
+        const smallArchive = new TrackedBlob([first.header, first.payload]);
+        expect(await new RawZipPayloadReader(smallArchive).readBatch([first.file], signal(), () => false, true)).toBeNull();
+        expect(smallArchive.ranges).toEqual([]);
+    });
+
     test('coalesces the full deferred media entry limit in a bounded Blob range', async () => {
         const entries = Array.from({length: 1024}, (_, index) => {
             const result = entry(0);
@@ -345,11 +369,11 @@ describe('bounded large ZIP entry reads', () => {
         expect(archive.ranges).toEqual([[0, header.byteLength + payload.byteLength]]);
     });
 
-    test('joins a cancelled batch Blob read before exposing bytes', async () => {
+    test.each([false, true])('joins a cancelled batch Blob read before exposing bytes (borrowed=%s)', async (borrowPayloadViews) => {
         const {header, payload, file} = entry(8);
         const {archive, started, release} = delayedArchive([header, payload, padding]);
         const controller = new AbortController();
-        const pending = new RawZipPayloadReader(archive).readBatch([file], controller.signal);
+        const pending = new RawZipPayloadReader(archive).readBatch([file], controller.signal, () => false, borrowPayloadViews);
         let settled = false;
         const markSettled = () => { settled = true; };
         void pending.then(markSettled, markSettled);
