@@ -193,6 +193,17 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     typeof validation.probeCount !== 'number' || validation.probeCount < 12) {
         throw new Error(`Missing or invalid post-import validation for ${fixture.expectedTitle}`);
     }
+    if (typeof fixture.mediaRows === 'number') {
+        if (validation.mediaRows !== fixture.mediaRows) {
+            throw new Error(`Missing or invalid post-import media count for ${fixture.expectedTitle}`);
+        }
+        const restart = asRecord(validation.restart);
+        if (restart?.title !== fixture.expectedTitle || restart.revision !== fixture.revision ||
+        restart.termRows !== fixture.termRows || restart.mediaRows !== fixture.mediaRows || restart.contentReadable !== true ||
+        typeof restart.probeCount !== 'number' || !Number.isSafeInteger(restart.probeCount) || restart.probeCount < 12) {
+            throw new Error(`Missing or invalid post-restart validation for ${fixture.expectedTitle}`);
+        }
+    }
     const localPhases = Array.isArray(debug.localPhaseTimings) ? debug.localPhaseTimings.map(asRecord) : [];
     const workerPhases = localPhases.filter((entry) => entry?.phase === 'worker-import-dictionary');
     return {
