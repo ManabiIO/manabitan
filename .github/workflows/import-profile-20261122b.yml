@@ -1,0 +1,43 @@
+name: Import profiles 20261122 round 2
+
+on:
+  push:
+    branches: [perf/import-profile-20261122-71149b]
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Verify baseline production source
+        run: git diff --exit-code 5e1f8c12f7ff798ba407323aff675cb23b22af02 HEAD -- ext dev/data/dictionary-wasm package-lock.json
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-memory-20261122-${{ matrix.dictionary }}-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Capture diagnostic import trace
+        env:
+          PERF_DICTIONARY: ${{ matrix.dictionary }}
+        run: node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --trace --runs 1 --build-target chrome --output "builds/import-profile-20261122b/$PERF_DICTIONARY"
+      - name: Preserve trace and correctness receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-profile-20261122b-${{ matrix.dictionary }}
+          path: builds/import-profile-20261122b
+          if-no-files-found: error
+          retention-days: 14
