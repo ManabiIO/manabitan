@@ -112,15 +112,19 @@ static __attribute__((always_inline)) inline uint32_t crc32_bytes_serial(const u
 static uint32_t crc32_braid_table[8][256];
 static uint32_t crc32_braid_initialized;
 
-static inline uint32_t crc32_word8(uint64_t word, uint32_t table[8][256]) {
-    return table[7][(word >> 0u) & 0xffu] ^
-        table[6][(word >> 8u) & 0xffu] ^
-        table[5][(word >> 16u) & 0xffu] ^
-        table[4][(word >> 24u) & 0xffu] ^
-        table[3][(word >> 32u) & 0xffu] ^
-        table[2][(word >> 40u) & 0xffu] ^
-        table[1][(word >> 48u) & 0xffu] ^
-        table[0][word >> 56u];
+static inline uint32_t crc32_word8(const uint8_t* data, uint32_t crc, uint32_t table[8][256]) {
+    // Table addresses are 32-bit in WASM. Load each half directly instead of
+    // shifting and narrowing the upper bytes of an eight-byte word.
+    const uint32_t low = crc32_read_u32_le(data) ^ crc;
+    const uint32_t high = crc32_read_u32_le(data + 4u);
+    return table[7][low & 0xffu] ^
+        table[6][(low >> 8u) & 0xffu] ^
+        table[5][(low >> 16u) & 0xffu] ^
+        table[4][low >> 24u] ^
+        table[3][high & 0xffu] ^
+        table[2][(high >> 8u) & 0xffu] ^
+        table[1][(high >> 16u) & 0xffu] ^
+        table[0][high >> 24u];
 }
 
 static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
@@ -141,16 +145,12 @@ static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
     const uint32_t final_group = (length / step - 1u) * step;
     for (uint32_t offset = 0u; offset < final_group; offset += step) {
         for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
-            uint64_t word;
-            __builtin_memcpy(&word, data + offset + i * 8u, sizeof(word));
-            state[i] = crc32_word8(word ^ state[i], crc32_braid_table);
+            state[i] = crc32_word8(data + offset + i * 8u, state[i], crc32_braid_table);
         }
     }
     uint32_t crc = 0u;
     for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
-        uint64_t word;
-        __builtin_memcpy(&word, data + final_group + i * 8u, sizeof(word));
-        crc = crc32_word8(word ^ state[i] ^ crc, crc32_table);
+        crc = crc32_word8(data + final_group + i * 8u, state[i] ^ crc, crc32_table);
     }
     for (uint32_t offset = final_group + step; offset < length; ++offset) {
         crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset]) & 0xffu];

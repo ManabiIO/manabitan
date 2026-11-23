@@ -133,6 +133,21 @@ describe('term bank CRC32', () => {
         }
     })
 
+    test('preserves every braided tail at unaligned and physical memory ends', () => {
+        for (let tail = 0; tail < 64; ++tail) {
+            const bytes = randomBytes(262144 + tail, 0x81b4e761 ^ tail)
+            const expected = crc32(bytes) >>> 0
+            for (const alignment of [0, 1, 3, 7]) {
+                expect(candidateCrc(bytes, alignment)).toBe(expected)
+            }
+            wasm.wasm_reset_heap()
+            wasm.wasm_alloc(bytes.length)
+            const input = wasm.memory.buffer.byteLength - bytes.length
+            new Uint8Array(wasm.memory.buffer, input, bytes.length).set(bytes)
+            expect(wasm.term_bank_crc32_test(input, bytes.length) >>> 0).toBe(expected)
+        }
+    })
+
     /**
      * @param {Uint8Array} bytes
      */
