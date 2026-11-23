@@ -26,6 +26,7 @@ afterEach(() => { vi.restoreAllMocks() })
  * be observed without spawning a browser for this unit test.
  * @param {unknown[]} rows
  * @param {(chunk: ColumnChunk) => void} [inspect]
+ * @returns {Promise<{importer: DictionaryImporter, requirements: import('dictionary-importer').ImportRequirement[]}>}
  */
 async function collectReferences(rows, inspect = () => {}) {
     vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (source, version, onChunk, size, options) => {
