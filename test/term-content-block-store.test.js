@@ -269,7 +269,7 @@ describe('TermContentBlockStore', () => {
             completion,
         });
         const blockStore = new TermContentBlockStore(contentStore);
-        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const begin = Reflect.get(blockStore, '_beginAppendSpans').bind(blockStore);
         const source = Uint8Array.of(1, 2);
         const operation = begin(
             source,
@@ -296,7 +296,7 @@ describe('TermContentBlockStore', () => {
             completion: Promise.resolve({...reserved, primaryOffsets: [0], primaryLengths: [count + 12]}),
         });
         const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 40});
-        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const begin = Reflect.get(blockStore, '_beginAppendSpans').bind(blockStore);
         const operation = /** @type {TermContentBlockAppendOperation} */ (begin(
             new Uint8Array(count),
             Uint32Array.from({length: count}, (_, index) => index),
@@ -318,7 +318,7 @@ describe('TermContentBlockStore', () => {
             completion: Promise.resolve({...reserved, primaryOffsets: [0], primaryLengths: [15]}),
         });
         const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 40});
-        const begin = Reflect.get(blockStore, '_beginAppendSharedSpans').bind(blockStore);
+        const begin = Reflect.get(blockStore, '_beginAppendSpans').bind(blockStore);
         const operation = /** @type {TermContentBlockAppendOperation} */ (begin(
             Uint8Array.of(1, 2, 3),
             Uint32Array.of(0, 1, 2),
@@ -554,7 +554,7 @@ describe('TermContentBlockStore', () => {
         )).toBeNull();
     });
 
-    test('publishes reserved references while shared compression is pending', async () => {
+    test.each(['jmdict', null])('publishes reserved references while shared compression is pending (%s)', async (compressionDictName) => {
         /** @type {() => void} */
         let releaseCompression = () => {};
         vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(
@@ -593,7 +593,7 @@ describe('TermContentBlockStore', () => {
         const offsets = new Uint32Array([1, 5, 8]);
         const lengths = new Uint32Array([3, 2, 4]);
 
-        const operation = blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true);
+        const operation = blockStore.tryBeginAppendSpans(source, offsets, lengths, compressionDictName, true);
         if (operation === null) { throw new Error('Expected an early block append operation'); }
         const storage = await operation.storage;
         expect(storage.contentOffsets).toStrictEqual(new Float64Array([0, 20, 40]));
@@ -610,7 +610,7 @@ describe('TermContentBlockStore', () => {
         releaseCompression();
         await expect(operation.completion).resolves.toMatchObject({
             contentOffsets: new Float64Array([0, 20, 40]),
-            contentDictName: 'raw-block-v2:jmdict',
+            contentDictName: compressionDictName === null ? 'raw-block-v2' : 'raw-block-v2:jmdict',
         });
         await expect(competingAppend).resolves.toStrictEqual([{offset: 93, length: 1}]);
         for (let i = 0; i < lengths.length; ++i) {
@@ -622,12 +622,12 @@ describe('TermContentBlockStore', () => {
         }
     });
 
-    test.each([
+    test.each(['jmdict', null].flatMap((compressionDictName) => [
         {compressionFails: false, setupFails: false},
         {compressionFails: true, setupFails: false},
         {compressionFails: false, setupFails: true},
         {compressionFails: true, setupFails: true},
-    ])('drains borrowed compression before reservation failure completes ($compressionFails, setup: $setupFails)', async ({compressionFails, setupFails}) => {
+    ].map((value) => ({...value, compressionDictName}))))('drains borrowed compression before reservation failure completes ($compressionDictName, $compressionFails, setup: $setupFails)', async ({compressionFails, setupFails, compressionDictName}) => {
         /** @type {() => void} */
         let consumeSource = () => {};
         /** @type {() => void} */
@@ -661,7 +661,7 @@ describe('TermContentBlockStore', () => {
         });
         const source = new Uint8Array(new SharedArrayBuffer(3));
         source.set([1, 2, 3]);
-        const operation = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), 'jmdict', true);
+        const operation = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), compressionDictName, true);
         if (operation === null) { throw new Error('Expected an early block append operation'); }
         let terminal = false;
         const observedCompletion = operation.completion.finally(() => { terminal = true; });
@@ -681,7 +681,7 @@ describe('TermContentBlockStore', () => {
         }
         expect(terminal).toBe(true);
         Reflect.set(contentStore, '_queuedWriteError', null);
-        const retry = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), 'jmdict', true);
+        const retry = blockStore.tryBeginAppendSpans(source, new Uint32Array([0]), new Uint32Array([3]), compressionDictName, true);
         if (retry === null) { throw new Error('Expected a healthy retry'); }
         const stored = await retry.completion;
         expect(await blockStore.read(stored.contentOffsets[0], stored.contentLengths[0], stored.contentDictName)).toStrictEqual(source);
@@ -785,7 +785,7 @@ describe('TermContentBlockStore', () => {
         expect(Reflect.get(database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
     });
 
-    test('uses the reserved block plan after parallel shared compression fails', async () => {
+    test.each(['jmdict', null])('uses the reserved block plan after parallel shared compression fails (%s)', async (compressionDictName) => {
         vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
             const error = new Error('injected reservation compression failure');
             return {sourceConsumed: Promise.reject(error), completion: Promise.reject(error)};
@@ -803,7 +803,7 @@ describe('TermContentBlockStore', () => {
             source,
             new Uint32Array([0, 3]),
             new Uint32Array([3, 3]),
-            'jmdict',
+            compressionDictName,
             true,
         );
         if (operation === null) { throw new Error('Expected an early block append operation'); }
@@ -818,7 +818,7 @@ describe('TermContentBlockStore', () => {
         )).toStrictEqual(new Uint8Array([4, 5, 6]));
     });
 
-    test('does not reread shared source after compression acknowledged consumption', async () => {
+    test.each(['jmdict', null])('does not reread shared source after compression acknowledged consumption (%s)', async (compressionDictName) => {
         vi.mocked(beginCompressWrappedTermContentZstdSpansBatch).mockImplementationOnce(() => {
             const error = new Error('injected failure after source consumption');
             return {sourceConsumed: Promise.resolve(), completion: Promise.reject(error)};
@@ -835,13 +835,86 @@ describe('TermContentBlockStore', () => {
             source,
             new Uint32Array([0, 3]),
             new Uint32Array([3, 3]),
-            'jmdict',
+            compressionDictName,
             true,
         );
         if (operation === null) { throw new Error('Expected an early block append operation'); }
 
         await expect(operation.sourceConsumed).resolves.toBeUndefined();
         await expect(operation.completion).rejects.toThrow('failure after source consumption');
+    });
+
+    test.each(['jmdict', null].flatMap((compressionDictName) => [false, true].map((fails) => ({compressionDictName, fails}))))('retains owned source through transferred compression and fallback ($compressionDictName, failure: $fails)', async ({compressionDictName, fails}) => {
+        /** @type {() => void} */
+        let finishCompression = () => {};
+        vi.mocked(compressWrappedTermContentZstdBatch).mockImplementationOnce((chunks) => {
+            const transferred = structuredClone(chunks, {transfer: chunks.map((chunk) => /** @type {ArrayBuffer} */ (chunk.buffer))});
+            expect(chunks.every((chunk) => chunk.byteLength === 0)).toBe(true);
+            return new Promise((resolve, reject) => {
+                finishCompression = () => {
+                    if (fails) {
+                        reject(new Error('injected transferred compression failure'));
+                    } else {
+                        resolve({chunks: transferred.map(wrapCompressedTermContentBlock), envelopeMs: 0, wrapped: true});
+                    }
+                };
+            });
+        });
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 3});
+        const source = Uint8Array.of(99, 1, 2, 3, 88, 4, 5, 6, 77);
+        const offsets = Uint32Array.of(1, 5);
+        const lengths = Uint32Array.of(3, 3);
+        const operation = blockStore.tryBeginAppendSpans(source, offsets, lengths, compressionDictName, true);
+        if (operation === null) { throw new Error('Expected an owned block reservation'); }
+        let sourceConsumed = false;
+        void operation.sourceConsumed.then(() => { sourceConsumed = true; });
+        const storage = await operation.storage;
+        expect(storage.contentOffsets).toEqual(Float64Array.of(0, 20));
+        expect(Reflect.get(contentStore, '_length')).toBe(0);
+        expect(sourceConsumed).toBe(false);
+        expect([...source]).toEqual([99, 1, 2, 3, 88, 4, 5, 6, 77]);
+
+        finishCompression();
+        await operation.sourceConsumed;
+        source.fill(0);
+        await operation.completion;
+        expect(await blockStore.read(storage.contentOffsets[0], 3, storage.contentDictName)).toEqual(Uint8Array.of(1, 2, 3));
+        expect(await blockStore.read(storage.contentOffsets[1], 3, storage.contentDictName)).toEqual(Uint8Array.of(4, 5, 6));
+    });
+
+    test.each([false, true])('drains transferred compression after an owned reservation fails (setup: %s)', async (setupFails) => {
+        /** @type {() => void} */
+        let finishCompression = () => {};
+        vi.mocked(compressWrappedTermContentZstdBatch).mockImplementationOnce((chunks) => {
+            const transferred = structuredClone(chunks, {transfer: chunks.map((chunk) => /** @type {ArrayBuffer} */ (chunk.buffer))});
+            return new Promise((resolve) => {
+                finishCompression = () => { resolve({chunks: transferred.map(wrapCompressedTermContentBlock), envelopeMs: 0, wrapped: true}); };
+            });
+        });
+        const contentStore = new TermContentOpfsStore();
+        const writeError = new Error('injected owned reservation failure');
+        if (setupFails) {
+            vi.spyOn(contentStore, 'beginAppendBatchWithDerivedPrefix').mockImplementationOnce(() => { throw writeError; });
+        } else {
+            Reflect.set(contentStore, '_queuedWriteError', writeError);
+        }
+        const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 3});
+        const source = Uint8Array.of(1, 2, 3, 4, 5, 6);
+        const operation = blockStore.tryBeginAppendSpans(source, Uint32Array.of(0, 3), Uint32Array.of(3, 3), null, true);
+        if (operation === null) { throw new Error('Expected an owned block reservation'); }
+        let terminal = false;
+        const completion = operation.completion.finally(() => { terminal = true; });
+        void completion.catch(() => {});
+        try {
+            await expect(operation.storage).rejects.toBe(writeError);
+            await new Promise((resolve) => { setTimeout(resolve, 0); });
+            expect(terminal).toBe(false);
+        } finally {
+            finishCompression();
+            await expect(completion).rejects.toBe(writeError);
+        }
+        expect(terminal).toBe(true);
     });
 
     test('falls back to packed compression when shared-span dispatch fails', async () => {

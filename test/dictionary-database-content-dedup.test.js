@@ -2677,8 +2677,11 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         expect(harness.releaseBorrowedContent).toHaveBeenCalledOnce();
     });
 
-    test('reports source-driven initial content reservation', async () => {
+    test.each([false, true])('reports content reservation and ownership (owned: %s)', async (owned) => {
         const harness = createArtifactOverlapHarness();
+        if (owned && harness.chunk.contentBytesBuffer instanceof Uint8Array) {
+            harness.chunk.contentBytesBuffer = Uint8Array.from(harness.chunk.contentBytesBuffer);
+        }
         const importing = harness.run();
 
         await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
@@ -2693,6 +2696,8 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         });
         expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
             contentInitialReservationCount: 1,
+            contentReservationCount: 1,
+            contentOwnedReservationCount: owned ? 1 : 0,
         });
     });
 

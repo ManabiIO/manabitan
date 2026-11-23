@@ -120,7 +120,7 @@ export class TermContentBlockImportSession {
     }
 
     /**
-     * Starts a shared-slab append when block storage was already selected or
+     * Starts a slab append when block storage was already selected or
      * the source itself has a conservative compressibility estimate. Stable
      * reference offsets are published before compression and physical append.
      * @param {string} dictionary
@@ -725,8 +725,8 @@ export class TermContentBlockStore {
 
     /**
      * Begins the reservation-capable path without waiting for compression.
-     * Initial JMdict slabs are admitted only when sampled byte entropy leaves
-     * a conservative margin beyond the normal measured-savings threshold.
+     * Owned slabs and generic codecs require the measured-savings check to
+     * have passed already. Initial shared JMdict slabs retain their estimate.
      * @param {Uint8Array} sourceBytes
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
@@ -736,11 +736,11 @@ export class TermContentBlockStore {
      */
     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
+        const sharedSource = typeof SharedArrayBuffer === 'function' && sourceBytes.buffer instanceof SharedArrayBuffer;
         if (
             uncompressedBytes === 0 ||
-            compressionDictName !== 'jmdict' ||
-            typeof SharedArrayBuffer !== 'function' ||
-            !(sourceBytes.buffer instanceof SharedArrayBuffer)
+            (!force && (!sharedSource || compressionDictName !== 'jmdict')) ||
+            (compressionDictName !== 'jmdict' && this._compressionExperiments.experimentalGenericSpanCompression !== true)
         ) {
             return null;
         }
@@ -757,7 +757,7 @@ export class TermContentBlockStore {
         ) {
             return null;
         }
-        return this._beginAppendSharedSpans(
+        return this._beginAppendSpans(
             sourceBytes,
             sourceOffsets,
             sourceLengths,
@@ -771,12 +771,12 @@ export class TermContentBlockStore {
      * @param {Uint8Array} sourceBytes
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
-     * @param {string} compressionDictName
+     * @param {string|null} compressionDictName
      * @param {number} uncompressedBytes
      * @param {boolean} initialSelection
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
-    _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
+    _beginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
         const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
@@ -801,26 +801,44 @@ export class TermContentBlockStore {
             let compressionStart = safePerformance.now();
             let sourceWasConsumed = false;
             try {
-                const operation = beginCompressWrappedTermContentZstdSpansBatch(
-                    sourceBytes,
-                    sourceOffsets,
-                    sourceLengths,
-                    packed.blockStartIndexes,
-                    packed.packedChunkLengths,
-                    compressionDictName,
-                    compressionExperiments,
-                );
-                const consumed = operation.sourceConsumed.then(() => {
-                    sourceWasConsumed = true;
-                    resolveSourceConsumed();
-                });
-                void consumed.catch(() => {});
+                const sharedSource = typeof SharedArrayBuffer === 'function' && sourceBytes.buffer instanceof SharedArrayBuffer;
                 let result;
-                try {
-                    result = await operation.completion;
-                } catch (error) {
-                    await consumed.catch(() => {});
-                    throw error;
+                if (sharedSource) {
+                    const operation = beginCompressWrappedTermContentZstdSpansBatch(
+                        sourceBytes,
+                        sourceOffsets,
+                        sourceLengths,
+                        packed.blockStartIndexes,
+                        packed.packedChunkLengths,
+                        compressionDictName,
+                        compressionExperiments,
+                    );
+                    const consumed = operation.sourceConsumed.then(() => {
+                        sourceWasConsumed = true;
+                        resolveSourceConsumed();
+                    });
+                    void consumed.catch(() => {});
+                    try {
+                        result = await operation.completion;
+                    } catch (error) {
+                        await consumed.catch(() => {});
+                        throw error;
+                    }
+                } else {
+                    const packStart = safePerformance.now();
+                    const packedChunks = packPlannedContentSpansIntoSlabs(
+                        sourceBytes,
+                        sourceOffsets,
+                        sourceLengths,
+                        packed.blockStartIndexes,
+                        packed.packedChunkLengths,
+                    );
+                    packMs += safePerformance.now() - packStart;
+                    compressionStart = safePerformance.now();
+                    // Owned parser output needs transferable compression slabs.
+                    // Retain the source until worker success: fallback may have
+                    // to repack after those slabs have been detached.
+                    result = await compressWrappedTermContentZstdBatch(packedChunks, compressionDictName, compressionExperiments);
                 }
                 compressedChunks = result.chunks;
                 envelopeMs = result.envelopeMs;
@@ -830,6 +848,7 @@ export class TermContentBlockStore {
                     envelopeMs += safePerformance.now() - envelopeStart;
                 }
                 validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length);
+                if (!sharedSource) { resolveSourceConsumed(); }
             } catch (error) {
                 if (sourceWasConsumed) {
                     throw error;

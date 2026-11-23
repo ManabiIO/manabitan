@@ -104,4 +104,70 @@ describe('generic span compression with the real codec', () => {
         const {source} = makeSource();
         expect(() => prepareWrappedTermContentZstdSpans(source, new Uint32Array([source.length - 1]), new Uint32Array([2]), 2, null, options)).toThrow();
     });
+
+    test('reserves generic content only after measured block savings in the same import', async () => {
+        const {source, offsets, lengths} = makeSource();
+        const store = new TermContentBlockStore(new TermContentOpfsStore(), {minInputBytes: 0});
+        const session = store.beginImportSession();
+
+        expect(session.tryBeginAppendSpans('Jitendex', source, offsets, lengths, null)).toBeNull();
+        const first = await session.appendSpans('Jitendex', source, offsets, lengths, null);
+        expect(first).not.toBeNull();
+        expect(session.tryBeginAppendSpans('VNDB', source, offsets, lengths, null)).toBeNull();
+        const operation = session.tryBeginAppendSpans('Jitendex', source, offsets, lengths, null);
+        if (operation === null) { throw new Error('Expected an established generic block reservation'); }
+        expect(operation.initialSelection).toBe(false);
+        await expect(operation.completion).resolves.toMatchObject({initialSelectionSavingsMiss: false});
+
+        store.setCompressionExperiments({experimentalGenericSpanCompression: false});
+        expect(session.tryBeginAppendSpans('Jitendex', source, offsets, lengths, null)).toBeNull();
+        store.setCompressionExperiments(options);
+        const ownedOperation = session.tryBeginAppendSpans('Jitendex', Uint8Array.from(source), offsets, lengths, null);
+        if (ownedOperation === null) { throw new Error('Expected an owned generic block reservation'); }
+        await ownedOperation.completion;
+        expect(session.tryBeginAppendSpans('Jitendex', source, Uint32Array.of(0), Uint32Array.of(0), null)).toBeNull();
+        expect(() => session.tryBeginAppendSpans('Jitendex', source, Uint32Array.of(source.length - 1), Uint32Array.of(2), null)).toThrow(RangeError);
+        session.close();
+        expect(() => session.tryBeginAppendSpans('Jitendex', source, offsets, lengths, null)).toThrow('closed');
+        expect(store.beginImportSession().tryBeginAppendSpans('Jitendex', source, offsets, lengths, null)).toBeNull();
+    });
+
+    test.each([512, 4096, 1024 * 1024].flatMap((blockTargetBytes) => [
+        {blockTargetBytes, shared: true, compressionDictName: null},
+        {blockTargetBytes, shared: false, compressionDictName: null},
+        {blockTargetBytes, shared: false, compressionDictName: 'jmdict'},
+    ]))('preserves frames, total storage and content with early references ($blockTargetBytes-byte blocks, shared: $shared, codec: $compressionDictName)', async ({blockTargetBytes, shared, compressionDictName}) => {
+        const fixture = makeSource();
+        const {offsets, lengths, expected} = fixture;
+        const source = shared ? fixture.source : Uint8Array.from(fixture.source);
+        const baselineContent = new TermContentOpfsStore();
+        const candidateContent = new TermContentOpfsStore();
+        const baseline = new TermContentBlockStore(baselineContent, {blockTargetBytes});
+        const candidate = new TermContentBlockStore(candidateContent, {blockTargetBytes});
+        const a = await baseline.tryAppendSpans(source, offsets, lengths, compressionDictName, true);
+        expect(candidate.tryBeginAppendSpans(source, offsets, lengths, compressionDictName)).toBeNull();
+        const operation = candidate.tryBeginAppendSpans(source, offsets, lengths, compressionDictName, true);
+        if (a === null || operation === null) { throw new Error('Expected generic compressed storage'); }
+        const reserved = await operation.storage;
+        await operation.sourceConsumed;
+        source.fill(0);
+        const b = await operation.completion;
+        expect(b.compressedBytes).toBe(a.compressedBytes);
+        expect(b.uncompressedBytes).toBe(a.uncompressedBytes);
+        expect(b.contentDictName).toBe(a.contentDictName);
+        expect(b.contentLengths).toEqual(a.contentLengths);
+        expect(b.contentOffsets).toEqual(reserved.contentOffsets);
+        expect(b.initialSelectionSavingsMiss).toBe(false);
+        expect(Reflect.get(candidateContent, '_length')).toBe(Reflect.get(baselineContent, '_length'));
+
+        // Prefix references move physical offsets; every logical definition and
+        // the complete compressed frame payload must remain unchanged.
+        const payloadBytes = a.compressedBytes;
+        const referenceBytes = offsets.length * 20;
+        expect(await candidateContent.readSlice(referenceBytes, payloadBytes)).toEqual(await baselineContent.readSlice(0, payloadBytes));
+        candidate.clearCache();
+        for (let i = 0; i < expected.length; ++i) {
+            expect(await candidate.read(b.contentOffsets[i], b.contentLengths[i], b.contentDictName)).toEqual(expected[i]);
+        }
+    });
 });

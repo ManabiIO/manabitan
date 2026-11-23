@@ -8370,8 +8370,14 @@ this._readTermContentSignature(
                         chunk.dictionary,
                         pendingContentSpans,
                     );
-                if (earlyContentPersistence?.initialSelection === true) {
-                    importMetrics.contentInitialReservationCount += 1;
+                if (earlyContentPersistence !== null) {
+                    importMetrics.contentReservationCount += 1;
+                    if (pendingContentSpans?.buffer.buffer instanceof ArrayBuffer) {
+                        importMetrics.contentOwnedReservationCount += 1;
+                    }
+                    if (earlyContentPersistence.initialSelection === true) {
+                        importMetrics.contentInitialReservationCount += 1;
+                    }
                 }
                 const pendingContentPersistence = earlyContentPersistence === null ?
                     this._persistArtifactTermContent(
@@ -9450,8 +9456,8 @@ null :
     }
 
     /**
-     * Starts the reservation-capable block path for an already-enabled JMdict
-     * import. A null result means the caller must use normal persistence.
+     * Starts the reservation-capable block path when its codec and the import
+     * session admit it. A null result retains normal persistence.
      * @param {string} dictionary
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
      * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}

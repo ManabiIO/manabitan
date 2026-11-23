@@ -35,6 +35,8 @@ export const TERM_IMPORT_METRIC_KEYS = Object.freeze([
     'contentEnvelopeMs',
     'contentReferenceMs',
     'contentOpfsAppendMs',
+    'contentReservationCount',
+    'contentOwnedReservationCount',
     'contentInitialReservationCount',
     'contentInitialReservationSavingsMissCount',
     'contentMetadataMs',
