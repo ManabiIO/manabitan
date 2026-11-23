@@ -172,6 +172,22 @@ function contiguousEntries(count, extraLength = 0) {
     });
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * @param {number} extraLength
+ * @returns {ReturnType<typeof entry>[]}
+ */
+function entriesWithTrailingExtra(extraLength) {
+    const sources = contiguousEntries(2)
+    const last = sources[1]
+    const header = new Uint8Array(last.header.length + extraLength)
+    header.set(last.header)
+    new DataView(header.buffer).setUint16(28, extraLength, true)
+    last.header = header
+    return sources
+}
+/* eslint-enable @stylistic/semi */
+
 describe('coalesced admitted compressed-source reads', () => {
     test('counts actual dispatched ranges and leaves cached whole-archive reads at zero', async () => {
         const sources = contiguousEntries(4);
@@ -443,10 +459,10 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources[0].bytes.buffer).toBe(batch?.sources[1].bytes.buffer);
         expect(batch?.sources[0].bytes.byteOffset).toBeGreaterThan(0);
         /* eslint-disable @stylistic/semi */
-        expect(batch?.sources[0].bytes.buffer.byteLength).toBe(archive.ranges[1][1])
-        expect(batch?.rangeReadCount).toBe(2)
+        expect(batch?.sources[0].bytes.buffer.byteLength).toBe(batch?.rangeReadBytes)
+        expect(batch?.rangeReadCount).toBe(1)
         expect(batch?.rangeReadBytes).toBe(archive.ranges.reduce((sum, [start, end]) => sum + end - start, 0))
-        expect(archive.ranges).toHaveLength(2)
+        expect(archive.ranges).toHaveLength(1)
         /* eslint-enable @stylistic/semi */
 
         const smallArchive = new TrackedBlob([first.header, first.payload]);
@@ -626,16 +642,87 @@ describe('bounded large ZIP entry reads', () => {
         expect(archive.ranges).toEqual([[0, expectedLength]])
     })
 
-    test('extends borrowed media ranges only to the actual maximum local extra field', async () => {
-        const {header, payload, file} = entry(8, 65535)
+    test.each([0, 12, 65535])('keeps borrowed singleton ranges on one original read with %s extra bytes', async (extraLength) => {
+        const {header, payload, file} = entry(8, extraLength)
         const archive = new TrackedBlob([header, payload, padding])
         const batch = await new RawZipPayloadReader(archive).readBatch([file], signal(), () => false, true)
-        const firstLength = 30 + name.length + payload.length
-        const finalLength = header.length + payload.length
+        const originalLength = 30 + name.length + 65535 + payload.length
 
         expect(batch?.sources[0].bytes).toEqual(payload)
         expect(batch?.sources[0].archiveOffset).toBe(header.length)
-        expect(batch?.sources[0].bytes.buffer.byteLength).toBe(finalLength)
+        expect(batch?.sources[0].bytes.buffer.byteLength).toBe(originalLength)
+        expect(batch?.rangeReadCount).toBe(1)
+        expect(batch?.rangeReadBytes).toBe(originalLength)
+        expect(archive.ranges).toEqual([[0, originalLength]])
+    })
+
+    test('keeps media batches with local extras on one original range read', async () => {
+        const extraLength = 12
+        const sources = contiguousEntries(1024, extraLength)
+        let length = 0
+        for (let i = 0; i < sources.length; ++i) {
+            const source = sources[i]
+            source.payload = new Uint8Array(1024).fill(i & 0xff)
+            Object.assign(source.file, {
+                offset: length,
+                compressedSize: source.payload.length,
+                uncompressedSize: source.payload.length,
+                compressionMethod: 0,
+                signature: crc32(source.payload),
+            })
+            const view = new DataView(source.header.buffer)
+            view.setUint16(6, 0, true)
+            view.setUint16(8, 0, true)
+            view.setUint32(14, source.file.signature, true)
+            view.setUint32(18, source.payload.length, true)
+            view.setUint32(22, source.payload.length, true)
+            const extraStart = 30 + source.file.rawFilename.length
+            view.setUint16(extraStart, 0xcafe, true)
+            view.setUint16(extraStart + 2, 8, true)
+            length += source.header.length + source.payload.length
+        }
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])
+        const batch = await new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file), signal(), () => false, true)
+        const originalLength = length - extraLength + 65535
+
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(sources.map(({payload}) => payload))
+        expect(batch?.rangeReadCount).toBe(1)
+        expect(batch?.rangeReadBytes).toBe(originalLength)
+        expect(archive.ranges).toEqual([[0, originalLength]])
+    })
+
+    test('keeps the original range when a later media entry breaks adjacency', async () => {
+        const sources = contiguousEntries(3)
+        const gap = new Uint8Array(16)
+        sources[2].file.offset += gap.length
+        const archive = new TrackedBlob([
+            ...sources.slice(0, 2).flatMap(({header, payload}) => [header, payload]),
+            gap,
+            sources[2].header,
+            sources[2].payload,
+            padding,
+        ])
+        const batch = await new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file), signal(), () => false, true)
+        const last = sources[2]
+        const originalLength = last.file.offset + last.header.length + 65535 + last.payload.length
+
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(sources.map(({payload}) => payload))
+        expect(batch?.rangeReadCount).toBe(1)
+        expect(archive.ranges).toEqual([[0, originalLength]])
+    })
+
+    test('retries a contiguous media range once when only its last member has an extra field', async () => {
+        const sources = entriesWithTrailingExtra(65535)
+        const last = sources[1]
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])
+        const batch = await new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file), signal(), () => false, true)
+        const firstLength = last.file.offset + 30 + last.file.rawFilename.length + last.payload.length
+        const finalLength = last.file.offset + last.header.length + last.payload.length
+
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(sources.map(({payload}) => payload))
+        expect(batch?.sources[1].archiveOffset).toBe(last.file.offset + last.header.length)
+        expect(batch?.sources[0].bytes.buffer).toBe(batch?.sources[1].bytes.buffer)
+        expect(batch?.sources[1].bytes.buffer.byteLength).toBe(finalLength)
         expect(batch?.rangeReadCount).toBe(2)
         expect(batch?.rangeReadBytes).toBe(firstLength + finalLength)
         expect(archive.ranges).toEqual([[0, firstLength], [0, finalLength]])
@@ -652,24 +739,25 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload])
         expect(batch?.rangeReadCount).toBe(2)
         expect(archive.ranges).toEqual([
-            [0, first.header.length + first.payload.length],
-            [second.file.offset, second.file.offset + second.header.length + second.payload.length],
+            [0, first.header.length + first.payload.length + 65535],
+            [second.file.offset, second.file.offset + second.header.length + second.payload.length + 65535],
         ])
     })
 
     test('checks cancellation before extending a borrowed media range', async () => {
-        const {header, payload, file} = entry(8, 65535)
-        const archive = new TrackedBlob([header, payload, padding])
+        const sources = entriesWithTrailingExtra(65535)
+        const last = sources[1]
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])
         let checks = 0
-        await expect(new RawZipPayloadReader(archive).readBatch([file], signal(), () => ++checks === 2, true)).rejects.toThrow('cancelled')
-        expect(archive.ranges).toEqual([[0, 30 + name.length + payload.length]])
+        await expect(new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file), signal(), () => ++checks === 2, true)).rejects.toThrow('cancelled')
+        expect(archive.ranges).toEqual([[0, last.file.offset + 30 + last.file.rawFilename.length + last.payload.length]])
     })
 
     test('joins a cancelled borrowed media range extension before exposing bytes', async () => {
-        const {header, payload, file} = entry(8, 65535)
-        const {archive, started, release} = delayedArchive([header, payload, padding], 1)
+        const sources = entriesWithTrailingExtra(65535)
+        const {archive, started, release} = delayedArchive([...sources.flatMap(({header, payload}) => [header, payload]), padding], 1)
         const controller = new AbortController()
-        const pending = new RawZipPayloadReader(archive).readBatch([file], controller.signal, () => false, true)
+        const pending = new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file), controller.signal, () => false, true)
         let settled = false
         const markSettled = () => { settled = true }
         void pending.then(markSettled, markSettled)
@@ -687,13 +775,14 @@ describe('bounded large ZIP entry reads', () => {
     })
 
     test('validates local filenames after the borrowed range extension settles', async () => {
-        const {header, payload, file} = entry(8, 65535)
-        file.rawFilename = Uint8Array.from(file.rawFilename)
-        const {archive, started, release} = delayedArchive([header, payload, padding], 1)
-        const pending = new RawZipPayloadReader(archive).readBatch([file], signal(), () => false, true)
+        const sources = entriesWithTrailingExtra(65535)
+        const first = sources[0].file
+        first.rawFilename = Uint8Array.from(first.rawFilename)
+        const {archive, started, release} = delayedArchive([...sources.flatMap(({header, payload}) => [header, payload]), padding], 1)
+        const pending = new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file), signal(), () => false, true)
         await started
         const rejected = expect(pending).rejects.toThrow('local filename disagrees')
-        file.rawFilename[0] ^= 1
+        first.rawFilename[0] ^= 1
         release()
         await rejected
         expect(archive.ranges).toHaveLength(2)
