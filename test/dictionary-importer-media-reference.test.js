@@ -49,6 +49,45 @@ async function collectReferences(rows, inspect = () => {}) {
 }
 
 describe('preformatted image references', () => {
+    test('decodes an owned exact-span snapshot of a shared glossary before parser storage is reused', async () => {
+        const glossary = String.raw`[{"type":"structured-content","content":{"tag":"\u0069mg","pa\u0074h":"img/\u732b.webp"}}]`
+        const expected = encoder.encode(glossary)
+        const source = encoder.encode(`[["image","reading","","",0,${glossary},1,""]]`)
+        const decode = vi.spyOn(TextDecoder.prototype, 'decode')
+        let projectedRows = 0
+        await nativeParse(source, 3, (chunk) => {
+            const bytes = chunk.mediaRows[0].row.glossaryJsonBytes
+            if (!(bytes instanceof Uint8Array)) { throw new Error('Expected a lazy glossary view') }
+            expect(bytes.buffer).toBeInstanceOf(SharedArrayBuffer)
+            expect(bytes.byteOffset).toBeGreaterThan(0)
+            expect(bytes.byteLength).toBeLessThan(bytes.buffer.byteLength)
+            expect(bytes).toEqual(expected)
+
+            const result = parser.copyWasmBackedColumnChunk(chunk, false, true)
+            expect(result.mediaRows[0].imagePaths).toEqual(['img/猫.webp'])
+            const snapshot = decode.mock.calls.find(([input]) => input instanceof Uint8Array && input.byteLength === expected.byteLength && input[0] === 0x5b)?.[0]
+            if (!(snapshot instanceof Uint8Array)) { throw new Error('Expected glossary decode input') }
+            expect(snapshot.buffer).toBeInstanceOf(ArrayBuffer)
+            expect(snapshot.buffer).not.toBe(bytes.buffer)
+            expect(snapshot.byteOffset).toBe(0)
+            expect(snapshot.buffer.byteLength).toBe(expected.byteLength)
+            expect(snapshot).toEqual(expected)
+
+            bytes.fill(0)
+            expect(snapshot).toEqual(expected)
+            expect(result.mediaRows[0].imagePaths).toEqual(['img/猫.webp'])
+            projectedRows += result.mediaRows.length
+        }, 2048, {
+            singleChunk: true,
+            emitTermByteLists: false,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            mediaHintFastScan: true,
+            validateGlossaryTypes: true,
+        })
+        expect(projectedRows).toBe(1)
+    })
+
     test('stores projected image bytes without decoding diagnostic keys or allocating a presentation target', async () => {
         const decode = vi.spyOn(TextDecoder.prototype, 'decode')
         let decodedBeforeMaterialization = -1
