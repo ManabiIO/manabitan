@@ -23,7 +23,7 @@ import {ensurePinnedDictionaryCache} from './dictionary-fixtures.js';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const cacheDir = path.join(root, 'builds', 'e2e-dictionary-cache');
-const result = await ensurePinnedDictionaryCache(cacheDir);
-for (const [id, fixture] of Object.entries(result.fixtures)) {
-    console.log(`${id}: ${path.join(cacheDir, fixture.cacheFile)} sha256=${fixture.sha256}`);
+const result = await ensurePinnedDictionaryCache(cacheDir, process.argv.slice(2));
+for (const [id, filePath] of Object.entries(result.paths)) {
+    console.log(`${id}: ${filePath} sha256=${result.fixtures[id].sha256}`);
 }
