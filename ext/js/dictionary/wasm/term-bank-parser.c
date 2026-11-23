@@ -749,6 +749,35 @@ static int parse_composite_span_impl(
     uint32_t glossary_object_type = 0u;
     uint32_t glossary_valid_fields = 0u;
     uint32_t i = start + 1u;
+    if (state == ARRAY_FIRST) {
+        /* A leading run of strings needs no nested/object state. Consume it
+         * with the same bounded string validator and conservative hints.
+         * Mixed arrays resume below at the first unconsumed value, with the
+         * exact ARRAY_FIRST/ARRAY_VALUE state of the ordinary scanner. */
+        for (;;) {
+            const uint32_t value_start = skip_ws(src, len, i);
+            if (value_start != i && normalization_hint != 0) { *normalization_hint = 1u; }
+            i = value_start;
+            if (i >= len || src[i] != '"') { break; }
+            uint32_t s_end = 0u;
+            if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+            const uint8_t first = src[i + 1u];
+            if ((first == 'i' || first == '\\') && media_hint != 0 && *media_hint == 0u &&
+                is_media_marker_at(src, s_end, i)) {
+                *media_hint = 1u;
+            }
+            i = skip_ws(src, len, s_end);
+            if (i != s_end && normalization_hint != 0) { *normalization_hint = 1u; }
+            if (i >= len) { return 0; }
+            if (src[i] == ']') {
+                *out_end = i + 1u;
+                return 1;
+            }
+            if (src[i] != ',') { return 0; }
+            state = ARRAY_VALUE;
+            i = advance_glossary_delimiter(src, len, i, normalization_hint);
+        }
+    }
     while (i < len) {
         const uint8_t c = src[i];
         if (is_ws(c)) {

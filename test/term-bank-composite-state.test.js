@@ -19,7 +19,7 @@
 import {readFile} from 'node:fs/promises'
 import {beforeAll, describe, expect, test} from 'vitest'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number) => number}} ParserExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number, spans?: number, banks?: number, validate?: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number, spans?: number, banks?: number, validate?: number) => number}} ParserExports */
 /** @type {ParserExports} */
 let parser
 const encoder = new TextEncoder()
@@ -33,15 +33,16 @@ beforeAll(async () => {
 /**
  * @param {string} glossary
  * @param {boolean} [hints]
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {{count: number, metadata: number[]}}
  */
-function parseGlossary(glossary, hints = true) {
+function parseGlossary(glossary, hints = true, validateGlossaryTypes = false) {
     const bytes = encoder.encode(`[["entry","","","",0,${glossary},1,""]]`)
     parser.wasm_reset_heap()
     const input = parser.wasm_alloc(bytes.length)
     const output = parser.wasm_alloc(17 * 4)
     new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
-    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
+    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1, 0, 0, validateGlossaryTypes ? 1 : 0)
     return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)]}
 }
 
@@ -56,6 +57,60 @@ function nested(depth) {
 }
 
 describe('composite parser state transitions', () => {
+    test.each([
+        {json: '["prefix",{"type":"text","text":"last"}]', valid: true},
+        {json: '["prefix",{"type":"image","path":"x.webp"}]', valid: true},
+        {json: '["prefix",{"type":"structured-content","content":[]}]', valid: true},
+        {json: '["prefix",{"type":"text"}]', valid: false},
+        {json: '["prefix",{"type":"image","text":"x.webp"}]', valid: false},
+        {json: '["prefix",{"type":"unsupported","text":"last"}]', valid: false},
+        {json: '["prefix",{"type":"text","text":"first","text":0}]', valid: false},
+        {json: '["prefix",{"type":"text","text":0,"text":"last"}]', valid: true},
+        {json: '["prefix",{"type":"text","text":"last","type":"image"}]', valid: false},
+    ])('retains glossary object validation after a string prefix: $json', ({json, valid}) => {
+        expect(parseGlossary(json, true, true).count > 0).toBe(valid)
+        expect(parseGlossary(json, false, true).count > 0).toBe(valid)
+        expect(parseGlossary(json).count).toBe(1)
+    })
+
+    test.each([
+        {json: '["first","second","third"]', flags: [0, 0, 0]},
+        {json: '[ "first","second" ]', flags: [0, 1, 0]},
+        {json: '["\\u0069mg","\\u0069mage"]', flags: [1, 0, 0]},
+        {json: '["image",null,1,true,false]', flags: [1, 0, 0]},
+        {json: '["prefix",["image"],{"type":"text","text":"last"}]', flags: [1, 1, 1]},
+        {json: '["prefix",{"type":"text","text":"last"},"suffix"]', flags: [0, 1, 1]},
+        {json: '["prefix",{"type":"structured-content","content":{"tag":"img","path":"x"}}]', flags: [1, 0, 0]},
+    ])('preserves leading string runs and the mixed-array continuation: $json', ({json, flags}) => {
+        const withHints = parseGlossary(json)
+        expect(withHints.count).toBe(1)
+        expect(withHints.metadata.slice(14)).toEqual(flags)
+        const withoutHints = parseGlossary(json, false)
+        expect(withoutHints.count).toBe(1)
+        expect(withoutHints.metadata.slice(14)).toEqual([0, ...flags.slice(1)])
+    })
+
+    test('rejects every truncated leading string run at its logical bank end', () => {
+        const source = '["first","quote\\" and slash\\\\","\\u0069mage","last"]'
+        for (let end = 0; end < source.length; ++end) {
+            expect(parseGlossary(source.slice(0, end)).count).toBeLessThan(0)
+        }
+        expect(parseGlossary(source).count).toBe(1)
+    })
+
+    test.each([
+        '["prefix",]',
+        '["prefix",\n]',
+        '["prefix",,"next"]',
+        '["prefix","next"{}]',
+        '["prefix",{"key":}]',
+        '["prefix",["nested",]]',
+        '["prefix","bad\\q"]',
+    ])('rejects malformed input after a leading string run: %s', (json) => {
+        expect(parseGlossary(json).count).toBeLessThan(0)
+        expect(parseGlossary(json, false).count).toBeLessThan(0)
+    })
+
     test.each([
         '[]',
         '{}',
