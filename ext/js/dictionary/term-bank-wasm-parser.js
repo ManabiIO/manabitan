@@ -97,6 +97,8 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
+/** @type {WeakMap<import('./term-lookup-index-preparation.js').PreparedTermLookupIndex, {plan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, bytes: Uint8Array, stringsBuffer: Uint8Array, stringLengths: Uint16Array}>} */
+const ownedNativeLookupKeys = new WeakMap();
 /** @type {WebAssembly.Module|null} */
 let suppliedWasmModule = null;
 
@@ -2438,9 +2440,29 @@ null :
                     chunk.preparedLookupIndexEncodeMs = elapsedMs;
                     nativeSegmentedLookupSegments += segments.size;
                 } else if (bytes !== null) {
-                    chunk.preparedLookupIndexes = new Map([
-                        [`0:${count}`, {bytes, preinternedPlan: termRecordPreinternedPlan}],
-                    ]);
+                    const prepared = {bytes, preinternedPlan: termRecordPreinternedPlan};
+                    if (!emitTermByteLists) {
+                        // As with segmented native plans, the v7 sidecar owns
+                        // the keys and lengths. Publish these views together;
+                        // emitted byte lists retain their original aliases.
+                        const stringsLength = termRecordPreinternedPlan.stringsBuffer.byteLength;
+                        const stringsBuffer = bytes.subarray(48, 48 + stringsLength);
+                        const stringLengths = new Uint16Array(
+                            bytes.buffer,
+                            bytes.byteOffset + 48 + Math.ceil(stringsLength / 4) * 4,
+                            termRecordPreinternedPlan.stringLengths.length,
+                        );
+                        const ownedPlan = {...termRecordPreinternedPlan, stringsBuffer, stringLengths};
+                        prepared.preinternedPlan = ownedPlan;
+                        ownedNativeLookupKeys.set(prepared, {
+                            plan: ownedPlan,
+                            bytes,
+                            stringsBuffer,
+                            stringLengths,
+                        });
+                        chunk.termRecordPreinternedPlan = ownedPlan;
+                    }
+                    chunk.preparedLookupIndexes = new Map([[`0:${count}`, prepared]]);
                     chunk.preparedLookupIndexEncodeMs = elapsedMs;
                 } else if (nativeCompactionScratch !== null) {
                     ++nativeSegmentedLookupFallbacks;
@@ -3906,6 +3928,30 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     if (!(stringOffsets instanceof Uint32Array)) {
         throw new Error('Term record string offsets are unavailable');
     }
+    const wholePreparedIndex = chunk.preparedLookupIndexes instanceof Map ?
+        chunk.preparedLookupIndexes.get(`0:${chunk.rowCount}`) :
+        void 0;
+    const ownedLookupKeys = typeof wholePreparedIndex === 'undefined' ?
+        void 0 :
+        ownedNativeLookupKeys.get(wholePreparedIndex);
+    // This records ownership, not validation. Recheck every descriptor when
+    // copying; replaced or foreign plans keep the existing snapshot path.
+    // Consumers still validate the current key boundaries on each admission.
+    const reuseOwnedKeys = (
+        wholePreparedIndex?.preinternedPlan === plan &&
+        ownedLookupKeys?.plan === plan &&
+        ownedLookupKeys.bytes === wholePreparedIndex.bytes &&
+        ownedLookupKeys.stringsBuffer === plan.stringsBuffer &&
+        ownedLookupKeys.stringLengths === plan.stringLengths &&
+        wholePreparedIndex.bytes.buffer instanceof ArrayBuffer &&
+        plan.stringsBuffer.buffer === wholePreparedIndex.bytes.buffer &&
+        plan.stringLengths.buffer === wholePreparedIndex.bytes.buffer &&
+        plan.stringsBuffer.byteLength > 0 &&
+        plan.stringsBuffer.byteOffset >= wholePreparedIndex.bytes.byteOffset &&
+        plan.stringsBuffer.byteOffset + plan.stringsBuffer.byteLength <= wholePreparedIndex.bytes.byteOffset + wholePreparedIndex.bytes.byteLength &&
+        plan.stringLengths.byteOffset >= wholePreparedIndex.bytes.byteOffset &&
+        plan.stringLengths.byteOffset + plan.stringLengths.byteLength <= wholePreparedIndex.bytes.byteOffset + wholePreparedIndex.bytes.byteLength
+    );
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
@@ -3928,7 +3974,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         };
     });
     const stablePlan = {
-        stringLengths: new Uint16Array(plan.stringLengths),
+        stringLengths: reuseOwnedKeys ? plan.stringLengths : new Uint16Array(plan.stringLengths),
         stringOffsets: chunk.preparedLookupIndexes instanceof Map ?
             void 0 :
             new Uint32Array(stringOffsets),
@@ -3939,7 +3985,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     new Uint32Array(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: new Uint8Array(plan.stringsBuffer),
+        stringsBuffer: reuseOwnedKeys ? plan.stringsBuffer : new Uint8Array(plan.stringsBuffer),
         expressionIndexes: new Uint32Array(plan.expressionIndexes),
         readingIndexes: new Uint32Array(plan.readingIndexes),
     };
@@ -3949,7 +3995,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         preparedLookupIndexes = new Map();
         for (const [key, prepared] of chunk.preparedLookupIndexes) {
             preparedLookupIndexes.set(key, {
-                bytes: prepared.bytes.buffer === plan.stringsBuffer.buffer ?
+                bytes: !(reuseOwnedKeys && prepared === wholePreparedIndex) && prepared.bytes.buffer === plan.stringsBuffer.buffer ?
                     new Uint8Array(prepared.bytes) :
                     prepared.bytes,
                 preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,

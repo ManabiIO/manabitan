@@ -2025,13 +2025,29 @@ export class TermRecordOpfsStore {
         const firstContentDictName = uniformContentDictName ?? (contentDictNames[0] ?? 'raw');
         const preinternedPlan = chunk.termRecordPreinternedPlan ?? null;
         const stableStringLengths = preinternedPlan?.stringLengths;
-        const stableStringsBuffer = preinternedPlan?.stringsBuffer;
+        let retainedStringsBuffer = preinternedPlan?.stringsBuffer;
         const stableExpressionIndexes = preinternedPlan?.expressionIndexes;
         const stableReadingIndexes = preinternedPlan?.readingIndexes;
         const skipRecordMaterialization = (
             this._importSessionActive &&
             (chunk.dictionaryTotalRows ?? count) >= PERSISTED_ONLY_IMPORT_ROW_THRESHOLD
         );
+        if (
+            !skipRecordMaterialization &&
+            (!this._importSessionActive || this._recordsDirectoryHandle === null) &&
+            retainedStringsBuffer instanceof Uint8Array &&
+            retainedStringsBuffer.byteLength < retainedStringsBuffer.buffer.byteLength
+        ) {
+            // Retained row-key subviews must not pin the whole prepared lookup
+            // sidecar. OPFS imports discard these records and keep zero-copy
+            // ownership; other appends retain one tightly sized key arena.
+            for (const {bytes} of chunk.preparedLookupIndexes?.values() ?? []) {
+                if (bytes.buffer !== retainedStringsBuffer.buffer) { continue; }
+                retainedStringsBuffer = new Uint8Array(retainedStringsBuffer);
+                break;
+            }
+        }
+        const stableStringsBuffer = retainedStringsBuffer;
         const stableStringOffsets = skipRecordMaterialization ?
             null :
             (
