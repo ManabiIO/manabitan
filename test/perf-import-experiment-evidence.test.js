@@ -18,6 +18,7 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 import {afterEach, describe, expect, test} from 'vitest'
+import {createHash} from 'node:crypto'
 import {DictionaryImportController} from '../ext/js/pages/settings/dictionary-import-controller.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 import {extractImportResult} from '../dev/perf/benchmark-support.js'
@@ -25,6 +26,7 @@ import {loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js'
 
 const fixture = (await loadDictionaryFixtures()).jmdict
 const keys = Object.keys(snapshotTermBankExperiments())
+const probeTerms = Array.from({length: 12}, (_, index) => `term-${index}`)
 
 /** @returns {Record<string, any>} */
 function report() {
@@ -44,7 +46,12 @@ function report() {
                 revision: fixture.revision,
                 termRows: fixture.termRows,
                 contentReadable: true,
-                probeCount: 12}},
+                probeCount: 12,
+                probeTerms,
+                restart: {title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12, mediaFiles: 0},
+                media: {mode: 'all', totalFiles: 0, totalBytes: 0, files: 0, bytes: 0, sha256: createHash('sha256').digest('hex')},
+                storage: {bytes: 1000000},
+                lookup: {observations: Array.from({length: 6}).flatMap((_, pass) => probeTerms.map((term) => ({pass, term, elapsedMs: 1, results: 1, originalTextLength: term.length, hasExactHeadwordMatch: true, sha256: 'b'.repeat(64)})))}}},
         phases: [{name: 'JMdict: total import',
             durationMs: 123.5,
             startMs: 100,

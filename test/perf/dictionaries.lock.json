@@ -4,13 +4,15 @@
         "jmdict": {
             "label": "JMdict",
             "cacheFile": "JMdict.zip",
-            "release": "2026-09-06",
-            "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip",
-            "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
-            "sizeBytes": 15587032,
-            "expectedTitle": "JMdict [2026-09-06]",
-            "revision": "JMdict.2026-09-06",
-            "termRows": 526942
+            "release": "2026-11-22",
+            "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+            "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "sizeBytes": 15645766,
+            "expectedTitle": "JMdict [2026-11-22]",
+            "revision": "JMdict.2026-11-22",
+            "termRows": 528299,
+            "mediaFiles": 0,
+            "mediaBytes": 0
         },
         "jmnedict": {
             "label": "JMnedict",
@@ -26,13 +28,28 @@
         "jitendex": {
             "label": "Jitendex",
             "cacheFile": "jitendex-yomitan.zip",
-            "release": "2026.08.11.0",
-            "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip",
-            "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
-            "sizeBytes": 38698313,
-            "expectedTitle": "Jitendex.org [2026-08-11]",
-            "revision": "2026.08.11.0",
-            "termRows": 435448
+            "release": "2026.10.03.0",
+            "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+            "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "sizeBytes": 38831822,
+            "expectedTitle": "Jitendex.org [2026-10-03]",
+            "revision": "2026.10.03.0",
+            "termRows": 436555,
+            "mediaFiles": 249,
+            "mediaBytes": 5026554
+        },
+        "vndb": {
+            "label": "VNDB",
+            "cacheFile": "vndb_characters_by_bee.zip",
+            "release": "1.0.0",
+            "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+            "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "sizeBytes": 291705969,
+            "expectedTitle": "VNDB Characters by Bee",
+            "revision": "395525135651",
+            "termRows": 6648310,
+            "mediaFiles": 146570,
+            "mediaBytes": 188131284
         }
     }
 }

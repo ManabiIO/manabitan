@@ -22,7 +22,7 @@
  */
 export type PerformanceDictionaryLock = {
     schemaVersion: 1;
-    dictionaries: Record<'jmdict' | 'jmnedict' | 'jitendex', PerformanceDictionaryFixture>;
+    dictionaries: Record<'jmdict' | 'jmnedict' | 'jitendex' | 'vndb', PerformanceDictionaryFixture>;
 };
 
 export type PerformanceDictionaryFixture = {
@@ -35,4 +35,6 @@ export type PerformanceDictionaryFixture = {
     expectedTitle: string;
     revision: string;
     termRows: number;
+    mediaFiles?: number;
+    mediaBytes?: number;
 };

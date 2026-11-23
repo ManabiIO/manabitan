@@ -26,7 +26,7 @@ const root = path.join(dirname, '..', '..');
 const lockPath = path.join(root, 'test', 'perf', 'dictionaries.lock.json');
 
 /**
- * @typedef {{label: string, cacheFile: string, release: string, url: string, sha256: string, sizeBytes: number, expectedTitle: string, revision: string, termRows: number}} DictionaryFixture
+ * @typedef {{label: string, cacheFile: string, release: string, url: string, sha256: string, sizeBytes: number, expectedTitle: string, revision: string, termRows: number, mediaFiles?: number, mediaBytes?: number}} DictionaryFixture
  */
 
 /**
@@ -90,17 +90,22 @@ export async function ensureFixtureFile(fixture, filePath) {
 }
 
 /**
- * Ensures all locked real-dictionary performance fixtures are available and
- * integrity checked. Existing valid files require no network access.
+ * Ensures the requested locked fixtures are available and integrity checked.
+ * Keep the large VNDB archive opt-in for existing functional E2E callers.
+ * Existing valid files require no network access.
  * @param {string} cacheDir
- * @returns {Promise<{jitendexPath: string, jmnedictPath: string, jmdictPath: string, fixtures: Record<string, DictionaryFixture>}>}
+ * @param {string[]} [dictionaryIds]
+ * @returns {Promise<{paths: Record<string, string>, fixtures: Record<string, DictionaryFixture>}>}
  */
-export async function ensurePinnedDictionaryCache(cacheDir) {
-    const fixtures = await loadDictionaryFixtures();
-    for (const id of ['jitendex', 'jmnedict', 'jmdict']) {
-        if (!(id in fixtures)) {
-            throw new Error(`Performance dictionary lock is missing ${id}`);
+export async function ensurePinnedDictionaryCache(cacheDir, dictionaryIds = ['jmdict', 'jmnedict', 'jitendex']) {
+    const allFixtures = await loadDictionaryFixtures();
+    /** @type {Record<string, DictionaryFixture>} */
+    const fixtures = {};
+    for (const id of dictionaryIds) {
+        if (!Object.hasOwn(allFixtures, id)) {
+            throw new Error(`Unknown performance dictionary: ${id}`);
         }
+        fixtures[id] = allFixtures[id];
     }
     await mkdir(cacheDir, {recursive: true});
     /** @type {Record<string, string>} */
@@ -110,10 +115,5 @@ export async function ensurePinnedDictionaryCache(cacheDir) {
         await ensureFixtureFile(fixture, filePath);
         paths[id] = filePath;
     }
-    return {
-        jitendexPath: paths.jitendex,
-        jmnedictPath: paths.jmnedict,
-        jmdictPath: paths.jmdict,
-        fixtures,
-    };
+    return {paths, fixtures};
 }
