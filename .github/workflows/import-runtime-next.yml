@@ -17,30 +17,38 @@ concurrency:
 
 jobs:
   study:
-    name: Frozen import check (${{ matrix.candidate }}, ${{ matrix.dictionary }})
+    name: Frozen import check (${{ matrix.candidate }}, ${{ matrix.stage }}, ${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
         include:
-          - candidate: pack-dispatch
-            sha: 78a2adcfba8d72d8cba070319b53d4b2b354a8f9
+          - candidate: record-runs
+            baseline: 10a8f09e96ff943ec1351b1391cb56fa7e20feed
+            sha: bb1073961bb5adaa190e32943c94d063a18aa8bd
+            stage: screen
             dictionary: jmdict
-          - candidate: pack-dispatch
-            sha: 78a2adcfba8d72d8cba070319b53d4b2b354a8f9
+          - candidate: record-runs
+            baseline: 10a8f09e96ff943ec1351b1391cb56fa7e20feed
+            sha: bb1073961bb5adaa190e32943c94d063a18aa8bd
+            stage: screen
             dictionary: jitendex
+          - candidate: record-runs
+            baseline: 10a8f09e96ff943ec1351b1391cb56fa7e20feed
+            sha: bb1073961bb5adaa190e32943c94d063a18aa8bd
+            stage: screen
+            dictionary: vndb
           - candidate: pack-dispatch
+            baseline: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
             sha: 78a2adcfba8d72d8cba070319b53d4b2b354a8f9
-            dictionary: vndb
-          - candidate: media-path
-            sha: 32c13e05c1a7fda88fd531dab40648c1978565f2
-            dictionary: vndb
+            stage: qualification
+            dictionary: jitendex
     env:
-      PERF_BASELINE_SHA: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
+      PERF_BASELINE_SHA: ${{ matrix.baseline }}
       PERF_CANDIDATE_SHA: ${{ matrix.sha }}
       PERF_CANDIDATE_NAME: ${{ matrix.candidate }}
-      PERF_STAGE: screen
+      PERF_STAGE: ${{ matrix.stage }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
