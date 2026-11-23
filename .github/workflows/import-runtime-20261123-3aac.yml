@@ -1,8 +1,8 @@
-name: Frozen import comparisons (20261123 3aac)
+name: Independent structured-import regression assessment
 
 on:
   push:
-    branches: [perf/import-20261123-3aac]
+    branches: [perf/structured-import-confirmation-20261123-3aac]
     paths:
       - '.github/workflows/import-runtime-20261123-3aac.yml'
       - 'dev/perf/import-runtime-20261123-3aac.py'
@@ -16,18 +16,20 @@ concurrency:
 
 jobs:
   compare:
-    name: Structured strings (${{ matrix.dictionary }})
+    name: Structured strings independent host ${{ matrix.replication }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, vndb]
+        dictionary: [jitendex]
+        replication: [1, 2]
     env:
       PERF_BASELINE_SHA: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
       PERF_CANDIDATE_SHA: 09dfb90d926758205ff52d127ef3d950f0b15a65
-      PERF_STAGE: screen
+      PERF_STAGE: qualification
       PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_REPLICATION: ${{ matrix.replication }}
       PERF_EXPECTED_DIFFERENCES: '["js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -54,7 +56,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 dev/perf/import-runtime-20261123-3aac.py \
+          reverse_args=()
+          if [ "$PERF_REPLICATION" = 2 ]; then reverse_args+=(--reverse); fi
+          python3 dev/perf/import-runtime-20261123-3aac.py "${reverse_args[@]}" \
             --baseline "$PERF_BASELINE_SHA" \
             --candidate "$PERF_CANDIDATE_SHA" \
             --dictionary "$PERF_DICTIONARY" \
@@ -66,7 +70,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-3aac-structured-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: import-3aac-structured-confirmation-${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/import-3aac-evidence
           if-no-files-found: error
           retention-days: 30
