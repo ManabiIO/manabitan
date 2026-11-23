@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": "45123579865",
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45123579865",
+  "harnessSha": "a45d8f7e1802ea6ebb7abc613eeda2c9539b75cb",
+  "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "candidateSha": "c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1",
+  "workflowJobs": [
+    {
+      "id": 137522697002,
+      "name": "plan",
+      "conclusion": "success"
+    },
+    {
+      "id": 137522733629,
+      "name": "compare (jitendex, 1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 137522733656,
+      "name": "compare (vndb, 1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 137522733669,
+      "name": "compare (jmdict, 1)",
+      "conclusion": "success"
+    }
+  ],
+  "ordinaryImports": 36,
+  "measuredImports": 27,
+  "excludedWarmups": 9,
+  "completeSampledResponsesChecked": 864,
+  "preAndPostRestartStates": 72,
+  "sourceMediaByteProbesChecked": 5784,
+  "decision": "Reject this broad-activation candidate under the cross-corpus promotion gate: VNDB has a strong discovery gain, but JMdict exceeds the 5% regression screen against both controls and is slower in every B/C pair. Do not advance this exact candidate or a union containing it. A narrower eligibility candidate requires a new frozen screen.",
+  "retention": "Every GitHub-digest-verified ZIP member and acquired observation is retained and byte-verified. No import was rerun, replaced or removed. Source archives independently match their locks; all 236 referenced Jitendex images and five VNDB references are rederived from the originals. Complete semantic/provenance verifier reproduces the original receipts; Python independently recomputes timing from raw browser timestamps and all paired arithmetic. All candidate observations explicitly activate the I/O worker; the baseline excludes its modules and lacks the new counter, retained as null. Queue maxima remain below even the 24 MiB low-memory budget; byte totals and write-call counts remain unchanged. Compare only within this runner cohort; no total-memory or isolated worker-startup claim.",
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "archive": {
+        "path": "import-study-jmdict-1-attempt-1.zip",
+        "bytes": 830950,
+        "sha256": "7c08371625cf730691b2b9d8f7c5251a782be6530659ca0da2a708ec81fb1766",
+        "githubArtifactId": 14794414396,
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "sourceTermBankCount": 53,
+      "sourceTermBankBytes": 171092992,
+      "sourceMediaProbeBytes": 0,
+      "semanticDigestSha256": "aecae8ec5a9ce8818ca119c9c3f9c6278e0f76c02ee629dcb57ec2cef6dfe57b",
+      "semanticEntryCount": 12,
+      "mediaProbesPerReadback": 0,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 1156.300000000003,
+          "phaseMetrics": {
+            "totalImportMs": 1156.300000000003,
+            "archiveAndIndexMs": 14,
+            "importDataBanksMs": 1057,
+            "bulkFinalizationMs": 29,
+            "termRecordCloseMs": 10.5,
+            "termRecordFlushPendingMs": 12.099999999991269,
+            "termRecordAwaitQueuedMs": 1,
+            "termContentEndSessionMs": 6.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 951.5,
+            "parserSourceInflateMs": 488.70000000001164,
+            "parserParseBankMs": 1337,
+            "sourceArchiveReadMs": 104.69999999999709
+          },
+          "reportSha256": "3fbee95552b30607749d36f6939d745408f139e406e10078f8da77ab789573ee",
+          "summarySha256": "af079b737764626212cbfaefb1c05fa4ac4421a1c74ba5384fe8509af01322b5"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 1048.1000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 1048.1000000000058,
+            "archiveAndIndexMs": 13,
+            "importDataBanksMs": 964,
+            "bulkFinalizationMs": 22,
+            "termRecordCloseMs": 4.5,
+            "termRecordFlushPendingMs": 5.69999999999709,
+            "termRecordAwaitQueuedMs": 4.5,
+            "termContentEndSessionMs": 8.099999999991269
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 8792236,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 852.8000000000029,
+            "parserSourceInflateMs": 400.6999999999971,
+            "parserParseBankMs": 1122,
+            "sourceArchiveReadMs": 87.09999999999127
+          },
+          "reportSha256": "8fbdf3e40fe51bec03d9e57d8d9d4da388185abb3a3e8f55f63841f60acdb0f6",
+          "summarySha256": "d67b28d6675f8eed29e54b8bb960292af5ed6162f9c54c203d011e50acc16bce"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 1131.199999999997,
+          "phaseMetrics": {
+            "totalImportMs": 1131.199999999997,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1035,
+            "bulkFinalizationMs": 32,
+            "termRecordCloseMs": 8.900000000008731,
+            "termRecordFlushPendingMs": 13.5,
+            "termRecordAwaitQueuedMs": 1.5999999999912689,
+            "termContentEndSessionMs": 13.799999999988358
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 862.9000000000087,
+            "parserSourceInflateMs": 381.30000000001746,
+            "parserParseBankMs": 1052,
+            "sourceArchiveReadMs": 90.19999999999709
+          },
+          "reportSha256": "3552ccf017b9f1f8b2cbfa645446cef712b5b4e7119fad95e6709bec75978ead",
+          "summarySha256": "c3e387c5be94be1be00cad68c4c9973215ce98d3319446979d72171702914eca"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 991.5999999999913,
+          "phaseMetrics": {
+            "totalImportMs": 991.5999999999913,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 909,
+            "bulkFinalizationMs": 28,
+            "termRecordCloseMs": 8,
+            "termRecordFlushPendingMs": 14,
+            "termRecordAwaitQueuedMs": 1.5,
+            "termContentEndSessionMs": 14.400000000008731
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 805.0999999999913,
+            "parserSourceInflateMs": 379.99999999998545,
+            "parserParseBankMs": 1143,
+            "sourceArchiveReadMs": 103.29999999998836
+          },
+          "reportSha256": "724fcacdd3e95e215c8f0b236b0d99c3535090a196ec83fdac367f5c5323bd5f",
+          "summarySha256": "9d2e99d1c690a34e30dac61d7312dc32a084c90b04feedef3fdf7a35273e1054"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 1054.1999999999825,
+          "phaseMetrics": {
+            "totalImportMs": 1054.1999999999825,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 970,
+            "bulkFinalizationMs": 26,
+            "termRecordCloseMs": 4.300000000017462,
+            "termRecordFlushPendingMs": 13.800000000017462,
+            "termRecordAwaitQueuedMs": 1.6999999999825377,
+            "termContentEndSessionMs": 14.10000000000582
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0.10000000000582077,
+            "termRecordLookupIndexMaxQueuedBytes": 8792236,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 800.3000000000175,
+            "parserSourceInflateMs": 354.30000000004657,
+            "parserParseBankMs": 1214,
+            "sourceArchiveReadMs": 86.30000000001746
+          },
+          "reportSha256": "6988af2309dce7f0d4267fb02d426af5be20b06a445ab9756a43c40891ae1c14",
+          "summarySha256": "f11f5d96860f5914541c82bb9cadc88ea51f562a519e9cbff83eb06df0230109"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 966.2000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 966.2000000000116,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 886,
+            "bulkFinalizationMs": 24,
+            "termRecordCloseMs": 8,
+            "termRecordFlushPendingMs": 7.899999999994179,
+            "termRecordAwaitQueuedMs": 1.2999999999883585,
+            "termContentEndSessionMs": 5.399999999994179
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 798.6999999999825,
+            "parserSourceInflateMs": 365.19999999998254,
+            "parserParseBankMs": 1104,
+            "sourceArchiveReadMs": 81.89999999999418
+          },
+          "reportSha256": "7dc8f0bf2f78b771db29af849db191b6793bb045cf6873653605f35d0e7688a6",
+          "summarySha256": "74971d5f6f495a68144f255e0cf8dc964ea00658a11164bc42d291a468a5f209"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 1058.6000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 1058.6000000000058,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 980,
+            "bulkFinalizationMs": 23,
+            "termRecordCloseMs": 4.599999999976717,
+            "termRecordFlushPendingMs": 10,
+            "termRecordAwaitQueuedMs": 1.2000000000116415,
+            "termContentEndSessionMs": 5.7999999999883585
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 8792236,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 811,
+            "parserSourceInflateMs": 368.9999999999709,
+            "parserParseBankMs": 1100,
+            "sourceArchiveReadMs": 88
+          },
+          "reportSha256": "fd721a4014c4b415cd626975539db4cfac56e8f4369be936fede4f03e83a7279",
+          "summarySha256": "536cf8d31a63b047c39ba3e26ab29ef9e50f78bdd4e6c9d968c177ea3cc287d9"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 987.8000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 987.8000000000175,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 904,
+            "bulkFinalizationMs": 24,
+            "termRecordCloseMs": 7.899999999994179,
+            "termRecordFlushPendingMs": 7.7999999999883585,
+            "termRecordAwaitQueuedMs": 1.1000000000058208,
+            "termContentEndSessionMs": 8.199999999982538
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 822.5,
+            "parserSourceInflateMs": 380.3999999999651,
+            "parserParseBankMs": 1174,
+            "sourceArchiveReadMs": 85.80000000001746
+          },
+          "reportSha256": "91a8eb0d451dc72771d81a3e8b577e6a8b884cdb012d0450d782f91355118b39",
+          "summarySha256": "547ba59299aa35e4dab8eccff062598a7a9762a772a6d39dcd6d528fb1f91db1"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 1210.7000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 1210.7000000000116,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1093,
+            "bulkFinalizationMs": 27,
+            "termRecordCloseMs": 7.899999999994179,
+            "termRecordFlushPendingMs": 9.199999999982538,
+            "termRecordAwaitQueuedMs": 2.900000000023283,
+            "termContentEndSessionMs": 21.60000000000582
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0.10000000000582077,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 939.9000000000233,
+            "parserSourceInflateMs": 554.6999999999825,
+            "parserParseBankMs": 1229,
+            "sourceArchiveReadMs": 89.10000000000582
+          },
+          "reportSha256": "2f4d1421567076447bb72c56585c63967263d8a6cc8c1d3f685f1d6296abf7ce",
+          "summarySha256": "644d02324c54099ee7024de3059c8e46574866bf6747552afcf8de9f427721a4"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 1007.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1007.8999999999942,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 921,
+            "bulkFinalizationMs": 30,
+            "termRecordCloseMs": 7.7999999999883585,
+            "termRecordFlushPendingMs": 11.199999999982538,
+            "termRecordAwaitQueuedMs": 5.2000000000116415,
+            "termContentEndSessionMs": 11.39999999999418
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0.09999999997671694,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 778,
+            "parserSourceInflateMs": 381.3999999999942,
+            "parserParseBankMs": 1034,
+            "sourceArchiveReadMs": 84.10000000000582
+          },
+          "reportSha256": "f42b373be8d43b22b1c58c30aa7444916160c39db229384b1efc17409f0bfea3",
+          "summarySha256": "5e8fcdb4c35b84fb2c246b24a146b89068d42c72f11f0ecc2280cd1e5c352332"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 975.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 975.8999999999942,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 876,
+            "bulkFinalizationMs": 42,
+            "termRecordCloseMs": 7.7999999999883585,
+            "termRecordFlushPendingMs": 21.79999999998836,
+            "termRecordAwaitQueuedMs": 6.5,
+            "termContentEndSessionMs": 28.199999999982538
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0.10000000000582077,
+            "termRecordLookupIndexMaxQueuedBytes": 6284044,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 787,
+            "parserSourceInflateMs": 408.0999999999767,
+            "parserParseBankMs": 1080,
+            "sourceArchiveReadMs": 90.19999999998254
+          },
+          "reportSha256": "e9a8437c555f4ba06a190931fef19a52558dc37c32a994e50b697c2dae7b4c78",
+          "summarySha256": "808715a497c12fbec0ad2c9f4282f61a5e1c76e71c3f745ce93af0c8200bccf0"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 1055.2000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 1055.2000000000116,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 956,
+            "bulkFinalizationMs": 42,
+            "termRecordCloseMs": 10,
+            "termRecordFlushPendingMs": 15.89999999999418,
+            "termRecordAwaitQueuedMs": 3.8999999999941792,
+            "termContentEndSessionMs": 5.599999999976717
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 5,
+            "termRecordLookupIndexWriteBytes": 23693336,
+            "termRecordLookupIndexAwaitMs": 0.10000000000582077,
+            "termRecordLookupIndexMaxQueuedBytes": 8792236,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 808.7000000000116,
+            "parserSourceInflateMs": 402.4999999999418,
+            "parserParseBankMs": 1164,
+            "sourceArchiveReadMs": 83.79999999998836
+          },
+          "reportSha256": "16ef2e729d77660390a3a24bb75030812cea84d48a8349a2e1ddb2b0dba89deb",
+          "summarySha256": "a7766c2a1fda3bd85c01012c7e6a91aff15d5e8b837d3706760d2cd6cf1030e6"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            6.313029447356988,
+            -12.562980094160759,
+            8.125832564813805
+          ],
+          "medianPairedChangePercent": 6.313029447356988,
+          "equalWorkChangePercent": -0.3209363790824038,
+          "fasterPairs": 1
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            9.107845166629037,
+            7.167442802185375,
+            4.692925885506272
+          ],
+          "medianPairedChangePercent": 7.167442802185375,
+          "equalWorkChangePercent": 6.958371315708667,
+          "fasterPairs": 0
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            -2.561516740619185,
+            -18.41083670603717,
+            3.2790244902141774
+          ],
+          "medianPairedChangePercent": -2.561516740619185,
+          "equalWorkChangePercent": -6.8057390976015935,
+          "fasterPairs": 2
+        }
+      },
+      "meetsDiscoveryThreshold": false
+    },
+    {
+      "dictionary": "jitendex",
+      "archive": {
+        "path": "import-study-jitendex-1-attempt-1.zip",
+        "bytes": 1799221,
+        "sha256": "ecaf9d03daaf6ef5cb0192f8535513b931a43976efd161f8035cf5210668f704",
+        "githubArtifactId": 14795051876,
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "sourceTermBankCount": 218,
+      "sourceTermBankBytes": 537538792,
+      "sourceMediaProbeBytes": 4992155,
+      "semanticDigestSha256": "766e9db5b84e7883a062279304ef1b8b22921bb2cd48918535f435be666ea469",
+      "semanticEntryCount": 17,
+      "mediaProbesPerReadback": 236,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 1577.6000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 1577.6000000000058,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1363,
+            "bulkFinalizationMs": 160,
+            "termRecordCloseMs": 135.3000000000029,
+            "termRecordFlushPendingMs": 5.30000000000291,
+            "termRecordAwaitQueuedMs": 3.3000000000029104,
+            "termContentEndSessionMs": 5.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.5999999999912689,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1125,
+            "parserSourceInflateMs": 850.9000000000087,
+            "parserParseBankMs": 1255,
+            "sourceArchiveReadMs": 1038.0999999999913
+          },
+          "reportSha256": "0429fb1a2740c5fd52ee9b36cfc2ceb815e9f4a10ba57179e89729bdc47892cd",
+          "summarySha256": "c3171c2c851baf511f5e7e14f7c5774b24fd0b2c138f715740cc53543133b2b6"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 1519.199999999997,
+          "phaseMetrics": {
+            "totalImportMs": 1519.199999999997,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1405,
+            "bulkFinalizationMs": 61,
+            "termRecordCloseMs": 34.40000000000873,
+            "termRecordFlushPendingMs": 5.7999999999883585,
+            "termRecordAwaitQueuedMs": 4,
+            "termContentEndSessionMs": 5.899999999994179
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 1.1000000000058208,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1202.9000000000087,
+            "parserSourceInflateMs": 768.6000000000058,
+            "parserParseBankMs": 1231,
+            "sourceArchiveReadMs": 1072.7000000000116
+          },
+          "reportSha256": "7082982ef2de50d616329d635aabb936f8131ea7cfadc8e87c964686cbadc4b8",
+          "summarySha256": "5ad245516450151ce9de437a1f8765a9bd0f28472a104847d02f1153a847175e"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 1565.7000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 1565.7000000000116,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1376,
+            "bulkFinalizationMs": 137,
+            "termRecordCloseMs": 115.10000000000582,
+            "termRecordFlushPendingMs": 4.900000000008731,
+            "termRecordAwaitQueuedMs": 0.5999999999912689,
+            "termContentEndSessionMs": 5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.5,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1142.6000000000058,
+            "parserSourceInflateMs": 753.699999999968,
+            "parserParseBankMs": 1208,
+            "sourceArchiveReadMs": 1040.199999999997
+          },
+          "reportSha256": "b51a5e0ec14ff3f3c55fcdbf6e53b3b974a7a5b2c33e8251e3c1d45e779c9464",
+          "summarySha256": "88653a82f0b697d9dcbb4e585eb6553afcf034d4bf163cc54052cfcceac62f0c"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 1571.800000000003,
+          "phaseMetrics": {
+            "totalImportMs": 1571.800000000003,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1383,
+            "bulkFinalizationMs": 138,
+            "termRecordCloseMs": 113.69999999999709,
+            "termRecordFlushPendingMs": 5.30000000000291,
+            "termRecordAwaitQueuedMs": 3.599999999991269,
+            "termContentEndSessionMs": 3.900000000008731
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 2.6000000000058208,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1169.6000000000058,
+            "parserSourceInflateMs": 810.1000000000058,
+            "parserParseBankMs": 1264,
+            "sourceArchiveReadMs": 1051.699999999997
+          },
+          "reportSha256": "a2d30ef1785279994398ab91f1d116d95b1871725cf896b5f2882fd450681656",
+          "summarySha256": "164a346f0ea825e0be9e4defd9d23f76bc825a753288ffbe8f829475f4808114"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 1661.0,
+          "phaseMetrics": {
+            "totalImportMs": 1661,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1549,
+            "bulkFinalizationMs": 59,
+            "termRecordCloseMs": 33,
+            "termRecordFlushPendingMs": 5.899999999994179,
+            "termRecordAwaitQueuedMs": 3.8999999999941792,
+            "termContentEndSessionMs": 5.2999999999883585
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 1,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1260.3000000000175,
+            "parserSourceInflateMs": 819.8999999999942,
+            "parserParseBankMs": 1260,
+            "sourceArchiveReadMs": 1130.5
+          },
+          "reportSha256": "f962870192dada659869823e77b05b613edadb9b914519a71c27630560eb099b",
+          "summarySha256": "9939cdae666d5195099785f6c019853f485891f09359ea6d6cc3a47be0a160be"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 1613.5,
+          "phaseMetrics": {
+            "totalImportMs": 1613.5,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1422,
+            "bulkFinalizationMs": 138,
+            "termRecordCloseMs": 112.29999999998836,
+            "termRecordFlushPendingMs": 5.7000000000116415,
+            "termRecordAwaitQueuedMs": 3.2000000000116415,
+            "termContentEndSessionMs": 3.1000000000058208
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.6000000000058208,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1206,
+            "parserSourceInflateMs": 812.4999999999709,
+            "parserParseBankMs": 1376,
+            "sourceArchiveReadMs": 1079
+          },
+          "reportSha256": "c733650f0aa49b364a348ff8a0d9143208f68d55fea5592385b3614cc9dfd714",
+          "summarySha256": "e7338677d00b2335338ff3c15cceb36da417faa73f7fd170d7ee56041ae20acf"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 1509.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1509.8999999999942,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1393,
+            "bulkFinalizationMs": 66,
+            "termRecordCloseMs": 36.60000000000582,
+            "termRecordFlushPendingMs": 6.5,
+            "termRecordAwaitQueuedMs": 6.899999999994179,
+            "termContentEndSessionMs": 6.599999999976717
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.7999999999883585,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1146.8000000000175,
+            "parserSourceInflateMs": 753.8000000000175,
+            "parserParseBankMs": 1191,
+            "sourceArchiveReadMs": 1044.4000000000233
+          },
+          "reportSha256": "4009e6d898bac363437450722dac5f374f98ffa58a17b568774a828b4c4bbec5",
+          "summarySha256": "d995f429dc4f4e7b18f8f5f3256fae0dd9f7f80f3bd6129b8e1c2ed29da51680"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 1584.3999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1584.3999999999942,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1399,
+            "bulkFinalizationMs": 131,
+            "termRecordCloseMs": 108,
+            "termRecordFlushPendingMs": 5.7000000000116415,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 4.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.5999999999767169,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1156.8999999999942,
+            "parserSourceInflateMs": 749.4999999999418,
+            "parserParseBankMs": 1169,
+            "sourceArchiveReadMs": 1061.1999999999825
+          },
+          "reportSha256": "f0bd644789194d48e8204470dbbc362b2ef69ee01db693dd4767cb4cd0f22243",
+          "summarySha256": "81b5bc40f0993c08d9082f8284f86e4685ee8038ba07fec1729c048fdad7afab"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 1630.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1630.8999999999942,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1420,
+            "bulkFinalizationMs": 156,
+            "termRecordCloseMs": 109.70000000001164,
+            "termRecordFlushPendingMs": 6.199999999982538,
+            "termRecordAwaitQueuedMs": 0.6000000000058208,
+            "termContentEndSessionMs": 4.699999999982538
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.5,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1211.5,
+            "parserSourceInflateMs": 800.1999999999534,
+            "parserParseBankMs": 1394,
+            "sourceArchiveReadMs": 1055.1999999999825
+          },
+          "reportSha256": "0527076d9fcc8bd7aad5d25f18e242da682758e68a05e5601dc9a2b02681006e",
+          "summarySha256": "b4f202c9407dd9e8a3558d7ff5bc2c31c2e103961a7c9dec735faa3fe38e8ac9"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 1590.2000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 1590.2000000000116,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1382,
+            "bulkFinalizationMs": 157,
+            "termRecordCloseMs": 108.89999999999418,
+            "termRecordFlushPendingMs": 4.600000000005821,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 3.6000000000058208
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.5,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1175.7999999999884,
+            "parserSourceInflateMs": 728.5999999999767,
+            "parserParseBankMs": 1270,
+            "sourceArchiveReadMs": 1033.6999999999825
+          },
+          "reportSha256": "48cc499b87296f89dc8de87d9e42fda91d1713081ed135f34dc9c811030a2f81",
+          "summarySha256": "543280f9f93ed91b57e077260091f6f4b760039263f9a61a726ccfe14956708b"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 1618.5,
+          "phaseMetrics": {
+            "totalImportMs": 1618.5,
+            "archiveAndIndexMs": 15,
+            "importDataBanksMs": 1423,
+            "bulkFinalizationMs": 139,
+            "termRecordCloseMs": 115.20000000001164,
+            "termRecordFlushPendingMs": 5.399999999994179,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 3.8000000000174623
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.39999999999417923,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1206.2000000000116,
+            "parserSourceInflateMs": 726.1999999999825,
+            "parserParseBankMs": 1193,
+            "sourceArchiveReadMs": 1083.1000000000058
+          },
+          "reportSha256": "581adf751ea4c9d6b0d8cdc2ebdd860490c3ea2dd3e4e7a157d3935eb81b4841",
+          "summarySha256": "48220a8cd3584b0cfdab14bc9d19aeb0258b1439aafedc77b3c15c39b9aa2bcb"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 1594.0,
+          "phaseMetrics": {
+            "totalImportMs": 1594,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1467,
+            "bulkFinalizationMs": 59,
+            "termRecordCloseMs": 34.60000000000582,
+            "termRecordFlushPendingMs": 5.400000000023283,
+            "termRecordAwaitQueuedMs": 1.2999999999883585,
+            "termContentEndSessionMs": 4.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 6,
+            "termRecordLookupIndexWriteBytes": 23526384,
+            "termRecordLookupIndexAwaitMs": 0.8999999999941792,
+            "termRecordLookupIndexMaxQueuedBytes": 5175076,
+            "termRecordLookupIndexWorkerFileCount": 1,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 1223.3000000000175,
+            "parserSourceInflateMs": 769.9999999998836,
+            "parserParseBankMs": 1252,
+            "sourceArchiveReadMs": 1110.1000000000058
+          },
+          "reportSha256": "bd4f739282c1d2d5b9005c4eacd7176a2025c7b7133ced2e4822f3795edae531",
+          "summarySha256": "f1ec5a0461890630beb5d446532d3e6f10acef036bf93379436933cf5d5f05cf"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            5.675022267463858,
+            -7.419216383591909,
+            -1.5137472968798305
+          ],
+          "medianPairedChangePercent": -1.5137472968798305,
+          "equalWorkChangePercent": -1.1677590641334668,
+          "fasterPairs": 2
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            2.9439107530213837,
+            -4.702095430446873,
+            0.23896365237003891
+          ],
+          "medianPairedChangePercent": 0.23896365237003891,
+          "equalWorkChangePercent": -0.48453457530150956,
+          "fasterPairs": 1
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            2.6530092887133927,
+            -2.8511864614630067,
+            -1.7485325919053718
+          ],
+          "medianPairedChangePercent": -1.7485325919053718,
+          "equalWorkChangePercent": -0.6865510661244301,
+          "fasterPairs": 2
+        }
+      },
+      "meetsDiscoveryThreshold": false
+    },
+    {
+      "dictionary": "vndb",
+      "archive": {
+        "path": "import-study-vndb-1-attempt-1.zip",
+        "bytes": 906295,
+        "sha256": "93782c9a25a90af4bc81b59b6fe8fe424f0c1ce5570d568f77d4c5b0951f1070",
+        "githubArtifactId": 14794509331,
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "sourceTermBankCount": 665,
+      "sourceTermBankBytes": 4267992967,
+      "sourceMediaProbeBytes": 4550,
+      "semanticDigestSha256": "a45be67b068406670a6d89a640799963e1b2e080d165b1306c1e57b34d8fba22",
+      "semanticEntryCount": 13,
+      "mediaProbesPerReadback": 5,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 8527.100000000006,
+          "phaseMetrics": {
+            "totalImportMs": 8527.100000000006,
+            "archiveAndIndexMs": 166,
+            "importDataBanksMs": 6315,
+            "bulkFinalizationMs": 1987,
+            "termRecordCloseMs": 1964.8999999999942,
+            "termRecordFlushPendingMs": 13.89999999999418,
+            "termRecordAwaitQueuedMs": 2.5,
+            "termContentEndSessionMs": 8.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.3000000000174623,
+            "termRecordLookupIndexMaxQueuedBytes": 7368732,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 6242.200000000012,
+            "parserSourceInflateMs": 3082.000000000233,
+            "parserParseBankMs": 4971,
+            "sourceArchiveReadMs": 6162.100000000006
+          },
+          "reportSha256": "d000b9a960240d054d44fe5930c06cab78139cadce5e36cecba91d0938bdaa15",
+          "summarySha256": "7e0832fd087d46bf7aa5c53bd3364307166cc8bdae4fdc4b31e1c2285a571ede"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 5410.899999999965,
+          "phaseMetrics": {
+            "totalImportMs": 5410.899999999965,
+            "archiveAndIndexMs": 156,
+            "importDataBanksMs": 5137,
+            "bulkFinalizationMs": 60,
+            "termRecordCloseMs": 41.59999999997672,
+            "termRecordFlushPendingMs": 11.599999999976717,
+            "termRecordAwaitQueuedMs": 1.7000000000116415,
+            "termContentEndSessionMs": 1.7000000000116415
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 1.7999999999883585,
+            "termRecordLookupIndexMaxQueuedBytes": 14791144,
+            "termRecordLookupIndexWorkerFileCount": 2,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5059,
+            "parserSourceInflateMs": 2611.2999999996973,
+            "parserParseBankMs": 4224,
+            "sourceArchiveReadMs": 4974.799999999988
+          },
+          "reportSha256": "a6f3f3019aa2d076e15a5c4914e9dd2dfe885ba47cfdf7f5d73b1aa345060f60",
+          "summarySha256": "8ad064aeb726d47bc53d8395ce785467106abb579047fddae0412ce833c8ac50"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 7287.0,
+          "phaseMetrics": {
+            "totalImportMs": 7287,
+            "archiveAndIndexMs": 156,
+            "importDataBanksMs": 5095,
+            "bulkFinalizationMs": 1982,
+            "termRecordCloseMs": 1966.2000000000116,
+            "termRecordFlushPendingMs": 9.5,
+            "termRecordAwaitQueuedMs": 0.40000000002328306,
+            "termContentEndSessionMs": 3.800000000046566
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.1000000000349246,
+            "termRecordLookupIndexMaxQueuedBytes": 7368732,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5022.5,
+            "parserSourceInflateMs": 2394.4000000000815,
+            "parserParseBankMs": 3989,
+            "sourceArchiveReadMs": 4960.100000000035
+          },
+          "reportSha256": "9863601c1561363bea6a34530f9164d3980800f8cf0a1c01e70db05714f8ca01",
+          "summarySha256": "b67a0a8b425c41dab36f6b73da58131757aeb00f5a17f3dd6ed7b23511c28fd2"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 7246.5,
+          "phaseMetrics": {
+            "totalImportMs": 7246.5,
+            "archiveAndIndexMs": 147,
+            "importDataBanksMs": 5060,
+            "bulkFinalizationMs": 1985,
+            "termRecordCloseMs": 1968.5,
+            "termRecordFlushPendingMs": 10.599999999976717,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 6.099999999976717
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.20000000001164153,
+            "termRecordLookupIndexMaxQueuedBytes": 9737612,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 4920.699999999953,
+            "parserSourceInflateMs": 2434.4999999996508,
+            "parserParseBankMs": 3860,
+            "sourceArchiveReadMs": 4858.5
+          },
+          "reportSha256": "1ed7be7ff83e44baa61c242ba075f9eac578b3131d236c48fbbcb683d0661a19",
+          "summarySha256": "4e4adc345e6963a439f58a05a5f31d60d4ffb94c30682d8fe2d859a5b04775db"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 5474.399999999965,
+          "phaseMetrics": {
+            "totalImportMs": 5474.399999999965,
+            "archiveAndIndexMs": 163,
+            "importDataBanksMs": 5190,
+            "bulkFinalizationMs": 65,
+            "termRecordCloseMs": 41.79999999998836,
+            "termRecordFlushPendingMs": 15.5,
+            "termRecordAwaitQueuedMs": 1.2999999999883585,
+            "termContentEndSessionMs": 7.7000000000116415
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.5999999999767169,
+            "termRecordLookupIndexMaxQueuedBytes": 14394828,
+            "termRecordLookupIndexWorkerFileCount": 2,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5118.299999999988,
+            "parserSourceInflateMs": 2495.799999999581,
+            "parserParseBankMs": 4111,
+            "sourceArchiveReadMs": 5060.699999999953
+          },
+          "reportSha256": "6d970a820dc0c58ff63d3185d74c6d97c5e656819b73064d786eb691e422edc6",
+          "summarySha256": "3363b1812d7478c563ebbce0b1729bd29f13182728d38a833f471cc407a8bc60"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 7289.700000000012,
+          "phaseMetrics": {
+            "totalImportMs": 7289.700000000012,
+            "archiveAndIndexMs": 147,
+            "importDataBanksMs": 5118,
+            "bulkFinalizationMs": 1964,
+            "termRecordCloseMs": 1946.5,
+            "termRecordFlushPendingMs": 8.800000000046566,
+            "termRecordAwaitQueuedMs": 3.5,
+            "termContentEndSessionMs": 2.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.29999999998835847,
+            "termRecordLookupIndexMaxQueuedBytes": 7368732,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5033.5,
+            "parserSourceInflateMs": 2572.7999999997555,
+            "parserParseBankMs": 4122,
+            "sourceArchiveReadMs": 4956
+          },
+          "reportSha256": "af06cca188c10a28f246b17e749d33baf597bb3a2efd64916f28eadfaa4d1ab2",
+          "summarySha256": "93e20866f48b34646624d9184fd17af0dea32db9c1f5f1fea6a69208dd46c612"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 5576.600000000035,
+          "phaseMetrics": {
+            "totalImportMs": 5576.600000000035,
+            "archiveAndIndexMs": 167,
+            "importDataBanksMs": 5299,
+            "bulkFinalizationMs": 56,
+            "termRecordCloseMs": 38.800000000046566,
+            "termRecordFlushPendingMs": 7.300000000046566,
+            "termRecordAwaitQueuedMs": 4.699999999953434,
+            "termContentEndSessionMs": 3
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.49999999994179234,
+            "termRecordLookupIndexMaxQueuedBytes": 18845704,
+            "termRecordLookupIndexWorkerFileCount": 2,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5208.800000000047,
+            "parserSourceInflateMs": 2489.699999999546,
+            "parserParseBankMs": 4186,
+            "sourceArchiveReadMs": 5155.600000000035
+          },
+          "reportSha256": "658512ecd5046e524a555c2c2c9099b827c74055bfe0302c8f0466b40c1aeee7",
+          "summarySha256": "a5d14536d3e65bda859d2216bc6eb10a44c35ae32c3cfc5552337df58785d107"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 7168.0,
+          "phaseMetrics": {
+            "totalImportMs": 7168,
+            "archiveAndIndexMs": 146,
+            "importDataBanksMs": 5035,
+            "bulkFinalizationMs": 1934,
+            "termRecordCloseMs": 1915,
+            "termRecordFlushPendingMs": 13.300000000046566,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 5.800000000046566
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.6000000000349246,
+            "termRecordLookupIndexMaxQueuedBytes": 7368732,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 4951.199999999953,
+            "parserSourceInflateMs": 2305.200000000128,
+            "parserParseBankMs": 3624,
+            "sourceArchiveReadMs": 4902.5
+          },
+          "reportSha256": "7c3cb7f191d8639e298387fbbeb2951878cac8c0391dc9894f4bc6dc736e4a57",
+          "summarySha256": "5728cc0bff95737a80d22e6618c754ee9ef43ced44eb5cc68d65e82d621e2e95"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 7489.700000000012,
+          "phaseMetrics": {
+            "totalImportMs": 7489.700000000012,
+            "archiveAndIndexMs": 170,
+            "importDataBanksMs": 5334,
+            "bulkFinalizationMs": 1927,
+            "termRecordCloseMs": 1911.8000000000466,
+            "termRecordFlushPendingMs": 8.799999999988358,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 2.1000000000349246
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.7999999999883585,
+            "termRecordLookupIndexMaxQueuedBytes": 7368732,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5263.700000000012,
+            "parserSourceInflateMs": 2590.4000000000815,
+            "parserParseBankMs": 4414,
+            "sourceArchiveReadMs": 5195.700000000012
+          },
+          "reportSha256": "25d7bc7e0ebf79099b2d4137281b1cac10a27fbeddc67f6637fab2d6714b21f4",
+          "summarySha256": "bbc9cdd46b814476a1779692b8c6d71e573de6073cabdac66f9edf1e32a3a8cd"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 7087.299999999988,
+          "phaseMetrics": {
+            "totalImportMs": 7087.299999999988,
+            "archiveAndIndexMs": 150,
+            "importDataBanksMs": 4949,
+            "bulkFinalizationMs": 1935,
+            "termRecordCloseMs": 1912.5,
+            "termRecordFlushPendingMs": 15.200000000011642,
+            "termRecordAwaitQueuedMs": 1.599999999976717,
+            "termContentEndSessionMs": 3.7999999999883585
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.29999999998835847,
+            "termRecordLookupIndexMaxQueuedBytes": 9737612,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 4879.200000000012,
+            "parserSourceInflateMs": 2486.6000000005006,
+            "parserParseBankMs": 3608,
+            "sourceArchiveReadMs": 4804.700000000012
+          },
+          "reportSha256": "bfdf67ec011b5ee9dd8551d487cab280d62de81b9b3a187782810afc62b7eedc",
+          "summarySha256": "64e02cac8c21853114204d2c9c386c45f8b1f6cec5e34d486a9feecd6e41e445"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 7028.299999999988,
+          "phaseMetrics": {
+            "totalImportMs": 7028.299999999988,
+            "archiveAndIndexMs": 150,
+            "importDataBanksMs": 4880,
+            "bulkFinalizationMs": 1945,
+            "termRecordCloseMs": 1912.5,
+            "termRecordFlushPendingMs": 26.5,
+            "termRecordAwaitQueuedMs": 0.7999999999883585,
+            "termContentEndSessionMs": 20.599999999976717
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 0.1000000000349246,
+            "termRecordLookupIndexMaxQueuedBytes": 7368732,
+            "termRecordLookupIndexWorkerFileCount": null,
+            "workerPathActive": false,
+            "activationEvidence": "New I/O worker modules absent from frozen baseline package; legacy counter is absent, not a measured zero"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 4763.399999999965,
+            "parserSourceInflateMs": 2305.0999999995693,
+            "parserParseBankMs": 3684,
+            "sourceArchiveReadMs": 4700.699999999953
+          },
+          "reportSha256": "5e7a32aec2c4b852f9c52da2a8bb761893ef8ee1c48117106a02990fb3f631e3",
+          "summarySha256": "4b68d4c3996118754a9bc20c6a8430333a53c0a75418a5c0cde85a5887d58577"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 5416.600000000035,
+          "phaseMetrics": {
+            "totalImportMs": 5416.600000000035,
+            "archiveAndIndexMs": 143,
+            "importDataBanksMs": 5154,
+            "bulkFinalizationMs": 67,
+            "termRecordCloseMs": 42.5,
+            "termRecordFlushPendingMs": 11.800000000046566,
+            "termRecordAwaitQueuedMs": 4.5,
+            "termContentEndSessionMs": 6.5
+          },
+          "indexWriter": {
+            "termRecordLookupIndexWriteCallCount": 83,
+            "termRecordLookupIndexWriteBytes": 401899752,
+            "termRecordLookupIndexAwaitMs": 1.900000000023283,
+            "termRecordLookupIndexMaxQueuedBytes": 19116968,
+            "termRecordLookupIndexWorkerFileCount": 2,
+            "workerPathActive": true,
+            "activationEvidence": "Explicit runtime file-count counter and worker modules present in frozen package"
+          },
+          "parserProfile": {
+            "parserParallelWorkerWallMs": 5063.099999999977,
+            "parserSourceInflateMs": 2369.9000000000233,
+            "parserParseBankMs": 3579,
+            "sourceArchiveReadMs": 5018
+          },
+          "reportSha256": "68dc281a12e501a1646afa5f9cc13a84e98b3cdc66fa250b1eb9aa7009445d2b",
+          "summarySha256": "5f417583b2f8b6663358e3f12b4a9ba59760e4c96e53263723db97d8c9217bd4"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            -24.454564272407854,
+            -25.543079162048866,
+            -22.931576625925988
+          ],
+          "medianPairedChangePercent": -24.454564272407854,
+          "equalWorkChangePercent": -24.337338326173196,
+          "fasterPairs": 3
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            -24.902259352237323,
+            -22.201450892856656,
+            -23.57315197606925
+          ],
+          "medianPairedChangePercent": -23.57315197606925,
+          "equalWorkChangePercent": -23.566488744488122,
+          "fasterPairs": 3
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            0.5961498654524444,
+            -4.295232118776604,
+            0.8394633126076023
+          ],
+          "medianPairedChangePercent": 0.5961498654524444,
+          "equalWorkChangePercent": -1.008523053596455,
+          "fasterPairs": 1
+        }
+      },
+      "meetsDiscoveryThreshold": true
+    }
+  ]
+}
