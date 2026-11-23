@@ -234,6 +234,12 @@
             "bytes": 22749,
             "sha256": "029cf7ac80530cfee6e5b73a47d9b63172d92775abb27c49e9d4c89536958b04",
             "files": 2
+        },
+        {
+            "path": "develop-integration.json.gz",
+            "bytes": 4921,
+            "sha256": "06994c47cb699cc27e8b6fb889c167847132df308013d27ceb40895d81ca749f",
+            "files": 4
         }
     ]
 }

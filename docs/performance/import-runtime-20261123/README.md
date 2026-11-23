@@ -152,6 +152,21 @@ These component proofs measure functionality, not performance. They do not repla
 
 The four frozen source CI runs passed their applicable JavaScript, four TypeScript configurations, full unit/options tests, native artifacts, builds and Chromium/Firefox E2E jobs: [cache](https://github.com/ManabiIO/manabitan/actions/runs/45126780039), [columns](https://github.com/ManabiIO/manabitan/actions/runs/45125831476), [row](https://github.com/ManabiIO/manabitan/actions/runs/45125833597), [source](https://github.com/ManabiIO/manabitan/actions/runs/45126317944). Each has 15 successful jobs and four manual/platform skips. The independent combined-source validation passed lint, all TypeScript configurations, unit tests and build validation: **629 test files, 14,084 passed tests and 47 skipped tests**. Final receipts, not merely an intermediate `analysis.json`, establish diagnostic/job completion.
 
+## Develop integration after measurement
+
+While the results were being published, develop gained the [shared-image import fix in #798](https://github.com/ManabiIO/manabitan/pull/798), commit `71d194390cdf49e024642c0152e66c2f64279cec`. It resolves first image references before duplicates during eager metadata import. Each runtime PR now includes that fix through a non-conflicting merge. The optimization patch against the updated base has the same stable Git patch ID as its original patch.
+
+| Runtime PR   | Updated head                                                                                                                        | Source CI                                                                |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| #824 cache   | [`8fa98a1d73ab4cc3dc20d95c888690be8412e8e0`](https://github.com/ManabiIO/manabitan/commit/8fa98a1d73ab4cc3dc20d95c888690be8412e8e0) | [Passed](https://github.com/ManabiIO/manabitan/actions/runs/45135543421) |
+| #825 columns | [`f4bd45e969c2f6792f917438a5869bfa78e98543`](https://github.com/ManabiIO/manabitan/commit/f4bd45e969c2f6792f917438a5869bfa78e98543) | [Passed](https://github.com/ManabiIO/manabitan/actions/runs/45135555709) |
+| #826 row     | [`ecd64989c8e5d2d1caa671e8254ee84f9915f597`](https://github.com/ManabiIO/manabitan/commit/ecd64989c8e5d2d1caa671e8254ee84f9915f597) | [Passed](https://github.com/ManabiIO/manabitan/actions/runs/45135559869) |
+| #827 source  | [`c6f1b1d859f175ecfaad0217bc47af30966a4b35`](https://github.com/ManabiIO/manabitan/commit/c6f1b1d859f175ecfaad0217bc47af30966a4b35) | [Passed](https://github.com/ManabiIO/manabitan/actions/runs/45135572541) |
+
+Each updated head passed 15 CI jobs, with four conditional platform/manual skips, plus CodeQL, static-web acceptance and Chromium restart/interruption. The new shared-image regression passes with the native parser enabled and disabled. [Integration receipts](develop-integration.json.gz) retain the updated trees, original measured ancestors, unchanged optimization patch IDs and final job outcomes.
+
+**All timing tables in this report still describe the original frozen benchmark commits.** No timing cohort was rerun after this develop integration. The integration checks establish source preservation and current-head correctness; they do not provide new latency estimates.
+
 ## Reproduction and retained evidence
 
 The [frozen runner](https://github.com/ManabiIO/manabitan/blob/0eea97429e101dd049b24c8318d1e5bee1b74909/dev/perf/import-runtime-study.py) and [qualification workflow](https://github.com/ManabiIO/manabitan/blob/0eea97429e101dd049b24c8318d1e5bee1b74909/.github/workflows/import-runtime-qualification-20261123.yml) specify the complete procedure. With the recorded commits available in a clone and Node 22.22.0 installed, use a new output directory:
