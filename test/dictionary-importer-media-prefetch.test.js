@@ -633,6 +633,31 @@ describe('bounded referenced-media prefetch', () => {
         for (const entry of media) { expect(entry).toMatchObject({width: 100, height: 100}); }
     });
 
+    test.each([true, false])('persists an image shared by eager requirements in the same bank (disableWasm=%s)', async (disableTermBankWasmFastPath) => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+        await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+            ['first', '', '', '', 0, [{type: 'image', path: 'shared.png', width: 40}], 0, ''],
+            ['second', '', '', '', 0, [{type: 'structured-content', content: {tag: 'img', path: 'shared.png', height: 60, border: '1px solid'}}], 1, ''],
+            ['third', '', '', '', 0, [{type: 'image', path: 'shared.png', title: 'third target'}], 2, ''],
+        ])));
+        const content = Uint8Array.of(0, 17, 255);
+        await writer.add('shared.png', new Uint8ArrayReader(content));
+        const db = database();
+        const result = await run(new Uint8Array(await writer.close()).buffer, db, {skipImageMetadata: false, disableTermBankWasmFastPath});
+        expect(result.errors).toEqual([]);
+        expect(result.result?.counts?.media.total).toBe(1);
+        const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+        expect(media).toEqual([expect.objectContaining({path: 'shared.png', content: content.buffer, width: 100, height: 100})]);
+        expect(state.events.filter((event) => event === 'read:shared.png')).toHaveLength(1);
+        const terms = db.bulkAdd.mock.calls.filter(([store]) => store === 'terms').flatMap(([, entries]) => entries);
+        expect(terms).toEqual([
+            expect.objectContaining({expression: 'first', glossary: [expect.objectContaining({path: 'shared.png', width: 100, height: 100, preferredWidth: 40})]}),
+            expect.objectContaining({expression: 'second', glossary: [expect.objectContaining({content: expect.objectContaining({path: 'shared.png', width: 100, height: 100, preferredHeight: 60, border: '1px solid'})})]}),
+            expect.objectContaining({expression: 'third', glossary: [expect.objectContaining({path: 'shared.png', width: 100, height: 100, title: 'third target'})]}),
+        ]);
+    });
+
     test('does not load media when media import is disabled', async () => {
         const result = await run(await archive(), database(), {skipMediaImport: true});
         expect(result.errors).toEqual([]);
