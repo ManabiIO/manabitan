@@ -12,22 +12,35 @@ permissions:
   contents: read
 
 concurrency:
-  group: import-crossover-0a175-${{ github.ref }}
+  group: import-crossover-0a175-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
   study:
-    name: Frozen import check (${{ matrix.dictionary }})
+    name: Frozen import check (${{ matrix.candidate }}, ${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, vndb]
+        include:
+          - candidate: pack-dispatch
+            sha: 78a2adcfba8d72d8cba070319b53d4b2b354a8f9
+            dictionary: jmdict
+          - candidate: pack-dispatch
+            sha: 78a2adcfba8d72d8cba070319b53d4b2b354a8f9
+            dictionary: jitendex
+          - candidate: pack-dispatch
+            sha: 78a2adcfba8d72d8cba070319b53d4b2b354a8f9
+            dictionary: vndb
+          - candidate: media-path
+            sha: 32c13e05c1a7fda88fd531dab40648c1978565f2
+            dictionary: vndb
     env:
       PERF_BASELINE_SHA: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
-      PERF_CANDIDATE_SHA: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
-      PERF_STAGE: baseline
+      PERF_CANDIDATE_SHA: ${{ matrix.sha }}
+      PERF_CANDIDATE_NAME: ${{ matrix.candidate }}
+      PERF_STAGE: screen
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -72,7 +85,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-crossover-${{ env.PERF_STAGE }}-${{ env.PERF_DICTIONARY }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: import-crossover-${{ env.PERF_CANDIDATE_NAME }}-${{ env.PERF_STAGE }}-${{ env.PERF_DICTIONARY }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/import-crossover-evidence
           if-no-files-found: error
           retention-days: 14
