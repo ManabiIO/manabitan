@@ -681,6 +681,10 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexWriteBytes
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
+ * @property {number} [lookupIndexCheckpointCount]
+ * @property {number} [lookupIndexCheckpointBytes]
+ * @property {number} [lookupIndexCheckpointMs]
+ * @property {number} [lookupIndexFinalFlushMs]
  */
 
 /**
@@ -797,7 +801,7 @@ export class TermRecordOpfsStore {
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
-        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number}} */
+        /** @type {ReturnType<TermRecordOpfsStore['_createEmptyLookupIndexWriteMetrics']>} */
         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
     }
 
@@ -1362,6 +1366,10 @@ export class TermRecordOpfsStore {
             lookupIndexWriteBytes: this._lookupIndexWriteMetrics.writeBytes,
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
+            lookupIndexCheckpointCount: this._lookupIndexWriteMetrics.checkpointCount,
+            lookupIndexCheckpointBytes: this._lookupIndexWriteMetrics.checkpointBytes,
+            lookupIndexCheckpointMs: this._lookupIndexWriteMetrics.checkpointMs,
+            lookupIndexFinalFlushMs: this._lookupIndexWriteMetrics.finalFlushMs,
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -5826,6 +5834,13 @@ export class TermRecordOpfsStore {
             } catch (error) {
                 closeError = error instanceof Error ? error : new Error(String(error));
             } finally {
+                if (writable instanceof SyncImportIndexWriter) {
+                    const metrics = writable.getFlushMetrics();
+                    this._lookupIndexWriteMetrics.checkpointCount += metrics.checkpointCount;
+                    this._lookupIndexWriteMetrics.checkpointBytes += metrics.checkpointBytes;
+                    this._lookupIndexWriteMetrics.checkpointMs += metrics.checkpointMs;
+                    this._lookupIndexWriteMetrics.finalFlushMs += metrics.finalFlushMs;
+                }
                 state.lookupIndexWritable = null;
             }
         }
@@ -7008,7 +7023,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number}}
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, checkpointCount: number, checkpointBytes: number, checkpointMs: number, finalFlushMs: number}}
      */
     _createEmptyLookupIndexWriteMetrics() {
         return {
@@ -7016,6 +7031,10 @@ export class TermRecordOpfsStore {
             writeBytes: 0,
             awaitMs: 0,
             maxQueuedBytes: 0,
+            checkpointCount: 0,
+            checkpointBytes: 0,
+            checkpointMs: 0,
+            finalFlushMs: 0,
         };
     }
 

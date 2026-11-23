@@ -20,6 +20,7 @@ import {toError} from '../core/to-error.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
 const WRITE_TIME_BUDGET_MS = 6;
+const DURABILITY_CHECKPOINT_BYTES = 16 * 1024 * 1024;
 
 /**
  * @typedef {object} SyncAccessHandle
@@ -76,6 +77,15 @@ export class SyncImportIndexWriter {
         this._closePromise = null;
         /** @type {number} */
         this._workStartedAt = safePerformance.now();
+        /** @type {number} */
+        this._bytesSinceFlush = 0;
+        /** @type {ReturnType<SyncImportIndexWriter['getFlushMetrics']>} */
+        this._flushMetrics = {checkpointCount: 0, checkpointBytes: 0, checkpointMs: 0, finalFlushMs: 0};
+    }
+
+    /** @returns {{checkpointCount: number, checkpointBytes: number, checkpointMs: number, finalFlushMs: number}} */
+    getFlushMetrics() {
+        return {...this._flushMetrics};
     }
 
     /** @param {number} offset */
@@ -185,7 +195,7 @@ export class SyncImportIndexWriter {
             const errors = this._failure === null ? [] : [this._failure];
             if (!abort && errors.length === 0) {
                 try {
-                    this._access.flush();
+                    this._flush(false);
                 } catch (error) {
                     errors.push(toError(error));
                 }
@@ -253,8 +263,35 @@ export class SyncImportIndexWriter {
             }
             offset += written;
             this._position += written;
+            this._bytesSinceFlush += written;
+            if (!this._aborted && this._bytesSinceFlush >= DURABILITY_CHECKPOINT_BYTES) {
+                // This sidecar remains unpublished until finalization. Spread
+                // durable writeback across the import while parser workers can
+                // continue; finalization still flushes the last header patch.
+                this._flush(true);
+            }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
         }
+    }
+
+    /** @param {boolean} checkpoint */
+    _flush(checkpoint) {
+        const startedAt = safePerformance.now();
+        try {
+            this._access.flush();
+        } finally {
+            const elapsedMs = Math.max(0, safePerformance.now() - startedAt);
+            if (checkpoint) {
+                this._flushMetrics.checkpointMs += elapsedMs;
+            } else {
+                this._flushMetrics.finalFlushMs += elapsedMs;
+            }
+        }
+        if (checkpoint) {
+            ++this._flushMetrics.checkpointCount;
+            this._flushMetrics.checkpointBytes += this._bytesSinceFlush;
+        }
+        this._bytesSinceFlush = 0;
     }
 
     /** @returns {Promise<void>} */

@@ -1507,6 +1507,10 @@ export class DictionaryDatabase {
             let termRecordLookupIndexWriteBytes = 0;
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
+            let termRecordLookupIndexCheckpointCount = 0;
+            let termRecordLookupIndexCheckpointBytes = 0;
+            let termRecordLookupIndexCheckpointMs = 0;
+            let termRecordLookupIndexFinalFlushMs = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1577,6 +1581,10 @@ export class DictionaryDatabase {
                             termRecordLookupIndexWriteBytes = metrics.lookupIndexWriteBytes ?? 0;
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
+                            termRecordLookupIndexCheckpointCount = metrics.lookupIndexCheckpointCount ?? 0;
+                            termRecordLookupIndexCheckpointBytes = metrics.lookupIndexCheckpointBytes ?? 0;
+                            termRecordLookupIndexCheckpointMs = metrics.lookupIndexCheckpointMs ?? 0;
+                            termRecordLookupIndexFinalFlushMs = metrics.lookupIndexFinalFlushMs ?? 0;
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1750,6 +1758,10 @@ export class DictionaryDatabase {
                     compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
+                    termRecordLookupIndexCheckpointCount,
+                    termRecordLookupIndexCheckpointBytes,
+                    termRecordLookupIndexCheckpointMs,
+                    termRecordLookupIndexFinalFlushMs,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
