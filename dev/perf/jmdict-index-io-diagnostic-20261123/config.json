@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "authoritativeTiming": false,
+  "baseline": "467067650653c37c1f7d6b05d6737d070e1259cd",
+  "arms": {
+    "A": {
+      "sha": "4d75ad41042dd9792301f3e1b3013be2a6fcb7ff",
+      "tree": "a40f3424899011cdf3e62254c10e8b0f67379c8b",
+      "policy": "current writer gate with common instrumentation"
+    },
+    "B": {
+      "sha": "2c7a9f8493c5f501e0a1d72830dd57e20aa25c7b",
+      "tree": "16ae80a6fa6554f41272da3ed2f1e941abcee1f1",
+      "policy": "existing lazy worker past only the source-size gate"
+    },
+    "C": {
+      "sha": "c76a2a9508d68a4271df10d7b55894e3c7659adf",
+      "tree": "b58eea8875daf41b7330c2b2b50c6ba2a7f4c355",
+      "policy": "B plus nonawaited readiness prewarm after journal ownership"
+    }
+  },
+  "expectedArmPackageDifferences": [
+    "js/dictionary/term-record-import-index-diagnostic-arm.js"
+  ],
+  "expectedCommonInstrumentationDifferencesFromBaseline": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-record-import-index-diagnostic-arm.js",
+    "js/dictionary/term-record-import-index-diagnostic.js",
+    "js/dictionary/term-record-import-index-worker-client.js",
+    "js/dictionary/term-record-import-index-worker.js",
+    "js/dictionary/term-record-import-index-writer.js",
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "fixtureKey": "jmdict",
+  "fixedOrder": ["A1", "B1", "C1", "C2", "B2", "A2"],
+  "purpose": "mechanistic-diagnostic-only"
+}
