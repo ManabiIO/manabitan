@@ -5,9 +5,23 @@ Jitendex and VNDB archives. Each candidate, baseline and exact permitted package
 product difference list is frozen in `config.json` before acquisition. The
 baseline is `5e1f8c12f7ff798ba407323aff675cb23b22af02`.
 
-The current revision limits the dedicated index I/O worker to raw term-bank
-imports with at least 1 GiB of validated declared source bytes, while retaining
-the existing 2 MiB queued-index startup boundary. The preceding broad-worker
+The current candidate is the exact combination of gated index I/O revision
+`7b6f5115f8d837a035c34ba395c9cb63b4eca39a` and source CRC reuse revision
+`0d5a05c40410fd97b0b85a2ad5e432dc5507bb33`. It has no additional runtime edits.
+The I/O worker requires raw term-bank imports with at least 1 GiB of validated
+declared source bytes and the existing 2 MiB queued-index startup boundary. CRC
+reuse requires full raw-byte glossary equality and the separate worker-private
+source admission rules. This combined candidate receives its own fixed study;
+component results are not added or pooled into a whole-import estimate.
+
+The isolated CRC change passed correctness and reduced component CPU work, but
+its [complete browser confirmation](https://github.com/ManabiIO/manabitan/blob/6909759a81b3248e52e6bea60bb6c7baf8b59096/dev/perf/import-study-20261123/confirmation-crc.md)
+missed the predefined 5% materiality threshold. The new hypothesis is that
+overlapping persistence and reducing parser checksum work together improves the
+complete import path; it must meet the unchanged discovery and confirmation
+criteria below.
+
+The preceding broad-worker
 candidate (`c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1`) was rejected after a
 JMdict regression despite a strong VNDB discovery result. Its complete
 [independent audit](https://github.com/ManabiIO/manabitan/blob/a01b8abb1d07119f16bf507dc6f406dc037df51a/dev/perf/import-study-20261123/discovery-io.md)

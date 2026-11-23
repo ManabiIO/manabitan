@@ -2,14 +2,19 @@
   "schemaVersion": 1,
   "stage": "discovery",
   "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
-  "candidate": "7b6f5115f8d837a035c34ba395c9cb63b4eca39a",
+  "candidate": "958099525e6017c9faa3d912168da51575527b7d",
   "expectedPackageDifferences": [
     "js/dictionary/dictionary-database.js",
     "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-source-crc.js",
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
     "js/dictionary/term-record-import-index-worker-client.js",
     "js/dictionary/term-record-import-index-worker.js",
     "js/dictionary/term-record-import-index-writer.js",
-    "js/dictionary/term-record-opfs-store.js"
+    "js/dictionary/term-record-opfs-store.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
   ],
   "dictionaries": [
     "jmdict",
@@ -17,10 +22,19 @@
     "vndb"
   ],
   "confirmationOf": null,
-  "revisionOf": "https://github.com/ManabiIO/manabitan/actions/runs/45123579865",
+  "revisionOf": "https://github.com/ManabiIO/manabitan/actions/runs/45127809761",
   "expectedCandidateIndexWorkerFiles": {
     "jmdict": 0,
     "jitendex": 0,
     "vndb": 2
+  },
+  "components": [
+    "7b6f5115f8d837a035c34ba395c9cb63b4eca39a",
+    "0d5a05c40410fd97b0b85a2ad5e432dc5507bb33"
+  ],
+  "expectedSourceCrcCoverageBytes": {
+    "jmdict": 0,
+    "jitendex": 0,
+    "vndb": 4267992967
   }
 }
