@@ -1,0 +1,845 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": "45119016466",
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45119016466",
+  "harnessSha": "6427e3d801f797271cd1e68b038f9babe13ac18d",
+  "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "candidateSha": "e31032d575e329e6021b96359a74e825707004b3",
+  "ordinaryImports": 36,
+  "measuredImports": 27,
+  "excludedWarmups": 9,
+  "completeSampledResponsesChecked": 864,
+  "preAndPostRestartStates": 72,
+  "decision": "Do not advance unconditional 16 MiB flushing to confirmation or production: VNDB meets the materiality screen, but JMdict has an unresolved material regression versus C and broad A/C variation; Jitendex has no material gain.",
+  "retention": "Every ZIP member and acquired observation is retained and byte-verified. No import was rerun, replaced or removed. Source archives independently match their locks. Complete semantic/provenance verifier reproduces the original receipts; Python independently recomputes timing from raw browser timestamps and all paired arithmetic.",
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "archive": {
+        "path": "import-study-jmdict-1-attempt-1.zip",
+        "bytes": 825240,
+        "sha256": "b71f7f6e002a68155932d0607efcd1fe57e7a24a98872641a5033bc6f03cdca7",
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "semanticDigestSha256": "aecae8ec5a9ce8818ca119c9c3f9c6278e0f76c02ee629dcb57ec2cef6dfe57b",
+      "semanticEntryCount": 12,
+      "mediaProbesPerReadback": 0,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 735.6000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 735.6000000000058,
+            "archiveAndIndexMs": 7,
+            "importDataBanksMs": 581,
+            "bulkFinalizationMs": 117,
+            "termRecordCloseMs": 106,
+            "termRecordFlushPendingMs": 4.7000000000116415,
+            "termRecordAwaitQueuedMs": 0.6000000000058208,
+            "termContentEndSessionMs": 4.900000000023283
+          },
+          "reportSha256": "4eaf8ca168a0084c4e8d1559d26ba9680cd7c55360fc8b439e4aed2a84c1a6a7",
+          "summarySha256": "09d0b6bb6b4c560dd97f42fa655de0b991167d361d37ebad2589bc69311da120"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 699.6000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 699.6000000000058,
+            "archiveAndIndexMs": 7,
+            "importDataBanksMs": 618,
+            "bulkFinalizationMs": 42,
+            "termRecordCloseMs": 29.29999999998836,
+            "termRecordFlushPendingMs": 6.099999999976717,
+            "termRecordAwaitQueuedMs": 1.3000000000174623,
+            "termContentEndSessionMs": 7.599999999976717
+          },
+          "reportSha256": "f7acffed0a31879394f59c7c0aa2a88287c62797f1166524745ca58929f73ce7",
+          "summarySha256": "96239994484b19fbfa7614e6f57c21a8b5865f800eefda3550580bc834fda3da"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 704.1999999999825,
+          "phaseMetrics": {
+            "totalImportMs": 704.1999999999825,
+            "archiveAndIndexMs": 8,
+            "importDataBanksMs": 543,
+            "bulkFinalizationMs": 123,
+            "termRecordCloseMs": 108.5,
+            "termRecordFlushPendingMs": 5,
+            "termRecordAwaitQueuedMs": 3.099999999976717,
+            "termContentEndSessionMs": 5.099999999976717
+          },
+          "reportSha256": "f5a44b71336ea91852150260829ffa413f8d84a1fa37d2d0332a9e10fc59f3ff",
+          "summarySha256": "9566cd6a2c4fd29491bbdaf4ce06d273715c0ad4f3b4b59f1818331c8aa43027"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 1125.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1125.8999999999942,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 696,
+            "bulkFinalizationMs": 384,
+            "termRecordCloseMs": 220.39999999999418,
+            "termRecordFlushPendingMs": 5.899999999994179,
+            "termRecordAwaitQueuedMs": 7.2000000000116415,
+            "termContentEndSessionMs": 5.100000000005821
+          },
+          "reportSha256": "83e2e90e9ac1153d47c21eb03b3796d47cabd6f56b67946452b0d75fedbfaef7",
+          "summarySha256": "5712ac1d6be77b69601cc325e6ad0ceafda58de8e2824984f15f231a57cfcb87"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 727.3000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 727.3000000000175,
+            "archiveAndIndexMs": 7,
+            "importDataBanksMs": 654,
+            "bulkFinalizationMs": 34,
+            "termRecordCloseMs": 21.199999999982538,
+            "termRecordFlushPendingMs": 4.7000000000116415,
+            "termRecordAwaitQueuedMs": 3.6000000000058208,
+            "termContentEndSessionMs": 3.8000000000174623
+          },
+          "reportSha256": "7268768fc57498d8faeddd85227b0fde21a44091832b90688dca24dccf630806",
+          "summarySha256": "54dc61257c3fc3f17f10d8ec3e03985a506513f7d816ba43a22871340164bd5d"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 700.2999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 700.2999999999884,
+            "archiveAndIndexMs": 8,
+            "importDataBanksMs": 537,
+            "bulkFinalizationMs": 124,
+            "termRecordCloseMs": 110.29999999998836,
+            "termRecordFlushPendingMs": 8.800000000017462,
+            "termRecordAwaitQueuedMs": 0.39999999999417923,
+            "termContentEndSessionMs": 4.5
+          },
+          "reportSha256": "f56a7660effa2b3421d489a7eefb19a54f70f016a11aede5fb7e16e8137df60e",
+          "summarySha256": "f4002a57a1b8a8f873974a61f3cd0a47a707e90d5d915cdc79cfed236bfaf56e"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 783.2999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 783.2999999999884,
+            "archiveAndIndexMs": 14,
+            "importDataBanksMs": 679,
+            "bulkFinalizationMs": 48,
+            "termRecordCloseMs": 32.39999999999418,
+            "termRecordFlushPendingMs": 9.5,
+            "termRecordAwaitQueuedMs": 0.6000000000058208,
+            "termContentEndSessionMs": 7.899999999994179
+          },
+          "reportSha256": "f8d99ddbcdb327391898384c97426bfa9025b2b6869bb6741dbdb4c5e7320d0c",
+          "summarySha256": "266c6d9de0c5d761585b2ead85fb34769508aa4fa31a05065be69d6db97e8d3d"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 735.3999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 735.3999999999942,
+            "archiveAndIndexMs": 8,
+            "importDataBanksMs": 573,
+            "bulkFinalizationMs": 124,
+            "termRecordCloseMs": 107.30000000001746,
+            "termRecordFlushPendingMs": 11.10000000000582,
+            "termRecordAwaitQueuedMs": 0.8999999999941792,
+            "termContentEndSessionMs": 5
+          },
+          "reportSha256": "40d6178c965d571872d75103905cb8386302d3344371ba061058a6de3b14ae1a",
+          "summarySha256": "bdc560762748b905a21925c6987dfdc3a96c11dc6d527b199d8aab0c2a6c8c60"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 737.3999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 737.3999999999942,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 567,
+            "bulkFinalizationMs": 130,
+            "termRecordCloseMs": 111.30000000001746,
+            "termRecordFlushPendingMs": 12.699999999982538,
+            "termRecordAwaitQueuedMs": 1.5,
+            "termContentEndSessionMs": 13
+          },
+          "reportSha256": "4dd3e0195ee93e40ef3802124e3c0317cfa003b3f307278a13a0739a64381e9a",
+          "summarySha256": "5de7ab1448303107aa64fc8e6886508e774219bbb6cdc56d4edc248d9fc5e6c2"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 731.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 731.8999999999942,
+            "archiveAndIndexMs": 8,
+            "importDataBanksMs": 562,
+            "bulkFinalizationMs": 132,
+            "termRecordCloseMs": 112.89999999999418,
+            "termRecordFlushPendingMs": 12.700000000011642,
+            "termRecordAwaitQueuedMs": 2,
+            "termContentEndSessionMs": 6.5
+          },
+          "reportSha256": "73ac10c6fee052fe762e03734e1b6ebf945523d4234b3b69ffaef896c8e690d6",
+          "summarySha256": "6e2fe581798d743164b056c477ac2c6ae7aea4277b4117de6b168e7268ecee3c"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 818.7999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 818.7999999999884,
+            "archiveAndIndexMs": 8,
+            "importDataBanksMs": 643,
+            "bulkFinalizationMs": 130,
+            "termRecordCloseMs": 110,
+            "termRecordFlushPendingMs": 14.200000000011642,
+            "termRecordAwaitQueuedMs": 1.5,
+            "termContentEndSessionMs": 3.1000000000349246
+          },
+          "reportSha256": "d6f906b286b493834632949b47cebf5e0015d8e41c7bff50e3e84e082250dd67",
+          "summarySha256": "35711a8a7e6c5bdee1bce0be3e57807d974cb1ab9c7e9a456f7b7cfd07861640"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 816.9000000000233,
+          "phaseMetrics": {
+            "totalImportMs": 816.9000000000233,
+            "archiveAndIndexMs": 29,
+            "importDataBanksMs": 712,
+            "bulkFinalizationMs": 41,
+            "termRecordCloseMs": 24.800000000046566,
+            "termRecordFlushPendingMs": 8.5,
+            "termRecordAwaitQueuedMs": 1.599999999976717,
+            "termContentEndSessionMs": 35.09999999997672
+          },
+          "reportSha256": "1ebbe5cd7374c65907ec27c8ccb34e32a42790bbe757341699aecdf540598145",
+          "summarySha256": "5b1709f4ece665ba2e5507a761d594ab66ddb5c6d71cadb8d44a836bda3bcc85"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            -35.40278888000522,
+            6.224572823432939,
+            -0.23204689789509958
+          ],
+          "medianPairedChangePercent": -0.23204689789509958,
+          "equalWorkChangePercent": -13.220983557658206,
+          "fasterPairs": 2
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            3.8554905040738996,
+            6.513462061462416,
+            11.613608416454401
+          ],
+          "medianPairedChangePercent": 6.513462061462416,
+          "equalWorkChangePercent": 7.376822291938279,
+          "fasterPairs": 0
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            -37.80087041477999,
+            -0.2712232167073503,
+            -10.613092330238816
+          ],
+          "medianPairedChangePercent": -10.613092330238816,
+          "equalWorkChangePercent": -19.18272995041216,
+          "fasterPairs": 3
+        }
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "archive": {
+        "path": "import-study-jitendex-1-attempt-1.zip",
+        "bytes": 1022038,
+        "sha256": "8b5182c9d4f7c449e82e0bac23174c67669cdaf360c17cde6dcf24555a86dd38",
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "semanticDigestSha256": "766e9db5b84e7883a062279304ef1b8b22921bb2cd48918535f435be666ea469",
+      "semanticEntryCount": 17,
+      "mediaProbesPerReadback": 0,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 1991.7999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 1991.7999999999884,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1745,
+            "bulkFinalizationMs": 191,
+            "termRecordCloseMs": 112.69999999998254,
+            "termRecordFlushPendingMs": 9.799999999988358,
+            "termRecordAwaitQueuedMs": 0.6000000000058208,
+            "termContentEndSessionMs": 6.599999999976717
+          },
+          "reportSha256": "2d2b9237f0d56bf228e9cae67d099c3c920f3fec917c2dead1e76fa793de2797",
+          "summarySha256": "f489fdd62533bc62cc58639149a96a0745869017319de3531c4c5bfe23f26318"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 1606.1000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 1606.1000000000058,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1505,
+            "bulkFinalizationMs": 51,
+            "termRecordCloseMs": 29.79999999998836,
+            "termRecordFlushPendingMs": 4.7000000000116415,
+            "termRecordAwaitQueuedMs": 0.39999999999417923,
+            "termContentEndSessionMs": 2.3999999999941792
+          },
+          "reportSha256": "03caf17e16b868ee61944b0ccf6d69aea84d80ffc34bbc46998348aa7276a124",
+          "summarySha256": "a1cb870a5172c5c6330e80bf46eed97a2610f418bc71195127f9efbade481a4d"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 1650.0,
+          "phaseMetrics": {
+            "totalImportMs": 1650,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1450,
+            "bulkFinalizationMs": 148,
+            "termRecordCloseMs": 112.89999999999418,
+            "termRecordFlushPendingMs": 13.700000000011642,
+            "termRecordAwaitQueuedMs": 1.2000000000116415,
+            "termContentEndSessionMs": 5.7000000000116415
+          },
+          "reportSha256": "16e9184584096c66fd9a0bd065f5426c43ace77cd5577e14b0e38eb39bd9734b",
+          "summarySha256": "406ae4681a759206f638a000fc5722e40d2af06c3a70860228406c93b598c90e"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 1725.2999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 1725.2999999999884,
+            "archiveAndIndexMs": 13,
+            "importDataBanksMs": 1521,
+            "bulkFinalizationMs": 147,
+            "termRecordCloseMs": 112.79999999998836,
+            "termRecordFlushPendingMs": 10.799999999988358,
+            "termRecordAwaitQueuedMs": 6,
+            "termContentEndSessionMs": 5.2999999999883585
+          },
+          "reportSha256": "90d55e3ac143b328e75e738b4d64d16dd57e25dbdc207260146c9bcb7384d84f",
+          "summarySha256": "5312d5844685f4f165afaff0a5385d1c35dd5a57bb0dc154da09d51a79f97f56"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 1791.6000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 1791.6000000000058,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1557,
+            "bulkFinalizationMs": 154,
+            "termRecordCloseMs": 32.60000000000582,
+            "termRecordFlushPendingMs": 12.60000000000582,
+            "termRecordAwaitQueuedMs": 1.3999999999941792,
+            "termContentEndSessionMs": 5.899999999994179
+          },
+          "reportSha256": "808079b4c1fe74b35b1743b4f4873ee9ca3341798094463eee6877106340e31d",
+          "summarySha256": "be226572d5384e87bbe731ac4c01baeb11969df74ef6641ffcb56106d61eaf24"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 1721.8000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1721.8000000000175,
+            "archiveAndIndexMs": 15,
+            "importDataBanksMs": 1436,
+            "bulkFinalizationMs": 229,
+            "termRecordCloseMs": 110,
+            "termRecordFlushPendingMs": 6.2000000000116415,
+            "termRecordAwaitQueuedMs": 0.7999999999883585,
+            "termContentEndSessionMs": 3.1000000000058208
+          },
+          "reportSha256": "a330cd9e3b3a9724c6d76b552ad793acab532847da05a0e7d1e30a5c7b743b32",
+          "summarySha256": "9b6cd57f03ba94a2ef819ef939d34437d4bdbe91fa12a51a09079765cb02a1e5"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 1616.8000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1616.8000000000175,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 1513,
+            "bulkFinalizationMs": 50,
+            "termRecordCloseMs": 26.70000000001164,
+            "termRecordFlushPendingMs": 5.2000000000116415,
+            "termRecordAwaitQueuedMs": 0.6999999999825377,
+            "termContentEndSessionMs": 3.5
+          },
+          "reportSha256": "1ce3ed395fc001e6c98b3e202fb2a35a03c9d337175f23483a0f10e71e864179",
+          "summarySha256": "8e0fd3929126fcb7f6b4f8a73a6439bd96b3cc4afd4f989bc8816db7381c8bc8"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 1700.8000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1700.8000000000175,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1436,
+            "bulkFinalizationMs": 143,
+            "termRecordCloseMs": 114.60000000003492,
+            "termRecordFlushPendingMs": 5.7000000000116415,
+            "termRecordAwaitQueuedMs": 5.699999999953434,
+            "termContentEndSessionMs": 2.7000000000116415
+          },
+          "reportSha256": "ce95d104d586636147dc94c53d84000c6f67f6016389973ba04ce46517913975",
+          "summarySha256": "ac9d666778774ecd732389f52f610602eb1a17bfe8006c7f8f3481f0f97ee7c2"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 1919.0,
+          "phaseMetrics": {
+            "totalImportMs": 1919,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1479,
+            "bulkFinalizationMs": 386,
+            "termRecordCloseMs": 113.60000000003492,
+            "termRecordFlushPendingMs": 5.2999999999883585,
+            "termRecordAwaitQueuedMs": 1.2999999999883585,
+            "termContentEndSessionMs": 5.399999999965075
+          },
+          "reportSha256": "e1a37b86a5edc6019ad4e6b8dfb66c909a5497a1965796af2fe61f90a4e99e70",
+          "summarySha256": "c4f3ca0e7094a0fc2bbc131293f48758c04e383d4f93b5c1cf715af1aeb5188b"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 1617.399999999965,
+          "phaseMetrics": {
+            "totalImportMs": 1617.399999999965,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 1424,
+            "bulkFinalizationMs": 140,
+            "termRecordCloseMs": 109.70000000001164,
+            "termRecordFlushPendingMs": 5.7000000000116415,
+            "termRecordAwaitQueuedMs": 8.400000000023283,
+            "termContentEndSessionMs": 3.300000000046566
+          },
+          "reportSha256": "85acc8f9c8ac0d16f6670669aa8d1d594ac5145e44cc5b201f4bf06a01dd2456",
+          "summarySha256": "4b32fb610348b421eb69190772a9fc638cd531590a2eabc6a13a2cee2f533555"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 1676.100000000035,
+          "phaseMetrics": {
+            "totalImportMs": 1676.100000000035,
+            "archiveAndIndexMs": 13,
+            "importDataBanksMs": 1477,
+            "bulkFinalizationMs": 145,
+            "termRecordCloseMs": 114.79999999998836,
+            "termRecordFlushPendingMs": 10.899999999965075,
+            "termRecordAwaitQueuedMs": 5.100000000034925,
+            "termContentEndSessionMs": 6
+          },
+          "reportSha256": "a9d7589e3d4f453ef4e1d242b0ae13ea50f3bd33337f29e3cf52c85d8139d950",
+          "summarySha256": "06c2156945fea285f07c61d75e6238a32069a3839f6a74645ebbc0f4e68a38c5"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 1638.1999999999534,
+          "phaseMetrics": {
+            "totalImportMs": 1638.1999999999534,
+            "archiveAndIndexMs": 15,
+            "importDataBanksMs": 1518,
+            "bulkFinalizationMs": 66,
+            "termRecordCloseMs": 32.29999999998836,
+            "termRecordFlushPendingMs": 12.199999999953434,
+            "termRecordAwaitQueuedMs": 5.300000000046566,
+            "termContentEndSessionMs": 8
+          },
+          "reportSha256": "220507f937fdaa338b49791d17034346f7b6682432b4be31708c3afaf561f7d6",
+          "summarySha256": "211415fd3f15b434832ed96359088d790ef55d1cc3cf1519cfa1ba45817ac8fc"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            3.8428099460973586,
+            -15.747785304845364,
+            -2.261201598954754
+          ],
+          "medianPairedChangePercent": -2.261201598954754,
+          "equalWorkChangePercent": -5.146229606797337,
+          "fasterPairs": 2
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            4.05389708444579,
+            -4.938852304797692,
+            1.2860145913187182
+          ],
+          "medianPairedChangePercent": 1.2860145913187182,
+          "equalWorkChangePercent": 0.13095238095190975,
+          "fasterPairs": 1
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            -0.2028632701542299,
+            -11.370505471598879,
+            -3.5021776743672017
+          ],
+          "medianPairedChangePercent": -3.5021776743672017,
+          "equalWorkChangePercent": -5.270280430043273,
+          "fasterPairs": 3
+        }
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "archive": {
+        "path": "import-study-vndb-1-attempt-1.zip",
+        "bytes": 901514,
+        "sha256": "24379ffaf955fb58c07a9c07f7e2c622e14d7809f834d29d3797601583d0d313",
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "semanticDigestSha256": "a45be67b068406670a6d89a640799963e1b2e080d165b1306c1e57b34d8fba22",
+      "semanticEntryCount": 13,
+      "mediaProbesPerReadback": 5,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 8552.800000000047,
+          "phaseMetrics": {
+            "totalImportMs": 8552.800000000047,
+            "archiveAndIndexMs": 167,
+            "importDataBanksMs": 6349,
+            "bulkFinalizationMs": 1970,
+            "termRecordCloseMs": 1950.0999999999767,
+            "termRecordFlushPendingMs": 12.799999999988358,
+            "termRecordAwaitQueuedMs": 0.7000000000116415,
+            "termContentEndSessionMs": 9.599999999976717
+          },
+          "reportSha256": "02b07042543b99cd125e5db45eaa463c8d287d925323c37e784cea4bd84db667",
+          "summarySha256": "99c375d51063306e0567eadd03ac7a0efb846625eaaf38dfab475d7abe8e203e"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 7195.199999999953,
+          "phaseMetrics": {
+            "totalImportMs": 7195.199999999953,
+            "archiveAndIndexMs": 172,
+            "importDataBanksMs": 6893,
+            "bulkFinalizationMs": 69,
+            "termRecordCloseMs": 51.600000000034925,
+            "termRecordFlushPendingMs": 10.100000000034925,
+            "termRecordAwaitQueuedMs": 0.8999999999650754,
+            "termContentEndSessionMs": 2
+          },
+          "reportSha256": "0fcfd41761d1573e63504887961bad91dd46aa11cdf64a215e0a4f89c1f3023b",
+          "summarySha256": "61b361cf76d588716596ffff087de1beb24da1a6b47d6a6fa82d765b3cd90502"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 7906.5,
+          "phaseMetrics": {
+            "totalImportMs": 7906.5,
+            "archiveAndIndexMs": 163,
+            "importDataBanksMs": 5715,
+            "bulkFinalizationMs": 1970,
+            "termRecordCloseMs": 1954.7000000000116,
+            "termRecordFlushPendingMs": 6.900000000023283,
+            "termRecordAwaitQueuedMs": 0.9000000000232831,
+            "termContentEndSessionMs": 1.900000000023283
+          },
+          "reportSha256": "7f51d95141163efb99647b0e1e8606137bedd0378088f9c6c25045fd22ff042b",
+          "summarySha256": "775d1cb769abc7752e3f0bf14341bd20d6fb80e401e01e1946791c3cfdd7b2d1"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 7511.300000000047,
+          "phaseMetrics": {
+            "totalImportMs": 7511.300000000047,
+            "archiveAndIndexMs": 163,
+            "importDataBanksMs": 5295,
+            "bulkFinalizationMs": 1994,
+            "termRecordCloseMs": 1980.0999999999767,
+            "termRecordFlushPendingMs": 4.799999999930151,
+            "termRecordAwaitQueuedMs": 2.400000000023283,
+            "termContentEndSessionMs": 2.199999999953434
+          },
+          "reportSha256": "73dfa2ce222e47c04e6708d574f29b99bc2afae247e50b015c23d126e4b53c4f",
+          "summarySha256": "78f1c6cf3fee5131a01e8641c8f1eae714de92852e3d18187dc873cea77d888c"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 7204.699999999953,
+          "phaseMetrics": {
+            "totalImportMs": 7204.699999999953,
+            "archiveAndIndexMs": 163,
+            "importDataBanksMs": 6919,
+            "bulkFinalizationMs": 65,
+            "termRecordCloseMs": 48.199999999953434,
+            "termRecordFlushPendingMs": 10.399999999906868,
+            "termRecordAwaitQueuedMs": 0.6000000000931323,
+            "termContentEndSessionMs": 2.799999999930151
+          },
+          "reportSha256": "3ba8dd32b1ca050685a33718e0854166ea9ec33a349fe297a8552650d76c3906",
+          "summarySha256": "3f65c0a32a79fa4e3b4cf7e57a310bdc6de07b798bd0f0e2d7be2db577796a21"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 8017.900000000023,
+          "phaseMetrics": {
+            "totalImportMs": 8017.900000000023,
+            "archiveAndIndexMs": 178,
+            "importDataBanksMs": 5767,
+            "bulkFinalizationMs": 2013,
+            "termRecordCloseMs": 1994.3999999999069,
+            "termRecordFlushPendingMs": 5,
+            "termRecordAwaitQueuedMs": 6.600000000093132,
+            "termContentEndSessionMs": 1.5
+          },
+          "reportSha256": "59f749827e665eb03afac2b793a00cc8d0e6af2326e8d83fd6b38d01aba60665",
+          "summarySha256": "6ce7ead3faf285651df8ecc60959ee778cd1a04b35a2ae0f75b70fe71a8f57ac"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 7104.800000000047,
+          "phaseMetrics": {
+            "totalImportMs": 7104.800000000047,
+            "archiveAndIndexMs": 165,
+            "importDataBanksMs": 6811,
+            "bulkFinalizationMs": 71,
+            "termRecordCloseMs": 51.5,
+            "termRecordFlushPendingMs": 9.099999999976717,
+            "termRecordAwaitQueuedMs": 4,
+            "termContentEndSessionMs": 1.599999999976717
+          },
+          "reportSha256": "23064f6c515f4bc2cfdd89173c058222828301c538379f4198d4a6d84cfd28d1",
+          "summarySha256": "e7b167a714e52560a9454be78f3ef06e769f86347dc16f1eba6e8518896a64e9"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 7477.099999999977,
+          "phaseMetrics": {
+            "totalImportMs": 7477.099999999977,
+            "archiveAndIndexMs": 158,
+            "importDataBanksMs": 5276,
+            "bulkFinalizationMs": 1986,
+            "termRecordCloseMs": 1967.5,
+            "termRecordFlushPendingMs": 11.699999999953434,
+            "termRecordAwaitQueuedMs": 0.5,
+            "termContentEndSessionMs": 1.7999999999301508
+          },
+          "reportSha256": "d4ad217182ab9d013cf322805e3b8da84e6f89dd213c99810822111dfa4623d2",
+          "summarySha256": "197e77236be9f0482055f3d4fbf64b92e2a109ff3d55677b14027a0567c71a25"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 7581.400000000023,
+          "phaseMetrics": {
+            "totalImportMs": 7581.400000000023,
+            "archiveAndIndexMs": 158,
+            "importDataBanksMs": 5383,
+            "bulkFinalizationMs": 1984,
+            "termRecordCloseMs": 1968,
+            "termRecordFlushPendingMs": 5.300000000046566,
+            "termRecordAwaitQueuedMs": 3.5,
+            "termContentEndSessionMs": 1.5
+          },
+          "reportSha256": "4d629de8b2a4023dfe5170f7d86571f6084eea7ae073d993b1095d5f7ee0555d",
+          "summarySha256": "ba25a7df6187a67f8336c5c4857b605fc5b90895ea733c6d81ff412cedf75c93"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 7451.599999999977,
+          "phaseMetrics": {
+            "totalImportMs": 7451.599999999977,
+            "archiveAndIndexMs": 163,
+            "importDataBanksMs": 5237,
+            "bulkFinalizationMs": 1997,
+            "termRecordCloseMs": 1978.1999999999534,
+            "termRecordFlushPendingMs": 9.899999999906868,
+            "termRecordAwaitQueuedMs": 2.800000000046566,
+            "termContentEndSessionMs": 2.8999999999068677
+          },
+          "reportSha256": "feb6e2b823b14b192d5b36a7df924e502b559256db2fed98b88dc5b284506524",
+          "summarySha256": "a9b98902675cc71dd17452cc4d1887de1ab338d62f6de67ec42744f78404e9a4"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 7389.900000000023,
+          "phaseMetrics": {
+            "totalImportMs": 7389.900000000023,
+            "archiveAndIndexMs": 158,
+            "importDataBanksMs": 5187,
+            "bulkFinalizationMs": 1983,
+            "termRecordCloseMs": 1965.5999999999767,
+            "termRecordFlushPendingMs": 11,
+            "termRecordAwaitQueuedMs": 0.9000000000232831,
+            "termContentEndSessionMs": 5.900000000023283
+          },
+          "reportSha256": "9c524d88b58d0ece66521280422e821320c5b19c80fda53fa524f6afa4946b7b",
+          "summarySha256": "dcace14190b9c67df45b64106122d78b299074fbd79aec27cb8714b7e88b21be"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 6962.5,
+          "phaseMetrics": {
+            "totalImportMs": 6962.5,
+            "archiveAndIndexMs": 160,
+            "importDataBanksMs": 6680,
+            "bulkFinalizationMs": 66,
+            "termRecordCloseMs": 50.300000000046566,
+            "termRecordFlushPendingMs": 8.599999999976717,
+            "termRecordAwaitQueuedMs": 1.5,
+            "termContentEndSessionMs": 4.099999999976717
+          },
+          "reportSha256": "492198370e7e1aa61deb3861b3e5bbb9d8bceb16d10683c771841dab47d54d00",
+          "summarySha256": "511a8e09097f6faac8672bed12c7cb25f9052f3711d81bb774709c0a4d7d614b"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            -4.081850012648824,
+            -6.28643786108074,
+            -5.783569466434213
+          ],
+          "medianPairedChangePercent": -5.783569466434213,
+          "equalWorkChangePercent": -5.384608541717095,
+          "fasterPairs": 3
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            -10.142306589007944,
+            -4.979203167002333,
+            -6.563691019378092
+          ],
+          "medianPairedChangePercent": -6.563691019378092,
+          "equalWorkChangePercent": -7.297813183652391,
+          "fasterPairs": 3
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            6.744504945881191,
+            -1.3757353523102145,
+            0.8349233413165624
+          ],
+          "medianPairedChangePercent": 0.8349233413165624,
+          "equalWorkChangePercent": 2.0638182416619077,
+          "fasterPairs": 1
+        }
+      }
+    }
+  ]
+}
