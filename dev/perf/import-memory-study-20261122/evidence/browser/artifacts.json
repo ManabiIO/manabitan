@@ -1,0 +1,29 @@
+[
+  {
+    "id": 14786906499,
+    "name": "import-memory-20261122-vndb",
+    "sizeBytes": 771497,
+    "sha256": "273d1c7df735457f2317c0b6d4455ea62c348974a598dc322202c783fb49843d",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14786906499",
+    "expiresAt": "2026-12-23T03:07:03Z",
+    "runId": 45102744757
+  },
+  {
+    "id": 14786033700,
+    "name": "import-memory-20261122-jitendex",
+    "sizeBytes": 757893,
+    "sha256": "929dd431f3d64035d99065f50aaf8354670ee5b714f005a35b3fc4d2fa78c76e",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14786033700",
+    "expiresAt": "2026-12-23T02:59:13Z",
+    "runId": 45102744757
+  },
+  {
+    "id": 14785534379,
+    "name": "import-memory-20261122-jmdict",
+    "sizeBytes": 750323,
+    "sha256": "3fc27b4741f70252c015bf48d68a02d9ad6d7f4ea48246e539d80676155bcdde",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14785534379",
+    "expiresAt": "2026-12-23T02:59:53Z",
+    "runId": 45102744757
+  }
+]

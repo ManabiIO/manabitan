@@ -1,0 +1,6 @@
+{
+  "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+  "sha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "sourceDiff": "dev/perf/benchmark-support.js                      | 11 ++++++++\n dev/perf/dictionary-fixtures.js                    | 32 ++++++++++++++++++----\n .../extension-two-dictionary-import.e2e.js         | 24 ++++++++++++----\n test/perf/dictionaries.lock.json                   | 13 +++++++++\n 4 files changed, 69 insertions(+), 11 deletions(-)",
+  "statusWithHarnessOverlay": "M dev/perf/benchmark-support.js\n M dev/perf/dictionary-fixtures.js\n M test/chromium/extension-two-dictionary-import.e2e.js\n M test/perf/dictionaries.lock.json\n?? node_modules"
+}

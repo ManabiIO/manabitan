@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "baselineCommit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "measuredLocalCandidateCommit": "de6027ee16ee91b8c57f3087f4628817678ff177",
+  "publishedCandidateCommit": "f8dae7026d57488d4097caba942783bc1bbef6d4",
+  "publishedCandidateScope": "The three measured runtime source files match this published runtime commit byte for byte. Other runtime changes in that commit are outside this component receipt.",
+  "fixtureToolingCommit": "4e568fcde29fb93df9a856eab5d177b741d99bce",
+  "fixtureLockSha256": "9c0698d7b16e282f51823ea9b85b3fd5b809ebcb84e7a3ced49127b032cc3573",
+  "nodeVersion": "v24.22.3",
+  "plannerProfile": {
+    "hardwareConcurrency": 9,
+    "deviceMemory": null,
+    "workerCount": 5
+  },
+  "sourceHashes": {
+    "baseline": {
+      "ext/js/dictionary/term-bank-wasm-parser.js": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+      "ext/js/dictionary/dictionary-database.js": "619fd5c51858ea4b3366cb92624aad13ed046dc7deff5788ba3d5abee9d79abd",
+      "ext/js/dictionary/term-content-canonical-scan.js": "6f22f3df0c29f22094924e7f7c076e2367759724df8eea26dbb6f21233fbe731"
+    },
+    "candidate": {
+      "ext/js/dictionary/term-bank-wasm-parser.js": "1e88979fa1e3228c8128ace3ab3434ea91760327e4f70b279d923f3468d8390a",
+      "ext/js/dictionary/dictionary-database.js": "c017f3508ee039e514eae7082829eb7af7a7b672c8b69b9e6380e07615e001e8",
+      "ext/js/dictionary/term-content-canonical-scan.js": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4"
+    }
+  },
+  "originalFiles": {
+    "plan-scratch-receipt.mjs": {
+      "bytes": 10225,
+      "sha256": "3471396cb17a50dca6dffad0db0073b516b24d39678812bd83df2fc2d40cc391"
+    },
+    "plan-scratch-comparison.json": {
+      "bytes": 2678,
+      "sha256": "ccc2747ac4618a4d08cad2b3db50e1bbc839881d1531eaf4d520f0067db6d3e7"
+    },
+    "plan-scratch-jmdict-baseline.json": {
+      "bytes": 17613,
+      "sha256": "830651199b78c51a32bdd510257e5ac56b85d562aebcdd1e304b87900f5c1fa1"
+    },
+    "plan-scratch-jmdict-candidate.json": {
+      "bytes": 17065,
+      "sha256": "145f1fc4f686b10bbe9b4815596fb32f90dc37e7ddc8e8d0980e5853e807b7c5"
+    },
+    "plan-scratch-jitendex-baseline.json": {
+      "bytes": 23926,
+      "sha256": "346e948c16be5eb2be0866a4e1194b754b8bc91e3bdc2eac8a4d6b57d5b8d582"
+    },
+    "plan-scratch-jitendex-candidate.json": {
+      "bytes": 23382,
+      "sha256": "eb3c5ae327ec4e5e6afa6a82bbbbcb7ae81f0894cd643095526f0814735b1c31"
+    },
+    "plan-scratch-vndb-baseline.json": {
+      "bytes": 144999,
+      "sha256": "9ac129ae0cb99725a74e5312d6e97c44bd04baaaaed11148265e4cb9cb00faa0"
+    },
+    "plan-scratch-vndb-candidate.json": {
+      "bytes": 140560,
+      "sha256": "fcdca4ee8e5c42c3f62c11958e53bff8be468c84c96820dab61ecf0c63c540c6"
+    }
+  },
+  "portableRunnerSha256": "a7372025d408bbacb7c2163f941076c707e292c93de271f74cfd00c844a0609f",
+  "wasmHashes": {
+    "term-bank-parser.wasm": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+    "term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+  }
+}

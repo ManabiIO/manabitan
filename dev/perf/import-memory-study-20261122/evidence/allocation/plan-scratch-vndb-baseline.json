@@ -1,0 +1,4603 @@
+{
+  "description": "Deterministic scratch allocation receipt; production group planner with metadata-only worker shim, then real full-corpus native parser and isolated canonical resolver, sequential. Not import timing or a persistent storage benchmark.",
+  "sourceRoot": "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base",
+  "dictionary": "vndb",
+  "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "archiveBytes": 291705969,
+  "node": "v24.22.3",
+  "hardwareConcurrency": 9,
+  "plannerWorkerCount": 5,
+  "sourceBytes": 4267992967,
+  "sourceBanks": 665,
+  "groups": 170,
+  "rows": 6648310,
+  "sourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+    "ext/js/dictionary/dictionary-database.js": "619fd5c51858ea4b3366cb92624aad13ed046dc7deff5788ba3d5abee9d79abd",
+    "ext/js/dictionary/term-content-canonical-scan.js": "6f22f3df0c29f22094924e7f7c076e2367759724df8eea26dbb6f21233fbe731"
+  },
+  "wasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "parserScratchBytes": 54449392,
+  "maximumParserScratchBytesPerGroup": 330072,
+  "canonicalScratchBytes": 54449392,
+  "maximumCanonicalScratchBytesPerGroup": 330072,
+  "parserDigest": "265705376e6537e7aaefe7d07fe2c82ed0207b1bacfa9b9bfe676af8f8754990",
+  "canonicalDigest": "b47f8da98f0e3f208af2ac1ba7cb7c64c63fee5ffabf0b5559a2e86ab5b9782d",
+  "records": [
+    {
+      "group": 1,
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 822,
+      "parserScratchBytes": {
+        "pendingEpochs": 3288,
+        "pendingIndexes": 3288,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3288,
+        "pendingIndexes": 3288,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "79225626d6cc5151cf5e71d074da5bf26159dc650fff0dccbdbc77bbd6d92215",
+      "canonicalDigest": "cea75acd90995b56b932f82c711a8070f9a07b215b8df28a9f1667f723264ae0",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 2,
+      "banks": [
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 853,
+      "parserScratchBytes": {
+        "pendingEpochs": 3412,
+        "pendingIndexes": 3412,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3412,
+        "pendingIndexes": 3412,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c9e05107721c93f29677a9bacec027bdd41736e6949ae752ffb38f21041b80f8",
+      "canonicalDigest": "1dbc4c91284ee6d88b9835bcde38398bfbf0af91805df80b68073dbf469f1e35",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 3,
+      "banks": [
+        "term_bank_9.json",
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 830,
+      "parserScratchBytes": {
+        "pendingEpochs": 3320,
+        "pendingIndexes": 3320,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3320,
+        "pendingIndexes": 3320,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "af799518dd7e71e1c6eee2eed8d1a86e49fd1d0fcaf0c6270eb15ff3478512f7",
+      "canonicalDigest": "1ba41d962a2b8d2934478f124fe2f9534f26944d4f1327e4d671374f89a95e7d",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 4,
+      "banks": [
+        "term_bank_13.json",
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 803,
+      "parserScratchBytes": {
+        "pendingEpochs": 3212,
+        "pendingIndexes": 3212,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3212,
+        "pendingIndexes": 3212,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a676324945218f206ecc78152d85a5bfb42c088ea41e71fa4964d2d6ba693cf8",
+      "canonicalDigest": "013d71c87ca031ed07d8f2153afba4f5c652cb2719f4ea449cd8c97e15c81737",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 5,
+      "banks": [
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 842,
+      "parserScratchBytes": {
+        "pendingEpochs": 3368,
+        "pendingIndexes": 3368,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3368,
+        "pendingIndexes": 3368,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "8ac62ecdf205136bcf290c065535d512e0e30fb7557f3f7c07317c6fa0b9e4db",
+      "canonicalDigest": "1f5cbea53fbc11644a4271898b181f44c7807d667e664042a7b8f8d9ccb43294",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 6,
+      "banks": [
+        "term_bank_21.json",
+        "term_bank_22.json",
+        "term_bank_23.json",
+        "term_bank_24.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 889,
+      "parserScratchBytes": {
+        "pendingEpochs": 3556,
+        "pendingIndexes": 3556,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3556,
+        "pendingIndexes": 3556,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "f80655612042ead37749d9028fecd185df58dceb6ee9d1c5236e0c0a4b9daf16",
+      "canonicalDigest": "21f4cd09f2d43ceb404810672d43de0a604ae5c9cccd4ed0982c936fc1b5f0e6",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 7,
+      "banks": [
+        "term_bank_25.json",
+        "term_bank_26.json",
+        "term_bank_27.json",
+        "term_bank_28.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 961,
+      "parserScratchBytes": {
+        "pendingEpochs": 3844,
+        "pendingIndexes": 3844,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3844,
+        "pendingIndexes": 3844,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "9711b7d62651513a63fe78af1d88a5edade31c4e2b1827b9a1765bd85b6f51a8",
+      "canonicalDigest": "aeee95cf870c932ba0a6e22d2fbedd1d093a4f95370bb97bd9e05f94c8b8293c",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 8,
+      "banks": [
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 807,
+      "parserScratchBytes": {
+        "pendingEpochs": 3228,
+        "pendingIndexes": 3228,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3228,
+        "pendingIndexes": 3228,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "93a9c8c06a3ae4b60d3a4532666cbff89138839dd18bc473436976259f58fc17",
+      "canonicalDigest": "5b404778627d40a482617e265c1123182d9747579ff66d915803c709996c0a3e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 9,
+      "banks": [
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 835,
+      "parserScratchBytes": {
+        "pendingEpochs": 3340,
+        "pendingIndexes": 3340,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3340,
+        "pendingIndexes": 3340,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "347fcaf0d112d963015ef4edf791352a806c692b0e0dfeb9f77acb704a1297ac",
+      "canonicalDigest": "9425a2455921a027796478bd7a667031a1f538bd78f59b437ef23a220bfb060c",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 10,
+      "banks": [
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 849,
+      "parserScratchBytes": {
+        "pendingEpochs": 3396,
+        "pendingIndexes": 3396,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3396,
+        "pendingIndexes": 3396,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1323e47d9ea8c388bf9286844378d8d5c681ee638303bca80c9c93094f687f2b",
+      "canonicalDigest": "32a835e5b697181f2b152fcc8d766db39981729367129d0fcc62363c7d65e17e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 11,
+      "banks": [
+        "term_bank_41.json",
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 875,
+      "parserScratchBytes": {
+        "pendingEpochs": 3500,
+        "pendingIndexes": 3500,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3500,
+        "pendingIndexes": 3500,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "06558d0bffb2fba3e2c38b9b8e3d5a30d029a53f8212967f95916327e91f8310",
+      "canonicalDigest": "c5836afe4853a5fa3e0b5e0f883742cd717b5e27e2eb297e1064ed643d3fd6b0",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 12,
+      "banks": [
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 887,
+      "parserScratchBytes": {
+        "pendingEpochs": 3548,
+        "pendingIndexes": 3548,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3548,
+        "pendingIndexes": 3548,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c47786ef26ab7579fe57f79a0ada1c2e511b38219f6db71dd598f0a0a9e043fe",
+      "canonicalDigest": "693a55886ada829b96e5a9dfda0d4912cfee9460141ca0c6aa554e6ce19e480f",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 13,
+      "banks": [
+        "term_bank_49.json",
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 832,
+      "parserScratchBytes": {
+        "pendingEpochs": 3328,
+        "pendingIndexes": 3328,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3328,
+        "pendingIndexes": 3328,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "3e6d18c6fa1c760b0574a93e5d960162efae56b64b27c8d61b5444dc0300da50",
+      "canonicalDigest": "5ef6cf3dbcf9956ff57c8aabacc9f71c412ea58d0a509de6b056258f3ec415cb",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 14,
+      "banks": [
+        "term_bank_53.json",
+        "term_bank_54.json",
+        "term_bank_55.json",
+        "term_bank_56.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 868,
+      "parserScratchBytes": {
+        "pendingEpochs": 3472,
+        "pendingIndexes": 3472,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3472,
+        "pendingIndexes": 3472,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a480b1b40670b49b7732b8293e9bb2d7d670cf63e5a9a218e8317f0855dc6adf",
+      "canonicalDigest": "f70fde7ebbfadbca98cba28ea760fad18e72e8fc3448fa4624c550cd84af6331",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 15,
+      "banks": [
+        "term_bank_57.json",
+        "term_bank_58.json",
+        "term_bank_59.json",
+        "term_bank_60.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 948,
+      "parserScratchBytes": {
+        "pendingEpochs": 3792,
+        "pendingIndexes": 3792,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3792,
+        "pendingIndexes": 3792,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c476e99fe34d0e71406e7d3e68aa7553b1c3aca47b76b2618866dd8932cdd4f5",
+      "canonicalDigest": "e1e2fc96988c40845c1498ca0588a72f29b31940119b70701b1e6dd2ced780df",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 16,
+      "banks": [
+        "term_bank_61.json",
+        "term_bank_62.json",
+        "term_bank_63.json",
+        "term_bank_64.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 900,
+      "parserScratchBytes": {
+        "pendingEpochs": 3600,
+        "pendingIndexes": 3600,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3600,
+        "pendingIndexes": 3600,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "50a3091f1599df0d2133ab692d100d6981fefe8f48f56068e0929969741258f9",
+      "canonicalDigest": "baa481c9f63113e35a8a2b280e6e5bc1382795a28b65f566aba9b8c1f635db84",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 17,
+      "banks": [
+        "term_bank_65.json",
+        "term_bank_66.json",
+        "term_bank_67.json",
+        "term_bank_68.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 829,
+      "parserScratchBytes": {
+        "pendingEpochs": 3316,
+        "pendingIndexes": 3316,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3316,
+        "pendingIndexes": 3316,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "4094978db3c55088e153fc703d3082aedbe0c8666868e371f41c518df1413776",
+      "canonicalDigest": "343c780a0d4a4a218b7cfbb33f91482a40f459433b74c948d15cb6dea766ce3f",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 18,
+      "banks": [
+        "term_bank_69.json",
+        "term_bank_70.json",
+        "term_bank_71.json",
+        "term_bank_72.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1068,
+      "parserScratchBytes": {
+        "pendingEpochs": 4272,
+        "pendingIndexes": 4272,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4272,
+        "pendingIndexes": 4272,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "463f9d72a63c1d752bd8f7aa33c663630b17e5579dd74618fab10725bae16d5d",
+      "canonicalDigest": "7c960898b48f97b2bfdace7c6ed347593ca05d20f18b5ea3a17558e0bac1539b",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 19,
+      "banks": [
+        "term_bank_73.json",
+        "term_bank_74.json",
+        "term_bank_75.json",
+        "term_bank_76.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 954,
+      "parserScratchBytes": {
+        "pendingEpochs": 3816,
+        "pendingIndexes": 3816,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3816,
+        "pendingIndexes": 3816,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1d4b9d3aa22fb684504cecc0fde9cb7e69242567795c0856882cf19604d83ae7",
+      "canonicalDigest": "ac87e907d8d73ea09737982e159d4bb3f3d2d8177d634ab91a052c20f90d76cc",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 20,
+      "banks": [
+        "term_bank_77.json",
+        "term_bank_78.json",
+        "term_bank_79.json",
+        "term_bank_80.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 917,
+      "parserScratchBytes": {
+        "pendingEpochs": 3668,
+        "pendingIndexes": 3668,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3668,
+        "pendingIndexes": 3668,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "99eb0f05fba17b679c4f4c2960c44217b7371507e65f48f123bc4422ad297df3",
+      "canonicalDigest": "9bfd8a1ac5c7c181510a43dba12ed5e7296c50a06aad85cb51ca656d32781d20",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 21,
+      "banks": [
+        "term_bank_81.json",
+        "term_bank_82.json",
+        "term_bank_83.json",
+        "term_bank_84.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 905,
+      "parserScratchBytes": {
+        "pendingEpochs": 3620,
+        "pendingIndexes": 3620,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3620,
+        "pendingIndexes": 3620,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "9c24bbd5e5afbf4ac26670c803d2c781576e9dbb60c81e7fdf25d6b7a462b59c",
+      "canonicalDigest": "ce3790dc255db41fb0ce887477de527794a2f3f3ef9ddbd458e951095eac37c8",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 22,
+      "banks": [
+        "term_bank_85.json",
+        "term_bank_86.json",
+        "term_bank_87.json",
+        "term_bank_88.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 866,
+      "parserScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1c82a1210ec18a6f646486e91fb7b678d8afe653c2a30c1dd1d72245f3d1e570",
+      "canonicalDigest": "93a88219f6eeb1b16d3afbc56b91cac3206446a908eef667576ba143c51134ed",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 23,
+      "banks": [
+        "term_bank_89.json",
+        "term_bank_90.json",
+        "term_bank_91.json",
+        "term_bank_92.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 822,
+      "parserScratchBytes": {
+        "pendingEpochs": 3288,
+        "pendingIndexes": 3288,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3288,
+        "pendingIndexes": 3288,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "7a10909c8d6f0ab66365448fc54dbd338d07bfdc97ea5591ce1c48da53b13095",
+      "canonicalDigest": "ce749eb4ab80e4e44ed82b770fbf09aed183dfe1bfa6baf9838c44e8c910e88c",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 24,
+      "banks": [
+        "term_bank_93.json",
+        "term_bank_94.json",
+        "term_bank_95.json",
+        "term_bank_96.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 887,
+      "parserScratchBytes": {
+        "pendingEpochs": 3548,
+        "pendingIndexes": 3548,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3548,
+        "pendingIndexes": 3548,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "6f08003099db4ffbcc4ad3f4bff091a5234ff75f395fd0af3f82dcb44d5215d6",
+      "canonicalDigest": "b88ef0a52952296d7d7e544fecacebc2b69e2f4377e0c1f1c869d4cf992f2227",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 25,
+      "banks": [
+        "term_bank_97.json",
+        "term_bank_98.json",
+        "term_bank_99.json",
+        "term_bank_100.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 824,
+      "parserScratchBytes": {
+        "pendingEpochs": 3296,
+        "pendingIndexes": 3296,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3296,
+        "pendingIndexes": 3296,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "930432812e12a254424fa463b5ac7e76b7bbbfe0ee7847843162ab7f2b8aec5f",
+      "canonicalDigest": "5e61a28631299535ff932184ae69699534ab18be7633ee6bbbb36807efd5a0bc",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 26,
+      "banks": [
+        "term_bank_101.json",
+        "term_bank_102.json",
+        "term_bank_103.json",
+        "term_bank_104.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 812,
+      "parserScratchBytes": {
+        "pendingEpochs": 3248,
+        "pendingIndexes": 3248,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3248,
+        "pendingIndexes": 3248,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1dcebee973b5f1f3870993027c70d4948ac059d546778d0c168728016c8e812e",
+      "canonicalDigest": "073977dab52f422b991680ede5ac46102deb279a44e25cfa8449eebb81718990",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 27,
+      "banks": [
+        "term_bank_105.json",
+        "term_bank_106.json",
+        "term_bank_107.json",
+        "term_bank_108.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 788,
+      "parserScratchBytes": {
+        "pendingEpochs": 3152,
+        "pendingIndexes": 3152,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3152,
+        "pendingIndexes": 3152,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "44816f1f1d6b8c617796f334681909b8bda31e62813dfc8cc03beb131c7fc725",
+      "canonicalDigest": "ab0a87e7aaaeaa5651ac0a57f0e647c0703a137cc2e75f5d4fe0b9ab02f8f9cb",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 28,
+      "banks": [
+        "term_bank_109.json",
+        "term_bank_110.json",
+        "term_bank_111.json",
+        "term_bank_112.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 723,
+      "parserScratchBytes": {
+        "pendingEpochs": 2892,
+        "pendingIndexes": 2892,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 2892,
+        "pendingIndexes": 2892,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a8a379394999afd5a526441787865fd9b9b86e8d6b3e07baeafcd46f1fcb0153",
+      "canonicalDigest": "97c01f6d28c3e0f2774a2834758091abc640231418f59a6d0b0aaa3db9b8586f",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 29,
+      "banks": [
+        "term_bank_113.json",
+        "term_bank_114.json",
+        "term_bank_115.json",
+        "term_bank_116.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 815,
+      "parserScratchBytes": {
+        "pendingEpochs": 3260,
+        "pendingIndexes": 3260,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3260,
+        "pendingIndexes": 3260,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "4acc57172616c19aa30c79eda09a44039ff178963206ffda73bc617d766ca0e8",
+      "canonicalDigest": "e3e2673628f8f8169c168a1d104910bcf7ad8ffdfd4c8937c1837f5dba5154b8",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 30,
+      "banks": [
+        "term_bank_117.json",
+        "term_bank_118.json",
+        "term_bank_119.json",
+        "term_bank_120.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 960,
+      "parserScratchBytes": {
+        "pendingEpochs": 3840,
+        "pendingIndexes": 3840,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3840,
+        "pendingIndexes": 3840,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "736e38111eea438eb4bc3b9581bfbed7017977ba7fcca382630f90b2663f0ef7",
+      "canonicalDigest": "d67bbe858650fc7a335c0ef1cfa2222cfe4bc535e4be048141905c7c7d85dd4e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 31,
+      "banks": [
+        "term_bank_121.json",
+        "term_bank_122.json",
+        "term_bank_123.json",
+        "term_bank_124.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 901,
+      "parserScratchBytes": {
+        "pendingEpochs": 3604,
+        "pendingIndexes": 3604,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3604,
+        "pendingIndexes": 3604,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "7ec2648abb6cff9876338f035819c4d83e3c7cf38fcea61886a9528b8622d755",
+      "canonicalDigest": "f351e192f6794729e5bbfda04bba341a9fe010e77b1d75df8e902f22727faee2",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 32,
+      "banks": [
+        "term_bank_125.json",
+        "term_bank_126.json",
+        "term_bank_127.json",
+        "term_bank_128.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 830,
+      "parserScratchBytes": {
+        "pendingEpochs": 3320,
+        "pendingIndexes": 3320,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3320,
+        "pendingIndexes": 3320,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a27ead77dddab0df0b3ed2c80280b9feac074f00a5993e1676a0a04b3a072626",
+      "canonicalDigest": "99bb67154625348271c025f147e74bccbde14e48a6680da23e880028647b3974",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 33,
+      "banks": [
+        "term_bank_129.json",
+        "term_bank_130.json",
+        "term_bank_131.json",
+        "term_bank_132.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 868,
+      "parserScratchBytes": {
+        "pendingEpochs": 3472,
+        "pendingIndexes": 3472,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3472,
+        "pendingIndexes": 3472,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "7d8e8154b2bb41a04c3b6b131c88267768b025f7b3cfdf654dda2889afb2991d",
+      "canonicalDigest": "b4b25843a7ac274b9c7f40323a70b621d8a95bd7bbfae6a9fb2077d5ee9d7ded",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 34,
+      "banks": [
+        "term_bank_133.json",
+        "term_bank_134.json",
+        "term_bank_135.json",
+        "term_bank_136.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 843,
+      "parserScratchBytes": {
+        "pendingEpochs": 3372,
+        "pendingIndexes": 3372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3372,
+        "pendingIndexes": 3372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "3c8746960de9576ff643957017453e3788e4d3c14d0a0c0f07e9464277435fd9",
+      "canonicalDigest": "9cc3517cedac20cf0a43a416633dffc7d052e3968decd85889b033dc1ad5b9cf",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 35,
+      "banks": [
+        "term_bank_137.json",
+        "term_bank_138.json",
+        "term_bank_139.json",
+        "term_bank_140.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 967,
+      "parserScratchBytes": {
+        "pendingEpochs": 3868,
+        "pendingIndexes": 3868,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3868,
+        "pendingIndexes": 3868,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "235b69e69bd6fe6cb4a1d230a218ddb16a4619e8d8e1e1f64cfab3602cac60f5",
+      "canonicalDigest": "9ca8c2f6a48950aab0a40167ba7fa991d653c36f0532982e822b5690d267aef9",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 36,
+      "banks": [
+        "term_bank_141.json",
+        "term_bank_142.json",
+        "term_bank_143.json",
+        "term_bank_144.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 880,
+      "parserScratchBytes": {
+        "pendingEpochs": 3520,
+        "pendingIndexes": 3520,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3520,
+        "pendingIndexes": 3520,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e35a699ddc4a3fbd949ea9ea8523eb14cb4df3a2c651b621769c7414e309adf5",
+      "canonicalDigest": "ca3a63b86029b294eca4a7cbdef60c8e7f014a2c848d3287f0bff93ab3dcfe69",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 37,
+      "banks": [
+        "term_bank_145.json",
+        "term_bank_146.json",
+        "term_bank_147.json",
+        "term_bank_148.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 885,
+      "parserScratchBytes": {
+        "pendingEpochs": 3540,
+        "pendingIndexes": 3540,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3540,
+        "pendingIndexes": 3540,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "0560e2683b0137bade3b86fe4f84bbd6e4172a9d8b5e20a7b8011fd10a5f8bbd",
+      "canonicalDigest": "123921e674021c58e2b96a22a66bb99074a94cb783e01d221c1a1b71d48911c7",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 38,
+      "banks": [
+        "term_bank_149.json",
+        "term_bank_150.json",
+        "term_bank_151.json",
+        "term_bank_152.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 869,
+      "parserScratchBytes": {
+        "pendingEpochs": 3476,
+        "pendingIndexes": 3476,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3476,
+        "pendingIndexes": 3476,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c58f0c71e3903478011b53e5d8c6efaf50f80ebd2d7db34b1633fee6b04dceac",
+      "canonicalDigest": "a7045d09b3afc343cd4c1a65d73ccd757a6f15f2ca6ecc29e4ceb61532381424",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 39,
+      "banks": [
+        "term_bank_153.json",
+        "term_bank_154.json",
+        "term_bank_155.json",
+        "term_bank_156.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 815,
+      "parserScratchBytes": {
+        "pendingEpochs": 3260,
+        "pendingIndexes": 3260,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3260,
+        "pendingIndexes": 3260,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "ad7a8226390575026448441959e5ab556e8d1da579f9629bf030230b56e7b213",
+      "canonicalDigest": "453eb75c4db6fd81a0f1a9e14d0e73f5f1b17973190d3ced234d51e8c7794905",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 40,
+      "banks": [
+        "term_bank_157.json",
+        "term_bank_158.json",
+        "term_bank_159.json",
+        "term_bank_160.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 859,
+      "parserScratchBytes": {
+        "pendingEpochs": 3436,
+        "pendingIndexes": 3436,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3436,
+        "pendingIndexes": 3436,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "66aa7d36311dd38f432e1c9fd077c74307b61e238d2f9802131a950058596374",
+      "canonicalDigest": "7d9ea1f68f0aa8f8c554a00d82cdffc9887c1e281bf782322867c8454d103180",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 41,
+      "banks": [
+        "term_bank_161.json",
+        "term_bank_162.json",
+        "term_bank_163.json",
+        "term_bank_164.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 862,
+      "parserScratchBytes": {
+        "pendingEpochs": 3448,
+        "pendingIndexes": 3448,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3448,
+        "pendingIndexes": 3448,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "38e6a3c193cee6a0cf90252b8fc25ea8e770f8e4028bb89121de44ade06500e4",
+      "canonicalDigest": "84dee72420876e143577141c9c62614f1eb083447ab388436edd3b1b095fffdf",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 42,
+      "banks": [
+        "term_bank_165.json",
+        "term_bank_166.json",
+        "term_bank_167.json",
+        "term_bank_168.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 865,
+      "parserScratchBytes": {
+        "pendingEpochs": 3460,
+        "pendingIndexes": 3460,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3460,
+        "pendingIndexes": 3460,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "b53e0810f4af44a9298738134c8163fdeca2fd106368aabcf6334e8965fe046d",
+      "canonicalDigest": "27ef2de46d0e99fa3155bdd4ef7621def45d83781c97739ed734f9701f824fdf",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 43,
+      "banks": [
+        "term_bank_169.json",
+        "term_bank_170.json",
+        "term_bank_171.json",
+        "term_bank_172.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 857,
+      "parserScratchBytes": {
+        "pendingEpochs": 3428,
+        "pendingIndexes": 3428,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3428,
+        "pendingIndexes": 3428,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "b2adc8982a4ec4e160c04f339e286f83be1f1f44856c84d4f46460139dee6d83",
+      "canonicalDigest": "45840e98d13b0bec3b2cb9c887a88ca25a600dfd97d3722eb332684d3b25adc3",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 44,
+      "banks": [
+        "term_bank_173.json",
+        "term_bank_174.json",
+        "term_bank_175.json",
+        "term_bank_176.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 907,
+      "parserScratchBytes": {
+        "pendingEpochs": 3628,
+        "pendingIndexes": 3628,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3628,
+        "pendingIndexes": 3628,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "4f3e09c0e59bf0a06eeb022ee1e1090493cb9d44ad347c47392961c1c8bcdcad",
+      "canonicalDigest": "1626c26aea38a20af03b5a54ab99e7133130eaa63f20a4b9f880a1a9de1232b8",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 45,
+      "banks": [
+        "term_bank_177.json",
+        "term_bank_178.json",
+        "term_bank_179.json",
+        "term_bank_180.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 839,
+      "parserScratchBytes": {
+        "pendingEpochs": 3356,
+        "pendingIndexes": 3356,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3356,
+        "pendingIndexes": 3356,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "250ca5e364d9b4faf868649b4e6f92cfe6f6f38dce13e0740e84c470426e1de5",
+      "canonicalDigest": "19848733d339d782a3fb18bd4fbf970271cbbf834d37fa288ad4e1629bac70a3",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 46,
+      "banks": [
+        "term_bank_181.json",
+        "term_bank_182.json",
+        "term_bank_183.json",
+        "term_bank_184.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 963,
+      "parserScratchBytes": {
+        "pendingEpochs": 3852,
+        "pendingIndexes": 3852,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3852,
+        "pendingIndexes": 3852,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "15617e64836147993164bc7036de97780d079441c945c370098d8389282fa120",
+      "canonicalDigest": "36cfbe12f32fb38ec417c4e1b44d815517657e83431057b70b42b042bdb8e9a2",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 47,
+      "banks": [
+        "term_bank_185.json",
+        "term_bank_186.json",
+        "term_bank_187.json",
+        "term_bank_188.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 811,
+      "parserScratchBytes": {
+        "pendingEpochs": 3244,
+        "pendingIndexes": 3244,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3244,
+        "pendingIndexes": 3244,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a4c8c895172302d471f9410d0720496fa6fb258430194fb9d2ec4414c11ab059",
+      "canonicalDigest": "40cbaee46cafa6cb7d2263a98fe8315f7cbd8ad3076e325f04b93a16815a9f19",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 48,
+      "banks": [
+        "term_bank_189.json",
+        "term_bank_190.json",
+        "term_bank_191.json",
+        "term_bank_192.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 875,
+      "parserScratchBytes": {
+        "pendingEpochs": 3500,
+        "pendingIndexes": 3500,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3500,
+        "pendingIndexes": 3500,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "cbf3f2c303af3a6da0ee4eef663b38c40823b5420cdf155705376d10c991d0f4",
+      "canonicalDigest": "e860fa5a279108a321870ecdcf387eb0fa7eb9242f83660f0ae74582fed268be",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 49,
+      "banks": [
+        "term_bank_193.json",
+        "term_bank_194.json",
+        "term_bank_195.json",
+        "term_bank_196.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 850,
+      "parserScratchBytes": {
+        "pendingEpochs": 3400,
+        "pendingIndexes": 3400,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3400,
+        "pendingIndexes": 3400,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "086f7855760fe606645782c69af133b9a66d54a5becdfdd02a1c1f09fdf9803f",
+      "canonicalDigest": "2a67e56801ba11c80c605b5bb811649870b2f50f52dc5e89722a177d9d9297e8",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 50,
+      "banks": [
+        "term_bank_197.json",
+        "term_bank_198.json",
+        "term_bank_199.json",
+        "term_bank_200.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 913,
+      "parserScratchBytes": {
+        "pendingEpochs": 3652,
+        "pendingIndexes": 3652,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3652,
+        "pendingIndexes": 3652,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "225d01d6d5f5037d99a32101bf85c6a93b005cdaea26aab8ecf1754580bd635f",
+      "canonicalDigest": "9599f4943274caf85bcbc356f642d9bf7b7e2ef794094c26fed4f4b6ea2a5752",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 51,
+      "banks": [
+        "term_bank_201.json",
+        "term_bank_202.json",
+        "term_bank_203.json",
+        "term_bank_204.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 903,
+      "parserScratchBytes": {
+        "pendingEpochs": 3612,
+        "pendingIndexes": 3612,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3612,
+        "pendingIndexes": 3612,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "4101fef9396c432f8dd7b25504532b9693994d438120a541683be32926b55aa2",
+      "canonicalDigest": "1dfe4ee38beb7c613d40fd68f50db58c2eb814f183019c860022c4b091046726",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 52,
+      "banks": [
+        "term_bank_205.json",
+        "term_bank_206.json",
+        "term_bank_207.json",
+        "term_bank_208.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 924,
+      "parserScratchBytes": {
+        "pendingEpochs": 3696,
+        "pendingIndexes": 3696,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3696,
+        "pendingIndexes": 3696,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "203b196b74f77056da7d923de34bbcea038db9961a8b4dda7d9909a28af02dc9",
+      "canonicalDigest": "121dc20a82a19261632e5bb13ecad742cbe99e26050ae6d3b0049982a3b3b678",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 53,
+      "banks": [
+        "term_bank_209.json",
+        "term_bank_210.json",
+        "term_bank_211.json",
+        "term_bank_212.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 843,
+      "parserScratchBytes": {
+        "pendingEpochs": 3372,
+        "pendingIndexes": 3372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3372,
+        "pendingIndexes": 3372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "0d3c57f4769f86ca9c7f1906c81575dda701806726180ef622d47118cf9fd7b5",
+      "canonicalDigest": "e75f8872206c0c90d979d30cbd14f54b01b7e3fced0e306f24ca610d47048370",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 54,
+      "banks": [
+        "term_bank_213.json",
+        "term_bank_214.json",
+        "term_bank_215.json",
+        "term_bank_216.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 845,
+      "parserScratchBytes": {
+        "pendingEpochs": 3380,
+        "pendingIndexes": 3380,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3380,
+        "pendingIndexes": 3380,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "defdd9f32bf8068e11494db7b75cc2b4edf8f23f990bf4fa0960fc2c65301f3c",
+      "canonicalDigest": "fe20984473d5a92ed8d353efe7db185e95584e3aa4c007f64069c9dc32f6ea19",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 55,
+      "banks": [
+        "term_bank_217.json",
+        "term_bank_218.json",
+        "term_bank_219.json",
+        "term_bank_220.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 841,
+      "parserScratchBytes": {
+        "pendingEpochs": 3364,
+        "pendingIndexes": 3364,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3364,
+        "pendingIndexes": 3364,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "fa2e72f5c64a1a7257e3096feb193a135f3d96c107e9425066daf2fa5d6d7781",
+      "canonicalDigest": "ca209bfabec879ce6655e58ef1198f6eab3c2ca29fccfac94a0462c9f3414c08",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 56,
+      "banks": [
+        "term_bank_221.json",
+        "term_bank_222.json",
+        "term_bank_223.json",
+        "term_bank_224.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 817,
+      "parserScratchBytes": {
+        "pendingEpochs": 3268,
+        "pendingIndexes": 3268,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3268,
+        "pendingIndexes": 3268,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "fc664b3694ca5a504f48ce0e9033b7557f60c8ebfa269a0a6e421eb51106aef1",
+      "canonicalDigest": "6de9bd4526090e08869db2fe2c5fac4101233e8ae7b322e7a7b5f8fe5338f1cb",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 57,
+      "banks": [
+        "term_bank_225.json",
+        "term_bank_226.json",
+        "term_bank_227.json",
+        "term_bank_228.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 851,
+      "parserScratchBytes": {
+        "pendingEpochs": 3404,
+        "pendingIndexes": 3404,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3404,
+        "pendingIndexes": 3404,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "addc42429b37562c7fe561fc37648fe0824711f6057d0bcc5e8ade28b5b40640",
+      "canonicalDigest": "2b6353f8e3464e70b5ae3aa8ee98d08dade82adb42780d1cfb022e28326d597d",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 58,
+      "banks": [
+        "term_bank_229.json",
+        "term_bank_230.json",
+        "term_bank_231.json",
+        "term_bank_232.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 861,
+      "parserScratchBytes": {
+        "pendingEpochs": 3444,
+        "pendingIndexes": 3444,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3444,
+        "pendingIndexes": 3444,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "ae1e154208687f59d1acd4522a5292254e37a8266f77e568fb49b964c452792d",
+      "canonicalDigest": "05dfd3a65e722a2e2d5423b254674ce9b944f49fd67f01a4c877c5f1fa1611f1",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 59,
+      "banks": [
+        "term_bank_233.json",
+        "term_bank_234.json",
+        "term_bank_235.json",
+        "term_bank_236.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 928,
+      "parserScratchBytes": {
+        "pendingEpochs": 3712,
+        "pendingIndexes": 3712,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3712,
+        "pendingIndexes": 3712,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "161ebd6a4480c36ab6f10e3f6135885c46d0f1688d00959c75743e7497dc9fec",
+      "canonicalDigest": "12c47fe1857b2cb0bac2c908f222d8551ebae99dfa6606ed55721697713c1477",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 60,
+      "banks": [
+        "term_bank_237.json",
+        "term_bank_238.json",
+        "term_bank_239.json",
+        "term_bank_240.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 930,
+      "parserScratchBytes": {
+        "pendingEpochs": 3720,
+        "pendingIndexes": 3720,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3720,
+        "pendingIndexes": 3720,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "3c11d6cd8ca3aed81cabdf340f30bb50053e50decf0568d70fdbb735bcfbed5a",
+      "canonicalDigest": "4c1b7ee75d160ea873052d60cfaaa4efd651f5a9d87936032d61de287717e3ea",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 61,
+      "banks": [
+        "term_bank_241.json",
+        "term_bank_242.json",
+        "term_bank_243.json",
+        "term_bank_244.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 954,
+      "parserScratchBytes": {
+        "pendingEpochs": 3816,
+        "pendingIndexes": 3816,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3816,
+        "pendingIndexes": 3816,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e95101ceed30dc5f52e88ec0e0c580ee19c067371a63638d66f75e2bf5d0e98a",
+      "canonicalDigest": "29a383b96513e7d18ce1c12f7d4ca1743c4c87be972ceb3a6802e2e19c2b28d9",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 62,
+      "banks": [
+        "term_bank_245.json",
+        "term_bank_246.json",
+        "term_bank_247.json",
+        "term_bank_248.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 877,
+      "parserScratchBytes": {
+        "pendingEpochs": 3508,
+        "pendingIndexes": 3508,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3508,
+        "pendingIndexes": 3508,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "706371ddc6355e5b64662fcebc8881ca22a8eaa2b1b2d4befff0dce4ae1a3765",
+      "canonicalDigest": "b7a675485e4b3f94a50e737a8b51464b71409e50e52bbce387b550d7dd2c9f5f",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 63,
+      "banks": [
+        "term_bank_249.json",
+        "term_bank_250.json",
+        "term_bank_251.json",
+        "term_bank_252.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 886,
+      "parserScratchBytes": {
+        "pendingEpochs": 3544,
+        "pendingIndexes": 3544,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3544,
+        "pendingIndexes": 3544,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "cb3305ba76f50e3c88f56d2c56b5a01ac179ca2cb9a54fb86508c9c50715fcc8",
+      "canonicalDigest": "08ecc27b696851cd7368be49219ffe32a4cd86d6dc96f567774efd605c5d0402",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 64,
+      "banks": [
+        "term_bank_253.json",
+        "term_bank_254.json",
+        "term_bank_255.json",
+        "term_bank_256.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 855,
+      "parserScratchBytes": {
+        "pendingEpochs": 3420,
+        "pendingIndexes": 3420,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3420,
+        "pendingIndexes": 3420,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "5c3b65ae8fb3c43ed94ac8a906f4988d43676f98ad6681291149b3dd4b235c1c",
+      "canonicalDigest": "29ab713bebf804b171430f5654d2220af162120841362c6b894e49de9a90f907",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 65,
+      "banks": [
+        "term_bank_257.json",
+        "term_bank_258.json",
+        "term_bank_259.json",
+        "term_bank_260.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 874,
+      "parserScratchBytes": {
+        "pendingEpochs": 3496,
+        "pendingIndexes": 3496,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3496,
+        "pendingIndexes": 3496,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1824a61c469789ddb19769b1432fb57ff5293147416df59f971d80cb950be805",
+      "canonicalDigest": "c22bb9350174eab31e87631f9113c83d0b3407fd3d1f3e24195217ec97fa17ea",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 66,
+      "banks": [
+        "term_bank_261.json",
+        "term_bank_262.json",
+        "term_bank_263.json",
+        "term_bank_264.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 832,
+      "parserScratchBytes": {
+        "pendingEpochs": 3328,
+        "pendingIndexes": 3328,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3328,
+        "pendingIndexes": 3328,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a6ab2ed874ca7a77354aab1cd5c80b05e4cd72fedefafb1ca197aaf9833476c0",
+      "canonicalDigest": "2ac5475614dc8cab0231c6deefc422a6b9c3a9bd77a84ab123cd651b375bd6bb",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 67,
+      "banks": [
+        "term_bank_265.json",
+        "term_bank_266.json",
+        "term_bank_267.json",
+        "term_bank_268.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 843,
+      "parserScratchBytes": {
+        "pendingEpochs": 3372,
+        "pendingIndexes": 3372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3372,
+        "pendingIndexes": 3372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "0ac366a2fd7f4fc268bb79b674a007fa846c057453cab711c5e8abcb171e5336",
+      "canonicalDigest": "0608c72db556b1e97f1908672cfc9ddff490b64d8e5f50e378f41d3e4f50cf46",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 68,
+      "banks": [
+        "term_bank_269.json",
+        "term_bank_270.json",
+        "term_bank_271.json",
+        "term_bank_272.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 859,
+      "parserScratchBytes": {
+        "pendingEpochs": 3436,
+        "pendingIndexes": 3436,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3436,
+        "pendingIndexes": 3436,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "42620d8813d08f88cfcc316c2f253690accb4ab05e27d9741cb75d87d7f31b52",
+      "canonicalDigest": "4c72d7a777238f7494c2d31b1ee9a72f5491e1420f00ff328fdeb98b0023e3be",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 69,
+      "banks": [
+        "term_bank_273.json",
+        "term_bank_274.json",
+        "term_bank_275.json",
+        "term_bank_276.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 921,
+      "parserScratchBytes": {
+        "pendingEpochs": 3684,
+        "pendingIndexes": 3684,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3684,
+        "pendingIndexes": 3684,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "40afce342b2d5c7518b18355c2fbcff4dd1fb1c05e1fb48e228a3c9204e4477c",
+      "canonicalDigest": "e4d04936879b42ce29facc6a50963e2f3f660c1e9a38d4810d8940b5ebb2e13e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 70,
+      "banks": [
+        "term_bank_277.json",
+        "term_bank_278.json",
+        "term_bank_279.json",
+        "term_bank_280.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 841,
+      "parserScratchBytes": {
+        "pendingEpochs": 3364,
+        "pendingIndexes": 3364,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3364,
+        "pendingIndexes": 3364,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c85ccaef4c8c28bcc459c7ff1932dfcdaa08f25f50140dfdf06fc1cf28cb4ecc",
+      "canonicalDigest": "15110e7aaa8d65f6fefe2ca0c7c208b630af0afe3f9ebfd771e0d89c85e87926",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 71,
+      "banks": [
+        "term_bank_281.json",
+        "term_bank_282.json",
+        "term_bank_283.json",
+        "term_bank_284.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 945,
+      "parserScratchBytes": {
+        "pendingEpochs": 3780,
+        "pendingIndexes": 3780,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3780,
+        "pendingIndexes": 3780,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "75aa079dbf3c1347ea1e405baf479e837ecaf23bf715997ecde527abab9679c7",
+      "canonicalDigest": "4197191cc525f116ce49fcb98b3348a6b8332cff982b559108da6e74cc519dad",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 72,
+      "banks": [
+        "term_bank_285.json",
+        "term_bank_286.json",
+        "term_bank_287.json",
+        "term_bank_288.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 825,
+      "parserScratchBytes": {
+        "pendingEpochs": 3300,
+        "pendingIndexes": 3300,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3300,
+        "pendingIndexes": 3300,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "229f65dc74ddb5ad67dbb24ce38cde4ce86612be1a49b354e9be53674832f4a6",
+      "canonicalDigest": "c7f3b9ecefeeb7b74209862a0b0097a6d4e418c0b163b0194d8eca90df79be26",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 73,
+      "banks": [
+        "term_bank_289.json",
+        "term_bank_290.json",
+        "term_bank_291.json",
+        "term_bank_292.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 821,
+      "parserScratchBytes": {
+        "pendingEpochs": 3284,
+        "pendingIndexes": 3284,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3284,
+        "pendingIndexes": 3284,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "80cc52cb47b3a408b5fa6ae6b60306677830add4545519b6ccae553dfb63b685",
+      "canonicalDigest": "4e6ea247b776150554be4d85a5e82b8c7caaf04e1fdb629cad82d039bedfada7",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 74,
+      "banks": [
+        "term_bank_293.json",
+        "term_bank_294.json",
+        "term_bank_295.json",
+        "term_bank_296.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 844,
+      "parserScratchBytes": {
+        "pendingEpochs": 3376,
+        "pendingIndexes": 3376,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3376,
+        "pendingIndexes": 3376,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "9d9f9774cf6a384cfd329f56a141cb3dc7856038a926137d053db95430ea4ca8",
+      "canonicalDigest": "57b292377b650ba6d8d5b270dd58d522b6b13f2f575b5775be4280382115c934",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 75,
+      "banks": [
+        "term_bank_297.json",
+        "term_bank_298.json",
+        "term_bank_299.json",
+        "term_bank_300.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 837,
+      "parserScratchBytes": {
+        "pendingEpochs": 3348,
+        "pendingIndexes": 3348,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3348,
+        "pendingIndexes": 3348,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "397ed502509f5d5c823487adaf2fcb2fd9aec27658c93032c11746a62e5c5fc1",
+      "canonicalDigest": "819c023ebead203f431b3e6e3956fb8108c89f0b143661985d5bb8a4dfcd2f2b",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 76,
+      "banks": [
+        "term_bank_301.json",
+        "term_bank_302.json",
+        "term_bank_303.json",
+        "term_bank_304.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 821,
+      "parserScratchBytes": {
+        "pendingEpochs": 3284,
+        "pendingIndexes": 3284,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3284,
+        "pendingIndexes": 3284,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "84e20653aec8ce748ab6fa2d40b1367a3ccdc1c1a4ad155c79ece49a6bc30cae",
+      "canonicalDigest": "2fde226bedd789ca00d2315cac08f6264f31e46eac04e9cb14a26b538ab0ff35",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 77,
+      "banks": [
+        "term_bank_305.json",
+        "term_bank_306.json",
+        "term_bank_307.json",
+        "term_bank_308.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 889,
+      "parserScratchBytes": {
+        "pendingEpochs": 3556,
+        "pendingIndexes": 3556,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3556,
+        "pendingIndexes": 3556,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "861af02c8bb691f9ffe6395b60cea129dd4b8fc99a1052d469f1808459804857",
+      "canonicalDigest": "05e7c6301883407de89a36c7ee7ed2f7e423c0cde045fc6c5fa1ea72237bf85d",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 78,
+      "banks": [
+        "term_bank_309.json",
+        "term_bank_310.json",
+        "term_bank_311.json",
+        "term_bank_312.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 808,
+      "parserScratchBytes": {
+        "pendingEpochs": 3232,
+        "pendingIndexes": 3232,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3232,
+        "pendingIndexes": 3232,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "2c2bc8133b12f6ebd826b9823dccf1409db23a26a9507a32750c32747f304b13",
+      "canonicalDigest": "95e7d8f2002761bfd41189cf8b49cc0c6610a0fe2c49bd9a4375e8dc7d82d5af",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 79,
+      "banks": [
+        "term_bank_313.json",
+        "term_bank_314.json",
+        "term_bank_315.json",
+        "term_bank_316.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 935,
+      "parserScratchBytes": {
+        "pendingEpochs": 3740,
+        "pendingIndexes": 3740,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3740,
+        "pendingIndexes": 3740,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1db235fe470b97b116a5f2ec4c1e6a288a99c04f136690e8575f8faf4b25a031",
+      "canonicalDigest": "5583df3efeb8ef19fbdf4268f0ede0759a62f44135cb72c59f0bfb492a573a52",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 80,
+      "banks": [
+        "term_bank_317.json",
+        "term_bank_318.json",
+        "term_bank_319.json",
+        "term_bank_320.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 888,
+      "parserScratchBytes": {
+        "pendingEpochs": 3552,
+        "pendingIndexes": 3552,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3552,
+        "pendingIndexes": 3552,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "92353d06368d26d775a0dcb807a122dcee0cad8c381f28af61972b3e521056eb",
+      "canonicalDigest": "c96878bbd1da253cf62a8e81e19aa8a43cf83cf43a3c4df3373ff3c19967308b",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 81,
+      "banks": [
+        "term_bank_321.json",
+        "term_bank_322.json",
+        "term_bank_323.json",
+        "term_bank_324.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 829,
+      "parserScratchBytes": {
+        "pendingEpochs": 3316,
+        "pendingIndexes": 3316,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3316,
+        "pendingIndexes": 3316,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "57679068bc82ae0c2b13ca38575baa07ca336e071ec44af4b95c3099b2cedc89",
+      "canonicalDigest": "d2685fdff6c127863fffcd9d42401eaeab6103402975ecff9009a132e698c479",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 82,
+      "banks": [
+        "term_bank_325.json",
+        "term_bank_326.json",
+        "term_bank_327.json",
+        "term_bank_328.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 896,
+      "parserScratchBytes": {
+        "pendingEpochs": 3584,
+        "pendingIndexes": 3584,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3584,
+        "pendingIndexes": 3584,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e5030f27eb398e58bf4ac77d2aeadc43c3f60c0efe5bf213681a8bb00e06a190",
+      "canonicalDigest": "911af0250462b4c5cb2d6540956ade81115f4055656e16b4b15bd91381c42182",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 83,
+      "banks": [
+        "term_bank_329.json",
+        "term_bank_330.json",
+        "term_bank_331.json",
+        "term_bank_332.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 886,
+      "parserScratchBytes": {
+        "pendingEpochs": 3544,
+        "pendingIndexes": 3544,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3544,
+        "pendingIndexes": 3544,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1f017ca0d1da87e93bae09df7e1ebe1acee4d1a1a8714926b4c7df3b8d9c431a",
+      "canonicalDigest": "c7578a2dcb2e5ee2ab50e4a79146be513c5474b674513428993d855421fdd412",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 84,
+      "banks": [
+        "term_bank_333.json",
+        "term_bank_334.json",
+        "term_bank_335.json",
+        "term_bank_336.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 981,
+      "parserScratchBytes": {
+        "pendingEpochs": 3924,
+        "pendingIndexes": 3924,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3924,
+        "pendingIndexes": 3924,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "2fe1e4f77d29360266e64f0adc76389fc02d036687391a6dde82fdf9299bfa95",
+      "canonicalDigest": "b69789d8ab310b9652a230874df71ffcb6d37a8d7e8a58179ddd90ed44d54ec4",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 85,
+      "banks": [
+        "term_bank_337.json",
+        "term_bank_338.json",
+        "term_bank_339.json",
+        "term_bank_340.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 847,
+      "parserScratchBytes": {
+        "pendingEpochs": 3388,
+        "pendingIndexes": 3388,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3388,
+        "pendingIndexes": 3388,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "dffaf268efb7b21612ec8f6c78854ce53af383679806caf4087d6db2200a9dad",
+      "canonicalDigest": "52758869e1454952f611ad84af351a7e282707189599b95c79346b47040c01e5",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 86,
+      "banks": [
+        "term_bank_341.json",
+        "term_bank_342.json",
+        "term_bank_343.json",
+        "term_bank_344.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 866,
+      "parserScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "397763de01c42b73a478c8f59b71298507b50246c50a27c2cecda03636475bae",
+      "canonicalDigest": "d4471d5d15ce02a3279c66f8a1dff1b2cd4196fe930c1b3a08d5fb26abe72844",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 87,
+      "banks": [
+        "term_bank_345.json",
+        "term_bank_346.json",
+        "term_bank_347.json",
+        "term_bank_348.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 857,
+      "parserScratchBytes": {
+        "pendingEpochs": 3428,
+        "pendingIndexes": 3428,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3428,
+        "pendingIndexes": 3428,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "45bf10d0436173b9a007c76a3f93938e9ba0281479d74b11d1d8dd065d2c369c",
+      "canonicalDigest": "5dc702071dfcb12e20102133c95ff652a8aa747ebe938aed44ed5696f893fe6e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 88,
+      "banks": [
+        "term_bank_349.json",
+        "term_bank_350.json",
+        "term_bank_351.json",
+        "term_bank_352.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 869,
+      "parserScratchBytes": {
+        "pendingEpochs": 3476,
+        "pendingIndexes": 3476,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3476,
+        "pendingIndexes": 3476,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e70e5ce874dc8c92cf7463023f3fac0ada257cc2f80facc6396369b509bb270c",
+      "canonicalDigest": "020f0a8404ce21dc4a9685afe0cdfac0f4b11567e19ba09f48bae2eae379219a",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 89,
+      "banks": [
+        "term_bank_353.json",
+        "term_bank_354.json",
+        "term_bank_355.json",
+        "term_bank_356.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 940,
+      "parserScratchBytes": {
+        "pendingEpochs": 3760,
+        "pendingIndexes": 3760,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3760,
+        "pendingIndexes": 3760,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "32e8a12ec3b8cb4b2ae06bd23037ca2b3b56b806cfb0f9b8992c5f142153aaed",
+      "canonicalDigest": "f82d4187c306ae842cc7ef6829c18c7aef6cdc5d1bc48acb87ae970dc6fd4d47",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 90,
+      "banks": [
+        "term_bank_357.json",
+        "term_bank_358.json",
+        "term_bank_359.json",
+        "term_bank_360.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 975,
+      "parserScratchBytes": {
+        "pendingEpochs": 3900,
+        "pendingIndexes": 3900,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3900,
+        "pendingIndexes": 3900,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "b8b9aa7da2fb90a77ba526a8fbdf2dcc9846f34f4d8619e9f690eb139038e38a",
+      "canonicalDigest": "7d53dab9d4556bf594afdbbf6db9f716407fbaee35bec28076a94c06fc191e6e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 91,
+      "banks": [
+        "term_bank_361.json",
+        "term_bank_362.json",
+        "term_bank_363.json",
+        "term_bank_364.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 866,
+      "parserScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "ead42a834bc7dd392f347841b651a4485fc624d2b1dc6b18735685b5b6dd8a54",
+      "canonicalDigest": "0367ba93ff0276cebf960d18e61c1c20a16dab76c2d8b31174f443bf7cfa6795",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 92,
+      "banks": [
+        "term_bank_365.json",
+        "term_bank_366.json",
+        "term_bank_367.json",
+        "term_bank_368.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 979,
+      "parserScratchBytes": {
+        "pendingEpochs": 3916,
+        "pendingIndexes": 3916,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3916,
+        "pendingIndexes": 3916,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "facb85bf233d5a837afba35d9964dbafb4f1d9d68e234a942f234b5f6a20679d",
+      "canonicalDigest": "5f34fc3f591301786ca959ce66bef89283946482bdba9be46b353cc744eb2d3d",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 93,
+      "banks": [
+        "term_bank_369.json",
+        "term_bank_370.json",
+        "term_bank_371.json",
+        "term_bank_372.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 940,
+      "parserScratchBytes": {
+        "pendingEpochs": 3760,
+        "pendingIndexes": 3760,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3760,
+        "pendingIndexes": 3760,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "0d52ec996b5b2b2eb28734fbfdefdf4bf37ca1b665bf0e1272c4604c39bfcdfd",
+      "canonicalDigest": "d5b725aace9f621b6d61a61e05735ef49d4ba97a36d258973706d60575c64421",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 94,
+      "banks": [
+        "term_bank_373.json",
+        "term_bank_374.json",
+        "term_bank_375.json",
+        "term_bank_376.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1014,
+      "parserScratchBytes": {
+        "pendingEpochs": 4056,
+        "pendingIndexes": 4056,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4056,
+        "pendingIndexes": 4056,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c5c7808667a96210e35f6459e54c11dcfa573c8333d2f35c2d06499406a8771c",
+      "canonicalDigest": "675a298cb6f15c6b5054ff3aa37dbf8b77a3d42d94cb1bd71dbee3c24947b997",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 95,
+      "banks": [
+        "term_bank_377.json",
+        "term_bank_378.json",
+        "term_bank_379.json",
+        "term_bank_380.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 927,
+      "parserScratchBytes": {
+        "pendingEpochs": 3708,
+        "pendingIndexes": 3708,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3708,
+        "pendingIndexes": 3708,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "3cda409ad954f1b79271b137b4ac95104d3b7af2abaf10fdef99b4c1af01554e",
+      "canonicalDigest": "9e4429207fe4cb37e4df4115d017b3f0f08ee46b68a33f6d549b90e9e86bc146",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 96,
+      "banks": [
+        "term_bank_381.json",
+        "term_bank_382.json",
+        "term_bank_383.json",
+        "term_bank_384.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 995,
+      "parserScratchBytes": {
+        "pendingEpochs": 3980,
+        "pendingIndexes": 3980,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3980,
+        "pendingIndexes": 3980,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "5d8d54c092bc719de67c4f43b7d5e0a3d341b5f3f5174ccb8d0ca4db2d528052",
+      "canonicalDigest": "3cc046afbc8b377f77a7b2a9b76a04ea223dba184616521248876d248ca20dc2",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 97,
+      "banks": [
+        "term_bank_385.json",
+        "term_bank_386.json",
+        "term_bank_387.json",
+        "term_bank_388.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 946,
+      "parserScratchBytes": {
+        "pendingEpochs": 3784,
+        "pendingIndexes": 3784,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3784,
+        "pendingIndexes": 3784,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "696d2bd7a8064278bb01ef09a4b3806b92df14f6d7c7893e9359dc4b76ba9ed5",
+      "canonicalDigest": "f9499b74a526f569b8c5c586f845269e2d4f8007209f843b253501335913db75",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 98,
+      "banks": [
+        "term_bank_389.json",
+        "term_bank_390.json",
+        "term_bank_391.json",
+        "term_bank_392.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 951,
+      "parserScratchBytes": {
+        "pendingEpochs": 3804,
+        "pendingIndexes": 3804,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3804,
+        "pendingIndexes": 3804,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "65b549c29195eed65183eb1ea7458230a9d3722f82bc75810bca87d2bbb08e08",
+      "canonicalDigest": "6ec8871eb00b646b5c1fe4bc9d7e558576532d1ab31c61af5afa985b8103a4e0",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 99,
+      "banks": [
+        "term_bank_393.json",
+        "term_bank_394.json",
+        "term_bank_395.json",
+        "term_bank_396.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1088,
+      "parserScratchBytes": {
+        "pendingEpochs": 4352,
+        "pendingIndexes": 4352,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4352,
+        "pendingIndexes": 4352,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "942cf1ce7dc7ef8ecaf42e81a2a60b7898157f8d07ad8c1c260a9b346430eb22",
+      "canonicalDigest": "e504186d0fc8237b78c2260820258617798f804a823914abaa64e93c7e65d470",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 100,
+      "banks": [
+        "term_bank_397.json",
+        "term_bank_398.json",
+        "term_bank_399.json",
+        "term_bank_400.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 987,
+      "parserScratchBytes": {
+        "pendingEpochs": 3948,
+        "pendingIndexes": 3948,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3948,
+        "pendingIndexes": 3948,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "445e17800bbc7957cd8df5d4b942032d131ab186132cda2bfc46fb9cdf976b1f",
+      "canonicalDigest": "c2471902f51aa5abd583c65dc6593390604bbd794c2ce628799b0b3b509a4220",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 101,
+      "banks": [
+        "term_bank_401.json",
+        "term_bank_402.json",
+        "term_bank_403.json",
+        "term_bank_404.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 953,
+      "parserScratchBytes": {
+        "pendingEpochs": 3812,
+        "pendingIndexes": 3812,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3812,
+        "pendingIndexes": 3812,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a52d1dde1622d138154a276373878b046243793a70d93f488e0284856c02a8c0",
+      "canonicalDigest": "651e8f3d7467328a6be488f57844b6e0936abd2d5bba935736a5c9aa5a45d871",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 102,
+      "banks": [
+        "term_bank_405.json",
+        "term_bank_406.json",
+        "term_bank_407.json",
+        "term_bank_408.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 978,
+      "parserScratchBytes": {
+        "pendingEpochs": 3912,
+        "pendingIndexes": 3912,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3912,
+        "pendingIndexes": 3912,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "89c5022d90853ae3813c9982823f162c7e09823445b51a49eefec417d75683c3",
+      "canonicalDigest": "57b44cf8cb7ca5ee03922a0353e5aba8ddb6fc35b2d4b517d2edf3d375247039",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 103,
+      "banks": [
+        "term_bank_409.json",
+        "term_bank_410.json",
+        "term_bank_411.json",
+        "term_bank_412.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 923,
+      "parserScratchBytes": {
+        "pendingEpochs": 3692,
+        "pendingIndexes": 3692,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3692,
+        "pendingIndexes": 3692,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "44b8362bee018ff34ef3b94bb051c3923c7002fad97cffea3f16972ffcdccc8b",
+      "canonicalDigest": "44a6dc1a739523a666c6bff658989d60a693599d8252f01eea53dee2f644c930",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 104,
+      "banks": [
+        "term_bank_413.json",
+        "term_bank_414.json",
+        "term_bank_415.json",
+        "term_bank_416.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1034,
+      "parserScratchBytes": {
+        "pendingEpochs": 4136,
+        "pendingIndexes": 4136,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4136,
+        "pendingIndexes": 4136,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a78580947cd3b69ea90d1bd6bb636e674a4ddf4dcae22952a39c007ebdf8792d",
+      "canonicalDigest": "c9e66697f2f630cf6990756438db3692f0cac72ddac4c2d420a8bface749c8b2",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 105,
+      "banks": [
+        "term_bank_417.json",
+        "term_bank_418.json",
+        "term_bank_419.json",
+        "term_bank_420.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1026,
+      "parserScratchBytes": {
+        "pendingEpochs": 4104,
+        "pendingIndexes": 4104,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4104,
+        "pendingIndexes": 4104,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "fb2bda017790530d48f9e8932c330c669e32043de5bbf92e41048775c67eec39",
+      "canonicalDigest": "11719c957bbf80c46e340baf4159970d10f99df076d2f2bb2e80243e8a461c08",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 106,
+      "banks": [
+        "term_bank_421.json",
+        "term_bank_422.json",
+        "term_bank_423.json",
+        "term_bank_424.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1066,
+      "parserScratchBytes": {
+        "pendingEpochs": 4264,
+        "pendingIndexes": 4264,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4264,
+        "pendingIndexes": 4264,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1dfd0f39857625fe31b3e71bd1dbe81903ee4cf80999daa88362af41c73842e4",
+      "canonicalDigest": "fc22974618e563a7f1e657cfe3db885fddabe4ed276ba3df06b17c30abbee6a0",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 107,
+      "banks": [
+        "term_bank_425.json",
+        "term_bank_426.json",
+        "term_bank_427.json",
+        "term_bank_428.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1093,
+      "parserScratchBytes": {
+        "pendingEpochs": 4372,
+        "pendingIndexes": 4372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4372,
+        "pendingIndexes": 4372,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c34b6af71581f8b3621c4cd183b0c4b966dce12e36df8c9f6f338cf40f09cf72",
+      "canonicalDigest": "8290aa634a71fb7d57b1acef157c5d3fd5c2d582d401789609273709539755e2",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 108,
+      "banks": [
+        "term_bank_429.json",
+        "term_bank_430.json",
+        "term_bank_431.json",
+        "term_bank_432.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1100,
+      "parserScratchBytes": {
+        "pendingEpochs": 4400,
+        "pendingIndexes": 4400,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4400,
+        "pendingIndexes": 4400,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a57297a8bfca9cd8f80edfce25a76742fba9b9405507e7918451a3a2053bf903",
+      "canonicalDigest": "b88ff03ab844795468e8d5b7fb4791a6a1a358b5dae3735947bbfd42b66aa75e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 109,
+      "banks": [
+        "term_bank_433.json",
+        "term_bank_434.json",
+        "term_bank_435.json",
+        "term_bank_436.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1061,
+      "parserScratchBytes": {
+        "pendingEpochs": 4244,
+        "pendingIndexes": 4244,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4244,
+        "pendingIndexes": 4244,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "c894cc4c5bbf0dc35163c1d516e9a99fba907364377c56a0b90990327680df24",
+      "canonicalDigest": "980a32a3e8c52e6617bc73d02935af4d8221917690eef64272f5c6de76804bf4",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 110,
+      "banks": [
+        "term_bank_437.json",
+        "term_bank_438.json",
+        "term_bank_439.json",
+        "term_bank_440.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 973,
+      "parserScratchBytes": {
+        "pendingEpochs": 3892,
+        "pendingIndexes": 3892,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3892,
+        "pendingIndexes": 3892,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "30f66c1995be68b9e7224caaea0ea68f543e6ce7610d7524b337f9518517cd4a",
+      "canonicalDigest": "4685644fa1b4fda431a469889575075f593795886bd2af510026baa92b051f41",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 111,
+      "banks": [
+        "term_bank_441.json",
+        "term_bank_442.json",
+        "term_bank_443.json",
+        "term_bank_444.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 988,
+      "parserScratchBytes": {
+        "pendingEpochs": 3952,
+        "pendingIndexes": 3952,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3952,
+        "pendingIndexes": 3952,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "6143b898bdf670fdd8225262cb218205492189a34d631af0ccf5a2aa276402cf",
+      "canonicalDigest": "3ad529a1592c0a97f5961e6dfa499af1cf65e15eb86eaf72f6da8ddadd661914",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 112,
+      "banks": [
+        "term_bank_445.json",
+        "term_bank_446.json",
+        "term_bank_447.json",
+        "term_bank_448.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1054,
+      "parserScratchBytes": {
+        "pendingEpochs": 4216,
+        "pendingIndexes": 4216,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4216,
+        "pendingIndexes": 4216,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "ba98e3d60082a50b82955168813e13723a670a377870644d4fc5e0c97f5a4f89",
+      "canonicalDigest": "2219b4c894f4f019bc2c8c8d69fbcfc1ed2a3fceda6fcbad77c42432ee4b5445",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 113,
+      "banks": [
+        "term_bank_449.json",
+        "term_bank_450.json",
+        "term_bank_451.json",
+        "term_bank_452.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 962,
+      "parserScratchBytes": {
+        "pendingEpochs": 3848,
+        "pendingIndexes": 3848,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3848,
+        "pendingIndexes": 3848,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "5518b7c100264c3a85256f54085ac0a3bb67bd2bed908b1dbed419da1a25ab03",
+      "canonicalDigest": "8d3e9f5a4bd1955be1b4338f354b5bd2be26cc415e2250359687f1da3963eca6",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 114,
+      "banks": [
+        "term_bank_453.json",
+        "term_bank_454.json",
+        "term_bank_455.json",
+        "term_bank_456.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1095,
+      "parserScratchBytes": {
+        "pendingEpochs": 4380,
+        "pendingIndexes": 4380,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4380,
+        "pendingIndexes": 4380,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "b57c472b8aa5961e44215fdbcf076a6c2dc1aebea1eddb382f55b082f369a182",
+      "canonicalDigest": "93ce96c0748e7e01b5876ee86650d6940492f96c6d8a5d7f58d994d596763478",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 115,
+      "banks": [
+        "term_bank_457.json",
+        "term_bank_458.json",
+        "term_bank_459.json",
+        "term_bank_460.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 971,
+      "parserScratchBytes": {
+        "pendingEpochs": 3884,
+        "pendingIndexes": 3884,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3884,
+        "pendingIndexes": 3884,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e78e0c90e9e9fc0d78259e07d39b89f6c3981507dbcc5d7ab44c14bbf24e09ca",
+      "canonicalDigest": "2891e4eeb1e93e75fafdd78c549ac0eeea082d70143cc8daf79060853a8d1bd1",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 116,
+      "banks": [
+        "term_bank_461.json",
+        "term_bank_462.json",
+        "term_bank_463.json",
+        "term_bank_464.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 988,
+      "parserScratchBytes": {
+        "pendingEpochs": 3952,
+        "pendingIndexes": 3952,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3952,
+        "pendingIndexes": 3952,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "be71e794270fb5029c8145c4ae96517e712077048038c6236e5958f12076190e",
+      "canonicalDigest": "cd364640349576bdf6b1ade0a429f418d1f45759feeba7a58c15a0a509fa1596",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 117,
+      "banks": [
+        "term_bank_465.json",
+        "term_bank_466.json",
+        "term_bank_467.json",
+        "term_bank_468.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 915,
+      "parserScratchBytes": {
+        "pendingEpochs": 3660,
+        "pendingIndexes": 3660,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3660,
+        "pendingIndexes": 3660,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "9096d43c679d7aeb72a20ebf452723e81c6641ee99d0563a2507f30abc8a323d",
+      "canonicalDigest": "82667c8b414a7a40069b96e1a4fe67eee124d89188e936f14051d352b30e778c",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 118,
+      "banks": [
+        "term_bank_469.json",
+        "term_bank_470.json",
+        "term_bank_471.json",
+        "term_bank_472.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 936,
+      "parserScratchBytes": {
+        "pendingEpochs": 3744,
+        "pendingIndexes": 3744,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3744,
+        "pendingIndexes": 3744,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "d850286f754497fb89c21d3a5c000bc6985eb7cf8bc3395abd4f385ff2bec4a3",
+      "canonicalDigest": "4b899bb2a1fe785030b8a876eafc10cbddcd5b7a8e8f288cdee2ed06f6379069",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 119,
+      "banks": [
+        "term_bank_473.json",
+        "term_bank_474.json",
+        "term_bank_475.json",
+        "term_bank_476.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1025,
+      "parserScratchBytes": {
+        "pendingEpochs": 4100,
+        "pendingIndexes": 4100,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4100,
+        "pendingIndexes": 4100,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "f41fd77f4e704e8ac1d88e8ea603a1370b6eec2658ab352d14f1910f7ec69dd6",
+      "canonicalDigest": "9c696af47dc8ef94aa585cfe22bd9416258205396e30508b942f00bee62db085",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 120,
+      "banks": [
+        "term_bank_477.json",
+        "term_bank_478.json",
+        "term_bank_479.json",
+        "term_bank_480.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 995,
+      "parserScratchBytes": {
+        "pendingEpochs": 3980,
+        "pendingIndexes": 3980,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3980,
+        "pendingIndexes": 3980,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "f6359155653b795d7b0ea7d57e8a7bb01f2813cb1abe9d0d5751242de18955f5",
+      "canonicalDigest": "5673ae9e4cd202cf98a6d18512d5364330ea07003a4cc9a25ddc0d1cae0cbeb5",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 121,
+      "banks": [
+        "term_bank_481.json",
+        "term_bank_482.json",
+        "term_bank_483.json",
+        "term_bank_484.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1051,
+      "parserScratchBytes": {
+        "pendingEpochs": 4204,
+        "pendingIndexes": 4204,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4204,
+        "pendingIndexes": 4204,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "ebe52a171daf786b223749e3f4bbeae1dac470c554cbdde8850a444a9c5e7244",
+      "canonicalDigest": "1dbfdc3d39e54d958557b79fe6d790059570c40b12a8cf62b6f9c09f1c269b66",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 122,
+      "banks": [
+        "term_bank_485.json",
+        "term_bank_486.json",
+        "term_bank_487.json",
+        "term_bank_488.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 972,
+      "parserScratchBytes": {
+        "pendingEpochs": 3888,
+        "pendingIndexes": 3888,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3888,
+        "pendingIndexes": 3888,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1f2c74a041ffee6304f181859df3794e2cb226c096fb1c852ce394b317a6f24a",
+      "canonicalDigest": "fa3777c36eff727760d3862e081fd40b3740119c5cb5b9667cd16ab7329441d1",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 123,
+      "banks": [
+        "term_bank_489.json",
+        "term_bank_490.json",
+        "term_bank_491.json",
+        "term_bank_492.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1259,
+      "parserScratchBytes": {
+        "pendingEpochs": 5036,
+        "pendingIndexes": 5036,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 5036,
+        "pendingIndexes": 5036,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "5be53bfbf295c373a2cec5c46ae77fd9b7758c45ee476ecea789b54a8daebcd0",
+      "canonicalDigest": "f57abf30c8a3d69a45c9dbaa85b0247a2b537ebdcbbaeb1316855fe5a7ee9842",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 124,
+      "banks": [
+        "term_bank_493.json",
+        "term_bank_494.json",
+        "term_bank_495.json",
+        "term_bank_496.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1002,
+      "parserScratchBytes": {
+        "pendingEpochs": 4008,
+        "pendingIndexes": 4008,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4008,
+        "pendingIndexes": 4008,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "02954b16b12db173b922ddcb224bc11c0a97f24c07aa8906b4b593066468999f",
+      "canonicalDigest": "dfcf0f16f74be7060f5609fd561be152976f56dfa605cdb57216269e0ff5ece7",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 125,
+      "banks": [
+        "term_bank_497.json",
+        "term_bank_498.json",
+        "term_bank_499.json",
+        "term_bank_500.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 915,
+      "parserScratchBytes": {
+        "pendingEpochs": 3660,
+        "pendingIndexes": 3660,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3660,
+        "pendingIndexes": 3660,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "53a29baccc452aa0df4efd44a8bd11d253d23e7a49ffa61dc6d8d13ed37621a4",
+      "canonicalDigest": "45a370e1b2627d4b77b3cdeb1e19d5320915ec630b56630119142d80e4aa4dae",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 126,
+      "banks": [
+        "term_bank_501.json",
+        "term_bank_502.json",
+        "term_bank_503.json",
+        "term_bank_504.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 926,
+      "parserScratchBytes": {
+        "pendingEpochs": 3704,
+        "pendingIndexes": 3704,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3704,
+        "pendingIndexes": 3704,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "af73b9d0052f014f4e987fc323108d0a4c9dd3496e2a3f706d7de0b074f3666a",
+      "canonicalDigest": "9d44f9f9f998275757650b40c520a8eef4a5c415b96cd5a3ba03390defd472a5",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 127,
+      "banks": [
+        "term_bank_505.json",
+        "term_bank_506.json",
+        "term_bank_507.json",
+        "term_bank_508.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 929,
+      "parserScratchBytes": {
+        "pendingEpochs": 3716,
+        "pendingIndexes": 3716,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3716,
+        "pendingIndexes": 3716,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "36f2d716f5affc7038433a0ed39f889fe01597abc152efbfadc24d2d15d4b4e6",
+      "canonicalDigest": "1c8a2b0ddafe391d7e4d944512a8373be4ac1ab762fbbc6c837a99deef395b04",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 128,
+      "banks": [
+        "term_bank_509.json",
+        "term_bank_510.json",
+        "term_bank_511.json",
+        "term_bank_512.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 911,
+      "parserScratchBytes": {
+        "pendingEpochs": 3644,
+        "pendingIndexes": 3644,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3644,
+        "pendingIndexes": 3644,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "97107dcf57ff7a383f75f87d736e0d9822db2f13316140ad93c239bc7cf68cd7",
+      "canonicalDigest": "143d318e5b423ca175f0bf9dd337eef0a45342dadca372b37f1931867ef5d6d7",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 129,
+      "banks": [
+        "term_bank_513.json",
+        "term_bank_514.json",
+        "term_bank_515.json",
+        "term_bank_516.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 916,
+      "parserScratchBytes": {
+        "pendingEpochs": 3664,
+        "pendingIndexes": 3664,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3664,
+        "pendingIndexes": 3664,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "56b27cd6efb7962bade761c4082bd2a0108cfbb426aa3a810df82c50070c3a9a",
+      "canonicalDigest": "eb964994a09dbd205862e8d2e679680a5d1a0cfedd300493f35c9c30b45ef4b8",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 130,
+      "banks": [
+        "term_bank_517.json",
+        "term_bank_518.json",
+        "term_bank_519.json",
+        "term_bank_520.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1030,
+      "parserScratchBytes": {
+        "pendingEpochs": 4120,
+        "pendingIndexes": 4120,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4120,
+        "pendingIndexes": 4120,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "f1ad3d11f4d1f9b39ee32bc1f74d90a359054cf1824d2f6007d1c10efccd9068",
+      "canonicalDigest": "a9f3a218b7328ae8e5ce3603e6890dddba17a8afb9b0c685389d861c3d13c7b1",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 131,
+      "banks": [
+        "term_bank_521.json",
+        "term_bank_522.json",
+        "term_bank_523.json",
+        "term_bank_524.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 862,
+      "parserScratchBytes": {
+        "pendingEpochs": 3448,
+        "pendingIndexes": 3448,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3448,
+        "pendingIndexes": 3448,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "bebccf29753e6c34d84857bfc0f23a1e60f773c60441d2471749409428337fcb",
+      "canonicalDigest": "c5c10d1c96deada2d132d6ddf646723bbc8b02093724480ba53db73946476697",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 132,
+      "banks": [
+        "term_bank_525.json",
+        "term_bank_526.json",
+        "term_bank_527.json",
+        "term_bank_528.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 961,
+      "parserScratchBytes": {
+        "pendingEpochs": 3844,
+        "pendingIndexes": 3844,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3844,
+        "pendingIndexes": 3844,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "68a23a27c35009596e0256f5bff2b90651c60f2868ebb1550103b62fbbf28823",
+      "canonicalDigest": "f0d69abc60653c48915c9d34da74b0753ed30705530886235489d51636a8ab1d",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 133,
+      "banks": [
+        "term_bank_529.json",
+        "term_bank_530.json",
+        "term_bank_531.json",
+        "term_bank_532.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 938,
+      "parserScratchBytes": {
+        "pendingEpochs": 3752,
+        "pendingIndexes": 3752,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3752,
+        "pendingIndexes": 3752,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "83bdc9d25f440a3346266021d82b654435b85d86e2b3862db00d2c24c5490409",
+      "canonicalDigest": "df3125b2ff571ffb53f80811b11a21c7b41e01a078c4399647c07137663c0512",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 134,
+      "banks": [
+        "term_bank_533.json",
+        "term_bank_534.json",
+        "term_bank_535.json",
+        "term_bank_536.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1041,
+      "parserScratchBytes": {
+        "pendingEpochs": 4164,
+        "pendingIndexes": 4164,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4164,
+        "pendingIndexes": 4164,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e00de7caa620c525198cdeaea76dae3fd05c1c7e1167273f79d72e5d5f6b7f46",
+      "canonicalDigest": "fa6e1828921b40284132bfbb41c44c33c9b04aea6ad354880be1608141d6d511",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 135,
+      "banks": [
+        "term_bank_537.json",
+        "term_bank_538.json",
+        "term_bank_539.json",
+        "term_bank_540.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1011,
+      "parserScratchBytes": {
+        "pendingEpochs": 4044,
+        "pendingIndexes": 4044,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4044,
+        "pendingIndexes": 4044,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "dc2ed07330aaa9ffffff412ffdd71108c84cdf00249fcd3fc68c7fdaed41be25",
+      "canonicalDigest": "0adde698da065e6862c1b8a16c969a7e6e8e343f7480537e2a1034a511a09b24",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 136,
+      "banks": [
+        "term_bank_541.json",
+        "term_bank_542.json",
+        "term_bank_543.json",
+        "term_bank_544.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1033,
+      "parserScratchBytes": {
+        "pendingEpochs": 4132,
+        "pendingIndexes": 4132,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4132,
+        "pendingIndexes": 4132,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "7c5d59b70767e629eaa0ff08b4454dfa3b7a4033c6cab10daf58c674636abe60",
+      "canonicalDigest": "2ab07da49a0a066ecaea838d54e1af930c987570b194229c74b7157b73833645",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 137,
+      "banks": [
+        "term_bank_545.json",
+        "term_bank_546.json",
+        "term_bank_547.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 797,
+      "parserScratchBytes": {
+        "pendingEpochs": 3188,
+        "pendingIndexes": 3188,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3188,
+        "pendingIndexes": 3188,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "5d6a68d1bfa0872c326bf8f17062a70e69f5ebb4d6c43426d9f17c4b36fbbcd4",
+      "canonicalDigest": "524c2d8229d7af0a7d665097d8b8c5f153c07cf50bbef97c58d0183ce74d0852",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 138,
+      "banks": [
+        "term_bank_548.json",
+        "term_bank_549.json",
+        "term_bank_550.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 728,
+      "parserScratchBytes": {
+        "pendingEpochs": 2912,
+        "pendingIndexes": 2912,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 2912,
+        "pendingIndexes": 2912,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "5402eeb9a3f16fc71581bf7bd77766a85975aaf6738272474a552ef30cb577ba",
+      "canonicalDigest": "cfc710b4c0137c80b8892520a15206eaa92c98d939eb988dce891cceddaa4ca5",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 139,
+      "banks": [
+        "term_bank_551.json",
+        "term_bank_552.json",
+        "term_bank_553.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 804,
+      "parserScratchBytes": {
+        "pendingEpochs": 3216,
+        "pendingIndexes": 3216,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3216,
+        "pendingIndexes": 3216,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "f2dc2c6fe734209db84cf3b29f0cb70fe0c8805c3799b0aea83d70e5387365f3",
+      "canonicalDigest": "59f2faf159fd22335b579126301445fa7d016fbbf3b0a67db96f396d2863cb95",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 140,
+      "banks": [
+        "term_bank_554.json",
+        "term_bank_555.json",
+        "term_bank_556.json",
+        "term_bank_557.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1032,
+      "parserScratchBytes": {
+        "pendingEpochs": 4128,
+        "pendingIndexes": 4128,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4128,
+        "pendingIndexes": 4128,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "4164c4785b834eff9c4498f7837503e4532bbff323c62ad22951dcda43dc27b2",
+      "canonicalDigest": "0913fa4072886866d17e993e8d708fbb637121a899bd137cfba8c315dd7dacab",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 141,
+      "banks": [
+        "term_bank_558.json",
+        "term_bank_559.json",
+        "term_bank_560.json",
+        "term_bank_561.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1056,
+      "parserScratchBytes": {
+        "pendingEpochs": 4224,
+        "pendingIndexes": 4224,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4224,
+        "pendingIndexes": 4224,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "4e81ea4425801ec25590952d07d3900051267729f47d55eb9bbc8497a45237a9",
+      "canonicalDigest": "d184395f681971797f8a8c1b05350c6c522f2a550ceb123b9f65e1618867ba07",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 142,
+      "banks": [
+        "term_bank_562.json",
+        "term_bank_563.json",
+        "term_bank_564.json",
+        "term_bank_565.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 979,
+      "parserScratchBytes": {
+        "pendingEpochs": 3916,
+        "pendingIndexes": 3916,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3916,
+        "pendingIndexes": 3916,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "dbf712daca7d9af6742c14664ad2f840fd5132f465048197df99c0492e6775c3",
+      "canonicalDigest": "26945b2cb8bd02909f7247ecc147c2cc9698ea85c99873e202b929fcb4f02483",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 143,
+      "banks": [
+        "term_bank_566.json",
+        "term_bank_567.json",
+        "term_bank_568.json",
+        "term_bank_569.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1143,
+      "parserScratchBytes": {
+        "pendingEpochs": 4572,
+        "pendingIndexes": 4572,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4572,
+        "pendingIndexes": 4572,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "8123d5d6f244372042e96bc98592a155226a39671cf3cc111a2ba6770b417ee3",
+      "canonicalDigest": "777fa1a3f5421ceb27023c6191f7c819bf673386ceb49411b867d8c765298670",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 144,
+      "banks": [
+        "term_bank_570.json",
+        "term_bank_571.json",
+        "term_bank_572.json",
+        "term_bank_573.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1252,
+      "parserScratchBytes": {
+        "pendingEpochs": 5008,
+        "pendingIndexes": 5008,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 5008,
+        "pendingIndexes": 5008,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "b5dd04e2394fb5d23048d163a5c8f4ecdddc949412bb5a4bd9a802e1498e7e5e",
+      "canonicalDigest": "5cf9129f434adc657f0a3bc609797ff65c05070ac8b7aae2a6b32f08f545597e",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 145,
+      "banks": [
+        "term_bank_574.json",
+        "term_bank_575.json",
+        "term_bank_576.json",
+        "term_bank_577.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1106,
+      "parserScratchBytes": {
+        "pendingEpochs": 4424,
+        "pendingIndexes": 4424,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4424,
+        "pendingIndexes": 4424,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "1ef69cf695cdc8225e098742edec8a59395bf3c2b775912e58eb245afc2a81d3",
+      "canonicalDigest": "943e609fcbc5e7e1444af659ccd7ad5522aca4aec163917e56317532417bbac5",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 146,
+      "banks": [
+        "term_bank_578.json",
+        "term_bank_579.json",
+        "term_bank_580.json",
+        "term_bank_581.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1155,
+      "parserScratchBytes": {
+        "pendingEpochs": 4620,
+        "pendingIndexes": 4620,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4620,
+        "pendingIndexes": 4620,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "868d6337f870ca03c1185a62c60549234e4fa73f96366b97eac46106d63edc9e",
+      "canonicalDigest": "7709c34d702ffb55fec2e36855d1f6ef1b413aa2dc18a825b8751931257db0ff",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 147,
+      "banks": [
+        "term_bank_582.json",
+        "term_bank_583.json",
+        "term_bank_584.json",
+        "term_bank_585.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1152,
+      "parserScratchBytes": {
+        "pendingEpochs": 4608,
+        "pendingIndexes": 4608,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4608,
+        "pendingIndexes": 4608,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "a35785c0f57902f79dc345f48912b44af95c6fae742bec645e48904c01edc7c3",
+      "canonicalDigest": "12a69d41a21e6adbe44b7917be1911426dd5405df1082e756a1c7744ac5abcd8",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 148,
+      "banks": [
+        "term_bank_586.json",
+        "term_bank_587.json",
+        "term_bank_588.json",
+        "term_bank_589.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1143,
+      "parserScratchBytes": {
+        "pendingEpochs": 4572,
+        "pendingIndexes": 4572,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4572,
+        "pendingIndexes": 4572,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "6eddbe96a09b7c5a408a9c7c9673e2dd2d5ba94e91a651ca507fbf18326ac69e",
+      "canonicalDigest": "8d68635eb62d7f5464fa9434cd9324b58c78c7cbf80ce9cd1daa3690c8412248",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 149,
+      "banks": [
+        "term_bank_590.json",
+        "term_bank_591.json",
+        "term_bank_592.json",
+        "term_bank_593.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1201,
+      "parserScratchBytes": {
+        "pendingEpochs": 4804,
+        "pendingIndexes": 4804,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4804,
+        "pendingIndexes": 4804,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "3946e31418eaa2ceffed9c869458935aa1f3b0d83f92bf6eb61ccc9e6a06fa0a",
+      "canonicalDigest": "648823d7dab913f0de43c7a9ac8e64b1bc691484239ab7d7b39c384e44820ae4",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 150,
+      "banks": [
+        "term_bank_594.json",
+        "term_bank_595.json",
+        "term_bank_596.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 788,
+      "parserScratchBytes": {
+        "pendingEpochs": 3152,
+        "pendingIndexes": 3152,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3152,
+        "pendingIndexes": 3152,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "8110c9468aeeac3e0951c0f630a04736997bc30397bbba951686e23033aec94c",
+      "canonicalDigest": "b21c170c34e1294a7df6cc873728fab69ffef5f34a81562bd9412d130fcb8eb6",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 151,
+      "banks": [
+        "term_bank_597.json",
+        "term_bank_598.json",
+        "term_bank_599.json",
+        "term_bank_600.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1073,
+      "parserScratchBytes": {
+        "pendingEpochs": 4292,
+        "pendingIndexes": 4292,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4292,
+        "pendingIndexes": 4292,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "5b9b5e7b49ced0334e92c0073ba6a971053917ca357a15e210f71ae4e256d668",
+      "canonicalDigest": "c97f500cb5a2452ac6acb7d3c38843d19914cd151173f632e33e111ce00a53f6",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 152,
+      "banks": [
+        "term_bank_601.json",
+        "term_bank_602.json",
+        "term_bank_603.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 753,
+      "parserScratchBytes": {
+        "pendingEpochs": 3012,
+        "pendingIndexes": 3012,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3012,
+        "pendingIndexes": 3012,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "98c40ae2462096b8b7d45902bf1d64a7ae51bf00ab02a95190150364e73a7d3e",
+      "canonicalDigest": "cadec9f1bba9cca92ab2966924605849fddba7ea4c454704ce2d0e1ab69ee256",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 153,
+      "banks": [
+        "term_bank_604.json",
+        "term_bank_605.json",
+        "term_bank_606.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 723,
+      "parserScratchBytes": {
+        "pendingEpochs": 2892,
+        "pendingIndexes": 2892,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 2892,
+        "pendingIndexes": 2892,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "c56caa41c3bb84212612ef9162053dd74031ca29f7a69cb9a0f75722da05bfac",
+      "canonicalDigest": "f10793df2b63924eb513f305cd3992876c4668a5e9a701797f2355541c55e9e9",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 154,
+      "banks": [
+        "term_bank_607.json",
+        "term_bank_608.json",
+        "term_bank_609.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 879,
+      "parserScratchBytes": {
+        "pendingEpochs": 3516,
+        "pendingIndexes": 3516,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3516,
+        "pendingIndexes": 3516,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "d2bf987bc4aa6fd67c6632760a0739bd5d5c3b72c224107f54b4f50fedc82c83",
+      "canonicalDigest": "4e78976c894881519ee40b887980479ed352687c438915f753d00f39f5be04dc",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 155,
+      "banks": [
+        "term_bank_610.json",
+        "term_bank_611.json",
+        "term_bank_612.json",
+        "term_bank_613.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1138,
+      "parserScratchBytes": {
+        "pendingEpochs": 4552,
+        "pendingIndexes": 4552,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4552,
+        "pendingIndexes": 4552,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e61bbf94446f62f5d26a6213cf95c6497febb5c061854760e190404598a8abdc",
+      "canonicalDigest": "745b605bc74eaa7fb2b1685317bd4e1c5cc1a9aae02da47e2b5355aba70cb68f",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 156,
+      "banks": [
+        "term_bank_614.json",
+        "term_bank_615.json",
+        "term_bank_616.json",
+        "term_bank_617.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1126,
+      "parserScratchBytes": {
+        "pendingEpochs": 4504,
+        "pendingIndexes": 4504,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4504,
+        "pendingIndexes": 4504,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "f653edf06fa16d5a5c2b9111f7211f40138b2a8119c348600cb2b8e775038577",
+      "canonicalDigest": "f3eebcb8933e9407d67d3133a9122f9591d3be850c4d8848f8a7ebd61048499b",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 157,
+      "banks": [
+        "term_bank_618.json",
+        "term_bank_619.json",
+        "term_bank_620.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 952,
+      "parserScratchBytes": {
+        "pendingEpochs": 3808,
+        "pendingIndexes": 3808,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3808,
+        "pendingIndexes": 3808,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "c293e654367dc6a16acd2ea860e0e78720c29b7e211eb2c6a679a78fca5f4c8c",
+      "canonicalDigest": "5091aa9f1e5dea7398f2651d0699fed1e12430bd8ea37ece4363eb33ceeaa2a6",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 158,
+      "banks": [
+        "term_bank_621.json",
+        "term_bank_622.json",
+        "term_bank_623.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 866,
+      "parserScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3464,
+        "pendingIndexes": 3464,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "28b0f25710d861d396c705b34ce7da573d934c65905b98155f412398d5262bba",
+      "canonicalDigest": "40d5664cb913efcef304ed1682fcb65014382ca2fc98887918a2f45d5374ada2",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 159,
+      "banks": [
+        "term_bank_624.json",
+        "term_bank_625.json",
+        "term_bank_626.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 746,
+      "parserScratchBytes": {
+        "pendingEpochs": 2984,
+        "pendingIndexes": 2984,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 2984,
+        "pendingIndexes": 2984,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "47cae0c1fb7df2e45437f46272992c7a5350c361ae28823b4fa418dabfff2e8b",
+      "canonicalDigest": "4cb556480f708cbe7bc67e004f3953a995afd68aae990df2c1c6570f36203231",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 160,
+      "banks": [
+        "term_bank_627.json",
+        "term_bank_628.json",
+        "term_bank_629.json",
+        "term_bank_630.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1103,
+      "parserScratchBytes": {
+        "pendingEpochs": 4412,
+        "pendingIndexes": 4412,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4412,
+        "pendingIndexes": 4412,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "14e05d85b5c5563fa04e8bc057e574ba0cf1ead981f3261787c16837004c358f",
+      "canonicalDigest": "d90b418d532305c803d39d9f9ac3374cd25d51f3cd810455773ceb8c7edcb305",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 161,
+      "banks": [
+        "term_bank_631.json",
+        "term_bank_632.json",
+        "term_bank_633.json",
+        "term_bank_634.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1161,
+      "parserScratchBytes": {
+        "pendingEpochs": 4644,
+        "pendingIndexes": 4644,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4644,
+        "pendingIndexes": 4644,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e6bcc8ee00bcc37ef36825404d8d1dd5fcac1c5b0c5daaf08cef48256e9b5143",
+      "canonicalDigest": "a441c67c7d67444cdc891fcad1db711c62144d7c46eacc2265f9885acaab08a7",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 162,
+      "banks": [
+        "term_bank_635.json",
+        "term_bank_636.json",
+        "term_bank_637.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 1010,
+      "parserScratchBytes": {
+        "pendingEpochs": 4040,
+        "pendingIndexes": 4040,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4040,
+        "pendingIndexes": 4040,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "95c90cf28b5dfb89650a04827cef2780f4c6bf990539214727b6706115b60948",
+      "canonicalDigest": "ad734d5f540951f724b33a6474021757df58dfae7610712022189571eea69f7d",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 163,
+      "banks": [
+        "term_bank_638.json",
+        "term_bank_639.json",
+        "term_bank_640.json",
+        "term_bank_641.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1003,
+      "parserScratchBytes": {
+        "pendingEpochs": 4012,
+        "pendingIndexes": 4012,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4012,
+        "pendingIndexes": 4012,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "e81fd5808c6a1eebe02aef3730584e1bc78d22cbebf694ac01b7ca6a94385b2f",
+      "canonicalDigest": "2d69fb373cab7a273707de1b82afe29fe9e65d1c0e1ad19d2ec8b8bc4a417e46",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 164,
+      "banks": [
+        "term_bank_642.json",
+        "term_bank_643.json",
+        "term_bank_644.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 902,
+      "parserScratchBytes": {
+        "pendingEpochs": 3608,
+        "pendingIndexes": 3608,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3608,
+        "pendingIndexes": 3608,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "ffc8fc73a2e76546b7edb2d7bb924cdabf373c782fa5ea24b6dad273a26cf34f",
+      "canonicalDigest": "3c3ee2a56c2524540e658ec2b3341ab26884e9b257b9308b52e2ffa9d2ce7ab6",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 165,
+      "banks": [
+        "term_bank_645.json",
+        "term_bank_646.json",
+        "term_bank_647.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 849,
+      "parserScratchBytes": {
+        "pendingEpochs": 3396,
+        "pendingIndexes": 3396,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3396,
+        "pendingIndexes": 3396,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "76a0b0b986260225c53772a3cf7f2695e275b7c55a98c6993be056adbb1efd7c",
+      "canonicalDigest": "b4d9fa1d3d7c59cf8bc4f5d84b7d88c161302124aa2cec99872084755d82a1c4",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 166,
+      "banks": [
+        "term_bank_648.json",
+        "term_bank_649.json",
+        "term_bank_650.json",
+        "term_bank_651.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1186,
+      "parserScratchBytes": {
+        "pendingEpochs": 4744,
+        "pendingIndexes": 4744,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4744,
+        "pendingIndexes": 4744,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "3b189fb0e1fb54cc99ba13910803c04df23ce1df525420c1bd9d904399a4932e",
+      "canonicalDigest": "ae9f308449e7fbfae60990c0151f6a1eecd90496cba447b60cc550ad3ff87dee",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 167,
+      "banks": [
+        "term_bank_652.json",
+        "term_bank_653.json",
+        "term_bank_654.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 892,
+      "parserScratchBytes": {
+        "pendingEpochs": 3568,
+        "pendingIndexes": 3568,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3568,
+        "pendingIndexes": 3568,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "132d773b12b33cd8b33e6212958459e31c98455a30f775110a54335074c568a3",
+      "canonicalDigest": "1e92485c235c005feb813d3d2d06770a49de5c7e9ecfe51c3304da94582072b3",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 168,
+      "banks": [
+        "term_bank_655.json",
+        "term_bank_656.json",
+        "term_bank_657.json",
+        "term_bank_658.json"
+      ],
+      "rowCount": 40000,
+      "uniqueCount": 1131,
+      "parserScratchBytes": {
+        "pendingEpochs": 4524,
+        "pendingIndexes": 4524,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4524,
+        "pendingIndexes": 4524,
+        "pendingSpanOffsetsScratch": 160000,
+        "pendingSpanLengthsScratch": 160000
+      },
+      "parserDigest": "b2c03229dc588d02459a48ebe55c8572809e198540f8790af9d8abd281eebab4",
+      "canonicalDigest": "e86b09ab4a3961a9bcc0d46d1e76c69c5dffba7e507290d034dbcb8323850483",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 169,
+      "banks": [
+        "term_bank_659.json",
+        "term_bank_660.json",
+        "term_bank_661.json"
+      ],
+      "rowCount": 30000,
+      "uniqueCount": 857,
+      "parserScratchBytes": {
+        "pendingEpochs": 3428,
+        "pendingIndexes": 3428,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 3428,
+        "pendingIndexes": 3428,
+        "pendingSpanOffsetsScratch": 120000,
+        "pendingSpanLengthsScratch": 120000
+      },
+      "parserDigest": "c30140f8234a36c9bdbee7ae82ae7123089b6c1209562c83810749281a6693d9",
+      "canonicalDigest": "dd1f8d17a4e23c36f81ebb442c10913942b833e3a2de700e95efb63652787234",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    },
+    {
+      "group": 170,
+      "banks": [
+        "term_bank_662.json",
+        "term_bank_663.json",
+        "term_bank_664.json",
+        "term_bank_665.json"
+      ],
+      "rowCount": 38310,
+      "uniqueCount": 1118,
+      "parserScratchBytes": {
+        "pendingEpochs": 4472,
+        "pendingIndexes": 4472,
+        "pendingSpanOffsetsScratch": 153240,
+        "pendingSpanLengthsScratch": 153240
+      },
+      "canonicalScratchBytes": {
+        "pendingEpochs": 4472,
+        "pendingIndexes": 4472,
+        "pendingSpanOffsetsScratch": 153240,
+        "pendingSpanLengthsScratch": 153240
+      },
+      "parserDigest": "e11110b2316aa8e48a8c95cd9c857d388e1b3d29a32df1d7d64838ef9ed63b68",
+      "canonicalDigest": "b738ed7c33fb415d6eef85999a99e28903baaeb70e718ad67bea57fe8c5e2846",
+      "nativeCalls": 1,
+      "nativeFallbacks": 0
+    }
+  ]
+}

@@ -1,0 +1,860 @@
+[
+  {
+    "arm": "A",
+    "index": 0,
+    "kind": "warmup",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 0,
+    "totalImportMs": 1163.2999999999884,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 1,
+    "kind": "warmup",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 0,
+    "totalImportMs": 1113.699999999997,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 2,
+    "kind": "control-before",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 0,
+    "totalImportMs": 954.5,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 3,
+    "kind": "control-before",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 0,
+    "totalImportMs": 929.3000000000029,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 4,
+    "kind": "control-before",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 1,
+    "totalImportMs": 944.2999999999884,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 5,
+    "kind": "control-before",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 1,
+    "totalImportMs": 937.0999999999913,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 6,
+    "kind": "candidate",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 0,
+    "totalImportMs": 930,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 7,
+    "kind": "candidate",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 0,
+    "totalImportMs": 933.8999999999942,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 8,
+    "kind": "candidate",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 1,
+    "totalImportMs": 959.1999999999825,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 9,
+    "kind": "candidate",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 1,
+    "totalImportMs": 923.8000000000175,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 10,
+    "kind": "candidate",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 2,
+    "totalImportMs": 1009.7999999999884,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 11,
+    "kind": "candidate",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 2,
+    "totalImportMs": 978,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 12,
+    "kind": "candidate",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 3,
+    "totalImportMs": 952.5,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 13,
+    "kind": "candidate",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 3,
+    "totalImportMs": 957.1000000000058,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 14,
+    "kind": "candidate",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 4,
+    "totalImportMs": 978.6000000000058,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 15,
+    "kind": "candidate",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 4,
+    "totalImportMs": 959.7000000000116,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "B",
+    "index": 16,
+    "kind": "candidate",
+    "packageSha256": "8267bbf17d72ce6ec52033dcf0a2a4ad6ed1cd6e4e686b2af5ac9297de59c1d8",
+    "pair": 5,
+    "totalImportMs": 946.2000000000116,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 17,
+    "kind": "candidate",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 5,
+    "totalImportMs": 983.2999999999884,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 18,
+    "kind": "control-after",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 0,
+    "totalImportMs": 987.3000000000175,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 19,
+    "kind": "control-after",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 0,
+    "totalImportMs": 979.1999999999825,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 20,
+    "kind": "control-after",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 1,
+    "totalImportMs": 969.0999999999767,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  },
+  {
+    "arm": "A",
+    "index": 21,
+    "kind": "control-after",
+    "packageSha256": "858626c2a035ac021cbabe1e7b92a886950f0bd2d3863bbef15ff8ce8d79f1ca",
+    "pair": 1,
+    "totalImportMs": 965.2999999999884,
+    "validation": {
+      "contentReadable": true,
+      "mediaRows": 0,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "probeCount": 12,
+      "probeTerms": [
+        "\u30fd",
+        "\u30be\u30c3\u3068",
+        "\u30a2\u30ab\u30c7\u30df\u30a3",
+        "\u30a8\u30a2\u30fc",
+        "\u3071\u3061\u308a",
+        "\u8db3\u3092\u904b\u3076",
+        "\u9063\u308a\u9003\u3052",
+        "\u591c\u3092\u65e5\u306b\u3064\u3044\u3067",
+        "\u5bae\u53e4\u77ed\u671f\u5927\u5b66",
+        "\u65e5\u672c\u74b0\u5883\u5036\u697d\u90e8",
+        "\u30b8\u30e3\u30c3\u30d4\u30fc",
+        "\u56fd\u5bb6\u60c5\u5831\u5c40"
+      ],
+      "restart": {
+        "contentReadable": true,
+        "mediaRows": 0,
+        "probeCount": 12,
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "title": "JMdict [2026-09-06]"
+      },
+      "revision": "JMdict.2026-09-06",
+      "termRows": 526942,
+      "title": "JMdict [2026-09-06]"
+    }
+  }
+]

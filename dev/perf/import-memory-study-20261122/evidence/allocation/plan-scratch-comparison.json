@@ -1,0 +1,57 @@
+{
+  "baselineCommit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "candidateCommit": "de6027ee1",
+  "scope": "Scratch allocated by the full-corpus production parser and isolated canonical resolver. Production grouping with five-worker policy; native groups measured sequentially using a metadata-only planner shim. This does not measure process RSS or full import latency.",
+  "scriptSha256": "3471396cb17a50dca6dffad0db0073b516b24d39678812bd83df2fc2d40cc391",
+  "canonicalWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+  "results": [
+    {
+      "dictionary": "jmdict",
+      "rows": 526942,
+      "groups": 20,
+      "parserOutputBytesRemoved": 7137008,
+      "maximumParserOutputBytesRemovedPerGroup": 437264,
+      "baselineCanonicalScratchBytes": 7137008,
+      "candidateCanonicalScratchBytes": 2921472,
+      "canonicalScratchAllocationBytesRemoved": 4215536,
+      "baselineMaximumCanonicalScratchBytesPerGroup": 437264,
+      "candidateMaximumCanonicalScratchBytesPerGroup": 197264,
+      "nativeCalls": 20,
+      "nativeFallbacks": 0,
+      "parserDigest": "108f8d417300454f8c4106316d4afc55e9ef855de0475e77fd9d74103f2f926f",
+      "canonicalDigest": "c3a357cd2b62d42af1dedb897c1307ad710d0a143ea30ca85955e7a673da710c"
+    },
+    {
+      "dictionary": "jitendex",
+      "rows": 435448,
+      "groups": 22,
+      "parserOutputBytesRemoved": 6381056,
+      "maximumParserOutputBytesRemovedPerGroup": 358704,
+      "baselineCanonicalScratchBytes": 6381056,
+      "candidateCanonicalScratchBytes": 2897472,
+      "canonicalScratchAllocationBytesRemoved": 3483584,
+      "baselineMaximumCanonicalScratchBytesPerGroup": 358704,
+      "candidateMaximumCanonicalScratchBytesPerGroup": 166704,
+      "nativeCalls": 22,
+      "nativeFallbacks": 0,
+      "parserDigest": "2d5ef903228621513d96aa5d4f1df7b600648f489fe5c457ba19494283672e86",
+      "canonicalDigest": "8f15ef8b5b7eeb56ce1a3a2a8d9450d2ac8a3ee7e362c9ff9d15e7cdbacb3ef9"
+    },
+    {
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "parserOutputBytesRemoved": 54449392,
+      "maximumParserOutputBytesRemovedPerGroup": 330072,
+      "baselineCanonicalScratchBytes": 54449392,
+      "candidateCanonicalScratchBytes": 1262912,
+      "canonicalScratchAllocationBytesRemoved": 53186480,
+      "baselineMaximumCanonicalScratchBytesPerGroup": 330072,
+      "candidateMaximumCanonicalScratchBytesPerGroup": 10072,
+      "nativeCalls": 170,
+      "nativeFallbacks": 0,
+      "parserDigest": "265705376e6537e7aaefe7d07fe2c82ed0207b1bacfa9b9bfe676af8f8754990",
+      "canonicalDigest": "b47f8da98f0e3f208af2ac1ba7cb7c64c63fee5ffabf0b5559a2e86ab5b9782d"
+    }
+  ]
+}

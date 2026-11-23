@@ -1,0 +1,80 @@
+{
+  "candidate": {
+    "fasterPairs": 3,
+    "medianChangePercent": -0.8446343261358236,
+    "pairs": [
+      {
+        "baselineMs": 9442.29999999993,
+        "changePercent": -2.8520593499458013,
+        "comparisonMs": 9173,
+        "pair": 0
+      },
+      {
+        "baselineMs": 9362.800000000047,
+        "changePercent": 2.9991028324852564,
+        "comparisonMs": 9643.599999999977,
+        "pair": 1
+      },
+      {
+        "baselineMs": 8780.79999999993,
+        "changePercent": 2.677432580174677,
+        "comparisonMs": 9015.899999999907,
+        "pair": 2
+      },
+      {
+        "baselineMs": 8823.599999999977,
+        "changePercent": 1.1627906976741542,
+        "comparisonMs": 8926.199999999953,
+        "pair": 3
+      },
+      {
+        "baselineMs": 9021.599999999977,
+        "changePercent": -3.8308060654426934,
+        "comparisonMs": 8676,
+        "pair": 4
+      },
+      {
+        "baselineMs": 9319.399999999907,
+        "changePercent": -5.249264974139523,
+        "comparisonMs": 8830.199999999953,
+        "pair": 5
+      }
+    ]
+  },
+  "control-after": {
+    "fasterPairs": 1,
+    "medianChangePercent": 2.4677669333053096,
+    "pairs": [
+      {
+        "baselineMs": 8936.199999999953,
+        "changePercent": 7.718045701753251,
+        "comparisonMs": 9625.900000000023,
+        "pair": 0
+      },
+      {
+        "baselineMs": 8977.5,
+        "changePercent": -2.7825118351426315,
+        "comparisonMs": 8727.70000000007,
+        "pair": 1
+      }
+    ]
+  },
+  "control-before": {
+    "fasterPairs": 0,
+    "medianChangePercent": 0.3751600663928323,
+    "pairs": [
+      {
+        "baselineMs": 9359.100000000035,
+        "changePercent": 0.15813486339424365,
+        "comparisonMs": 9373.899999999965,
+        "pair": 0
+      },
+      {
+        "baselineMs": 9456.5,
+        "changePercent": 0.5921852693914209,
+        "comparisonMs": 9512.5,
+        "pair": 1
+      }
+    ]
+  }
+}

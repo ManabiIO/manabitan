@@ -1,0 +1,128 @@
+{
+  "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "boundary": "file-input change to post-UI import completion; restart/readback outside timing",
+  "candidate": "f8dae7026d57488d4097caba942783bc1bbef6d4",
+  "dictionary": "jitendex",
+  "harness": "e0dd57a40819bc3ed199dd98d0d3f7c513222307",
+  "node": "v22.22.0",
+  "overlaidHarnessFiles": {
+    "dev/perf/benchmark-support.js": "cc629515c5accab66785f4217761bc4fa9aadf0c560b0e0bf188be1c8c3fe558",
+    "dev/perf/dictionary-fixtures.js": "6dd239bf8b4c9914d4a7581ac85529cdb63cc1daeab07415f844a12f3bfe8f10",
+    "dev/perf/import-benchmark.js": "bdd7af08657d421fd18d0fcd49d6c45383af559fef87fd1c3bd068aa38870d2b",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "dbccf958930c4403d61a814ed4175b3e9e76c9d6652c9cd997c144f52e968e7e",
+    "test/perf/dictionaries.lock.json": "9c0698d7b16e282f51823ea9b85b3fd5b809ebcb84e7a3ced49127b032cc3573"
+  },
+  "schedule": [
+    [
+      "warmup",
+      0,
+      "A"
+    ],
+    [
+      "warmup",
+      0,
+      "B"
+    ],
+    [
+      "control-before",
+      0,
+      "A"
+    ],
+    [
+      "control-before",
+      0,
+      "A"
+    ],
+    [
+      "control-before",
+      1,
+      "A"
+    ],
+    [
+      "control-before",
+      1,
+      "A"
+    ],
+    [
+      "candidate",
+      0,
+      "A"
+    ],
+    [
+      "candidate",
+      0,
+      "B"
+    ],
+    [
+      "candidate",
+      1,
+      "B"
+    ],
+    [
+      "candidate",
+      1,
+      "A"
+    ],
+    [
+      "candidate",
+      2,
+      "A"
+    ],
+    [
+      "candidate",
+      2,
+      "B"
+    ],
+    [
+      "candidate",
+      3,
+      "B"
+    ],
+    [
+      "candidate",
+      3,
+      "A"
+    ],
+    [
+      "candidate",
+      4,
+      "A"
+    ],
+    [
+      "candidate",
+      4,
+      "B"
+    ],
+    [
+      "candidate",
+      5,
+      "B"
+    ],
+    [
+      "candidate",
+      5,
+      "A"
+    ],
+    [
+      "control-after",
+      0,
+      "A"
+    ],
+    [
+      "control-after",
+      0,
+      "A"
+    ],
+    [
+      "control-after",
+      1,
+      "A"
+    ],
+    [
+      "control-after",
+      1,
+      "A"
+    ]
+  ],
+  "scope": "Linux Chromium; fixed six-pair screen with four identical-package control pairs; no process-memory claim"
+}

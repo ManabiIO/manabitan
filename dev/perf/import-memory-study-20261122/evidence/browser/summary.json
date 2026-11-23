@@ -1,0 +1,76 @@
+{
+  "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "currentRuntimePrHead": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "measuredCandidate": "f8dae7026d57488d4097caba942783bc1bbef6d4",
+  "results": [
+    {
+      "baselineMedianMs": 967.8500000000058,
+      "candidateFasterPairs": 4,
+      "candidateMedianMs": 955.8499999999913,
+      "candidatePairs": 6,
+      "changedPackagedFiles": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/dictionary-importer.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/term-content-canonical-scan.js"
+      ],
+      "dictionary": "jmdict",
+      "identicalPackageControlChangeRangePercent": [
+        -2.6401257202720907,
+        -0.39211639665549525
+      ],
+      "mediaRows": 0,
+      "medianPairedTimeChangePercent": -1.2059745036306468,
+      "observations": 22,
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "rows": 526942
+    },
+    {
+      "baselineMedianMs": 1905.7000000000116,
+      "candidateFasterPairs": 3,
+      "candidateMedianMs": 1913.949999999997,
+      "candidatePairs": 6,
+      "changedPackagedFiles": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/dictionary-importer.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/term-content-canonical-scan.js"
+      ],
+      "dictionary": "jitendex",
+      "identicalPackageControlChangeRangePercent": [
+        -17.21012921689389,
+        -0.3304484657743689
+      ],
+      "mediaRows": 236,
+      "medianPairedTimeChangePercent": 0.25454495113705344,
+      "observations": 22,
+      "outputDigestSha256": "5908783776b5c1760d653c18ab547caaffa8ef97bfe01b2345ad542645f61404",
+      "rows": 435448
+    },
+    {
+      "baselineMedianMs": 9170.499999999942,
+      "candidateFasterPairs": 3,
+      "candidateMedianMs": 8971.04999999993,
+      "candidatePairs": 6,
+      "changedPackagedFiles": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/dictionary-importer.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/term-content-canonical-scan.js"
+      ],
+      "dictionary": "vndb",
+      "identicalPackageControlChangeRangePercent": [
+        -2.7825118351426315,
+        7.718045701753251
+      ],
+      "mediaRows": 146570,
+      "medianPairedTimeChangePercent": -0.8446343261358236,
+      "observations": 22,
+      "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "rows": 6648310
+    }
+  ],
+  "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45102744757",
+  "runtimeSourceIdenticalAfterFormattingFix": true,
+  "scope": "Linux Chromium; six counterbalanced AB/BA pairs and four A/A control pairs per dictionary, plus two warmups. Fresh profiles, pinned archives, original file-input-to-completion timer. Twelve content probes, full term/media counts, and restart readback; no exhaustive media-payload readback or peak-memory measurement."
+}
