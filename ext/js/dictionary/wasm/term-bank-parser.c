@@ -625,8 +625,8 @@ static int is_media_marker_at(const uint8_t* src, uint32_t len, uint32_t i) {
         json_string_matches_ascii(src, i, len, "image", 5u);
 }
 
-static inline int type_text_pair_at(const uint8_t* src, uint32_t len, uint32_t key_start, uint32_t key_end) {
-    if (!json_string_matches_ascii(src, key_start, key_end, "type", 4u)) { return 0; }
+static inline int type_text_pair_at(const uint8_t* src, uint32_t len, uint32_t key_start, uint32_t key_end, int known_type_key) {
+    if (!known_type_key && !json_string_matches_ascii(src, key_start, key_end, "type", 4u)) { return 0; }
     const uint32_t separator = skip_ws(src, len, key_end);
     if (separator >= len || src[separator] != ':') { return 0; }
     const uint32_t value_start = skip_ws(src, len, separator + 1u);
@@ -649,7 +649,13 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
 enum {
-    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
+    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG,
+    COMMON_STRUCTURED_KEY_TYPE
+};
+
+enum {
+    GLOSSARY_TEXT_FIELD = 1u, GLOSSARY_PATH_FIELD = 2u,
+    GLOSSARY_CONTENT_FIELD = 4u, GLOSSARY_TYPE_FIELD = 8u
 };
 
 /* These complete ASCII literals are already valid JSON strings. Matching
@@ -673,8 +679,45 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
             *out_end = start + 5u;
             return COMMON_STRUCTURED_KEY_TAG;
         }
+        if (word == UINT32_C(0x70797422) && len - start >= 6u && src[start + 4u] == 'e' && src[start + 5u] == '"') {
+            *out_end = start + 6u;
+            return COMMON_STRUCTURED_KEY_TYPE;
+        }
     }
     return COMMON_STRUCTURED_KEY_NONE;
+}
+
+/* A complete literal discriminator is both a valid JSON string and its
+ * supported schema kind. The general scanner remains authoritative for
+ * escaped, unknown, or incomplete spellings, including duplicate type keys. */
+static inline uint32_t parse_common_glossary_type_span(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end
+) {
+    if (len - start < 6u) { return 0u; }
+    uint32_t prefix;
+    __builtin_memcpy(&prefix, src + start, sizeof(prefix));
+    if (prefix == UINT32_C(0x78657422) && src[start + 4u] == 't' && src[start + 5u] == '"') {
+        *out_end = start + 6u;
+        return GLOSSARY_TEXT_FIELD;
+    }
+    if (prefix == UINT32_C(0x616d6922) && len - start >= 7u &&
+        src[start + 4u] == 'g' && src[start + 5u] == 'e' && src[start + 6u] == '"') {
+        *out_end = start + 7u;
+        return GLOSSARY_PATH_FIELD;
+    }
+    if (prefix == UINT32_C(0x72747322) && len - start >= 20u) {
+        uint64_t first, middle;
+        uint32_t last;
+        __builtin_memcpy(&first, src + start, sizeof(first));
+        __builtin_memcpy(&middle, src + start + 8u, sizeof(middle));
+        __builtin_memcpy(&last, src + start + 16u, sizeof(last));
+        if (first == UINT64_C(0x7574637572747322) && middle == UINT64_C(0x746e6f632d646572) &&
+            last == UINT32_C(0x22746e65)) {
+            *out_end = start + 20u;
+            return GLOSSARY_CONTENT_FIELD;
+        }
+    }
+    return 0u;
 }
 
 /* A single ASCII space is common after a structured-content delimiter.
@@ -740,10 +783,6 @@ static int parse_composite_span_impl(
     // Each supported type selects the bit of its required field. Track all
     // fields until object close because duplicate keys and type keep the last
     // value, and nested structured content has a separate vocabulary.
-    enum {
-        GLOSSARY_TEXT_FIELD = 1u, GLOSSARY_PATH_FIELD = 2u,
-        GLOSSARY_CONTENT_FIELD = 4u, GLOSSARY_TYPE_FIELD = 8u
-    };
     const int validate_top_level_objects = validate_glossary_types && src[start] == '[';
     uint32_t glossary_key = 0u;
     uint32_t glossary_object_type = 0u;
@@ -763,8 +802,11 @@ static int parse_composite_span_impl(
             const int object_key = state == OBJECT_FIRST || state == OBJECT_KEY;
             const int common_key_kind = object_key ?
                 parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
+            const uint32_t common_type = validate_top_level_objects && depth == 2u &&
+                state == OBJECT_VALUE && glossary_key == GLOSSARY_TYPE_FIELD ?
+                parse_common_glossary_type_span(src, len, i, &s_end) : 0u;
             if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
-                if (!parse_string_span(src, len, i, &s_end)) { return 0; }
+                if (common_type == 0u && !parse_string_span(src, len, i, &s_end)) { return 0; }
                 // A validated token can match these markers only with a literal or escaped i.
                 const uint8_t first = src[i + 1u];
                 if ((first == 'i' || first == '\\') && media_hint != 0 && *media_hint == 0u &&
@@ -785,20 +827,21 @@ static int parse_composite_span_impl(
                 }
                 if (validate_top_level_objects && depth == 2u) {
                     glossary_key = common_key_kind != COMMON_STRUCTURED_KEY_NONE ?
-                        (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD : 0u) :
+                        (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD :
+                            common_key_kind == COMMON_STRUCTURED_KEY_TYPE ? GLOSSARY_TYPE_FIELD : 0u) :
                         json_string_matches_ascii(src, i, s_end, "type", 4u) ? GLOSSARY_TYPE_FIELD :
                         json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
                         json_string_matches_ascii(src, i, s_end, "path", 4u) ? GLOSSARY_PATH_FIELD :
                         json_string_matches_ascii(src, i, s_end, "content", 7u) ? GLOSSARY_CONTENT_FIELD : 0u;
                 }
                 if (
-                    common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
-                    (src[i + 1u] == 't' || src[i + 1u] == '\\') &&
+                    (common_key_kind == COMMON_STRUCTURED_KEY_TYPE ||
+                        (common_key_kind == COMMON_STRUCTURED_KEY_NONE && (src[i + 1u] == 't' || src[i + 1u] == '\\'))) &&
                     (
                         (normalization_hint != 0 && *normalization_hint == 0u) ||
                         (text_normalization_hint != 0 && *text_normalization_hint == 0u)
                     ) &&
-                    type_text_pair_at(src, len, i, s_end)
+                    type_text_pair_at(src, len, i, s_end, common_key_kind == COMMON_STRUCTURED_KEY_TYPE)
                 ) {
                     if (normalization_hint != 0) { *normalization_hint = 1u; }
                     if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
@@ -814,7 +857,7 @@ static int parse_composite_span_impl(
             } else if (state == OBJECT_VALUE) {
                 if (validate_top_level_objects && depth == 2u) {
                     if (glossary_key == GLOSSARY_TYPE_FIELD) {
-                        glossary_object_type =
+                        glossary_object_type = common_type != 0u ? common_type :
                             json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
                             json_string_matches_ascii(src, i, s_end, "image", 5u) ? GLOSSARY_PATH_FIELD :
                             json_string_matches_ascii(src, i, s_end, "structured-content", 18u) ? GLOSSARY_CONTENT_FIELD : 0u;
