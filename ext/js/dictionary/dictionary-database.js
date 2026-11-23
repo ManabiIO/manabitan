@@ -142,8 +142,8 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint32Array} resolvedLengths
  * @property {string[]|null} resolvedDictNames
  * @property {string} [resolvedUniformDictName]
- * @property {Uint32Array} pendingEpochs
- * @property {Uint32Array} pendingIndexes
+ * @property {Uint32Array|null} pendingEpochs Null together with pendingIndexes until generic deduplication needs scratch.
+ * @property {Uint32Array|null} pendingIndexes
  * @property {Uint32Array} [uniqueRowIndexes]
  * @property {Uint32Array} [uniqueSignatures]
  * @property {number} nextEpoch
@@ -8657,8 +8657,10 @@ this._readTermContentSignature(
                 typeof candidateDedupPlan.resolvedUniformDictName === 'undefined' ||
                 typeof candidateDedupPlan.resolvedUniformDictName === 'string'
             ) &&
-            candidateDedupPlan.pendingEpochs instanceof Uint32Array &&
-            candidateDedupPlan.pendingIndexes instanceof Uint32Array
+            (
+                (candidateDedupPlan.pendingEpochs instanceof Uint32Array && candidateDedupPlan.pendingIndexes instanceof Uint32Array) ||
+                (candidateDedupPlan.pendingEpochs === null && candidateDedupPlan.pendingIndexes === null)
+            )
         ) ?
             /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) :
             null;
@@ -8676,7 +8678,7 @@ null;
         if (contentDedupPlan !== null) {
             pendingPlanEpoch = contentDedupPlan.nextEpoch >>> 0;
             if (pendingPlanEpoch === 0) {
-                contentDedupPlan.pendingEpochs.fill(0);
+                contentDedupPlan.pendingEpochs?.fill(0);
                 pendingPlanEpoch = 1;
             }
             contentDedupPlan.nextEpoch = (pendingPlanEpoch + 1) >>> 0;
@@ -9206,6 +9208,16 @@ null :
                     },
             };
         }
+        if (contentDedupPlan !== null && contentDedupPlan.pendingEpochs === null && contentDedupPlan.pendingIndexes === null) {
+            // Build both columns before publishing either. A failed allocation
+            // must leave the deferred pair intact for rollback or a later scan.
+            const epochs = new Uint32Array(contentDedupPlan.resolvedFlags.length);
+            const indexes = new Uint32Array(contentDedupPlan.resolvedFlags.length);
+            contentDedupPlan.pendingEpochs = epochs;
+            contentDedupPlan.pendingIndexes = indexes;
+        }
+        const pendingEpochs = contentDedupPlan?.pendingEpochs ?? null;
+        const pendingIndexes = contentDedupPlan?.pendingIndexes ?? null;
         let tableSize = 1;
         while (tableSize < count * 2) { tableSize *= 2; }
         const tableMask = tableSize - 1;
@@ -9251,10 +9263,10 @@ null :
          * @returns {number}
          */
         const findPendingContentIndex = (hash1, hash2, contentBytes, contentOffset, contentLength) => {
-            if (contentDedupPlan !== null && uniqueIndexList !== null) {
+            if (pendingEpochs !== null && pendingIndexes !== null && uniqueIndexList !== null) {
                 const uniqueIndex = uniqueIndexList[currentRowIndex];
-                return contentDedupPlan.pendingEpochs[uniqueIndex] === pendingPlanEpoch ?
-                    contentDedupPlan.pendingIndexes[uniqueIndex] :
+                return pendingEpochs[uniqueIndex] === pendingPlanEpoch ?
+                    pendingIndexes[uniqueIndex] :
                     -1;
             }
             let slot = getPendingHashSlot(hash1, hash2);
@@ -9286,11 +9298,11 @@ null :
          * @throws {Error} If the selected hash-table slot is unavailable.
          */
         const insertPendingContentIndex = (hash1, hash2) => {
-            if (contentDedupPlan !== null && uniqueIndexList !== null) {
+            if (pendingEpochs !== null && pendingIndexes !== null && uniqueIndexList !== null) {
                 const pendingIndex = pendingContentCount;
                 const uniqueIndex = uniqueIndexList[currentRowIndex];
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingIndex;
+                pendingEpochs[uniqueIndex] = pendingPlanEpoch;
+                pendingIndexes[uniqueIndex] = pendingIndex;
                 pendingPlanUniqueIndexes.push(uniqueIndex);
                 return pendingIndex;
             }

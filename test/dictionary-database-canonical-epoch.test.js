@@ -111,8 +111,12 @@ describe('canonical content plans across generic scans', () => {
         expect(generic.pendingRowToUniqueIndex).toEqual(new Int32Array([0, 0, 1, 2]));
     });
 
-    test.each(['content', 'records'])('restores collision journals after %s failure and allows generic scan plus retry', async (failureStage) => {
+    test.each(['content', 'records'].flatMap((failureStage) => [false, true].map((deferredScratch) => ({failureStage, deferredScratch}))))('restores collision journals after $failureStage failure with deferred scratch=$deferredScratch and allows generic scan plus retry', async ({failureStage, deferredScratch}) => {
         const {database, chunk, plan} = createFixture();
+        if (deferredScratch) {
+            plan.pendingEpochs = null;
+            plan.pendingIndexes = null;
+        }
         Reflect.set(database, '_bulkImportTransactionOpen', true);
         Reflect.set(database, '_termRecordStore', {prepareArtifactChunkLookupIndexes: () => null});
         // Two distinct canonical contents deliberately share an existing hash
