@@ -18,7 +18,7 @@
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
-import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
+import {createGlossaryImagePathProjector} from './dictionary-image-projection.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -107,7 +107,6 @@ let suppliedWasmModule = null;
 // Tokens are fields within JSON, not standalone documents with a BOM.
 /** @type {TextDecoder} */
 const textDecoder = new TextDecoder('utf-8', {ignoreBOM: true});
-const glossaryJsonDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
@@ -4034,13 +4033,10 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         throw new Error('Term record string offsets are unavailable');
     }
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
+    const projectGlossaryImagePaths = projectImagePaths && chunk.mediaRows.length > 0 ? createGlossaryImagePathProjector() : null;
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
-        const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
-            tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
-                row.glossaryJson :
-                glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
-                    row.glossaryJsonBytes :
-                    new Uint8Array(row.glossaryJsonBytes))) :
+        const imagePaths = projectGlossaryImagePaths !== null && row.termEntryContentBytes.length > 0 ?
+            projectGlossaryImagePaths(row.glossaryJson, row.glossaryJsonBytes) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
         return {
