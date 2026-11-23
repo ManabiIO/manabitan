@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "runtime": "Node.js 22.22.0",
+  "checks": [
+    {
+      "name": "Focused unit suites, sequential rerun",
+      "command": "node node_modules/vitest/vitest.mjs run test/dictionary-importer-media-prefetch.test.js test/term-bank-wasm-parser.test.js test/term-bank-experiments.test.js --no-file-parallelism --testTimeout 30000",
+      "exitCode": 0,
+      "passedTests": 365,
+      "log": "vndb-focused-tests.log"
+    },
+    {
+      "name": "Original focused unit run",
+      "exitCode": 1,
+      "passedTests": 358,
+      "failedTests": 7,
+      "reason": "Seven 5-second test timeouts while other work was running; preserved without discarding the attempt. The complete sequential rerun is separate.",
+      "log": "vndb-focused-tests-contended.log"
+    },
+    {
+      "name": "Changed-file ESLint",
+      "exitCode": 0,
+      "log": "vndb-eslint.log"
+    },
+    {
+      "name": "All build dry-run targets",
+      "command": "node dev/bin/build.js --dryRun --all",
+      "exitCode": 0,
+      "targets": 7,
+      "log": "vndb-test-build.log"
+    },
+    {
+      "name": "Main TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json",
+      "exitCode": 0
+    },
+    {
+      "name": "Full test TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json",
+      "exitCode": 137,
+      "reason": "Process killed locally; not claimed as a pass. Hosted CI subsequently caught the new helper type omission."
+    },
+    {
+      "name": "Explicit optional native parser flag in test helper",
+      "commit": "80fe0fdd1",
+      "exitCode": 0,
+      "validation": "Changed-file ESLint plus focused TypeScript project extending test/jsconfig.typecheck.json and including dictionary-importer-media-prefetch.test.js and repo declaration files. No runtime source changed.",
+      "log": "vndb-ts-helper-fix.log"
+    }
+  ],
+  "outsideScope": [
+    "full browser import and OPFS equality",
+    "browser memory peaks",
+    "reopened lookups",
+    "complete repository CI"
+  ]
+}

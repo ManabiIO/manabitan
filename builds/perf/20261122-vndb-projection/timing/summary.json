@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "boundary": "serialized compressed-source inflation, fused column parsing, owned result/image projection, prepared lookup indexes; source ZIP reads/sha256, module loading/compilation, output hashing, browser and storage excluded",
+  "signConvention": "Negative candidateTimeChangePercent means less measured time; baseline drift is C/A minus one.",
+  "completeArms": 12,
+  "termRowsPerArm": 6648310,
+  "perGroupMediaRepresentativesPerArm": 146725,
+  "fusedFallbacks": 0,
+  "observations": [
+    {
+      "triple": 1,
+      "position": "A",
+      "arm": "baseline",
+      "elapsedMs": 7320.558659999993,
+      "sourceInflateMs": 2490.7672119999943,
+      "rowDecodeMs": 178,
+      "parseBankMs": 2974,
+      "rawReport": "triple-1-A-baseline.json"
+    },
+    {
+      "triple": 1,
+      "position": "B",
+      "arm": "candidate",
+      "elapsedMs": 7131.785092000006,
+      "sourceInflateMs": 2464.232756999997,
+      "rowDecodeMs": 139,
+      "parseBankMs": 2990,
+      "rawReport": "triple-1-B-candidate.json"
+    },
+    {
+      "triple": 1,
+      "position": "C",
+      "arm": "baseline",
+      "elapsedMs": 6528.823579999999,
+      "sourceInflateMs": 2304.1073529999967,
+      "rowDecodeMs": 146,
+      "parseBankMs": 2716,
+      "rawReport": "triple-1-C-baseline.json"
+    },
+    {
+      "triple": 2,
+      "position": "A",
+      "arm": "baseline",
+      "elapsedMs": 7249.201657000002,
+      "sourceInflateMs": 2548.020228999999,
+      "rowDecodeMs": 170,
+      "parseBankMs": 3061,
+      "rawReport": "triple-2-A-baseline.json"
+    },
+    {
+      "triple": 2,
+      "position": "B",
+      "arm": "candidate",
+      "elapsedMs": 6425.942344999998,
+      "sourceInflateMs": 2261.565573000002,
+      "rowDecodeMs": 125,
+      "parseBankMs": 2718,
+      "rawReport": "triple-2-B-candidate.json"
+    },
+    {
+      "triple": 2,
+      "position": "C",
+      "arm": "baseline",
+      "elapsedMs": 9847.990089000008,
+      "sourceInflateMs": 3098.2914860000024,
+      "rowDecodeMs": 311,
+      "parseBankMs": 4145,
+      "rawReport": "triple-2-C-baseline.json"
+    },
+    {
+      "triple": 3,
+      "position": "A",
+      "arm": "baseline",
+      "elapsedMs": 6990.527231999997,
+      "sourceInflateMs": 2513.061163000002,
+      "rowDecodeMs": 135,
+      "parseBankMs": 2891,
+      "rawReport": "triple-3-A-baseline.json"
+    },
+    {
+      "triple": 3,
+      "position": "B",
+      "arm": "candidate",
+      "elapsedMs": 7089.577645999999,
+      "sourceInflateMs": 2534.1192900000005,
+      "rowDecodeMs": 139,
+      "parseBankMs": 2972,
+      "rawReport": "triple-3-B-candidate.json"
+    },
+    {
+      "triple": 3,
+      "position": "C",
+      "arm": "baseline",
+      "elapsedMs": 8870.564064000004,
+      "sourceInflateMs": 3098.490053000004,
+      "rowDecodeMs": 166,
+      "parseBankMs": 3758,
+      "rawReport": "triple-3-C-baseline.json"
+    },
+    {
+      "triple": 4,
+      "position": "A",
+      "arm": "baseline",
+      "elapsedMs": 8743.328621000004,
+      "sourceInflateMs": 3035.7028180000093,
+      "rowDecodeMs": 191,
+      "parseBankMs": 3737,
+      "rawReport": "triple-4-A-baseline.json"
+    },
+    {
+      "triple": 4,
+      "position": "B",
+      "arm": "candidate",
+      "elapsedMs": 10219.072992999998,
+      "sourceInflateMs": 3535.244955000001,
+      "rowDecodeMs": 318,
+      "parseBankMs": 4299,
+      "rawReport": "triple-4-B-candidate.json"
+    },
+    {
+      "triple": 4,
+      "position": "C",
+      "arm": "baseline",
+      "elapsedMs": 10080.757600000004,
+      "sourceInflateMs": 3349.7239289999898,
+      "rowDecodeMs": 345,
+      "parseBankMs": 4126,
+      "rawReport": "triple-4-C-baseline.json"
+    }
+  ],
+  "triples": [
+    {
+      "triple": 1,
+      "baselineBeforeMs": 7320.558659999993,
+      "candidateMs": 7131.785092000006,
+      "baselineAfterMs": 6528.823579999999,
+      "baselineMeanMs": 6924.691119999996,
+      "candidateTimeChangePercent": 2.9906600657158444,
+      "unchangedBaselineDriftPercent": -10.815227590840648
+    },
+    {
+      "triple": 2,
+      "baselineBeforeMs": 7249.201657000002,
+      "candidateMs": 6425.942344999998,
+      "baselineAfterMs": 9847.990089000008,
+      "baselineMeanMs": 8548.595873000006,
+      "candidateTimeChangePercent": -24.830434840231764,
+      "unchangedBaselineDriftPercent": 35.84930527474779
+    },
+    {
+      "triple": 3,
+      "baselineBeforeMs": 6990.527231999997,
+      "candidateMs": 7089.577645999999,
+      "baselineAfterMs": 8870.564064000004,
+      "baselineMeanMs": 7930.545648,
+      "candidateTimeChangePercent": -10.604163185317327,
+      "unchangedBaselineDriftPercent": 26.894063489144383
+    },
+    {
+      "triple": 4,
+      "baselineBeforeMs": 8743.328621000004,
+      "candidateMs": 10219.072992999998,
+      "baselineAfterMs": 10080.757600000004,
+      "baselineMeanMs": 9412.043110500004,
+      "candidateTimeChangePercent": 8.57443886545395,
+      "unchangedBaselineDriftPercent": 15.296565381149252
+    }
+  ],
+  "medianCandidateTimeChangePercent": -3.8067515598007415,
+  "equalWorkAggregateTimeChangePercent": -5.940715068105085,
+  "minimumBaselineDriftPercent": -10.815227590840648,
+  "maximumBaselineDriftPercent": 35.84930527474779
+}
