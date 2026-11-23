@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the frozen durability screen, including unchanged-code controls."""
+"""Verify the frozen durability confirmation, including unchanged-code controls."""
 
 import json
 import math
@@ -13,10 +13,18 @@ baseline = (evidence / "baseline-sha.txt").read_text().strip()
 candidate = (evidence / "candidate-sha.txt").read_text().strip()
 qualification_path = evidence / "qualification-sha.txt"
 qualification = qualification_path.read_text().strip() if qualification_path.exists() else candidate
-assert candidate == qualification, "Candidate product source differs from qualification HEAD"
+assert candidate == "5e2335ef34f86b45f8e54b0dd40fa27db0f3bfc8", "Candidate runtime differs from the frozen screen source"
+assert baseline == "5e1f8c12f7ff798ba407323aff675cb23b22af02", "Baseline differs from the frozen source"
 assert candidate != baseline, "Candidate source must differ from the baseline"
 order = (evidence / "observation-order.txt").read_text().split()
-expected_order = "C1 D1 D2 C2 A1 B1 B2 A2 B3 A3 A4 B4 C3 D3 D4 C4".split()
+replication = int((evidence / "replication.txt").read_text())
+orders = {
+    1: "C1 D1 D2 C2 A1 B1 B2 A2 B3 A3 A4 B4 A5 B5 B6 A6 B7 A7 A8 B8 C3 D3 D4 C4",
+    2: "D1 C1 C2 D2 B1 A1 A2 B2 A3 B3 B4 A4 B5 A5 A6 B6 A7 B7 B8 A8 D3 C3 C4 D4",
+}
+assert replication in orders
+expected_order = orders[replication].split()
+assert (evidence / "warmup-order.txt").read_text().split() == (["A", "B"] if replication == 1 else ["B", "A"])
 assert order == expected_order, "The predeclared observation schedule changed"
 observations = []
 reference_validation = None
@@ -88,7 +96,7 @@ for i in range(0, len(observations), 2):
         assert set(pair) == {"C", "D"}
         assert pair["C"]["name"][1:] == pair["D"]["name"][1:]
         control_changes.append(100 * (pair["D"]["milliseconds"] / pair["C"]["milliseconds"] - 1))
-assert len(paired_changes) == len(control_changes) == 4
+assert len(paired_changes) == 8 and len(control_changes) == 4
 assert package_hashes["A"] == package_hashes["C"] == package_hashes["D"], "Unchanged-code control packages differ"
 
 old_map = json.loads((evidence / "baseline-package-entry-sha256.json").read_text())
@@ -105,7 +113,8 @@ assert old_map["lib/term-bank-parser.wasm"] == new_map["lib/term-bank-parser.was
 
 result = {
     "dictionary": dictionary,
-    "comparisonKind": "exploratory-durability-screen-with-bracketing-controls",
+    "comparisonKind": "durability-confirmation-with-bracketing-controls",
+    "replication": replication,
     "baselineSha": baseline,
     "candidateSha": candidate,
     "qualificationSha": qualification,
@@ -129,7 +138,7 @@ result = {
     "changedPackageEntries": changed_entries,
     "identicalSampledContentAndMedia": True,
     "validation": reference_validation,
-    "limitation": "Exploratory four-pair screen on one Chromium host per dictionary; requires independent confirmation before a speed claim. Sampled persistence checks, not exhaustive stored-byte equality or peak-memory measurement.",
+    "limitation": "Eight candidate pairs and four unchanged-code pairs on one independently provisioned Chromium host per dictionary and replication; sampled persistence checks, not exhaustive stored-byte equality or peak-memory measurement.",
 }
 (evidence / "comparison.json").write_text(json.dumps(result, indent=2) + "\n")
 print("IMPORT_COMPARISON_RESULT " + json.dumps(result, separators=(",", ":")))
