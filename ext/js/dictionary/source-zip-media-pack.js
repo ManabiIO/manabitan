@@ -46,7 +46,7 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
     let rangeEndLowerBound = 0;
     let compressedTotal = 0;
     for (const requirement of requirements) {
-        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { return null; }
+        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { return null; }
         const {path} = requirement.source;
         const entry = fileMap.get(path);
         const mediaType = getImageMediaTypeFromFileName(path);

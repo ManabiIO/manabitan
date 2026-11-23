@@ -512,6 +512,10 @@ describe('lookup construction experiments', () => {
                         emitTokenBinaryContent: true,
                         prepareLookupIndexes: true}})
                 expect(reply.type).toBe('result')
+                expect(reply.chunk.contentDedupPlan.pendingEpochs).toBeNull()
+                expect(reply.chunk.contentDedupPlan.pendingIndexes).toBeNull()
+                expect(reply.chunk.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined()
+                expect(reply.chunk.contentDedupPlan.pendingSpanLengthsScratch).toBeUndefined()
                 expect(reply.profile.nativeSegmentedLookupSegments ?? 0).toBe(enabled === false ? 0 : 3)
                 expect(reply.profile.nativeLookupScratchReuseGroups ?? 0).toBe(enabled === false ? 0 : 1)
                 expect(hasCompletePreparedTermLookupIndexes(reply.chunk.preparedLookupIndexes, 70001)).toBe(true)
