@@ -81,6 +81,8 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/term-record-import-index-writer.js',
     'ext/js/dictionary/term-record-import-index-worker.js',
     'ext/js/dictionary/term-record-import-index-worker-client.js',
+    'ext/js/dictionary/term-record-import-index-diagnostic-arm.js',
+    'ext/js/dictionary/term-record-import-index-diagnostic.js',
     'ext/js/dictionary/term-lookup-index.js',
     'ext/js/dictionary/term-lookup-index-preparation.js',
     'ext/js/dictionary/term-bank-source-crc.js',

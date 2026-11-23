@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {INDEX_IO_DIAGNOSTIC_ARM} from './term-record-import-index-diagnostic-arm.js';
+import {getIndexIoDiagnosticReceipt, nextIndexIoDiagnosticId, recordIndexIoDiagnostic, resetIndexIoDiagnostic} from './term-record-import-index-diagnostic.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -760,6 +762,7 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
  * @property {number} lookupIndexWorkerFileCount
+ * @property {import('./term-record-import-index-diagnostic.js').IndexIoDiagnosticReceipt} [lookupIndexIoDiagnostic]
  */
 
 /**
@@ -835,6 +838,8 @@ export class TermRecordOpfsStore {
         this._importSessionActive = false;
         /** @type {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>|null} */
         this._importIndexWorkerPromise = null;
+        /** @type {boolean} */
+        this._diagnosticIndexWorkerAdmitted = false;
         /** @type {DenseIdRecordStore} */
         this._recordsById = new DenseIdRecordStore();
         /** @type {Map<string, number[]>} */
@@ -1156,6 +1161,9 @@ export class TermRecordOpfsStore {
             if (this._importSessionActive) {
                 return;
             }
+            resetIndexIoDiagnostic();
+            recordIndexIoDiagnostic('session-begin', {rawTermBankSourceBytes: this._rawTermBankSourceBytes});
+            this._diagnosticIndexWorkerAdmitted = false;
             this._importSessionActive = true;
             this._deferIndexBuild = true;
             this._indexDirty = true;
@@ -1186,6 +1194,13 @@ export class TermRecordOpfsStore {
                 state.lookupIndexMaxQueuedBytes = 0;
                 state.lookupIndexWritePromise = null;
                 state.lookupIndexWriteError = null;
+            }
+            if (INDEX_IO_DIAGNOSTIC_ARM === 'C') {
+                // Diagnostic only: readiness may overlap subsequent setup and
+                // parsing. No file handle or payload is sent until B's normal
+                // sidecar admission condition has independently been met.
+                recordIndexIoDiagnostic('worker-prewarm');
+                this._importIndexWorkerPromise ??= createImportIndexWorkerClient();
             }
         }, true);
     }
@@ -1438,6 +1453,12 @@ export class TermRecordOpfsStore {
         this._importSessionActive = false;
         closeWritableMs = safePerformance.now() - tCloseWritableStart;
         this._deferIndexBuild = false;
+        recordIndexIoDiagnostic('session-complete', {
+            success: true,
+            writeCallCount: this._lookupIndexWriteMetrics.writeCallCount,
+            writeBytes: this._lookupIndexWriteMetrics.writeBytes,
+            workerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+        }, tStart);
         this._lastEndImportSessionMetrics = {
             flushPendingWritesMs,
             awaitQueuedWritesMs,
@@ -1449,6 +1470,7 @@ export class TermRecordOpfsStore {
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
+            lookupIndexIoDiagnostic: getIndexIoDiagnosticReceipt(),
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -5977,6 +5999,14 @@ export class TermRecordOpfsStore {
         const chunks = state.pendingLookupIndexChunks;
         const recordCount = state.pendingLookupIndexRecordCount;
         const byteLength = state.pendingLookupIndexBytes;
+        const diagnostic = {
+            batchId: nextIndexIoDiagnosticId(),
+            fileName: `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
+            byteLength,
+            chunkCount: chunks.length,
+            recordCount,
+        };
+        let batchStartedAt = safePerformance.now();
         state.pendingLookupIndexChunks = [];
         state.pendingLookupIndexBytes = 0;
         state.pendingLookupIndexRecordCount = 0;
@@ -5987,11 +6017,21 @@ export class TermRecordOpfsStore {
             this._lookupIndexWriteMetrics.maxQueuedBytes,
             state.lookupIndexMaxQueuedBytes,
         );
+        recordIndexIoDiagnostic('batch-enqueue', {...diagnostic, queuedBytes: state.lookupIndexQueuedBytes});
         const writePromise = previousWrite
             .then(async () => {
+                batchStartedAt = safePerformance.now();
+                recordIndexIoDiagnostic('batch-start', diagnostic, batchStartedAt);
                 if (state.lookupIndexWritable === null) {
                     const indexFileName = `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`;
-                    state.lookupIndexFileHandle = await this._recordsDirectoryHandle?.getFileHandle(indexFileName, {create: true}) ?? null;
+                    const fileStartedAt = safePerformance.now();
+                    let fileSuccess = false;
+                    try {
+                        state.lookupIndexFileHandle = await this._recordsDirectoryHandle?.getFileHandle(indexFileName, {create: true}) ?? null;
+                        fileSuccess = state.lookupIndexFileHandle !== null;
+                    } finally {
+                        recordIndexIoDiagnostic('file-handle', {fileName: indexFileName, success: fileSuccess}, fileStartedAt);
+                    }
                     if (state.lookupIndexFileHandle === null) {
                         throw new Error('Term-record lookup index directory became unavailable during import');
                     }
@@ -6002,7 +6042,7 @@ export class TermRecordOpfsStore {
                     // _createLookupIndexChunk owns each complete buffer. The
                     // existing queue budget remains charged until this worker
                     // acknowledges the write, including any periodic flush.
-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
+                    await state.lookupIndexWritable.writeOwnedChunks(chunks, diagnostic.batchId);
                 } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
                     await state.lookupIndexWritable.writeChunks(chunks);
                 } else {
@@ -6012,8 +6052,10 @@ export class TermRecordOpfsStore {
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
                 state.lookupIndexChunkCount += chunks.length;
                 state.lookupIndexRecordCount += recordCount;
+                recordIndexIoDiagnostic('batch-complete', {...diagnostic, success: true}, batchStartedAt);
             })
             .catch((error) => {
+                recordIndexIoDiagnostic('batch-complete', {...diagnostic, success: false}, batchStartedAt);
                 state.lookupIndexWriteError = error instanceof Error ? error : new Error(String(error));
                 throw state.lookupIndexWriteError;
             })
@@ -6042,21 +6084,30 @@ export class TermRecordOpfsStore {
             // sidecars first written at finalization still use the local path
             // unless a worker already belongs to this eligible session.
             if (
-                this._rawTermBankSourceBytes !== null &&
-                this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES &&
-                (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
+                (INDEX_IO_DIAGNOSTIC_ARM !== 'A' || (
+                    this._rawTermBankSourceBytes !== null && this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES
+                )) &&
+                ((INDEX_IO_DIAGNOSTIC_ARM === 'C' ? this._diagnosticIndexWorkerAdmitted : this._importIndexWorkerPromise !== null) ||
+                state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
             ) {
+                this._diagnosticIndexWorkerAdmitted = true;
                 this._importIndexWorkerPromise ??= createImportIndexWorkerClient();
+                const readyStartedAt = safePerformance.now();
                 const worker = await this._importIndexWorkerPromise;
+                recordIndexIoDiagnostic('worker-readiness-wait', {fileName: `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`, available: worker !== null}, readyStartedAt);
                 if (worker !== null) {
-                    const writer = await worker.open(fileHandle);
+                    const writer = await worker.open(fileHandle, `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`);
                     if (writer !== null) {
                         ++this._lookupIndexWriteMetrics.workerFileCount;
                         return writer;
                     }
                 }
             }
-            const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)));
+            const writer = await openSyncImportIndexWriter(
+                /** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)),
+                false,
+                {writerId: `local-${nextIndexIoDiagnosticId()}`, fileName: `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`},
+            );
             if (writer !== null) { return writer; }
         }
         const writable = await fileHandle.createWritable();
@@ -6075,9 +6126,14 @@ export class TermRecordOpfsStore {
 
     /** @returns {Promise<void>} */
     async _retireImportIndexWorker() {
+        const startedAt = safePerformance.now();
         const promise = this._importIndexWorkerPromise;
         this._importIndexWorkerPromise = null;
-        if (promise !== null) { (await promise)?.dispose(); }
+        this._diagnosticIndexWorkerAdmitted = false;
+        if (promise !== null) {
+            (await promise)?.dispose();
+            recordIndexIoDiagnostic('worker-retire', {}, startedAt);
+        }
     }
 
     /**

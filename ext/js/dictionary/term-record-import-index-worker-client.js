@@ -16,6 +16,8 @@
  */
 
 import {toError} from '../core/to-error.js';
+import {safePerformance} from '../core/safe-performance.js';
+import {appendIndexIoDiagnosticEvents, recordIndexIoDiagnostic} from './term-record-import-index-diagnostic.js';
 
 const READY_TIMEOUT_MS = 30_000;
 const REQUEST_TIMEOUT_MS = 60_000;
@@ -95,16 +97,25 @@ function deserializeImportIndexWorkerError(value, errors) {
  * @returns {Promise<ImportIndexWorkerClient|null>}
  */
 export async function createImportIndexWorkerClient() {
-    if (typeof Worker !== 'function') { return null; }
+    const startedAt = safePerformance.now();
+    recordIndexIoDiagnostic('worker-start');
+    if (typeof Worker !== 'function') {
+        recordIndexIoDiagnostic('worker-startup', {status: 'unavailable'}, startedAt);
+        return null;
+    }
     let client;
+    let status = 'failed';
     try {
         const worker = new Worker(new URL('term-record-import-index-worker.js', import.meta.url), {type: 'module'});
         client = new ImportIndexWorkerClient(worker);
         await client.ready;
+        status = 'ready';
         return client;
     } catch (_) {
         client?.dispose();
         return null;
+    } finally {
+        recordIndexIoDiagnostic('worker-startup', {status}, startedAt);
     }
 }
 
@@ -122,7 +133,7 @@ export class ImportIndexWorkerClient {
         this._failure = null;
         /** @type {Map<number, Error>} */
         this._errors = new Map();
-        /** @type {Map<number, {resolve: (value: unknown) => void, reject: (error: Error) => void, timeout: ReturnType<typeof setTimeout>}>} */
+        /** @type {Map<number, {resolve: (value: unknown) => void, reject: (error: Error) => void, timeout: ReturnType<typeof setTimeout>, sentAt: number, diagnostic: import('./term-record-import-index-diagnostic.js').IndexIoDiagnosticDetails}>} */
         this._pending = new Map();
         /** @type {() => void} */
         this._resolveReady = () => {};
@@ -151,12 +162,13 @@ export class ImportIndexWorkerClient {
      * Once this request is sent, an ambiguous failure cannot retry acquisition
      * locally: the worker may already have truncated the unpublished file.
      * @param {FileSystemFileHandle} fileHandle
+     * @param {string} [fileName='']
      * @returns {Promise<WorkerImportIndexWriter|null>}
      */
-    async open(fileHandle) {
+    async open(fileHandle, fileName = '') {
         await this.ready;
         const writerId = this._nextWriterId++;
-        const status = await this.request(writerId, 'open', {fileHandle});
+        const status = await this.request(writerId, 'open', {fileHandle, diagnosticFileName: fileName});
         if (status === 'unsupported') { return null; }
         if (status !== 'opened') {
             const error = new Error('Import index worker returned invalid acquisition status');
@@ -176,12 +188,23 @@ export class ImportIndexWorkerClient {
     request(writerId, action, params = {}, transfer = []) {
         if (this._failure !== null) { return Promise.reject(this._failure); }
         const id = this._nextRequestId++;
+        const sentAt = safePerformance.now();
+        const chunks = /** @type {Uint8Array[]|undefined} */ (params.chunks);
+        const diagnostic = {
+            requestId: id,
+            writerId: `worker-${writerId}`,
+            action,
+            byteLength: Array.isArray(chunks) ? chunks.reduce((sum, chunk) => sum + chunk.byteLength, 0) : 0,
+            chunkCount: Array.isArray(chunks) ? chunks.length : 0,
+            batchId: typeof params.diagnosticBatchId === 'number' ? params.diagnosticBatchId : 0,
+        };
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
                 this._fail(new Error(`Import index worker request timed out: ${action}`));
             }, REQUEST_TIMEOUT_MS);
-            this._pending.set(id, {resolve, reject, timeout});
+            this._pending.set(id, {resolve, reject, timeout, sentAt, diagnostic});
             try {
+                recordIndexIoDiagnostic('request-send', diagnostic, sentAt);
                 this._worker.postMessage({id, writerId, action, ...params}, transfer);
             } catch (error) {
                 this._fail(toError(error));
@@ -195,18 +218,21 @@ export class ImportIndexWorkerClient {
      * never used as proof that a mutated file was successfully published.
      */
     dispose() {
+        recordIndexIoDiagnostic('worker-dispose');
         this._fail(new Error('Import index worker closed'));
     }
 
     /** @param {MessageEvent<unknown>} event */
     _onMessage(event) {
         if (this._failure !== null) { return; }
-        const data = /** @type {{type?: unknown, id?: unknown, result?: unknown, error?: unknown}} */ (event.data);
+        const data = /** @type {{type?: unknown, id?: unknown, result?: unknown, error?: unknown, indexIoDiagnosticEvents?: import('./term-record-import-index-diagnostic.js').IndexIoDiagnosticEvent[]}} */ (event.data);
         if (typeof data !== 'object' || data === null) {
             this._fail(new Error('Import index worker returned an invalid message'));
             return;
         }
+        appendIndexIoDiagnosticEvents(data.indexIoDiagnosticEvents);
         if (data.type === 'ready') {
+            recordIndexIoDiagnostic('worker-ready');
             clearTimeout(this._readyTimeout);
             this._resolveReady();
             return;
@@ -218,6 +244,7 @@ export class ImportIndexWorkerClient {
         }
         this._pending.delete(/** @type {number} */ (data.id));
         clearTimeout(pending.timeout);
+        recordIndexIoDiagnostic('request-ack', {...pending.diagnostic, success: typeof data.error === 'undefined'}, pending.sentAt);
         if (typeof data.error !== 'undefined') {
             try {
                 pending.reject(deserializeImportIndexWorkerError(data.error, this._errors));
@@ -238,7 +265,8 @@ export class ImportIndexWorkerClient {
         clearTimeout(this._readyTimeout);
         this._rejectReady(error);
         this._worker.terminate();
-        for (const {reject, timeout} of this._pending.values()) {
+        for (const {reject, timeout, sentAt, diagnostic} of this._pending.values()) {
+            recordIndexIoDiagnostic('request-failed', diagnostic, sentAt);
             clearTimeout(timeout);
             reject(error);
         }
@@ -302,8 +330,9 @@ export class WorkerImportIndexWriter {
      * private encoder. Parser views and ordinary caller buffers never enter
      * this method. Its promise settles after the worker stops using the bytes.
      * @param {Uint8Array[]} chunks
+     * @param {number} [diagnosticBatchId=0]
      */
-    async writeOwnedChunks(chunks) {
+    async writeOwnedChunks(chunks, diagnosticBatchId = 0) {
         if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
         const owned = [...chunks];
         /** @type {Set<ArrayBuffer>} */
@@ -321,7 +350,7 @@ export class WorkerImportIndexWriter {
             length += chunk.byteLength;
             if (!Number.isSafeInteger(length)) { throw new RangeError('Import index chunk length overflow'); }
         }
-        await this._enqueue('writeChunks', {chunks: owned}, [...buffers]);
+        await this._enqueue('writeChunks', {chunks: owned, diagnosticBatchId}, [...buffers]);
     }
 
     /** @returns {Promise<void>} */

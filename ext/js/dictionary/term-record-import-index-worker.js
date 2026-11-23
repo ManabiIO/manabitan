@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {serializeImportIndexWorkerError} from './term-record-import-index-worker-client.js';
+import {safePerformance} from '../core/safe-performance.js';
+import {drainIndexIoDiagnosticEvents, recordIndexIoDiagnostic, resetIndexIoDiagnostic} from './term-record-import-index-diagnostic.js';
 
 /** @type {Map<number, import('./term-record-import-index-writer.js').SyncImportIndexWriter>} */
 const writers = new Map();
@@ -25,13 +27,23 @@ const opening = new Set();
 /** @type {Map<Error, number>} */
 const errors = new Map();
 
+resetIndexIoDiagnostic('index-worker');
 self.addEventListener('message', (event) => { void handleRequest(event.data); });
-self.postMessage({type: 'ready'});
+recordIndexIoDiagnostic('worker-ready');
+self.postMessage({type: 'ready', indexIoDiagnosticEvents: drainIndexIoDiagnosticEvents()});
 
 /** @param {unknown} value */
 async function handleRequest(value) {
-    const data = /** @type {{id?: unknown, writerId?: unknown, action?: unknown, fileHandle?: unknown, chunks?: unknown, offset?: unknown, size?: unknown}} */ (value);
+    const data = /** @type {{id?: unknown, writerId?: unknown, action?: unknown, fileHandle?: unknown, chunks?: unknown, offset?: unknown, size?: unknown, diagnosticFileName?: string, diagnosticBatchId?: number}} */ (value);
     const id = typeof data?.id === 'number' ? data.id : -1;
+    const startedAt = safePerformance.now();
+    const diagnostic = {
+        requestId: id,
+        writerId: typeof data?.writerId === 'number' ? `worker-${data.writerId}` : 'invalid',
+        action: typeof data?.action === 'string' ? data.action : 'invalid',
+        batchId: typeof data?.diagnosticBatchId === 'number' ? data.diagnosticBatchId : 0,
+    };
+    recordIndexIoDiagnostic('request-received', diagnostic, startedAt);
     try {
         const writerId = data.writerId;
         if (
@@ -46,7 +58,11 @@ async function handleRequest(value) {
             if (typeof data.fileHandle !== 'object' || data.fileHandle === null) { throw new TypeError('Missing import index file handle'); }
             opening.add(writerId);
             try {
-                const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (data.fileHandle), true);
+                const writer = await openSyncImportIndexWriter(
+                    /** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (data.fileHandle),
+                    true,
+                    {writerId: `worker-${writerId}`, fileName: data.diagnosticFileName ?? ''},
+                );
                 if (writer === null) {
                     result = 'unsupported';
                 } else {
@@ -81,8 +97,10 @@ async function handleRequest(value) {
                     throw new TypeError('Unknown import index worker operation');
             }
         }
-        self.postMessage({id, result});
+        recordIndexIoDiagnostic('request-complete', {...diagnostic, success: true}, startedAt);
+        self.postMessage({id, result, indexIoDiagnosticEvents: drainIndexIoDiagnosticEvents()});
     } catch (error) {
-        self.postMessage({id, error: serializeImportIndexWorkerError(error, errors)});
+        recordIndexIoDiagnostic('request-complete', {...diagnostic, success: false}, startedAt);
+        self.postMessage({id, error: serializeImportIndexWorkerError(error, errors), indexIoDiagnosticEvents: drainIndexIoDiagnosticEvents()});
     }
 }

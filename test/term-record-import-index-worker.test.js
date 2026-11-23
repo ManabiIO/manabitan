@@ -10,6 +10,7 @@ import {createImportIndexWorkerClient, WorkerImportIndexWriter} from '../ext/js/
 import {SyncImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-writer.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {getIndexIoDiagnosticReceipt, resetIndexIoDiagnostic} from '../ext/js/dictionary/term-record-import-index-diagnostic.js';
 
 /** @type {NodeWorker[]} */
 const workers = [];
@@ -146,6 +147,7 @@ afterEach(async () => {
 
 describe('production import index worker', () => {
     test('preserves positional byte parity across owned transfer, short writes and periodic/final flush', async () => {
+        resetIndexIoDiagnostic();
         const file = fixture({shortWrite: 200_003});
         const {client, writer} = await openWorker(file);
         const expected = patternedBytes(18 * 1024 * 1024 + 31);
@@ -164,6 +166,32 @@ describe('production import index worker', () => {
         expect(Atomics.load(file.counters, 3)).toBe(1);
         expect(Atomics.load(file.counters, 7)).toBeLessThanOrEqual(512 * 1024);
         client.dispose();
+        const events = getIndexIoDiagnosticReceipt().events;
+        const flushes = events.filter(({type}) => type === 'writer-flush');
+        expect(flushes).toHaveLength(2);
+        expect(flushes[0]).toMatchObject({realm: 'index-worker', reason: 'periodic', success: true});
+        expect(flushes[1]).toMatchObject({
+            realm: 'index-worker',
+            reason: 'final',
+            success: true,
+            position: header.byteLength,
+            fileLength: expected.byteLength - 13,
+            writtenBytes: expected.byteLength + header.byteLength,
+        });
+        const sent = events.filter(({type}) => type === 'request-send');
+        expect(sent).toHaveLength(6);
+        for (const request of sent) {
+            for (const type of ['request-received', 'request-complete', 'request-ack']) {
+                const matched = events.filter((event) => event.type === type && event.requestId === request.requestId);
+                expect(matched).toHaveLength(1);
+                expect(matched[0].action).toBe(request.action);
+                if (type !== 'request-received') { expect(matched[0].success).toBe(true); }
+            }
+        }
+        for (const realm of ['record-store', 'index-worker']) {
+            const local = events.filter((event) => event.realm === realm);
+            expect(local.map(({sequence}) => sequence)).toEqual(local.map((_, index) => index + 1));
+        }
     });
 
     test('joins an admitted large write on abort and suppresses periodic/final flush', async () => {

@@ -17,6 +17,7 @@
 
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
+import {nextIndexIoDiagnosticId, recordIndexIoDiagnostic} from './term-record-import-index-diagnostic.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
 const MAX_UNFLUSHED_BYTES = 16 * 1024 * 1024;
@@ -36,26 +37,39 @@ const WRITE_TIME_BUDGET_MS = 6;
  * Once acquired, every failure belongs to this writer and must fail import.
  * @param {{createSyncAccessHandle?: () => Promise<SyncAccessHandle>}} fileHandle
  * @param {boolean} [periodicFlush=false] Only the dedicated I/O worker opts in.
+ * @param {{writerId: string, fileName: string}} [diagnostic]
  * @returns {Promise<SyncImportIndexWriter|null>}
  */
-export async function openSyncImportIndexWriter(fileHandle, periodicFlush = false) {
-    if (typeof fileHandle.createSyncAccessHandle !== 'function') {
-        return null;
-    }
-    let access;
-    try { access = await fileHandle.createSyncAccessHandle(); } catch (error) {
-        if (error instanceof Error && error.name === 'NotSupportedError') { return null; }
-        throw error;
-    }
+export async function openSyncImportIndexWriter(fileHandle, periodicFlush = false, diagnostic) {
+    diagnostic ??= {writerId: `local-${nextIndexIoDiagnosticId()}`, fileName: ''};
+    const startedAt = safePerformance.now();
+    let status = 'error';
     try {
-        access.truncate(0);
-    } catch (error) {
-        try { access.close(); } catch (closeError) {
-            throw new AggregateError([error, closeError], 'Failed to initialize synchronous import index writer');
+        if (typeof fileHandle.createSyncAccessHandle !== 'function') {
+            status = 'unsupported';
+            return null;
         }
-        throw error;
+        let access;
+        try { access = await fileHandle.createSyncAccessHandle(); } catch (error) {
+            if (error instanceof Error && error.name === 'NotSupportedError') {
+                status = 'unsupported';
+                return null;
+            }
+            throw error;
+        }
+        try {
+            access.truncate(0);
+        } catch (error) {
+            try { access.close(); } catch (closeError) {
+                throw new AggregateError([error, closeError], 'Failed to initialize synchronous import index writer');
+            }
+            throw error;
+        }
+        status = 'opened';
+        return new SyncImportIndexWriter(access, periodicFlush, diagnostic);
+    } finally {
+        recordIndexIoDiagnostic('writer-open', {...diagnostic, periodicFlush, status}, startedAt);
     }
-    return new SyncImportIndexWriter(access, periodicFlush);
 }
 
 /** Ordered, bounded writes to an unpublished generation-bound index sidecar. */
@@ -63,14 +77,21 @@ export class SyncImportIndexWriter {
     /**
      * @param {SyncAccessHandle} access
      * @param {boolean} [periodicFlush=false]
+     * @param {{writerId: string, fileName: string}} [diagnostic]
      */
-    constructor(access, periodicFlush = false) {
+    constructor(access, periodicFlush = false, diagnostic) {
         /** @type {SyncAccessHandle} */
         this._access = access;
         /** @type {number} */
         this._position = 0;
         /** @type {number} */
         this._unflushedBytes = 0;
+        /** @type {{writerId: string, fileName: string}} */
+        this._diagnostic = diagnostic ?? {writerId: `local-${nextIndexIoDiagnosticId()}`, fileName: ''};
+        /** @type {number} */
+        this._writtenBytes = 0;
+        /** @type {number} */
+        this._fileLength = 0;
         /** @type {boolean} */
         this._periodicFlush = periodicFlush;
         /** @type {boolean} */
@@ -99,6 +120,7 @@ export class SyncImportIndexWriter {
         await this._enqueue(() => {
             this._access.truncate(size);
             this._position = Math.min(this._position, size);
+            this._fileLength = size;
         });
     }
 
@@ -194,15 +216,27 @@ export class SyncImportIndexWriter {
             const errors = this._failure === null ? [] : [this._failure];
             if (!abort && errors.length === 0) {
                 try {
-                    this._access.flush();
+                    this._flush('final');
                 } catch (error) {
                     errors.push(toError(error));
                 }
             }
+            const closeStartedAt = safePerformance.now();
+            let closed = false;
             try {
                 this._access.close();
+                closed = true;
             } catch (error) {
                 errors.push(toError(error));
+            } finally {
+                recordIndexIoDiagnostic('writer-close', {
+                    ...this._diagnostic,
+                    aborted: abort,
+                    success: closed,
+                    position: this._position,
+                    fileLength: this._fileLength,
+                    writtenBytes: this._writtenBytes,
+                }, closeStartedAt);
             }
             if (errors.length > 0) {
                 this._failure = errors.length === 1 ?
@@ -263,13 +297,36 @@ export class SyncImportIndexWriter {
             offset += written;
             this._position += written;
             this._unflushedBytes += written;
+            this._writtenBytes += written;
+            this._fileLength = Math.max(this._fileLength, this._position);
             if (this._periodicFlush && !this._aborted && this._unflushedBytes >= MAX_UNFLUSHED_BYTES) {
                 // Persist bounded batches while parser workers can still make progress.
                 // Successful close must also flush the final index header and tail.
-                this._access.flush();
+                this._flush('periodic');
                 this._unflushedBytes = 0;
             }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
+        }
+    }
+
+    /** @param {'periodic'|'final'} reason */
+    _flush(reason) {
+        const startedAt = safePerformance.now();
+        let success = false;
+        try {
+            this._access.flush();
+            success = true;
+        } finally {
+            recordIndexIoDiagnostic('writer-flush', {
+                ...this._diagnostic,
+                reason,
+                success,
+                periodicFlush: this._periodicFlush,
+                position: this._position,
+                fileLength: this._fileLength,
+                writtenBytes: this._writtenBytes,
+                unflushedBytes: this._unflushedBytes,
+            }, startedAt);
         }
     }
 
