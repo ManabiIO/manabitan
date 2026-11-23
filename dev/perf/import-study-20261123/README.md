@@ -1,11 +1,24 @@
 # Import pipeline study, 2026-11-23
 
-This study measures complete production-default imports of the locked JMdict,
-Jitendex and VNDB archives. The first candidate moves some synchronous index
-flushes into the ordered write pipeline. Its frozen source is
-`e31032d575e329e6021b96359a74e825707004b3`; the baseline is
-`5e1f8c12f7ff798ba407323aff675cb23b22af02`. The only permitted packaged product
-difference is `js/dictionary/term-record-import-index-writer.js`.
+This series measures complete production-default imports of the locked JMdict,
+Jitendex and VNDB archives. Each candidate, baseline and exact permitted packaged
+product difference list is frozen in `config.json` before acquisition. The
+baseline is `5e1f8c12f7ff798ba407323aff675cb23b22af02`.
+
+The current revision limits the dedicated index I/O worker to raw term-bank
+imports with at least 1 GiB of validated declared source bytes, while retaining
+the existing 2 MiB queued-index startup boundary. The preceding broad-worker
+candidate (`c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1`) was rejected after a
+JMdict regression despite a strong VNDB discovery result. Its complete
+[independent audit](https://github.com/ManabiIO/manabitan/blob/a01b8abb1d07119f16bf507dc6f406dc037df51a/dev/perf/import-study-20261123/discovery-io.md)
+is retained. This new eligibility revision receives a separate fixed study;
+observations from the previous candidate are not pooled into it.
+
+The original 16 MiB local-flush candidate was
+`e31032d575e329e6021b96359a74e825707004b3`, with only
+`js/dictionary/term-record-import-index-writer.js` changed in its package. Its
+[retained audit](https://github.com/ManabiIO/manabitan/blob/5e7a9dce4271106092eba2e198d44221354c1072/dev/perf/import-study-20261123/discovery-16mib.md)
+also records the unresolved cross-corpus tradeoff.
 
 ## Predeclared acquisition and decisions
 
@@ -44,10 +57,12 @@ least a 5% median improvement against A and C, improve equal-work totals and
 have at least five of six faster pairs against each baseline in a benefiting
 corpus. No material regression may remain in the other corpora. Compare complete
 packaged member maps and all measurement-source hashes across replications.
-The media-readback revision below is an explicit difference from discovery;
-compare that small source diff instead of asserting identical whole-harness
-hashes across the two stages. The dependency lock, production package members,
-timing boundary, import controls and fixed acquisition schedules remain frozen.
+The media-readback revision below differs from the original 16 MiB local-flush
+discovery. Later CRC and I/O-worker studies use that strengthened revision in
+both discovery and confirmation. Compare source identities for the actual
+campaigns rather than assuming all historical harnesses are identical. The
+dependency lock, production package members, timing boundary, import controls
+and fixed acquisition schedules remain frozen within each candidate's stages.
 
 Report the identical-code C/A controls separately, without subtracting them.
 Unstable controls make a result inconclusive and call for a separately declared

@@ -2,9 +2,10 @@
   "schemaVersion": 1,
   "stage": "discovery",
   "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
-  "candidate": "c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1",
+  "candidate": "7b6f5115f8d837a035c34ba395c9cb63b4eca39a",
   "expectedPackageDifferences": [
     "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-importer.js",
     "js/dictionary/term-record-import-index-worker-client.js",
     "js/dictionary/term-record-import-index-worker.js",
     "js/dictionary/term-record-import-index-writer.js",
@@ -15,5 +16,11 @@
     "jitendex",
     "vndb"
   ],
-  "confirmationOf": null
+  "confirmationOf": null,
+  "revisionOf": "https://github.com/ManabiIO/manabitan/actions/runs/45123579865",
+  "expectedCandidateIndexWorkerFiles": {
+    "jmdict": 0,
+    "jitendex": 0,
+    "vndb": 2
+  }
 }
