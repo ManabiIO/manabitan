@@ -1628,7 +1628,7 @@ export class DictionaryImporter {
                 `externalPackedMediaStorage=${String(useExternalPackedMediaStorage)}`,
             );
             const uniqueMediaPaths = useTermMediaRequirements ? new Set() : null;
-            /** @type {import('dictionary-importer').ImportRequirement[]} */
+            /** @type {import('dictionary-importer').DeferredMediaImportRequirement[]} */
             const deferredNoMetadataMediaRequirements = [];
 
             const canPackSourceMedia = (
@@ -1995,7 +1995,7 @@ export class DictionaryImporter {
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
@@ -2003,7 +2003,7 @@ export class DictionaryImporter {
                                     typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
                                     size > mediaPrefetchRemainingBytes || mediaPrefetchRemainingEntries === 0
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 mediaPrefetchRemainingBytes -= size;
@@ -3433,9 +3433,20 @@ export class DictionaryImporter {
     }
 
     /**
+     * No-metadata targets are already assigned before term serialization. Keep
+     * only the path and diagnostic text until the later media drain, so neither
+     * a full glossary nor its parser-backed content stays alive through here.
+     * @param {import('dictionary-importer').ImportRequirement} requirement
+     * @returns {import('dictionary-importer').DeferredMediaImportRequirement}
+     */
+    _createDeferredMediaRequirement({type, source: {path}, entry: {dictionary, expression, reading}}) {
+        return {type, source: {path}, dictionary, expression, reading};
+    }
+
+    /**
      * Resolve and store bounded media batches in order. One raw ZIP read
      * may overlap the preceding batch’s write.
-     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @param {import('dictionary-importer').DeferredMediaImportRequirement[]} requirements
      * @param {import('dictionary-database').MediaDataArrayBufferContent[]} prefetched
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[], processed: number, total: number) => Promise<void>} writeMedia
@@ -3551,8 +3562,15 @@ export class DictionaryImporter {
                         mediaMetrics.mediaZipBatchUncompressedBytes += inflated.uncompressedBytes;
                     }
                 }
-                const {media} = await this._resolveAsyncRequirements(batchRequirements, fileMap, rawMediaBytesByPath);
+                /** @type {Map<string, import('dictionary-database').MediaDataArrayBufferContent>} */
+                const mediaByPath = new Map();
+                /** @type {import('dictionary-importer').ImportRequirementContext} */
+                const context = {fileMap, media: mediaByPath, ...(typeof rawMediaBytesByPath === 'undefined' ? {} : {rawMediaBytesByPath})};
+                await this._runWithConcurrencyLimit(batchRequirements, this._mediaResolutionConcurrency, async (requirement) => {
+                    await this._getImageMedia(context, requirement.source.path, requirement);
+                });
                 this._throwIfCancelled();
+                const media = [...mediaByPath.values()];
                 processed += end - start;
                 // Start only the next raw read. The current resolver has
                 // settled so its cache updates are visible to the next plan.
@@ -3783,7 +3801,7 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer').ImportRequirementContext} context
      * @param {string} path
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {Pick<import('dictionary-database').DatabaseTermEntry, 'dictionary'|'expression'|'reading'>} entry
      * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent>}
      */
     async _getImageMedia(context, path, entry) {

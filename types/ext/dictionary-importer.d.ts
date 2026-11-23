@@ -211,6 +211,11 @@ export type StructuredContentImageImportRequirement = {
     entry: DictionaryDatabase.DatabaseTermEntry;
 };
 
+export type DeferredMediaImportRequirement = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> & {
+    type: ImportRequirement['type'];
+    source: {path: string};
+};
+
 export type ImportRequirementContext = {
     fileMap: ArchiveFileMap;
     media: Map<string, DictionaryDatabase.MediaDataArrayBufferContent>;

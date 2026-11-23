@@ -379,18 +379,89 @@ describe('bounded referenced-media prefetch', () => {
         expect(state.events.indexOf('read:image0.png')).toBeGreaterThan(state.events.lastIndexOf('terms:1'));
     });
 
+    test.each(['image', 'structured-content-image'])('releases %s term references before draining deferred media', async (type) => {
+        state.sizeOverride = void 0;
+        const path = 'portrait.png';
+        const presentation = {
+            path, width: 40, height: 60, title: 'Portrait', alt: 'Character',
+            description: 'Retained presentation', collapsed: false, collapsible: true,
+            data: {caption: 'kept in glossary'},
+        };
+        const glossary = type === 'image' ?
+            {type: 'image', ...presentation} :
+            {type: 'structured-content', content: {tag: 'img', ...presentation, border: '1px solid', sizeUnits: 'em'}};
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+        await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+            ['名前', 'なまえ', '', '', 0, [glossary], 0, ''],
+        ])));
+        await writer.add(path, new Uint8ArrayReader(Uint8Array.of(7, 17, 255)));
+        const db = database();
+        const compact = vi.spyOn(DictionaryImporter.prototype, '_createDeferredMediaRequirement');
+        const expected = {
+            ...(type === 'image' ? {type: 'image'} : {tag: 'img', border: '1px solid', sizeUnits: 'em'}),
+            ...presentation, width: 0, height: 0, preferredWidth: 40, preferredHeight: 60,
+        };
+        /** @type {unknown[]} */
+        const written = [];
+        db.bulkAdd.mockImplementation(async (store, entries) => {
+            state.events.push(`${store}:${entries.length}`);
+            if (store !== 'terms') { return; }
+            const row = /** @type {import('dictionary-database').DatabaseTermEntry} */ (entries[0]);
+            const value = row.glossary[0];
+            const target = type === 'image' ? value : Reflect.get(/** @type {object} */ (value), 'content');
+            expect(target).toEqual(expected);
+            written.push(target);
+            // The term sink owns the serialized image at this point. A later
+            // media read must not mutate it or require a reference to its row.
+            Object.freeze(target);
+        });
+        try {
+            const result = await run(new Uint8Array(await writer.close()).buffer, db);
+            expect(result.errors).toEqual([]);
+            expect(result.result?.counts?.media.total).toBe(1);
+            expect(written).toEqual([expected]);
+            expect(compact).toHaveBeenCalledOnce();
+            expect(compact.mock.results[0].value).toEqual({
+                type, source: {path}, dictionary: 'Media test', expression: '名前', reading: 'なまえ',
+            });
+            const original = compact.mock.calls[0][0];
+            expect(compact.mock.results[0].value.source).not.toBe(original.source);
+            const media = db.bulkAdd.mock.calls.filter(([store]) => store === 'media').flatMap(([, entries]) => entries);
+            expect(media).toEqual([expect.objectContaining({path, content: Uint8Array.of(7, 17, 255).buffer, width: 0, height: 0})]);
+            expect(state.events.indexOf('read:portrait.png')).toBeGreaterThan(state.events.lastIndexOf('terms:1'));
+        } finally {
+            compact.mockRestore();
+        }
+    });
+
+    test('retains the first referencing term in a deferred missing-image diagnostic', async () => {
+        const writer = new ZipWriter(new Uint8ArrayWriter(), {level: 0});
+        await writer.add('index.json', new TextReader(JSON.stringify({title: 'Media test', revision: '1', format: 3})));
+        await writer.add('term_bank_1.json', new TextReader(JSON.stringify([
+            ['名前', 'なまえ', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
+            ['別名', 'べつめい', '', '', 0, [{type: 'image', path: 'missing.png'}], 1, ''],
+        ])));
+        await writer.add('unused.png', new Uint8ArrayReader(Uint8Array.of(0)));
+        const db = database();
+        const result = await run(new Uint8Array(await writer.close()).buffer, db);
+        expect(result.result).toBeNull();
+        expect(result.errors.some(({message}) => message === 'Could not find image at path "missing.png" for 名前 (なまえ) in Media test')).toBe(true);
+        expect(db.finishBulkImport).not.toHaveBeenCalled();
+        expect(db.abortBulkImport).toHaveBeenCalledOnce();
+    });
+
     test('bounds a large deferred image corpus and preserves every payload', async () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         Reflect.set(importer, '_skipImageMetadata', true);
-        const entry = {dictionary: 'Media test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
-        /** @type {import('dictionary-importer').ImportRequirement[]} */
+        /** @type {import('dictionary-importer').DeferredMediaImportRequirement[]} */
         const requirements = [];
         /** @type {import('dictionary-importer').ArchiveFileMap} */
         const files = new Map();
         for (let i = 0; i < 1100; ++i) {
             const path = `image${i}.png`;
             files.set(path, {filename: path, bytes: Uint8Array.of(i >>> 8, i & 255), uncompressedSize: 2});
-            requirements.push({type: 'image', source: {type: 'image', path}, target: {type: 'image', path: ''}, entry});
+            requirements.push({type: 'image', source: {path}, dictionary: 'Media test', expression: 'term', reading: ''});
         }
         /** @type {number[]} */
         const batches = [];
@@ -424,11 +495,12 @@ describe('bounded referenced-media prefetch', () => {
             }
             return null;
         });
-        vi.spyOn(importer, '_resolveAsyncRequirements').mockResolvedValue({media: []});
-        const row = {dictionary: 'Media test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
-        /** @type {import('dictionary-importer').ImportRequirement[]} */
+        vi.spyOn(importer, '_getImageMedia').mockResolvedValue({
+            dictionary: 'Media test', path: 'first.png', mediaType: 'image/png', width: 0, height: 0, content: new ArrayBuffer(0),
+        });
+        /** @type {import('dictionary-importer').DeferredMediaImportRequirement[]} */
         const requests = ['first.png', 'next.png'].map((path) => ({
-            type: 'image', source: {type: 'image', path}, target: {type: 'image', path: ''}, entry: row,
+            type: 'image', source: {path}, dictionary: 'Media test', expression: 'term', reading: '',
         }));
         const files = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (
             new Map(requests.map(({source: {path}}) => [path, {filename: path, uncompressedSize: 3 * 1024 * 1024, compressedSize: 10}]))
