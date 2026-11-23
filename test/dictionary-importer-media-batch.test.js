@@ -69,9 +69,8 @@ describe('bounded media ZIP batching', () => {
         expect(rawReader.supportsCachedBatchReads()).toBe(storage !== 'ranged-blob');
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         Reflect.set(importer, '_skipImageMetadata', true);
-        const entry = {dictionary: 'Media test', expression: 'term', reading: '', definitionTags: '', rules: '', score: 0, glossary: []};
-        /** @type {import('dictionary-importer').ImportRequirement} */
-        const requirement = {type: 'image', source: {type: 'image', path: 'image0.png'}, target: {type: 'image', path: ''}, entry};
+        /** @type {import('dictionary-importer').DeferredMediaImportRequirement} */
+        const requirement = {type: 'image', source: {path: 'image0.png'}, dictionary: 'Media test', expression: 'term', reading: ''};
         const fileMap = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (new Map([['image0.png', file]])));
         const metrics = {
             mediaZipBatchReadMs: 0,
