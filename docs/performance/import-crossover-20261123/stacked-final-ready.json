@@ -3,6 +3,7 @@
   "candidateCommit": "bb1073961bb5adaa190e32943c94d063a18aa8bd",
   "candidateLocalCommit": "22f09dd819b2e338f2e16daea9ef061fe1176878",
   "tree": "de8f9ef7ba011def59396fe64855fe22bebedac9",
-  "status": "Published stacked on PR849; final focused272 tests, changed-test lint and test typecheck passed; browser cohort pending",
-  "apiAndLocalTreeEqualityVerified": true
+  "status": "Published stacked on PR849; final focused 272 tests, lint, types and hosted CI passed; all three browser screens completed with inconclusive performance results",
+  "apiAndLocalTreeEqualityVerified": true,
+  "reviewState": "Draft; no complete-import gain established on JMdict, Jitendex or VNDB"
 }

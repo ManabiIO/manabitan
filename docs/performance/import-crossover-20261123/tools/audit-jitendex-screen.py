@@ -140,6 +140,7 @@ audit = {
     'originalArchiveSha256': sha(args.archive.read_bytes()), 'verifiedExtractedFiles': len(members),
     'sourceIdentities': identities, 'verifiedHarnessHashesPerSource': len(protocol['unchangedHarnessSha256']),
     'packageEntriesPerArm': len(packages['A']['entries']), 'changedPackagedFiles': changed,
+    'productArchiveVerificationLimit': 'Original product ZIPs are absent. Audit compares recorded entry/archive hashes, exact A/C receipt equality and the two changed runtime entries with Git source bytes; it does not independently rehash or rebuild a product archive.',
     'identicalControlPackage': True, 'successfulObservations': len(observations),
     'timedObservations': len(timed), 'separateExhaustiveDiagnostics': len(diagnostic),
     'sourceRowsPerImport': 436555, 'lookupReceiptsPerImport': 72, 'distinctTermProbes': 12,

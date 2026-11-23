@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "output": "/workspace/scratch/0a1757ac2970/record-runs-screen-vndb-audit.json",
+  "rawObservations": 20,
+  "comparisons": {
+    "B/A": {
+      "pairs": 6,
+      "fasterPairs": 3,
+      "pairedChangesPercent": [
+        -14.787786886540555,
+        -3.5086164101835737,
+        0.13304600393526655,
+        2.450162965208591,
+        -1.7580144777662898,
+        0.8828668079242652
+      ],
+      "pairedMedianPercent": -0.8124842369155116,
+      "pairedMedianBootstrap95Percent": [
+        -9.148201648362065,
+        1.666514886566428
+      ],
+      "equalWorkPercent": -3.135769160279822,
+      "baselineMedianMs": 5358.350000000006,
+      "candidateMedianMs": 5400.600000000006
+    },
+    "B/C": {
+      "pairs": 6,
+      "fasterPairs": 5,
+      "pairedChangesPercent": [
+        -1.3711903760715516,
+        -0.3624846676306359,
+        -0.5305187915340404,
+        -0.5682863133108729,
+        -3.645785309901184,
+        1.249836775048041
+      ],
+      "pairedMedianPercent": -0.5494025524224566,
+      "pairedMedianBootstrap95Percent": [
+        -2.5084878429863675,
+        0.44367605370870256
+      ],
+      "equalWorkPercent": -0.8759442765387426,
+      "baselineMedianMs": 5430.049999999988,
+      "candidateMedianMs": 5400.600000000006
+    },
+    "C/A": {
+      "pairs": 6,
+      "fasterPairs": 3,
+      "pairedChangesPercent": [
+        -13.603121199197755,
+        -3.157577476774809,
+        0.6671039070552887,
+        3.0357007503970523,
+        1.9591990222809441,
+        -0.3624400579914866
+      ],
+      "pairedMedianPercent": 0.15233192453190103,
+      "pairedMedianBootstrap95Percent": [
+        -8.380349337986281,
+        2.4974498863389982
+      ],
+      "equalWorkPercent": -2.27979461418083,
+      "baselineMedianMs": 5358.350000000006,
+      "candidateMedianMs": 5430.049999999988
+    }
+  }
+}

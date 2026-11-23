@@ -1,0 +1,200 @@
+{
+  "status": "passed",
+  "dictionary": "jitendex",
+  "kind": "record-runs",
+  "artifactSha256": "7fa62214df6557efea98857bddd809402ec7cc430b982751787407fba37244e1",
+  "artifact": "/workspace/scratch/0a1757ac2970/artifacts/record-runs-screen-jitendex.zip",
+  "verifiedExtractedFiles": 164,
+  "sourceIdentities": {
+    "A": {
+      "commit": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+      "tree": "deae81513cb4fb5508c9d9a388316e049b05429b"
+    },
+    "B": {
+      "commit": "bb1073961bb5adaa190e32943c94d063a18aa8bd",
+      "tree": "de8f9ef7ba011def59396fe64855fe22bebedac9"
+    },
+    "C": {
+      "commit": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+      "tree": "deae81513cb4fb5508c9d9a388316e049b05429b"
+    }
+  },
+  "toolingCommit": "3c8f26e7ebfde84ad7bd46a5296617e18a46ca6a",
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "harnessFilesVerifiedAgainstAllThreeGitTrees": 66,
+  "packageEntriesPerArm": 550,
+  "identicalControlManifestAndArchiveHash": true,
+  "packageDifferences": [
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "sourceDifferences": [
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "test/term-record-encoding-runs.test.js"
+  ],
+  "productArchiveVerificationLimit": "Product ZIP bytes are not included in this artifact. Verified package-entry manifests, per-run recorded archive hashes, and changed runtime file hashes against exact source commits; did not independently rebuild product ZIPs.",
+  "fixture": {
+    "fixture": {
+      "cacheFile": "jitendex-yomitan.zip",
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "label": "Jitendex",
+      "mediaBytes": 4992155,
+      "mediaFiles": 236,
+      "release": "2026.10.03.0",
+      "revision": "2026.10.03.0",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "termRows": 436555,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ],
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+    },
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822
+  },
+  "rawObservations": 20,
+  "timedObservations": 18,
+  "diagnosticObservationsExcludedFromTiming": 2,
+  "failedOrSkippedObservations": 0,
+  "orders": [
+    "ABC",
+    "CBA",
+    "BAC",
+    "CAB",
+    "BCA",
+    "ACB"
+  ],
+  "browserVersion": "153.0.8010.12",
+  "nodeVersion": "v22.22.0",
+  "correctness": {
+    "fullInventoryRowsPerRun": 436555,
+    "restartCheckedRuns": 20,
+    "matchingLookupReceiptsPerRun": 72,
+    "matchingLookupReceiptTotal": 1440,
+    "persistedStorageBytesPerRun": 67466332,
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "matchingMediaReceipts": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      }
+    },
+    "strictOpfsRuns": 20,
+    "productionDefaultRuns": 20
+  },
+  "allTimingsMsFromRawBrowserClock": {
+    "A": [
+      1818.3999999999942,
+      1915.0,
+      1828.7999999999884,
+      1859.6000000000058,
+      1850.9000000000233,
+      1803.5
+    ],
+    "B": [
+      1934.8999999999942,
+      1806.800000000003,
+      1829.7000000000116,
+      1844.0,
+      1854.6000000000058,
+      1832.0999999999767
+    ],
+    "C": [
+      2105.0,
+      1879.0,
+      1834.1000000000058,
+      1830.2000000000116,
+      1889.6000000000058,
+      1852.7000000000116
+    ]
+  },
+  "comparisons": {
+    "B/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        6.4067311922569425,
+        -5.650130548302723,
+        0.04921259842647352,
+        -0.838890083889321,
+        0.19990275001255942,
+        1.585805378429539
+      ],
+      "pairedMedianPercent": 0.12455767421951647,
+      "pairedMedianBootstrap95Percent": [
+        -3.2445103160960223,
+        3.9962682853432407
+      ],
+      "equalWorkPercent": 0.23383470865441236,
+      "baselineMedianMs": 1839.8500000000058,
+      "candidateMedianMs": 1838.0499999999884
+    },
+    "B/C": {
+      "pairs": 6,
+      "fasterPairs": 5,
+      "pairedChangesPercent": [
+        -8.080760095012153,
+        -3.842469398616133,
+        -0.23989967831602454,
+        0.754015954539855,
+        -1.8522438611346281,
+        -1.1118907540365264
+      ],
+      "pairedMedianPercent": -1.4820673075855773,
+      "pairedMedianBootstrap95Percent": [
+        -5.961614746814143,
+        0.25705813811191525
+      ],
+      "equalWorkPercent": -2.5327901954246723,
+      "baselineMedianMs": 1865.8500000000058,
+      "candidateMedianMs": 1838.0499999999884
+    },
+    "C/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        15.761108666960343,
+        -1.8798955613577029,
+        0.2898075240604481,
+        -1.5809851580982026,
+        2.090874709599766,
+        2.728028832825702
+      ],
+      "pairedMedianPercent": 1.190341116830107,
+      "pairedMedianBootstrap95Percent": [
+        -1.7304403597279527,
+        9.244568749893023
+      ],
+      "equalWorkPercent": 2.838518625521602,
+      "baselineMedianMs": 1839.8500000000058,
+      "candidateMedianMs": 1865.8500000000058
+    }
+  },
+  "intervalMethod": "Descriptive percentile bootstrap of six paired block changes; 10000 resamples, seed 20261123, indices249 and9749; no multiple-comparison correction.",
+  "scopeLimit": "Six-block exploratory screen, not independent qualification. No full persisted semantic corpus equivalence claim: full inventory count, restart, strict OPFS, sampled lookup receipts and source-equal sampled/exhaustive media receipts are checked separately. Assess candidate comparisons together with identical-code control drift."
+}

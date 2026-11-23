@@ -24,6 +24,7 @@
     "js/dictionary/term-content-block-store.js",
     "js/dictionary/zstd-term-content.js"
   ],
+  "productArchiveVerificationLimit": "Original product ZIPs are absent. Audit compares recorded entry/archive hashes, exact A/C receipt equality and the two changed runtime entries with Git source bytes; it does not independently rehash or rebuild a product archive.",
   "identicalControlPackage": true,
   "successfulObservations": 20,
   "timedObservations": 18,

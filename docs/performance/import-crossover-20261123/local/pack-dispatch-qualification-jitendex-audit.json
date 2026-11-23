@@ -1,0 +1,246 @@
+{
+  "status": "passed",
+  "stage": "qualification",
+  "dictionary": "jitendex",
+  "kind": "pack-dispatch",
+  "artifactSha256": "74a24a8aabce076966d6340041395d9480ff9ab961e9f5d323658813981bfe01",
+  "artifact": "artifacts/pack-dispatch-qualification-jitendex.zip",
+  "verifiedExtractedFiles": 290,
+  "sourceIdentities": {
+    "A": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "B": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "C": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    }
+  },
+  "toolingCommit": "3c8f26e7ebfde84ad7bd46a5296617e18a46ca6a",
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "harnessFilesVerifiedAgainstAllThreeGitTrees": 66,
+  "packageEntriesPerArm": 550,
+  "identicalControlManifestAndArchiveHash": true,
+  "packageDifferences": [
+    "js/dictionary/term-content-block-store.js",
+    "js/dictionary/zstd-term-content.js"
+  ],
+  "sourceDifferences": [
+    "ext/js/dictionary/term-content-block-store.js",
+    "ext/js/dictionary/zstd-term-content.js",
+    "test/term-content-block-store.test.js",
+    "test/zstd-term-content-packed-dispatch.test.js"
+  ],
+  "productArchiveVerificationLimit": "Product ZIP bytes are not included in this artifact. Verified package-entry manifests, per-run recorded archive hashes, and changed runtime file hashes against exact source commits; did not independently rebuild product ZIPs.",
+  "fixture": {
+    "fixture": {
+      "cacheFile": "jitendex-yomitan.zip",
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "label": "Jitendex",
+      "mediaBytes": 4992155,
+      "mediaFiles": 236,
+      "release": "2026.10.03.0",
+      "revision": "2026.10.03.0",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "termRows": 436555,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ],
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+    },
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822
+  },
+  "rawObservations": 38,
+  "timedObservations": 36,
+  "diagnosticObservationsExcludedFromTiming": 2,
+  "failedOrSkippedObservations": 0,
+  "orders": [
+    "ABC",
+    "CBA",
+    "BAC",
+    "CAB",
+    "BCA",
+    "ACB",
+    "ACB",
+    "BCA",
+    "CAB",
+    "BAC",
+    "CBA",
+    "ABC"
+  ],
+  "browserVersion": "153.0.8010.12",
+  "nodeVersion": "v22.22.0",
+  "correctness": {
+    "fullInventoryRowsPerRun": 436555,
+    "restartCheckedRuns": 38,
+    "matchingLookupReceiptsPerRun": 72,
+    "matchingLookupReceiptTotal": 2736,
+    "persistedStorageBytesPerRun": 67466332,
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "matchingMediaReceipts": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      }
+    },
+    "strictOpfsRuns": 38,
+    "productionDefaultRuns": 38
+  },
+  "allTimingsMsFromRawBrowserClock": {
+    "A": [
+      2173.899999999994,
+      1807.3999999999942,
+      1863.0,
+      1835.3999999999942,
+      1833.2999999999884,
+      1828.6000000000058,
+      1861.899999999965,
+      2148.1999999999534,
+      1831.8000000000466,
+      1873.9000000000233,
+      1814.2000000000116,
+      1800.0999999999767
+    ],
+    "B": [
+      1785.699999999997,
+      1732.699999999997,
+      1761.0,
+      1749.0,
+      1766.0999999999767,
+      1773.5999999999767,
+      1827.0999999999767,
+      1861.4000000000233,
+      1795.2999999999884,
+      1793.0999999999767,
+      1732.6999999999534,
+      1772.899999999965
+    ],
+    "C": [
+      1830,
+      1829.800000000003,
+      1855.3999999999942,
+      1824.9000000000233,
+      1800.6000000000058,
+      1811,
+      1831.4000000000233,
+      1930.399999999965,
+      1799.0,
+      1839.399999999965,
+      1840.899999999965,
+      1812.7000000000116
+    ]
+  },
+  "comparisons": {
+    "B/A": {
+      "pairs": 12,
+      "fasterPairs": 12,
+      "pairedChangesPercent": [
+        -17.85730714384278,
+        -4.133008741838962,
+        -5.475040257648955,
+        -4.707420725727063,
+        -3.6655211912950403,
+        -3.0077655036655826,
+        -1.8690584886400408,
+        -13.350712224184736,
+        -1.992575608694036,
+        -4.311862959605395,
+        -4.4923382207065155,
+        -1.511027165158163
+      ],
+      "pairedMedianPercent": -4.222435850722178,
+      "pairedMedianBootstrap95Percent": [
+        -5.091230491688009,
+        -2.5001705561798095
+      ],
+      "equalWorkPercent": -5.827088396547786,
+      "baselineMedianMs": 1834.3499999999913,
+      "candidateMedianMs": 1773.249999999971
+    },
+    "B/C": {
+      "pairs": 12,
+      "fasterPairs": 12,
+      "pairedChangesPercent": [
+        -2.420765027322569,
+        -5.306590884249951,
+        -5.0878516761881265,
+        -4.159132007234501,
+        -1.9160279906713873,
+        -2.065157371619175,
+        -0.2347930544963739,
+        -3.5743887277218778,
+        -0.2056698165654014,
+        -2.5171251495046842,
+        -5.877559889185379,
+        -2.195619793680492
+      ],
+      "pairedMedianPercent": -2.4689450884136264,
+      "pairedMedianBootstrap95Percent": [
+        -4.6234918417113136,
+        -1.9905926811452812
+      ],
+      "equalWorkPercent": -2.976074163277942,
+      "baselineMedianMs": 1829.9000000000015,
+      "candidateMedianMs": 1773.249999999971
+    },
+    "C/A": {
+      "pairs": 12,
+      "fasterPairs": 9,
+      "pairedChangesPercent": [
+        -15.81949491696928,
+        1.239349341596152,
+        -0.4079441760604263,
+        -0.5720823798611163,
+        -1.7836687939771334,
+        -0.9624849611727937,
+        -1.6381116064204448,
+        -10.138720789497857,
+        -1.7905884921959658,
+        -1.841080100328607,
+        1.4717230735284526,
+        0.6999611132734396
+      ],
+      "pairedMedianPercent": -1.3002982837966193,
+      "pairedMedianBootstrap95Percent": [
+        -1.8158342962622864,
+        0.14600846860650663
+      ],
+      "equalWorkPercent": -2.938465134947965,
+      "baselineMedianMs": 1834.3499999999913,
+      "candidateMedianMs": 1829.9000000000015
+    }
+  },
+  "intervalMethod": "Descriptive percentile bootstrap of twelve paired block changes; 10000 resamples, seed 20261123, indices249 and9749; no multiple-comparison correction.",
+  "scopeLimit": "Independent fixed twelve-block qualification, not pooled with the exploratory screen and not a cross-device claim. No full persisted semantic corpus equivalence claim: full inventory count, restart, strict OPFS, sampled lookup receipts and source-equal sampled/exhaustive media receipts are checked separately. Assess candidate comparisons together with identical-code control drift."
+}

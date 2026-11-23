@@ -1,0 +1,185 @@
+{
+  "status": "passed",
+  "dictionary": "jmdict",
+  "kind": "record-runs",
+  "artifactSha256": "7be7ba3f554966d111afe1cf1b24b10222c443dee1efdcccce81c568866721f2",
+  "artifact": "/workspace/scratch/0a1757ac2970/artifacts/record-runs-screen-jmdict.zip",
+  "verifiedExtractedFiles": 164,
+  "sourceIdentities": {
+    "A": {
+      "commit": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+      "tree": "deae81513cb4fb5508c9d9a388316e049b05429b"
+    },
+    "B": {
+      "commit": "bb1073961bb5adaa190e32943c94d063a18aa8bd",
+      "tree": "de8f9ef7ba011def59396fe64855fe22bebedac9"
+    },
+    "C": {
+      "commit": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+      "tree": "deae81513cb4fb5508c9d9a388316e049b05429b"
+    }
+  },
+  "toolingCommit": "3c8f26e7ebfde84ad7bd46a5296617e18a46ca6a",
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "harnessFilesVerifiedAgainstAllThreeGitTrees": 66,
+  "packageEntriesPerArm": 550,
+  "identicalControlManifestAndArchiveHash": true,
+  "packageDifferences": [
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "sourceDifferences": [
+    "ext/js/dictionary/term-record-opfs-store.js",
+    "test/term-record-encoding-runs.test.js"
+  ],
+  "productArchiveVerificationLimit": "Product ZIP bytes are not included in this artifact. Verified package-entry manifests, per-run recorded archive hashes, and changed runtime file hashes against exact source commits; did not independently rebuild product ZIPs.",
+  "fixture": {
+    "fixture": {
+      "cacheFile": "JMdict.zip",
+      "expectedTitle": "JMdict [2026-11-22]",
+      "label": "JMdict",
+      "mediaBytes": 0,
+      "mediaFiles": 0,
+      "release": "2026-11-22",
+      "revision": "JMdict.2026-11-22",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299,
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+    },
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766
+  },
+  "rawObservations": 20,
+  "timedObservations": 18,
+  "diagnosticObservationsExcludedFromTiming": 2,
+  "failedOrSkippedObservations": 0,
+  "orders": [
+    "ABC",
+    "CBA",
+    "BAC",
+    "CAB",
+    "BCA",
+    "ACB"
+  ],
+  "browserVersion": "153.0.8010.12",
+  "nodeVersion": "v22.22.0",
+  "correctness": {
+    "fullInventoryRowsPerRun": 528299,
+    "restartCheckedRuns": 20,
+    "matchingLookupReceiptsPerRun": 72,
+    "matchingLookupReceiptTotal": 1440,
+    "persistedStorageBytesPerRun": 43520477,
+    "mediaFiles": 0,
+    "mediaBytes": 0,
+    "matchingMediaReceipts": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "strictOpfsRuns": 20,
+    "productionDefaultRuns": 20
+  },
+  "allTimingsMsFromRawBrowserClock": {
+    "A": [
+      933.1000000000058,
+      913.8999999999942,
+      966.0,
+      999.7999999999884,
+      989.7999999999884,
+      953.3999999999651
+    ],
+    "B": [
+      1133.0,
+      948.1999999999825,
+      954.8999999999651,
+      998.4000000000233,
+      996.7000000000116,
+      997.6000000000349
+    ],
+    "C": [
+      1492.9000000000233,
+      971.2000000000116,
+      996.9000000000233,
+      994.2999999999884,
+      939.0,
+      975.3999999999651
+    ]
+  },
+  "comparisons": {
+    "B/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        21.423212946092907,
+        3.753145858407758,
+        -1.1490683229849807,
+        -0.14002800559762552,
+        0.6971105273816391,
+        4.636039437809059
+      ],
+      "pairedMedianPercent": 2.2251281928946987,
+      "pairedMedianBootstrap95Percent": [
+        -0.6445481642913031,
+        13.029626191950982
+      ],
+      "equalWorkPercent": 4.7394023627532755,
+      "baselineMedianMs": 959.6999999999825,
+      "candidateMedianMs": 997.1500000000233
+    },
+    "B/C": {
+      "pairs": 6,
+      "fasterPairs": 3,
+      "pairedChangesPercent": [
+        -24.107441891621516,
+        -2.3682042833637618,
+        -4.213060487517028,
+        0.41235039726792433,
+        6.144834930778664,
+        2.2759893377148455
+      ],
+      "pairedMedianPercent": -0.9779269430479187,
+      "pairedMedianBootstrap95Percent": [
+        -14.160251189569273,
+        4.210412134246755
+      ],
+      "equalWorkPercent": -5.351900403472587,
+      "baselineMedianMs": 984.8499999999767,
+      "candidateMedianMs": 997.1500000000233
+    },
+    "C/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        59.99356982102819,
+        6.269832585624013,
+        3.1987577639775555,
+        -0.550110022004402,
+        -5.132349969689731,
+        2.3075309418922663
+      ],
+      "pairedMedianPercent": 2.753144352934911,
+      "pairedMedianBootstrap95Percent": [
+        -2.8412299958470664,
+        33.1317012033261
+      ],
+      "equalWorkPercent": 10.66191799861147,
+      "baselineMedianMs": 959.6999999999825,
+      "candidateMedianMs": 984.8499999999767
+    }
+  },
+  "intervalMethod": "Descriptive percentile bootstrap of six paired block changes; 10000 resamples, seed 20261123, indices249 and9749; no multiple-comparison correction.",
+  "scopeLimit": "Six-block exploratory screen, not independent qualification. No full persisted semantic corpus equivalence claim: full inventory count, restart, strict OPFS, sampled lookup receipts and source-equal sampled/exhaustive media receipts are checked separately. Assess candidate comparisons together with identical-code control drift."
+}

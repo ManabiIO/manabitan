@@ -1,0 +1,362 @@
+[
+  {
+    "arm": "A",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.954463988,
+    "mediaCheck": "sample",
+    "name": "block-01-1-A",
+    "phaseCounters": "block-01-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-01-1-A/summary.json",
+    "totalImportMs": 969.3000000000029
+  },
+  {
+    "arm": "B",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.717968931999991,
+    "mediaCheck": "sample",
+    "name": "block-01-2-B",
+    "phaseCounters": "block-01-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-01-2-B/summary.json",
+    "totalImportMs": 958.3000000000029
+  },
+  {
+    "arm": "C",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.713783552999999,
+    "mediaCheck": "sample",
+    "name": "block-01-3-C",
+    "phaseCounters": "block-01-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-01-3-C/summary.json",
+    "totalImportMs": 947.5
+  },
+  {
+    "arm": "C",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 10.321995626999993,
+    "mediaCheck": "sample",
+    "name": "block-02-1-C",
+    "phaseCounters": "block-02-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-02-1-C/summary.json",
+    "totalImportMs": 985.1999999999971
+  },
+  {
+    "arm": "B",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.698018017999999,
+    "mediaCheck": "sample",
+    "name": "block-02-2-B",
+    "phaseCounters": "block-02-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-02-2-B/summary.json",
+    "totalImportMs": 940
+  },
+  {
+    "arm": "A",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.858914081999998,
+    "mediaCheck": "sample",
+    "name": "block-02-3-A",
+    "phaseCounters": "block-02-3-A/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-02-3-A/summary.json",
+    "totalImportMs": 972.5
+  },
+  {
+    "arm": "B",
+    "block": 3,
+    "cohort": "timed",
+    "commandElapsedSeconds": 10.004220079999982,
+    "mediaCheck": "sample",
+    "name": "block-03-1-B",
+    "phaseCounters": "block-03-1-B/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-03-1-B/summary.json",
+    "totalImportMs": 981.1000000000058
+  },
+  {
+    "arm": "A",
+    "block": 3,
+    "cohort": "timed",
+    "commandElapsedSeconds": 11.155322850999994,
+    "mediaCheck": "sample",
+    "name": "block-03-2-A",
+    "phaseCounters": "block-03-2-A/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-03-2-A/summary.json",
+    "totalImportMs": 1133.2999999999884
+  },
+  {
+    "arm": "C",
+    "block": 3,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.916992988999993,
+    "mediaCheck": "sample",
+    "name": "block-03-3-C",
+    "phaseCounters": "block-03-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-03-3-C/summary.json",
+    "totalImportMs": 1007.2999999999884
+  },
+  {
+    "arm": "C",
+    "block": 4,
+    "cohort": "timed",
+    "commandElapsedSeconds": 10.143993119000015,
+    "mediaCheck": "sample",
+    "name": "block-04-1-C",
+    "phaseCounters": "block-04-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-04-1-C/summary.json",
+    "totalImportMs": 1017.5
+  },
+  {
+    "arm": "A",
+    "block": 4,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.984816816999995,
+    "mediaCheck": "sample",
+    "name": "block-04-2-A",
+    "phaseCounters": "block-04-2-A/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-04-2-A/summary.json",
+    "totalImportMs": 971
+  },
+  {
+    "arm": "B",
+    "block": 4,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.946882533000007,
+    "mediaCheck": "sample",
+    "name": "block-04-3-B",
+    "phaseCounters": "block-04-3-B/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-04-3-B/summary.json",
+    "totalImportMs": 980.6000000000058
+  },
+  {
+    "arm": "B",
+    "block": 5,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.836320183999987,
+    "mediaCheck": "sample",
+    "name": "block-05-1-B",
+    "phaseCounters": "block-05-1-B/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-05-1-B/summary.json",
+    "totalImportMs": 955.3999999999942
+  },
+  {
+    "arm": "C",
+    "block": 5,
+    "cohort": "timed",
+    "commandElapsedSeconds": 10.016480685000005,
+    "mediaCheck": "sample",
+    "name": "block-05-2-C",
+    "phaseCounters": "block-05-2-C/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-05-2-C/summary.json",
+    "totalImportMs": 965.5
+  },
+  {
+    "arm": "A",
+    "block": 5,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.905591411999978,
+    "mediaCheck": "sample",
+    "name": "block-05-3-A",
+    "phaseCounters": "block-05-3-A/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-05-3-A/summary.json",
+    "totalImportMs": 975.6000000000058
+  },
+  {
+    "arm": "A",
+    "block": 6,
+    "cohort": "timed",
+    "commandElapsedSeconds": 10.20518499100001,
+    "mediaCheck": "sample",
+    "name": "block-06-1-A",
+    "phaseCounters": "block-06-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-06-1-A/summary.json",
+    "totalImportMs": 1103.1999999999825
+  },
+  {
+    "arm": "C",
+    "block": 6,
+    "cohort": "timed",
+    "commandElapsedSeconds": 9.916092423999999,
+    "mediaCheck": "sample",
+    "name": "block-06-2-C",
+    "phaseCounters": "block-06-2-C/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-06-2-C/summary.json",
+    "totalImportMs": 945.2000000000116
+  },
+  {
+    "arm": "B",
+    "block": 6,
+    "cohort": "timed",
+    "commandElapsedSeconds": 10.132878771000009,
+    "mediaCheck": "sample",
+    "name": "block-06-3-B",
+    "phaseCounters": "block-06-3-B/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "block-06-3-B/summary.json",
+    "totalImportMs": 998.9000000000233
+  },
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "exhaustive-diagnostic",
+    "commandElapsedSeconds": 9.848574666000019,
+    "mediaCheck": "all",
+    "name": "diagnostic-A",
+    "phaseCounters": "diagnostic-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "diagnostic-A/summary.json",
+    "totalImportMs": 953.1999999999825
+  },
+  {
+    "arm": "B",
+    "block": null,
+    "cohort": "exhaustive-diagnostic",
+    "commandElapsedSeconds": 9.839111258000003,
+    "mediaCheck": "all",
+    "name": "diagnostic-B",
+    "phaseCounters": "diagnostic-B/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "diagnostic-B/summary.json",
+    "totalImportMs": 953.3999999999651
+  }
+]

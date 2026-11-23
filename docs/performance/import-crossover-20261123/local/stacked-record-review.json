@@ -1,0 +1,11 @@
+{
+  "parent": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+  "candidateBlob": "01291979b8d3cb0e55cbf62c9f5a8c2a26f37fdf",
+  "cases": 196,
+  "exactErrorParityCases": 40,
+  "formats": {
+    "legacy": 99,
+    "compact": 57
+  },
+  "result": "exact byte/error parity"
+}

@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "output": "/workspace/scratch/0a1757ac2970/record-runs-screen-jitendex-audit.json",
+  "rawObservations": 20,
+  "comparisons": {
+    "B/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        6.4067311922569425,
+        -5.650130548302723,
+        0.04921259842647352,
+        -0.838890083889321,
+        0.19990275001255942,
+        1.585805378429539
+      ],
+      "pairedMedianPercent": 0.12455767421951647,
+      "pairedMedianBootstrap95Percent": [
+        -3.2445103160960223,
+        3.9962682853432407
+      ],
+      "equalWorkPercent": 0.23383470865441236,
+      "baselineMedianMs": 1839.8500000000058,
+      "candidateMedianMs": 1838.0499999999884
+    },
+    "B/C": {
+      "pairs": 6,
+      "fasterPairs": 5,
+      "pairedChangesPercent": [
+        -8.080760095012153,
+        -3.842469398616133,
+        -0.23989967831602454,
+        0.754015954539855,
+        -1.8522438611346281,
+        -1.1118907540365264
+      ],
+      "pairedMedianPercent": -1.4820673075855773,
+      "pairedMedianBootstrap95Percent": [
+        -5.961614746814143,
+        0.25705813811191525
+      ],
+      "equalWorkPercent": -2.5327901954246723,
+      "baselineMedianMs": 1865.8500000000058,
+      "candidateMedianMs": 1838.0499999999884
+    },
+    "C/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        15.761108666960343,
+        -1.8798955613577029,
+        0.2898075240604481,
+        -1.5809851580982026,
+        2.090874709599766,
+        2.728028832825702
+      ],
+      "pairedMedianPercent": 1.190341116830107,
+      "pairedMedianBootstrap95Percent": [
+        -1.7304403597279527,
+        9.244568749893023
+      ],
+      "equalWorkPercent": 2.838518625521602,
+      "baselineMedianMs": 1839.8500000000058,
+      "candidateMedianMs": 1865.8500000000058
+    }
+  }
+}

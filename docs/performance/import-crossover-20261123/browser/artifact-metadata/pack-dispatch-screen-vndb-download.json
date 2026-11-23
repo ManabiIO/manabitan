@@ -1,0 +1,19 @@
+{
+  "id": 14863658369,
+  "name": "import-crossover-pack-dispatch-screen-vndb-45262916933-1",
+  "size_in_bytes": 915671,
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14863658369",
+  "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14863658369/zip",
+  "expired": false,
+  "created_at": "2026-11-23T21:22:23Z",
+  "expires_at": "2026-12-07T21:22:21Z",
+  "updated_at": "2026-11-23T21:22:23Z",
+  "digest": "sha256:972ec3e2770313432c8f6a39a20618cbf3ca7926b32b89ecd63b203c413cee02",
+  "workflow_run": {
+    "id": 45262916933,
+    "repository_id": 1165902460,
+    "head_repository_id": 1165902460,
+    "head_branch": "perf/import-crossover-20261123-0a175",
+    "head_sha": "462c4e1e079f4bf7a0c858b004e14bb9356f11d5"
+  }
+}

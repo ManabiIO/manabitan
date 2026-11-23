@@ -1,0 +1,67 @@
+{
+  "status": "passed",
+  "output": "/workspace/scratch/0a1757ac2970/record-runs-screen-jmdict-audit.json",
+  "rawObservations": 20,
+  "comparisons": {
+    "B/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        21.423212946092907,
+        3.753145858407758,
+        -1.1490683229849807,
+        -0.14002800559762552,
+        0.6971105273816391,
+        4.636039437809059
+      ],
+      "pairedMedianPercent": 2.2251281928946987,
+      "pairedMedianBootstrap95Percent": [
+        -0.6445481642913031,
+        13.029626191950982
+      ],
+      "equalWorkPercent": 4.7394023627532755,
+      "baselineMedianMs": 959.6999999999825,
+      "candidateMedianMs": 997.1500000000233
+    },
+    "B/C": {
+      "pairs": 6,
+      "fasterPairs": 3,
+      "pairedChangesPercent": [
+        -24.107441891621516,
+        -2.3682042833637618,
+        -4.213060487517028,
+        0.41235039726792433,
+        6.144834930778664,
+        2.2759893377148455
+      ],
+      "pairedMedianPercent": -0.9779269430479187,
+      "pairedMedianBootstrap95Percent": [
+        -14.160251189569273,
+        4.210412134246755
+      ],
+      "equalWorkPercent": -5.351900403472587,
+      "baselineMedianMs": 984.8499999999767,
+      "candidateMedianMs": 997.1500000000233
+    },
+    "C/A": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        59.99356982102819,
+        6.269832585624013,
+        3.1987577639775555,
+        -0.550110022004402,
+        -5.132349969689731,
+        2.3075309418922663
+      ],
+      "pairedMedianPercent": 2.753144352934911,
+      "pairedMedianBootstrap95Percent": [
+        -2.8412299958470664,
+        33.1317012033261
+      ],
+      "equalWorkPercent": 10.66191799861147,
+      "baselineMedianMs": 959.6999999999825,
+      "candidateMedianMs": 984.8499999999767
+    }
+  }
+}

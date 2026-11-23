@@ -13,11 +13,3 @@ npm warn Unknown env config "http-proxy". This will stop working in the next maj
 
   Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
 
-
-/workspace/scratch/0a1757ac2970/score-boundary/test/term-record-opfs-store.test.js
-  466:65  error  Unexpected newline after '('   @stylistic/function-paren-newline
-  468:9   error  Unexpected newline before ')'  @stylistic/function-paren-newline
-
-✖ 2 problems (2 errors, 0 warnings)
-  2 errors and 0 warnings potentially fixable with the `--fix` option.
-

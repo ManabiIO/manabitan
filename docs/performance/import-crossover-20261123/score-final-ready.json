@@ -1,0 +1,14 @@
+{
+  "localCommit": "fab6370ceaeb86f0c3b936df430d285ff37236e0",
+  "pr": 859,
+  "apiCommit": "585662de70b3efcf91e4d94376710181f7b10fd8",
+  "tree": "6cb58901545a7468512f2154819f7cca0c489a07",
+  "parentCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "status": "Published as PR859; separate correctness fix, validated and reviewed",
+  "apiAndLocalTreeEqualityVerified": true,
+  "reviewState": "Ready for review; not merged; final hosted CI has 15 successful executed jobs and four conditional skips",
+  "ciReceipt": "ci/pr859-final.json",
+  "scope": "Low-level record encoder score-boundary contract; public chunk limits already protect publication. Excluded from every frozen performance candidate.",
+  "runtimeBlob": "1547f6c55eb97a3b2920733c9ae98b9eb4dd0214",
+  "testBlob": "f678a42347081c18b03de23ba2e7ae1101abc7cc"
+}

@@ -1,0 +1,18 @@
+{
+  "scope": "Inspection of retained final workflow metadata; no CI jobs were rerun",
+  "initialCheck": {
+    "result": "AssertionError",
+    "reason": "A local inspection assumed all four commit workflow lists contained the same five separate workflows. PR855's returned list does not contain CodeQL or Chromium Restart Interruption."
+  },
+  "correctedInterpretation": {
+    "allFourProductPRs": "Each retained main CI run completed with 15 successful executed jobs, four conditional skips, and no failing or pending jobs",
+    "pr846_pr851_pr859": "Returned lists contain successful CodeQL, Chromium Restart Interruption, Dependency Review, Lint GitHub Actions workflows and ManabiTan static web acceptance runs",
+    "pr855": "Returned list contains successful Dependency Review, Lint GitHub Actions workflows and ManabiTan static web acceptance; no separate CodeQL or restart result is inferred"
+  },
+  "receipts": [
+    "ci/pr846-final.json",
+    "ci/pr851-final.json",
+    "ci/pr855-final.json",
+    "ci/pr859-final.json"
+  ]
+}
