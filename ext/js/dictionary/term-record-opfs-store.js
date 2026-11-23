@@ -111,6 +111,7 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 /** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
+const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
 const EMPTY_BYTES = new Uint8Array(0);
@@ -358,7 +359,10 @@ export function createArtifactTermRecordChunkWithResolvedContent(chunk, uniqueIn
  */
 function getSynchronousResolvedContentReferences(chunk, count) {
     const origin = resolvedContentReferenceOrigins.get(chunk);
-    if (typeof origin === 'undefined' || Object.getPrototypeOf(chunk) !== Object.prototype) { return null; }
+    if (
+        typeof origin === 'undefined' || Object.getPrototypeOf(chunk) !== Object.prototype ||
+        typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function'
+    ) { return null; }
     const fixedLengthDescriptor = Object.getOwnPropertyDescriptor(chunk, 'fixedContentLength');
     if (
         typeof fixedLengthDescriptor === 'undefined' ?
@@ -385,6 +389,13 @@ function getSynchronousResolvedContentReferences(chunk, count) {
             Object.hasOwn(column, 'buffer') ||
             !(column.buffer instanceof ArrayBuffer)
         ) { return null; }
+        // The builtin getter establishes private ArrayBuffer storage using
+        // the buffer's internal identity, independently of its prototype.
+        try {
+            ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(column.buffer);
+        } catch {
+            return null;
+        }
     }
     if (uniqueIndexList.length < count || offsets.length !== lengths.length) { return null; }
     return {uniqueIndexList, offsets, lengths};
