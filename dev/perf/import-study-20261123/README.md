@@ -1,11 +1,13 @@
 # Further import qualification, 2026-11-23
 
 This campaign compares frozen current develop
-`467067650653c37c1f7d6b05d6737d070e1259cd` with shared owned content plus consumed
-compression-reference release at `e0cde0e1e387606f4c9f1f970c738c42fb986484`.
-The hypothesis is that passing immutable, independently owned shared content to
-compression workers removes the main-thread packing copy without retaining a
-materially larger process footprint. Runtime identity, all three packaged-file
+`467067650653c37c1f7d6b05d6737d070e1259cd` with native unique-content
+descriptor emission at `83cd9023e10e3bea185c165cd5e698aa9d9fecb4`. The hypothesis
+is that constructing native metadata once per unique content span, and carrying
+compact descriptors through the existing consumer path, removes redundant row
+metadata work without changing decoded content or import behavior. This candidate
+includes the compact consumer columns plus native direct emission; the browser
+claim applies to their combination. Runtime identity, all seven packaged-file
 differences, fixtures, schedule and criteria are frozen before acquisition.
 
 The source snapshot already contains the qualified large-import index worker and
@@ -15,29 +17,26 @@ validation. Earlier results against older baselines are not pooled into this
 campaign. The updated JMdict and Jitendex fixtures also differ from the earlier
 round; VNDB archive bytes are unchanged.
 
-## Acquisition-budget revision, frozen before candidate results
+## Acquisition policy, frozen before native candidate results
 
-The original unchanged discovery is retained at
-<https://github.com/ManabiIO/manabitan/actions/runs/45215444963>. No candidate
-performance output from that campaign was opened or used to select this revision.
-The independently completed baseline diagnostic showed that exhaustive VNDB
-readback costs approximately 373 seconds per observation, including only about
-8 seconds of actual import. Twelve or twenty-one such observations exceed the
-original 45-minute job budget. The original campaign may time out before artifact
-upload; its original job logs and any surviving partial artifacts remain evidence,
-not substitute performance observations.
+This independent native candidate uses the already revised acquisition policy,
+with no native candidate observations acquired or inspected when it is frozen.
+The separately completed baseline diagnostic at
+<https://github.com/ManabiIO/manabitan/actions/runs/45213616348> showed that
+exhaustive VNDB readback costs approximately 373 seconds per observation,
+including only about 8 seconds of actual import. A previous shared-content
+campaign exceeded its original acquisition budget; its partial observations are
+not evidence for this native candidate and are not pooled here.
 
-This separate, prospectively declared acquisition revision preserves all runtime
-code, fixtures, timing boundaries, schedules, controls, metrics and promotion
-criteria. JMdict/Jitendex retain complete media verification after every import.
-VNDB verifies all 146,570 images on the first A and first B warmups of each cell;
-the C warmup and every measured import verify exactly the same 64 deterministic
-images spanning the sorted complete source list through the existing benchmark
-sample mode. Complete counts, restart checks and sampled full public responses
-remain mandatory on every import. Both full and sampled media digests are
-independently derived from the complete source before acquisition. Each job has a
-60-minute budget. Failed or partial original observations are never pooled into
-this revised campaign.
+JMdict/Jitendex retain complete media verification after every import. VNDB
+verifies all 146,570 images on the first A and first B warmups of each cell; the C
+warmup and every measured import verify exactly the same 64 deterministic images
+spanning the sorted complete source list through the existing benchmark sample
+mode. Complete counts, restart checks and sampled full public responses remain
+mandatory on every import. Both full and sampled media digests are independently
+derived from the complete source before acquisition. Each job has a 60-minute
+budget. The fixed schedules, controls, timing boundary and promotion criteria
+below remain unchanged.
 
 ## Fixed timing protocol
 
@@ -108,9 +107,9 @@ exact SHA-256 values in the fixture lock.
 
 ## Separately frozen memory requirement
 
-The earlier shared-buffer candidate had a measured memory cost. This revision
-requires a separate process-tree study before promotion, with no memory sampling
-in the timing cohort. Its prospective schedule is two independent jobs per
+Material memory regressions also block promotion. This candidate uses the same
+prospective separate process-tree screen, with no memory sampling in the timing
+cohort and no memory inference from fewer encoded descriptor bytes alone. Its prospective schedule is two independent jobs per
 corpus: ABBA in replication 1 and BAAB in replication 2. All eight imports per
 corpus use fresh profiles, producing four fixed adjacent A/B pairs; there are no
 warmup exclusions, replacements or adaptive extensions.
@@ -139,6 +138,8 @@ blocks promotion rather than triggering reruns to obtain a preferred result.
 ## Run
 
 The dedicated study workflow launches on `perf/import-*-study-20261123-72c24`.
+This source is an independent native screen; shared-content outcomes are not
+combined with it.
 The memory observer is a separate workflow and evidence stream, implementing the
 prospective protocol above. Ordinary baseline diagnosis was separately frozen at
 `b34633bc4f4211491cbc651c29c27a5ca1bc30a4`; traced diagnostics never enter timing

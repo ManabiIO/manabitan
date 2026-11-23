@@ -2,11 +2,15 @@
   "schemaVersion": 1,
   "stage": "discovery",
   "baseline": "467067650653c37c1f7d6b05d6737d070e1259cd",
-  "candidate": "e0cde0e1e387606f4c9f1f970c738c42fb986484",
+  "candidate": "83cd9023e10e3bea185c165cd5e698aa9d9fecb4",
   "expectedPackageDifferences": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/dictionary-importer.js",
     "js/dictionary/term-bank-wasm-parser-worker.js",
     "js/dictionary/term-bank-wasm-parser.js",
-    "js/dictionary/zstd-term-content-compression-worker.js"
+    "js/dictionary/term-content-canonical-scan.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
   ],
   "dictionaries": [
     "jmdict",
@@ -25,5 +29,6 @@
     "vndb": 4267992967
   },
   "mediaReadbackPolicy": "all-jm-jt-first-ab-full-vndb-64-remaining-v1",
-  "acquisitionBudgetRevisionOf": "https://github.com/ManabiIO/manabitan/actions/runs/45215444963"
+  "acquisitionBudgetEvidence": "https://github.com/ManabiIO/manabitan/actions/runs/45213616348",
+  "candidateKind": "native-unique-content-descriptors"
 }
