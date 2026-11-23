@@ -21,8 +21,8 @@ jobs:
         dictionary: [jmdict, jitendex, vndb]
     env:
       PERF_BASELINE: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
-      PERF_CANDIDATE: 2da6e38c204e1bb22c5835f8f53f867e872b7296
-      PERF_LABEL: media-ranges
+      PERF_CANDIDATE: cb9f241106ab1529fa21c112f1733849c188511c
+      PERF_LABEL: utf8-loop
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
