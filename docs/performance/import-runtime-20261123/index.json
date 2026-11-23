@@ -1,0 +1,239 @@
+{
+    "schemaVersion": 1,
+    "bundles": [
+        {
+            "path": "screen-cache-jitendex.json.gz",
+            "bytes": 623382,
+            "sha256": "2e3c94210c5e0ba543a545fcba15b76a5e5381827dd523252750ea8cc861378d",
+            "files": 93,
+            "candidate": "cache",
+            "dictionary": "jitendex",
+            "stage": "screen",
+            "artifactId": 14795829570,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-cache-jmdict.json.gz",
+            "bytes": 621968,
+            "sha256": "5fdb96c9e65059ad9d761bccbfa60c63c89267de5c845fffe1d6738a2906dc00",
+            "files": 93,
+            "candidate": "cache",
+            "dictionary": "jmdict",
+            "stage": "screen",
+            "artifactId": 14796696230,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-cache-vndb.json.gz",
+            "bytes": 631967,
+            "sha256": "231015ed7960902b73e4c38e840f7ab5054b8e1a62d32be3ee3d6cf51f12cf79",
+            "files": 93,
+            "candidate": "cache",
+            "dictionary": "vndb",
+            "stage": "screen",
+            "artifactId": 14797990062,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-columns-vndb.json.gz",
+            "bytes": 633860,
+            "sha256": "577f14dc7490c3c638a1e5890e20c0fcedcccf0e1f62f2b5e26f5eeddaba5d3d",
+            "files": 94,
+            "candidate": "columns",
+            "dictionary": "vndb",
+            "stage": "screen",
+            "artifactId": 14796648313,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-row-jitendex.json.gz",
+            "bytes": 585331,
+            "sha256": "0da2fec476feddbcb9b71000cacc5ae0ffd0629a3a4334c8e608ec278d641e27",
+            "files": 91,
+            "candidate": "row",
+            "dictionary": "jitendex",
+            "stage": "screen",
+            "artifactId": 14796023450,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-row-jmdict.json.gz",
+            "bytes": 579821,
+            "sha256": "6278b255813dfa4ec667dd795087a6833e8bf9f366ed220872616a3c46bdeb53",
+            "files": 91,
+            "candidate": "row",
+            "dictionary": "jmdict",
+            "stage": "screen",
+            "artifactId": 14796765795,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-row-vndb.json.gz",
+            "bytes": 592433,
+            "sha256": "73ca03e8c03149bae25be326417eaab2346087048d53645298936047f8ae06f8",
+            "files": 91,
+            "candidate": "row",
+            "dictionary": "vndb",
+            "stage": "screen",
+            "artifactId": 14797330878,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "screen-source-vndb.json.gz",
+            "bytes": 632591,
+            "sha256": "f21b75934a9ccadd9cd09b01c2d27ed2c80f57d0e841cd6e05fa06bde1ff57ff",
+            "files": 94,
+            "candidate": "source",
+            "dictionary": "vndb",
+            "stage": "screen",
+            "artifactId": 14796464724,
+            "timedReports": 18,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-cache-jmdict.json.gz",
+            "bytes": 1044979,
+            "sha256": "2542f16c913fff046fc134601cf0d68c0e027bfbb56ec058b1514f253b757eaa",
+            "files": 165,
+            "candidate": "cache",
+            "dictionary": "jmdict",
+            "stage": "qualification",
+            "artifactId": 14797161271,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-columns-vndb.json.gz",
+            "bytes": 1080497,
+            "sha256": "1983b106669e89c85983974ca14ccbc822e5cf321eae62d85d5ebf1f60e8df48",
+            "files": 166,
+            "candidate": "columns",
+            "dictionary": "vndb",
+            "stage": "qualification",
+            "artifactId": 14797604949,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-combined-jitendex.json.gz",
+            "bytes": 1063811,
+            "sha256": "c0725274d6e5f9e3b240a2fe99c1611844a19d1c81a8ff35faaccf446f126a2a",
+            "files": 166,
+            "candidate": "combined",
+            "dictionary": "jitendex",
+            "stage": "qualification",
+            "artifactId": 14796943006,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-combined-jmdict.json.gz",
+            "bytes": 1054238,
+            "sha256": "750162e589a97f903fd1bb169c121380b1dd70377e39828f4945ad159c638006",
+            "files": 166,
+            "candidate": "combined",
+            "dictionary": "jmdict",
+            "stage": "qualification",
+            "artifactId": 14797586419,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-combined-vndb.json.gz",
+            "bytes": 1077909,
+            "sha256": "7f5d24ee32f8b0ee5d4edb60793233c5db362c897877a14e3e9ad62955922691",
+            "files": 166,
+            "candidate": "combined",
+            "dictionary": "vndb",
+            "stage": "qualification",
+            "artifactId": 14797828152,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-row-jitendex.json.gz",
+            "bytes": 1021942,
+            "sha256": "d7608fe57d64807e91f689e12c8bd10e955610230f2bcf885791f42f581d6a54",
+            "files": 163,
+            "candidate": "row",
+            "dictionary": "jitendex",
+            "stage": "qualification",
+            "artifactId": 14796878441,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-row-jmdict.json.gz",
+            "bytes": 1010141,
+            "sha256": "6bc0597a58eab99c10e59ae6254f180500a59d85aa2ab92dfd4e20534c3dc0bc",
+            "files": 163,
+            "candidate": "row",
+            "dictionary": "jmdict",
+            "stage": "qualification",
+            "artifactId": 14796424265,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-row-vndb.json.gz",
+            "bytes": 1033003,
+            "sha256": "9297fa74912726b06c50996ad9e1f95ec98824630ff24e5a1dcf6e5203580f15",
+            "files": 163,
+            "candidate": "row",
+            "dictionary": "vndb",
+            "stage": "qualification",
+            "artifactId": 14797663968,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "qualification-source-vndb.json.gz",
+            "bytes": 1081865,
+            "sha256": "23eccd31de53e0627531e67809bc487813febdc257ab3e18f41007df1d49d518",
+            "files": 166,
+            "candidate": "source",
+            "dictionary": "vndb",
+            "stage": "qualification",
+            "artifactId": 14797569931,
+            "timedReports": 36,
+            "diagnostics": 2
+        },
+        {
+            "path": "compact-metadata-parity.json.gz",
+            "bytes": 18097,
+            "sha256": "7a4a8274c3f08f2b7cbc1d912b80e4ca5dc1217de639967b135bad8c8b63709d",
+            "files": 14
+        },
+        {
+            "path": "source-and-ci-receipts.json.gz",
+            "bytes": 15919,
+            "sha256": "8e693df9c5d435e5e0f6c1ad1872234ad1e2538d8cd49485f190cf16f67ede4b",
+            "files": 3
+        },
+        {
+            "path": "strict-row-parity.json.gz",
+            "bytes": 17480,
+            "sha256": "fe86e6ebfbc8e405b80fb18878b161028a06c636c9881e3c5d7e19198ffbf9ab",
+            "files": 9
+        },
+        {
+            "path": "source-coalescing-proof.json.gz",
+            "bytes": 3184,
+            "sha256": "ea2b08fcd6fe139ef8ec2456a55fcd5230b434fa33c2b167038cd1a94feac738",
+            "files": 2
+        },
+        {
+            "path": "secondary-phase.json.gz",
+            "bytes": 22749,
+            "sha256": "029cf7ac80530cfee6e5b73a47d9b63172d92775abb27c49e9d4c89536958b04",
+            "files": 2
+        }
+    ]
+}

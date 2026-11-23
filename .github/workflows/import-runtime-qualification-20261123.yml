@@ -1,0 +1,113 @@
+name: Runtime import qualification
+
+on:
+  push:
+    branches: [perf/import-qualification-20261123-0f5c]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Independent twelve-block cohorts retain every observation. The isolated
+# runtime PRs retain their own CI; the combined tree receives a separate gate.
+jobs:
+  combined-validation:
+    if: "!contains(github.event.head_commit.message, '[study-report]')"
+    name: Validate combined runtime changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Validate the unmodified combined source
+        run: |
+          npm run test:js
+          npm run test:ts
+          npm run test:unit
+          npm run test:build
+
+  imports:
+    if: "!contains(github.event.head_commit.message, '[study-report]')"
+    name: Qualify ${{ matrix.candidate }} (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - candidate: row
+            dictionary: jmdict
+            revision: 99ceb532e752327db5f817404e6bbc60b9408011
+            review-url: https://github.com/ManabiIO/manabitan/pull/826
+          - candidate: row
+            dictionary: jitendex
+            revision: 99ceb532e752327db5f817404e6bbc60b9408011
+            review-url: https://github.com/ManabiIO/manabitan/pull/826
+          - candidate: row
+            dictionary: vndb
+            revision: 99ceb532e752327db5f817404e6bbc60b9408011
+            review-url: https://github.com/ManabiIO/manabitan/pull/826
+          - candidate: cache
+            dictionary: jmdict
+            revision: ee0f578fa802d8672d46e0442a8baa1ca0b1b437
+            review-url: https://github.com/ManabiIO/manabitan/pull/824
+          - candidate: columns
+            dictionary: vndb
+            revision: aed295978d3ee252275ed4263c8d378a2f4b376a
+            review-url: https://github.com/ManabiIO/manabitan/pull/825
+          - candidate: source
+            dictionary: vndb
+            revision: 8b3ba70a77b8cbea3d3316b2fc9c5066b020a59d
+            review-url: https://github.com/ManabiIO/manabitan/pull/827
+          - candidate: combined
+            dictionary: jmdict
+            revision: b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+            review-url: https://github.com/ManabiIO/manabitan/compare/5e1f8c12f7ff798ba407323aff675cb23b22af02...b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+          - candidate: combined
+            dictionary: jitendex
+            revision: b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+            review-url: https://github.com/ManabiIO/manabitan/compare/5e1f8c12f7ff798ba407323aff675cb23b22af02...b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+          - candidate: combined
+            dictionary: vndb
+            revision: b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+            review-url: https://github.com/ManabiIO/manabitan/compare/5e1f8c12f7ff798ba407323aff675cb23b22af02...b8ff4190fe37195734d8587d48d1a2aeb6038e4e
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore verified dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run twelve fixed qualification blocks and exhaustive media verification
+        env:
+          STUDY_CANDIDATE: ${{ matrix.candidate }}
+          STUDY_DICTIONARY: ${{ matrix.dictionary }}
+          STUDY_REVISION: ${{ matrix.revision }}
+          STUDY_REVIEW_URL: ${{ matrix.review-url }}
+        run: >-
+          python3 dev/perf/import-runtime-study.py
+          --baseline 5e1f8c12f7ff798ba407323aff675cb23b22af02
+          --candidate "$STUDY_REVISION"
+          --label "$STUDY_CANDIDATE"
+          --dictionary "$STUDY_DICTIONARY"
+          --source-pr-url "$STUDY_REVIEW_URL"
+          --output "builds/perf/runtime-qualification-$STUDY_CANDIDATE-$STUDY_DICTIONARY"
+      - name: Retain every report and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: runtime-qualification-${{ matrix.candidate }}-${{ matrix.dictionary }}
+          path: |
+            builds/perf/runtime-qualification-${{ matrix.candidate }}-${{ matrix.dictionary }}
+            !builds/perf/runtime-qualification-${{ matrix.candidate }}-${{ matrix.dictionary }}/worktrees/**
+          retention-days: 14
+          if-no-files-found: error
