@@ -1509,7 +1509,7 @@ export class DictionaryImporter {
             ),
             ...(rawZipPayloadReader === null ?
                 {} :
-                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal)}),
+                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal, true)}),
         });
         const uncompressedImportRunPlan = termBankSourcePipeline.createImportRunPlan(0);
         const compressedImportRunPlan = termBankSourcePipeline.createCompressedImportRunPlan(0);
@@ -2691,6 +2691,7 @@ export class DictionaryImporter {
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
+            const sourceRangeReadCounts = rawZipPayloadReader?.getCoalescedRangeReadCounts() ?? {logicalRequests: 0, physicalRanges: 0};
             const step4AccountedMs = (
                 step4TimingBreakdown.termParseMs +
                 step4TimingBreakdown.termSerializationMs +
@@ -2795,6 +2796,8 @@ export class DictionaryImporter {
                 fastPathParserParallelOwnedContentBytes: fastPathProfile?.parallelOwnedContentBytes ?? null,
                 fastPathParserParallelPeakQueuedOwnedContentBytes: fastPathProfile?.parallelPeakQueuedOwnedContentBytes ?? null,
                 fastPathParserParallelSkipReason: fastPathProfile?.parallelSkipReason ?? null,
+                sourceZipLogicalRangeReadCount: sourceRangeReadCounts.logicalRequests,
+                sourceZipPhysicalRangeReadCount: sourceRangeReadCounts.physicalRanges,
                 sourceInitialPrefetchFileCount: initialSourcePrefetch.fileCount,
                 sourceInitialPrefetchEstimatedBytes: initialSourcePrefetch.estimatedBytes,
                 zipUseWebWorkers: zipWorkerPolicy.useWebWorkers,

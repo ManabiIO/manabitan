@@ -22,6 +22,7 @@ import {homedir, tmpdir} from 'node:os';
 import path from 'node:path';
 import {crc32, deflateRawSync, inflateRawSync} from 'node:zlib';
 import {preparePackedSourceZipMedia} from '../ext/js/dictionary/source-zip-media-pack.js';
+import {inflateCompressedTermBankSourcesWasm, setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
 import {AbortableZipReadPool, RawZipPayloadReader, TermBankSourcePipeline} from '../ext/js/dictionary/term-bank-source-pipeline.js';
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js';
 
@@ -141,6 +142,231 @@ function entry(method, extraLength = 0) {
 
 /** @returns {AbortSignal} */
 function signal() { return new AbortController().signal; }
+
+/**
+ * @param {number} count
+ * @param {number} [extraLength]
+ * @returns {ReturnType<typeof entry>[]}
+ */
+function contiguousEntries(count, extraLength = 0) {
+    let offset = 0;
+    return Array.from({length: count}, (_, index) => {
+        const source = entry(8, extraLength);
+        const filename = `term_bank_${index + 1}.json`;
+        const rawFilename = encoder.encode(filename);
+        const header = new Uint8Array(30 + rawFilename.length + extraLength);
+        header.set(source.header.subarray(0, 30));
+        new DataView(header.buffer).setUint16(26, rawFilename.length, true);
+        header.set(rawFilename, 30);
+        source.header = header;
+        Object.assign(source.file, {filename, rawFilename, offset, signature: crc32(content)});
+        offset += header.byteLength + source.payload.byteLength;
+        return source;
+    });
+}
+
+describe('coalesced admitted compressed-source reads', () => {
+    test('counts actual dispatched ranges and leaves cached whole-archive reads at zero', async () => {
+        const sources = contiguousEntries(4);
+        const parts = sources.flatMap(({header, payload}) => [header, payload]);
+        const cached = new RawZipPayloadReader(new Blob(parts));
+        await Promise.all(sources.map(({file}) => cached.read(file, signal(), true)));
+        expect(cached.getCoalescedRangeReadCounts()).toEqual({logicalRequests: 0, physicalRanges: 0});
+        const {archive, started, release} = delayedArchive([...parts, padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const reads = Promise.all(sources.map(({file}) => reader.read(file, signal(), true)));
+        try {
+            expect(reader.getCoalescedRangeReadCounts()).toEqual({logicalRequests: 0, physicalRanges: 0});
+            await started;
+            expect(reader.getCoalescedRangeReadCounts()).toEqual({logicalRequests: 4, physicalRanges: 1});
+        } finally { release(); }
+        await reads;
+        expect(reader.getCoalescedRangeReadCounts()).toEqual({logicalRequests: 4, physicalRanges: archive.ranges.length});
+    });
+
+    test('reduces adjacent reads without reading additional bytes or sharing transferable payloads', async () => {
+        const sources = contiguousEntries(4);
+        const parts = sources.flatMap(({header, payload}) => [header, payload]);
+        const baseline = new TrackedBlob([...parts, padding]);
+        const candidate = new TrackedBlob([...parts, padding]);
+        const direct = new RawZipPayloadReader(baseline);
+        const coalesced = new RawZipPayloadReader(candidate);
+        const expected = await Promise.all(sources.map(({file}) => direct.read(file, signal())));
+        const actual = await Promise.all(sources.map(({file}) => coalesced.read(file, signal(), true)));
+        expect(actual).toEqual(expected);
+        expect(baseline.ranges).toHaveLength(4);
+        expect(candidate.ranges).toEqual([[0, parts.reduce((sum, part) => sum + part.byteLength, 0)]]);
+        expect(candidate.ranges[0][1]).toBe(baseline.ranges.reduce((sum, [start, end]) => sum + end - start, 0));
+        expect(new Set(actual.map(({buffer}) => buffer)).size).toBe(4);
+        for (const bytes of actual) {
+            expect(bytes.byteOffset).toBe(0);
+            expect(bytes.buffer.byteLength).toBe(bytes.byteLength);
+        }
+        structuredClone(actual[0].buffer, {transfer: [actual[0].buffer]});
+        expect(actual[0].byteLength).toBe(0);
+        expect(actual.slice(1)).toEqual(expected.slice(1));
+    });
+
+    test('does not read an unclaimed entry between independently admitted groups', async () => {
+        const sources = contiguousEntries(4);
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const selected = [sources[3], sources[0], sources[1]];
+        const actual = await Promise.all(selected.map(({file}) => reader.read(file, signal(), true)));
+        expect(actual).toEqual(selected.map(({payload}) => payload));
+        expect(archive.ranges).toEqual([
+            [0, sources[2].file.offset],
+            [sources[3].file.offset, sources[3].file.offset + sources[3].header.byteLength + sources[3].payload.byteLength],
+        ]);
+    });
+
+    test('caps merged requests while preserving every admitted byte', async () => {
+        const sources = contiguousEntries(3);
+        let offset = 0;
+        for (const source of sources) {
+            source.payload = new Uint8Array(1536 * 1024).fill(0x61);
+            new DataView(source.header.buffer).setUint16(8, 0, true);
+            Object.assign(source.file, {offset, compressionMethod: 0, compressedSize: source.payload.byteLength, uncompressedSize: source.payload.byteLength});
+            offset += source.header.byteLength + source.payload.byteLength;
+        }
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const actual = await Promise.all(sources.map(({file}) => reader.read(file, signal(), true)));
+        expect(actual.map((bytes) => crc32(bytes))).toEqual(sources.map(({payload}) => crc32(payload)));
+        expect(archive.ranges).toHaveLength(2);
+        expect(archive.ranges.every(([start, end]) => end - start <= 4 * 1024 * 1024)).toBe(true);
+        expect(archive.ranges.reduce((sum, [start, end]) => sum + end - start, 0)).toBe(offset);
+    });
+
+    test('retains independent ownership for overlapping exact payload reads after an extra field', async () => {
+        const [source] = contiguousEntries(1, 32);
+        const archive = new TrackedBlob([source.header, source.payload, padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const actual = await Promise.all([0, 1].map(() => reader.read(source.file, signal(), true)));
+        expect(actual).toEqual([source.payload, source.payload]);
+        expect(archive.ranges).toHaveLength(2);
+        expect(actual[0].buffer).not.toBe(actual[1].buffer);
+        structuredClone(actual[0].buffer, {transfer: [actual[0].buffer]});
+        expect(actual[1]).toEqual(source.payload);
+    });
+
+    test('retains the existing owned exact-read buffer when no peer can share its range', async () => {
+        const [source] = contiguousEntries(1, 32);
+        const archive = new TrackedBlob([source.header, source.payload, padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const original = reader._readBlobRange.bind(reader);
+        /** @type {Uint8Array[]} */
+        const physicalReads = [];
+        const read = vi.spyOn(reader, '_readBlobRange').mockImplementation(async (...args) => {
+            const bytes = await original(...args);
+            physicalReads.push(bytes);
+            return bytes;
+        });
+        try {
+            const actual = await reader.read(source.file, signal(), true);
+            expect(actual).toEqual(source.payload);
+            expect(physicalReads).toHaveLength(2);
+            expect(actual).toBe(physicalReads[1]);
+        } finally { read.mockRestore(); }
+    });
+
+    test.each(['signature', 'encrypted', 'method', 'filename', 'name-length'])('retains the exact local-header failure independently of an adjacent healthy entry: %s', async (kind) => {
+        const sources = contiguousEntries(2);
+        const damaged = sources[1];
+        const view = new DataView(damaged.header.buffer);
+        if (kind === 'signature') { view.setUint32(0, 0, true); }
+        if (kind === 'encrypted') { view.setUint16(6, 1, true); }
+        if (kind === 'method') { view.setUint16(8, 0, true); }
+        if (kind === 'filename') { damaged.header[30] ^= 1; }
+        if (kind === 'name-length') { view.setUint16(26, 0, true); }
+        const parts = [...sources.flatMap(({header, payload}) => [header, payload]), padding];
+        const baseline = new RawZipPayloadReader(new TrackedBlob(parts));
+        const archive = new TrackedBlob(parts);
+        const candidate = new RawZipPayloadReader(archive);
+        const expected = await baseline.read(damaged.file, signal()).then(() => null, (error) => error);
+        const [healthy, failure] = await Promise.allSettled(sources.map(({file}) => candidate.read(file, signal(), true)));
+        expect(healthy).toEqual({status: 'fulfilled', value: sources[0].payload});
+        expect(failure).toMatchObject({status: 'rejected', reason: {name: expected.name, message: expected.message}});
+        expect(archive.ranges).toHaveLength(1);
+    });
+
+    test.skipIf(!existsSync(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))('retains the native inflater CRC error for coalesced source bytes', async () => {
+        setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))));
+        const sources = contiguousEntries(4);
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const direct = await Promise.all(sources.map(({file}) => reader.read(file, signal())));
+        const coalesced = await Promise.all(sources.map(({file}) => reader.read(file, signal(), true)));
+        /**
+         * @param {Uint8Array[]} payloads
+         * @returns {Parameters<typeof inflateCompressedTermBankSourcesWasm>[0]}
+         */
+        const makeSources = (payloads) => sources.map(({file}, index) => ({
+            bytes: payloads[index],
+            compressionMethod: /** @type {0|8} */ (file.compressionMethod),
+            compressedSize: file.compressedSize,
+            uncompressedSize: file.uncompressedSize,
+            signature: file.signature,
+            filename: file.filename,
+        }));
+        const inflated = await inflateCompressedTermBankSourcesWasm(makeSources(coalesced));
+        expect(inflated.uncompressedBytes).toBe(content.byteLength * sources.length);
+        sources[2].file.signature = (sources[2].file.signature ^ 1) >>> 0;
+        const expected = await inflateCompressedTermBankSourcesWasm(makeSources(direct)).then(() => null, (error) => error);
+        expect(expected).toMatchObject({name: 'DictionarySourceIntegrityError'});
+        await expect(inflateCompressedTermBankSourcesWasm(makeSources(coalesced))).rejects.toMatchObject({name: expected.name, message: expected.message});
+    });
+
+    test('cancels one owner without dropping its adjacent peer or replacing its cancellation reason', async () => {
+        const sources = contiguousEntries(2);
+        const {archive, started, release} = delayedArchive([...sources.flatMap(({header, payload}) => [header, payload]), padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const cancelled = new AbortController();
+        const reason = new Error('Cancelled only the first source');
+        const first = reader.read(sources[0].file, cancelled.signal, true);
+        const second = reader.read(sources[1].file, signal(), true);
+        const rejected = expect(first).rejects.toBe(reason);
+        await started;
+        cancelled.abort(reason);
+        release();
+        await rejected;
+        expect(await second).toEqual(sources[1].payload);
+        expect(archive.ranges).toHaveLength(1);
+    });
+
+    test('joins shared Blob I/O through pool disposal, including released owners', async () => {
+        const sources = contiguousEntries(2);
+        const {archive, started, release} = delayedArchive([...sources.flatMap(({header, payload}) => [header, payload]), padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const pool = new AbortableZipReadPool(async (file, abortSignal) => await reader.read(file, abortSignal, true));
+        const reads = sources.map(({file}) => pool.read(file));
+        const settled = Promise.allSettled(reads);
+        pool.release(sources[0].file);
+        await started;
+        let disposed = false;
+        const disposal = pool.dispose().then(() => { disposed = true; });
+        await Promise.resolve();
+        expect(disposed).toBe(false);
+        release();
+        await disposal;
+        const results = await settled;
+        expect(results).toHaveLength(2);
+        for (const result of results) { expect(result).toMatchObject({status: 'rejected', reason: {name: 'AbortError'}}); }
+        expect(archive.ranges).toHaveLength(1);
+    });
+
+    test('cancels queued owners before physical I/O starts', async () => {
+        const sources = contiguousEntries(2);
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding]);
+        const reader = new RawZipPayloadReader(archive);
+        const pool = new AbortableZipReadPool(async (file, abortSignal) => await reader.read(file, abortSignal, true));
+        const reads = Promise.allSettled(sources.map(({file}) => pool.read(file)));
+        await pool.dispose();
+        for (const result of await reads) { expect(result).toMatchObject({status: 'rejected', reason: {name: 'AbortError'}}); }
+        expect(archive.ranges).toEqual([]);
+        expect(reader.getCoalescedRangeReadCounts()).toEqual({logicalRequests: 0, physicalRanges: 0});
+    });
+});
 
 describe('bounded large ZIP entry reads', () => {
     test('batches owned or already cached bytes while retaining large-Blob ranged policy', async () => {
