@@ -242,11 +242,13 @@ function collectChunkTransferables(chunk) {
     addView(chunk.contentBytesBuffer);
     addView(chunk.contentMetaList);
     addView(chunk.contentUniqueIndexList);
-    for (const {row} of chunk.mediaRows) {
+    for (const {row, imagePaths} of chunk.mediaRows) {
         addView(row.expressionBytes);
         addView(row.readingBytes);
-        addView(row.glossaryJsonBytes);
-        addView(row.termEntryContentBytes);
+        if (typeof imagePaths === 'undefined') {
+            addView(row.glossaryJsonBytes);
+            addView(row.termEntryContentBytes);
+        }
     }
     const plan = chunk.termRecordPreinternedPlan;
     addView(plan.stringLengths);

@@ -10,7 +10,7 @@ import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
 import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
 
-/** @typedef {Parameters<typeof parser.copyWasmBackedColumnChunk>[0]} ColumnChunk */
+/** @typedef {ReturnType<typeof parser.copyWasmBackedColumnChunk>} ColumnChunk */
 
 const encoder = new TextEncoder()
 const nativeParse = parser.parseTermBankWithWasmColumnChunks
@@ -33,7 +33,7 @@ async function collectReferences(rows, inspect = () => {}) {
         return await nativeParse(source, version, async (chunk, progress) => {
             const projected = parser.copyWasmBackedColumnChunk(chunk, false, true)
             inspect(projected)
-            await onChunk(projected, progress)
+            await onChunk(/** @type {Parameters<typeof onChunk>[0]} */ (/** @type {unknown} */ (projected)), progress)
         }, size, options)
     })
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
@@ -162,8 +162,9 @@ describe('preformatted image references', () => {
             ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'image.png', width: 40, title: 'Image'}], 0, ''],
             ['別名', '', '', '', 0, [{type: 'structured-content', content: {tag: 'img', path: 'image.png', height: 60}}], 0, ''],
         ], (chunk) => {
-            for (const {imagePaths} of chunk.mediaRows) {
+            for (const {imagePaths, row} of chunk.mediaRows) {
                 expect(imagePaths).toEqual(['image.png'])
+                expect(Object.keys(row).sort()).toEqual(['expression', 'expressionBytes', 'reading', 'readingBytes'])
             }
             decodedBeforeMaterialization = decode.mock.calls.length
         })
@@ -189,6 +190,39 @@ describe('preformatted image references', () => {
         expect(count).toBe(1)
         expect(written).toEqual([{dictionary: 'Media references', path: 'image.png', mediaType: 'image/png', width: 0, height: 0, content: bytes.buffer}])
         expect(decode.mock.calls).toHaveLength(decodedBeforeMaterialization)
+    })
+
+    test('keeps full fallback rows beside compact paths and preserves unsupported-media diagnostics', async () => {
+        const fallbackGlossary = [{type: 'image', path: 'unsupported.bin', title: 'Retained title'}]
+        let inspected = false
+        const {importer, requirements} = await collectReferences([
+            ['画像', 'がぞう', '', '', 5, [{type: 'image', path: 'image.png'}], 3, ''],
+            ['未対応', 'みたいおう', '', '', -9, fallbackGlossary, 4, ''],
+        ], (chunk) => {
+            expect(chunk.mediaRows).toHaveLength(2)
+            expect(chunk.mediaRows[0].imagePaths).toEqual(['image.png'])
+            const fallback = chunk.mediaRows[1]
+            if (typeof fallback.imagePaths !== 'undefined') { throw new Error('Expected an unprojected media row') }
+            expect(fallback.row.score).toBe(-9)
+            expect(fallback.row.sequence).toBe(4)
+            expect(fallback.row.termEntryContentBytes.length).toBeGreaterThan(0)
+            expect(fallback.row.glossaryJsonBytes).toEqual(encoder.encode(JSON.stringify(fallbackGlossary)))
+            inspected = true
+        })
+        expect(inspected).toBe(true)
+        expect(requirements.map(({type}) => type)).toEqual(['image-reference', 'image'])
+        const fallback = requirements[1]
+        if (fallback.type !== 'image') { throw new Error('Expected an image requirement') }
+        expect(fallback.source.title).toBe('Retained title')
+        const bytes = Uint8Array.of(7, 17, 255)
+        /** @type {import('dictionary-importer').ArchiveFileMap} */
+        const files = new Map([
+            ['image.png', {filename: 'image.png', bytes}],
+            ['unsupported.bin', {filename: 'unsupported.bin', bytes}],
+        ])
+        await expect(importer._resolveAsyncRequirements(requirements, files)).rejects.toThrow(
+            'Could not determine media type for image at path "unsupported.bin" for 未対応 (みたいおう) in Media references',
+        )
     })
 
     test.each([
