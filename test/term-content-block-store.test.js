@@ -23,6 +23,17 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         envelopeMs: 0,
         wrapped: false,
     })),
+    /* eslint-disable @stylistic/semi */
+    compressWrappedTermContentZstdProducedBatch: vi.fn(async (
+        /** @type {number} */ count,
+        /** @type {(index: number) => Uint8Array} */ produce,
+        /** @type {string|null} */ dictName,
+        /** @type {import('dictionary-importer').ImportExperiments} */ options,
+    ) => {
+        const result = await compressWrappedTermContentZstdBatch(Array.from({length: count}, (_, index) => produce(index)), dictName, options)
+        return {...result, chunks: result.wrapped ? result.chunks : result.chunks.map(wrapCompressedTermContentBlock), wrapped: true}
+    }),
+    /* eslint-enable @stylistic/semi */
     compressWrappedTermContentZstdSpansBatch: vi.fn(async (
         /** @type {Uint8Array} */ source,
         /** @type {Uint32Array} */ offsets,

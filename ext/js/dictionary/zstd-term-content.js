@@ -143,6 +143,64 @@ export class TermContentCompressionPool {
         };
     }
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Packs only when a worker can accept the next block. Every produced slab
+     * is independently owned and transferred before another block is packed.
+     * @param {number} count
+     * @param {(index: number) => Uint8Array} produce
+     * @param {string|null} dictName
+     * @param {import('dictionary-importer').ImportExperiments} [options]
+     * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
+     * @throws {Error} If production or a worker fails, after active jobs drain.
+     */
+    async compressWrappedProduced(count, produce, dictName, options = {}) {
+        if (this._failed) { throw new Error('Term content compression pool is unavailable') }
+        if (!Number.isSafeInteger(count) || count < 0) { throw new RangeError('Invalid term content block count') }
+        const compressionExperiments = snapshotTermBankExperiments(options)
+        /** @type {Uint8Array[]} */
+        const chunks = new Array(count)
+        const workerCount = Math.min(count, this._workers.length)
+        const envelopeMsByWorker = new Float64Array(workerCount)
+        let nextIndex = 0
+        let failed = false
+        /** @type {unknown} */
+        let failure
+        await Promise.all(Array.from({length: workerCount}, async (_, workerIndex) => {
+            while (!failed && nextIndex < count) {
+                const index = nextIndex++
+                try {
+                    const content = produce(index)
+                    if (
+                        !(content instanceof Uint8Array) ||
+                        !(content.buffer instanceof ArrayBuffer) ||
+                        content.byteOffset !== 0 ||
+                        content.byteLength !== content.buffer.byteLength
+                    ) {
+                        throw new TypeError('Produced term content must own its complete private buffer')
+                    }
+                    const result = await this._dispatch(
+                        workerIndex,
+                        {content, dictName, wrap: true, compressionExperiments},
+                        [content.buffer],
+                    )
+                    chunks[index] = result.bytes
+                    envelopeMsByWorker[workerIndex] += result.envelopeMs
+                } catch (error) {
+                    if (!failed) {
+                        failed = true
+                        failure = error
+                    }
+                }
+            }
+        }))
+        // A failed producer or dispatch must not leave sibling tasks packing
+        // from the source after the caller has started its fallback or cleanup.
+        if (failed) { throw failure }
+        return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: true}
+    }
+    /* eslint-enable @stylistic/semi */
+
     /**
      * @param {Uint8Array} source
      * @param {Uint32Array} sourceOffsets
@@ -530,6 +588,45 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName, op
     });
     return {chunks, envelopeMs, wrapped: true};
 }
+
+/* eslint-disable @stylistic/semi */
+/**
+ * Overlaps private block packing with compression without retaining a whole
+ * batch of packed input. The producer's source must stay stable until return.
+ * The caller can then repack after a failed transfer or worker operation.
+ * @param {number} count
+ * @param {(index: number) => Uint8Array} produce
+ * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
+ * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
+ */
+export async function compressWrappedTermContentZstdProducedBatch(count, produce, dictName, options = {}) {
+    if (!Number.isSafeInteger(count) || count < 0) { throw new RangeError('Invalid term content block count') }
+    options = snapshotTermBankExperiments(options)
+    /** @type {TermContentCompressionPool|null} */
+    let pool = null
+    if (count > 1) {
+        try {
+            pool = await initializeCompressionPool()
+            if (pool !== null && !pool.failed) {
+                return await pool.compressWrappedProduced(count, produce, dictName, options)
+            }
+        } catch (error) {
+            discardCompressionPool(pool)
+            throw error
+        }
+    }
+    /** @type {Uint8Array[]} */
+    const chunks = []
+    let envelopeMs = 0
+    for (let index = 0; index < count; ++index) {
+        const result = compressWrappedTermContentZstd(produce(index), dictName, options)
+        chunks.push(result.bytes)
+        envelopeMs += result.envelopeMs
+    }
+    return {chunks, envelopeMs, wrapped: true}
+}
+/* eslint-enable @stylistic/semi */
 
 /**
  * @param {Uint8Array} source

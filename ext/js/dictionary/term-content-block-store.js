@@ -36,7 +36,7 @@ import {
 } from './term-content-block-envelope.js';
 import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdProducedBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
@@ -715,11 +715,13 @@ export class TermContentBlockStore {
                 uncompressedBytes,
             );
         }
-        return await this._tryAppendPacked(
-            () => packContentSpansIntoSlabs(sourceBytes, sourceOffsets, sourceLengths, this._blockTargetBytes),
+        return await this._tryAppendProducedSpans(
+            sourceBytes,
+            sourceOffsets,
             sourceLengths,
             compressionDictName,
             force,
+            uncompressedBytes,
         );
     }
 
@@ -1009,6 +1011,89 @@ export class TermContentBlockStore {
             envelopeMs,
         );
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * @param {Uint8Array} sourceBytes
+     * @param {Uint32Array} sourceOffsets
+     * @param {Uint32Array} sourceLengths
+     * @param {string|null} compressionDictName
+     * @param {boolean} force
+     * @param {number} uncompressedBytes
+     * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
+     */
+    async _tryAppendProducedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force, uncompressedBytes) {
+        if (!force && uncompressedBytes < this._minInputBytes) { return null }
+        const planStart = safePerformance.now()
+        const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes)
+        const planMs = safePerformance.now() - planStart
+        let packMs = planMs
+        let compressionStart = safePerformance.now()
+        let packingDuringCompression = 0
+        /**
+         * @param {number} blockIndex
+         * @returns {Uint8Array}
+         */
+        const produce = (blockIndex) => {
+            const packStart = safePerformance.now()
+            const content = packPlannedContentSpanBlock(
+                sourceBytes,
+                sourceOffsets,
+                sourceLengths,
+                packed.blockStartIndexes[blockIndex],
+                packed.blockStartIndexes[blockIndex + 1],
+                packed.packedChunkLengths[blockIndex],
+            )
+            const elapsed = safePerformance.now() - packStart
+            packMs += elapsed
+            packingDuringCompression += elapsed
+            return content
+        }
+        /** @type {Uint8Array[]} */
+        let compressedChunks
+        let envelopeMs = 0
+        try {
+            const result = await compressWrappedTermContentZstdProducedBatch(
+                packed.packedChunkLengths.length,
+                produce,
+                compressionDictName,
+                this._compressionExperiments,
+            )
+            compressedChunks = result.chunks
+            envelopeMs = result.envelopeMs
+            validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length)
+        } catch (_) {
+            // The pool drains all producers before rejection. Its transferred
+            // inputs may be detached; recreate them from the stable source.
+            const chunks = Array.from(packed.packedChunkLengths, (_length, index) => produce(index))
+            compressionStart = safePerformance.now()
+            packingDuringCompression = 0
+            compressedChunks = chunks.map((content) => {
+                const compressed = compressTermContentZstd(content, compressionDictName)
+                const envelopeStart = safePerformance.now()
+                const wrapped = wrapCompressedTermContentBlock(compressed)
+                envelopeMs += safePerformance.now() - envelopeStart
+                return wrapped
+            })
+            validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length)
+        }
+        // Worker compression now overlaps packing. Count only the remaining
+        // completion wait here; packMs still records actual packing work.
+        const compressMs = Math.max(0, safePerformance.now() - compressionStart - packingDuringCompression - envelopeMs)
+        return await this._appendCompressedBlocks(
+            packed,
+            packed.packedChunkLengths,
+            sourceLengths,
+            compressionDictName,
+            force,
+            compressedChunks,
+            uncompressedBytes,
+            packMs,
+            compressMs,
+            envelopeMs,
+        )
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @param {() => ReturnType<typeof packContentChunksIntoSlabs>} pack
@@ -1463,32 +1548,53 @@ function packPlannedContentSpansIntoSlabs(
     }
     const packedChunks = new Array(packedChunkLengths.length);
     for (let blockIndex = 0; blockIndex < packedChunks.length; ++blockIndex) {
-        const output = new Uint8Array(packedChunkLengths[blockIndex]);
-        const startIndex = blockStartIndexes[blockIndex];
-        const endIndex = blockStartIndexes[blockIndex + 1];
-        let outputOffset = 0;
-        let runStart = sourceOffsets[startIndex];
-        let runEnd = runStart;
-        let runOutputOffset = 0;
-        for (let i = startIndex; i < endIndex; ++i) {
-            const sourceOffset = sourceOffsets[i];
-            const length = sourceLengths[i];
-            if (sourceOffset !== runEnd) {
-                if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
-                runStart = sourceOffset;
-                runOutputOffset = outputOffset;
-            }
-            runEnd = sourceOffset + length;
-            outputOffset += length;
-        }
-        if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
-        if (outputOffset !== output.byteLength) {
-            throw new RangeError(`Packed term content fallback block ${blockIndex} has an invalid length`);
-        }
-        packedChunks[blockIndex] = output;
+        packedChunks[blockIndex] = packPlannedContentSpanBlock(
+            sourceBytes,
+            sourceOffsets,
+            sourceLengths,
+            blockStartIndexes[blockIndex],
+            blockStartIndexes[blockIndex + 1],
+            packedChunkLengths[blockIndex],
+        );
     }
     return packedChunks;
 }
+
+/* eslint-disable @stylistic/semi */
+/**
+ * @param {Uint8Array} sourceBytes
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {number} startIndex
+ * @param {number} endIndex
+ * @param {number} byteLength
+ * @returns {Uint8Array}
+ * @throws {RangeError} If the preserved block plan is inconsistent.
+ */
+function packPlannedContentSpanBlock(sourceBytes, sourceOffsets, sourceLengths, startIndex, endIndex, byteLength) {
+    const output = new Uint8Array(byteLength)
+    let outputOffset = 0
+    let runStart = sourceOffsets[startIndex]
+    let runEnd = runStart
+    let runOutputOffset = 0
+    for (let i = startIndex; i < endIndex; ++i) {
+        const sourceOffset = sourceOffsets[i]
+        const length = sourceLengths[i]
+        if (sourceOffset !== runEnd) {
+            if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset) }
+            runStart = sourceOffset
+            runOutputOffset = outputOffset
+        }
+        runEnd = sourceOffset + length
+        outputOffset += length
+    }
+    if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset) }
+    if (outputOffset !== output.byteLength) {
+        throw new RangeError('Packed term content block has an invalid length')
+    }
+    return output
+}
+/* eslint-enable @stylistic/semi */
 
 /**
  * @param {Uint8Array} sourceBytes
