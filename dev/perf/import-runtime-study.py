@@ -101,9 +101,9 @@ def activation_observations(run, label, dictionary, arm):
         "recentSourceHitCount": total(files, "dedupRecentSourceHitCount"),
     }
     if arm == "B" and dictionary == "vndb":
-        if label == "columns" and (len(banks) != 1 or metrics["compactMetadataGroups"] <= 0 or metrics["compactMetadataDescriptorBytesAvoided"] <= 0):
+        if label in ("columns", "combined") and (len(banks) != 1 or metrics["compactMetadataGroups"] <= 0 or metrics["compactMetadataDescriptorBytesAvoided"] <= 0):
             raise RuntimeError("Candidate compact metadata path did not execute")
-        if label == "source" and (len(banks) != 1 or metrics["sourceLogicalRangeReads"] <= 0 or
+        if label in ("source", "combined") and (len(banks) != 1 or metrics["sourceLogicalRangeReads"] <= 0 or
                                   metrics["sourcePhysicalRangeReads"] <= 0 or
                                   metrics["sourcePhysicalRangeReads"] >= metrics["sourceLogicalRangeReads"] or
                                   not all(key in banks[0] for key in ("sourceZipLogicalRangeReadCount", "sourceZipPhysicalRangeReadCount"))):
@@ -134,7 +134,7 @@ def main():
     parser.add_argument("--baseline", required=True)
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--dictionary", choices=("jmdict", "jitendex", "vndb"), required=True)
-    parser.add_argument("--label", choices=("row", "cache", "columns", "source"), required=True)
+    parser.add_argument("--label", choices=("row", "cache", "columns", "source", "combined"), required=True)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--screen", action="store_true", help="Use the fixed six-block exploratory screen; default is independent twelve-block qualification")
     parser.add_argument("--source-pr-url", default=None)
