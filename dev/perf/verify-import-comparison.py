@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the frozen durability confirmation, including unchanged-code controls."""
+"""Verify the frozen adaptive durability confirmation, including unchanged-code controls."""
 
 import json
 import math
@@ -13,7 +13,7 @@ baseline = (evidence / "baseline-sha.txt").read_text().strip()
 candidate = (evidence / "candidate-sha.txt").read_text().strip()
 qualification_path = evidence / "qualification-sha.txt"
 qualification = qualification_path.read_text().strip() if qualification_path.exists() else candidate
-assert candidate == "5e2335ef34f86b45f8e54b0dd40fa27db0f3bfc8", "Candidate runtime differs from the frozen screen source"
+assert candidate == "32e7c9144f58268b07f92323e9c0f6f34e1189ed", "Candidate runtime differs from the frozen screen source"
 assert baseline == "5e1f8c12f7ff798ba407323aff675cb23b22af02", "Baseline differs from the frozen source"
 assert candidate != baseline, "Candidate source must differ from the baseline"
 order = (evidence / "observation-order.txt").read_text().split()
@@ -72,18 +72,47 @@ for name in ["warmup-A", "warmup-B", *order]:
     finalization = [phase for phase in imports[0]["importDebug"]["importerPhaseTimings"] if phase["phase"] == "bulk-finalization"]
     assert len(finalization) == 1 and finalization[0]["details"]["ok"] is True
     details = finalization[0]["details"]
-    flush_metrics = {
-        key: details.get("termRecordLookupIndex" + key, 0)
-        for key in ("CheckpointCount", "CheckpointBytes", "CheckpointMs", "FinalFlushMs")
-    }
+    metric_keys = ("CheckpointCount", "CheckpointBytes", "CheckpointMs", "FirstCheckpointBytes", "FirstCheckpointMs",
+                   "LastCheckpointBytes", "LastCheckpointMs", "CheckpointDisabledCount", "FinalFlushMs")
+    flush_metrics = {key: details.get("termRecordLookupIndex" + key, 0) for key in metric_keys}
     assert all(isinstance(value, (int, float)) and math.isfinite(value) and value >= 0 for value in flush_metrics.values())
+    checkpoint_mode = "baseline"
     if arm == "B":
-        assert flush_metrics["CheckpointCount"] > 0 and flush_metrics["CheckpointBytes"] > 0, (name, "Durability checkpoint path did not activate")
+        assert all("termRecordLookupIndex" + key in details for key in metric_keys), (name, "Adaptive diagnostics missing")
+        count = flush_metrics["CheckpointCount"]
+        disabled = flush_metrics["CheckpointDisabledCount"]
+        assert isinstance(count, int) and count >= 0 and disabled in (0, 1)
+        if dictionary != "vndb":
+            assert details["termRecordLookupIndexWriteBytes"] + 80 <= 32 * 1024 * 1024
+            assert all(flush_metrics[key] == 0 for key in metric_keys if key != "FinalFlushMs"), (name, "Small sidecar checkpointed")
+            checkpoint_mode = "inactive-small-file"
+        else:
+            assert count > 0, (name, "Large-sidecar adaptive path did not activate")
+            first_bytes = flush_metrics["FirstCheckpointBytes"]
+            last_bytes = flush_metrics["LastCheckpointBytes"]
+            assert 32 * 1024 * 1024 < first_bytes <= 32 * 1024 * 1024 + 512 * 1024
+            assert first_bytes <= flush_metrics["CheckpointBytes"] <= details["termRecordLookupIndexWriteBytes"] + 80
+            first_cheap = flush_metrics["FirstCheckpointMs"] < first_bytes * 2 / (1024 * 1024)
+            last_cheap = flush_metrics["LastCheckpointMs"] < last_bytes * 2 / (1024 * 1024)
+            assert bool(disabled) == last_cheap, (name, "Stop decision differs from fixed cost cutoff")
+            if first_cheap:
+                assert count == 1 and disabled == 1, (name, "Checkpointing continued after a cheap first flush")
+            if count == 1:
+                assert disabled == 1
+                assert first_bytes == last_bytes == flush_metrics["CheckpointBytes"]
+                assert flush_metrics["FirstCheckpointMs"] == flush_metrics["LastCheckpointMs"] == flush_metrics["CheckpointMs"]
+            else:
+                assert 16 * 1024 * 1024 <= last_bytes <= 16 * 1024 * 1024 + 512 * 1024
+                assert flush_metrics["CheckpointBytes"] >= first_bytes + (count - 1) * 16 * 1024 * 1024
+                assert flush_metrics["CheckpointMs"] >= flush_metrics["FirstCheckpointMs"] + flush_metrics["LastCheckpointMs"]
+            if not disabled:
+                assert details["termRecordLookupIndexWriteBytes"] + 80 - flush_metrics["CheckpointBytes"] < 16 * 1024 * 1024, (name, "Enabled checkpoint cadence stopped early")
+            checkpoint_mode = "stopped-cheap-writeback" if disabled else "periodic-expensive-writeback"
     else:
         assert all(value == 0 for value in flush_metrics.values()), (name, "Baseline unexpectedly contains checkpoint instrumentation")
     if not name.startswith("warmup-"):
         observations.append({"name": name, "arm": arm, "milliseconds": duration,
-                             "bulkFinalizationMs": finalization[0]["elapsedMs"], "flushMetrics": flush_metrics})
+                             "bulkFinalizationMs": finalization[0]["elapsedMs"], "flushMetrics": flush_metrics, "checkpointMode": checkpoint_mode})
 
 paired_changes = []
 control_changes = []
@@ -113,8 +142,10 @@ assert old_map["lib/term-bank-parser.wasm"] == new_map["lib/term-bank-parser.was
 
 result = {
     "dictionary": dictionary,
-    "comparisonKind": "durability-confirmation-with-bracketing-controls",
+    "comparisonKind": "adaptive-index-durability-confirmation-with-bracketing-controls",
     "replication": replication,
+    "checkpointPolicy": {"firstMinimumWrittenBytes": 32 * 1024 * 1024, "firstComparison": "strictly-greater",
+                         "subsequentBytes": 16 * 1024 * 1024, "minFlushMsPerMiB": 2, "stopAfterAnyCheapFlush": True},
     "baselineSha": baseline,
     "candidateSha": candidate,
     "qualificationSha": qualification,

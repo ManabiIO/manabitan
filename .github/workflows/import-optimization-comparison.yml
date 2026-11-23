@@ -1,4 +1,4 @@
-name: Import durability confirmation
+name: Adaptive import durability confirmation
 
 on:
   pull_request:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   browser-comparison:
-    name: Confirm import (${{ matrix.dictionary }}, replication ${{ matrix.replication }})
+    name: Confirm adaptive import (${{ matrix.dictionary }}, replication ${{ matrix.replication }})
     if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'perf/import-storage-round2-20261123-86c2'
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -24,7 +24,7 @@ jobs:
         replication: [1, 2]
     env:
       PERF_BASELINE_SHA: '5e1f8c12f7ff798ba407323aff675cb23b22af02'
-      PERF_CANDIDATE_PRODUCT_SHA: '5e2335ef34f86b45f8e54b0dd40fa27db0f3bfc8'
+      PERF_CANDIDATE_PRODUCT_SHA: '32e7c9144f58268b07f92323e9c0f6f34e1189ed'
       PERF_REPLICATION: ${{ matrix.replication }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_BOUNDARY: import-${{ matrix.dictionary }}-replication-${{ matrix.replication }}
@@ -192,7 +192,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: durability-confirmation-${{ matrix.dictionary }}-replication-${{ matrix.replication }}
+          name: adaptive-durability-${{ matrix.dictionary }}-replication-${{ matrix.replication }}
           path: ${{ env.PERF_EVIDENCE_ROOT }}
           if-no-files-found: error
           retention-days: 14
