@@ -3394,25 +3394,46 @@ describe('term-bank WASM parser', () => {
         expect(profile?.nativeStringPlanFallbackChunkCount).toBe(0);
     });
 
-    maybeTest.each([false, true])('projects media once per exact content across chunks without dropping term rows (dedupe=%s)', async (dedupe) => {
+    maybeTest.each([[false, false], [true, false], [false, true], [true, true]])('projects media once per exact content across chunks without dropping term rows (dedupe=%s, multipleBanks=%s)', async (dedupe, multipleBanks) => {
         const imageA = [{type: 'image', path: 'a.png'}];
         const imageB = [{type: 'image', path: 'b.png'}];
         const rows = [
             ['first', '', '', '', 1, imageA, 1, ''],
-            ['second', '', '', '', 2, imageA, 2, ''],
+            ['second', 'reading two', '', '', 2, imageA, 2, ''],
             ['third', '', '', '', 3, imageB, 3, ''],
             ['fourth', '', '', 'v1', 4, imageA, 4, ''],
             ['plain', '', '', '', 5, ['plain'], 5, ''],
-            ['sixth', '', '', '', 6, imageB, 6, ''],
+            ['sixth', 'sixth', '', '', 6, imageB, -1, ''],
         ];
         /** @type {string[]} */
         const projected = [];
         /** @type {number[]} */
         const scores = [];
+        /** @type {number[]} */
+        const sequences = [];
+        /** @type {number[]} */
+        const readingFlags = [];
+        /** @type {string[]} */
+        const expressions = [];
+        /** @type {string[]} */
+        const readings = [];
         /** @type {string[]} */
         const content = [];
-        await parseTermBankWithWasmColumnChunks(textEncoder.encode(JSON.stringify(rows)), 3, (chunk) => {
+        const sources = multipleBanks ?
+            [textEncoder.encode(JSON.stringify(rows.slice(0, 3))), textEncoder.encode(JSON.stringify(rows.slice(3)))] :
+            textEncoder.encode(JSON.stringify(rows));
+        await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
             scores.push(...chunk.scoreList);
+            sequences.push(...chunk.sequenceList);
+            readingFlags.push(...chunk.readingEqualsExpressionList);
+            const {stringOffsets, stringLengths, stringsBuffer, expressionIndexes, readingIndexes} = chunk.termRecordPreinternedPlan;
+            if (!(stringOffsets instanceof Uint32Array)) { throw new Error('Expected string offsets'); }
+            for (let i = 0; i < chunk.rowCount; ++i) {
+                const expression = expressionIndexes[i];
+                const reading = readingIndexes[i];
+                expressions.push(textDecoder.decode(stringsBuffer.subarray(stringOffsets[expression], stringOffsets[expression] + stringLengths[expression])));
+                readings.push(textDecoder.decode(stringsBuffer.subarray(stringOffsets[reading], stringOffsets[reading] + stringLengths[reading])));
+            }
             const metas = chunk.contentMetaList;
             const bytes = chunk.contentBytesBuffer;
             if (!(metas instanceof Uint32Array) || !(bytes instanceof Uint8Array)) { throw new Error('Expected content slab'); }
@@ -3428,6 +3449,10 @@ describe('term-bank WASM parser', () => {
             mediaHintFastScan: true,
         });
         expect(scores).toEqual([1, 2, 3, 4, 5, 6]);
+        expect(sequences).toEqual([1, 2, 3, 4, 5, -1]);
+        expect(readingFlags).toEqual([1, 0, 1, 1, 1, 1]);
+        expect(expressions).toEqual(['first', 'second', 'third', 'fourth', 'plain', 'sixth']);
+        expect(readings).toEqual(['first', 'reading two', 'third', 'fourth', 'plain', 'sixth']);
         expect(content).toHaveLength(6);
         expect(content[0]).toBe(content[1]);
         expect(content[2]).toBe(content[5]);

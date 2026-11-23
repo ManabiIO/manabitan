@@ -2258,7 +2258,14 @@ null :
                 const o = sourceIndex * META_U32_FIELDS;
                 // Fused columns already contain the final term fields. Only
                 // hinted media rows need JavaScript projection in this mode.
-                if (projectMediaHintsOnly && metas[o + 14] !== 1) { continue; }
+                if (projectMediaHintsOnly) {
+                    if (metas[o + 14] !== 1) { continue; }
+                    const uniqueIndex = contentUniqueIndexes[sourceIndex];
+                    // Repeated media content needs no row projection either:
+                    // its keys, reading flag, score and sequence are already
+                    // present in the fused columns, including across chunks.
+                    if (seenMediaContent !== null && uniqueIndex < seenMediaContent.length && seenMediaContent[uniqueIndex] !== 0) { continue; }
+                }
                 const c = sourceIndex * CONTENT_META_U32_FIELDS;
                 if (nativeStringPlan === null) {
                     if (planBuilder === null) {
