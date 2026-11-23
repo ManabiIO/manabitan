@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/jitendex
+
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  15:39:47
+   Duration  9.72s (transform 245ms, setup 28ms, import 148ms, tests 9.34s, environment 0ms)
+

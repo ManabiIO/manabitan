@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/jmdict-stacked
+
+
+ Test Files  7 passed (7)
+      Tests  271 passed (271)
+   Start at  15:49:18
+   Duration  6.69s (transform 1.98s, setup 291ms, import 2.94s, tests 8.09s, environment 5ms)
+

@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/score-boundary
+
+
+ Test Files  4 passed (4)
+      Tests  243 passed (243)
+   Start at  16:05:05
+   Duration  4.21s (transform 4.08s, setup 120ms, import 6.57s, tests 2.31s, environment 1ms)
+

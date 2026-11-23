@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/0a1757ac2970/evidence-staging/tools/audit-jitendex-screen.py", line 56, in <module>
+    assert packages['A'] == packages['C']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

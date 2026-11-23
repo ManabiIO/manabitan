@@ -1,0 +1,64 @@
+{
+  "result": "passed",
+  "verifiedExtractedFiles": 164,
+  "verifiedHarnessHashesPerSource": 66,
+  "packageEntriesPerArm": 550,
+  "successfulObservations": 20,
+  "comparisons": {
+    "B/A": {
+      "pairedChangesPercent": [
+        -6.590709903593083,
+        -6.181566918251768,
+        -3.6763902545622895,
+        -1.7780704642752165,
+        -5.957334737951325,
+        -2.9625639644492274
+      ],
+      "pairedMedianPercent": -4.816862496256808,
+      "equalWorkPercent": -4.619227046460428,
+      "fasterPairs": 6,
+      "descriptiveBootstrap95Percent": [
+        -6.386138410922426,
+        -2.370317214362222
+      ],
+      "bootstrapScope": "10000 block-paired median resamples, seed20261123; descriptive six-pair screen, no multiplicity correction"
+    },
+    "B/C": {
+      "pairedChangesPercent": [
+        19.110415735360764,
+        -6.598581860514175,
+        -2.109587520125955,
+        -2.839150969003712,
+        -4.991485738611601,
+        -0.972955145117782
+      ],
+      "pairedMedianPercent": -2.4743692445648335,
+      "equalWorkPercent": 0.1406380430443166,
+      "fasterPairs": 5,
+      "descriptiveBootstrap95Percent": [
+        -5.795033799562888,
+        9.06873029512149
+      ],
+      "bootstrapScope": "10000 block-paired median resamples, seed20261123; descriptive six-pair screen, no multiplicity correction"
+    },
+    "C/A": {
+      "pairedChangesPercent": [
+        -21.577563540754106,
+        0.4464760284898839,
+        -1.600568119741519,
+        1.0920864888593007,
+        -1.016592046353304,
+        -2.009157015891061
+      ],
+      "pairedMedianPercent": -1.3085800830474115,
+      "equalWorkPercent": -4.753180309734761,
+      "fasterPairs": 4,
+      "descriptiveBootstrap95Percent": [
+        -11.793360278322584,
+        0.7692812586745923
+      ],
+      "bootstrapScope": "10000 block-paired median resamples, seed20261123; descriptive six-pair screen, no multiplicity correction"
+    }
+  },
+  "assessment": "No whole-import gain established. B/A aggregate improvement is matched by unchanged C/A drift; B/C equal-work is +0.141%. Keep all six blocks, including block1, and use a separate fixed qualification without pooling."
+}

@@ -1,0 +1,136 @@
+{
+  "result": "passed",
+  "workflowRun": 45262916933,
+  "artifactId": 14861638196,
+  "originalArchiveSha256": "c5921388044bbe93a671e2072fce3fc4d36051985c65d5967bf5197ad7fbaa6e",
+  "verifiedExtractedFiles": 164,
+  "sourceIdentities": {
+    "A": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "B": {
+      "commit": "78a2adcfba8d72d8cba070319b53d4b2b354a8f9",
+      "tree": "5c074e07c8964e8435987b954987b4fba95d7fdb"
+    },
+    "C": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    }
+  },
+  "verifiedHarnessHashesPerSource": 66,
+  "packageEntriesPerArm": 550,
+  "changedPackagedFiles": [
+    "js/dictionary/term-content-block-store.js",
+    "js/dictionary/zstd-term-content.js"
+  ],
+  "identicalControlPackage": true,
+  "successfulObservations": 20,
+  "timedObservations": 18,
+  "separateExhaustiveDiagnostics": 2,
+  "sourceRowsPerImport": 436555,
+  "lookupReceiptsPerImport": 72,
+  "distinctTermProbes": 12,
+  "sampledMediaPerTimedImport": 64,
+  "exhaustiveMediaPerDiagnostic": 236,
+  "logicalStorageBytesAllObservations": 67466332,
+  "screenshotsCollected": false,
+  "processMemorySampled": false,
+  "blocks": {
+    "1": {
+      "A": 2282,
+      "B": 2131.600000000006,
+      "C": 1789.5999999999913
+    },
+    "2": {
+      "C": 1889.800000000003,
+      "B": 1765.1000000000058,
+      "A": 1881.3999999999942
+    },
+    "3": {
+      "B": 1763.2999999999884,
+      "A": 1830.6000000000058,
+      "C": 1801.3000000000175
+    },
+    "4": {
+      "C": 1842.1000000000058,
+      "A": 1822.2000000000116,
+      "B": 1789.7999999999884
+    },
+    "5": {
+      "B": 1785.3999999999942,
+      "C": 1879.1999999999825,
+      "A": 1898.5
+    },
+    "6": {
+      "A": 1856.5,
+      "C": 1819.1999999999825,
+      "B": 1801.5
+    }
+  },
+  "comparisons": {
+    "B/A": {
+      "pairedChangesPercent": [
+        -6.590709903593083,
+        -6.181566918251768,
+        -3.6763902545622895,
+        -1.7780704642752165,
+        -5.957334737951325,
+        -2.9625639644492274
+      ],
+      "pairedMedianPercent": -4.816862496256808,
+      "equalWorkPercent": -4.619227046460428,
+      "fasterPairs": 6,
+      "descriptiveBootstrap95Percent": [
+        -6.386138410922426,
+        -2.370317214362222
+      ],
+      "bootstrapScope": "10000 block-paired median resamples, seed20261123; descriptive six-pair screen, no multiplicity correction"
+    },
+    "B/C": {
+      "pairedChangesPercent": [
+        19.110415735360764,
+        -6.598581860514175,
+        -2.109587520125955,
+        -2.839150969003712,
+        -4.991485738611601,
+        -0.972955145117782
+      ],
+      "pairedMedianPercent": -2.4743692445648335,
+      "equalWorkPercent": 0.1406380430443166,
+      "fasterPairs": 5,
+      "descriptiveBootstrap95Percent": [
+        -5.795033799562888,
+        9.06873029512149
+      ],
+      "bootstrapScope": "10000 block-paired median resamples, seed20261123; descriptive six-pair screen, no multiplicity correction"
+    },
+    "C/A": {
+      "pairedChangesPercent": [
+        -21.577563540754106,
+        0.4464760284898839,
+        -1.600568119741519,
+        1.0920864888593007,
+        -1.016592046353304,
+        -2.009157015891061
+      ],
+      "pairedMedianPercent": -1.3085800830474115,
+      "equalWorkPercent": -4.753180309734761,
+      "fasterPairs": 4,
+      "descriptiveBootstrap95Percent": [
+        -11.793360278322584,
+        0.7692812586745923
+      ],
+      "bootstrapScope": "10000 block-paired median resamples, seed20261123; descriptive six-pair screen, no multiplicity correction"
+    }
+  },
+  "assessment": "No whole-import gain established. B/A aggregate improvement is matched by unchanged C/A drift; B/C equal-work is +0.141%. Keep all six blocks, including block1, and use a separate fixed qualification without pooling.",
+  "inferenceLimits": [
+    "Fresh browser whole-import timing, one shared hosted environment",
+    "Six exploratory paired blocks; intervals descriptive",
+    "12 fixed term probes, not exhaustive term equivalence",
+    "Exhaustive media diagnostics excluded from timing comparison",
+    "No process-memory or screenshot evidence",
+    "No omitted observations or post-hoc trimming"
+  ]
+}

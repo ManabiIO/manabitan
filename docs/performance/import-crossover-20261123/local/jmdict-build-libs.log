@@ -1,0 +1,23 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 build:libs
+> node ./dev/bin/build-libs.js
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 build:dictionary-wasm
+> node ./dev/bin/build-dictionary-wasm.js --check
+
+file:///workspace/scratch/0a1757ac2970/jmdict/dev/bin/build-dictionary-wasm.js:43
+    throw new Error(`Missing pinned WASM tool: ${command}`);
+          ^
+
+Error: Missing pinned WASM tool: clang-21
+    at executable (file:///workspace/scratch/0a1757ac2970/jmdict/dev/bin/build-dictionary-wasm.js:43:11)
+    at main (file:///workspace/scratch/0a1757ac2970/jmdict/dev/bin/build-dictionary-wasm.js:55:22)
+    at file:///workspace/scratch/0a1757ac2970/jmdict/dev/bin/build-dictionary-wasm.js:95:72
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.22.3

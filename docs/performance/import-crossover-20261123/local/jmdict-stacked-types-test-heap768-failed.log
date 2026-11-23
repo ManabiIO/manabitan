@@ -1,0 +1,25 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:ts:test
+> npx tsc --noEmit --project test/jsconfig.typecheck.json
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+<--- Last few GCs --->
+
+[87:0x25d57000]    10422 ms: Mark-Compact (reduce) 764.4 (773.4) -> 762.4 (768.1) MB, pooled: 0 MB, 222.97 / 0.00 ms  (+ 0.5 ms in 57 steps since start of marking, biggest step 0.2 ms, walltime since start of marking 238 ms) (average mu = 0.186, current m[87:0x25d57000]    10735 ms: Mark-Compact 763.5 (768.4) -> 760.7 (771.1) MB, pooled: 0 MB, 308.39 / 0.00 ms  (average mu = 0.098, current mu = 0.015) allocation failure; scavenge might not succeed
+
+FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0x91df90  [node]
+ 2: 0x75bb9f node::OOMErrorHandler(char const*, v8::OOMDetails const&) [node]
+ 3: 0xc77280  [node]
+ 4: 0xc7737f  [node]
+ 5: 0xf272b5  [node]
+ 6: 0xf272e2  [node]
+ 7: 0xf27664  [node]
+ 8: 0xf393ca  [node]
+ 9: 0xf3d880  [node]
+10: 0x1a420c1  [node]
+Aborted

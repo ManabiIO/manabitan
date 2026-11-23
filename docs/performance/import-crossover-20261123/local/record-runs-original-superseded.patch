@@ -1,0 +1,393 @@
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index 38f42372d..736c61087 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -403,6 +403,97 @@ function getSynchronousResolvedContentReferences(chunk, count) {
+     return {uniqueIndexList, offsets, lengths};
+ }
+ 
++/**
++ * Run encoding also reads scores ahead. Only an ordinary private typed column
++ * can keep those reads free of accessors or concurrent mutation.
++ * @param {{scoreList: number[]|Int32Array|Float64Array}} chunk
++ * @param {number} count
++ * @returns {Int32Array|null}
++ */
++function getSynchronousInt32Scores(chunk, count) {
++    const scores = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value);
++    if (
++        typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function' ||
++        !(scores instanceof Int32Array) || Object.getPrototypeOf(scores) !== Int32Array.prototype ||
++        !ArrayBuffer.isView(scores) || Object.hasOwn(scores, 'length') || Object.hasOwn(scores, 'buffer') ||
++        !(scores.buffer instanceof ArrayBuffer) || scores.length < count
++    ) { return null; }
++    try {
++        ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(scores.buffer);
++    } catch {
++        return null;
++    }
++    return scores;
++}
++
++/**
++ * The caller admitted private typed columns for this synchronous invocation.
++ * Resolve consecutive content aliases independently of score runs: alternate
++ * spellings often share a definition while retaining different scores.
++ * @param {ResolvedContentReferences} references
++ * @param {Int32Array} scoreList
++ * @param {number} count
++ * @param {number} contentOffsetBase
++ * @param {{offsets: Uint32Array, lengths: Uint16Array, scoreKeys: Uint16Array, scores: number[]}} columns
++ * @param {Uint16Array|null} inlineScoreIndexes
++ * @returns {boolean} Whether the compact representation can hold every field.
++ * @throws {RangeError} If a row references an unavailable content span.
++ */
++function fillCompactArtifactRecordRuns(references, scoreList, count, contentOffsetBase, columns, inlineScoreIndexes) {
++    const {offsets, lengths, scoreKeys, scores} = columns;
++    const {uniqueIndexList, offsets: sourceOffsets, lengths: sourceLengths} = references;
++    for (let start = 0; start < count;) {
++        const uniqueIndex = uniqueIndexList[start];
++        if (uniqueIndex >= sourceOffsets.length) {
++            throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
++        }
++        const sourceOffset = sourceOffsets[uniqueIndex];
++        const sourceLength = sourceLengths[uniqueIndex];
++        if (sourceLength >= U16_NULL) { return false; }
++        const offset = sourceOffset < 0 ? U32_NULL : sourceOffset - contentOffsetBase;
++        const length = sourceLength < 0 ? U16_NULL : sourceLength;
++        let end = start + 1;
++        while (end < count && uniqueIndexList[end] === uniqueIndex) { ++end; }
++        if (end - start >= 4) {
++            offsets.fill(offset, start, end);
++            lengths.fill(length, start, end);
++        } else {
++            for (let row = start; row < end; ++row) {
++                offsets[row] = offset;
++                lengths[row] = length;
++            }
++        }
++        start = end;
++    }
++    /** @type {Map<number, number>} */
++    const scoreIndexes = new Map();
++    for (let start = 0; start < count;) {
++        const score = scoreList[start];
++        const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
++        const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
++        let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
++        if (scoreIndex < 0) {
++            scoreIndex = scores.length;
++            if (scoreIndex >= U16_NULL) { return false; }
++            if (useInlineScore) {
++                inlineScoreIndexes[inlineScore] = scoreIndex + 1;
++            } else {
++                scoreIndexes.set(score, scoreIndex);
++            }
++            scores.push(score);
++        }
++        let end = start + 1;
++        while (end < count && scoreList[end] === score) { ++end; }
++        if (end - start >= 4) {
++            scoreKeys.fill(scoreIndex, start, end);
++        } else {
++            for (let row = start; row < end; ++row) { scoreKeys[row] = scoreIndex; }
++        }
++        start = end;
++    }
++    return true;
++}
++
+ /**
+  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+  * @param {number} start
+@@ -5524,14 +5615,15 @@ export class TermRecordOpfsStore {
+     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
+         const count = chunk.rowCount;
+         const useFixedContentSpan = hasFixedContentSpan(chunk, count);
++        const candidateReferences = useFixedContentSpan ? null : getSynchronousResolvedContentReferences(chunk, count);
++        const runScores = candidateReferences === null ? null : getSynchronousInt32Scores(chunk, count);
++        const runReferences = runScores === null ? null : candidateReferences;
+         const offsets = new Uint32Array(count);
+         const lengths = new Uint16Array(count);
+         const scoreKeys = new Uint16Array(count);
+         /** @type {number[]} */
+         const scores = [];
+         const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
+-        /** @type {Map<number, number>} */
+-        const scoreIndexes = new Map();
+         if (useFloat64Scores) {
+             const output = new Uint8Array(count * FLOAT64_SCORE_RECORD_FIELDS_BYTES);
+             const view = new DataView(output.buffer);
+@@ -5550,34 +5642,48 @@ export class TermRecordOpfsStore {
+         const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
+             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
+             null;
+-        let compact = true;
+-        for (let i = 0; i < count; ++i) {
+-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+-            if (contentLength >= U16_NULL) {
+-                compact = false;
+-                break;
+-            }
+-            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+-            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+-            const score = chunk.scoreList[i] ?? 0;
+-            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+-            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+-            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+-            if (scoreIndex < 0) {
+-                scoreIndex = scores.length;
+-                if (scoreIndex >= U16_NULL) {
++        let compact;
++        if (runReferences !== null && runScores !== null) {
++            compact = fillCompactArtifactRecordRuns(
++                runReferences,
++                runScores,
++                count,
++                contentOffsetBase,
++                {offsets, lengths, scoreKeys, scores},
++                inlineScoreIndexes,
++            );
++        } else {
++            compact = true;
++            /** @type {Map<number, number>} */
++            const scoreIndexes = new Map();
++            for (let i = 0; i < count; ++i) {
++                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
++                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
++                if (contentLength >= U16_NULL) {
+                     compact = false;
+                     break;
+                 }
+-                if (useInlineScore) {
+-                    inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+-                } else {
+-                    scoreIndexes.set(score, scoreIndex);
++                offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
++                lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
++                const score = chunk.scoreList[i] ?? 0;
++                const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
++                const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
++                let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
++                if (scoreIndex < 0) {
++                    scoreIndex = scores.length;
++                    if (scoreIndex >= U16_NULL) {
++                        compact = false;
++                        break;
++                    }
++                    if (useInlineScore) {
++                        inlineScoreIndexes[inlineScore] = scoreIndex + 1;
++                    } else {
++                        scoreIndexes.set(score, scoreIndex);
++                    }
++                    scores.push(score);
+                 }
+-                scores.push(score);
++                scoreKeys[i] = scoreIndex;
+             }
+-            scoreKeys[i] = scoreIndex;
+         }
+         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
+         (scores.length * 4) +
+diff --git a/test/term-record-encoding-runs.test.js b/test/term-record-encoding-runs.test.js
+new file mode 100644
+index 000000000..30a9ac1aa
+--- /dev/null
++++ b/test/term-record-encoding-runs.test.js
+@@ -0,0 +1,195 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {describe, expect, test} from 'vitest'
++import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
++
++/** @typedef {Parameters<TermRecordOpfsStore['_encodeArtifactRecordFields']>[0]} Chunk */
++/** @typedef {NonNullable<Chunk['resolvedContentReferences']>} References */
++
++/**
++ * @param {References} references
++ * @param {Chunk['scoreList']} scores
++ * @param {boolean} owned
++ * @returns {Chunk}
++ */
++function makeChunk(references, scores, owned) {
++    const chunk = {rowCount: references.uniqueIndexList.length, scoreList: scores, resolvedContentReferences: references}
++    return owned ?
++        createArtifactTermRecordChunkWithResolvedContent(chunk, references.uniqueIndexList, references.offsets, references.lengths) :
++        chunk
++}
++
++/**
++ * @param {Chunk} chunk
++ * @param {number} base
++ * @returns {Uint8Array}
++ */
++function encode(chunk, base) {
++    return new TermRecordOpfsStore()._encodeArtifactRecordFields(chunk, [], [], base)
++}
++
++describe('compact record encoding of repeated content and scores', () => {
++    test.each(['compact', 'large-length-fallback'])('matches every scalar field byte with %s content', (kind) => {
++        const base = 2 ** 40 + 123
++        const references = {
++            uniqueIndexList: new Uint32Array(2000),
++            offsets: Float64Array.of(base, base + 128, -1, base + 0xfffffffe),
++            lengths: Uint32Array.of(7, 0, 65534, kind === 'compact' ? 42 : 65535),
++        }
++        const scores = new Int32Array(references.uniqueIndexList.length)
++        const values = [75, 50, 100, -256, 255, 256, -257, -2147483648, 2147483647]
++        for (let i = 0; i < scores.length; ++i) {
++            references.uniqueIndexList[i] = Math.floor(i / 47) % references.offsets.length
++            scores[i] = values[Math.floor(i / 29) % values.length]
++        }
++        const expected = encode(makeChunk(references, scores, false), base)
++        const actual = encode(makeChunk(references, scores, true), base)
++        expect(actual).toStrictEqual(expected)
++        expect(actual.buffer.byteLength).toBe(actual.byteLength)
++        expect(actual.byteLength).toBe(kind === 'compact' ? 16 + values.length * 4 + scores.length * 8 : scores.length * 12)
++    })
++
++    test('keeps score changes inside an identical content run and nonconsecutive aliases', () => {
++        const references = {
++            uniqueIndexList: Uint32Array.from({length: 256}, (_, i) => Math.floor(i / 64) % 2),
++            offsets: Float64Array.of(1234, 4567),
++            lengths: Uint32Array.of(7, 11),
++        }
++        const scores = Int32Array.from({length: 256}, (_, i) => (Math.floor(i / 16) % 3 === 0 ? 50 : 100))
++        const result = encode(makeChunk(references, scores, true), 1234)
++        expect(result).toStrictEqual(encode(makeChunk(references, scores, false), 1234))
++        const header = new Uint32Array(result.buffer, 0, 4)
++        expect([...header]).toEqual([0x3246524d, 256, 2, 2])
++        expect([...new Int32Array(result.buffer, 16, 2)]).toEqual([50, 100])
++        expect([...new Uint16Array(result.buffer, 24 + 256 * 6, 256)]).toEqual([...scores].map((score) => (score === 50 ? 0 : 1)))
++    })
++
++    test('rebuilds legacy fields when the score dictionary exceeds compact keys', () => {
++        const references = {
++            uniqueIndexList: new Uint32Array(65536),
++            offsets: Float64Array.of(100),
++            lengths: Uint32Array.of(10),
++        }
++        const scores = Int32Array.from({length: 65536}, (_, i) => i - 32768)
++        const actual = encode(makeChunk(references, scores, true), 100)
++        expect(actual).toStrictEqual(encode(makeChunk(references, scores, false), 100))
++        expect(actual.byteLength).toBe(scores.length * 12)
++    })
++
++    test.each(['array', 'float64', 'shared', 'subclass', 'shadowed-length', 'shadowed-buffer'])('retains scalar parity for %s scores', (kind) => {
++        const references = {
++            uniqueIndexList: new Uint32Array(120),
++            offsets: Float64Array.of(100),
++            lengths: Uint32Array.of(10),
++        }
++        /** @type {Chunk['scoreList']} */
++        let scores = new Int32Array(120).fill(50)
++        switch (kind) {
++            case 'array': scores = [...scores]; break
++            case 'float64':
++                scores = new Float64Array(120).fill(50)
++                scores[20] = -0
++                scores[21] = 0
++                scores[60] = 0.25
++                break
++            case 'shared': scores = new Int32Array(new SharedArrayBuffer(480)).fill(50); break
++            case 'subclass': {
++                class Scores extends Int32Array {}
++                scores = new Scores(120).fill(50)
++                break
++            }
++            case 'shadowed-length': Object.defineProperty(scores, 'length', {value: 120}); break
++            case 'shadowed-buffer': Object.defineProperty(scores, 'buffer', {value: scores.buffer}); break
++        }
++        expect(encode(makeChunk(references, scores, true), 100)).toStrictEqual(encode(makeChunk(references, scores, false), 100))
++        if (kind === 'float64') {
++            const output = encode(makeChunk(references, scores, true), 100)
++            const view = new DataView(output.buffer)
++            expect(output.byteLength).toBe(120 * 16)
++            expect(Object.is(view.getFloat64(20 * 16 + 8, true), -0)).toBe(true)
++            expect(Object.is(view.getFloat64(21 * 16 + 8, true), 0)).toBe(true)
++            expect(view.getFloat64(60 * 16 + 8, true)).toBe(0.25)
++        }
++    })
++
++    test('preserves per-row score getter effects on resolved content', () => {
++        /**
++         * @param {boolean} owned
++         * @returns {{bytes: Uint8Array, reads: number}}
++         */
++        const run = (owned) => {
++            const references = {
++                uniqueIndexList: new Uint32Array(120),
++                offsets: Float64Array.of(100),
++                lengths: Uint32Array.of(10),
++            }
++            const scores = new Int32Array(120).fill(75)
++            const chunk = makeChunk(references, scores, owned)
++            let reads = 0
++            Object.defineProperty(chunk, 'scoreList', {
++                get() {
++                    references.offsets[0] = 100 + ++reads
++                    return scores
++                },
++            })
++            return {bytes: encode(chunk, 100), reads}
++        }
++        const generic = run(false)
++        const owned = run(true)
++        expect(owned).toStrictEqual(generic)
++        expect(owned.reads).toBeGreaterThanOrEqual(120)
++    })
++
++    test('keeps indexed score Proxy effects on the scalar path', () => {
++        /**
++         * @param {boolean} owned
++         * @returns {{bytes: Uint8Array, reads: number}}
++         */
++        const run = (owned) => {
++            const references = {
++                uniqueIndexList: new Uint32Array(120),
++                offsets: Float64Array.of(100),
++                lengths: Uint32Array.of(10),
++            }
++            let reads = 0
++            const scores = new Proxy(new Int32Array(120).fill(75), {
++                get(target, key) {
++                    if (typeof key === 'string' && /^\d+$/.test(key)) { references.offsets[0] = 100 + ++reads }
++                    return Reflect.get(target, key, target)
++                },
++            })
++            return {bytes: encode(makeChunk(references, scores, owned), 100), reads}
++        }
++        expect(run(true)).toStrictEqual(run(false))
++        expect(run(true).reads).toBe(120)
++    })
++
++    test.each(['buffer', 'length'])('does not invoke a shadowed score %s accessor during admission', (property) => {
++        const references = {
++            uniqueIndexList: new Uint32Array(120),
++            offsets: Float64Array.of(100),
++            lengths: Uint32Array.of(10),
++        }
++        const scores = new Int32Array(120).fill(75)
++        let reads = 0
++        Object.defineProperty(scores, property, {
++            get() { ++reads; throw new Error('Unexpected shadowed property read') },
++        })
++        expect(encode(makeChunk(references, scores, true), 100)).toStrictEqual(encode(makeChunk(references, scores, false), 100))
++        expect(reads).toBe(0)
++    })
++
++    test('rejects an out-of-bounds ID after a long repeated run', () => {
++        const references = {
++            uniqueIndexList: new Uint32Array(120),
++            offsets: Float64Array.of(100),
++            lengths: Uint32Array.of(10),
++        }
++        references.uniqueIndexList[119] = 1
++        expect(() => encode(makeChunk(references, new Int32Array(120).fill(75), true), 100)).toThrow('Invalid resolved term content reference index: 1')
++    })
++})

@@ -1,0 +1,28 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/jmdict-stacked
+
+ ❯ test/term-record-encoding-runs.test.js (15 tests | 1 failed) 6130ms
+     × rebuilds legacy fields when the score dictionary exceeds compact keys 5533ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-record-encoding-runs.test.js > compact record encoding of repeated content and scores > rebuilds legacy fields when the score dictionary exceeds compact keys
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-record-encoding-runs.test.js:71:9
+     69|     })
+     70|
+     71|     test('rebuilds legacy fields when the score dictionary exceeds com…
+       |         ^
+     72|         const references = {
+     73|             uniqueIndexList: new Uint32Array(65536),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 270 passed (271)
+   Start at  15:48:19
+   Duration  12.04s (transform 3.58s, setup 137ms, import 6.01s, tests 15.91s, environment 1ms)
+

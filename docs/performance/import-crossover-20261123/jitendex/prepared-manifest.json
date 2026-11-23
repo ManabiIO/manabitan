@@ -1,0 +1,373 @@
+{
+  "archivePath": "/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/jitendex-yomitan.zip",
+  "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+  "archiveBytes": 38831822,
+  "sourceRoot": "/workspace/scratch/0f5c13c58962/manabitan-next",
+  "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+  "node": "v24.22.3",
+  "rows": 436555,
+  "banks": 219,
+  "filesPerGroup": 10,
+  "sourceJsonBytes": 538927310,
+  "sourceBytes": 389702339,
+  "uniqueContents": 363273,
+  "persistedHits": 30,
+  "selectedContents": 363243,
+  "selectedBytes": 389687485,
+  "inputDigest": "bb4a7ffc8a206dd7b4bff985cc35c697deb14b98ebafdc00f96c3b11622b3d93",
+  "preparation": "Production native parser plus copyWasmBackedColumnChunk(chunk,false,true); native unique representatives plus cross-group hash-pair and exact-byte equality; fixed component groups, not production planner override",
+  "groups": [
+    {
+      "files": {
+        "source": "group-0-source.bin",
+        "offsets": "group-0-offsets.bin",
+        "lengths": "group-0-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 14706,
+      "selected": 14706,
+      "sourceBytes": 20641795,
+      "hashes": {
+        "source": "25c31058a51dcee02d5910bb3950328db9a5e0b60ba12f195a63d6fa005148c5",
+        "offsets": "89af0c1b256dbffe1b38ded2db887c161533178235a29c58eabd5bc0d02b2729",
+        "lengths": "2d6a79a1bf57f313c8794c0d6df5d01e1816ab58741d98ff5c2a0aab0cf2e73e"
+      }
+    },
+    {
+      "files": {
+        "source": "group-1-source.bin",
+        "offsets": "group-1-offsets.bin",
+        "lengths": "group-1-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 17482,
+      "selected": 17482,
+      "sourceBytes": 22434206,
+      "hashes": {
+        "source": "3d0d868e8831a9291c710a279648fb8c473b2c8c0938d52a49d52fde569f9b66",
+        "offsets": "7cdeaff54d17f8ffd68bf4b7d9732f856384b55df410f2859a4587e4bca0f660",
+        "lengths": "4a7306c7c4f2f3628d39108d4ffe722b66422e7e38a260b97bd18f009088f662"
+      }
+    },
+    {
+      "files": {
+        "source": "group-2-source.bin",
+        "offsets": "group-2-offsets.bin",
+        "lengths": "group-2-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 18122,
+      "selected": 18122,
+      "sourceBytes": 23708027,
+      "hashes": {
+        "source": "4cecaf3a133832161b9ec50a351160e0755a6d3759ea8f3b187f1c1b2d22e832",
+        "offsets": "637e98f35aab7ec03cbaed5af9d23c145c7b64afc6f5d284827579f6ba837e02",
+        "lengths": "04e736c44e32a25903e119f17b6234e947a08fec230efd23f95eb13bac5617d1"
+      }
+    },
+    {
+      "files": {
+        "source": "group-3-source.bin",
+        "offsets": "group-3-offsets.bin",
+        "lengths": "group-3-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 18041,
+      "selected": 18041,
+      "sourceBytes": 24249266,
+      "hashes": {
+        "source": "10450ea0acc4cd31703a186bf788146ffad307f22c165ddc4903f6f5cabe662c",
+        "offsets": "71e2cfaa77d6efc03d72f66981134ebad0955f1a2a908e00c62c161dcea1dd0c",
+        "lengths": "71bb5f14fd1b18c0ef34d26dd49b53890f2a625f627af5846ffe1eb896a7ff83"
+      }
+    },
+    {
+      "files": {
+        "source": "group-4-source.bin",
+        "offsets": "group-4-offsets.bin",
+        "lengths": "group-4-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 18054,
+      "selected": 18053,
+      "sourceBytes": 23549418,
+      "hashes": {
+        "source": "598607daaf249ebc2199a9a68ea68b1f4d635fd2f623dbef8dedfda19f1411e4",
+        "offsets": "f976a44276932be5f143826eff3ad4877957fb4d9682b008ef6efe2e3039997a",
+        "lengths": "45fef4d2d7837a227c65dab27f8a59d04388940b12446d6fc5667324b12a906d"
+      }
+    },
+    {
+      "files": {
+        "source": "group-5-source.bin",
+        "offsets": "group-5-offsets.bin",
+        "lengths": "group-5-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 15449,
+      "selected": 15448,
+      "sourceBytes": 24673900,
+      "hashes": {
+        "source": "6cd923e41f6291be34cebe4da0bfafaae9ae88fd2377d8470be936db59bd611a",
+        "offsets": "d40a60af0af4b4a0ccc4317497db609a49ed563e57e7f16dfe102ae3aa7953c6",
+        "lengths": "e24c935b29f1f40a968bc870bcf700f5ea266d332de497dd991e06918d9a1663"
+      }
+    },
+    {
+      "files": {
+        "source": "group-6-source.bin",
+        "offsets": "group-6-offsets.bin",
+        "lengths": "group-6-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16894,
+      "selected": 16894,
+      "sourceBytes": 16404484,
+      "hashes": {
+        "source": "b9a96b03066e55e233dd01efb38a14c9db0d920846623da8e6e9a4c988ed5e94",
+        "offsets": "03a8c2f8daf5f32816467331bb13c653b23468400e9d6fbb9226074478191fef",
+        "lengths": "19dd18e29d417253268f3c2c09ded8331b7bd7ee0d2f8c7a25fcc34d55d001cd"
+      }
+    },
+    {
+      "files": {
+        "source": "group-7-source.bin",
+        "offsets": "group-7-offsets.bin",
+        "lengths": "group-7-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 17419,
+      "selected": 17419,
+      "sourceBytes": 15263213,
+      "hashes": {
+        "source": "7cbe14f60a1af658b3a060238e1d79ccf783703395b33734b6c44c1f6d2fdb07",
+        "offsets": "1805204fc6e0998d5beb6dc2c9a524096dba3849c72ba58b89a2384fc969ef1b",
+        "lengths": "c434d704af91135c4058d9d759a1d3903e1bc873e03163949521100c336e0842"
+      }
+    },
+    {
+      "files": {
+        "source": "group-8-source.bin",
+        "offsets": "group-8-offsets.bin",
+        "lengths": "group-8-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 17185,
+      "selected": 17185,
+      "sourceBytes": 15431462,
+      "hashes": {
+        "source": "58ae7655510c3b207454e4fd868435c4cbbc7a52f6928d455a9e2346cfa3bb39",
+        "offsets": "88e869376c4c3074df5928e4bb9b4bb95a818ef4122a75192a4807520752d5ba",
+        "lengths": "81e8764725de43ffe139bbe16c245be8a672c358c3ae881fe0e56b80af0d6fec"
+      }
+    },
+    {
+      "files": {
+        "source": "group-9-source.bin",
+        "offsets": "group-9-offsets.bin",
+        "lengths": "group-9-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 17288,
+      "selected": 17288,
+      "sourceBytes": 16959261,
+      "hashes": {
+        "source": "e56a42447e3f0a7bedb13e773d37d41f194be79b0844c32f9425162a90d80fb8",
+        "offsets": "779c69b81e327162462114e6a62706948cf8411950e8559bb79ced10fd6a8521",
+        "lengths": "6a85814514e85b8009696ebd989ba840eeef19ff177ff0a474dbf3335fab6f65"
+      }
+    },
+    {
+      "files": {
+        "source": "group-10-source.bin",
+        "offsets": "group-10-offsets.bin",
+        "lengths": "group-10-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16183,
+      "selected": 16183,
+      "sourceBytes": 17452819,
+      "hashes": {
+        "source": "3b25b1cc606fc8e94fdb41b6c3b345144a451c5531ae52ac20dd0367b4beaf53",
+        "offsets": "c21cddafc56ddeefda2bed5b0dfc9c86073e4cac16c4174f534f252c47a6bcc2",
+        "lengths": "c44c0cb000228bbd82eadfb4ad1fde636966ad88fb716c5843af0fe0b8fdeaaa"
+      }
+    },
+    {
+      "files": {
+        "source": "group-11-source.bin",
+        "offsets": "group-11-offsets.bin",
+        "lengths": "group-11-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 15691,
+      "selected": 15691,
+      "sourceBytes": 16502893,
+      "hashes": {
+        "source": "20b466273c75010d9c8f6cc39333fda2a6f4b36e290e6b30430edab3608ec595",
+        "offsets": "cdb827e2c30248bb37dbb5718dd2197d3f2bc2cf35e324e6613ef359eb942ab5",
+        "lengths": "d93e116e57819183ea4b1d7fdde132a8c591d5d4c2a166d14f51707d8071afff"
+      }
+    },
+    {
+      "files": {
+        "source": "group-12-source.bin",
+        "offsets": "group-12-offsets.bin",
+        "lengths": "group-12-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 15920,
+      "selected": 15919,
+      "sourceBytes": 14759063,
+      "hashes": {
+        "source": "40c883dbb7dedef8346d489c7ac6908dfb9fe2b9977ee7b5557c7067d4cbd203",
+        "offsets": "eada0b89ecba3fd93ce7a0fd2deec1055b9ec9cd7b5c0b1af8986ef80b144736",
+        "lengths": "08a1797c63893b2aef4a7a4f153ea4ae23b39332cdd530afb4aa080d1f07ec53"
+      }
+    },
+    {
+      "files": {
+        "source": "group-13-source.bin",
+        "offsets": "group-13-offsets.bin",
+        "lengths": "group-13-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16639,
+      "selected": 16639,
+      "sourceBytes": 15418265,
+      "hashes": {
+        "source": "e727442ef469aba7a909b2754534274cc4728269d5f8a3f791e9c26587030e77",
+        "offsets": "c798da32507cdff1bfca44522f1543688a2339cf36a9f82a49269624440e40a9",
+        "lengths": "5840852e5f1db14ac514dd9e89a139952f4bb60d019045f072e68d15963565d0"
+      }
+    },
+    {
+      "files": {
+        "source": "group-14-source.bin",
+        "offsets": "group-14-offsets.bin",
+        "lengths": "group-14-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 15401,
+      "selected": 15401,
+      "sourceBytes": 14794790,
+      "hashes": {
+        "source": "a92f8a2cc42484adc80862306041f0d7357845bb627cdf1f4e06e3cca74e28a8",
+        "offsets": "b335f98eff7c082a5e4270fdb535ca5bcb8c9524bfa76d379eb5f60b3b8caf23",
+        "lengths": "d82ebe411e62efc9e0a6df9d6d4b8533fe772c3f2f0a27541dc6c4b6edf18808"
+      }
+    },
+    {
+      "files": {
+        "source": "group-15-source.bin",
+        "offsets": "group-15-offsets.bin",
+        "lengths": "group-15-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16756,
+      "selected": 16756,
+      "sourceBytes": 15345710,
+      "hashes": {
+        "source": "62ddd83fefc4337b1de01b9b6cdc8c5ef82147714f30195c23dec1738510392a",
+        "offsets": "73113343327126b5d8e15659c386f32c230e70d6fc216db92701cb36ad1c10d3",
+        "lengths": "ceba4f733ca6fdc412e8eb4828abd4f6b8e97e8bb842dd6a57e9bd6665162178"
+      }
+    },
+    {
+      "files": {
+        "source": "group-16-source.bin",
+        "offsets": "group-16-offsets.bin",
+        "lengths": "group-16-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 15951,
+      "selected": 15950,
+      "sourceBytes": 15711309,
+      "hashes": {
+        "source": "bcbd6d6c366d12d2cc845be1c746b1eddce52765965699e46bc04894f0d692c8",
+        "offsets": "1c0cd5e86385c61be3783a12879cf785e18caf3d7bef180febd28e034182e875",
+        "lengths": "ccd92c3318dea8f8ab83d9c19b6404e60791eefbd5586fceb472aa0afe2dd73e"
+      }
+    },
+    {
+      "files": {
+        "source": "group-17-source.bin",
+        "offsets": "group-17-offsets.bin",
+        "lengths": "group-17-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16060,
+      "selected": 16058,
+      "sourceBytes": 15689291,
+      "hashes": {
+        "source": "568d316cbf756fbde3efdc9f8e1435e04c4eae23fcf397430683fc66ac539b1e",
+        "offsets": "5e60915ed261f5e346387c03f1e3759d5f0aab61eb98bb5c6843d8b98af49532",
+        "lengths": "a802a7111851658ecf9224da1f26af9edcba5e800d8a3dfbfd77c7e64a23e33c"
+      }
+    },
+    {
+      "files": {
+        "source": "group-18-source.bin",
+        "offsets": "group-18-offsets.bin",
+        "lengths": "group-18-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16135,
+      "selected": 16132,
+      "sourceBytes": 15738874,
+      "hashes": {
+        "source": "6786717907f60904d8b5484f7d270d3ef7be0d1c80d68dc0cf239a703ef730dc",
+        "offsets": "bda9da1097879450f8b8786cd3077f2c73a00a034baaa2452947b825acee2815",
+        "lengths": "53493ef42676488d1f640e96889d8abe47164586dbd54992db9212615f5b9b0d"
+      }
+    },
+    {
+      "files": {
+        "source": "group-19-source.bin",
+        "offsets": "group-19-offsets.bin",
+        "lengths": "group-19-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16718,
+      "selected": 16717,
+      "sourceBytes": 15881345,
+      "hashes": {
+        "source": "f6ac5ce39dd610c8c55d9473722fff6e0db69326bc91bb5fefb6ed157b439142",
+        "offsets": "c7a0e34b72a0e51ce2487ee4bf79eee48e88caaaa20051953d3047bdf12b30f5",
+        "lengths": "d038b90b23981739e2787bcd81dc15bae5c55fd6d6611d428cf4ae8e08510d3a"
+      }
+    },
+    {
+      "files": {
+        "source": "group-20-source.bin",
+        "offsets": "group-20-offsets.bin",
+        "lengths": "group-20-lengths.bin"
+      },
+      "rows": 20000,
+      "uniqueRows": 16880,
+      "selected": 16864,
+      "sourceBytes": 15623229,
+      "hashes": {
+        "source": "3aa7a1c1873f5a0aa3d727f728e49db21f08a19874b14f59688b114d2bb11006",
+        "offsets": "f5d651efe9bdfad7a07cf2192277e4366fa141c1479e7506ce5a413f15c72dcb",
+        "lengths": "3d2999ebbc792134a9396a8961fa6aac434ff78d7ce59c1d6f7832a947f20b82"
+      }
+    },
+    {
+      "files": {
+        "source": "group-21-source.bin",
+        "offsets": "group-21-offsets.bin",
+        "lengths": "group-21-lengths.bin"
+      },
+      "rows": 16555,
+      "uniqueRows": 14299,
+      "selected": 14295,
+      "sourceBytes": 13469719,
+      "hashes": {
+        "source": "a9fe61460512aacc84444ef2fba5a0a858eaeec72b90fcb6a2e91cbab92b9db7",
+        "offsets": "9323f29a7c800d5477e3aacdddd388dd67857f42c1d5fdb392a2df0f3b49630e",
+        "lengths": "3213115a3585c1258d61e77b805452f4251243c748c73fd9a046994d932bfc2b"
+      }
+    }
+  ]
+}

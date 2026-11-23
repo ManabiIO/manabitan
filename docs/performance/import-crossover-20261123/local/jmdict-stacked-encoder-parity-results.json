@@ -1,0 +1,82 @@
+{
+  "baselineCommit": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+  "sourceArms": [
+    "jmdict-direct-base",
+    "jmdict-stacked"
+  ],
+  "scope": "Byte-for-byte artifact record-field equivalence for every locked source-bank row. Deterministic resolved offsets above 1 TiB, with constant compact lengths and actual native token lengths. No timing measurement or full-import/persisted-database equivalence claim.",
+  "node": "v24.22.3",
+  "v8": "13.6.233.17-node.63",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "parserWasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+  "sourceFile": "ext/js/dictionary/term-record-opfs-store.js",
+  "sourceHashes": [
+    "6b2767b061a4fd36ba0d6460bfce1b9c2ff8a0790974892d44244b184596accb",
+    "4876e204ae5512720a3b5990accc98b13b40a75b1a122952c6c36e49cb25652c"
+  ],
+  "results": [
+    {
+      "corpus": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": 53,
+      "rows": 528299,
+      "contentScoreRuns": 527320,
+      "contentRuns": 519023,
+      "scoreRuns": 412237,
+      "repeatedRows": 979,
+      "fieldBytes": 4259648,
+      "fieldDigest": "f587d07dcda64e1a6b17eaad0a95436f533eff16a3c528b72c9c5845094ecb49",
+      "variableFieldBytes": 4259648,
+      "variableFieldDigest": "b119f8acdb060fab87626a3c98419d613d2d5c4a78e9ea16bb697e10a1a1b5ae",
+      "memory": {
+        "rss": 115974144,
+        "heapTotal": 31105024,
+        "heapUsed": 12474448,
+        "external": 15895338,
+        "arrayBuffers": 11886189
+      }
+    },
+    {
+      "corpus": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "rows": 436555,
+      "contentScoreRuns": 436555,
+      "contentRuns": 365026,
+      "scoreRuns": 357859,
+      "repeatedRows": 0,
+      "fieldBytes": 3522372,
+      "fieldDigest": "9193a899cbc02c6b1b51f344375fe8829e527a8a1afc5907b90f993c1d1e1293",
+      "variableFieldBytes": 3522372,
+      "variableFieldDigest": "201cd16e695708414238b18c1491f1e8022fbb65ff59eb50488a77f266a1f61c",
+      "memory": {
+        "rss": 164171776,
+        "heapTotal": 48930816,
+        "heapUsed": 13485816,
+        "external": 15939996,
+        "arrayBuffers": 11930807
+      }
+    },
+    {
+      "corpus": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "banks": 665,
+      "rows": 6648310,
+      "contentScoreRuns": 158501,
+      "contentRuns": 158501,
+      "scoreRuns": 53123,
+      "repeatedRows": 6489809,
+      "fieldBytes": 53205100,
+      "fieldDigest": "c6205e7c3a52621e1f124987c1f632466d9b1da304a127353fda9ec9cb95ce38",
+      "variableFieldBytes": 53205100,
+      "variableFieldDigest": "fe8e9964dd55bb2af42f5402fdd13b8c18bd97b25cdf6bf4d7330fc0c19ecff8",
+      "memory": {
+        "rss": 353615872,
+        "heapTotal": 155361280,
+        "heapUsed": 16748352,
+        "external": 28741594,
+        "arrayBuffers": 24732405
+      }
+    }
+  ]
+}

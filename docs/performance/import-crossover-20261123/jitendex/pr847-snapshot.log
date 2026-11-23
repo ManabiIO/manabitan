@@ -1,0 +1,89 @@
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/review847
+
+ ❯ test/source-snapshot-repro.test.js (4 tests | 4 failed) 273ms
+     × snapshots source with workers ready=false and detach=false 194ms
+     × snapshots source with workers ready=true and detach=false 14ms
+     × snapshots source with workers ready=false and detach=true 26ms
+     × snapshots source with workers ready=true and detach=true 39ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/source-snapshot-repro.test.js > packed source snapshot boundary > snapshots source with workers ready=false and detach=false
+AssertionError: expected Uint8Array[ 0, 0, 0, 0 ] to deeply equal Uint8Array[ 2, 3, 4, 5 ]
+
+- Expected
++ Received
+
+  Uint8Array [
+-   2,
+-   3,
+-   4,
+-   5,
++   0,
++   0,
++   0,
++   0,
+  ]
+
+ ❯ test/source-snapshot-repro.test.js:138:117
+    136|             if (result === null) { throw new Error('Expected block sto…
+    137|             for (let index = 0; index < expected.length; ++index) {
+    138|                 expect(await blockStore.read(result.contentOffsets[ind…
+       |                                                                                                                     ^
+    139|             }
+    140|             expect(workers.reduce((count, worker) => count + worker.ca…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/source-snapshot-repro.test.js > packed source snapshot boundary > snapshots source with workers ready=true and detach=false
+AssertionError: expected Uint8Array[ 0, 0, 0, 0 ] to deeply equal Uint8Array[ 2, 3, 4, 5 ]
+
+- Expected
++ Received
+
+  Uint8Array [
+-   2,
+-   3,
+-   4,
+-   5,
++   0,
++   0,
++   0,
++   0,
+  ]
+
+ ❯ test/source-snapshot-repro.test.js:138:117
+    136|             if (result === null) { throw new Error('Expected block sto…
+    137|             for (let index = 0; index < expected.length; ++index) {
+    138|                 expect(await blockStore.read(result.contentOffsets[ind…
+       |                                                                                                                     ^
+    139|             }
+    140|             expect(workers.reduce((count, worker) => count + worker.ca…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/source-snapshot-repro.test.js > packed source snapshot boundary > snapshots source with workers ready=false and detach=true
+ FAIL  test/source-snapshot-repro.test.js > packed source snapshot boundary > snapshots source with workers ready=true and detach=true
+TypeError: Cannot perform Construct on a detached ArrayBuffer
+ ❯ packPlannedContentSpanBlock ext/js/dictionary/term-content-block-store.js:1591:53
+    1589|         outputOffset += length
+    1590|     }
+    1591|     if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart,…
+       |                                                     ^
+    1592|     if (outputOffset !== output.byteLength) {
+    1593|         throw new RangeError('Packed term content block has an invalid…
+ ❯ produce ext/js/dictionary/term-content-block-store.js:1039:29
+ ❯ ext/js/dictionary/term-content-block-store.js:1068:86
+ ❯ TermContentBlockStore._tryAppendProducedSpans ext/js/dictionary/term-content-block-store.js:1068:34
+ ❯ TermContentBlockStore.tryAppendSpans ext/js/dictionary/term-content-block-store.js:718:16
+ ❯ test/source-snapshot-repro.test.js:135:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  15:46:49
+   Duration  807ms (transform 298ms, setup 54ms, import 223ms, tests 273ms, environment 0ms)
+

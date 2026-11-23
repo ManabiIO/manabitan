@@ -1,0 +1,11 @@
+{
+  "attemptedObservations": 4,
+  "browserVersion": "153.0.8010.12",
+  "buildComplete": true,
+  "dictionary": "jitendex",
+  "exhaustiveDiagnostics": 1,
+  "performanceClaim": "none; diagnostic snapshot only",
+  "stage": "baseline",
+  "status": "success",
+  "timedObservations": 0
+}

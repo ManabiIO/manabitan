@@ -1,0 +1,29 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/score-boundary
+
+ ❯ test/term-record-opfs-store.test.js (196 tests | 1 failed | 195 skipped) 112ms
+     × round-trips 65535 distinct scores through the persisted field reader 110ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-record-opfs-store.test.js > TermRecordOpfsStore > round-trips 65535 distinct scores through the persisted field reader
+Error: Invalid compact term-record fields dimensions
+ ❯ getRecordFieldsByteLength ext/js/dictionary/term-record-opfs-store.js:168:15
+    166|         view.getUint32(12, true) !== LOOKUP_INDEX_RECORD_FIELDS_FORMAT…
+    167|     ) {
+    168|         throw new Error('Invalid compact term-record fields dimensions…
+       |               ^
+    169|     }
+    170|     const byteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
+ ❯ TermRecordOpfsStore._createLookupIndexChunk ext/js/dictionary/term-record-opfs-store.js:5863:13
+ ❯ test/term-record-opfs-store.test.js:438:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 195 skipped (196)
+   Start at  16:04:36
+   Duration  1.78s (transform 1.17s, setup 23ms, import 1.44s, tests 112ms, environment 0ms)
+

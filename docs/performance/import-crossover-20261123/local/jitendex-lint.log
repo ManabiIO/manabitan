@@ -1,0 +1,31 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/0a1757ac2970/jitendex/ext/js/dictionary/zstd-term-content.js
+  194:17  error  Unsafe assignment of type `any[]` to a variable of type `Uint8Array<ArrayBufferLike>[]`  @typescript-eslint/no-unsafe-assignment
+
+/workspace/scratch/0a1757ac2970/jitendex/test/zstd-term-content-packed-dispatch.test.js
+   66:1   error  Missing JSDoc @returns declaration                jsdoc/require-returns
+   72:59  error  This line has 3 statements. Maximum allowed is 2  @stylistic/max-statements-per-line
+  119:75  error  This line has 3 statements. Maximum allowed is 2  @stylistic/max-statements-per-line
+  191:13  error  'api' is never reassigned. Use 'const' instead    prefer-const
+  242:33  error  Do not use useless `undefined`                    unicorn/no-useless-undefined
+  262:61  error  Do not use useless `undefined`                    unicorn/no-useless-undefined
+  262:81  error  This line has 3 statements. Maximum allowed is 2  @stylistic/max-statements-per-line
+  280:99  error  Prefer the spread operator over `Array#slice()`   unicorn/prefer-spread
+
+✖ 9 problems (9 errors, 0 warnings)
+  3 errors and 0 warnings potentially fixable with the `--fix` option.
+

@@ -1,0 +1,1017 @@
+{
+  "scope": "Node component only: generation media index creation and selection on all verified VNDB image records. No complete-import, OPFS, browser, peak-memory, or lookup-time claim.",
+  "corpus": {
+    "path": "/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "archiveBytes": 291705969,
+    "images": 146570,
+    "dataBytes": 195649882,
+    "indexBytes": 3912816,
+    "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+    "productionPreparationMetrics": {
+      "validationMs": 337,
+      "readMs": 2991
+    }
+  },
+  "inputs": {
+    "baselineRoot": "/workspace/scratch/0a1757ac2970/manabitan",
+    "candidateRoot": "/workspace/scratch/0a1757ac2970/vndb",
+    "baselineModuleSha256": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+    "candidateModuleSha256": "6eb47a2ea4230130128e586d3aac931e9693795226ab17b2c99a6df1c430fec2",
+    "modulePath": "ext/js/dictionary/dictionary-generation-media-store.js"
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "v8": "13.6.233.17-node.63",
+    "platform": "linux",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpus": 9,
+    "loadBefore": [
+      15.78,
+      7.99,
+      3.42
+    ],
+    "loadAfter": [
+      14.51,
+      7.97,
+      3.46
+    ]
+  },
+  "design": {
+    "warmupTripletsPerMode": 2,
+    "measuredTripletsPerMode": 12,
+    "permutations": [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ],
+    "sameCodeControl": "C/A",
+    "omittedObservations": 0,
+    "subset": "withoutFirst256 excludes the first 256 source-directory image records to exercise a nearly complete selection; it is not an assertion about production prefetch order."
+  },
+  "comparisons": {
+    "all": {
+      "B/A": {
+        "pairedMedianPercent": -28.70546793959154,
+        "equalWorkPercent": -41.93039964518981,
+        "fasterPairs": 10,
+        "pairedPercent": [
+          -10.045388001046874,
+          -47.413458178326884,
+          -86.1740562348997,
+          -11.648302015511314,
+          32.15424580651347,
+          -25.321003958210085,
+          45.46042288929255,
+          -45.346381581766934,
+          -2.85338641220817,
+          -32.089931920972994,
+          -40.98311137575868,
+          -58.04617073914014
+        ]
+      },
+      "B/C": {
+        "pairedMedianPercent": -34.501388574305594,
+        "equalWorkPercent": -50.44565440822335,
+        "fasterPairs": 9,
+        "pairedPercent": [
+          -11.06134333185923,
+          -41.86210529996194,
+          -87.34253349867511,
+          -0.5642577135130944,
+          39.91599488821842,
+          2.3408909852528526,
+          51.72091651110551,
+          -82.02087051310082,
+          -53.01948391275757,
+          -27.140671848649244,
+          -63.52814506172404,
+          -43.78117436606146
+        ]
+      },
+      "C/A": {
+        "pairedMedianPercent": -4.83687859677851,
+        "equalWorkPercent": 17.18366908359823,
+        "fasterPairs": 7,
+        "pairedPercent": [
+          1.1423101819529657,
+          -9.54859632776024,
+          9.231525626815685,
+          -11.146941780817299,
+          -5.547435150574421,
+          -27.029171504329554,
+          -4.1263220429826,
+          203.98367428221377,
+          106.78064371917787,
+          -6.792898312269157,
+          61.81488088313576,
+          -25.374056131950017
+        ]
+      }
+    },
+    "withoutFirst256": {
+      "B/A": {
+        "pairedMedianPercent": -53.45879217173712,
+        "equalWorkPercent": 9.79229219687805,
+        "fasterPairs": 10,
+        "pairedPercent": [
+          -90.45736637737905,
+          -48.05984746854484,
+          1539.303778870546,
+          -69.29563434758333,
+          -54.174550832503066,
+          12.596716324001722,
+          -52.74303351097118,
+          -72.80468162000496,
+          -45.89391377868165,
+          -55.78060316514855,
+          -58.60849556162646,
+          -37.93871380976247
+        ]
+      },
+      "B/C": {
+        "pairedMedianPercent": -40.338281815269895,
+        "equalWorkPercent": 86.44647906167766,
+        "fasterPairs": 11,
+        "pairedPercent": [
+          -37.16319444669088,
+          -63.715248989926664,
+          1243.4641698442351,
+          -39.637163316603996,
+          -41.03940031393579,
+          -50.004706549764144,
+          -56.40748263031712,
+          -50.63810214285935,
+          -12.575875878615184,
+          -22.498594954721828,
+          -52.001115002026665,
+          -25.143254460711482
+        ]
+      },
+      "C/A": {
+        "pairedMedianPercent": -19.685552889850054,
+        "equalWorkPercent": -41.11323917221409,
+        "fasterPairs": 8,
+        "pairedPercent": [
+          -84.81362389670616,
+          43.145952736552,
+          22.020654935710816,
+          -49.13366014678613,
+          -22.277844167978955,
+          125.21463232549657,
+          8.406142476861,
+          -44.90625449876012,
+          -38.110805495524026,
+          -42.94374816944618,
+          -13.76569593205923,
+          -17.093261611721154
+        ]
+      }
+    }
+  },
+  "rows": [
+    {
+      "mode": "all",
+      "block": -2,
+      "warmup": true,
+      "order": "CBA",
+      "arm": "C",
+      "createMs": 60.09805200000119,
+      "selectMs": 20.720918999999412,
+      "totalMs": 80.8189710000006
+    },
+    {
+      "mode": "all",
+      "block": -2,
+      "warmup": true,
+      "order": "CBA",
+      "arm": "B",
+      "createMs": 47.8500810000005,
+      "selectMs": 29.571146999998746,
+      "totalMs": 77.42122799999925
+    },
+    {
+      "mode": "all",
+      "block": -2,
+      "warmup": true,
+      "order": "CBA",
+      "arm": "A",
+      "createMs": 96.49328799999967,
+      "selectMs": 75.67808100000002,
+      "totalMs": 172.1713689999997
+    },
+    {
+      "mode": "all",
+      "block": -1,
+      "warmup": true,
+      "order": "BAC",
+      "arm": "B",
+      "createMs": 25.104240999999092,
+      "selectMs": 40.62417900000037,
+      "totalMs": 65.72841999999946
+    },
+    {
+      "mode": "all",
+      "block": -1,
+      "warmup": true,
+      "order": "BAC",
+      "arm": "A",
+      "createMs": 59.21008299999994,
+      "selectMs": 58.14559100000042,
+      "totalMs": 117.35567400000036
+    },
+    {
+      "mode": "all",
+      "block": -1,
+      "warmup": true,
+      "order": "BAC",
+      "arm": "C",
+      "createMs": 86.09523900000022,
+      "selectMs": 40.378146000000925,
+      "totalMs": 126.47338500000114
+    },
+    {
+      "mode": "all",
+      "block": 0,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "A",
+      "createMs": 29.39186300000074,
+      "selectMs": 15.60064500000044,
+      "totalMs": 44.99250800000118
+    },
+    {
+      "mode": "all",
+      "block": 0,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "B",
+      "createMs": 20.21824199999901,
+      "selectMs": 20.254593999999997,
+      "totalMs": 40.472835999999006
+    },
+    {
+      "mode": "all",
+      "block": 0,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "C",
+      "createMs": 27.43138700000054,
+      "selectMs": 18.075075000000652,
+      "totalMs": 45.50646200000119
+    },
+    {
+      "mode": "all",
+      "block": 1,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "B",
+      "createMs": 29.069852000000537,
+      "selectMs": 10.40458899999976,
+      "totalMs": 39.4744410000003
+    },
+    {
+      "mode": "all",
+      "block": 1,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "C",
+      "createMs": 44.56053500000053,
+      "selectMs": 23.3374189999995,
+      "totalMs": 67.89795400000003
+    },
+    {
+      "mode": "all",
+      "block": 1,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "A",
+      "createMs": 44.763302000001204,
+      "selectMs": 30.302369999999428,
+      "totalMs": 75.06567200000063
+    },
+    {
+      "mode": "all",
+      "block": 2,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "C",
+      "createMs": 74.50897500000065,
+      "selectMs": 255.32459000000017,
+      "totalMs": 329.8335650000008
+    },
+    {
+      "mode": "all",
+      "block": 2,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "A",
+      "createMs": 264.4466900000007,
+      "selectMs": 37.51152499999989,
+      "totalMs": 301.95821500000056
+    },
+    {
+      "mode": "all",
+      "block": 2,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "B",
+      "createMs": 21.322109000000637,
+      "selectMs": 20.426464000000124,
+      "totalMs": 41.74857300000076
+    },
+    {
+      "mode": "all",
+      "block": 3,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "A",
+      "createMs": 21.34133699999984,
+      "selectMs": 18.78629700000056,
+      "totalMs": 40.1276340000004
+    },
+    {
+      "mode": "all",
+      "block": 3,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "C",
+      "createMs": 20.70677500000056,
+      "selectMs": 14.947855000000345,
+      "totalMs": 35.65463000000091
+    },
+    {
+      "mode": "all",
+      "block": 3,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "B",
+      "createMs": 22.6252510000013,
+      "selectMs": 12.82819500000005,
+      "totalMs": 35.45344600000135
+    },
+    {
+      "mode": "all",
+      "block": 4,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "C",
+      "createMs": 24.052143999999316,
+      "selectMs": 41.2691190000005,
+      "totalMs": 65.32126299999982
+    },
+    {
+      "mode": "all",
+      "block": 4,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "B",
+      "createMs": 62.655721999999514,
+      "selectMs": 28.739172999999937,
+      "totalMs": 91.39489499999945
+    },
+    {
+      "mode": "all",
+      "block": 4,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "A",
+      "createMs": 51.91687499999898,
+      "selectMs": 17.240869000001112,
+      "totalMs": 69.1577440000001
+    },
+    {
+      "mode": "all",
+      "block": 5,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "B",
+      "createMs": 26.790172999999413,
+      "selectMs": 29.105901000000813,
+      "totalMs": 55.896074000000226
+    },
+    {
+      "mode": "all",
+      "block": 5,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "A",
+      "createMs": 36.50904399999854,
+      "selectMs": 38.3394100000005,
+      "totalMs": 74.84845399999904
+    },
+    {
+      "mode": "all",
+      "block": 5,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "C",
+      "createMs": 38.11113500000101,
+      "selectMs": 16.50640199999907,
+      "totalMs": 54.617537000000084
+    },
+    {
+      "mode": "all",
+      "block": 6,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "A",
+      "createMs": 23.916315000000395,
+      "selectMs": 13.53972900000008,
+      "totalMs": 37.456044000000475
+    },
+    {
+      "mode": "all",
+      "block": 6,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "B",
+      "createMs": 39.35680200000024,
+      "selectMs": 15.126917999999932,
+      "totalMs": 54.483720000000176
+    },
+    {
+      "mode": "all",
+      "block": 6,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "C",
+      "createMs": 21.74107399999957,
+      "selectMs": 14.169412999999622,
+      "totalMs": 35.91048699999919
+    },
+    {
+      "mode": "all",
+      "block": 7,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "B",
+      "createMs": 16.915852000000086,
+      "selectMs": 9.002851000001101,
+      "totalMs": 25.918703000001187
+    },
+    {
+      "mode": "all",
+      "block": 7,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "C",
+      "createMs": 73.19575900000018,
+      "selectMs": 70.9641849999989,
+      "totalMs": 144.1599439999991
+    },
+    {
+      "mode": "all",
+      "block": 7,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "A",
+      "createMs": 31.074329999999463,
+      "selectMs": 16.34925099999964,
+      "totalMs": 47.4235809999991
+    },
+    {
+      "mode": "all",
+      "block": 8,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "C",
+      "createMs": 57.60061499999938,
+      "selectMs": 44.185819000000265,
+      "totalMs": 101.78643399999964
+    },
+    {
+      "mode": "all",
+      "block": 8,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "A",
+      "createMs": 33.00027599999885,
+      "selectMs": 16.22407700000076,
+      "totalMs": 49.22435299999961
+    },
+    {
+      "mode": "all",
+      "block": 8,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "B",
+      "createMs": 31.138764000001174,
+      "selectMs": 16.68102799999906,
+      "totalMs": 47.819792000000234
+    },
+    {
+      "mode": "all",
+      "block": 9,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "A",
+      "createMs": 30.88686400000006,
+      "selectMs": 29.255740999999034,
+      "totalMs": 60.142604999999094
+    },
+    {
+      "mode": "all",
+      "block": 9,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "C",
+      "createMs": 24.746213000000353,
+      "selectMs": 31.310965999999098,
+      "totalMs": 56.05717899999945
+    },
+    {
+      "mode": "all",
+      "block": 9,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "B",
+      "createMs": 29.4226749999998,
+      "selectMs": 11.420208999999886,
+      "totalMs": 40.842883999999685
+    },
+    {
+      "mode": "all",
+      "block": 10,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "C",
+      "createMs": 18.795029999999315,
+      "selectMs": 74.19765999999981,
+      "totalMs": 92.99268999999913
+    },
+    {
+      "mode": "all",
+      "block": 10,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "B",
+      "createMs": 26.171674000001076,
+      "selectMs": 7.744484999999258,
+      "totalMs": 33.916159000000334
+    },
+    {
+      "mode": "all",
+      "block": 10,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "A",
+      "createMs": 35.549316000000545,
+      "selectMs": 21.91924900000049,
+      "totalMs": 57.468565000001036
+    },
+    {
+      "mode": "all",
+      "block": 11,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "B",
+      "createMs": 15.835877999999866,
+      "selectMs": 8.277055999998993,
+      "totalMs": 24.11293399999886
+    },
+    {
+      "mode": "all",
+      "block": 11,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "A",
+      "createMs": 22.434291000001394,
+      "selectMs": 35.04063899999892,
+      "totalMs": 57.47493000000031
+    },
+    {
+      "mode": "all",
+      "block": 11,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "C",
+      "createMs": 25.21944799999983,
+      "selectMs": 17.671761000001425,
+      "totalMs": 42.891209000001254
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": -2,
+      "warmup": true,
+      "order": "CBA",
+      "arm": "C",
+      "createMs": 34.814823000000615,
+      "selectMs": 27.682042000000365,
+      "totalMs": 62.49686500000098
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": -2,
+      "warmup": true,
+      "order": "CBA",
+      "arm": "B",
+      "createMs": 21.136657000000923,
+      "selectMs": 8.943804000000455,
+      "totalMs": 30.080461000001378
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": -2,
+      "warmup": true,
+      "order": "CBA",
+      "arm": "A",
+      "createMs": 21.190425000000687,
+      "selectMs": 15.586451999999554,
+      "totalMs": 36.77687700000024
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": -1,
+      "warmup": true,
+      "order": "BAC",
+      "arm": "B",
+      "createMs": 15.449389999999767,
+      "selectMs": 16.51399400000082,
+      "totalMs": 31.963384000000588
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": -1,
+      "warmup": true,
+      "order": "BAC",
+      "arm": "A",
+      "createMs": 76.35477499999979,
+      "selectMs": 16.890164999998888,
+      "totalMs": 93.24493999999868
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": -1,
+      "warmup": true,
+      "order": "BAC",
+      "arm": "C",
+      "createMs": 37.86818900000071,
+      "selectMs": 35.17963400000008,
+      "totalMs": 73.04782300000079
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 0,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "A",
+      "createMs": 215.19367099999909,
+      "selectMs": 263.4271040000003,
+      "totalMs": 478.6207749999994
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 0,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "B",
+      "createMs": 23.701154999998835,
+      "selectMs": 21.971872000000076,
+      "totalMs": 45.67302699999891
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 0,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "C",
+      "createMs": 33.09248099999968,
+      "selectMs": 39.59267,
+      "totalMs": 72.68515099999968
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 1,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "B",
+      "createMs": 18.82738700000118,
+      "selectMs": 14.234538999999131,
+      "totalMs": 33.06192600000031
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 1,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "C",
+      "createMs": 39.56293000000005,
+      "selectMs": 51.55503299999873,
+      "totalMs": 91.11796299999878
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 1,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "A",
+      "createMs": 38.81756200000018,
+      "selectMs": 24.836325000000215,
+      "totalMs": 63.653887000000395
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 2,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "C",
+      "createMs": 48.210415000001376,
+      "selectMs": 22.449423000000024,
+      "totalMs": 70.6598380000014
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 2,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "A",
+      "createMs": 35.13712099999975,
+      "selectMs": 22.770975000001272,
+      "totalMs": 57.908096000001024
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 2,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "B",
+      "createMs": 131.31707800000004,
+      "selectMs": 817.9725280000002,
+      "totalMs": 949.2896060000003
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 3,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "A",
+      "createMs": 58.698700999999346,
+      "selectMs": 27.60109200000079,
+      "totalMs": 86.29979300000014
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 3,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "C",
+      "createMs": 30.253914999999324,
+      "selectMs": 13.643631000000823,
+      "totalMs": 43.89754600000015
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 3,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "B",
+      "createMs": 14.546816000000035,
+      "selectMs": 11.950987999998688,
+      "totalMs": 26.497803999998723
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 4,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "C",
+      "createMs": 23.041472000000795,
+      "selectMs": 26.135191999999734,
+      "totalMs": 49.17666400000053
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 4,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "B",
+      "createMs": 15.704915000000256,
+      "selectMs": 13.289941000000908,
+      "totalMs": 28.994856000001164
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 4,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "A",
+      "createMs": 37.48256299999957,
+      "selectMs": 25.789824999999837,
+      "totalMs": 63.27238799999941
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 5,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "B",
+      "createMs": 15.279091000000335,
+      "selectMs": 27.699516999999105,
+      "totalMs": 42.97860799999944
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 5,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "A",
+      "createMs": 23.15538899999956,
+      "selectMs": 15.015003000000434,
+      "totalMs": 38.17039199999999
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 5,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "C",
+      "createMs": 24.944534000000203,
+      "selectMs": 61.02077400000053,
+      "totalMs": 85.96530800000073
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 6,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "A",
+      "createMs": 33.43525299999965,
+      "selectMs": 16.89519300000029,
+      "totalMs": 50.33044599999994
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 6,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "B",
+      "createMs": 13.772901000000275,
+      "selectMs": 10.011740999998437,
+      "totalMs": 23.784641999998712
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 6,
+      "warmup": false,
+      "order": "ABC",
+      "arm": "C",
+      "createMs": 24.73105100000066,
+      "selectMs": 29.830243999998856,
+      "totalMs": 54.56129499999952
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 7,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "B",
+      "createMs": 13.59908500000165,
+      "selectMs": 10.31861199999912,
+      "totalMs": 23.91769700000077
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 7,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "C",
+      "createMs": 28.608130999999048,
+      "selectMs": 19.845632000000478,
+      "totalMs": 48.453762999999526
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 7,
+      "warmup": false,
+      "order": "BCA",
+      "arm": "A",
+      "createMs": 25.33560799999941,
+      "selectMs": 62.612239000000045,
+      "totalMs": 87.94784699999946
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 8,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "C",
+      "createMs": 22.141932000000452,
+      "selectMs": 12.420105999999578,
+      "totalMs": 34.56203800000003
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 8,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "A",
+      "createMs": 32.49137900000096,
+      "selectMs": 23.353649000000587,
+      "totalMs": 55.84502800000155
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 8,
+      "warmup": false,
+      "order": "CAB",
+      "arm": "B",
+      "createMs": 16.166944000000512,
+      "selectMs": 14.0486149999997,
+      "totalMs": 30.215559000000212
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 9,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "A",
+      "createMs": 57.14285299999938,
+      "selectMs": 35.55782800000088,
+      "totalMs": 92.70068100000026
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 9,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "C",
+      "createMs": 35.08937100000003,
+      "selectMs": 17.802162999998473,
+      "totalMs": 52.8915339999985
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 9,
+      "warmup": false,
+      "order": "ACB",
+      "arm": "B",
+      "createMs": 31.877566999999544,
+      "selectMs": 9.11411500000031,
+      "totalMs": 40.991681999999855
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 10,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "C",
+      "createMs": 31.442759999999907,
+      "selectMs": 17.371500999999625,
+      "totalMs": 48.81426099999953
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 10,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "B",
+      "createMs": 15.695271000000503,
+      "selectMs": 7.735029999999824,
+      "totalMs": 23.430301000000327
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 10,
+      "warmup": false,
+      "order": "CBA",
+      "arm": "A",
+      "createMs": 42.5886559999999,
+      "selectMs": 14.017890000000989,
+      "totalMs": 56.60654600000089
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 11,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "B",
+      "createMs": 13.513480999999956,
+      "selectMs": 21.19506100000035,
+      "totalMs": 34.70854200000031
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 11,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "A",
+      "createMs": 43.20908600000075,
+      "selectMs": 12.717150999998921,
+      "totalMs": 55.926236999999674
+    },
+    {
+      "mode": "withoutFirst256",
+      "block": 11,
+      "warmup": false,
+      "order": "BAC",
+      "arm": "C",
+      "createMs": 19.342172999999093,
+      "selectMs": 27.024445999999443,
+      "totalMs": 46.366618999998536
+    }
+  ]
+}

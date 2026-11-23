@@ -1,0 +1,46 @@
+{
+  "scope": "Targeted private-source snapshot regression with real codec, controlled worker readiness and actual transferred private buffers; no timing evidence",
+  "testSha256": "f6720c3c5be2cc9818ea6ca428ed21527ce916b5ee2db910a0651336195a1ebb",
+  "sourceCommits": {
+    "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+    "pr847": "44d6830646bfa43cb30fbec3c05ea9d98d09406f",
+    "candidate": "912c0bed18b5f6301a0a0eccd08ed2d2fefcf6b2"
+  },
+  "productSourceHashes": {
+    "baseline": {
+      "ext/js/dictionary/term-content-block-store.js": "d27395a9ce7402f1bb745b0bd0da95e8a0686bd496e19a3657179abcf9086056",
+      "ext/js/dictionary/zstd-term-content.js": "6b0c31f7d2cd5cd5b09ab12ab355c2cad96ee55c8539160d2aa9e599a1b248b3"
+    },
+    "pr847": {
+      "ext/js/dictionary/term-content-block-store.js": "c0961d309a5c54d528d222a8f512ffaa0666dc0dc52d20b266e10c62fd6a42bc",
+      "ext/js/dictionary/zstd-term-content.js": "c1f2f7cf878d5bbbefb60528c11b7780006ad7dfee7801f39602533c350230c8"
+    },
+    "candidate": {
+      "ext/js/dictionary/term-content-block-store.js": "cfc5bd1877325515cb904a2f23e4d1e297279a2f13857b474188bb9c399f1fd0",
+      "ext/js/dictionary/zstd-term-content.js": "6b4ccd44191ecc84d29eb5641ed1da087c8497373ee64229824ca54727a99ae9"
+    }
+  },
+  "cases": [
+    "cold workers / overwrite",
+    "ready workers / overwrite",
+    "cold workers / overwrite and detach",
+    "ready workers / overwrite and detach"
+  ],
+  "results": {
+    "baseline": {
+      "passed": 4,
+      "failed": 0
+    },
+    "pr847": {
+      "passed": 0,
+      "failed": 4,
+      "overwriteOnly": "persisted [0,0,0,0] instead of original [2,3,4,5]",
+      "overwriteAndDetach": "TypeError: Cannot perform Construct on a detached ArrayBuffer"
+    },
+    "candidate": {
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "isolation": "Same detached checkout, same test and dependencies; only two product modules replaced with the listed commit versions for controls; restored to PR847 HEAD afterward; no remote branch edits"
+}

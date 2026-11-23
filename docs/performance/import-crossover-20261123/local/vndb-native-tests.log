@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1
+
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/vndb
+
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  15:50:03
+   Duration  4.95s (transform 69ms, setup 41ms, import 73ms, tests 4.41s, environment 0ms)
+
