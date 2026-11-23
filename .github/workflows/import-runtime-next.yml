@@ -1,4 +1,4 @@
-name: Import runtime study (frozen sources)
+name: Import runtime regression assessment (frozen sources)
 
 on:
   push:
@@ -15,12 +15,12 @@ on:
       stage:
         description: 'Independent fixed cohort; never pool a screen with qualification'
         type: choice
-        default: screen
+        default: qualification
         options: [screen, qualification, baseline, diagnostic]
       dictionary:
         description: 'Run all three complete pinned archives or narrow to one independent job'
         type: choice
-        default: all
+        default: jitendex
         options: [all, jitendex, jmdict, vndb]
 
 permissions:
@@ -32,19 +32,20 @@ concurrency:
 
 jobs:
   study:
-    name: Frozen release Chrome import study (${{ matrix.dictionary }})
+    name: Frozen import regression assessment (${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        dictionary: ${{ fromJSON(inputs.dictionary != '' && inputs.dictionary != 'all' && format('["{0}"]', inputs.dictionary) || '["jitendex","jmdict","vndb"]') }}
+        dictionary: ${{ fromJSON(inputs.dictionary == 'all' && '["jitendex","jmdict","vndb"]' || inputs.dictionary != '' && format('["{0}"]', inputs.dictionary) || '["jitendex"]') }}
     env:
       PERF_BASELINE_SHA: 467067650653c37c1f7d6b05d6737d070e1259cd
       # Publish this exact frozen source before pushing the tooling branch.
       PERF_CANDIDATE_SHA: ${{ inputs.candidate_sha || '44686ef6ebaafa624e6d228494719bbed4cb8ef4' }}
-      # A separate push changing screen to qualification starts a new 12-block cohort.
-      PERF_STAGE: ${{ inputs.stage || 'screen' }}
+      # Independent 12-block Jitendex regression assessment after an inconclusive screen.
+      # Preserve all observations; do not pool the six-block screen with this cohort.
+      PERF_STAGE: ${{ inputs.stage || 'qualification' }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
