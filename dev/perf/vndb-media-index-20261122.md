@@ -19,7 +19,8 @@ are unchanged.
 - Source-derived metadata covers all 146,570 image paths and 163,034 index slots.
   The partial selection omits every seventh path, leaving 125,631 references.
 
-Run from the candidate checkout with Node 22.22.0:
+Run the [media-index benchmark](generation-media-index-benchmark.js) from the
+candidate checkout with Node 22.22.0:
 
 ```sh
 node --max-old-space-size=512 dev/perf/generation-media-index-benchmark.js \
@@ -68,10 +69,12 @@ All observations are in `results/vndb-media-index-20261122/`:
 - `contended-source.json`: first exact-source run overlapped another agent's
   multiworker corpus capture. All byte checks passed, but extreme same-code
   variation makes this correctness-only evidence. It is not used for speed claims.
-- `current-source.json`: the complete final fixed schedule above, after the known
+- [current-source.json](results/vndb-media-index-20261122/current-source.json):
+  the complete final fixed schedule above, after the known
   overlapping work stopped. Includes source/harness/fixture hashes and all 72
   timed observations. Unrelated host activity could not be excluded.
-- `measured-harness.js.txt`: exact final measurement script matching the recorded
+- [measured-harness.js.txt](results/vndb-media-index-20261122/measured-harness.js.txt):
+  exact final measurement script matching the recorded
   harness hash. The maintained script subsequently received lint/type annotations,
   a static candidate import, and the project's `safePerformance.now()` wrapper.
   These edits do not change the schedule or product source; no further timings
