@@ -2771,22 +2771,7 @@ class ParallelTermBankPipelineRun {
     /** @returns {Promise<boolean>} */
     async run() {
         try {
-            this._throwIfStopped();
-            // The run already owns its lease and bounded source partition.
-            // Load only group zero while the workers start. The importer owns
-            // aborting/joining these reads if startup fails, just as it owns
-            // reads activated by the normal pipeline window below.
-            /** @type {Promise<{workers: Worker[]}>} */
-            const startup = new Promise((resolve, reject) => {
-                void this._poolLease.getWorkers().then(resolve, reject);
-                for (const source of this._groups[0]) {
-                    // A source error must retire a hung worker startup too.
-                    // Late failures stay observed after readiness wins; the
-                    // ordinary source consumer then reports the same failure.
-                    void loadParallelTermBankSource(source).catch(reject);
-                }
-            });
-            const [{workers}] = await waitForParallelWork([startup], this._shouldCancel);
+            const [{workers}] = await waitForParallelWork([this._poolLease.getWorkers()], this._shouldCancel);
             this._throwIfStopped();
             await this._runPipeline(workers);
             this._keepWorkers = true;

@@ -37,6 +37,7 @@
         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
+        {"path": "dev/perf/evidence/startup-source-overlap-rejected-20261123.manifest.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",
