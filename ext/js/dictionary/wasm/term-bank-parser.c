@@ -206,9 +206,10 @@ int32_t inflate_and_join_term_banks(
     uint32_t source_count,
     uint32_t output_ptr,
     uint32_t output_capacity,
-    uint32_t bank_spans_ptr
+    uint32_t bank_spans_ptr,
+    uint32_t defer_crc
 ) {
-    if (source_count == 0u || output_capacity < 2u) {
+    if (source_count == 0u || output_capacity < 2u || (defer_crc != 0u && bank_spans_ptr == 0u)) {
         return -1;
     }
     const uint8_t* input = (const uint8_t*)(uintptr_t)input_ptr;
@@ -248,7 +249,7 @@ int32_t inflate_and_join_term_banks(
         } else {
             return -1;
         }
-        if (crc32_bytes(inflated, uncompressed_length) != signatures[i]) {
+        if (defer_crc == 0u && crc32_bytes(inflated, uncompressed_length) != signatures[i]) {
             return -4;
         }
 
@@ -367,6 +368,156 @@ typedef struct {
     uint32_t glossary_requires_normalization;
     uint32_t glossary_requires_text_normalization;
 } TermRowMeta;
+
+/* Apply a polynomial operator in the reflected IEEE CRC representation. The
+ * identity is bit 31; one step multiplies by x modulo the CRC polynomial. */
+static uint32_t crc32_multiply_mod(uint32_t a, uint32_t b) {
+    uint32_t result = 0u;
+    for (uint32_t bit = 0x80000000u; bit != 0u; bit >>= 1u) {
+        if ((a & bit) != 0u) { result ^= b; }
+        b = (b >> 1u) ^ ((b & 1u) != 0u ? 0xedb88320u : 0u);
+    }
+    return result;
+}
+
+typedef struct {
+    uint32_t length;
+    uint32_t table[8][16];
+} Crc32Shift;
+
+static void crc32_prepare_shift(Crc32Shift* shift, uint32_t length) {
+    uint32_t power = 0x00800000u; /* x^8: advance one byte. */
+    uint32_t factor = 0x80000000u;
+    for (uint32_t remaining = length; remaining != 0u; remaining >>= 1u) {
+        if ((remaining & 1u) != 0u) { factor = crc32_multiply_mod(factor, power); }
+        power = crc32_multiply_mod(power, power);
+    }
+    uint32_t basis[32];
+    basis[31] = factor;
+    for (uint32_t i = 31u; i > 0u; --i) {
+        const uint32_t previous = basis[i];
+        basis[i - 1u] = (previous >> 1u) ^ ((previous & 1u) != 0u ? 0xedb88320u : 0u);
+    }
+    for (uint32_t nibble = 0u; nibble < 8u; ++nibble) {
+        shift->table[nibble][0] = 0u;
+        for (uint32_t value = 1u; value < 16u; ++value) {
+            const uint32_t bit = (uint32_t)__builtin_ctz(value);
+            shift->table[nibble][value] =
+                shift->table[nibble][value & (value - 1u)] ^ basis[nibble * 4u + bit];
+        }
+    }
+    shift->length = length;
+}
+
+static uint32_t crc32_shift(const Crc32Shift* shift, uint32_t crc) {
+    return shift->table[0][crc & 15u] ^ shift->table[1][(crc >> 4u) & 15u] ^
+        shift->table[2][(crc >> 8u) & 15u] ^ shift->table[3][(crc >> 12u) & 15u] ^
+        shift->table[4][(crc >> 16u) & 15u] ^ shift->table[5][(crc >> 20u) & 15u] ^
+        shift->table[6][(crc >> 24u) & 15u] ^ shift->table[7][crc >> 28u];
+}
+
+/* These gaps are usually short row fields, separators, or array wrappers.
+ * Both the initial and returned state use the ordinary complemented CRC. */
+static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t length) {
+    crc = ~crc;
+    uint32_t offset = 0u;
+    while (length - offset >= 16u) {
+        crc = crc32_step16(data + offset, crc);
+        offset += 16u;
+    }
+    while (offset < length) {
+        crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset++]) & 0xffu];
+    }
+    return ~crc;
+}
+
+#if defined(TERM_BANK_CRC_TEST)
+__attribute__((visibility("default")))
+uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t second_length) {
+    Crc32Shift shift;
+    crc32_prepare_shift(&shift, second_length);
+    return crc32_shift(&shift, first) ^ second;
+}
+#endif
+
+/* The witness array comes only from reuse_validated_glossary: each ID proves
+ * full raw-byte equality with a previously parsed glossary in this invocation.
+ * Canonical content IDs MUST NOT be used here. Consume the IDs in source order,
+ * replacing them with CRCs; no content-dependent cache survives this call.
+ * Passing no rows performs the ordinary whole-bank verification for failures
+ * and non-fused fallback paths. */
+__attribute__((visibility("default")))
+int32_t verify_term_bank_source_crcs(
+    uint32_t json_ptr,
+    uint32_t json_length,
+    uint32_t bank_spans_ptr,
+    uint32_t bank_count,
+    uint32_t signatures_ptr,
+    uint32_t metas_ptr,
+    uint32_t row_count,
+    uint32_t glossary_witnesses_ptr,
+    uint32_t stats_ptr
+) {
+    if (json_ptr == 0u || bank_spans_ptr == 0u || bank_count == 0u || signatures_ptr == 0u ||
+        (row_count != 0u && (metas_ptr == 0u || glossary_witnesses_ptr == 0u))) { return -1; }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
+    const uint32_t* spans = (const uint32_t*)(uintptr_t)bank_spans_ptr;
+    const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
+    const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
+    uint32_t* witnesses = (uint32_t*)(uintptr_t)glossary_witnesses_ptr;
+    uint32_t* stats = (uint32_t*)(uintptr_t)stats_ptr;
+    uint32_t next_row = 0u;
+    uint32_t bank_end = 0u;
+    uint32_t reused_bytes = 0u;
+    uint32_t reused_glossaries = 0u;
+    Crc32Shift shift;
+    shift.length = 0xffffffffu;
+    /* Initialize the shared, input-independent slicing tables before gaps. */
+    (void)crc32_bytes(src, 0u);
+    for (uint32_t bank = 0u; bank < bank_count; ++bank) {
+        const uint32_t start = spans[bank * 2u];
+        const uint32_t length = spans[bank * 2u + 1u];
+        if (start != bank_end || start > json_length || length > json_length - start) { return -1; }
+        bank_end = start + length;
+        uint32_t crc;
+        if (row_count == 0u) {
+            crc = crc32_bytes(src + start, length);
+        } else {
+            uint32_t cursor = start;
+            crc = 0u;
+            while (next_row < row_count && rows[next_row].glossary_start < bank_end) {
+                const uint32_t glossary_start = rows[next_row].glossary_start;
+                const uint32_t glossary_length = rows[next_row].glossary_length;
+                if (glossary_start < cursor || glossary_length == 0u || glossary_length > bank_end - glossary_start) { return -1; }
+                crc = crc32_update_gap(crc, src + cursor, glossary_start - cursor);
+                const uint32_t witness = witnesses[next_row];
+                uint32_t glossary_crc;
+                if (witness == 0xffffffffu) {
+                    glossary_crc = crc32_bytes(src + glossary_start, glossary_length);
+                } else {
+                    if (witness >= next_row || rows[witness].glossary_length != glossary_length) { return -1; }
+                    glossary_crc = witnesses[witness];
+                    reused_bytes += glossary_length;
+                    ++reused_glossaries;
+                }
+                witnesses[next_row] = glossary_crc;
+                if (shift.length != glossary_length) { crc32_prepare_shift(&shift, glossary_length); }
+                crc = crc32_shift(&shift, crc) ^ glossary_crc;
+                cursor = glossary_start + glossary_length;
+                ++next_row;
+            }
+            crc = crc32_update_gap(crc, src + cursor, bank_end - cursor);
+        }
+        if (crc != signatures[bank]) { return -4; }
+    }
+    if (bank_end != json_length || next_row != row_count) { return -1; }
+    if (stats != 0) {
+        stats[0] = json_length - reused_bytes;
+        stats[1] = reused_bytes;
+        stats[2] = reused_glossaries;
+    }
+    return 0;
+}
 
 static uint32_t align8(uint32_t value) {
     return (value + 7u) & ~7u;
@@ -2811,7 +2962,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t raw_content_hash_table_ptr,
     uint32_t raw_content_hash_table_size,
     uint32_t raw_content_hashes_ptr,
-    uint32_t validate_glossary_types
+    uint32_t validate_glossary_types,
+    uint32_t glossary_witnesses_ptr
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -2848,6 +3000,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t* raw_content_hashes = (uint32_t*)(uintptr_t)raw_content_hashes_ptr;
     uint32_t* unique_indexes = (uint32_t*)(uintptr_t)unique_indexes_ptr;
     uint32_t* unique_signatures = (uint32_t*)(uintptr_t)unique_signatures_ptr;
+    uint32_t* glossary_witnesses = (uint32_t*)(uintptr_t)glossary_witnesses_ptr;
     uint8_t* strings = (uint8_t*)(uintptr_t)strings_ptr;
     uint16_t* string_lengths = (uint16_t*)(uintptr_t)string_lengths_ptr;
     uint32_t* string_offsets = (uint32_t*)(uintptr_t)string_offsets_ptr;
@@ -2901,6 +3054,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
             return -1;
         }
+        if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
         if (validated_glossary_reuse_enabled && row_count > 0u) {
             if (glossary_witness != 0xffffffffu) {
