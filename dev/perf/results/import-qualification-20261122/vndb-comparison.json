@@ -1,0 +1,389 @@
+{
+    "dictionary": "vndb",
+    "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "candidateSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+    "browser": "153.0.8010.12",
+    "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaRows": 146570,
+        "mediaProbePaths": [
+            "img/cc18737.webp"
+        ]
+    },
+    "timingBoundary": "file-input change to post-UI import-complete event",
+    "warmups": 6,
+    "measuredImports": 36,
+    "tripletCount": 12,
+    "armMediansMs": {
+        "A": 8065.6500000000815,
+        "B": 8079.800000000047,
+        "C": 8098.849999999977
+    },
+    "candidateVersusA": {
+        "pairedChangesPercent": [
+            -0.5468710982376113,
+            -0.25141264032999544,
+            0.3310472335694481,
+            -0.3307579974773045,
+            1.9172502231553645,
+            0.9700209564688755,
+            -4.542291315270852,
+            -0.7309390316561082,
+            0.1494436004774835,
+            8.620375432841264,
+            27.607610308998098,
+            -1.088849106111467
+        ],
+        "medianPairedChangePercent": -0.05098451992625597,
+        "equalWorkChangePercent": 2.6757447438161774,
+        "fasterPairs": 6,
+        "descriptivePairedMedianInterval95Percent": [
+            -0.6389050649468597,
+            1.44363558981212
+        ]
+    },
+    "candidateVersusC": {
+        "pairedChangesPercent": [
+            -0.6262787564258465,
+            -1.1934115790503297,
+            0.009961895749333038,
+            1.428952482566781,
+            1.7432885274297982,
+            -0.5917890809372106,
+            -3.9087174372499756,
+            4.949018296843133,
+            -0.1735833261531372,
+            4.747621502553678,
+            26.43201789034597,
+            -0.4565871958113421
+        ],
+        "medianPairedChangePercent": -0.08181071520190208,
+        "equalWorkChangePercent": 2.715746581031553,
+        "fasterPairs": 6,
+        "descriptivePairedMedianInterval95Percent": [
+            -0.6090339186815286,
+            3.2454550149917383
+        ]
+    },
+    "identicalCodeControl": {
+        "pairedChangesPercent": [
+            0.07990810567874984,
+            0.9533766460057436,
+            0.3210533548196004,
+            -1.7349193075286151,
+            0.17098100350734224,
+            1.5711076811126823,
+            -0.6593458439969724,
+            -5.4121109665206895,
+            0.3235886225246398,
+            3.697223740964062,
+            0.9298217637178752,
+            -0.6351619785669227
+        ],
+        "medianPairedChangePercent": 0.24601717916347132,
+        "equalWorkChangePercent": -0.03894421113301849,
+        "fasterPairs": 4,
+        "descriptivePairedMedianInterval95Percent": [
+            -0.6472539112819475,
+            0.9415992048618094
+        ]
+    },
+    "observations": [
+        {
+            "name": "A1",
+            "arm": "A",
+            "milliseconds": 8009.199999999953
+        },
+        {
+            "name": "B1",
+            "arm": "B",
+            "milliseconds": 7965.399999999907
+        },
+        {
+            "name": "C1",
+            "arm": "C",
+            "milliseconds": 8015.599999999977
+        },
+        {
+            "name": "C2",
+            "arm": "C",
+            "milliseconds": 8111.199999999953
+        },
+        {
+            "name": "B2",
+            "arm": "B",
+            "milliseconds": 8014.400000000023
+        },
+        {
+            "name": "A2",
+            "arm": "A",
+            "milliseconds": 8034.599999999977
+        },
+        {
+            "name": "B3",
+            "arm": "B",
+            "milliseconds": 8031.400000000023
+        },
+        {
+            "name": "C3",
+            "arm": "C",
+            "milliseconds": 8030.599999999977
+        },
+        {
+            "name": "A3",
+            "arm": "A",
+            "milliseconds": 8004.900000000023
+        },
+        {
+            "name": "A4",
+            "arm": "A",
+            "milliseconds": 8011.899999999907
+        },
+        {
+            "name": "C4",
+            "arm": "C",
+            "milliseconds": 7872.900000000023
+        },
+        {
+            "name": "B4",
+            "arm": "B",
+            "milliseconds": 7985.400000000023
+        },
+        {
+            "name": "C5",
+            "arm": "C",
+            "milliseconds": 7967.699999999953
+        },
+        {
+            "name": "A5",
+            "arm": "A",
+            "milliseconds": 7954.099999999977
+        },
+        {
+            "name": "B5",
+            "arm": "B",
+            "milliseconds": 8106.599999999977
+        },
+        {
+            "name": "B6",
+            "arm": "B",
+            "milliseconds": 8046.199999999953
+        },
+        {
+            "name": "A6",
+            "arm": "A",
+            "milliseconds": 7968.899999999907
+        },
+        {
+            "name": "C6",
+            "arm": "C",
+            "milliseconds": 8094.100000000093
+        },
+        {
+            "name": "B7",
+            "arm": "B",
+            "milliseconds": 8093
+        },
+        {
+            "name": "A7",
+            "arm": "A",
+            "milliseconds": 8478.099999999977
+        },
+        {
+            "name": "C7",
+            "arm": "C",
+            "milliseconds": 8422.20000000007
+        },
+        {
+            "name": "C8",
+            "arm": "C",
+            "milliseconds": 7777.299999999814
+        },
+        {
+            "name": "A8",
+            "arm": "A",
+            "milliseconds": 8222.300000000047
+        },
+        {
+            "name": "B8",
+            "arm": "B",
+            "milliseconds": 8162.200000000186
+        },
+        {
+            "name": "A9",
+            "arm": "A",
+            "milliseconds": 8096.700000000186
+        },
+        {
+            "name": "C9",
+            "arm": "C",
+            "milliseconds": 8122.90000000014
+        },
+        {
+            "name": "B9",
+            "arm": "B",
+            "milliseconds": 8108.800000000047
+        },
+        {
+            "name": "B10",
+            "arm": "B",
+            "milliseconds": 8940
+        },
+        {
+            "name": "C10",
+            "arm": "C",
+            "milliseconds": 8534.800000000047
+        },
+        {
+            "name": "A10",
+            "arm": "A",
+            "milliseconds": 8230.5
+        },
+        {
+            "name": "C11",
+            "arm": "C",
+            "milliseconds": 8227.90000000014
+        },
+        {
+            "name": "B11",
+            "arm": "B",
+            "milliseconds": 10402.699999999953
+        },
+        {
+            "name": "A11",
+            "arm": "A",
+            "milliseconds": 8152.100000000093
+        },
+        {
+            "name": "A12",
+            "arm": "A",
+            "milliseconds": 8155.399999999907
+        },
+        {
+            "name": "B12",
+            "arm": "B",
+            "milliseconds": 8066.600000000093
+        },
+        {
+            "name": "C12",
+            "arm": "C",
+            "milliseconds": 8103.59999999986
+        }
+    ],
+    "packageHashes": {
+        "A": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+        "B": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+        "C": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58"
+    },
+    "changedPackageEntries": [
+        "js/dictionary/dictionary-generation-media-store.js",
+        "js/dictionary/dictionary-importer.js"
+    ],
+    "identicalSampledContentAndMedia": true,
+    "validation": {
+        "title": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+            "フォーニ",
+            "あいこ先生",
+            "鎧衣 美琴たん",
+            "右代宮金蔵社長",
+            "Kamala Copperheart",
+            "榊亜実先輩",
+            "RestaurantOwnerちゃん",
+            "Osamu博士",
+            "Lynrd Skynrdたん",
+            "霧姫・アイスマン坊",
+            "Tyler博士",
+            "クレイグ・ウァジェト部長"
+        ],
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "mediaRows": 146570,
+        "generationMedia": {
+            "version": 2,
+            "prefix": "img/cc",
+            "suffix": ".webp",
+            "firstId": 1,
+            "slotCount": 163034,
+            "count": 146314,
+            "dataBytes": 195649882
+        },
+        "packedMediaActivation": {
+            "entries": 146314,
+            "bytes": 195649882
+        },
+        "mediaBeforeRestart": [
+            {
+                "path": "img/cc1.webp",
+                "bytes": 934,
+                "sha256": "eeca929c063487b7db1c270efc9b7a243e5cd56ff8fcd072b179a864f5098186"
+            },
+            {
+                "path": "img/cc51193.webp",
+                "bytes": 1336,
+                "sha256": "24eb098b3e27a66fed57a2268c51e9af9a28eb769134253ad117cd0e41bb6e43"
+            },
+            {
+                "path": "img/cc106314.webp",
+                "bytes": 936,
+                "sha256": "e3be14613a5777ae7ffd35544bf8758babc65c18be31b5dfaf38bdfcb20f8b56"
+            },
+            {
+                "path": "img/cc163034.webp",
+                "bytes": 1268,
+                "sha256": "29b4c1fc6fa8731290d5efe82f727dca6d0ae5e5c8a004b6ab6d904cf0620c84"
+            },
+            {
+                "path": "img/cc18737.webp",
+                "bytes": 76,
+                "sha256": "ebe9c28a4b678d7884dd7370343231ab7862d56abe35d717c6026fb12a8fd38d"
+            }
+        ],
+        "mediaAfterRestart": [
+            {
+                "path": "img/cc1.webp",
+                "bytes": 934,
+                "sha256": "eeca929c063487b7db1c270efc9b7a243e5cd56ff8fcd072b179a864f5098186"
+            },
+            {
+                "path": "img/cc51193.webp",
+                "bytes": 1336,
+                "sha256": "24eb098b3e27a66fed57a2268c51e9af9a28eb769134253ad117cd0e41bb6e43"
+            },
+            {
+                "path": "img/cc106314.webp",
+                "bytes": 936,
+                "sha256": "e3be14613a5777ae7ffd35544bf8758babc65c18be31b5dfaf38bdfcb20f8b56"
+            },
+            {
+                "path": "img/cc163034.webp",
+                "bytes": 1268,
+                "sha256": "29b4c1fc6fa8731290d5efe82f727dca6d0ae5e5c8a004b6ab6d904cf0620c84"
+            },
+            {
+                "path": "img/cc18737.webp",
+                "bytes": 76,
+                "sha256": "ebe9c28a4b678d7884dd7370343231ab7862d56abe35d717c6026fb12a8fd38d"
+            }
+        ],
+        "restart": {
+            "title": "VNDB Characters by Bee",
+            "revision": "395525135651",
+            "termRows": 6648310,
+            "contentReadable": true,
+            "probeCount": 12
+        }
+    },
+    "limitation": "One Chromium host per dictionary; all observations and tails retained. A/C controls are reported separately without subtraction. Descriptive intervals are not cross-device guarantees. Sampled browser persistence checks, not exhaustive stored-byte equality or peak-memory measurement."
+}

@@ -1,0 +1,3406 @@
+{
+    "schemaVersion": 1,
+    "dictionary": "vndb",
+    "baselineGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "measuredCandidateGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+    "originalArtifactDirectory": "vndb",
+    "originalArtifactComparisonFileSha256": "52a528d5b6ee796a8792be064871420a5f0475cfdc32510c05d79de3d5395b59",
+    "retainedComparisonFileSha256": "259e4b6c1a3705885aab137b25c69875f40744c73535efe63cac87e0637f18d1",
+    "comparisonFormatting": "The retained comparison uses four-space indentation; parsed values exactly match the original artifact comparison.",
+    "warmupOrderFileSha256": "7746ffb67b9404ceb195771c03d66c0f44182634a762631a9d09d8e3ca9d10a5",
+    "observationOrderFileSha256": "8b4a76082b4187262f5155e8dc1ad5604fefb52a371ebd92e04275e4dc05cd8a",
+    "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaRows": 146570,
+        "mediaProbePaths": [
+            "img/cc18737.webp"
+        ]
+    },
+    "sourceProvenance": {
+        "baseline": {
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "dirty": true,
+            "sha256": {
+                "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+                "test/perf/dictionaries.lock.json": "ff042cf90c33a04c7ea18ecec3c654c26d631ba67deca5dcee01441560d9aec5",
+                "dev/perf/benchmark-support.js": "664e079727759956b0eaad7c1a7122ceeb8489b17598d76093bf5b6599f7825f",
+                "dev/perf/dictionary-fixtures.js": "536a7d273b1d4846cb8006936e0440ae38c278d1355ca757ac260aaaf0b38a03",
+                "dev/perf/import-benchmark.js": "bdd7af08657d421fd18d0fcd49d6c45383af559fef87fd1c3bd068aa38870d2b",
+                "test/chromium/import-flags-ab-benchmark.js": "6e2fbbfa27d1565c600d7092b33cf51a05167b76d4451d50c1f2661efde2676f",
+                "test/chromium/extension-two-dictionary-import.e2e.js": "934414307ebbe5d5a4b98c5676ccd0b6018607b6336fdccea42c780966db1c43",
+                "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+                "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+                "builds/manabitan-chrome-dev.zip": null,
+                "builds/manabitan-chrome.zip": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58"
+            }
+        },
+        "candidate": {
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "dirty": true,
+            "sha256": {
+                "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+                "test/perf/dictionaries.lock.json": "ff042cf90c33a04c7ea18ecec3c654c26d631ba67deca5dcee01441560d9aec5",
+                "dev/perf/benchmark-support.js": "664e079727759956b0eaad7c1a7122ceeb8489b17598d76093bf5b6599f7825f",
+                "dev/perf/dictionary-fixtures.js": "536a7d273b1d4846cb8006936e0440ae38c278d1355ca757ac260aaaf0b38a03",
+                "dev/perf/import-benchmark.js": "bdd7af08657d421fd18d0fcd49d6c45383af559fef87fd1c3bd068aa38870d2b",
+                "test/chromium/import-flags-ab-benchmark.js": "6e2fbbfa27d1565c600d7092b33cf51a05167b76d4451d50c1f2661efde2676f",
+                "test/chromium/extension-two-dictionary-import.e2e.js": "934414307ebbe5d5a4b98c5676ccd0b6018607b6336fdccea42c780966db1c43",
+                "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+                "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+                "builds/manabitan-chrome-dev.zip": null,
+                "builds/manabitan-chrome.zip": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0"
+            }
+        }
+    },
+    "sourceProvenanceScope": "The complete original summary source object is stored once per source arm. Exact deep equality was checked across all 28 baseline summaries (A and C) and all 14 candidate summaries (B), including warmups.",
+    "sharedValidation": {
+        "title": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+            "フォーニ",
+            "あいこ先生",
+            "鎧衣 美琴たん",
+            "右代宮金蔵社長",
+            "Kamala Copperheart",
+            "榊亜実先輩",
+            "RestaurantOwnerちゃん",
+            "Osamu博士",
+            "Lynrd Skynrdたん",
+            "霧姫・アイスマン坊",
+            "Tyler博士",
+            "クレイグ・ウァジェト部長"
+        ],
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "mediaRows": 146570,
+        "generationMedia": {
+            "version": 2,
+            "prefix": "img/cc",
+            "suffix": ".webp",
+            "firstId": 1,
+            "slotCount": 163034,
+            "count": 146314,
+            "dataBytes": 195649882
+        },
+        "packedMediaActivation": {
+            "entries": 146314,
+            "bytes": 195649882
+        },
+        "mediaBeforeRestart": [
+            {
+                "path": "img/cc1.webp",
+                "bytes": 934,
+                "sha256": "eeca929c063487b7db1c270efc9b7a243e5cd56ff8fcd072b179a864f5098186"
+            },
+            {
+                "path": "img/cc51193.webp",
+                "bytes": 1336,
+                "sha256": "24eb098b3e27a66fed57a2268c51e9af9a28eb769134253ad117cd0e41bb6e43"
+            },
+            {
+                "path": "img/cc106314.webp",
+                "bytes": 936,
+                "sha256": "e3be14613a5777ae7ffd35544bf8758babc65c18be31b5dfaf38bdfcb20f8b56"
+            },
+            {
+                "path": "img/cc163034.webp",
+                "bytes": 1268,
+                "sha256": "29b4c1fc6fa8731290d5efe82f727dca6d0ae5e5c8a004b6ab6d904cf0620c84"
+            },
+            {
+                "path": "img/cc18737.webp",
+                "bytes": 76,
+                "sha256": "ebe9c28a4b678d7884dd7370343231ab7862d56abe35d717c6026fb12a8fd38d"
+            }
+        ],
+        "mediaAfterRestart": [
+            {
+                "path": "img/cc1.webp",
+                "bytes": 934,
+                "sha256": "eeca929c063487b7db1c270efc9b7a243e5cd56ff8fcd072b179a864f5098186"
+            },
+            {
+                "path": "img/cc51193.webp",
+                "bytes": 1336,
+                "sha256": "24eb098b3e27a66fed57a2268c51e9af9a28eb769134253ad117cd0e41bb6e43"
+            },
+            {
+                "path": "img/cc106314.webp",
+                "bytes": 936,
+                "sha256": "e3be14613a5777ae7ffd35544bf8758babc65c18be31b5dfaf38bdfcb20f8b56"
+            },
+            {
+                "path": "img/cc163034.webp",
+                "bytes": 1268,
+                "sha256": "29b4c1fc6fa8731290d5efe82f727dca6d0ae5e5c8a004b6ab6d904cf0620c84"
+            },
+            {
+                "path": "img/cc18737.webp",
+                "bytes": 76,
+                "sha256": "ebe9c28a4b678d7884dd7370343231ab7862d56abe35d717c6026fb12a8fd38d"
+            }
+        ],
+        "restart": {
+            "title": "VNDB Characters by Bee",
+            "revision": "395525135651",
+            "termRows": 6648310,
+            "contentReadable": true,
+            "probeCount": 12
+        }
+    },
+    "validationScope": {
+        "deduplication": "Every run validation object from all 42 warmup and timed summaries was checked for exact deep equality with sharedValidation. Each retained run explicitly refers to that object.",
+        "coverage": "Sampled browser persistence checks, including 12 content probes and post-restart checks; not exhaustive persisted-data equality.",
+        "mediaByteProbesPerformed": true,
+        "mediaProbeLimitation": "Five fixed source-exact image probes were checked before and after restart; sampled media-byte checks, not exhaustive persisted-data equality."
+    },
+    "retainedSummaryFields": [
+        "dictionary",
+        "buildTarget",
+        "authoritativeTiming",
+        "traceEnabled",
+        "gitSha",
+        "hostEnvironment",
+        "browserVersion",
+        "importFlags",
+        "timingBoundary",
+        "timing",
+        "automationObservedTiming",
+        "workerTiming"
+    ],
+    "retainedRunFields": [
+        "index",
+        "reportPath",
+        "reportJsonPath",
+        "tracePath",
+        "browserVersion",
+        "packageSha256",
+        "totalImportMs",
+        "automationObservedImportMs",
+        "workerImportMs"
+    ],
+    "omittedRunFields": [
+        "stepTimingSummary",
+        "step4Breakdown",
+        "importDebug"
+    ],
+    "warmupOrder": [
+        "warmup-A1",
+        "warmup-B1",
+        "warmup-C1",
+        "warmup-C2",
+        "warmup-B2",
+        "warmup-A2"
+    ],
+    "observationOrder": [
+        "A1",
+        "B1",
+        "C1",
+        "C2",
+        "B2",
+        "A2",
+        "B3",
+        "C3",
+        "A3",
+        "A4",
+        "C4",
+        "B4",
+        "C5",
+        "A5",
+        "B5",
+        "B6",
+        "A6",
+        "C6",
+        "B7",
+        "A7",
+        "C7",
+        "C8",
+        "A8",
+        "B8",
+        "A9",
+        "C9",
+        "B9",
+        "B10",
+        "C10",
+        "A10",
+        "C11",
+        "B11",
+        "A11",
+        "A12",
+        "B12",
+        "C12"
+    ],
+    "warmups": [
+        {
+            "name": "warmup-A1",
+            "phase": "warmup",
+            "arm": "A",
+            "originalSummaryPath": "warmup-A1/summary.json",
+            "originalSummaryFileSha256": "4d75e32e8d7c778f7fb55df89ecf8f5734cbf8100bd107365c8ec7d46e13563e",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:16:38.954Z",
+                "loadAverage": [
+                    3.15,
+                    0.99,
+                    0.36
+                ],
+                "freeMemoryBytes": 15179046912,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 9971.200000000012,
+                "medianMs": 9971.200000000012,
+                "p95Ms": 9971.200000000012,
+                "maxMs": 9971.200000000012
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 10010.173999,
+                "medianMs": 10010.173999,
+                "p95Ms": 10010.173999,
+                "maxMs": 10010.173999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 9939.900000000023,
+                "medianMs": 9939.900000000023,
+                "p95Ms": 9939.900000000023,
+                "maxMs": 9939.900000000023
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-A1/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-A1/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 9971.200000000012,
+                    "automationObservedImportMs": 10010.173999,
+                    "workerImportMs": 9939.900000000023,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "warmup-B1",
+            "phase": "warmup",
+            "arm": "B",
+            "originalSummaryPath": "warmup-B1/summary.json",
+            "originalSummaryFileSha256": "1e048d3d594e8492dd981d2fa24a2b4406295aba19142c86e4f6be46d910dcd6",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:17:04.058Z",
+                "loadAverage": [
+                    2.83,
+                    1.1,
+                    0.42
+                ],
+                "freeMemoryBytes": 15254630400,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8091.199999999953,
+                "medianMs": 8091.199999999953,
+                "p95Ms": 8091.199999999953,
+                "maxMs": 8091.199999999953
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8143.93562,
+                "medianMs": 8143.93562,
+                "p95Ms": 8143.93562,
+                "maxMs": 8143.93562
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8059.599999999977,
+                "medianMs": 8059.599999999977,
+                "p95Ms": 8059.599999999977,
+                "maxMs": 8059.599999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-B1/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-B1/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8091.199999999953,
+                    "automationObservedImportMs": 8143.93562,
+                    "workerImportMs": 8059.599999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "warmup-C1",
+            "phase": "warmup",
+            "arm": "C",
+            "originalSummaryPath": "warmup-C1/summary.json",
+            "originalSummaryFileSha256": "b10a08662b9f91d63c3bb6e10aeb644b977779af2e6ed4dc3afdbc6a0caa83f0",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:17:28.990Z",
+                "loadAverage": [
+                    2.93,
+                    1.26,
+                    0.49
+                ],
+                "freeMemoryBytes": 15259447296,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8216.099999999977,
+                "medianMs": 8216.099999999977,
+                "p95Ms": 8216.099999999977,
+                "maxMs": 8216.099999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8256.547276,
+                "medianMs": 8256.547276,
+                "p95Ms": 8256.547276,
+                "maxMs": 8256.547276
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8191,
+                "medianMs": 8191,
+                "p95Ms": 8191,
+                "maxMs": 8191
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-C1/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-C1/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8216.099999999977,
+                    "automationObservedImportMs": 8256.547276,
+                    "workerImportMs": 8191,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "warmup-C2",
+            "phase": "warmup",
+            "arm": "C",
+            "originalSummaryPath": "warmup-C2/summary.json",
+            "originalSummaryFileSha256": "e9cf106e4d87023a3abf6ee1b44cc3861bd515fbaa7afffb6c13c794649c95d8",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:17:53.104Z",
+                "loadAverage": [
+                    3.46,
+                    1.52,
+                    0.6
+                ],
+                "freeMemoryBytes": 15189590016,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7921.899999999965,
+                "medianMs": 7921.899999999965,
+                "p95Ms": 7921.899999999965,
+                "maxMs": 7921.899999999965
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 7969.991477,
+                "medianMs": 7969.991477,
+                "p95Ms": 7969.991477,
+                "maxMs": 7969.991477
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7897.099999999977,
+                "medianMs": 7897.099999999977,
+                "p95Ms": 7897.099999999977,
+                "maxMs": 7897.099999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-C2/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-C2/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 7921.899999999965,
+                    "automationObservedImportMs": 7969.991477,
+                    "workerImportMs": 7897.099999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "warmup-B2",
+            "phase": "warmup",
+            "arm": "B",
+            "originalSummaryPath": "warmup-B2/summary.json",
+            "originalSummaryFileSha256": "f260db87201e3f8c9bae5832100e7c0f2ee61743a2083091e6393e800522eb9e",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:18:17.545Z",
+                "loadAverage": [
+                    3.38,
+                    1.64,
+                    0.66
+                ],
+                "freeMemoryBytes": 15164829696,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8046.5,
+                "medianMs": 8046.5,
+                "p95Ms": 8046.5,
+                "maxMs": 8046.5
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8071.0511559999995,
+                "medianMs": 8071.0511559999995,
+                "p95Ms": 8071.0511559999995,
+                "maxMs": 8071.0511559999995
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8021.799999999988,
+                "medianMs": 8021.799999999988,
+                "p95Ms": 8021.799999999988,
+                "maxMs": 8021.799999999988
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-B2/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-B2/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8046.5,
+                    "automationObservedImportMs": 8071.0511559999995,
+                    "workerImportMs": 8021.799999999988,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "warmup-A2",
+            "phase": "warmup",
+            "arm": "A",
+            "originalSummaryPath": "warmup-A2/summary.json",
+            "originalSummaryFileSha256": "5711146cb48f094ec31fa8362b3da6043ca8e7f0a733b61337777162a82921fa",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:18:41.685Z",
+                "loadAverage": [
+                    3.33,
+                    1.77,
+                    0.73
+                ],
+                "freeMemoryBytes": 15176802304,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8016.5,
+                "medianMs": 8016.5,
+                "p95Ms": 8016.5,
+                "maxMs": 8016.5
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8055.713332,
+                "medianMs": 8055.713332,
+                "p95Ms": 8055.713332,
+                "maxMs": 8055.713332
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7993.700000000012,
+                "medianMs": 7993.700000000012,
+                "p95Ms": 7993.700000000012,
+                "maxMs": 7993.700000000012
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-A2/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/warmup-A2/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8016.5,
+                    "automationObservedImportMs": 8055.713332,
+                    "workerImportMs": 7993.700000000012,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        }
+    ],
+    "observations": [
+        {
+            "name": "A1",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A1/summary.json",
+            "originalSummaryFileSha256": "cb5f0020c1f206ea534e75c289d01452127784dfad7fc5f456312f300bb115ae",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:19:05.860Z",
+                "loadAverage": [
+                    3.21,
+                    1.88,
+                    0.8
+                ],
+                "freeMemoryBytes": 15288168448,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8009.199999999953,
+                "medianMs": 8009.199999999953,
+                "p95Ms": 8009.199999999953,
+                "maxMs": 8009.199999999953
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8048.734355,
+                "medianMs": 8048.734355,
+                "p95Ms": 8048.734355,
+                "maxMs": 8048.734355
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7985.20000000007,
+                "medianMs": 7985.20000000007,
+                "p95Ms": 7985.20000000007,
+                "maxMs": 7985.20000000007
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A1/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A1/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8009.199999999953,
+                    "automationObservedImportMs": 8048.734355,
+                    "workerImportMs": 7985.20000000007,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B1",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B1/summary.json",
+            "originalSummaryFileSha256": "c35fe7cb07271170e5d67f621889b2826e05da63f4b7646cbd699abf8bcf65eb",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:19:30.018Z",
+                "loadAverage": [
+                    2.71,
+                    1.88,
+                    0.82
+                ],
+                "freeMemoryBytes": 15283425280,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7965.399999999907,
+                "medianMs": 7965.399999999907,
+                "p95Ms": 7965.399999999907,
+                "maxMs": 7965.399999999907
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8015.612233999999,
+                "medianMs": 8015.612233999999,
+                "p95Ms": 8015.612233999999,
+                "maxMs": 8015.612233999999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7939.800000000047,
+                "medianMs": 7939.800000000047,
+                "p95Ms": 7939.800000000047,
+                "maxMs": 7939.800000000047
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B1/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B1/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 7965.399999999907,
+                    "automationObservedImportMs": 8015.612233999999,
+                    "workerImportMs": 7939.800000000047,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C1",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C1/summary.json",
+            "originalSummaryFileSha256": "965c992319cfa80fab1ff77a655c9996d502348e10ec9adf57068567822c9614",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:19:54.216Z",
+                "loadAverage": [
+                    3.11,
+                    2.05,
+                    0.91
+                ],
+                "freeMemoryBytes": 15172812800,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8015.599999999977,
+                "medianMs": 8015.599999999977,
+                "p95Ms": 8015.599999999977,
+                "maxMs": 8015.599999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8052.718037999999,
+                "medianMs": 8052.718037999999,
+                "p95Ms": 8052.718037999999,
+                "maxMs": 8052.718037999999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7989.699999999953,
+                "medianMs": 7989.699999999953,
+                "p95Ms": 7989.699999999953,
+                "maxMs": 7989.699999999953
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C1/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C1/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8015.599999999977,
+                    "automationObservedImportMs": 8052.718037999999,
+                    "workerImportMs": 7989.699999999953,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C2",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C2/summary.json",
+            "originalSummaryFileSha256": "aa6c922dee917b9665828816d16fdb2e751e8fa24b3e88efbb082f344a74164f",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:20:18.544Z",
+                "loadAverage": [
+                    2.87,
+                    2.08,
+                    0.95
+                ],
+                "freeMemoryBytes": 15152537600,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8111.199999999953,
+                "medianMs": 8111.199999999953,
+                "p95Ms": 8111.199999999953,
+                "maxMs": 8111.199999999953
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8146.670238,
+                "medianMs": 8146.670238,
+                "p95Ms": 8146.670238,
+                "maxMs": 8146.670238
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8085.599999999977,
+                "medianMs": 8085.599999999977,
+                "p95Ms": 8085.599999999977,
+                "maxMs": 8085.599999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C2/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C2/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8111.199999999953,
+                    "automationObservedImportMs": 8146.670238,
+                    "workerImportMs": 8085.599999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B2",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B2/summary.json",
+            "originalSummaryFileSha256": "f02aa4d18bb4f58b126f4f325bdb5798ed5bfdd64b97aef60b9875ae1c8f8aa6",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:20:42.672Z",
+                "loadAverage": [
+                    2.93,
+                    2.15,
+                    1
+                ],
+                "freeMemoryBytes": 15274528768,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8014.400000000023,
+                "medianMs": 8014.400000000023,
+                "p95Ms": 8014.400000000023,
+                "maxMs": 8014.400000000023
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8053.020956999999,
+                "medianMs": 8053.020956999999,
+                "p95Ms": 8053.020956999999,
+                "maxMs": 8053.020956999999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7988.800000000047,
+                "medianMs": 7988.800000000047,
+                "p95Ms": 7988.800000000047,
+                "maxMs": 7988.800000000047
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B2/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B2/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8014.400000000023,
+                    "automationObservedImportMs": 8053.020956999999,
+                    "workerImportMs": 7988.800000000047,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A2",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A2/summary.json",
+            "originalSummaryFileSha256": "1f740bb20177d656c88fcafda4d7f9fcfbfd0d4f9d5846dd6f80a6eee47b1686",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:21:06.817Z",
+                "loadAverage": [
+                    2.79,
+                    2.18,
+                    1.04
+                ],
+                "freeMemoryBytes": 15215964160,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8034.599999999977,
+                "medianMs": 8034.599999999977,
+                "p95Ms": 8034.599999999977,
+                "maxMs": 8034.599999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8059.561507999999,
+                "medianMs": 8059.561507999999,
+                "p95Ms": 8059.561507999999,
+                "maxMs": 8059.561507999999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8010.099999999977,
+                "medianMs": 8010.099999999977,
+                "p95Ms": 8010.099999999977,
+                "maxMs": 8010.099999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A2/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A2/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8034.599999999977,
+                    "automationObservedImportMs": 8059.561507999999,
+                    "workerImportMs": 8010.099999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B3",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B3/summary.json",
+            "originalSummaryFileSha256": "11342f820e21d5636fdeb5e5e3605ea1963f1023b428cd88e2afb752a7e432e6",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:21:31.022Z",
+                "loadAverage": [
+                    2.68,
+                    2.21,
+                    1.08
+                ],
+                "freeMemoryBytes": 15267799040,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8031.400000000023,
+                "medianMs": 8031.400000000023,
+                "p95Ms": 8031.400000000023,
+                "maxMs": 8031.400000000023
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8059.408198,
+                "medianMs": 8059.408198,
+                "p95Ms": 8059.408198,
+                "maxMs": 8059.408198
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8007.199999999953,
+                "medianMs": 8007.199999999953,
+                "p95Ms": 8007.199999999953,
+                "maxMs": 8007.199999999953
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B3/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B3/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8031.400000000023,
+                    "automationObservedImportMs": 8059.408198,
+                    "workerImportMs": 8007.199999999953,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C3",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C3/summary.json",
+            "originalSummaryFileSha256": "5caefb510e7568fe88110fd0b616b33bb332a3cd6e36629bb7a877dcc29a2aca",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:21:55.311Z",
+                "loadAverage": [
+                    2.93,
+                    2.32,
+                    1.15
+                ],
+                "freeMemoryBytes": 15257878528,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8030.599999999977,
+                "medianMs": 8030.599999999977,
+                "p95Ms": 8030.599999999977,
+                "maxMs": 8030.599999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8073.798876000001,
+                "medianMs": 8073.798876000001,
+                "p95Ms": 8073.798876000001,
+                "maxMs": 8073.798876000001
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8006.20000000007,
+                "medianMs": 8006.20000000007,
+                "p95Ms": 8006.20000000007,
+                "maxMs": 8006.20000000007
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C3/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C3/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8030.599999999977,
+                    "automationObservedImportMs": 8073.798876000001,
+                    "workerImportMs": 8006.20000000007,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A3",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A3/summary.json",
+            "originalSummaryFileSha256": "9b6b9abb830acf7f2192634c5aedbdfc95425e53442afdff7223c76f7b726c6f",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:22:19.455Z",
+                "loadAverage": [
+                    3.3,
+                    2.48,
+                    1.24
+                ],
+                "freeMemoryBytes": 15309611008,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8004.900000000023,
+                "medianMs": 8004.900000000023,
+                "p95Ms": 8004.900000000023,
+                "maxMs": 8004.900000000023
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8038.743194,
+                "medianMs": 8038.743194,
+                "p95Ms": 8038.743194,
+                "maxMs": 8038.743194
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7981.70000000007,
+                "medianMs": 7981.70000000007,
+                "p95Ms": 7981.70000000007,
+                "maxMs": 7981.70000000007
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A3/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A3/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8004.900000000023,
+                    "automationObservedImportMs": 8038.743194,
+                    "workerImportMs": 7981.70000000007,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A4",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A4/summary.json",
+            "originalSummaryFileSha256": "fdbae0288f5ab60c57aa26554a44ee67e100e79cb08fdf22d237502a0ebd6a32",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:22:43.592Z",
+                "loadAverage": [
+                    3.67,
+                    2.65,
+                    1.33
+                ],
+                "freeMemoryBytes": 15165153280,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8011.899999999907,
+                "medianMs": 8011.899999999907,
+                "p95Ms": 8011.899999999907,
+                "maxMs": 8011.899999999907
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8056.867015,
+                "medianMs": 8056.867015,
+                "p95Ms": 8056.867015,
+                "maxMs": 8056.867015
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7984.699999999953,
+                "medianMs": 7984.699999999953,
+                "p95Ms": 7984.699999999953,
+                "maxMs": 7984.699999999953
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A4/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A4/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8011.899999999907,
+                    "automationObservedImportMs": 8056.867015,
+                    "workerImportMs": 7984.699999999953,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C4",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C4/summary.json",
+            "originalSummaryFileSha256": "14230e13bdd19a0d0168fa6fed4717319d45e9938e68f7cbcce5dc98570b86e0",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:23:07.609Z",
+                "loadAverage": [
+                    3.12,
+                    2.59,
+                    1.34
+                ],
+                "freeMemoryBytes": 15214485504,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7872.900000000023,
+                "medianMs": 7872.900000000023,
+                "p95Ms": 7872.900000000023,
+                "maxMs": 7872.900000000023
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 7914.584101,
+                "medianMs": 7914.584101,
+                "p95Ms": 7914.584101,
+                "maxMs": 7914.584101
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7847.399999999907,
+                "medianMs": 7847.399999999907,
+                "p95Ms": 7847.399999999907,
+                "maxMs": 7847.399999999907
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C4/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C4/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 7872.900000000023,
+                    "automationObservedImportMs": 7914.584101,
+                    "workerImportMs": 7847.399999999907,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B4",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B4/summary.json",
+            "originalSummaryFileSha256": "4654d96f2643a0f0db4643b359fcba14aea48dc9d22b25a0088c4deef788c42f",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:23:31.799Z",
+                "loadAverage": [
+                    3.51,
+                    2.73,
+                    1.42
+                ],
+                "freeMemoryBytes": 15222292480,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7985.400000000023,
+                "medianMs": 7985.400000000023,
+                "p95Ms": 7985.400000000023,
+                "maxMs": 7985.400000000023
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8036.022922,
+                "medianMs": 8036.022922,
+                "p95Ms": 8036.022922,
+                "maxMs": 8036.022922
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7960.099999999977,
+                "medianMs": 7960.099999999977,
+                "p95Ms": 7960.099999999977,
+                "maxMs": 7960.099999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B4/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B4/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 7985.400000000023,
+                    "automationObservedImportMs": 8036.022922,
+                    "workerImportMs": 7960.099999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C5",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C5/summary.json",
+            "originalSummaryFileSha256": "44454bafbbf30ae71d7d11f78f4f9bf65e05570573c38d1d7a95edbc06c0830f",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:23:55.960Z",
+                "loadAverage": [
+                    3.08,
+                    2.7,
+                    1.44
+                ],
+                "freeMemoryBytes": 15326822400,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7967.699999999953,
+                "medianMs": 7967.699999999953,
+                "p95Ms": 7967.699999999953,
+                "maxMs": 7967.699999999953
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8016.988209,
+                "medianMs": 8016.988209,
+                "p95Ms": 8016.988209,
+                "maxMs": 8016.988209
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7941.699999999953,
+                "medianMs": 7941.699999999953,
+                "p95Ms": 7941.699999999953,
+                "maxMs": 7941.699999999953
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C5/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C5/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 7967.699999999953,
+                    "automationObservedImportMs": 8016.988209,
+                    "workerImportMs": 7941.699999999953,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A5",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A5/summary.json",
+            "originalSummaryFileSha256": "932bdfebf6de22df41b5edd5fa2b3226008d3ea54bf0f5a2ba34685e96ff84c9",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:24:20.023Z",
+                "loadAverage": [
+                    2.69,
+                    2.65,
+                    1.46
+                ],
+                "freeMemoryBytes": 15292092416,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7954.099999999977,
+                "medianMs": 7954.099999999977,
+                "p95Ms": 7954.099999999977,
+                "maxMs": 7954.099999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 7999.609505999999,
+                "medianMs": 7999.609505999999,
+                "p95Ms": 7999.609505999999,
+                "maxMs": 7999.609505999999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7928,
+                "medianMs": 7928,
+                "p95Ms": 7928,
+                "maxMs": 7928
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A5/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A5/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 7954.099999999977,
+                    "automationObservedImportMs": 7999.609505999999,
+                    "workerImportMs": 7928,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B5",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B5/summary.json",
+            "originalSummaryFileSha256": "cab773ad4c44c049d82160e9e6840fa9f2f5655500b516e8558e3d10543ae7b5",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:24:44.310Z",
+                "loadAverage": [
+                    2.86,
+                    2.7,
+                    1.51
+                ],
+                "freeMemoryBytes": 15168786432,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8106.599999999977,
+                "medianMs": 8106.599999999977,
+                "p95Ms": 8106.599999999977,
+                "maxMs": 8106.599999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8129.060536,
+                "medianMs": 8129.060536,
+                "p95Ms": 8129.060536,
+                "maxMs": 8129.060536
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8082.5,
+                "medianMs": 8082.5,
+                "p95Ms": 8082.5,
+                "maxMs": 8082.5
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B5/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B5/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8106.599999999977,
+                    "automationObservedImportMs": 8129.060536,
+                    "workerImportMs": 8082.5,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B6",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B6/summary.json",
+            "originalSummaryFileSha256": "940126b68ddda8d318e032dd75ecf3e86dda3dce5577912cd1420da1824aad75",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:25:08.634Z",
+                "loadAverage": [
+                    3.76,
+                    2.94,
+                    1.62
+                ],
+                "freeMemoryBytes": 15194341376,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8046.199999999953,
+                "medianMs": 8046.199999999953,
+                "p95Ms": 8046.199999999953,
+                "maxMs": 8046.199999999953
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8085.55841,
+                "medianMs": 8085.55841,
+                "p95Ms": 8085.55841,
+                "maxMs": 8085.55841
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8020.599999999977,
+                "medianMs": 8020.599999999977,
+                "p95Ms": 8020.599999999977,
+                "maxMs": 8020.599999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B6/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B6/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8046.199999999953,
+                    "automationObservedImportMs": 8085.55841,
+                    "workerImportMs": 8020.599999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A6",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A6/summary.json",
+            "originalSummaryFileSha256": "a143f56fdb1e5628ca78516fa985870feb9dc5c7574e9f8458940a5d2b313ad4",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:25:32.868Z",
+                "loadAverage": [
+                    3.66,
+                    2.97,
+                    1.66
+                ],
+                "freeMemoryBytes": 15229054976,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7968.899999999907,
+                "medianMs": 7968.899999999907,
+                "p95Ms": 7968.899999999907,
+                "maxMs": 7968.899999999907
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8008.417174,
+                "medianMs": 8008.417174,
+                "p95Ms": 8008.417174,
+                "maxMs": 8008.417174
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7944.900000000023,
+                "medianMs": 7944.900000000023,
+                "p95Ms": 7944.900000000023,
+                "maxMs": 7944.900000000023
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A6/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A6/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 7968.899999999907,
+                    "automationObservedImportMs": 8008.417174,
+                    "workerImportMs": 7944.900000000023,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C6",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C6/summary.json",
+            "originalSummaryFileSha256": "d716ad1fa37dc1839cbf732538ef0d5b5412639870b6b662c4e99ef5410ac81e",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:25:57.110Z",
+                "loadAverage": [
+                    3.29,
+                    2.94,
+                    1.69
+                ],
+                "freeMemoryBytes": 15211421696,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8094.100000000093,
+                "medianMs": 8094.100000000093,
+                "p95Ms": 8094.100000000093,
+                "maxMs": 8094.100000000093
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8140.039668,
+                "medianMs": 8140.039668,
+                "p95Ms": 8140.039668,
+                "maxMs": 8140.039668
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8067.900000000023,
+                "medianMs": 8067.900000000023,
+                "p95Ms": 8067.900000000023,
+                "maxMs": 8067.900000000023
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C6/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C6/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8094.100000000093,
+                    "automationObservedImportMs": 8140.039668,
+                    "workerImportMs": 8067.900000000023,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B7",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B7/summary.json",
+            "originalSummaryFileSha256": "9471e0708fbe9316559d14f4d900993adb395bd338938b6d58b812be3407480d",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:26:21.366Z",
+                "loadAverage": [
+                    2.76,
+                    2.85,
+                    1.69
+                ],
+                "freeMemoryBytes": 15366819840,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8093,
+                "medianMs": 8093,
+                "p95Ms": 8093,
+                "maxMs": 8093
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8137.5604410000005,
+                "medianMs": 8137.5604410000005,
+                "p95Ms": 8137.5604410000005,
+                "maxMs": 8137.5604410000005
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8067.599999999977,
+                "medianMs": 8067.599999999977,
+                "p95Ms": 8067.599999999977,
+                "maxMs": 8067.599999999977
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B7/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B7/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8093,
+                    "automationObservedImportMs": 8137.5604410000005,
+                    "workerImportMs": 8067.599999999977,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A7",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A7/summary.json",
+            "originalSummaryFileSha256": "9ab585761eb2446997386b8d4a6a1b5510f7e46bd959457b94cca871ee5051e7",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:26:46.599Z",
+                "loadAverage": [
+                    3.19,
+                    2.97,
+                    1.76
+                ],
+                "freeMemoryBytes": 15199588352,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8478.099999999977,
+                "medianMs": 8478.099999999977,
+                "p95Ms": 8478.099999999977,
+                "maxMs": 8478.099999999977
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8516.623149,
+                "medianMs": 8516.623149,
+                "p95Ms": 8516.623149,
+                "maxMs": 8516.623149
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8452.800000000047,
+                "medianMs": 8452.800000000047,
+                "p95Ms": 8452.800000000047,
+                "maxMs": 8452.800000000047
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A7/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A7/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8478.099999999977,
+                    "automationObservedImportMs": 8516.623149,
+                    "workerImportMs": 8452.800000000047,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C7",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C7/summary.json",
+            "originalSummaryFileSha256": "01f0fee7ef582dbb3257e0499997dd89db98fd40589871aafae1732f74f19a22",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:27:13.687Z",
+                "loadAverage": [
+                    3.91,
+                    3.2,
+                    1.88
+                ],
+                "freeMemoryBytes": 15187656704,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8422.20000000007,
+                "medianMs": 8422.20000000007,
+                "p95Ms": 8422.20000000007,
+                "maxMs": 8422.20000000007
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8464.316377000001,
+                "medianMs": 8464.316377000001,
+                "p95Ms": 8464.316377000001,
+                "maxMs": 8464.316377000001
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8396,
+                "medianMs": 8396,
+                "p95Ms": 8396,
+                "maxMs": 8396
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C7/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C7/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8422.20000000007,
+                    "automationObservedImportMs": 8464.316377000001,
+                    "workerImportMs": 8396,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C8",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C8/summary.json",
+            "originalSummaryFileSha256": "a38c4c7ca2d7c7d3c4251b2b8d3a34290b23290092542509e671c25b3fc7596a",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:27:39.135Z",
+                "loadAverage": [
+                    4.21,
+                    3.34,
+                    1.96
+                ],
+                "freeMemoryBytes": 15224840192,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 7777.299999999814,
+                "medianMs": 7777.299999999814,
+                "p95Ms": 7777.299999999814,
+                "maxMs": 7777.299999999814
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 7826.613833,
+                "medianMs": 7826.613833,
+                "p95Ms": 7826.613833,
+                "maxMs": 7826.613833
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 7748.59999999986,
+                "medianMs": 7748.59999999986,
+                "p95Ms": 7748.59999999986,
+                "maxMs": 7748.59999999986
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C8/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C8/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 7777.299999999814,
+                    "automationObservedImportMs": 7826.613833,
+                    "workerImportMs": 7748.59999999986,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A8",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A8/summary.json",
+            "originalSummaryFileSha256": "4c84c37c65794cb357e3afdbe510f6a3d5145ef4baf9f84ae12936743b4eeeec",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:28:04.351Z",
+                "loadAverage": [
+                    3.9,
+                    3.36,
+                    2
+                ],
+                "freeMemoryBytes": 15179206656,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8222.300000000047,
+                "medianMs": 8222.300000000047,
+                "p95Ms": 8222.300000000047,
+                "maxMs": 8222.300000000047
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8245.163851000001,
+                "medianMs": 8245.163851000001,
+                "p95Ms": 8245.163851000001,
+                "maxMs": 8245.163851000001
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8199.59999999986,
+                "medianMs": 8199.59999999986,
+                "p95Ms": 8199.59999999986,
+                "maxMs": 8199.59999999986
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A8/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A8/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8222.300000000047,
+                    "automationObservedImportMs": 8245.163851000001,
+                    "workerImportMs": 8199.59999999986,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B8",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B8/summary.json",
+            "originalSummaryFileSha256": "858ef2adfb72ab38cb87ad076079fc958de1df4148f6644b6591b35d026c9679",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:28:28.511Z",
+                "loadAverage": [
+                    3.48,
+                    3.31,
+                    2.02
+                ],
+                "freeMemoryBytes": 15164989440,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8162.200000000186,
+                "medianMs": 8162.200000000186,
+                "p95Ms": 8162.200000000186,
+                "maxMs": 8162.200000000186
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8193.987999,
+                "medianMs": 8193.987999,
+                "p95Ms": 8193.987999,
+                "maxMs": 8193.987999
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8136.399999999907,
+                "medianMs": 8136.399999999907,
+                "p95Ms": 8136.399999999907,
+                "maxMs": 8136.399999999907
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B8/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B8/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8162.200000000186,
+                    "automationObservedImportMs": 8193.987999,
+                    "workerImportMs": 8136.399999999907,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A9",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A9/summary.json",
+            "originalSummaryFileSha256": "7e5e7b2edd2971ab53bb8164ffdb9eae203796fd8be651b71a60c5c22b05eea8",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:28:52.935Z",
+                "loadAverage": [
+                    3.07,
+                    3.23,
+                    2.02
+                ],
+                "freeMemoryBytes": 15275261952,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8096.700000000186,
+                "medianMs": 8096.700000000186,
+                "p95Ms": 8096.700000000186,
+                "maxMs": 8096.700000000186
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8132.939422,
+                "medianMs": 8132.939422,
+                "p95Ms": 8132.939422,
+                "maxMs": 8132.939422
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8071.199999999953,
+                "medianMs": 8071.199999999953,
+                "p95Ms": 8071.199999999953,
+                "maxMs": 8071.199999999953
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A9/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A9/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8096.700000000186,
+                    "automationObservedImportMs": 8132.939422,
+                    "workerImportMs": 8071.199999999953,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C9",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C9/summary.json",
+            "originalSummaryFileSha256": "689befafbb3c058e11c6cd944570aa14904f9eb2ae418d63e45697dfde77bad2",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:29:17.980Z",
+                "loadAverage": [
+                    3.04,
+                    3.19,
+                    2.04
+                ],
+                "freeMemoryBytes": 15164641280,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8122.90000000014,
+                "medianMs": 8122.90000000014,
+                "p95Ms": 8122.90000000014,
+                "maxMs": 8122.90000000014
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8155.137307000001,
+                "medianMs": 8155.137307000001,
+                "p95Ms": 8155.137307000001,
+                "maxMs": 8155.137307000001
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8097.700000000186,
+                "medianMs": 8097.700000000186,
+                "p95Ms": 8097.700000000186,
+                "maxMs": 8097.700000000186
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C9/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C9/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8122.90000000014,
+                    "automationObservedImportMs": 8155.137307000001,
+                    "workerImportMs": 8097.700000000186,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B9",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B9/summary.json",
+            "originalSummaryFileSha256": "1f4370fbdae926ab22b83324e5b1b4944108a0c3ffa306ddd2ab2da1fe70d7f6",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:29:42.130Z",
+                "loadAverage": [
+                    3.19,
+                    3.22,
+                    2.09
+                ],
+                "freeMemoryBytes": 15203414016,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8108.800000000047,
+                "medianMs": 8108.800000000047,
+                "p95Ms": 8108.800000000047,
+                "maxMs": 8108.800000000047
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8141.116664,
+                "medianMs": 8141.116664,
+                "p95Ms": 8141.116664,
+                "maxMs": 8141.116664
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8083.90000000014,
+                "medianMs": 8083.90000000014,
+                "p95Ms": 8083.90000000014,
+                "maxMs": 8083.90000000014
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B9/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B9/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8108.800000000047,
+                    "automationObservedImportMs": 8141.116664,
+                    "workerImportMs": 8083.90000000014,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B10",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B10/summary.json",
+            "originalSummaryFileSha256": "be3dac9d6425129c37887fb95fc60c27751be2cdbe50399d1ac8827209660fbe",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:30:07.324Z",
+                "loadAverage": [
+                    3.29,
+                    3.24,
+                    2.12
+                ],
+                "freeMemoryBytes": 15195803648,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8940,
+                "medianMs": 8940,
+                "p95Ms": 8940,
+                "maxMs": 8940
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8976.137294,
+                "medianMs": 8976.137294,
+                "p95Ms": 8976.137294,
+                "maxMs": 8976.137294
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8914.100000000093,
+                "medianMs": 8914.100000000093,
+                "p95Ms": 8914.100000000093,
+                "maxMs": 8914.100000000093
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B10/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B10/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8940,
+                    "automationObservedImportMs": 8976.137294,
+                    "workerImportMs": 8914.100000000093,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C10",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C10/summary.json",
+            "originalSummaryFileSha256": "bf9ef745e8c7197d6d50b20040ea42e4439dc204d1f0265c7992a967f58ad15b",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:30:32.603Z",
+                "loadAverage": [
+                    3.58,
+                    3.3,
+                    2.17
+                ],
+                "freeMemoryBytes": 15108087808,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8534.800000000047,
+                "medianMs": 8534.800000000047,
+                "p95Ms": 8534.800000000047,
+                "maxMs": 8534.800000000047
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8577.737779,
+                "medianMs": 8577.737779,
+                "p95Ms": 8577.737779,
+                "maxMs": 8577.737779
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8510.199999999953,
+                "medianMs": 8510.199999999953,
+                "p95Ms": 8510.199999999953,
+                "maxMs": 8510.199999999953
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C10/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C10/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8534.800000000047,
+                    "automationObservedImportMs": 8577.737779,
+                    "workerImportMs": 8510.199999999953,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A10",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A10/summary.json",
+            "originalSummaryFileSha256": "1de6376b21beac406aeb52a75e1e0a2f544032d051f1d19d7e03bb258aff80ef",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:30:57.597Z",
+                "loadAverage": [
+                    3.47,
+                    3.3,
+                    2.2
+                ],
+                "freeMemoryBytes": 15161671680,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8230.5,
+                "medianMs": 8230.5,
+                "p95Ms": 8230.5,
+                "maxMs": 8230.5
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8272.226105000002,
+                "medianMs": 8272.226105000002,
+                "p95Ms": 8272.226105000002,
+                "maxMs": 8272.226105000002
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8204.899999999907,
+                "medianMs": 8204.899999999907,
+                "p95Ms": 8204.899999999907,
+                "maxMs": 8204.899999999907
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A10/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A10/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8230.5,
+                    "automationObservedImportMs": 8272.226105000002,
+                    "workerImportMs": 8204.899999999907,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C11",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C11/summary.json",
+            "originalSummaryFileSha256": "90272b3101a68feec89e48d6768edc80fbf4a55775d4c90d1dd810a60bb37932",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:31:21.933Z",
+                "loadAverage": [
+                    3.72,
+                    3.37,
+                    2.25
+                ],
+                "freeMemoryBytes": 15304265728,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8227.90000000014,
+                "medianMs": 8227.90000000014,
+                "p95Ms": 8227.90000000014,
+                "maxMs": 8227.90000000014
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8258.234928999998,
+                "medianMs": 8258.234928999998,
+                "p95Ms": 8258.234928999998,
+                "maxMs": 8258.234928999998
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8204.5,
+                "medianMs": 8204.5,
+                "p95Ms": 8204.5,
+                "maxMs": 8204.5
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C11/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C11/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8227.90000000014,
+                    "automationObservedImportMs": 8258.234928999998,
+                    "workerImportMs": 8204.5,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B11",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B11/summary.json",
+            "originalSummaryFileSha256": "249667b1029fcdef8ac5dfc94a0a34323e36d37fff5ea2790cb888b91bdc3a40",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:31:48.917Z",
+                "loadAverage": [
+                    3.63,
+                    3.38,
+                    2.29
+                ],
+                "freeMemoryBytes": 15262081024,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 10402.699999999953,
+                "medianMs": 10402.699999999953,
+                "p95Ms": 10402.699999999953,
+                "maxMs": 10402.699999999953
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 10442.336717,
+                "medianMs": 10442.336717,
+                "p95Ms": 10442.336717,
+                "maxMs": 10442.336717
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 10379.600000000093,
+                "medianMs": 10379.600000000093,
+                "p95Ms": 10379.600000000093,
+                "maxMs": 10379.600000000093
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B11/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B11/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 10402.699999999953,
+                    "automationObservedImportMs": 10442.336717,
+                    "workerImportMs": 10379.600000000093,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A11",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A11/summary.json",
+            "originalSummaryFileSha256": "2105939fd37c2e37d8081ab1288398a873ee97b1aa9a3543ddf0357b2b86c7bb",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:32:13.214Z",
+                "loadAverage": [
+                    3.87,
+                    3.45,
+                    2.34
+                ],
+                "freeMemoryBytes": 15228047360,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8152.100000000093,
+                "medianMs": 8152.100000000093,
+                "p95Ms": 8152.100000000093,
+                "maxMs": 8152.100000000093
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8177.401193,
+                "medianMs": 8177.401193,
+                "p95Ms": 8177.401193,
+                "maxMs": 8177.401193
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8127.09999999986,
+                "medianMs": 8127.09999999986,
+                "p95Ms": 8127.09999999986,
+                "maxMs": 8127.09999999986
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A11/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A11/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8152.100000000093,
+                    "automationObservedImportMs": 8177.401193,
+                    "workerImportMs": 8127.09999999986,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "A12",
+            "phase": "timed",
+            "arm": "A",
+            "originalSummaryPath": "A12/summary.json",
+            "originalSummaryFileSha256": "5f68f681c37f985d8ebe0af97edc3852e803f636825eda4fc0104e7297a948c2",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:32:38.194Z",
+                "loadAverage": [
+                    3.63,
+                    3.43,
+                    2.36
+                ],
+                "freeMemoryBytes": 15295725568,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8155.399999999907,
+                "medianMs": 8155.399999999907,
+                "p95Ms": 8155.399999999907,
+                "maxMs": 8155.399999999907
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8182.439125000001,
+                "medianMs": 8182.439125000001,
+                "p95Ms": 8182.439125000001,
+                "maxMs": 8182.439125000001
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8128.90000000014,
+                "medianMs": 8128.90000000014,
+                "p95Ms": 8128.90000000014,
+                "maxMs": 8128.90000000014
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A12/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/A12/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8155.399999999907,
+                    "automationObservedImportMs": 8182.439125000001,
+                    "workerImportMs": 8128.90000000014,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "B12",
+            "phase": "timed",
+            "arm": "B",
+            "originalSummaryPath": "B12/summary.json",
+            "originalSummaryFileSha256": "84f78f3f02e9ceecb3d8b390713522f65cd7047e12632fc7e50c22130072b0e8",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "sourceProvenanceRef": "candidate",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:33:02.443Z",
+                "loadAverage": [
+                    3.72,
+                    3.46,
+                    2.4
+                ],
+                "freeMemoryBytes": 15219908608,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8066.600000000093,
+                "medianMs": 8066.600000000093,
+                "p95Ms": 8066.600000000093,
+                "maxMs": 8066.600000000093
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8104.426471,
+                "medianMs": 8104.426471,
+                "p95Ms": 8104.426471,
+                "maxMs": 8104.426471
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8041.5,
+                "medianMs": 8041.5,
+                "p95Ms": 8041.5,
+                "maxMs": 8041.5
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B12/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/B12/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "9ab60584f595e0cc0b1429142d91ebd0b6f1a3b0c0920863aa9622d92c2372c0",
+                    "totalImportMs": 8066.600000000093,
+                    "automationObservedImportMs": 8104.426471,
+                    "workerImportMs": 8041.5,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        },
+        {
+            "name": "C12",
+            "phase": "timed",
+            "arm": "C",
+            "originalSummaryPath": "C12/summary.json",
+            "originalSummaryFileSha256": "62300f17581a3834ca7f1cdaf2d90c148bbda16cd527720805723c39e6cb398e",
+            "summarySchemaVersion": 3,
+            "sourceGitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "sourceProvenanceRef": "baseline",
+            "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "dictionary": "vndb",
+            "buildTarget": "chrome",
+            "authoritativeTiming": true,
+            "traceEnabled": false,
+            "gitSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+            "hostEnvironment": {
+                "capturedAtIso": "2026-11-23T03:33:27.130Z",
+                "loadAverage": [
+                    3.32,
+                    3.39,
+                    2.4
+                ],
+                "freeMemoryBytes": 15238336512,
+                "nodeVersion": "v22.22.0",
+                "v8Version": "12.4.254.21-node.33",
+                "platform": "linux",
+                "arch": "x64",
+                "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+                "logicalCpuCount": 4,
+                "availableParallelism": 4,
+                "totalMemoryBytes": 16759431168,
+                "cgroupCpuMax": null,
+                "cgroupCpuQuotaCores": null,
+                "cgroupMemoryMaxBytes": null,
+                "cgroupMemoryCurrentBytes": null
+            },
+            "browserVersion": "153.0.8010.12",
+            "importFlags": null,
+            "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+            "timing": {
+                "count": 1,
+                "minMs": 8103.59999999986,
+                "medianMs": 8103.59999999986,
+                "p95Ms": 8103.59999999986,
+                "maxMs": 8103.59999999986
+            },
+            "automationObservedTiming": {
+                "count": 1,
+                "minMs": 8132.014123,
+                "medianMs": 8132.014123,
+                "p95Ms": 8132.014123,
+                "maxMs": 8132.014123
+            },
+            "workerTiming": {
+                "count": 1,
+                "minMs": 8076.700000000186,
+                "medianMs": 8076.700000000186,
+                "p95Ms": 8076.700000000186,
+                "maxMs": 8076.700000000186
+            },
+            "runs": [
+                {
+                    "index": 1,
+                    "reportPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C12/run-1.html",
+                    "reportJsonPath": "/home/runner/work/_temp/browser-comparison.NasT6Z/evidence/C12/run-1.json",
+                    "tracePath": null,
+                    "browserVersion": "153.0.8010.12",
+                    "packageSha256": "0dd23f1c1e9b1183ef800c553fa624029e14d4c94d6023881c1f8f9fd4a65d58",
+                    "totalImportMs": 8103.59999999986,
+                    "automationObservedImportMs": 8132.014123,
+                    "workerImportMs": 8076.700000000186,
+                    "validationRef": "sharedValidation"
+                }
+            ]
+        }
+    ],
+    "postTimingTrace": {
+        "name": "candidate-trace",
+        "includedInWarmupOrTimedObservations": false,
+        "summaryArtifactPresent": false,
+        "traceArtifactPresent": false,
+        "traceArtifactCopied": false,
+        "timingValuesCopied": false,
+        "explanation": "No candidate-trace directory or post-timing trace summary is present in this cohort's original artifacts."
+    }
+}

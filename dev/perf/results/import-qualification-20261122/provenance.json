@@ -1,0 +1,64 @@
+{
+    "schemaVersion": 1,
+    "workflowRun": {
+        "id": 45104760158,
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/45104760158",
+        "conclusion": "success"
+    },
+    "measuredCandidate": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+    "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "browser": "153.0.8010.12",
+    "finalPullRequests": [
+        {
+            "number": 806,
+            "head": "2531f32d3f4322d05819a12e16fe70d34eb997a2",
+            "ciRun": 45104662449,
+            "unitPassed": 13996,
+            "unitSkipped": 47
+        },
+        {
+            "number": 807,
+            "head": "5c956ee99c518cbc05b1c3db9f480a8d2aecc01c",
+            "ciRun": 45105120736,
+            "unitPassed": 14016,
+            "unitSkipped": 47
+        }
+    ],
+    "runtimeByteIdenticalToFinalPullRequestHeads": true,
+    "runtimeSourceSha256": {
+        "ext/js/dictionary/dictionary-importer.js": "ae08735beef88480b619870c0b4ee115ff17745f206384dda2b5fb93311f7f90",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "0d6263a93771a1a77ade1376a64a5b74381a24b2a4a9e408f552e3bae02d447b"
+    },
+    "artifacts": [
+        {
+            "id": 14787630441,
+            "name": "browser-comparison-import-jmdict",
+            "sizeBytes": 2600027,
+            "sha256": "a97d49b31a2a119c1431788a0cd0c8ef4995b6cbf8d23ce01c1faaa8add56873",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14787630441",
+            "expiresAt": "2026-12-07T03:21:50Z",
+            "zipDigestVerifiedLocally": true
+        },
+        {
+            "id": 14787622782,
+            "name": "browser-comparison-import-vndb",
+            "sizeBytes": 2174772,
+            "sha256": "8c0add0109702e8717fe36f34683cd309a9e85df4301d7a6665f4f707915d451",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14787622782",
+            "expiresAt": "2026-12-07T03:33:27Z",
+            "zipDigestVerifiedLocally": true
+        },
+        {
+            "id": 14786249485,
+            "name": "browser-comparison-import-jitendex",
+            "sizeBytes": 2956158,
+            "sha256": "c445d4e4f491bd13a8fad2a748109cbd332aea607567bf20bb7289d68db6429e",
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14786249485",
+            "expiresAt": "2026-12-07T03:20:57Z",
+            "zipDigestVerifiedLocally": true
+        }
+    ],
+    "independentVerification": "The verifier reproduced each original artifact comparison.json byte for byte. Compact observations retain all 42 ordinary summary hashes and timing fields per dictionary; common source and validation objects are shared only after exact equality checks.",
+    "retainedEvidenceScope": "Compact timing and provenance records, complete shared sampled validation, and all VNDB finalization phase records. Full logs and post-timing traces remain in the workflow artifacts.",
+    "interpretation": "Correctness checks passed. No whole-import speedup established. All paired-median intervals include zero; retained VNDB candidate tails make equal-work total time approximately 2.7 percent worse. Combined-candidate measurements do not isolate the effects of either PR."
+}

@@ -1,0 +1,322 @@
+{
+    "dictionary": "jitendex",
+    "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "candidateSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+    "browser": "153.0.8010.12",
+    "fixture": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.08.11.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip",
+        "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "sizeBytes": 38698313,
+        "expectedTitle": "Jitendex.org [2026-08-11]",
+        "revision": "2026.08.11.0",
+        "termRows": 435448
+    },
+    "timingBoundary": "file-input change to post-UI import-complete event",
+    "warmups": 6,
+    "measuredImports": 36,
+    "tripletCount": 12,
+    "armMediansMs": {
+        "A": 1330.4499999999825,
+        "B": 1317.7000000000116,
+        "C": 1334.2999999999884
+    },
+    "candidateVersusA": {
+        "pairedChangesPercent": [
+            -5.493394932503959,
+            -3.1303570097680478,
+            0.8201038296565155,
+            0.12079118224193053,
+            4.6621351459406934,
+            -0.2463812750239991,
+            2.628546737721482,
+            2.379862700229718,
+            -2.766085387848105,
+            -2.525366403605911,
+            1.4126340191248588,
+            2.819013345331789
+        ],
+        "medianPairedChangePercent": 0.470447505949223,
+        "equalWorkChangePercent": 0.024367841946570934,
+        "fasterPairs": 5,
+        "descriptivePairedMedianInterval95Percent": [
+            -2.645725895727008,
+            2.5042047189756
+        ]
+    },
+    "candidateVersusC": {
+        "pairedChangesPercent": [
+            1.8991282689931221,
+            -3.53299190974804,
+            2.0019791428779854,
+            -2.2481020122313566,
+            -0.9460379928858065,
+            -1.0463606507302936,
+            -1.3498546310397597,
+            -1.7854529489218174,
+            -3.985749276327022,
+            -6.536465840296557,
+            6.205902435327215,
+            5.249424405220515
+        ],
+        "medianPairedChangePercent": -1.1981076408850266,
+        "equalWorkChangePercent": -0.5695546045712208,
+        "fasterPairs": 8,
+        "descriptivePairedMedianInterval95Percent": [
+            -2.890546960989698,
+            1.9505537059355538
+        ]
+    },
+    "identicalCodeControl": {
+        "pairedChangesPercent": [
+            -7.254746264347133,
+            0.41738093463341563,
+            -1.1586788052082575,
+            2.42337309375793,
+            5.661735305876725,
+            0.8084385586695442,
+            4.032838830476804,
+            4.241037376047041,
+            1.2702946482278765,
+            4.291619691843418,
+            -4.513184584181795,
+            -2.309191782875142
+        ],
+        "medianPairedChangePercent": 1.0393666034487103,
+        "equalWorkChangePercent": 0.5973245359163437,
+        "fasterPairs": 4,
+        "descriptivePairedMedianInterval95Percent": [
+            -1.7339352940416997,
+            4.136938103261922
+        ]
+    },
+    "observations": [
+        {
+            "name": "A1",
+            "arm": "A",
+            "milliseconds": 1385.2999999999884
+        },
+        {
+            "name": "B1",
+            "arm": "B",
+            "milliseconds": 1309.2000000000116
+        },
+        {
+            "name": "C1",
+            "arm": "C",
+            "milliseconds": 1284.7999999999884
+        },
+        {
+            "name": "C2",
+            "arm": "C",
+            "milliseconds": 1347.2999999999884
+        },
+        {
+            "name": "B2",
+            "arm": "B",
+            "milliseconds": 1299.6999999999534
+        },
+        {
+            "name": "A2",
+            "arm": "A",
+            "milliseconds": 1341.7000000000116
+        },
+        {
+            "name": "B3",
+            "arm": "B",
+            "milliseconds": 1340
+        },
+        {
+            "name": "C3",
+            "arm": "C",
+            "milliseconds": 1313.7000000000116
+        },
+        {
+            "name": "A3",
+            "arm": "A",
+            "milliseconds": 1329.100000000035
+        },
+        {
+            "name": "A4",
+            "arm": "A",
+            "milliseconds": 1324.600000000035
+        },
+        {
+            "name": "C4",
+            "arm": "C",
+            "milliseconds": 1356.6999999999534
+        },
+        {
+            "name": "B4",
+            "arm": "B",
+            "milliseconds": 1326.2000000000116
+        },
+        {
+            "name": "C5",
+            "arm": "C",
+            "milliseconds": 1321.2999999999884
+        },
+        {
+            "name": "A5",
+            "arm": "A",
+            "milliseconds": 1250.5
+        },
+        {
+            "name": "B5",
+            "arm": "B",
+            "milliseconds": 1308.7999999999884
+        },
+        {
+            "name": "B6",
+            "arm": "B",
+            "milliseconds": 1295.5999999999767
+        },
+        {
+            "name": "A6",
+            "arm": "A",
+            "milliseconds": 1298.7999999999884
+        },
+        {
+            "name": "C6",
+            "arm": "C",
+            "milliseconds": 1309.2999999999884
+        },
+        {
+            "name": "B7",
+            "arm": "B",
+            "milliseconds": 1425.0999999999767
+        },
+        {
+            "name": "A7",
+            "arm": "A",
+            "milliseconds": 1388.5999999999767
+        },
+        {
+            "name": "C7",
+            "arm": "C",
+            "milliseconds": 1444.5999999999767
+        },
+        {
+            "name": "C8",
+            "arm": "C",
+            "milliseconds": 1366.5999999999767
+        },
+        {
+            "name": "A8",
+            "arm": "A",
+            "milliseconds": 1311
+        },
+        {
+            "name": "B8",
+            "arm": "B",
+            "milliseconds": 1342.2000000000116
+        },
+        {
+            "name": "A9",
+            "arm": "A",
+            "milliseconds": 1330.399999999965
+        },
+        {
+            "name": "C9",
+            "arm": "C",
+            "milliseconds": 1347.2999999999884
+        },
+        {
+            "name": "B9",
+            "arm": "B",
+            "milliseconds": 1293.600000000035
+        },
+        {
+            "name": "B10",
+            "arm": "B",
+            "milliseconds": 1296.9000000000233
+        },
+        {
+            "name": "C10",
+            "arm": "C",
+            "milliseconds": 1387.5999999999767
+        },
+        {
+            "name": "A10",
+            "arm": "A",
+            "milliseconds": 1330.5
+        },
+        {
+            "name": "C11",
+            "arm": "C",
+            "milliseconds": 1318.0999999999767
+        },
+        {
+            "name": "B11",
+            "arm": "B",
+            "milliseconds": 1399.9000000000233
+        },
+        {
+            "name": "A11",
+            "arm": "A",
+            "milliseconds": 1380.4000000000233
+        },
+        {
+            "name": "A12",
+            "arm": "A",
+            "milliseconds": 1333.7999999999884
+        },
+        {
+            "name": "B12",
+            "arm": "B",
+            "milliseconds": 1371.4000000000233
+        },
+        {
+            "name": "C12",
+            "arm": "C",
+            "milliseconds": 1303
+        }
+    ],
+    "packageHashes": {
+        "A": "523802cff025b0284cb7b19b7b71b47a7169407ba88f082ed45aec690d1b76fc",
+        "B": "6fd4c61c8385a6458be38f6666b011d8da81a492ea863224658aabc5c271d10e",
+        "C": "523802cff025b0284cb7b19b7b71b47a7169407ba88f082ed45aec690d1b76fc"
+    },
+    "changedPackageEntries": [
+        "js/dictionary/dictionary-generation-media-store.js",
+        "js/dictionary/dictionary-importer.js"
+    ],
+    "identicalSampledContentAndMedia": true,
+    "validation": {
+        "title": "Jitendex.org [2026-08-11]",
+        "revision": "2026.08.11.0",
+        "termRows": 435448,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+            "ヽ",
+            "御坊ちゃん",
+            "噦",
+            "ドキっと",
+            "株式移転",
+            "こんくらい",
+            "年相應",
+            "偽医者",
+            "ダーッ",
+            "御者臺",
+            "飲みにくい",
+            "ＪＭｄｉｃｔ"
+        ],
+        "outputDigestSha256": "5908783776b5c1760d653c18ab547caaffa8ef97bfe01b2345ad542645f61404",
+        "mediaRows": 236,
+        "generationMedia": null,
+        "packedMediaActivation": null,
+        "mediaBeforeRestart": null,
+        "mediaAfterRestart": null,
+        "restart": {
+            "title": "Jitendex.org [2026-08-11]",
+            "revision": "2026.08.11.0",
+            "termRows": 435448,
+            "contentReadable": true,
+            "probeCount": 12
+        }
+    },
+    "limitation": "One Chromium host per dictionary; all observations and tails retained. A/C controls are reported separately without subtraction. Descriptive intervals are not cross-device guarantees. Sampled browser persistence checks, not exhaustive stored-byte equality or peak-memory measurement."
+}

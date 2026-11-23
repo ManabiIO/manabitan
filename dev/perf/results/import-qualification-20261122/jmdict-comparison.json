@@ -1,0 +1,322 @@
+{
+    "dictionary": "jmdict",
+    "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "candidateSha": "a1d00c8408cb91281e7075fc398ef0810f8ac700",
+    "browser": "153.0.8010.12",
+    "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-09-06",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "expectedTitle": "JMdict [2026-09-06]",
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942
+    },
+    "timingBoundary": "file-input change to post-UI import-complete event",
+    "warmups": 6,
+    "measuredImports": 36,
+    "tripletCount": 12,
+    "armMediansMs": {
+        "A": 730.6500000000087,
+        "B": 726.0500000000029,
+        "C": 736.5
+    },
+    "candidateVersusA": {
+        "pairedChangesPercent": [
+            -1.346287300487392,
+            3.261921216306396,
+            -3.29324952172797,
+            -6.021155410906143,
+            -0.94069529652272,
+            1.9424259362764262,
+            3.928123694109309,
+            0.5319148936122398,
+            -4.816544362913266,
+            1.7135023989033549,
+            -2.845473110955077,
+            4.418537708694892
+        ],
+        "medianPairedChangePercent": -0.20439020145524012,
+        "equalWorkChangePercent": -0.33594368070531955,
+        "fasterPairs": 6,
+        "descriptivePairedMedianInterval95Percent": [
+            -3.0693613163415234,
+            2.602173576291411
+        ]
+    },
+    "candidateVersusC": {
+        "pairedChangesPercent": [
+            1.2535612535595986,
+            0.9594594594563022,
+            -8.565891472866715,
+            -5.752753977966685,
+            4.32160804020183,
+            1.9566736547868668,
+            4.554372197317713,
+            -2.3579282024170145,
+            -3.3464300230337973,
+            0.5828927748391388,
+            -3.7756202804744676,
+            -0.13764624913971124
+        ],
+        "medianPairedChangePercent": 0.2226232628497138,
+        "equalWorkChangePercent": -0.9492120286702765,
+        "fasterPairs": 6,
+        "descriptivePairedMedianInterval95Percent": [
+            -3.5610251517541327,
+            1.6051174541732327
+        ]
+    },
+    "identicalCodeControl": {
+        "pairedChangesPercent": [
+            -2.5676613462872977,
+            2.2805805114028965,
+            5.766602896963868,
+            -0.28478437754744235,
+            -5.044308111792772,
+            -0.01397428731215733,
+            -0.5989692157746807,
+            2.9596290234603417,
+            -1.5210140093426694,
+            1.1240575736821912,
+            0.9666439754982825,
+            4.562464018424328
+        ],
+        "medianPairedChangePercent": 0.4763348440930626,
+        "equalWorkChangePercent": 0.6191453501031008,
+        "fasterPairs": 6,
+        "descriptivePairedMedianInterval95Percent": [
+            -1.059991612558675,
+            2.620104767431619
+        ]
+    },
+    "observations": [
+        {
+            "name": "A1",
+            "arm": "A",
+            "milliseconds": 720.5
+        },
+        {
+            "name": "B1",
+            "arm": "B",
+            "milliseconds": 710.7999999999884
+        },
+        {
+            "name": "C1",
+            "arm": "C",
+            "milliseconds": 702
+        },
+        {
+            "name": "C2",
+            "arm": "C",
+            "milliseconds": 740
+        },
+        {
+            "name": "B2",
+            "arm": "B",
+            "milliseconds": 747.0999999999767
+        },
+        {
+            "name": "A2",
+            "arm": "A",
+            "milliseconds": 723.5
+        },
+        {
+            "name": "B3",
+            "arm": "B",
+            "milliseconds": 707.7000000000116
+        },
+        {
+            "name": "C3",
+            "arm": "C",
+            "milliseconds": 774
+        },
+        {
+            "name": "A3",
+            "arm": "A",
+            "milliseconds": 731.8000000000175
+        },
+        {
+            "name": "A4",
+            "arm": "A",
+            "milliseconds": 737.4000000000233
+        },
+        {
+            "name": "C4",
+            "arm": "C",
+            "milliseconds": 735.2999999999884
+        },
+        {
+            "name": "B4",
+            "arm": "B",
+            "milliseconds": 693
+        },
+        {
+            "name": "C5",
+            "arm": "C",
+            "milliseconds": 696.5
+        },
+        {
+            "name": "A5",
+            "arm": "A",
+            "milliseconds": 733.5
+        },
+        {
+            "name": "B5",
+            "arm": "B",
+            "milliseconds": 726.6000000000058
+        },
+        {
+            "name": "B6",
+            "arm": "B",
+            "milliseconds": 729.5
+        },
+        {
+            "name": "A6",
+            "arm": "A",
+            "milliseconds": 715.6000000000058
+        },
+        {
+            "name": "C6",
+            "arm": "C",
+            "milliseconds": 715.5
+        },
+        {
+            "name": "B7",
+            "arm": "B",
+            "milliseconds": 746.1000000000349
+        },
+        {
+            "name": "A7",
+            "arm": "A",
+            "milliseconds": 717.9000000000233
+        },
+        {
+            "name": "C7",
+            "arm": "C",
+            "milliseconds": 713.5999999999767
+        },
+        {
+            "name": "C8",
+            "arm": "C",
+            "milliseconds": 754.9000000000233
+        },
+        {
+            "name": "A8",
+            "arm": "A",
+            "milliseconds": 733.2000000000116
+        },
+        {
+            "name": "B8",
+            "arm": "B",
+            "milliseconds": 737.0999999999767
+        },
+        {
+            "name": "A9",
+            "arm": "A",
+            "milliseconds": 749.5
+        },
+        {
+            "name": "C9",
+            "arm": "C",
+            "milliseconds": 738.0999999999767
+        },
+        {
+            "name": "B9",
+            "arm": "B",
+            "milliseconds": 713.3999999999651
+        },
+        {
+            "name": "B10",
+            "arm": "B",
+            "milliseconds": 742
+        },
+        {
+            "name": "C10",
+            "arm": "C",
+            "milliseconds": 737.7000000000116
+        },
+        {
+            "name": "A10",
+            "arm": "A",
+            "milliseconds": 729.5
+        },
+        {
+            "name": "C11",
+            "arm": "C",
+            "milliseconds": 741.6000000000349
+        },
+        {
+            "name": "B11",
+            "arm": "B",
+            "milliseconds": 713.6000000000349
+        },
+        {
+            "name": "A11",
+            "arm": "A",
+            "milliseconds": 734.5
+        },
+        {
+            "name": "A12",
+            "arm": "A",
+            "milliseconds": 694.7999999999884
+        },
+        {
+            "name": "B12",
+            "arm": "B",
+            "milliseconds": 725.5
+        },
+        {
+            "name": "C12",
+            "arm": "C",
+            "milliseconds": 726.5
+        }
+    ],
+    "packageHashes": {
+        "A": "8648b4f9146044e3e71612071258358f6772e9671fbce8a383c25318612d6759",
+        "B": "9fd39cd8f67879b53fc995eb20483872f54d2d3228a1d435095e68bd0f12302f",
+        "C": "8648b4f9146044e3e71612071258358f6772e9671fbce8a383c25318612d6759"
+    },
+    "changedPackageEntries": [
+        "js/dictionary/dictionary-generation-media-store.js",
+        "js/dictionary/dictionary-importer.js"
+    ],
+    "identicalSampledContentAndMedia": true,
+    "validation": {
+        "title": "JMdict [2026-09-06]",
+        "revision": "JMdict.2026-09-06",
+        "termRows": 526942,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+            "ヽ",
+            "ゾッと",
+            "アカデミィ",
+            "エアー",
+            "ぱちり",
+            "足を運ぶ",
+            "遣り逃げ",
+            "夜を日についで",
+            "宮古短期大学",
+            "日本環境倶楽部",
+            "ジャッピー",
+            "国家情報局"
+        ],
+        "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+        "mediaRows": 0,
+        "generationMedia": null,
+        "packedMediaActivation": null,
+        "mediaBeforeRestart": null,
+        "mediaAfterRestart": null,
+        "restart": {
+            "title": "JMdict [2026-09-06]",
+            "revision": "JMdict.2026-09-06",
+            "termRows": 526942,
+            "contentReadable": true,
+            "probeCount": 12
+        }
+    },
+    "limitation": "One Chromium host per dictionary; all observations and tails retained. A/C controls are reported separately without subtraction. Descriptive intervals are not cross-device guarantees. Sampled browser persistence checks, not exhaustive stored-byte equality or peak-memory measurement."
+}
