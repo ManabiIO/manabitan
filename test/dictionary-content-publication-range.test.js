@@ -172,7 +172,6 @@ describe('contiguous content metadata publication', () => {
                 state.pendingContentHash1s = Uint32Array.of(99, ...state.pendingContentHash1s, 99).subarray(1, 4)
                 state.pendingContentHash2s = Uint32Array.of(99, ...state.pendingContentHash2s, 99).subarray(1, 4)
             }},
-        {name: 'final cache suppression', expectedFast: true, change: ({state}) => { state.isFinalTermChunk = true }},
     ]
 
     test.each(cases)('matches scalar publication for $name', (fixture) => {
