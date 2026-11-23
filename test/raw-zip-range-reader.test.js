@@ -506,7 +506,9 @@ describe('bounded large ZIP entry reads', () => {
                     encrypted: false,
                 };
                 entryMap.set(filename, metadata);
-                requests.push({type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row});
+                requests.push(i % 2 === 0 ?
+                    {type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row} :
+                    {type: 'image-reference', source: {path: filename}, entry: row});
                 offset += header.length + data.length;
             }
             const archive = new TrackedBlob([...parts, padding]);

@@ -258,11 +258,14 @@ const quickImportBenchmarkMode = (
     parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false)
 );
 const quickImportBenchmarkDictionaryId = quickImportBenchmarkDictionaryIdRaw || 'jmdict';
-const supportedQuickImportBenchmarkDictionaries = new Set(['jmdict', 'jmnedict', 'jitendex']);
+const supportedQuickImportBenchmarkDictionaries = new Set(['jmdict', 'jmnedict', 'jitendex', 'vndb']);
 if (quickImportBenchmarkMode && !supportedQuickImportBenchmarkDictionaries.has(quickImportBenchmarkDictionaryId)) {
     fail(`Unsupported MANABITAN_E2E_IMPORT_BENCH_DICTIONARY=${quickImportBenchmarkDictionaryId}`);
 }
 const usePinnedPerfDictionaries = parseBooleanEnv(process.env.MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK, false);
+if (quickImportBenchmarkMode && quickImportBenchmarkDictionaryId === 'vndb' && !usePinnedPerfDictionaries) {
+    fail('VNDB import benchmarks require MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK=1');
+}
 const useProductionImportDefaults = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS, false);
 const capturePhaseProfiles = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_PROFILING, !quickImportBenchmarkMode);
 const capturePhaseScreenshots = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_SCREENSHOTS, !quickImportBenchmarkMode);
@@ -924,7 +927,7 @@ async function ensureCachedDownload(url, outputPath) {
 async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
     if (usePinnedPerfDictionaries) {
-        return await ensurePinnedDictionaryCache(dictionaryCacheDir);
+        return await ensurePinnedDictionaryCache(dictionaryCacheDir, quickImportBenchmarkMode ? [quickImportBenchmarkDictionaryId] : []);
     }
     const {jitendexUrl, jmnedictUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
@@ -3529,6 +3532,7 @@ async function main() {
             jmdict: {label: 'JMdict', filePath: cachedDictionaries.jmdictPath},
             jmnedict: {label: 'JMnedict', filePath: cachedDictionaries.jmnedictPath},
             jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},
+            vndb: {label: 'VNDB', filePath: cachedDictionaries.paths?.vndb},
         };
         const initialImportSpec = quickImportBenchmarkMode ?
             quickImportBenchmarkSpecs[quickImportBenchmarkDictionaryId] :
@@ -4185,7 +4189,8 @@ async function main() {
                 const state = await evalSendMessage(page, 'benchmarkDictionaryState');
                 const info = state.dictionaryInfo;
                 if (info.length !== 1 || info[0].title !== fixture.expectedTitle || info[0].revision !== fixture.revision ||
-                state.counts[0]?.terms !== fixture.termRows) {
+                state.counts[0]?.terms !== fixture.termRows ||
+                (typeof fixture.mediaRows === 'number' && state.counts[0]?.media !== fixture.mediaRows)) {
                     fail(`Persisted benchmark fixture does not match lock: ${JSON.stringify(state)}`);
                 }
                 const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
@@ -4229,7 +4234,8 @@ async function main() {
                 const restartedState = await evalSendMessage(page, 'benchmarkDictionaryState');
                 const restartedInfo = restartedState.dictionaryInfo;
                 if (restartedInfo.length !== 1 || restartedInfo[0].title !== fixture.expectedTitle || restartedInfo[0].revision !== fixture.revision ||
-                restartedState.counts[0]?.terms !== fixture.termRows) {
+                restartedState.counts[0]?.terms !== fixture.termRows ||
+                (typeof fixture.mediaRows === 'number' && restartedState.counts[0]?.media !== fixture.mediaRows)) {
                     fail(`Persisted benchmark fixture changed across restart: ${JSON.stringify(restartedState)}`);
                 }
                 const restartedProbeResults = [];
@@ -4246,11 +4252,19 @@ async function main() {
                     title: info[0].title,
                     revision: info[0].revision,
                     termRows: state.counts[0].terms,
+                    mediaRows: state.counts[0].media,
                     contentReadable: true,
                     probeCount: probeTerms.length,
                     probeTerms,
                     outputDigestSha256: postRestartOutputDigest,
-                    restart: {title: restartedInfo[0].title, revision: restartedInfo[0].revision, termRows: restartedState.counts[0].terms, contentReadable: true, probeCount: restartedProbeResults.length},
+                    restart: {
+                        title: restartedInfo[0].title,
+                        revision: restartedInfo[0].revision,
+                        termRows: restartedState.counts[0].terms,
+                        mediaRows: restartedState.counts[0].media,
+                        contentReadable: true,
+                        probeCount: restartedProbeResults.length,
+                    },
                 };
             }
             report.status = 'success';

@@ -23,21 +23,24 @@ import path from 'node:path';
 import {promisify} from 'node:util';
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {createBenchmarkEnvironment, extractImportResult, median, metricDelta, optionalMetric, parsePositiveInteger, percentDelta, roundMetric} from '../dev/perf/benchmark-support.js';
-import {ensureFixtureFile, loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
+import {ensureFixtureFile, ensurePinnedDictionaryCache, loadDictionaryFixtures, selectDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
 
 const fixtures = await loadDictionaryFixtures();
 const fixture = fixtures.jmdict;
 const execFileAsync = promisify(execFile);
 
 /**
+ * @param {string} [dictionaryId]
  * @returns {Record<string, any>}
  */
-function validReport() {
+function validReport(dictionaryId = 'jmdict') {
+    const reportFixture = fixtures[dictionaryId];
+    const validation = {title: reportFixture.expectedTitle, revision: reportFixture.revision, termRows: reportFixture.termRows, contentReadable: true, probeCount: 12};
     return {
         status: 'success',
         skippedVerification: false,
         benchmark: {
-            dictionary: 'jmdict',
+            dictionary: dictionaryId,
             pinnedDictionaries: true,
             productionImportDefaults: true,
             traceEnabled: false,
@@ -46,16 +49,24 @@ function validReport() {
             phaseScreenshots: false,
             processSampling: false,
             importFlags: null,
-            validation: {title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12},
+            validation: {
+                ...validation,
+                ...(typeof reportFixture.mediaRows === 'number' ?
+                    {
+                        mediaRows: reportFixture.mediaRows,
+                        restart: {...validation, mediaRows: reportFixture.mediaRows},
+                    } :
+                    {}),
+            },
         },
         phases: [{
-            name: 'JMdict: total import',
+            name: `${reportFixture.label}: total import`,
             durationMs: 123.5,
             startMs: 100,
             endMs: 223.5,
-            data: {kind: 'dictionary-import', dictionary: 'JMdict', browserTiming: {startedAtMs: 10, completedAtMs: 133.5, sequence: 1, sequenceBefore: 0, trigger: 'file-input-change', errorCount: 0}, importDebug: {hasResult: true, resultTitle: fixture.expectedTitle, errorCount: 0, addSettingsErrorCount: 0, usesFallbackStorage: false}},
+            data: {kind: 'dictionary-import', dictionary: reportFixture.label, browserTiming: {startedAtMs: 10, completedAtMs: 133.5, sequence: 1, sequenceBefore: 0, trigger: 'file-input-change', errorCount: 0}, importDebug: {hasResult: true, resultTitle: reportFixture.expectedTitle, errorCount: 0, addSettingsErrorCount: 0, usesFallbackStorage: false}},
         }, {
-            name: 'Import JMdict via file input',
+            name: `Import ${reportFixture.label} via file input`,
             startMs: 100,
             endMs: 140,
         }],
@@ -111,6 +122,21 @@ describe('benchmark count arguments', () => {
         await expect(execFileAsync(process.execPath, ['dev/perf/import-ab.js', 'jmdict', '--flags', '{}'], {
             env: {...process.env, MANABITAN_AB_PAIR_ITERATIONS: '5junk'},
         })).rejects.toThrow('positive safe integer');
+    });
+});
+
+describe('optional pinned dictionary selection', () => {
+    test('keeps the existing three default fixtures', () => {
+        expect(Object.keys(selectDictionaryFixtures(fixtures))).toEqual(['jmdict', 'jmnedict', 'jitendex']);
+    });
+    test('includes VNDB only when explicitly requested and deduplicates requests', () => {
+        const selected = selectDictionaryFixtures(fixtures, ['vndb', 'jmdict', 'vndb']);
+        expect(Object.keys(selected)).toEqual(['jmdict', 'jmnedict', 'jitendex', 'vndb']);
+        expect(selected.vndb).toBe(fixtures.vndb);
+        expect(selected.vndb).toMatchObject({optional: true, termRows: 6648310, mediaRows: 146570});
+    });
+    test.each(['missing', 'constructor', '__proto__'])('rejects unknown fixture %s', (id) => {
+        expect(() => selectDictionaryFixtures(fixtures, [id])).toThrow(`Unknown performance dictionary: ${id}`);
     });
 });
 
@@ -207,6 +233,39 @@ describe('benchmark report acceptance', () => {
         report.benchmark.authoritativeTiming = false;
         expect(extractImportResult(report, 'jmdict', fixture, true, null).totalImportMs).toBe(123.5);
     });
+    test('accepts VNDB only with its pinned media and restart validation', () => {
+        expect(extractImportResult(validReport('vndb'), 'vndb', fixtures.vndb, false, null).validation).toMatchObject({
+            termRows: 6648310,
+            mediaRows: 146570,
+            restart: {termRows: 6648310, mediaRows: 146570, contentReadable: true, probeCount: 12},
+        });
+    });
+    test.each([undefined, null, 0, 146569, '146570'])('rejects missing or incorrect VNDB media count: %j', (mediaRows) => {
+        const report = validReport('vndb');
+        report.benchmark.validation.mediaRows = mediaRows;
+        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('post-import media count');
+    });
+    test.each([undefined, null, {}])('rejects absent VNDB restart validation: %j', (restart) => {
+        const report = validReport('vndb');
+        report.benchmark.validation.restart = restart;
+        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('post-restart');
+    });
+    test.each([
+        ['title', 'wrong'],
+        ['revision', 'wrong'],
+        ['termRows', 1],
+        ['mediaRows', undefined],
+        ['mediaRows', 146569],
+        ['contentReadable', false],
+        ['probeCount', 11],
+        ['probeCount', Number.NaN],
+        ['probeCount', Infinity],
+        ['probeCount', 12.5],
+    ])('rejects invalid VNDB persisted fixture after restart: %s', (key, value) => {
+        const report = validReport('vndb');
+        report.benchmark.validation.restart[key] = value;
+        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('post-restart');
+    });
 });
 
 describe('missing diagnostic metrics', () => {
@@ -256,6 +315,13 @@ describe('atomic pinned fixture installation', () => {
         return {dir, filePath: path.join(dir, 'fixture.zip'), bytes, sampleFixture};
     }
 
+    test('rejects an unknown optional selection before downloading any fixture', async () => {
+        const {dir} = await setup();
+        const fetchSpy = vi.spyOn(globalThis, 'fetch');
+        await expect(ensurePinnedDictionaryCache(dir, ['missing'])).rejects.toThrow('Unknown performance dictionary');
+        expect(fetchSpy).not.toHaveBeenCalled();
+        expect(await readdir(dir)).toEqual([]);
+    });
     test('does not fetch an already verified cache file', async () => {
         const {filePath, bytes, sampleFixture} = await setup();
         await writeFile(filePath, bytes);

@@ -16,6 +16,7 @@
  */
 
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
+import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
 import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
@@ -63,6 +64,8 @@ const OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES = 512 * 1024 * 1024;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
+const CRC_REUSE_MIN_SOURCE_BYTES = 4 * 1024 * 1024;
+const CRC_REUSE_MIN_COMPRESSION_RATIO = 32;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -71,8 +74,8 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
-/** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -107,7 +110,7 @@ const glossaryJsonDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
-/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number})|null} */
+/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCrcMs?: number, sourceCrcScannedBytes?: number, sourceCrcReusedBytes?: number, sourceCrcReusedGlossaryCount?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number})|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -185,6 +188,7 @@ async function getWasm() {
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
+            verify_term_bank_source_crcs: typeof exports.verify_term_bank_source_crcs === 'function' ? exports.verify_term_bank_source_crcs : void 0,
             inflate_zip_media_batch: exports.inflate_zip_media_batch,
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
@@ -206,9 +210,10 @@ async function getWasm() {
  * operation.
  * @param {CompressedTermBankSource[]} sources
  * @param {import('dictionary-importer').ImportExperiments} [options]
+ * @param {boolean} [reuseGlossaryCrc] Internal worker transaction; verify before publishing results.
  * @returns {Promise<PreloadedTermBankSource>}
  */
-export async function inflateCompressedTermBankSourcesWasm(sources, options = {}) {
+export async function inflateCompressedTermBankSourcesWasm(sources, options = {}, reuseGlossaryCrc = false) {
     const experiments = snapshotTermBankExperiments(options);
     if (!Array.isArray(sources) || sources.length === 0) {
         throw new TypeError('Compressed term-bank sources are empty');
@@ -238,6 +243,14 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     }
 
     const wasm = await getWasm();
+    // Reuse is profitable only for highly repetitive source groups. Every other
+    // caller keeps immediate whole-bank CRC validation, including standalone
+    // inflation and source groups without the fused glossary witness proof.
+    const deferCrc = reuseGlossaryCrc && sources.length > 1 &&
+    experiments.experimentalValidatedGlossaryReuse && !experiments.experimentalSkipFusedParse &&
+    uncompressedBytes >= CRC_REUSE_MIN_SOURCE_BYTES &&
+    compressedBytes <= Math.floor(uncompressedBytes / CRC_REUSE_MIN_COMPRESSION_RATIO) &&
+    typeof wasm.verify_term_bank_source_crcs === 'function';
     wasm.wasm_reset_heap();
     const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'compressed term-bank input');
     const inputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'compressed term-bank offset');
@@ -245,6 +258,7 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'uncompressed term-bank length');
     const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank compression method');
     const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'term-bank CRC');
+    const crcStatsPtr = deferCrc ? allocateWasmBuffer(wasm, 12, 'source CRC stats') : 0;
     // Multiple source banks are independent JSON documents. Keep their bounds
     // through inflation so the native cursor validates each bank separately.
     const preserveBankBoundaries = sources.length > 1 || experiments.experimentalTermBankSpans;
@@ -271,7 +285,7 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         inputOffset += source.compressedSize;
     }
     const startedAt = safePerformance.now();
-    const jsonLength = wasm.inflate_and_join_term_banks(
+    let jsonLength = wasm.inflate_and_join_term_banks(
         inputPtr,
         compressedBytes,
         inputOffsetsPtr,
@@ -283,7 +297,27 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         outputPtr,
         outputCapacity,
         bankSpansPtr,
+        deferCrc ? 1 : 0,
     );
+    if (deferCrc && jsonLength < 0) {
+        // Preserve the original per-bank failure order: an earlier CRC error
+        // must still precede a later DEFLATE/wrapper error, and vice versa.
+        // The input and all metadata remain disjoint from the output arena.
+        jsonLength = wasm.inflate_and_join_term_banks(
+            inputPtr,
+            compressedBytes,
+            inputOffsetsPtr,
+            compressedLengthsPtr,
+            uncompressedLengthsPtr,
+            compressionMethodsPtr,
+            signaturesPtr,
+            sources.length,
+            outputPtr,
+            outputCapacity,
+            bankSpansPtr,
+            0,
+        );
+    }
     const inflateMs = Math.max(0, safePerformance.now() - startedAt);
     if (jsonLength < 0) {
         const messages = new Map([
@@ -309,6 +343,8 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
         sourceCount: sources.length,
         bankSpansPtr,
         bankSpanCount: bankSpansPtr === 0 ? 0 : sources.length,
+        crcSignaturesPtr: deferCrc ? signaturesPtr : 0,
+        crcStatsPtr,
         inflateMs,
         compressedBytes,
         uncompressedBytes,
@@ -750,6 +786,31 @@ function estimateFusedTermBankMetaCapacity(source, defaultCapacity) {
  * @throws {Error}
  */
 async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
+    try {
+        return await parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse, preloadedSource, experiments, validateGlossaryTypes);
+    } finally {
+        // Allocation errors, native traps, and every early return still settle
+        // the original source CRC before an importer can select its fallback.
+        verifyTermBankSourceCrc(preloadedSource);
+    }
+}
+
+/**
+ * @param {Uint8Array|Uint8Array[]} contentBytes
+ * @param {boolean} includeContentMetadata
+ * @param {number} initialContentBytesPerRow
+ * @param {boolean} mediaHintFastScan
+ * @param {boolean} computeContentHashes
+ * @param {boolean} emitTokenBinaryContent
+ * @param {boolean} deduplicateContent
+ * @param {boolean} [allowFusedParse]
+ * @param {PreloadedTermBankSource|null} [preloadedSource]
+ * @param {import('dictionary-importer').ImportExperiments} [experiments]
+ * @param {boolean} [validateGlossaryTypes]
+ * @returns {Promise<ParsedTermBankWasmBuffers>}
+ * @throws {Error}
+ */
+async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
     // Every multi-bank route must retain source boundaries until the native
     // term-bank cursor has validated each source as a complete JSON array.
@@ -862,6 +923,9 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
         const rawContentHashesPtr = experiments.experimentalGlobalExactContentReuse ?
             wasm.wasm_alloc(fusedMetaCapacity * 4) :
             0;
+        const glossaryWitnessesPtr = preloadedSource?.crcSignaturesPtr ?
+            allocateWasmBuffer(wasm, fusedMetaCapacity * 4, 'glossary CRC witnesses') :
+0;
         const contentUniqueIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const contentUniqueCountPtr = wasm.wasm_alloc(4);
         const contentUniqueSignaturesPtr = wasm.wasm_alloc(fusedMetaCapacity * CONTENT_SIGNATURE_U32_FIELDS * 4);
@@ -959,6 +1023,13 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             rawContentHashTablePtr === 0 ? 0 : contentHashTableSize,
             rawContentHashesPtr,
             validateGlossaryTypes ? 1 : 0,
+            glossaryWitnessesPtr,
+        );
+        verifyTermBankSourceCrc(
+            preloadedSource,
+            encodedContentBytes >= 0 ? outPtr : 0,
+            encodedContentBytes >= 0 ? new Uint32Array(wasm.memory.buffer, rowCountPtr, 1)[0] : 0,
+            encodedContentBytes >= 0 ? glossaryWitnessesPtr : 0,
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
         const experimentStats = experimentStatsPtr === 0 ?
@@ -1080,6 +1151,7 @@ void 0,
             },
         };
     }
+    verifyTermBankSourceCrc(preloadedSource);
     tStart = Date.now();
     const outPtr = wasm.wasm_alloc(initialMetaCapacity * META_U32_FIELDS * 4);
     allocationMs += Math.max(0, Date.now() - tStart);
@@ -2158,10 +2230,10 @@ null :
             resolvedLengths: new Uint32Array(contentUniqueCount),
             resolvedDictNames: null,
             resolvedUniformDictName: void 0,
-            pendingEpochs: new Uint32Array(contentUniqueCount),
-            pendingIndexes: new Uint32Array(contentUniqueCount),
-            pendingSpanOffsetsScratch: new Uint32Array(normalizedChunkSize),
-            pendingSpanLengthsScratch: new Uint32Array(normalizedChunkSize),
+            // Canonical scans do not use generic pending-row scratch. The
+            // storage owner allocates it only if a chunk takes that fallback.
+            pendingEpochs: null,
+            pendingIndexes: null,
             nextEpoch: 1,
             nextUnresolvedUniqueIndex: 0,
             persistedLookupRequired: null,
@@ -4031,6 +4103,10 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         sourceDeliveryMs: sum('sourceDeliveryMs'),
         sourceTransferredBytes: sum('sourceTransferredBytes'),
         sourceInflateMs: sum('sourceInflateMs'),
+        sourceCrcMs: sum('sourceCrcMs'),
+        sourceCrcScannedBytes: sum('sourceCrcScannedBytes'),
+        sourceCrcReusedBytes: sum('sourceCrcReusedBytes'),
+        sourceCrcReusedGlossaryCount: sum('sourceCrcReusedGlossaryCount'),
         sourceCompressedBytes: sum('sourceCompressedBytes'),
         sourceUncompressedBytes: sum('sourceUncompressedBytes'),
         resultCopyMs: sum('resultCopyMs'),
