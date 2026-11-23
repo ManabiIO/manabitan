@@ -1955,25 +1955,6 @@ export class DictionaryImporter {
                     }
 
                     const tMediaResolveStart = Date.now();
-                    const tResolveExisting = Date.now();
-                    if (alreadyAddedRequirements.length > 0) {
-                        if (this._skipImageMetadata) {
-                            for (const requirement of alreadyAddedRequirements) {
-                                this._assignRequirementNoMetadata(requirement);
-                            }
-                        } else {
-                            /** @type {import('dictionary-importer').ImportRequirement[]} */
-                            const unresolvedRequirements = [];
-                            for (const requirement of alreadyAddedRequirements) {
-                                if (!this._tryResolveRequirementFromCachedImageMetadata(requirement)) {
-                                    unresolvedRequirements.push(requirement);
-                                }
-                            }
-                            if (unresolvedRequirements.length > 0) {
-                                await this._resolveAsyncRequirements(unresolvedRequirements, fileMap);
-                            }
-                        }
-                    }
                     const tResolveNew = Date.now();
                     /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
                     let media = [];
@@ -2025,13 +2006,34 @@ export class DictionaryImporter {
                             ({media} = await this._resolveAsyncRequirements(notAddedRequirements, fileMap));
                         }
                     }
+                    // Resolve first references before duplicates so their payloads
+                    // remain in the media batch and repeated targets use the cache.
+                    const tResolveExisting = Date.now();
+                    if (alreadyAddedRequirements.length > 0) {
+                        if (this._skipImageMetadata) {
+                            for (const requirement of alreadyAddedRequirements) {
+                                this._assignRequirementNoMetadata(requirement);
+                            }
+                        } else {
+                            /** @type {import('dictionary-importer').ImportRequirement[]} */
+                            const unresolvedRequirements = [];
+                            for (const requirement of alreadyAddedRequirements) {
+                                if (!this._tryResolveRequirementFromCachedImageMetadata(requirement)) {
+                                    unresolvedRequirements.push(requirement);
+                                }
+                            }
+                            if (unresolvedRequirements.length > 0) {
+                                await this._resolveAsyncRequirements(unresolvedRequirements, fileMap);
+                            }
+                        }
+                    }
                     const tResolved = Date.now();
                     importMetrics.mediaResolveMs += Math.max(0, tResolved - tMediaResolveStart);
                     step4TimingBreakdown.mediaResolveMs += importMetrics.mediaResolveMs;
                     this._logImport(
                         `term file ${termFile.filename}: resolve existing=${alreadyAddedRequirements.length} ` +
-                        `${tResolveNew - tResolveExisting}ms new=${notAddedRequirements.length} ` +
-                        `${tResolved - tResolveNew}ms`,
+                        `${tResolved - tResolveExisting}ms new=${notAddedRequirements.length} ` +
+                        `${tResolveExisting - tResolveNew}ms`,
                     );
                     this._logImport(`term file ${termFile.filename}: requirements=${requirements.length} newMedia=${media.length}`);
                     const tMediaWriteStart = Date.now();
