@@ -60,6 +60,11 @@ these results with the ungated screen or claim an equivalent import speedup.
 
 The measured importer SHA-256 is
 `315b98dd0a065cde9320e94c41367805951bbedbbef09b8472f8fa94a570b1d3`.
+The measured source and runner are preserved in public commit
+[`fe9138c`](https://github.com/ManabiIO/manabitan/commit/fe9138c1c564433b56c2ccefb85261812451fd24). Subsequent
+lint fixes change importer indentation and runner formatting, type annotations,
+and baseline-constructor access; they do not change the classification algorithm
+or measurement plan. The raw report remains unchanged and no timings were rerun.
 The final gated source passed 85 focused importer tests across five files.
 Exact-head lint, types, full unit, build, and browser qualification remain
 separate gates; no browser import timing was collected by this runner.

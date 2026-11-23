@@ -57,6 +57,9 @@
             "dictionary-importer-media-loader": [
                 "../types/ext/dictionary-importer-media-loader"
             ],
+            "dictionary-worker-media-loader": [
+                "../types/ext/dictionary-worker-media-loader"
+            ],
             "dynamic-property": [
                 "../types/ext/dynamic-property"
             ],

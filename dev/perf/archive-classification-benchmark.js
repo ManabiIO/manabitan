@@ -28,11 +28,14 @@ import {DictionaryImporterMediaLoader} from '../../ext/js/dictionary/dictionary-
 import {parsePositiveInteger} from './benchmark-support.js';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const {values, positionals} = parseArgs({allowPositionals: true, options: {
-    'baseline-root': {type: 'string'},
-    'pairs': {type: 'string', default: '12'},
-    'out': {type: 'string', default: 'builds/perf/archive-classification.json'},
-}});
+const {values, positionals} = parseArgs({
+    allowPositionals: true,
+    options: {
+        'baseline-root': {type: 'string'},
+        'pairs': {type: 'string', default: '12'},
+        'out': {type: 'string', default: 'builds/perf/archive-classification.json'},
+    },
+});
 assert(values['baseline-root'], '--baseline-root must name a prepared source checkout');
 assert(positionals.length > 0, 'Provide at least one dictionary ZIP path');
 assert(typeof globalThis.gc === 'function', 'Run Node with --expose-gc');
@@ -41,15 +44,19 @@ const pairs = parsePositiveInteger(values.pairs, 'pairs');
 const baselineRoot = path.resolve(values['baseline-root']);
 const importerPath = 'ext/js/dictionary/dictionary-importer.js';
 const baselinePath = path.join(baselineRoot, importerPath);
-const baselineModule = /** @type {typeof import('../../ext/js/dictionary/dictionary-importer.js')} */ (
-    await import(pathToFileURL(baselinePath).href)
-);
-const baseline = new baselineModule.DictionaryImporter(new DictionaryImporterMediaLoader());
+/** @type {unknown} */
+// eslint-disable-next-line no-unsanitized/method -- Load the explicitly requested local baseline checkout.
+const baselineModule = await import(pathToFileURL(baselinePath).href);
+const {DictionaryImporter: BaselineImporter} = /** @type {{DictionaryImporter: typeof DictionaryImporter}} */ (baselineModule);
+const baseline = new BaselineImporter(new DictionaryImporterMediaLoader());
 const candidate = new DictionaryImporter(new DictionaryImporterMediaLoader());
 const readArchive = /** @type {DictionaryImporter['_getFilesFromArchive']} */ (Reflect.get(baseline, '_getFilesFromArchive')).bind(baseline);
 const classifyBaseline = /** @type {DictionaryImporter['_getArchiveFiles']} */ (Reflect.get(baseline, '_getArchiveFiles')).bind(baseline);
 const classifyCandidate = /** @type {DictionaryImporter['_getArchiveFiles']} */ (Reflect.get(candidate, '_getArchiveFiles')).bind(candidate);
-const threadCpuUsage = /** @type {(previous?: NodeJS.CpuUsage) => NodeJS.CpuUsage} */ (Reflect.get(process, 'threadCpuUsage'));
+/** @typedef {{user: number, system: number}} CpuUsage */
+/** @type {unknown} */
+const threadCpuUsageValue = Reflect.get(process, 'threadCpuUsage');
+const threadCpuUsage = /** @type {(previous?: CpuUsage) => CpuUsage} */ (threadCpuUsageValue);
 assert(typeof threadCpuUsage === 'function', 'Use a Node version supporting threadCpuUsage');
 /** @type {import('dictionary-importer').QueryDetails} */
 const baselineQueries = [
@@ -67,7 +74,9 @@ const baselineQueries = [
  */
 async function hashFile(file) {
     const hash = createHash('sha256');
-    for await (const bytes of createReadStream(file)) { hash.update(/** @type {Buffer} */ (bytes)); }
+    /** @type {AsyncIterable<Uint8Array>} */
+    const chunks = createReadStream(file);
+    for await (const bytes of chunks) { hash.update(bytes); }
     return hash.digest('hex');
 }
 

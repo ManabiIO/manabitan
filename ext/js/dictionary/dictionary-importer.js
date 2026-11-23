@@ -4256,7 +4256,7 @@ export class DictionaryImporter {
         }
 
         const filterBankCandidates = fileMap.size >= ARCHIVE_BANK_CANDIDATE_FILTER_MIN_ENTRIES &&
-            queryDetails.every((query) => ARCHIVE_BANK_QUERY_DETAILS.includes(query));
+        queryDetails.every((query) => ARCHIVE_BANK_QUERY_DETAILS.includes(query));
         const archiveEntries = filterBankCandidates ?
             this._getArchiveBankFileEntries(fileMap) :
             fileMap.entries();
