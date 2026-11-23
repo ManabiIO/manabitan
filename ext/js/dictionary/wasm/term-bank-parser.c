@@ -950,9 +950,13 @@ static int parse_composite_span_impl(
             continue;
         }
         if (c == '"') {
-            uint32_t s_end = 0u;
-            const int object_key = state == OBJECT_FIRST || state == OBJECT_KEY;
-            const int common_key_kind = object_key ?
+            uint32_t s_end;
+            int object_key;
+            int common_key_kind;
+parse_string:
+            s_end = 0u;
+            object_key = state == OBJECT_FIRST || state == OBJECT_KEY;
+            common_key_kind = object_key ?
                 parse_common_structured_key_span(src, len, i, &s_end) : COMMON_STRUCTURED_KEY_NONE;
             if (common_key_kind == COMMON_STRUCTURED_KEY_NONE) {
                 if (!parse_string_span(src, len, i, &s_end)) { return 0; }
@@ -999,6 +1003,10 @@ static int parse_composite_span_impl(
                 if (s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
                     i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
+                    // Adjacent string values already satisfy the dispatch
+                    // token check. Validate them through the same string path
+                    // without repeating the general JSON state dispatch.
+                    if (i < len && src[i] == '"') { goto parse_string; }
                     continue;
                 }
                 state = OBJECT_COLON;

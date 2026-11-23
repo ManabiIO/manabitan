@@ -23,9 +23,10 @@ beforeAll(async () => {
  * @param {string[]} banks
  * @param {number} [alignment]
  * @param {boolean} [physicalEnd]
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {{count: number, metadata: number[], bytes: Uint8Array}}
  */
-function parse(banks, alignment = 0, physicalEnd = false) {
+function parse(banks, alignment = 0, physicalEnd = false, validateGlossaryTypes = false) {
     wasm.wasm_reset_heap()
     const bytes = encoder.encode(banks.join(''))
     const spanPointer = wasm.wasm_alloc(Math.max(8, banks.length * 8))
@@ -45,7 +46,7 @@ function parse(banks, alignment = 0, physicalEnd = false) {
         spans[i * 2 + 1] = length
         cursor += length
     }
-    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, banks.length > 1 ? spanPointer : 0, banks.length > 1 ? banks.length : 0)
+    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, banks.length > 1 ? spanPointer : 0, banks.length > 1 ? banks.length : 0, validateGlossaryTypes ? 1 : 0)
     expect([...heap.subarray(guard, output)]).toEqual(new Array(16).fill(0xa5))
     expect([...heap.subarray(output + 68, output + 84)]).toEqual(new Array(16).fill(0xa5))
     return {count, metadata: [...new Uint32Array(wasm.memory.buffer, output, 17)], bytes}
@@ -159,6 +160,41 @@ describe('adjacent JSON delimiter state transitions', () => {
             expect(result.count).toBe(1)
             expect(result.metadata.slice(14)).toEqual(flags)
         }
+    })
+
+    test('keeps required-field and last-key semantics across adjacent string values', () => {
+        for (const space of ['', ' ', '\t', '\r\n']) {
+            for (const [object, valid] of /** @type {Array<[string, boolean]>} */ ([
+                ['{"type":"text","text":"kept"}', true],
+                ['{"text":"kept","type":"text"}', true],
+                ['{"type":"text","text":"kept","text":null}', false],
+                ['{"type":"text","text":null,"text":"kept"}', true],
+                ['{"type":"image","path":"kept.png"}', true],
+                ['{"path":"kept.png","type":"image","type":"text"}', false],
+                ['{"type":"structured-content","content":"image"}', true],
+                ['{"content":"kept","type":"structured-content","content":false}', false],
+                ['{"type":"structured-content","content":{"tag":"span","content":"text","title":"image"}}', true],
+                [String.raw`{"t\u0079pe":"te\u0078t","text":"kept"}`, true],
+            ])) {
+                const source = bank(`[${object.replaceAll(':', `:${space}`)}]`)
+                expect(parse([source], 3, false, true).count > 0).toBe(valid)
+            }
+        }
+    })
+
+    test('handles long mixed objects without consuming escaped value punctuation as keys', () => {
+        const content = Array.from({length: 1024}, (_, index) => ({
+            tag: 'span',
+            content: `text ${index} ",:{}[] 日🙂`,
+            title: index % 2 ? 'image' : '',
+            data: {kind: 'definition', label: '\\u0069mage'},
+        }))
+        const glossary = JSON.stringify([{type: 'structured-content', content}])
+        const result = parse([bank(glossary)], 5, false, true)
+        expect(result.count).toBe(1)
+        const [start, length] = result.metadata.slice(9, 11)
+        expect(decoder.decode(result.bytes.subarray(start, start + length))).toBe(glossary)
+        expect(result.metadata.slice(14)).toEqual([1, 0, 0])
     })
 
     test('preserves suspended parent states up to the existing nesting limit', () => {
