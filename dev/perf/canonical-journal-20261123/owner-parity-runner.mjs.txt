@@ -1,0 +1,277 @@
+import assert from 'node:assert/strict'
+import {readFile, writeFile, open, unlink} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import {execFileSync} from 'node:child_process'
+import {inflateRawSync, crc32} from 'node:zlib'
+import {pathToFileURL} from 'node:url'
+import path from 'node:path'
+import os from 'node:os'
+
+const directory = '/workspace/scratch/fd1e0bf33ec2'
+const baseline = path.join(directory, 'manabitan')
+const candidate = path.join(directory, 'jmdict')
+const cache = '/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache'
+const output = path.join(directory, 'jitendex-journal-owner-parity.json')
+const backingPath = path.join(directory, 'jitendex-journal-owner-content.bin')
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const imports = async (root, name) => await import(pathToFileURL(path.join(root, name)))
+const trackedFiles = [
+    'ext/js/dictionary/dictionary-database.js',
+    'ext/js/dictionary/term-bank-wasm-parser.js',
+    'ext/js/dictionary/term-content-canonical-scan.js',
+    'ext/js/dictionary/term-content-canonical-layout.js',
+    'ext/js/dictionary/term-content-metadata-arena.js',
+    'dev/data/dictionary-wasm/manifest.json',
+    'dev/data/dictionary-wasm/term-bank-parser.wasm',
+]
+const receipts = async (root, version) => ({
+    commit: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
+    baseTree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {cwd: root, encoding: 'utf8'}).trim(),
+    files: Object.fromEntries(await Promise.all([
+        ...trackedFiles,
+        `ext/js/dictionary/wasm/term-content-canonical-scan-v${version}.c`,
+        `dev/data/dictionary-wasm/term-content-canonical-scan-v${version}.wasm`,
+    ].map(async (name) => [name, sha256(await readFile(path.join(root, name)))]))),
+})
+const sourceBefore = {baseline: await receipts(baseline, 1), candidate: await receipts(candidate, 2)}
+assert.equal(sourceBefore.baseline.commit, '3d65e403c644b9a5a6be3128d72f9d30050b70e0')
+for (const name of ['ext/js/dictionary/dictionary-database.js', 'ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-content-metadata-arena.js', 'dev/data/dictionary-wasm/term-bank-parser.wasm']) {
+    assert.equal(sourceBefore.baseline.files[name], sourceBefore.candidate.files[name], `Unchanged integration dependency ${name}`)
+}
+const report = {
+    schema: 1,
+    complete: false,
+    node: process.version,
+    v8: process.versions.v8,
+    scope: 'Full locked Jitendex parser-to-canonical-owner integration. Actual baseline ABI1 and candidate ABI2 JS adapters run in separate database owners, resolve real parser slabs, perform exact persisted reads and publish metadata. All result columns, resolved plans and authoritative metadata tables are compared after each group. Scratch-file content backing bounds live historical slabs. No browser, compression, OPFS durability, final record writing, or import timing is claimed.',
+    runnerSha256: sha256(await readFile(new URL(import.meta.url))),
+    sources: sourceBefore,
+    parserOptions: {
+        singleChunk: true,
+        emitTermByteLists: false,
+        computeContentHashes: true,
+        emitContentSlab: true,
+        emitTokenBinaryContent: true,
+        mediaHintFastScan: true,
+        validateGlossaryTypes: true,
+        prepareLookupIndexes: true,
+        compactContentMetadata: true,
+    },
+    banksPerGroup: 10,
+    host: {startLoad: os.loadavg(), totalMemory: os.totalmem()},
+    groups: [],
+    totals: {rows: 0, uniqueRows: 0, pendingRows: 0, persistedHits: 0, copiedContentBytes: 0, exactReadCount: 0, exactReadBytes: 0, maxRssBytes: 0},
+}
+const {ZipReader, Uint8ArrayReader} = await imports(candidate, 'node_modules/@zip.js/zip.js/index.js')
+const parser = await imports(candidate, 'ext/js/dictionary/term-bank-wasm-parser.js')
+parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(path.join(candidate, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))))
+const baselineDatabase = await imports(baseline, 'ext/js/dictionary/dictionary-database.js')
+const candidateDatabase = await imports(candidate, 'ext/js/dictionary/dictionary-database.js')
+const baselineScanner = await imports(baseline, 'ext/js/dictionary/term-content-canonical-scan.js')
+const candidateScanner = await imports(candidate, 'ext/js/dictionary/term-content-canonical-scan.js')
+const arms = []
+for (const [name, root, version, dbModule, scannerModule] of [
+    ['baseline', baseline, 1, baselineDatabase, baselineScanner],
+    ['candidate', candidate, 2, candidateDatabase, candidateScanner],
+]) {
+    const module = await WebAssembly.compile(await readFile(path.join(root, `dev/data/dictionary-wasm/term-content-canonical-scan-v${version}.wasm`)))
+    const probe = new WebAssembly.Instance(module, {env: {memory: new WebAssembly.Memory({initial: 128})}})
+    assert.equal(probe.exports.canonical_abi_version(), version)
+    const database = new dbModule.DictionaryDatabase()
+    const scanner = new scannerModule.NativeCanonicalScanner({loadModule: async () => module})
+    database._nativeCanonicalScanner = scanner
+    arms.push({name, version, database, scanner})
+}
+const planFields = [
+    'uniqueCount', 'sourceRowCount', 'uniqueRowIndexes', 'uniqueSignatures',
+    'resolvedFlags', 'resolvedOffsets', 'resolvedLengths', 'resolvedDictNames',
+    'resolvedUniformDictName', 'pendingEpochs', 'pendingIndexes', 'nextEpoch',
+    'nextUnresolvedUniqueIndex', 'persistedLookupRequired',
+]
+const resultFields = [
+    'contentOffsets', 'contentLengths', 'resolvedContentDictNames',
+    'pendingContentBytes', 'pendingContentHash1s', 'pendingContentHash2s',
+    'pendingContentDictNames', 'pendingRowToUniqueIndex', 'pendingContentCount',
+    'pendingContentSpans', 'uniformContentDictName', 'pendingHitCount',
+    'persistedHitCount', 'exactFallbackCount', 'pendingPlanUniqueIndexes',
+    'pendingPlanUniqueStart', 'stagedContentMetadata', 'nativeScanMetrics',
+]
+const tableFields = [
+    'HashPairTable', 'Hash1Table', 'Hash2Table', 'StateTable', 'LengthTable',
+    'SignaturePresentTable', 'Signature1Table', 'Signature2Table', 'Signature3Table',
+    'IdTable', 'OffsetTable', 'DictNameIdTable', 'RecentSourceBatchIdTable',
+    'RecentSourceOffsetTable',
+]
+const counterFields = ['DenseCount', 'HashPairPendingCount', 'HashPairCount', 'FreeIndexes']
+const summaryValue = (value) => {
+    if (ArrayBuffer.isView(value)) {
+        return {type: value.constructor.name, length: value.length, sha256: sha256(new Uint8Array(value.buffer, value.byteOffset, value.byteLength))}
+    }
+    if (Array.isArray(value)) { return value.map(summaryValue) }
+    if (value !== null && typeof value === 'object') { return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, summaryValue(entry)])) }
+    return value
+}
+const pick = (value, fields) => Object.fromEntries(fields.map((key) => [key, value[key]]))
+function compareOwners() {
+    for (const field of [...tableFields, ...counterFields]) {
+        assert.deepEqual(arms[1].database[`_termEntryContentMeta${field}`], arms[0].database[`_termEntryContentMeta${field}`], `Authoritative metadata ${field}`)
+    }
+    assert.deepEqual(arms[1].scanner.stats, arms[0].scanner.stats, 'Actual native adapter counters')
+}
+function ownerDigest() {
+    return sha256(JSON.stringify(Object.fromEntries([...tableFields, ...counterFields].map((field) => [field, summaryValue(arms[1].database[`_termEntryContentMeta${field}`])]))))
+}
+let backing
+let reader
+try {
+    backing = await open(backingPath, 'w+')
+    let nextBase = 0
+    for (const {database} of arms) {
+        database._readTermEntryContentBytesDetailed = async (offset, length) => {
+            assert.ok(Number.isSafeInteger(offset) && offset >= 0 && offset + length <= nextBase)
+            const bytes = new Uint8Array(length)
+            let read = 0
+            while (read < length) {
+                const {bytesRead} = await backing.read(bytes, read, length - read, offset + read)
+                assert.ok(bytesRead > 0)
+                read += bytesRead
+            }
+            ++report.totals.exactReadCount
+            report.totals.exactReadBytes += length
+            return {status: 'ok', bytes}
+        }
+    }
+    const locks = JSON.parse(await readFile(path.join(candidate, 'test/perf/dictionaries.lock.json'), 'utf8'))
+    const spec = locks.dictionaries.jitendex
+    const archive = await readFile(path.join(cache, spec.cacheFile))
+    assert.equal(archive.length, spec.sizeBytes)
+    assert.equal(sha256(archive), spec.sha256)
+    report.fixture = {file: spec.cacheFile, bytes: archive.length, sha256: spec.sha256, expectedRows: spec.termRows}
+    reader = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)), {useWebWorkers: false})
+    const entries = (await reader.getEntries()).filter(({filename}) => /^term_bank_\d+\.json$/.test(filename))
+        .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+    report.banks = entries.length
+    for (let first = 0; first < entries.length; first += report.banksPerGroup) {
+        const sources = []
+        let expectedRows = 0
+        for (const entry of entries.slice(first, first + report.banksPerGroup)) {
+            const start = entry.offset
+            assert.equal(archive.readUInt32LE(start), 0x04034b50)
+            assert.equal(archive.readUInt16LE(start + 8), entry.compressionMethod)
+            const filenameLength = archive.readUInt16LE(start + 26)
+            const extraLength = archive.readUInt16LE(start + 28)
+            assert.equal(archive.subarray(start + 30, start + 30 + filenameLength).toString(), entry.filename)
+            const payloadStart = start + 30 + filenameLength + extraLength
+            const bytes = archive.subarray(payloadStart, payloadStart + entry.compressedSize)
+            const decoded = entry.compressionMethod === 0 ? bytes : inflateRawSync(bytes)
+            assert.equal(decoded.length, entry.uncompressedSize)
+            assert.equal(crc32(decoded), entry.signature)
+            expectedRows += JSON.parse(decoded.toString()).length
+            sources.push({bytes, compressionMethod: entry.compressionMethod, compressedSize: bytes.length, uncompressedSize: decoded.length, signature: entry.signature, filename: entry.filename})
+        }
+        const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, report.parserOptions, true)
+        let groupRows = 0
+        await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, async (borrowed) => {
+            const original = parser.copyWasmBackedColumnChunk(borrowed)
+            const contentBefore = sha256(original.contentBytesBuffer)
+            const results = []
+            const chunks = []
+            for (const {database} of arms) {
+                const chunk = {
+                    ...original,
+                    contentDedupPlan: structuredClone(original.contentDedupPlan),
+                    dictionary: spec.expectedTitle,
+                    dictionaryTotalRows: spec.termRows,
+                    uniformContentDictName: 'raw',
+                    contentDictNameList: null,
+                    useResolvedContentReferences: true,
+                }
+                chunks.push(chunk)
+                results.push(await database._resolveArtifactTermContentDedup(chunk, true))
+            }
+            assert.deepEqual(pick(results[1], resultFields), pick(results[0], resultFields), 'Dedup result and native metrics')
+            assert.deepEqual(pick(chunks[1].contentDedupPlan, planFields), pick(chunks[0].contentDedupPlan, planFields), 'Resolved plan before publication')
+            compareOwners()
+            const spans = results[0].pendingContentSpans
+            assert.ok(spans !== null)
+            const pendingOffsets = new Float64Array(results[0].pendingContentCount)
+            const pendingLengths = new Uint32Array(results[0].pendingContentCount)
+            for (let i = 0; i < pendingOffsets.length; ++i) {
+                pendingOffsets[i] = nextBase + spans.offsets[i]
+                pendingLengths[i] = spans.lengths[i]
+            }
+            let written = 0
+            while (written < spans.buffer.length) {
+                const {bytesWritten} = await backing.write(spans.buffer, written, spans.buffer.length - written, nextBase + written)
+                assert.ok(bytesWritten > 0)
+                written += bytesWritten
+            }
+            nextBase += spans.buffer.byteLength + 1
+            for (let i = 0; i < arms.length; ++i) {
+                const {database} = arms[i]
+                const result = results[i]
+                const chunk = chunks[i]
+                database._publishResolvedArtifactTermContentPlan(result.contentDedupPlan, result.pendingPlanUniqueStart, result.pendingPlanUniqueIndexes, pendingOffsets, pendingLengths, 'raw')
+                result.publishedDictName = database._publishArtifactTermContentMetadata({
+                    ...result,
+                    count: chunk.rowCount,
+                    pendingOffsets,
+                    pendingLengths,
+                    pendingResolvedDictNames: 'raw',
+                    contentUniqueIndexList: chunk.contentUniqueIndexList,
+                    useResolvedContentReferences: true,
+                })
+            }
+            assert.deepEqual(pick(results[1], [...resultFields, 'publishedDictName']), pick(results[0], [...resultFields, 'publishedDictName']), 'Published result')
+            assert.deepEqual(pick(chunks[1].contentDedupPlan, planFields), pick(chunks[0].contentDedupPlan, planFields), 'Published row references')
+            assert.ok(chunks[1].contentDedupPlan.resolvedFlags.every((flag) => flag === 1))
+            assert.equal(sha256(original.contentBytesBuffer), contentBefore, 'Source content remains immutable')
+            compareOwners()
+            const record = {
+                firstBank: first + 1,
+                rowCount: original.rowCount,
+                uniqueRows: original.contentDedupPlan.uniqueCount,
+                compactContentMetadata: original.contentMetaByUniqueIndex === true,
+                contentBytes: original.contentBytesBuffer.length,
+                contentSha256: contentBefore,
+                pendingRows: results[1].pendingContentCount,
+                persistedHits: results[1].persistedHitCount,
+                native: results[1].nativeScanMetrics,
+                resultSha256: sha256(JSON.stringify(summaryValue(pick(results[1], [...resultFields, 'publishedDictName'])))),
+                planSha256: sha256(JSON.stringify(summaryValue(pick(chunks[1].contentDedupPlan, planFields)))),
+                metadataSha256: ownerDigest(),
+            }
+            report.groups.push(record)
+            report.totals.rows += original.rowCount
+            groupRows += original.rowCount
+            report.totals.uniqueRows += original.contentDedupPlan.uniqueCount
+            report.totals.pendingRows += record.pendingRows
+            report.totals.persistedHits += record.persistedHits
+            report.totals.copiedContentBytes += record.contentBytes
+            report.totals.maxRssBytes = Math.max(report.totals.maxRssBytes, process.memoryUsage().rss)
+        }, 2048, {...report.parserOptions, preloadedSource})
+        assert.equal(groupRows, expectedRows)
+        console.log(`${Math.min(first + report.banksPerGroup, entries.length)}/${entries.length} banks: ${report.totals.rows} rows, candidate calls=${arms[1].scanner.stats.calls}, inserted=${arms[1].scanner.stats.inserted}`)
+        await writeFile(output, JSON.stringify(report, null, 2))
+        globalThis.gc?.()
+    }
+    assert.equal(report.totals.rows, spec.termRows)
+    assert.ok(arms[1].scanner.stats.calls > 0)
+    assert.ok(arms[1].scanner.stats.inserted > 0)
+    assert.ok(report.groups.every(({compactContentMetadata, uniqueRows, rowCount}) => compactContentMetadata === (uniqueRows * 2 < rowCount)))
+    report.nativeStats = Object.fromEntries(arms.map(({name, version, scanner}) => [name, {abiVersion: version, ...scanner.stats}]))
+    report.finalMetadataSha256 = ownerDigest()
+    assert.deepEqual(await receipts(baseline, 1), sourceBefore.baseline)
+    assert.deepEqual(await receipts(candidate, 2), sourceBefore.candidate)
+    report.complete = true
+} catch (error) {
+    report.error = error.stack ?? String(error)
+    process.exitCode = 1
+} finally {
+    await reader?.close()
+    await backing?.close()
+    await unlink(backingPath).catch(() => {})
+    report.host.endLoad = os.loadavg()
+    await writeFile(output, JSON.stringify(report, null, 2))
+    console.log(output)
+}

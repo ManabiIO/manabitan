@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-// Private ABI v1; mirror term-content-canonical-layout.js. All scratch columns
+// Private ABI v2; mirror term-content-canonical-layout.js. All scratch columns
 // fit below the authoritative arena, which begins at the fixed 8 MiB prefix.
 #define MAX_ROWS 100000u
 #define EXACT_BATCH_SIZE 4096u
@@ -37,14 +37,14 @@
 #define U32(p) ((uint32_t *)(uintptr_t)(p))
 #define U8(p) ((uint8_t *)(uintptr_t)(p))
 
-_Static_assert(LAYOUT_END == 8263840u, "canonical layout v1 endpoint");
+_Static_assert(LAYOUT_END == 8263840u, "canonical layout endpoint");
 _Static_assert(LAYOUT_END <= PREFIX, "canonical scratch exceeds reserved prefix");
 _Static_assert(META >= 131072u, "canonical scratch overlaps stack");
 _Static_assert(FLAGS % 4u == 0 && OUT % 4u == 0 && INDEXES % 4u == 0,
                "canonical columns must remain aligned");
 
 __attribute__((export_name("canonical_abi_version")))
-uint32_t canonical_abi_version(void) { return 1u; }
+uint32_t canonical_abi_version(void) { return 2u; }
 __attribute__((export_name("canonical_layout_end")))
 uint32_t canonical_layout_end(void) { return LAYOUT_END; }
 __attribute__((export_name("canonical_max_rows")))
@@ -129,9 +129,11 @@ int32_t scan_canonical(void) {
             const uint32_t index = h[5];
             if (index >= c[10] || state[index] != 0 || m[1] == 0xffffffffu) { return -5; }
             uint32_t j = h[0];
-            journal[j * 3] = slot;
-            journal[j * 3 + 1] = slots[slot];
-            journal[j * 3 + 2] = index;
+            // The probe ended on an empty slot; published matches continued
+            // above. New IDs are dense and no free IDs enter this kernel, so
+            // rollback derives the old slot value (0) and ID (initial + j).
+            // Keep the v1 scratch reservation, but log just the varying slot.
+            journal[j] = slot;
             h[0] = j + 1; // Commit rollback progress BEFORE authoritative mutation.
             __asm__ __volatile__("" ::: "memory");
             hash1[index] = m[2];

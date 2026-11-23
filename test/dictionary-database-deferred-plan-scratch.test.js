@@ -29,7 +29,7 @@ import {NativeCanonicalScanner} from '../ext/js/dictionary/term-content-canonica
 let canonicalModule
 
 beforeAll(async () => {
-    canonicalModule = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)))
+    canonicalModule = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v2.wasm', import.meta.url)))
 })
 
 /**

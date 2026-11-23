@@ -19,7 +19,7 @@ async function fixture() {
         sourceDigest: identity.digest,
         sourceFileCount: identity.count,
         toolchain: {compilerVersion: '21.1.8', linkerVersion: '21.1.8'},
-        targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
+        targets: ['term-bank-parser.wasm', 'term-content-canonical-scan-v2.wasm'].map((name) => ({name, sources: ['ext/js/dictionary/wasm/parser.c'], arguments: ['-O3'], sha256: dictionaryWasmHash(module)}))};
     for (const {name} of manifest.targets) { await writeFile(join(artifacts, name), module); }
     const saveManifest = () => writeFile(join(artifacts, 'manifest.json'), JSON.stringify(manifest));
     await saveManifest();

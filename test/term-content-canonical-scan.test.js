@@ -31,7 +31,7 @@ import {NativeCanonicalScanner, compileCanonicalScanModule} from '../ext/js/dict
 import {CANONICAL_SCAN_LAYOUT as layout} from '../ext/js/dictionary/term-content-canonical-layout.js';
 
 const wasm = new Uint8Array(
-    await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)),
+    await fs.readFile(new URL('../ext/lib/term-content-canonical-scan-v2.wasm', import.meta.url)),
 );
 const module = await WebAssembly.compile(wasm);
 function jsDatabase() {
@@ -55,7 +55,7 @@ function useProductionScanner(db, _bytes, hooks = {}) {
     };
 }
 
-test('production canonical kernel: 63 differential, boundary, rollback and full record/index byte controls', async () => {
+test('production canonical kernel: 65 differential, boundary, rollback and full record/index byte controls', async () => {
     const checks = [],
         totals = {
             calls: 0,
@@ -238,6 +238,59 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
             }
         }
     }
+    /* eslint-disable @stylistic/semi */
+    // Mixed resolved, exact, and pending rows cross the 4096-candidate yield.
+    // Each successful return must publish only that segment's counters, while
+    // its dense-ID cursor continues from the preceding accepted segment.
+    for (const reserve of [false, true]) {
+        const count = 9000
+        const a = fixture(count, {existing: true})
+        const b = fixture(count, {existing: true})
+        for (const f of [a, b]) {
+            for (let i = 0; i < count; i += 7) {
+                f.plan.resolvedFlags[i] = 1
+                f.plan.resolvedOffsets[i] = 80000 + i * 4
+                f.plan.resolvedLengths[i] = 4
+                f.plan.resolvedDictNames[i] = 'previous'
+            }
+        }
+        const headers = []
+        const initialDenseCount = b.db._termEntryContentMetaDenseCount
+        const controller = useProductionScanner(b.db, wasm, {
+            beforeOutputView({header, column}) {
+                if (column === 0) { headers.push([...header]) }
+            },
+        })
+        const ar = await a.db._resolveArtifactTermContentDedup(a.chunk, reserve)
+        const br = await b.db._resolveArtifactTermContentDedup(b.chunk, reserve)
+        same(a, b, ar, br)
+        assert.equal(headers.length, 2)
+        assert.equal(headers[0][3], 4096)
+        assert.equal(headers[1][1], count)
+        let cursor = 0
+        let denseCount = initialDenseCount
+        for (const header of headers) {
+            let resolvedCount = 0
+            let exactCount = 0
+            let pendingCount = 0
+            for (let i = cursor; i < header[1]; ++i) {
+                if (i % 7 === 0) {
+                    ++resolvedCount
+                } else if (i % 3 === 1) {
+                    ++pendingCount
+                } else {
+                    ++exactCount
+                }
+            }
+            const inserted = reserve ? pendingCount : 0
+            denseCount += inserted
+            assert.deepEqual(header, [inserted, header[1], pendingCount, exactCount, resolvedCount, denseCount, 0])
+            cursor = header[1]
+        }
+        collect(controller)
+        checks.push(`mixed progress counters publish across exact-batch yield reserve=${reserve}`)
+    }
+    /* eslint-enable @stylistic/semi */
     // True published collision-list byte matching: primary bytes differ, secondary equals source.
     {
         const a = fixture(4, {existing: true, collision: true}),
@@ -343,6 +396,16 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
         } else {
             await assert.rejects(b.db._resolveArtifactTermContentDedup(b.chunk, true));
         }
+        /* eslint-disable @stylistic/semi */
+        const rejectedProgress = {
+            'late-source': [13, 40, 13, 26, 0, 40, 0],
+            'late-identity': [13, 39, 13, 26, 0, 40, 0],
+            'late-row': [7, 20, 7, 13, 0, 34, 0],
+        }[fault]
+        if (rejectedProgress) {
+            assert.deepEqual([...new Uint32Array(b.db._termContentMetadataArena.memory.buffer, 1024, 7)], rejectedProgress)
+        }
+        /* eslint-enable @stylistic/semi */
         assert.equal(b.db._termEntryContentMetaHashPairPendingCount, 0);
         for (const f of [a, b]) {
             assert.equal(f.db._getTermEntryContentMetaByHashPair(1, 0x9e3779b9).offset, 100);
@@ -1055,7 +1118,7 @@ test('production canonical kernel: 63 differential, boundary, rollback and full 
     }
     assert.ok(layout.usedBytes <= layout.PREFIX);
     assert.equal(layout.usedBytes, 8263840);
-    assert.equal(checks.length, 63);
+    assert.equal(checks.length, 65);
 });
 
 test('production typed pending IDs: storage and record failure, old-entry preservation, free-ID retry (4 controls)', async () => {
@@ -1210,7 +1273,7 @@ test('default loader: missing asset retry, single-flight, healthy native metrics
     let fetches = 0;
     try {
         globalThis.fetch = vi.fn(async (url) => {
-            assert.ok(String(url).endsWith('/lib/term-content-canonical-scan-v1.wasm'));
+            assert.ok(String(url).endsWith('/lib/term-content-canonical-scan-v2.wasm'));
             ++fetches;
             if (fetches === 1) {
                 return new Response('', {status: 404});
@@ -1259,7 +1322,7 @@ test('default loader: missing asset retry, single-flight, healthy native metrics
         assert.equal(r.nativeScanMetrics.dedupNativeFallbackCount, 0);
         assert.ok(r.nativeScanMetrics.dedupNativeCopiedInputBytes > 0);
         assert.equal(db._termContentMetadataArena.memory.buffer instanceof SharedArrayBuffer, false);
-        for (const mode of ['missing', 'mismatch']) {
+        for (const mode of ['missing', 'mismatch', 'previous']) {
             const f = new DictionaryDatabase();
             // Valid empty WASM module, with no ABI exports.
             f._nativeCanonicalScanner = new NativeCanonicalScanner({
@@ -1267,6 +1330,16 @@ test('default loader: missing asset retry, single-flight, healthy native metrics
                     if (mode === 'missing') {
                         throw new Error('asset absent');
                     }
+                    /* eslint-disable @stylistic/semi */
+                    if (mode === 'previous') {
+                        // Exact formerly shipped ABI1 asset: its triple-word
+                        // rollback journal must never reach the ABI2 adapter.
+                        const previous = await WebAssembly.compile(await fs.readFile(new URL('data/dictionary-wasm/term-content-canonical-scan-v1.wasm', import.meta.url)))
+                        const instance = new WebAssembly.Instance(previous, {env: {memory: new WebAssembly.Memory({initial: 128})}})
+                        assert.equal(instance.exports.canonical_abi_version(), 1)
+                        return previous
+                    }
+                    /* eslint-enable @stylistic/semi */
                     return await WebAssembly.compile(Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0));
                 },
             });

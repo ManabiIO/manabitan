@@ -1,0 +1,90 @@
+{
+    "schema": 1,
+    "scope": "Native canonical scan only. Production parser output and metadata-owner state captured at the pre-call hook, with four-bank component partitions. Each arm resets an independent memory to the complete identical snapshot outside timing. All source banks are included; ZIP inflation, parser, copy/adoption, byte-exact matching, compression, storage and UI are outside the timed kernel. This is not a whole-import benchmark.",
+    "node": "v22.22.0",
+    "v8": "12.4.254.21-node.33",
+    "complete": true,
+    "sources": {
+        "baselineCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+        "baselineWasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "candidateWasm": "1cc8f55258075d5363cc2865a6335c0059fe929ccdbbd4086a095f51f08b118e",
+        "candidateC": "9741b735f2d03d6ae7a7d05deaa2ea4401ee0a78641969d68cb75a4c97b7ff19",
+        "candidateHashes": {
+            "ext/js/dictionary/wasm/term-content-canonical-scan-v2.c": "9741b735f2d03d6ae7a7d05deaa2ea4401ee0a78641969d68cb75a4c97b7ff19",
+            "ext/js/dictionary/term-content-canonical-scan.js": "c0cff75fdf3b07b508a039eb871a6edead6eed2ce78375cbcad4b729169d6789",
+            "ext/js/dictionary/term-content-canonical-layout.js": "4754822c2fb37d99f666d580d6cb575eab52937701b7148365f236d6e58b46a6",
+            "dev/data/dictionary-wasm/manifest.json": "02b5271907f165f457e655fe47b9e119c2f1ad157e9d91133de966b9b2d7a2ad",
+            "dev/data/dictionary-wasm/term-content-canonical-scan-v2.wasm": "1cc8f55258075d5363cc2865a6335c0059fe929ccdbbd4086a095f51f08b118e",
+            "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+        },
+        "harness": "441243c50efbbbca051ed1ab865124ba5904d06eaf83be3eb1014b2c9ae839fa"
+    },
+    "nativeScanAbi": {
+        "baseline": 1,
+        "candidate": 2
+    },
+    "journalWordsPerInsert": {
+        "baseline": 3,
+        "candidate": 1
+    },
+    "wasmBytes": {
+        "baseline": 1624,
+        "candidate": 1587
+    },
+    "raw": {
+        "file": "native-parity-raw.json.gz",
+        "gzipSha256": "e922049c80ea35ace9b9e294c936fb1def8a7a7513bfe924e189b59c891d1799",
+        "decodedSha256": "251e11f82abda11b0cad8628364376ded3679f53e0d85273b7e362add8aea9f6"
+    },
+    "dictionaries": [
+        {
+            "dictionary": "jmdict",
+            "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "banks": 53,
+            "rows": 528299,
+            "nativeCalls": 13,
+            "nativeCanonicalRows": 358990,
+            "journalEntries": 354890,
+            "baselineJournalBytes": 4258680,
+            "candidateJournalBytes": 1419560,
+            "journalBytesAvoided": 2839120,
+            "fallbackGroups": 1,
+            "fallbackRows": 8299,
+            "fallbackReasons": [
+                "eligibility"
+            ]
+        },
+        {
+            "dictionary": "jitendex",
+            "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "banks": 219,
+            "rows": 436555,
+            "nativeCalls": 55,
+            "nativeCanonicalRows": 363281,
+            "journalEntries": 363243,
+            "baselineJournalBytes": 4358916,
+            "candidateJournalBytes": 1452972,
+            "journalBytesAvoided": 2905944,
+            "fallbackGroups": 0,
+            "fallbackRows": 0,
+            "fallbackReasons": []
+        },
+        {
+            "dictionary": "vndb",
+            "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "banks": 665,
+            "rows": 6648310,
+            "nativeCalls": 141,
+            "nativeCanonicalRows": 132749,
+            "journalEntries": 132185,
+            "baselineJournalBytes": 1586220,
+            "candidateJournalBytes": 528740,
+            "journalBytesAvoided": 1057480,
+            "fallbackGroups": 26,
+            "fallbackRows": 1008310,
+            "fallbackReasons": [
+                "eligibility"
+            ]
+        }
+    ]
+}
