@@ -3943,10 +3943,11 @@ function isCompressedTermBankSource(value) {
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
+ * @param {boolean} [ownSharedContentBytes=false]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, ownSharedContentBytes = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -3967,7 +3968,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         shareContentBytes &&
         typeof SharedArrayBuffer === 'function'
     ) {
-        if (contentBytesSource.buffer instanceof SharedArrayBuffer) {
+        if (contentBytesSource.buffer instanceof SharedArrayBuffer && !ownSharedContentBytes) {
             contentBytesBuffer = contentBytesSource;
         } else {
             contentBytesBuffer = new Uint8Array(new SharedArrayBuffer(contentBytesLength));
