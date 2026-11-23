@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "stage": "discovery",
+  "baseline": "467067650653c37c1f7d6b05d6737d070e1259cd",
+  "candidate": "e0cde0e1e387606f4c9f1f970c738c42fb986484",
+  "expectedPackageDifferences": [
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/zstd-term-content-compression-worker.js"
+  ],
+  "dictionaries": ["jmdict", "jitendex", "vndb"],
+  "confirmationOf": null,
+  "expectedCandidateIndexWorkerFiles": {"jmdict": 0, "jitendex": 0, "vndb": 2},
+  "expectedSourceCrcCoverageBytes": {"jmdict": 0, "jitendex": 0, "vndb": 4267992967}
+}

@@ -322,6 +322,7 @@ export async function getSourceProvenance(root) {
         'dev/perf/benchmark-support.js',
         'dev/perf/dictionary-fixtures.js',
         'dev/perf/import-benchmark.js',
+        'dev/perf/import-media-validation.js',
         'test/chromium/import-flags-ab-benchmark.js',
         'test/chromium/extension-two-dictionary-import.e2e.js',
         'test/e2e/import-timing.js',

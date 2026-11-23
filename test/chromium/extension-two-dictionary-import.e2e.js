@@ -4229,14 +4229,29 @@ async function main() {
                 }
                 const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
                 if (probeTerms.length !== 12) { fail('Insufficient benchmark content probes'); }
+                const semanticProbes = async () => {
+                    const results = [];
+                    for (const term of probeTerms) {
+                        const result = await evalSendMessage(page, 'readerBridgeRuntime', {
+                            action: 'termsFind',
+                            params: {text: term, details: {primaryReading: '', matchType: 'exact', deinflect: false}, optionsContext: {index: 0}},
+                        });
+                        if (!Array.isArray(result?.dictionaryEntries) || result.dictionaryEntries.length === 0 ||
+                        (result.dictionaryAvailability?.length ?? 0) !== 0 || result.originalTextLength !== term.length) {
+                            fail(`Invalid complete public lookup for ${term}`);
+                        }
+                        results.push({term, result});
+                    }
+                    return results;
+                };
                 const probeResults = [];
                 for (const term of probeTerms) {
                     const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
                     if (!integrity.ok) { fail(`Unreadable benchmark content for ${term}: ${JSON.stringify(integrity)}`); }
                     probeResults.push({term, probes: integrity.probes});
                 }
-                const probeDigest = (results) => {
-                    const canonical = results.map(({term, probes}) => ({
+                const canonicalPhysicalProbes = (results) => {
+                    return results.map(({term, probes}) => ({
                         term,
                         probes: probes.map((probe) => {
                             const diagnostics = probe.diagnostics;
@@ -4259,9 +4274,12 @@ async function main() {
                             };
                         }),
                     }));
-                    return createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
                 };
-                const preRestartOutputDigest = probeDigest(probeResults);
+                const digestProbes = (results) => createHash('sha256').update(JSON.stringify(results)).digest('hex');
+                const preRestartPhysical = canonicalPhysicalProbes(probeResults);
+                const preRestartSemantic = await semanticProbes();
+                const preRestartOutputDigest = digestProbes(preRestartPhysical);
+                const preRestartSemanticDigest = digestProbes(preRestartSemantic);
                 await relaunchPersistentContext();
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
@@ -4279,7 +4297,17 @@ async function main() {
                     if (!integrity.ok) { fail(`Unreadable benchmark content after restart for ${term}: ${JSON.stringify(integrity)}`); }
                     restartedProbeResults.push({term, probes: integrity.probes});
                 }
-                const postRestartOutputDigest = probeDigest(restartedProbeResults);
+                const postRestartPhysical = canonicalPhysicalProbes(restartedProbeResults);
+                const postRestartSemantic = await semanticProbes();
+                const postRestartOutputDigest = digestProbes(postRestartPhysical);
+                const postRestartSemanticDigest = digestProbes(postRestartSemantic);
+                if (preRestartSemanticDigest !== postRestartSemanticDigest) {
+                    fail('Complete public lookup changed across restart');
+                }
+                report.benchmark.readbackDiagnostics = {
+                    preRestart: {physicalProbes: preRestartPhysical, semanticProbes: preRestartSemantic, physicalDigestSha256: preRestartOutputDigest, semanticDigestSha256: preRestartSemanticDigest},
+                    postRestart: {physicalProbes: postRestartPhysical, semanticProbes: postRestartSemantic, physicalDigestSha256: postRestartOutputDigest, semanticDigestSha256: postRestartSemanticDigest},
+                };
                 if (preRestartOutputDigest !== postRestartOutputDigest) {
                     fail(`Persisted content probe digest changed across restart: before=${preRestartOutputDigest} after=${postRestartOutputDigest}`);
                 }
@@ -4315,10 +4343,15 @@ async function main() {
                     probeCount: probeTerms.length,
                     probeTerms,
                     outputDigestSha256: postRestartOutputDigest,
+                    semanticDigestSha256: postRestartSemanticDigest,
+                    semanticProbeEntryCount: postRestartSemantic.reduce((sum, {result}) => sum + result.dictionaryEntries.length, 0),
+                    semanticProbes: postRestartSemantic,
+                    physicalProbes: postRestartPhysical,
+                    mediaRows: state.counts[0].media,
                     media,
                     storage,
                     lookup,
-                    restart: {title: restartedInfo[0].title, revision: restartedInfo[0].revision, termRows: restartedState.counts[0].terms, mediaFiles: restartedState.counts[0].media, contentReadable: true, probeCount: restartedProbeResults.length},
+                    restart: {title: restartedInfo[0].title, revision: restartedInfo[0].revision, termRows: restartedState.counts[0].terms, mediaRows: restartedState.counts[0].media, mediaFiles: restartedState.counts[0].media, contentReadable: true, probeCount: restartedProbeResults.length},
                 };
             }
             report.status = 'success';
