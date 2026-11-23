@@ -47,7 +47,7 @@ class QualificationContracts(unittest.TestCase):
         self.assertEqual(next(row for row in plans[1] if row["kind"] == "candidate")["arm"], "B")
 
     def test_pinned_refs_and_invalid_configuration_fail_closed(self):
-        for case_id in ("inflate-jmdict", "inflate-jitendex", "inflate-vndb"):
+        for case_id in CONFIG["cases"]:
             STUDY.validate_config(CONFIG, case_id)
         self.assertEqual(CONFIG["cases"]["inflate-vndb"]["dictionary"], "vndb")
         self.assertEqual(CONFIG["cases"]["inflate-vndb"]["sha"], CONFIG["cases"]["inflate-jmdict"]["sha"])

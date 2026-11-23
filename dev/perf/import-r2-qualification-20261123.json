@@ -28,6 +28,78 @@
                 "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
                 "lib/term-bank-parser.wasm"
             ]
+        },
+        "lookup-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "3a4ef7ed11dd6b0509c12ad495ab8f591b68872b",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "lookup-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "3a4ef7ed11dd6b0509c12ad495ab8f591b68872b",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "lookup-vndb": {
+            "dictionary": "vndb",
+            "sha": "3a4ef7ed11dd6b0509c12ad495ab8f591b68872b",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "crc-halves-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "4884b4bd93d45f152ec828bcca44990f18976a05",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "crc-halves-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "4884b4bd93d45f152ec828bcca44990f18976a05",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "crc-halves-vndb": {
+            "dictionary": "vndb",
+            "sha": "4884b4bd93d45f152ec828bcca44990f18976a05",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "flat-glossary-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "524b41a112a1ba0b1ac31723da274c97d5525653",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "flat-glossary-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "524b41a112a1ba0b1ac31723da274c97d5525653",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "flat-glossary-vndb": {
+            "dictionary": "vndb",
+            "sha": "524b41a112a1ba0b1ac31723da274c97d5525653",
+            "packageDifferences": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ]
         }
     },
     "extraFixture": {
