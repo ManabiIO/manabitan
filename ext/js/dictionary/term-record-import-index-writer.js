@@ -19,6 +19,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
+const MAX_UNFLUSHED_BYTES = 16 * 1024 * 1024;
 const WRITE_TIME_BUDGET_MS = 6;
 
 /**
@@ -64,6 +65,8 @@ export class SyncImportIndexWriter {
         this._access = access;
         /** @type {number} */
         this._position = 0;
+        /** @type {number} */
+        this._unflushedBytes = 0;
         /** @type {boolean} */
         this._closing = false;
         /** @type {boolean} */
@@ -253,6 +256,13 @@ export class SyncImportIndexWriter {
             }
             offset += written;
             this._position += written;
+            this._unflushedBytes += written;
+            if (!this._aborted && this._unflushedBytes >= MAX_UNFLUSHED_BYTES) {
+                // Persist bounded batches while parser workers can still make progress.
+                // Successful close must also flush the final index header and tail.
+                this._access.flush();
+                this._unflushedBytes = 0;
+            }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
         }
     }
