@@ -21,6 +21,8 @@ import {toError} from '../core/to-error.js';
 const MAX_WRITE_BYTES = 512 * 1024;
 const WRITE_TIME_BUDGET_MS = 6;
 const DURABILITY_CHECKPOINT_BYTES = 16 * 1024 * 1024;
+const MIN_DURABILITY_CHECKPOINT_BYTES = 32 * 1024 * 1024;
+const MIN_DURABILITY_CHECKPOINT_MS_PER_MIB = 2;
 
 /**
  * @typedef {object} SyncAccessHandle
@@ -80,10 +82,20 @@ export class SyncImportIndexWriter {
         /** @type {number} */
         this._bytesSinceFlush = 0;
         /** @type {ReturnType<SyncImportIndexWriter['getFlushMetrics']>} */
-        this._flushMetrics = {checkpointCount: 0, checkpointBytes: 0, checkpointMs: 0, finalFlushMs: 0};
+        this._flushMetrics = {
+            checkpointCount: 0,
+            checkpointBytes: 0,
+            checkpointMs: 0,
+            firstCheckpointBytes: 0,
+            firstCheckpointMs: 0,
+            lastCheckpointBytes: 0,
+            lastCheckpointMs: 0,
+            checkpointsDisabled: false,
+            finalFlushMs: 0,
+        };
     }
 
-    /** @returns {{checkpointCount: number, checkpointBytes: number, checkpointMs: number, finalFlushMs: number}} */
+    /** @returns {{checkpointCount: number, checkpointBytes: number, checkpointMs: number, firstCheckpointBytes: number, firstCheckpointMs: number, lastCheckpointBytes: number, lastCheckpointMs: number, checkpointsDisabled: boolean, finalFlushMs: number}} */
     getFlushMetrics() {
         return {...this._flushMetrics};
     }
@@ -264,10 +276,19 @@ export class SyncImportIndexWriter {
             offset += written;
             this._position += written;
             this._bytesSinceFlush += written;
-            if (!this._aborted && this._bytesSinceFlush >= DURABILITY_CHECKPOINT_BYTES) {
+            if (
+                !this._aborted &&
+                !this._flushMetrics.checkpointsDisabled &&
+                this._bytesSinceFlush >= DURABILITY_CHECKPOINT_BYTES &&
+                (
+                    this._flushMetrics.checkpointCount > 0 ||
+                    this._bytesSinceFlush > MIN_DURABILITY_CHECKPOINT_BYTES
+                )
+            ) {
                 // This sidecar remains unpublished until finalization. Spread
-                // durable writeback across the import while parser workers can
-                // continue; finalization still flushes the last header patch.
+                // large sidecar writeback across the import while parser workers
+                // can continue. Small sidecars retain one final durability flush,
+                // which still includes the last header patch for every sidecar.
                 this._flush(true);
             }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
@@ -277,10 +298,11 @@ export class SyncImportIndexWriter {
     /** @param {boolean} checkpoint */
     _flush(checkpoint) {
         const startedAt = safePerformance.now();
+        let elapsedMs = 0;
         try {
             this._access.flush();
         } finally {
-            const elapsedMs = Math.max(0, safePerformance.now() - startedAt);
+            elapsedMs = Math.max(0, safePerformance.now() - startedAt);
             if (checkpoint) {
                 this._flushMetrics.checkpointMs += elapsedMs;
             } else {
@@ -288,8 +310,20 @@ export class SyncImportIndexWriter {
             }
         }
         if (checkpoint) {
+            if (this._flushMetrics.checkpointCount === 0) {
+                this._flushMetrics.firstCheckpointBytes = this._bytesSinceFlush;
+                this._flushMetrics.firstCheckpointMs = elapsedMs;
+            }
             ++this._flushMetrics.checkpointCount;
             this._flushMetrics.checkpointBytes += this._bytesSinceFlush;
+            this._flushMetrics.lastCheckpointBytes = this._bytesSinceFlush;
+            this._flushMetrics.lastCheckpointMs = elapsedMs;
+            // Cheap durability work does not justify repeatedly pausing the
+            // import coordinator. Stop checkpointing once a successful flush
+            // falls below the fixed cost threshold; final flush is unchanged.
+            if (elapsedMs < (this._bytesSinceFlush / (1024 * 1024)) * MIN_DURABILITY_CHECKPOINT_MS_PER_MIB) {
+                this._flushMetrics.checkpointsDisabled = true;
+            }
         }
         this._bytesSinceFlush = 0;
     }

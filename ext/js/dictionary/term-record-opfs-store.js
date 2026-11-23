@@ -684,6 +684,11 @@ class DenseIdRecordStore {
  * @property {number} [lookupIndexCheckpointCount]
  * @property {number} [lookupIndexCheckpointBytes]
  * @property {number} [lookupIndexCheckpointMs]
+ * @property {number} [lookupIndexFirstCheckpointBytes]
+ * @property {number} [lookupIndexFirstCheckpointMs]
+ * @property {number} [lookupIndexLastCheckpointBytes]
+ * @property {number} [lookupIndexLastCheckpointMs]
+ * @property {number} [lookupIndexCheckpointDisabledCount]
  * @property {number} [lookupIndexFinalFlushMs]
  */
 
@@ -1369,6 +1374,11 @@ export class TermRecordOpfsStore {
             lookupIndexCheckpointCount: this._lookupIndexWriteMetrics.checkpointCount,
             lookupIndexCheckpointBytes: this._lookupIndexWriteMetrics.checkpointBytes,
             lookupIndexCheckpointMs: this._lookupIndexWriteMetrics.checkpointMs,
+            lookupIndexFirstCheckpointBytes: this._lookupIndexWriteMetrics.firstCheckpointBytes,
+            lookupIndexFirstCheckpointMs: this._lookupIndexWriteMetrics.firstCheckpointMs,
+            lookupIndexLastCheckpointBytes: this._lookupIndexWriteMetrics.lastCheckpointBytes,
+            lookupIndexLastCheckpointMs: this._lookupIndexWriteMetrics.lastCheckpointMs,
+            lookupIndexCheckpointDisabledCount: this._lookupIndexWriteMetrics.checkpointDisabledCount,
             lookupIndexFinalFlushMs: this._lookupIndexWriteMetrics.finalFlushMs,
         };
         if (this._reloadFromShardsAfterImport) {
@@ -5839,6 +5849,11 @@ export class TermRecordOpfsStore {
                     this._lookupIndexWriteMetrics.checkpointCount += metrics.checkpointCount;
                     this._lookupIndexWriteMetrics.checkpointBytes += metrics.checkpointBytes;
                     this._lookupIndexWriteMetrics.checkpointMs += metrics.checkpointMs;
+                    this._lookupIndexWriteMetrics.firstCheckpointBytes += metrics.firstCheckpointBytes;
+                    this._lookupIndexWriteMetrics.firstCheckpointMs += metrics.firstCheckpointMs;
+                    this._lookupIndexWriteMetrics.lastCheckpointBytes += metrics.lastCheckpointBytes;
+                    this._lookupIndexWriteMetrics.lastCheckpointMs += metrics.lastCheckpointMs;
+                    this._lookupIndexWriteMetrics.checkpointDisabledCount += metrics.checkpointsDisabled ? 1 : 0;
                     this._lookupIndexWriteMetrics.finalFlushMs += metrics.finalFlushMs;
                 }
                 state.lookupIndexWritable = null;
@@ -7023,7 +7038,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, checkpointCount: number, checkpointBytes: number, checkpointMs: number, finalFlushMs: number}}
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, checkpointCount: number, checkpointBytes: number, checkpointMs: number, firstCheckpointBytes: number, firstCheckpointMs: number, lastCheckpointBytes: number, lastCheckpointMs: number, checkpointDisabledCount: number, finalFlushMs: number}}
      */
     _createEmptyLookupIndexWriteMetrics() {
         return {
@@ -7034,6 +7049,11 @@ export class TermRecordOpfsStore {
             checkpointCount: 0,
             checkpointBytes: 0,
             checkpointMs: 0,
+            firstCheckpointBytes: 0,
+            firstCheckpointMs: 0,
+            lastCheckpointBytes: 0,
+            lastCheckpointMs: 0,
+            checkpointDisabledCount: 0,
             finalFlushMs: 0,
         };
     }

@@ -1510,6 +1510,11 @@ export class DictionaryDatabase {
             let termRecordLookupIndexCheckpointCount = 0;
             let termRecordLookupIndexCheckpointBytes = 0;
             let termRecordLookupIndexCheckpointMs = 0;
+            let termRecordLookupIndexFirstCheckpointBytes = 0;
+            let termRecordLookupIndexFirstCheckpointMs = 0;
+            let termRecordLookupIndexLastCheckpointBytes = 0;
+            let termRecordLookupIndexLastCheckpointMs = 0;
+            let termRecordLookupIndexCheckpointDisabledCount = 0;
             let termRecordLookupIndexFinalFlushMs = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
@@ -1584,6 +1589,11 @@ export class DictionaryDatabase {
                             termRecordLookupIndexCheckpointCount = metrics.lookupIndexCheckpointCount ?? 0;
                             termRecordLookupIndexCheckpointBytes = metrics.lookupIndexCheckpointBytes ?? 0;
                             termRecordLookupIndexCheckpointMs = metrics.lookupIndexCheckpointMs ?? 0;
+                            termRecordLookupIndexFirstCheckpointBytes = metrics.lookupIndexFirstCheckpointBytes ?? 0;
+                            termRecordLookupIndexFirstCheckpointMs = metrics.lookupIndexFirstCheckpointMs ?? 0;
+                            termRecordLookupIndexLastCheckpointBytes = metrics.lookupIndexLastCheckpointBytes ?? 0;
+                            termRecordLookupIndexLastCheckpointMs = metrics.lookupIndexLastCheckpointMs ?? 0;
+                            termRecordLookupIndexCheckpointDisabledCount = metrics.lookupIndexCheckpointDisabledCount ?? 0;
                             termRecordLookupIndexFinalFlushMs = metrics.lookupIndexFinalFlushMs ?? 0;
                         }
                     });
@@ -1761,6 +1771,11 @@ export class DictionaryDatabase {
                     termRecordLookupIndexCheckpointCount,
                     termRecordLookupIndexCheckpointBytes,
                     termRecordLookupIndexCheckpointMs,
+                    termRecordLookupIndexFirstCheckpointBytes,
+                    termRecordLookupIndexFirstCheckpointMs,
+                    termRecordLookupIndexLastCheckpointBytes,
+                    termRecordLookupIndexLastCheckpointMs,
+                    termRecordLookupIndexCheckpointDisabledCount,
                     termRecordLookupIndexFinalFlushMs,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
