@@ -133,6 +133,21 @@ describe('term bank CRC32', () => {
         }
     })
 
+    test('matches every braided tail with unaligned words and physical input boundaries', () => {
+        for (let tail = 0; tail < 64; ++tail) {
+            const bytes = randomBytes(262144 + tail, 0xa5c39e71 ^ tail)
+            const expected = crc32(bytes) >>> 0
+            for (let alignment = 0; alignment < 16; ++alignment) {
+                expect(candidateCrc(bytes, alignment)).toBe(expected)
+            }
+            wasm.wasm_reset_heap()
+            wasm.wasm_alloc(bytes.length + 64)
+            const pointer = wasm.memory.buffer.byteLength - bytes.length
+            new Uint8Array(wasm.memory.buffer, pointer, bytes.length).set(bytes)
+            expect(wasm.term_bank_crc32_test(pointer, bytes.length) >>> 0).toBe(expected)
+        }
+    })
+
     /**
      * @param {Uint8Array} bytes
      */
