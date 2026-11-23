@@ -1,0 +1,44 @@
+{
+    "schemaVersion": 1,
+    "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "cases": {
+        "inflate-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "5555f3efd3e0c8baa99e93b4c14e7f1889c30383",
+            "packageDifferences": [
+                "js/dictionary/wasm/vendor/libdeflate/README.md",
+                "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "inflate-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "5555f3efd3e0c8baa99e93b4c14e7f1889c30383",
+            "packageDifferences": [
+                "js/dictionary/wasm/vendor/libdeflate/README.md",
+                "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+                "lib/term-bank-parser.wasm"
+            ]
+        },
+        "inflate-vndb": {
+            "dictionary": "vndb",
+            "sha": "5555f3efd3e0c8baa99e93b4c14e7f1889c30383",
+            "packageDifferences": [
+                "js/dictionary/wasm/vendor/libdeflate/README.md",
+                "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+                "lib/term-bank-parser.wasm"
+            ]
+        }
+    },
+    "extraFixture": {
+        "label": "VNDB Characters by Bee",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310
+    }
+}
