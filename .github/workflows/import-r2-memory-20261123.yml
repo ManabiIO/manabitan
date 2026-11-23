@@ -1,0 +1,82 @@
+name: Import memory diagnostics round 2 / 2026-11-23
+
+on:
+  push:
+    branches: [perf/import-r2-study-20261123-fcff]
+    paths:
+      - .github/workflows/import-r2-memory-20261123.yml
+      - dev/perf/import-r2-memory-20261123.py
+      - dev/perf/import-r2-memory-20261123.json
+      - dev/perf/import-r2-memory-observer-20261123.py
+      - test/import-r2-memory-20261123.test.py
+      - test/import-r2-memory-observer-20261123.test.py
+
+permissions:
+  contents: read
+
+jobs:
+  memory:
+    name: ${{ matrix.dictionary }} / memory ${{ matrix.replication }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        replication: [1, 2]
+    env:
+      CI: 'true'
+      STUDY_OUTPUT: ${{ github.workspace }}/builds/perf/import-r2-memory/${{ matrix.dictionary }}-${{ matrix.replication }}
+      STUDY_SOURCES: ${{ github.workspace }}/builds/import-r2-memory-sources/${{ matrix.dictionary }}-${{ matrix.replication }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve research sources before setup
+        run: |
+          mkdir -p "$STUDY_OUTPUT/research-sources"
+          cp --parents .github/workflows/import-r2-memory-20261123.yml \
+            dev/perf/import-r2-memory-20261123.py \
+            dev/perf/import-r2-memory-20261123.json \
+            dev/perf/import-r2-memory-observer-20261123.py \
+            dev/perf/import-r2-qualification-20261123.py \
+            test/import-r2-memory-20261123.test.py \
+            test/import-r2-memory-observer-20261123.test.py "$STUDY_OUTPUT/research-sources"
+          git rev-parse HEAD > "$STUDY_OUTPUT/research-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$STUDY_OUTPUT/research-tree.txt"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check memory observer and fixed protocol
+        run: |
+          python3 test/import-r2-memory-observer-20261123.test.py
+          python3 test/import-r2-memory-20261123.test.py
+      - name: Prepare source-matched packages
+        run: >-
+          python3 dev/perf/import-r2-memory-20261123.py prepare
+          --case 'transfer-${{ matrix.dictionary }}' --replication '${{ matrix.replication }}'
+          --output "$STUDY_OUTPUT" --sources "$STUDY_SOURCES"
+      - name: Observe fixed memory imports
+        timeout-minutes: 20
+        run: >-
+          python3 dev/perf/import-r2-memory-20261123.py run
+          --case 'transfer-${{ matrix.dictionary }}' --replication '${{ matrix.replication }}'
+          --output "$STUDY_OUTPUT"
+      - name: Analyze complete observed trees
+        if: always()
+        run: >-
+          python3 dev/perf/import-r2-memory-20261123.py analyze
+          --case 'transfer-${{ matrix.dictionary }}' --replication '${{ matrix.replication }}'
+          --output "$STUDY_OUTPUT"
+      - name: Preserve observations and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-r2-memory-${{ matrix.dictionary }}-${{ matrix.replication }}
+          path: ${{ env.STUDY_OUTPUT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

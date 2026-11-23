@@ -36,6 +36,7 @@
         {"path": "dev/data/chrome-manifest-schema.json", "ignore": true},
         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
         {"path": "dev/perf/import-r2-qualification-20261123.json", "ignore": true},
+        {"path": "dev/perf/import-r2-memory-20261123.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
 

@@ -1,0 +1,51 @@
+{
+    "schemaVersion": 1,
+    "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+    "cases": {
+        "transfer-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "8fe5926cec1396a05ed4ea52be751e48784329b7",
+            "packageDifferences": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        },
+        "transfer-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "8fe5926cec1396a05ed4ea52be751e48784329b7",
+            "packageDifferences": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        },
+        "transfer-vndb": {
+            "dictionary": "vndb",
+            "sha": "8fe5926cec1396a05ed4ea52be751e48784329b7",
+            "packageDifferences": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        }
+    },
+    "extraFixture": {
+        "label": "VNDB Characters by Bee",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310
+    },
+    "observer": {
+        "sourceCommit": "00da5cb2ec28211dd6d09d938dc6cf1e3a4334c9",
+        "sourcePath": "dev/perf/import-memory-zombies-study-20261123/chromium_memory.py",
+        "sha256": "ca6c0f7761062761697a810d4bd0007ff0257bbce69099df45657ffdb7ee8f10"
+    },
+    "scope": "Separate external Chromium process-tree PSS diagnostics; all elapsed times are non-authoritative",
+    "orders": {
+        "1": "ABBA",
+        "2": "BAAB"
+    }
+}
