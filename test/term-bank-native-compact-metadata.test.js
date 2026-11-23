@@ -63,7 +63,7 @@ function sourcesFor(rows) {
  */
 function snapshot(chunk) {
     const {contentMetaList, contentUniqueIndexList, contentBytesBuffer} = chunk
-    if (!contentMetaList || !contentUniqueIndexList || !contentBytesBuffer) { throw new Error('Missing content columns') }
+    if (!contentMetaList || !contentUniqueIndexList || !contentBytesBuffer || typeof chunk.contentBytesLength !== 'number') { throw new Error('Missing content columns') }
     const contentBase = chunk.contentBytesBaseOffset ?? 0
     const rowMetadata = new Uint32Array(chunk.rowCount * 4)
     for (let row = 0; row < chunk.rowCount; ++row) {
