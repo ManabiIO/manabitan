@@ -147,6 +147,42 @@
       "manifest": "utf8-loop-jitendex-45266391385.manifest.json",
       "artifactId": 14864551471,
       "originalArtifactSha256": "sha256:4763ffbe3efd20a56c0afafd3f3fec9de07cbbf1a86f38fae5fe319cf0f704be"
+    },
+    {
+      "label": "media-adjacent",
+      "dictionary": "jmdict",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2c604d0f0a252a7a2e223773292507921b19feaf",
+      "studyCommit": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45267017516",
+      "archive": {
+        "path": "media-adjacent-jmdict-45267017516.tar.xz",
+        "bytes": 137660,
+        "sha256": "8a4f0c465228ffb2643dfd12df6ca6f19cb7932c844c316327f9914871afdb1a"
+      },
+      "manifest": "media-adjacent-jmdict-45267017516.manifest.json",
+      "artifactId": 14864037347,
+      "originalArtifactSha256": "sha256:bfe56fe03bfc56fbe84bbfea58da45216f7fb5d7197e50b1aacae98163a0c456"
+    },
+    {
+      "label": "media-adjacent",
+      "dictionary": "jitendex",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2c604d0f0a252a7a2e223773292507921b19feaf",
+      "studyCommit": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45267017516",
+      "archive": {
+        "path": "media-adjacent-jitendex-45267017516.tar.xz",
+        "bytes": 137192,
+        "sha256": "76e7f6e898f84f27681249fb9c0c4f5da770031a87a2a859a7528ff755e485b0"
+      },
+      "manifest": "media-adjacent-jitendex-45267017516.manifest.json",
+      "artifactId": 14863818745,
+      "originalArtifactSha256": "sha256:e395fdc8fab3a6c3c611acc76c7137a4bf061aff44305c2acc131f89d8e0bfea"
     }
   ]
 }

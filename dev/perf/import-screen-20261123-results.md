@@ -1,7 +1,7 @@
 # Import optimization evidence: 23 November 2026
 
-Report snapshot: **2026-11-23 21:23:32 UTC**. Browser status was observed at
-21:23:25 UTC; hosted CI at 21:23:32 UTC. These isolated changes have verified
+Report snapshot: **2026-11-23 21:30:24 UTC**. Browser status was observed at
+21:29:36 UTC; hosted CI at 21:30:24 UTC. These isolated changes have verified
 source identities and reduced specific work or retained backing storage. The
 available measurements support **no import speed or peak memory claim**.
 
@@ -85,6 +85,8 @@ medians. Negative values mean lower observed elapsed time.
 | Arena / VNDB                | +1.086% | -0.881% | +0.761% |
 | UTF-8 loop / JMdict         | -1.212% | -2.529% | +2.002% |
 | UTF-8 loop / Jitendex       | -0.552% | -0.617% | -0.223% |
+| Adjacent media / JMdict     | -1.094% | -0.689% | +0.447% |
+| Adjacent media / Jitendex   | -0.876% | -0.795% | -0.591% |
 
 [Arena workflow](https://github.com/ManabiIO/manabitan/actions/runs/45262851083)
 and [native workflow](https://github.com/ManabiIO/manabitan/actions/runs/45266391385)
@@ -114,22 +116,24 @@ transferred to V3. V2 VNDB recorded OPFS byte totals of 609,553,611 or 609,561,8
 semantic lookup and exhaustive media digests matched. These physical-layout
 diagnostics remain recorded without being treated as equality gates.
 
-The snapshot preserves 184 browser observations: 115 on current arena/native
-heads and 69 on the superseded V2 media head. Final V3 has no completed browser
-cohort at this checkpoint.
+The snapshot preserves 230 browser observations: 161 on the current three PR
+heads and 69 on the superseded V2 media head. Final V3 has completed its JMdict
+and Jitendex cohorts. Those archives fall below the large-Blob threshold, so
+their media comparisons are negative controls. All individual observations,
+including tails, remain retained.
 
 ## Pending at this snapshot
 
 [Browser status](import-screen-20261123-browser/screen-status.json) still has
-native VNDB and all three
-[final V3 cohorts](https://github.com/ManabiIO/manabitan/actions/runs/45267017516)
-pending. Partial cohorts are excluded from the tables.
+native VNDB and [final V3 VNDB](https://github.com/ManabiIO/manabitan/actions/runs/45267017516)
+running their fixed comparisons. Partial cohorts are excluded from the tables.
 
-The [CI checkpoint for these commits](import-screen-20261123-local/ci-final-code-heads.json)
-records [arena CI](https://github.com/ManabiIO/manabitan/actions/runs/45262275453)
-success: 15 jobs passed and four conditional jobs were skipped. Passing jobs
-include 641 unit suites / 14,406 tests and Chromium/Firefox E2E.
-[V3 CI](https://github.com/ManabiIO/manabitan/actions/runs/45266940839)
-has Test Build passed; [native CI](https://github.com/ManabiIO/manabitan/actions/runs/45266339914)
-has Test Build and Chromium E2E passed. Their remaining jobs, including hosted
-unit suites, are queued or running. Skipped jobs are not successful validation.
+The [completed CI snapshot](import-screen-20261123-local/ci-completed-code-heads.json)
+records all 15 active jobs passed on each final source head:
+[arena CI](https://github.com/ManabiIO/manabitan/actions/runs/45262275453),
+[V3 CI](https://github.com/ManabiIO/manabitan/actions/runs/45266940839), and
+[native CI](https://github.com/ManabiIO/manabitan/actions/runs/45266339914).
+Each includes the full unit suite, builds, type/lint checks and Chromium/Firefox
+extension checks. Four conditional jobs per PR were skipped and are not counted
+as successful validation. The earlier pending checkpoint remains preserved;
+the newer completed snapshot supersedes its job states.

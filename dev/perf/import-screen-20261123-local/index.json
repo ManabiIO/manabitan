@@ -98,5 +98,6 @@
     ],
     "browserEvidence": "../import-screen-20261123-browser/index.json",
     "ciSnapshot": "ci-final-code-heads.json",
-    "resultsReport": "../import-screen-20261123-results.md"
+    "resultsReport": "../import-screen-20261123-results.md",
+    "completedCiSnapshot": "ci-completed-code-heads.json"
 }

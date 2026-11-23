@@ -440,6 +440,303 @@
     "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
   },
   {
+    "directory": "media-adjacent/jitendex",
+    "label": "media-adjacent",
+    "dictionary": "jitendex",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2c604d0f0a252a7a2e223773292507921b19feaf",
+      "study": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+      "run": 45267017516
+    },
+    "fixture": {
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/term-bank-source-pipeline.js"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "aa60ed6449d54e89ddfd84004eeed1b60375307fd0662a89daf34ec741cae626",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        1647.8999999999942,
+        1626,
+        1669.7000000000116,
+        1635.7999999999884,
+        1676.6000000000058,
+        1650.5
+      ],
+      "B": [
+        1663.6999999999825,
+        1616.2000000000116,
+        1611.3999999999942,
+        1617,
+        1628.3000000000175,
+        1655.7999999999884
+      ],
+      "C": [
+        1641,
+        1613.5,
+        1631,
+        1623.2999999999884,
+        1723.7000000000116,
+        1688.7000000000116
+      ]
+    },
+    "medianByArmMs": {
+      "A": 1649.199999999997,
+      "B": 1622.6500000000087,
+      "C": 1636.0
+    },
+    "workerMedianByArmMs": {
+      "A": 1618.5,
+      "B": 1592.75,
+      "C": 1603.9000000000087
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          0.9587960434485288,
+          -0.6027060270595519,
+          -3.491645205726601,
+          -1.149284753636659,
+          -2.8808302516991624,
+          0.3211148136921249
+        ],
+        "medianPairedPercentChange": -0.8759953903481055,
+        "equalWorkPercentChange": -1.1517690405290049,
+        "fasterPairs": 4,
+        "worstPercentChange": 0.9587960434485288
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          1.383302864106195,
+          0.16733808490929647,
+          -1.2017167381977778,
+          -0.3880983182399045,
+          -5.53460578987025,
+          -1.9482442115250187
+        ],
+        "medianPairedPercentChange": -0.7949075282188411,
+        "equalWorkPercentChange": -1.2982300528163626,
+        "fasterPairs": 4,
+        "worstPercentChange": 1.383302864106195
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          -0.4187147278350789,
+          -0.7687576875768709,
+          -2.3177816374205795,
+          -0.7641520968333593,
+          2.809256829297735,
+          2.314450166616888
+        ],
+        "medianPairedPercentChange": -0.5914334123342191,
+        "equalWorkPercentChange": 0.14838742239955405,
+        "fasterPairs": 4,
+        "worstPercentChange": 2.809256829297735
+      }
+    },
+    "outputDigestVariants": [
+      "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723"
+    ],
+    "storageByteVariants": [
+      67466332
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  },
+  {
+    "directory": "media-adjacent/jmdict",
+    "label": "media-adjacent",
+    "dictionary": "jmdict",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2c604d0f0a252a7a2e223773292507921b19feaf",
+      "study": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+      "run": 45267017516
+    },
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/term-bank-source-pipeline.js"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "507474f79cc505c2e95f838350a6d13cd1cad6aefd091d013205e95f80211c24",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        950.5,
+        990,
+        957.7000000000116,
+        968,
+        1151,
+        958.8999999999651
+      ],
+      "B": [
+        962.1000000000058,
+        979.6999999999825,
+        946.7000000000116,
+        962.1999999999825,
+        967.4000000000233,
+        942.5999999999767
+      ],
+      "C": [
+        959.3000000000175,
+        936.5,
+        1045.6000000000058,
+        984.5999999999767,
+        942.8999999999942,
+        958.5999999999767
+      ]
+    },
+    "medianByArmMs": {
+      "A": 963.4499999999825,
+      "B": 962.1499999999942,
+      "C": 958.9499999999971
+    },
+    "workerMedianByArmMs": {
+      "A": 931.9499999999971,
+      "B": 929.1499999999942,
+      "C": 926.3499999999913
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          1.2204103103635733,
+          -1.0404040404058068,
+          -1.1485851519264734,
+          -0.5991735537208109,
+          -15.951346655080512,
+          -1.6998644279892505
+        ],
+        "medianPairedPercentChange": -1.09449459616614,
+        "equalWorkPercentChange": -3.6043573568045217,
+        "fasterPairs": 5,
+        "worstPercentChange": 1.2204103103635733
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          0.2918794954642312,
+          4.612920448476521,
+          -9.458684009180718,
+          -2.2750355474298933,
+          2.5983667409088085,
+          -1.6691007719591422
+        ],
+        "medianPairedPercentChange": -0.6886106382474555,
+        "equalWorkPercentChange": -1.146289146288948,
+        "fasterPairs": 3,
+        "worstPercentChange": 4.612920448476521
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          0.925828511311666,
+          -5.4040404040403995,
+          9.178239532211862,
+          1.7148760330554458,
+          -18.07993049522205,
+          -0.03128584836671333
+        ],
+        "medianPairedPercentChange": 0.44727133147247633,
+        "equalWorkPercentChange": -2.486571509847668,
+        "fasterPairs": 3,
+        "worstPercentChange": 9.178239532211862
+      }
+    },
+    "outputDigestVariants": [
+      "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d"
+    ],
+    "storageByteVariants": [
+      43520477
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  },
+  {
     "directory": "media-ranges/jitendex",
     "label": "media-ranges",
     "dictionary": "jitendex",

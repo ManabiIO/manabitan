@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "observedAt": "2026-11-23 21:23:25 UTC",
+  "observedAt": "2026-11-23 21:29:36 UTC",
   "studies": [
     {
       "label": "filename-arena",
@@ -109,8 +109,8 @@
           "completedAt": null,
           "currentSteps": [
             {
-              "name": "Install matching Chromium",
-              "startedAt": "2026-11-23T21:21:09Z"
+              "name": "Run fixed three-arm source comparison",
+              "startedAt": "2026-11-23T21:24:31Z"
             }
           ]
         }
@@ -126,30 +126,20 @@
         {
           "id": 138016499804,
           "name": "Frozen import screen (jmdict)",
-          "status": "in_progress",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "startedAt": "2026-11-23T21:21:27Z",
-          "completedAt": null,
-          "currentSteps": [
-            {
-              "name": "Run fixed three-arm source comparison",
-              "startedAt": "2026-11-23T21:22:06Z"
-            }
-          ]
+          "completedAt": "2026-11-23T21:26:34Z",
+          "currentSteps": []
         },
         {
           "id": 138016500172,
           "name": "Frozen import screen (jitendex)",
-          "status": "in_progress",
-          "conclusion": null,
+          "status": "completed",
+          "conclusion": "success",
           "startedAt": "2026-11-23T21:22:21Z",
-          "completedAt": null,
-          "currentSteps": [
-            {
-              "name": "Run fixed three-arm source comparison",
-              "startedAt": "2026-11-23T21:23:02Z"
-            }
-          ]
+          "completedAt": "2026-11-23T21:27:14Z",
+          "currentSteps": []
         },
         {
           "id": 138016500273,
