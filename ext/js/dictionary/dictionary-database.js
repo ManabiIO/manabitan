@@ -1507,6 +1507,7 @@ export class DictionaryDatabase {
             let termRecordLookupIndexWriteBytes = 0;
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
+            let termRecordLookupIndexWorkerFileCount = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1577,6 +1578,7 @@ export class DictionaryDatabase {
                             termRecordLookupIndexWriteBytes = metrics.lookupIndexWriteBytes ?? 0;
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
+                            termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1703,6 +1705,7 @@ export class DictionaryDatabase {
                         `termRecordLookupIndexWriteBytes=${termRecordLookupIndexWriteBytes} ` +
                         `termRecordLookupIndexAwait=${termRecordLookupIndexAwaitMs.toFixed(1)}ms ` +
                         `termRecordLookupIndexMaxQueuedBytes=${termRecordLookupIndexMaxQueuedBytes} ` +
+                        `termRecordLookupIndexWorkerFiles=${termRecordLookupIndexWorkerFileCount} ` +
                         `termsVtabSync=${termsVirtualTableSyncMs.toFixed(1)}ms ` +
                         `createIndexes=${createIndexesMs.toFixed(1)}ms ` +
                         `cacheReset=${cacheResetMs.toFixed(1)}ms ` +
@@ -1750,6 +1753,7 @@ export class DictionaryDatabase {
                     compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
+                    termRecordLookupIndexWorkerFileCount,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
