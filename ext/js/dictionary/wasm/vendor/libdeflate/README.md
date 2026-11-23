@@ -21,6 +21,11 @@ Review the upstream constructor, decoder state after failure, internal structure
 
 Run `test/term-bank-inflater.test.js`, the existing parser/worker/import suites, and the native sanitizer companion `test/native/term-bank-inflater-sanitizer.c`. The latter covers the portable decoder with the native host ABI; it is not a substitute for the production wasm32 tests. Requalify complete checksum-pinned dictionary imports, stored content, memory and package costs. A faster isolated decoder is not sufficient evidence of a faster complete import.
 
-Six upstream files are byte-identical to the verified v1.26 archive. `common_defs.h` contains one local adaptation: on wasm32, `machine_word_t` is `uint64_t`. WebAssembly supplies 64-bit integer operations while addresses, `size_t`, lengths, and the public wrapper ABI remain 32-bit. Native host builds retain the upstream type. Preserve or deliberately requalify this adaptation when updating the dependency.
+Five upstream files are byte-identical to the verified v1.26 archive. Two files contain local adaptations:
+
+- `common_defs.h`: on wasm32, `machine_word_t` is `uint64_t`. WebAssembly supplies 64-bit integer operations while addresses, `size_t`, lengths, and the public wrapper ABI remain 32-bit. Native host builds retain the upstream type.
+- `lib/decompress_template.h`: builds with `__wasm_simd128__` copy fast-loop matches with 16-byte loads and stores when the match distance is at least 16. Loads and stores remain interleaved so overlapping matches expand forward correctly. Copying in 32-byte steps can overrun a match by at most 31 bytes, within the existing fast-loop output guard; the bounded generic tail and all input, output, CRC, and trailing-byte validation remain unchanged. The production build already enables `-msimd128`; no additional WebAssembly feature is required. Other builds retain the upstream match-copy path.
+
+Preserve or deliberately requalify these adaptations when updating the dependency. The dictionary WASM source digest binds both changes along with the remaining native inputs.
 
 Qualify a contained decoder CPU improvement with realistic phase measurements plus bounded adjacent-parser, cold-start, memory, and browser import non-regression checks. Report a phase gain separately from any demonstrated whole-import improvement.

@@ -34,9 +34,10 @@ beforeAll(async () => {
  * @param {number} distance
  * @param {number} length
  * @param {number} padding
+ * @param {number} [trailingLiteralCount]
  * @returns {{compressed: Uint8Array, expected: Uint8Array}}
  */
-function fixedMatch(distance, length, padding) {
+function fixedMatch(distance, length, padding, trailingLiteralCount = 0) {
     /** @type {number[]} */
     const output = []
     /** @type {number[]} */
@@ -96,6 +97,7 @@ function fixedMatch(distance, length, padding) {
     codeBits(code, 5)
     bits(distance - distanceBase(code), code < 4 ? 0 : (code >>> 1) - 1)
     for (let i = 0; i < length; ++i) { output.push(output[output.length - distance]) }
+    for (let i = 0; i < trailingLiteralCount; ++i) { literal(97 + i % 26) }
     literal(34)
     literal(93)
     symbol(256)
@@ -140,6 +142,21 @@ function inflate(compressed, expected, options = {}) {
 const distances = [1, 2, 3, 4, 7, 8, 9, 15, 16, 17, 31, 32, 33, 63, 64, 65, 127, 128, 129, 255, 256, 257, 258, 259, 512, 1024, 4096, 32768]
 const lengths = [3, 8, 9, 15, 16, 17, 31, 32, 63, 64, 127, 128, 255, 256, 257, 258]
 describe('WASM DEFLATE history and bit buffers', () => {
+    test.each([8, 15, 16, 17, 23, 31, 32, 33, 64, 257, 32768])('preserves fast-loop match distance %i with following literals', (distance) => {
+        // Keep both logical input and output far enough from their ends that
+        // this controlled match executes in the fast loop.  The existing
+        // end-of-stream cases below exercise its bounded generic tail.
+        for (const length of [3, 15, 16, 17, 31, 32, 33, 63, 64, 255, 256, 257, 258]) {
+            for (let padding = 0; padding < 16; ++padding) {
+                const fixture = fixedMatch(distance, length, padding, 512)
+                expect(inflateRawSync(fixture.compressed).equals(Buffer.from(fixture.expected))).toBe(true)
+                const result = inflate(fixture.compressed, fixture.expected)
+                expect(result.status).toBe(fixture.expected.length)
+                expect(Buffer.from(result.output).equals(Buffer.from(fixture.expected))).toBe(true)
+            }
+        }
+    })
+
     test.each(distances)('preserves known match distance %i across lengths and alignments', (distance) => {
         for (const length of lengths) {
             for (const padding of [0, 1, 7, 15]) {

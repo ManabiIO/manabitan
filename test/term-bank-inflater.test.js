@@ -64,8 +64,8 @@ function decode(compressed, expected, options = {}) {
 const sizes = [0, 1, 2, 3, 7, 8, 15, 16, 17, 31, 32, 255, 256, 257, 258, 259, 4095, 4096, 32767, 32768, 65535, 65536, 131073]
 
 describe('wide-word overlap and output-memory boundary controls', () => {
-    test.each([1, 2, 3, 4, 5, 6, 7, 8, 9])('decodes repeated period %i across word-copy boundaries', (period) => {
-        const pattern = 'abcdefghi'.slice(0, period)
+    test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 15, 16, 17, 31, 32, 33])('decodes repeated period %i across word-copy boundaries', (period) => {
+        const pattern = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.slice(0, period)
         for (const length of [7, 8, 15, 16, 278, 279, 280, 298, 299, 300, 4096, 32768]) {
             const bytes = encoder.encode(JSON.stringify([pattern.repeat(Math.ceil(length / period)).slice(0, length)]))
             for (const strategy of [constants.Z_DEFAULT_STRATEGY, constants.Z_FIXED]) {
