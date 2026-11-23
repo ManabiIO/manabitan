@@ -1,0 +1,624 @@
+{
+    "schemaVersion": 1,
+    "scope": "Resident ZIP metadata to classified and sorted bank lists; excludes ZIP I/O, term parsing, storage and UI",
+    "node": "v24.22.3",
+    "runnerSha256": "072a7c25b3a07ffd425f7fc9261d676ca9b91dee7bae65cf37199fbd45ffa618",
+    "source": {
+        "baselineRoot": "/workspace/scratch/72c24f1e7bc9/archive-baseline",
+        "candidateRoot": "/workspace/scratch/72c24f1e7bc9/archive-work/",
+        "baselineImporterSha256": "08f0c30b3d77960cf0e8e11111f362bf11ac562b5e3ae8c0688a9bd1d2483e46",
+        "candidateImporterSha256": "315b98dd0a065cde9320e94c41367805951bbedbbef09b8472f8fa94a570b1d3"
+    },
+    "archives": [
+        "/workspace/scratch/fcfffdc555c8/fixtures/JMdict.zip",
+        "/workspace/scratch/fcfffdc555c8/fixtures/jitendex-yomitan.zip",
+        "/workspace/scratch/fcfffdc555c8/fixtures/vndb_characters_by_bee.zip"
+    ],
+    "pairs": 12,
+    "warmups": 3,
+    "order": "Alternating AB/BA",
+    "status": "complete",
+    "error": "",
+    "dictionaries": [
+        {
+            "fixture": {
+                "file": "JMdict.zip",
+                "sizeBytes": 15587032,
+                "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a"
+            },
+            "catalog": "zip.js",
+            "entries": 55,
+            "iterations": 100,
+            "banks": {
+                "termFiles": 53,
+                "termArtifactFiles": 0,
+                "termMetaFiles": 0,
+                "kanjiFiles": 0,
+                "kanjiMetaFiles": 0,
+                "tagFiles": 1
+            },
+            "observations": [
+                {
+                    "pair": 0,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.31163461000000003,
+                        "cpuMs": 0.28917000000000004
+                    },
+                    "candidate": {
+                        "wallMs": 0.11351496,
+                        "cpuMs": 0.10627
+                    }
+                },
+                {
+                    "pair": 1,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.10364841999999999,
+                        "cpuMs": 0.08982
+                    },
+                    "baseline": {
+                        "wallMs": 0.10490812999999999,
+                        "cpuMs": 0.08002000000000001
+                    }
+                },
+                {
+                    "pair": 2,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.09098796,
+                        "cpuMs": 0.08625
+                    },
+                    "candidate": {
+                        "wallMs": 0.10448841,
+                        "cpuMs": 0.07112
+                    }
+                },
+                {
+                    "pair": 3,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.10012072999999999,
+                        "cpuMs": 0.09842000000000001
+                    },
+                    "baseline": {
+                        "wallMs": 0.09079584,
+                        "cpuMs": 0.05762
+                    }
+                },
+                {
+                    "pair": 4,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.10934603,
+                        "cpuMs": 0.08082
+                    },
+                    "candidate": {
+                        "wallMs": 0.12539629,
+                        "cpuMs": 0.10328
+                    }
+                },
+                {
+                    "pair": 5,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.16733851000000002,
+                        "cpuMs": 0.09723000000000001
+                    },
+                    "baseline": {
+                        "wallMs": 0.05901551000000001,
+                        "cpuMs": 0.03063
+                    }
+                },
+                {
+                    "pair": 6,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.05279407,
+                        "cpuMs": 0.05405
+                    },
+                    "candidate": {
+                        "wallMs": 0.06260508,
+                        "cpuMs": 0.04915
+                    }
+                },
+                {
+                    "pair": 7,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.0519231,
+                        "cpuMs": 0.052919999999999995
+                    },
+                    "baseline": {
+                        "wallMs": 0.050244910000000004,
+                        "cpuMs": 0.04505
+                    }
+                },
+                {
+                    "pair": 8,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.08012104,
+                        "cpuMs": 0.061500000000000006
+                    },
+                    "candidate": {
+                        "wallMs": 0.08546673,
+                        "cpuMs": 0.06839
+                    }
+                },
+                {
+                    "pair": 9,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.09054071000000001,
+                        "cpuMs": 0.09217
+                    },
+                    "baseline": {
+                        "wallMs": 0.0728043,
+                        "cpuMs": 0.047220000000000005
+                    }
+                },
+                {
+                    "pair": 10,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.05834225,
+                        "cpuMs": 0.053540000000000004
+                    },
+                    "candidate": {
+                        "wallMs": 0.0580629,
+                        "cpuMs": 0.03796
+                    }
+                },
+                {
+                    "pair": 11,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.05464186,
+                        "cpuMs": 0.03651
+                    },
+                    "baseline": {
+                        "wallMs": 0.05009322,
+                        "cpuMs": 0.02222
+                    }
+                }
+            ]
+        },
+        {
+            "fixture": {
+                "file": "jitendex-yomitan.zip",
+                "sizeBytes": 38698313,
+                "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc"
+            },
+            "catalog": "zip.js",
+            "entries": 474,
+            "iterations": 100,
+            "banks": {
+                "termFiles": 218,
+                "termArtifactFiles": 0,
+                "termMetaFiles": 0,
+                "kanjiFiles": 0,
+                "kanjiMetaFiles": 0,
+                "tagFiles": 1
+            },
+            "observations": [
+                {
+                    "pair": 0,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.67120559,
+                        "cpuMs": 0.6171500000000001
+                    },
+                    "candidate": {
+                        "wallMs": 0.49528692,
+                        "cpuMs": 0.48732
+                    }
+                },
+                {
+                    "pair": 1,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.53942851,
+                        "cpuMs": 0.51942
+                    },
+                    "baseline": {
+                        "wallMs": 0.51886949,
+                        "cpuMs": 0.49674
+                    }
+                },
+                {
+                    "pair": 2,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 1.28223615,
+                        "cpuMs": 1.27875
+                    },
+                    "candidate": {
+                        "wallMs": 0.48151918000000005,
+                        "cpuMs": 0.45674
+                    }
+                },
+                {
+                    "pair": 3,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.52653127,
+                        "cpuMs": 0.49115000000000003
+                    },
+                    "baseline": {
+                        "wallMs": 0.51408822,
+                        "cpuMs": 0.51834
+                    }
+                },
+                {
+                    "pair": 4,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.54758431,
+                        "cpuMs": 0.46958
+                    },
+                    "candidate": {
+                        "wallMs": 0.51859763,
+                        "cpuMs": 0.4397
+                    }
+                },
+                {
+                    "pair": 5,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.48377576,
+                        "cpuMs": 0.43315
+                    },
+                    "baseline": {
+                        "wallMs": 0.40003892999999996,
+                        "cpuMs": 0.3971
+                    }
+                },
+                {
+                    "pair": 6,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.41432051000000003,
+                        "cpuMs": 0.40958
+                    },
+                    "candidate": {
+                        "wallMs": 0.48716977,
+                        "cpuMs": 0.47317
+                    }
+                },
+                {
+                    "pair": 7,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.30382026,
+                        "cpuMs": 0.29279
+                    },
+                    "baseline": {
+                        "wallMs": 0.42021748999999997,
+                        "cpuMs": 0.39115
+                    }
+                },
+                {
+                    "pair": 8,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.38523218,
+                        "cpuMs": 0.37796
+                    },
+                    "candidate": {
+                        "wallMs": 0.30762178,
+                        "cpuMs": 0.26936
+                    }
+                },
+                {
+                    "pair": 9,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.40226816,
+                        "cpuMs": 0.3961
+                    },
+                    "baseline": {
+                        "wallMs": 0.40846898000000004,
+                        "cpuMs": 0.38177999999999995
+                    }
+                },
+                {
+                    "pair": 10,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 0.39285842000000004,
+                        "cpuMs": 0.39128
+                    },
+                    "candidate": {
+                        "wallMs": 0.39901441,
+                        "cpuMs": 0.39438
+                    }
+                },
+                {
+                    "pair": 11,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 0.5037306,
+                        "cpuMs": 0.48046999999999995
+                    },
+                    "baseline": {
+                        "wallMs": 0.34872306000000003,
+                        "cpuMs": 0.33927999999999997
+                    }
+                }
+            ]
+        },
+        {
+            "fixture": {
+                "file": "vndb_characters_by_bee.zip",
+                "sizeBytes": 291705969,
+                "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+            },
+            "catalog": "dense-zip",
+            "entries": 147237,
+            "iterations": 2,
+            "banks": {
+                "termFiles": 665,
+                "termArtifactFiles": 0,
+                "termMetaFiles": 0,
+                "kanjiFiles": 0,
+                "kanjiMetaFiles": 0,
+                "tagFiles": 1
+            },
+            "observations": [
+                {
+                    "pair": 0,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 35.24965,
+                        "cpuMs": 33.646
+                    },
+                    "candidate": {
+                        "wallMs": 2.2203475,
+                        "cpuMs": 0.736
+                    }
+                },
+                {
+                    "pair": 1,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 2.1623835,
+                        "cpuMs": 2.0025
+                    },
+                    "baseline": {
+                        "wallMs": 40.9076605,
+                        "cpuMs": 40.8285
+                    }
+                },
+                {
+                    "pair": 2,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 43.350748,
+                        "cpuMs": 41.915
+                    },
+                    "candidate": {
+                        "wallMs": 3.393916,
+                        "cpuMs": 1.627
+                    }
+                },
+                {
+                    "pair": 3,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 3.611838,
+                        "cpuMs": 3.881
+                    },
+                    "baseline": {
+                        "wallMs": 42.4831715,
+                        "cpuMs": 41.072
+                    }
+                },
+                {
+                    "pair": 4,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 35.9465345,
+                        "cpuMs": 35.539
+                    },
+                    "candidate": {
+                        "wallMs": 3.134612,
+                        "cpuMs": 2.7355
+                    }
+                },
+                {
+                    "pair": 5,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 2.712296,
+                        "cpuMs": 2.681
+                    },
+                    "baseline": {
+                        "wallMs": 34.092782,
+                        "cpuMs": 33.712
+                    }
+                },
+                {
+                    "pair": 6,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 32.376898,
+                        "cpuMs": 31.2375
+                    },
+                    "candidate": {
+                        "wallMs": 2.6797345,
+                        "cpuMs": 2.2735
+                    }
+                },
+                {
+                    "pair": 7,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 3.300938,
+                        "cpuMs": 2.528
+                    },
+                    "baseline": {
+                        "wallMs": 33.7327505,
+                        "cpuMs": 32.55
+                    }
+                },
+                {
+                    "pair": 8,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 35.4873975,
+                        "cpuMs": 34.83
+                    },
+                    "candidate": {
+                        "wallMs": 3.0382095,
+                        "cpuMs": 1.68
+                    }
+                },
+                {
+                    "pair": 9,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 2.7283525,
+                        "cpuMs": 2.7955
+                    },
+                    "baseline": {
+                        "wallMs": 39.68527,
+                        "cpuMs": 38.512
+                    }
+                },
+                {
+                    "pair": 10,
+                    "order": [
+                        "baseline",
+                        "candidate"
+                    ],
+                    "baseline": {
+                        "wallMs": 36.845025,
+                        "cpuMs": 36.374
+                    },
+                    "candidate": {
+                        "wallMs": 2.597761,
+                        "cpuMs": 2.0225
+                    }
+                },
+                {
+                    "pair": 11,
+                    "order": [
+                        "candidate",
+                        "baseline"
+                    ],
+                    "candidate": {
+                        "wallMs": 2.967682,
+                        "cpuMs": 2.9545
+                    },
+                    "baseline": {
+                        "wallMs": 37.4737515,
+                        "cpuMs": 35.211
+                    }
+                }
+            ]
+        }
+    ]
+}

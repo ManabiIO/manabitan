@@ -131,6 +131,7 @@ const ARCHIVE_BANK_QUERY_DETAILS = [
     ['kanjiMetaFiles', /^kanji_meta_bank_(\d+)\.json$/],
     ['tagFiles', /^tag_bank_(\d+)\.json$/],
 ];
+const ARCHIVE_BANK_CANDIDATE_FILTER_MIN_ENTRIES = 1024;
 const TERM_ARTIFACT_PRELOAD_CONCURRENCY = 4;
 const ZIP_COMPRESSION_METHOD_STORE = 0;
 const ZIP_COMPRESSION_METHOD_DEFLATE = 8;
@@ -4243,10 +4244,10 @@ export class DictionaryImporter {
 
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
-     * @param {import('dictionary-importer').QueryDetails} queryDetails
+     * @param {import('dictionary-importer').QueryDetails} [queryDetails=ARCHIVE_BANK_QUERY_DETAILS]
      * @returns {import('dictionary-importer').QueryResult}
      */
-    _getArchiveFiles(fileMap, queryDetails) {
+    _getArchiveFiles(fileMap, queryDetails = ARCHIVE_BANK_QUERY_DETAILS) {
         /** @type {import('dictionary-importer').QueryResult} */
         const results = new Map();
 
@@ -4254,7 +4255,12 @@ export class DictionaryImporter {
             results.set(fileType, []);
         }
 
-        for (const [fileName, fileEntry] of fileMap.entries()) {
+        const filterBankCandidates = fileMap.size >= ARCHIVE_BANK_CANDIDATE_FILTER_MIN_ENTRIES &&
+            queryDetails.every((query) => ARCHIVE_BANK_QUERY_DETAILS.includes(query));
+        const archiveEntries = filterBankCandidates ?
+            this._getArchiveBankFileEntries(fileMap) :
+            fileMap.entries();
+        for (const [fileName, fileEntry] of archiveEntries) {
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
@@ -4279,6 +4285,21 @@ export class DictionaryImporter {
             });
         }
         return results;
+    }
+
+    /**
+     * Only built-in bank queries use this filter. Iterate names first so large
+     * image archives need neither entry pairs nor regex tests for each image.
+     * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @returns {Generator<[string, ImportFileEntry]>}
+     * @yields {[string, ImportFileEntry]} A candidate bank name and its archive entry.
+     */
+    *_getArchiveBankFileEntries(fileMap) {
+        for (const fileName of fileMap.keys()) {
+            // Every built-in bank starts with term_, tag_, or kanji_.
+            if (fileName[0] !== 't' && fileName[0] !== 'k') { continue; }
+            yield [fileName, /** @type {ImportFileEntry} */ (fileMap.get(fileName))];
+        }
     }
 
     /**
