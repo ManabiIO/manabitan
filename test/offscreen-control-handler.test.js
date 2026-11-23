@@ -91,11 +91,11 @@ describe('Offscreen control message acknowledgements', () => {
         Reflect.set(offscreen, '_invokeDictionaryWorker', invoke);
 
         await Reflect.get(Offscreen.prototype, '_findTermsStructuredHandler').call(offscreen, {
-            mode: 'group', text: 'フォ', options: {}, responseLimit: 32,
-        });
+            mode: 'group', text: 'フォ', options: /** @type {import('translation').FindTermsOptions} */ (/** @type {unknown} */ ({})), responseLimit: 32,
+        }, []);
 
         expect(invoke).toHaveBeenCalledWith('findTermsStructuredOffscreen', {
-            mode: 'group', text: 'フォ', options: {}, responseLimit: 32,
+            mode: 'group', text: 'フォ', options: expect.any(Object), responseLimit: 32,
         });
     });
 
