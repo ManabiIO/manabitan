@@ -72,7 +72,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, wasm_get_last_metadata_reuse_count?: () => number, wasm_get_last_metadata_reuse_bytes?: () => number, inflate_and_join_term_banks: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -93,7 +93,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, nestedMetadataReuseCount?: number, nestedMetadataReuseBytes?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
@@ -184,6 +184,8 @@ async function getWasm() {
             wasm_alloc: exports.wasm_alloc,
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
+            wasm_get_last_metadata_reuse_count: typeof exports.wasm_get_last_metadata_reuse_count === 'function' ? exports.wasm_get_last_metadata_reuse_count : void 0,
+            wasm_get_last_metadata_reuse_bytes: typeof exports.wasm_get_last_metadata_reuse_bytes === 'function' ? exports.wasm_get_last_metadata_reuse_bytes : void 0,
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
             inflate_zip_media_batch: exports.inflate_zip_media_batch,
             parse_term_bank: exports.parse_term_bank,
@@ -966,6 +968,8 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
             new Uint32Array(wasm.memory.buffer, experimentStatsPtr, 5);
         const escapedKeyDecodeCount = experimentStats[0];
         const validatedGlossaryReuseCount = experimentStats[1];
+        const nestedMetadataReuseCount = (wasm.wasm_get_last_metadata_reuse_count?.() ?? 0) >>> 0;
+        const nestedMetadataReuseBytes = (wasm.wasm_get_last_metadata_reuse_bytes?.() ?? 0) >>> 0;
         const globalExactContentReuseCount = experimentStats[2];
         const fastGlossaryNormalizationCount = experimentStats[3];
         const fastGlossaryNormalizationFallbackCount = experimentStats[4];
@@ -1004,6 +1008,8 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             fallback.discardedFusedRows = discardedFusedRows;
             fallback.escapedKeyDecodeCount = escapedKeyDecodeCount;
             fallback.validatedGlossaryReuseCount = validatedGlossaryReuseCount;
+            fallback.nestedMetadataReuseCount = nestedMetadataReuseCount;
+            fallback.nestedMetadataReuseBytes = nestedMetadataReuseBytes;
             fallback.globalExactContentReuseCount = globalExactContentReuseCount;
             fallback.fastGlossaryNormalizationCount = fastGlossaryNormalizationCount;
             fallback.fastGlossaryNormalizationFallbackCount = fastGlossaryNormalizationFallbackCount;
@@ -1063,6 +1069,8 @@ void 0,
             fusedParseAttempts: 1,
             escapedKeyDecodeCount,
             validatedGlossaryReuseCount,
+            nestedMetadataReuseCount,
+            nestedMetadataReuseBytes,
             globalExactContentReuseCount,
             fastGlossaryNormalizationCount,
             fastGlossaryNormalizationFallbackCount,
@@ -2486,6 +2494,8 @@ null :
         bankSpanCount: parsed.bankSpanCount ?? 0,
         escapedKeyDecodeCount: parsed.escapedKeyDecodeCount ?? 0,
         validatedGlossaryReuseCount: parsed.validatedGlossaryReuseCount ?? 0,
+        nestedMetadataReuseCount: parsed.nestedMetadataReuseCount ?? 0,
+        nestedMetadataReuseBytes: parsed.nestedMetadataReuseBytes ?? 0,
         globalExactContentReuseCount: parsed.globalExactContentReuseCount ?? 0,
         fastGlossaryNormalizationCount: parsed.fastGlossaryNormalizationCount ?? 0,
         fastGlossaryNormalizationFallbackCount: parsed.fastGlossaryNormalizationFallbackCount ?? 0,
@@ -4010,6 +4020,8 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         bankSpanCount: sum('bankSpanCount'),
         escapedKeyDecodeCount: sum('escapedKeyDecodeCount'),
         validatedGlossaryReuseCount: sum('validatedGlossaryReuseCount'),
+        nestedMetadataReuseCount: sum('nestedMetadataReuseCount'),
+        nestedMetadataReuseBytes: sum('nestedMetadataReuseBytes'),
         globalExactContentReuseCount: sum('globalExactContentReuseCount'),
         fastGlossaryNormalizationCount: sum('fastGlossaryNormalizationCount'),
         fastGlossaryNormalizationFallbackCount: sum('fastGlossaryNormalizationFallbackCount'),
