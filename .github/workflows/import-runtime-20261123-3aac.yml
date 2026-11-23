@@ -1,8 +1,8 @@
-name: Frozen import comparisons (20261123 3aac)
+name: Frozen repeated-field import comparisons
 
 on:
   push:
-    branches: [perf/import-20261123-3aac]
+    branches: [perf/record-field-study-20261123-3aac]
     paths:
       - '.github/workflows/import-runtime-20261123-3aac.yml'
       - 'dev/perf/import-runtime-20261123-3aac.py'
@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   compare:
-    name: Structured strings (${{ matrix.dictionary }})
+    name: Repeated record fields (${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
@@ -25,10 +25,10 @@ jobs:
         dictionary: [jmdict, jitendex, vndb]
     env:
       PERF_BASELINE_SHA: 3d65e403c644b9a5a6be3128d72f9d30050b70e0
-      PERF_CANDIDATE_SHA: 09dfb90d926758205ff52d127ef3d950f0b15a65
+      PERF_CANDIDATE_SHA: d2ab3344a483af52ac6d0765f3fbeaf8d1e2a0ca
       PERF_STAGE: screen
       PERF_DICTIONARY: ${{ matrix.dictionary }}
-      PERF_EXPECTED_DIFFERENCES: '["js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+      PERF_EXPECTED_DIFFERENCES: '["js/dictionary/term-record-opfs-store.js"]'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -66,7 +66,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-3aac-structured-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: import-3aac-fields-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/import-3aac-evidence
           if-no-files-found: error
           retention-days: 30
