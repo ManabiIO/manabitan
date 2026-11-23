@@ -3,7 +3,9 @@
   "status": {
     "structured": "Complete screens and two independent confirmations; no material complete-import benefit",
     "jmdictParser": "Three complete independent component screens; none promoted",
-    "recordFields": "JMdict/Jitendex browser screens complete; VNDB and full unit still pending"
+    "recordFields": "Final complete three-dictionary screen; no material total-import benefit; all source CI and local full unit/options pass; retain draft/HOLD",
+    "sourceCI": "Both frozen product revisions passed all15 normal source CI jobs;4 conditional jobs skipped per run",
+    "localFullUnit854": "14429 passed/47 skipped across642suites;32 options passed; original interrupted run retained"
   },
   "productPrs": {
     "848": "09dfb90d926758205ff52d127ef3d950f0b15a65",
@@ -28,6 +30,22 @@
     "fields-jitendex/correctness.json": {
       "bytes": 11439,
       "sha256": "e62c3b9f0c289d89e5ed57536bdeaf650d74d64ca7da1e75ed6363bc98220b56"
+    },
+    "fields-jitendex/diagnostic-A/phase-counters.json": {
+      "bytes": 15499,
+      "sha256": "2e235553415f34540ca4e0c2aa5741f701736cdb2c605cf660d67ea5738f1560"
+    },
+    "fields-jitendex/diagnostic-A/summary.json": {
+      "bytes": 59274,
+      "sha256": "62d4902d7a11790f21d338195cf9d3a2fb241e90b9037a74f626cc2c5a7b8289"
+    },
+    "fields-jitendex/diagnostic-B/phase-counters.json": {
+      "bytes": 15465,
+      "sha256": "35eb3c64cd8674392ad26a21261d2ad8e06a851525527f305c0b773db7fac056"
+    },
+    "fields-jitendex/diagnostic-B/summary.json": {
+      "bytes": 59149,
+      "sha256": "af5ac363a404c290c1d0a785077792c949cd95a07b8a833ad53bdb35b491e1da"
     },
     "fields-jitendex/fixture.json": {
       "bytes": 1123,
@@ -73,6 +91,22 @@
       "bytes": 11876,
       "sha256": "73360dcde8d277b0322898ad83668c07db4b47a53c5d0e56061c1b7ea470f9e5"
     },
+    "fields-jmdict/diagnostic-A/phase-counters.json": {
+      "bytes": 15373,
+      "sha256": "8ca2af152cffd11b99698006b98080dae13ef2fa46c1fb4dce9211e2600c83f4"
+    },
+    "fields-jmdict/diagnostic-A/summary.json": {
+      "bytes": 58917,
+      "sha256": "462f2a206d5483b97507291356a287f7bf8ce58d814ba901de944757ccb89e82"
+    },
+    "fields-jmdict/diagnostic-B/phase-counters.json": {
+      "bytes": 15411,
+      "sha256": "ad3355b80218950924950ad0976df7ce80a95f3c14020ceff3c9f94617c679de"
+    },
+    "fields-jmdict/diagnostic-B/summary.json": {
+      "bytes": 58943,
+      "sha256": "2ebeb0b0ba1190840b520bfc0e5220143a21f12805c954883bc973f638dd69b1"
+    },
     "fields-jmdict/fixture.json": {
       "bytes": 571,
       "sha256": "6ff6538a48f79c5b6a48dea9b63bd1d6392deab72e0ffe0703b43b1e8faaeeae"
@@ -108,6 +142,66 @@
     "fields-jmdict/state.json": {
       "bytes": 296,
       "sha256": "b2c7daac5bece7741dc5a1b9711080950a8b565172de8c3aef500145fb1041fd"
+    },
+    "fields-vndb/analysis.json": {
+      "bytes": 2832,
+      "sha256": "787fbbbfa32b21d2cf4adbc87710ab150d59e74e87ad2b55d7af03f6c735b708"
+    },
+    "fields-vndb/correctness.json": {
+      "bytes": 12041,
+      "sha256": "161f4ce7961779038f94e3b2fc5d067dea5c89b0f6d1f8e409729b58e3893dd7"
+    },
+    "fields-vndb/diagnostic-A/phase-counters.json": {
+      "bytes": 15590,
+      "sha256": "701843644f78a2358195c1dfe6fcf91aa67481077fa2220558613aba6a13b416"
+    },
+    "fields-vndb/diagnostic-A/summary.json": {
+      "bytes": 60008,
+      "sha256": "e4d8efafcb33bcee9335350e386c1f08f855c7cf76d01a66d1faab111dbae9a8"
+    },
+    "fields-vndb/diagnostic-B/phase-counters.json": {
+      "bytes": 15620,
+      "sha256": "7f69e6dced25ac68076d6d8f8f6c886791f6620f146966428940e92b8833da10"
+    },
+    "fields-vndb/diagnostic-B/summary.json": {
+      "bytes": 60004,
+      "sha256": "0e25b288e342526aebb8e54d4a1ef2842c1b6f81f8f19896bcc6ed40afe0588b"
+    },
+    "fields-vndb/fixture.json": {
+      "bytes": 656,
+      "sha256": "ef5038c0ce9d0532f1c41492d22f2900abbcf6e0eea5bbb9d21456470a1e5308"
+    },
+    "fields-vndb/independent-verification.json": {
+      "bytes": 7652,
+      "sha256": "ed2828009c624cb69ab1cda2e76d9e7325ffd7fae8f56ce267af6c839fb2e95f"
+    },
+    "fields-vndb/observations.json": {
+      "bytes": 12007,
+      "sha256": "1da78ce25cbe27606f923c4478b86d3e2e5e4ba3619afbb1bfc37ffa846c86f5"
+    },
+    "fields-vndb/package-A.json": {
+      "bytes": 60293,
+      "sha256": "d2f18138e0b23d0f213624eb214ca3b724270cafe1d6bd559f611eca5263f549"
+    },
+    "fields-vndb/package-B.json": {
+      "bytes": 60293,
+      "sha256": "61824b3dcc877590661c86708b416794bfc75f3d29bf1c3a13c7843132ac350d"
+    },
+    "fields-vndb/package-C.json": {
+      "bytes": 60327,
+      "sha256": "8d3eaac1d719b92c70c35512f55a0d836070142fbe7743d40cc98e76fe21262e"
+    },
+    "fields-vndb/package-differences.json": {
+      "bytes": 48,
+      "sha256": "faa50d1dd3bbb185900ce9605ef0c212cea25d88a14cc5cdd70d12dbb94da1ab"
+    },
+    "fields-vndb/protocol.json": {
+      "bytes": 10722,
+      "sha256": "d605cf94065b1b5e8971a619890216b7011da251a9b64a3c0f95dd94eafdbc80"
+    },
+    "fields-vndb/state.json": {
+      "bytes": 294,
+      "sha256": "54a667af41160629e8721e5b07c6055941dbb5feee6b98dba0440b7448376f91"
     },
     "jitendex-component.json": {
       "bytes": 18414,
@@ -212,6 +306,14 @@
     "native-parity.log": {
       "bytes": 456,
       "sha256": "e782f79b082206c1af8b5295d5e998dacdadced1a0bd10f2df6f78771a79e170"
+    },
+    "pr848-source-ci.json": {
+      "bytes": 4456,
+      "sha256": "3e09efa9bda17ea1cfe26bcb480500b67b2a9c66eeefce0ce797f67d32553c61"
+    },
+    "pr854-source-ci.json": {
+      "bytes": 4456,
+      "sha256": "4ef47cf250d9806bf260f76e7cd8d108cac01a06a27a10470c6415b5270adb9c"
     },
     "record-fields-component.json": {
       "bytes": 9565,
@@ -320,6 +422,22 @@
     "structured-jitendex/correctness.json": {
       "bytes": 11439,
       "sha256": "e62c3b9f0c289d89e5ed57536bdeaf650d74d64ca7da1e75ed6363bc98220b56"
+    },
+    "structured-jitendex/diagnostic-A/phase-counters.json": {
+      "bytes": 15447,
+      "sha256": "6d0b8a44b0e496797339d8a260ec28c3d3dc6bc6de6ca873ebdacce1d371931a"
+    },
+    "structured-jitendex/diagnostic-A/summary.json": {
+      "bytes": 59267,
+      "sha256": "77984341e08c7f462bd2730c98841e123ca8758bc71d355dc4096e2d05bba462"
+    },
+    "structured-jitendex/diagnostic-B/phase-counters.json": {
+      "bytes": 15423,
+      "sha256": "5d12e805a77fe1478019554037091e8378b12d1e8dcf2f990d0a88d2ca17dc44"
+    },
+    "structured-jitendex/diagnostic-B/summary.json": {
+      "bytes": 59185,
+      "sha256": "43211fc9bf6447b312ed2d097437512fd3a714b53c6017813fec5acbc8b4244e"
     },
     "structured-jitendex/fixture.json": {
       "bytes": 1123,
@@ -433,6 +551,10 @@
       "bytes": 294,
       "sha256": "54a667af41160629e8721e5b07c6055941dbb5feee6b98dba0440b7448376f91"
     },
+    "verify-field-study.py": {
+      "bytes": 10061,
+      "sha256": "d0af7370a8085ef279a3096d1cd569922071debd61e17313bc12bba98509ece6"
+    },
     "verify-native-import-parity.mjs": {
       "bytes": 9531,
       "sha256": "15bc9d6aa3f11d12f15af7ac1cd5c46550dd640e20390d67da7860ff5eff1171"
@@ -444,6 +566,14 @@
     "vndb-full-unit.log": {
       "bytes": 110739,
       "sha256": "e123258aeac5c92ad1a019f56dbf310d7210923846bb8e1d8e6d20a93f4671f7"
+    },
+    "vndb-source-unit-gate-20261123.json": {
+      "bytes": 1371,
+      "sha256": "b046cb2079ef232fd3e56135d4b8d594e206da9f94e1b70d804607e643bfc140"
+    },
+    "vndb-source-unit-gate-20261123.log": {
+      "bytes": 193311,
+      "sha256": "4c6dc54128eac02e3afcef20e1e60058cf3da99b2a1ed7a89f13bd708992a4ca"
     }
   }
 }

@@ -1,0 +1,160 @@
+{
+  "pr": 854,
+  "run": 45263947741,
+  "url": "https://github.com/ManabiIO/manabitan/actions/runs/45263947741",
+  "sourceCommit": "d2ab3344a483af52ac6d0765f3fbeaf8d1e2a0ca",
+  "jobs": [
+    {
+      "id": 138005763943,
+      "name": "Full Extension E2E (Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:54:54Z",
+      "completedAt": "2026-11-23T21:03:40Z"
+    },
+    {
+      "id": 138005764364,
+      "name": "TypeScript (dev)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:01:42Z",
+      "completedAt": "2026-11-23T21:02:08Z"
+    },
+    {
+      "id": 138005764438,
+      "name": "Test Build",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:56:27Z",
+      "completedAt": "2026-11-23T20:57:12Z"
+    },
+    {
+      "id": 138005764450,
+      "name": "Anki Deduplication Matrix (Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:11:43Z",
+      "completedAt": "2026-11-23T21:14:22Z"
+    },
+    {
+      "id": 138005764749,
+      "name": "JSON",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:02:09Z",
+      "completedAt": "2026-11-23T21:03:08Z"
+    },
+    {
+      "id": 138005764775,
+      "name": "Markdown",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:16:18Z",
+      "completedAt": "2026-11-23T21:16:44Z"
+    },
+    {
+      "id": 138005764776,
+      "name": "HTML",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:06:35Z",
+      "completedAt": "2026-11-23T21:06:53Z"
+    },
+    {
+      "id": 138005764800,
+      "name": "Unit Tests (options)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:14:40Z",
+      "completedAt": "2026-11-23T21:14:59Z"
+    },
+    {
+      "id": 138005764811,
+      "name": "TypeScript (bench)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:12:01Z",
+      "completedAt": "2026-11-23T21:12:35Z"
+    },
+    {
+      "id": 138005764839,
+      "name": "Full Extension E2E (Firefox)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:18:35Z",
+      "completedAt": "2026-11-23T21:20:42Z"
+    },
+    {
+      "id": 138005764866,
+      "name": "TypeScript (main)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:16:06Z",
+      "completedAt": "2026-11-23T21:16:36Z"
+    },
+    {
+      "id": 138005764930,
+      "name": "TypeScript (test)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:14:44Z",
+      "completedAt": "2026-11-23T21:15:34Z"
+    },
+    {
+      "id": 138005765081,
+      "name": "Unit Tests",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:17:57Z",
+      "completedAt": "2026-11-23T21:21:14Z"
+    },
+    {
+      "id": 138005765145,
+      "name": "CSS",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:16:55Z",
+      "completedAt": "2026-11-23T21:17:19Z"
+    },
+    {
+      "id": 138005765371,
+      "name": "JavaScript",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T21:18:54Z",
+      "completedAt": "2026-11-23T21:22:28Z"
+    },
+    {
+      "id": 138005766102,
+      "name": "Firefox Android Installation Smoke (blocking)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:53:10Z",
+      "completedAt": "2026-11-23T20:53:09Z"
+    },
+    {
+      "id": 138005766600,
+      "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:53:10Z",
+      "completedAt": "2026-11-23T20:53:09Z"
+    },
+    {
+      "id": 138005767290,
+      "name": "Published release upgrade and reimport",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:53:10Z",
+      "completedAt": "2026-11-23T20:53:09Z"
+    },
+    {
+      "id": 138005767340,
+      "name": "Full Extension E2E (Edge)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:53:10Z",
+      "completedAt": "2026-11-23T20:53:09Z"
+    }
+  ]
+}

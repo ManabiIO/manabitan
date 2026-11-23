@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "startedUtc": "2026-11-23T21:13:34.788226+00:00",
+  "supervisorPid": 5,
+  "sourceRoot": "/workspace/scratch/3aacd533c01f/vndb-record-fields",
+  "commit": "e949286b9e5f37f98c2a400ee067928382c7b1f9",
+  "tree": "24e3e31fb86f8c2587f1753f940da359162427cf",
+  "node": "v22.22.0",
+  "log": "/workspace/scratch/3aacd533c01f/vndb-source-unit-gate-20261123.log",
+  "commands": [
+    {
+      "args": [
+        "npm",
+        "run",
+        "test:unit",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "startedUtc": "2026-11-23T21:13:34.791466+00:00",
+      "status": "passed",
+      "exitCode": 0,
+      "endedUtc": "2026-11-23T21:17:29.821559+00:00",
+      "elapsedSeconds": 235.0301737109985
+    },
+    {
+      "args": [
+        "npm",
+        "run",
+        "test:unit:options",
+        "--",
+        "--maxWorkers=2"
+      ],
+      "startedUtc": "2026-11-23T21:17:29.824618+00:00",
+      "status": "passed",
+      "exitCode": 0,
+      "endedUtc": "2026-11-23T21:17:31.046428+00:00",
+      "elapsedSeconds": 1.2214511460006179
+    }
+  ],
+  "attemptsPerCommand": 1,
+  "endedUtc": "2026-11-23T21:17:31.046955+00:00",
+  "trackedStatusAfter": "",
+  "commitAfter": "e949286b9e5f37f98c2a400ee067928382c7b1f9",
+  "treeAfter": "24e3e31fb86f8c2587f1753f940da359162427cf",
+  "logSha256": "4c6dc54128eac02e3afcef20e1e60058cf3da99b2a1ed7a89f13bd708992a4ca"
+}

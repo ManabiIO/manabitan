@@ -1,0 +1,160 @@
+{
+  "pr": 848,
+  "run": 45261383648,
+  "url": "https://github.com/ManabiIO/manabitan/actions/runs/45261383648",
+  "sourceCommit": "09dfb90d926758205ff52d127ef3d950f0b15a65",
+  "jobs": [
+    {
+      "id": 137996736915,
+      "name": "Test Build",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:39:15Z",
+      "completedAt": "2026-11-23T20:39:56Z"
+    },
+    {
+      "id": 137996737520,
+      "name": "Full Extension E2E (Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:41:59Z",
+      "completedAt": "2026-11-23T20:44:58Z"
+    },
+    {
+      "id": 137996737693,
+      "name": "TypeScript (bench)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:42:01Z",
+      "completedAt": "2026-11-23T20:42:32Z"
+    },
+    {
+      "id": 137996737700,
+      "name": "Anki Deduplication Matrix (Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:43:55Z",
+      "completedAt": "2026-11-23T20:44:54Z"
+    },
+    {
+      "id": 137996737704,
+      "name": "JSON",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:42:39Z",
+      "completedAt": "2026-11-23T20:43:38Z"
+    },
+    {
+      "id": 137996737786,
+      "name": "Full Extension E2E (Firefox)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:44:51Z",
+      "completedAt": "2026-11-23T20:46:59Z"
+    },
+    {
+      "id": 137996737826,
+      "name": "TypeScript (dev)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:51:32Z",
+      "completedAt": "2026-11-23T20:51:57Z"
+    },
+    {
+      "id": 137996737859,
+      "name": "TypeScript (test)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:49:33Z",
+      "completedAt": "2026-11-23T20:50:23Z"
+    },
+    {
+      "id": 137996737870,
+      "name": "Unit Tests (options)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:42:33Z",
+      "completedAt": "2026-11-23T20:42:54Z"
+    },
+    {
+      "id": 137996737941,
+      "name": "Unit Tests",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:51:59Z",
+      "completedAt": "2026-11-23T20:54:41Z"
+    },
+    {
+      "id": 137996737957,
+      "name": "HTML",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:50:35Z",
+      "completedAt": "2026-11-23T20:50:53Z"
+    },
+    {
+      "id": 137996737958,
+      "name": "JavaScript",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:45:23Z",
+      "completedAt": "2026-11-23T20:48:09Z"
+    },
+    {
+      "id": 137996738015,
+      "name": "TypeScript (main)",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:49:08Z",
+      "completedAt": "2026-11-23T20:49:35Z"
+    },
+    {
+      "id": 137996738051,
+      "name": "Markdown",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:49:36Z",
+      "completedAt": "2026-11-23T20:50:00Z"
+    },
+    {
+      "id": 137996738401,
+      "name": "CSS",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-11-23T20:52:05Z",
+      "completedAt": "2026-11-23T20:52:28Z"
+    },
+    {
+      "id": 137996739944,
+      "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:38:00Z",
+      "completedAt": "2026-11-23T20:38:00Z"
+    },
+    {
+      "id": 137996740014,
+      "name": "Published release upgrade and reimport",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:38:00Z",
+      "completedAt": "2026-11-23T20:38:00Z"
+    },
+    {
+      "id": 137996740453,
+      "name": "Full Extension E2E (Edge)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:38:00Z",
+      "completedAt": "2026-11-23T20:38:00Z"
+    },
+    {
+      "id": 137996740949,
+      "name": "Firefox Android Installation Smoke (blocking)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-11-23T20:38:01Z",
+      "completedAt": "2026-11-23T20:38:00Z"
+    }
+  ]
+}
