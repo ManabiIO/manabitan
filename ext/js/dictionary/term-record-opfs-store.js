@@ -103,6 +103,7 @@ const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
+const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 const STORAGE_READ_RETRY_COUNT = 2;
@@ -797,6 +798,8 @@ export class TermRecordOpfsStore {
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         /** @type {number|null} */
         this._expectedImportBytes = null;
+        /** @type {number|null} */
+        this._rawTermBankSourceBytes = null;
         /** @type {TermRecordEndImportSessionMetrics|null} */
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
@@ -1247,6 +1250,7 @@ export class TermRecordOpfsStore {
      */
     async _abandonImportWritesForRollback() {
         this._importSessionActive = false;
+        this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._preinternedCompactionRemap = new Uint32Array(0);
@@ -1328,6 +1332,7 @@ export class TermRecordOpfsStore {
             await this._endImportSession();
         } finally {
             this._preinternedCompactionRemap = new Uint32Array(0);
+            this._rawTermBankSourceBytes = null;
         }
     }
 
@@ -1396,6 +1401,15 @@ export class TermRecordOpfsStore {
             null;
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
+    }
+
+    /**
+     * Source work controls worker eligibility independently of output-size
+     * estimates used to coalesce record writes. Invalid hints disable it.
+     * @param {number|null} value
+     */
+    setRawTermBankSourceBytes(value) {
+        this._rawTermBankSourceBytes = typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null;
     }
 
     /**
@@ -5929,10 +5943,15 @@ export class TermRecordOpfsStore {
         const fileHandle = state.lookupIndexFileHandle;
         if (fileHandle === null) { throw new Error('Term-record lookup index file handle is unavailable'); }
         if (this._importSessionActive && state.initialFileLength === 0) {
-            // Tiny sidecars first written at finalization have no parsing work
-            // left to overlap. Retain their established local writer unless a
-            // worker already belongs to this import session.
-            if (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES) {
+            // Keep the worker and periodic flushes for imports with enough
+            // source work to cover their setup and scheduling costs. Tiny
+            // sidecars first written at finalization still use the local path
+            // unless a worker already belongs to this eligible session.
+            if (
+                this._rawTermBankSourceBytes !== null &&
+                this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES &&
+                (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
+            ) {
                 this._importIndexWorkerPromise ??= createImportIndexWorkerClient();
                 const worker = await this._importIndexWorkerPromise;
                 if (worker !== null) {

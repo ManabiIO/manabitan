@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {Worker as ThreadWorker} from 'node:worker_threads';
 import {afterEach, describe, expect, test, vi} from 'vitest';
-import {createImportIndexWorkerClient} from '../ext/js/dictionary/term-record-import-index-worker-client.js';
+import {createImportIndexWorkerClient, WorkerImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-worker-client.js';
 import {SyncImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-writer.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
@@ -100,6 +100,7 @@ function digest(bytes) { return createHash('sha256').update(bytes).digest('hex')
 function storeWithPendingIndex(file, bytes) {
     vi.stubGlobal('Worker', NodeWorker);
     const store = new TermRecordOpfsStore();
+    store.setRawTermBankSourceBytes(1024 * 1024 * 1024);
     const name = store._getShardSegmentFileName('Worker test', 'raw', 0);
     const state = store._createShardState(name, file.handle, 0);
     state.pendingLookupIndexChunks = [bytes];
@@ -110,6 +111,22 @@ function storeWithPendingIndex(file, bytes) {
     Reflect.set(store, '_recordsDirectoryHandle', {async getFileHandle() { return file.handle; }});
     Reflect.get(store, '_shardStateByFileName').set(name, state);
     return {store, state};
+}
+
+/**
+ * Native file-handle methods are not enumerable data in a worker message.
+ * @param {ReturnType<typeof fixture>} file
+ * @returns {{flush: import('vitest').Mock, close: import('vitest').Mock}}
+ */
+function localFallback(file) {
+    const access = {
+        write: vi.fn((/** @type {Uint8Array} */ bytes) => bytes.byteLength),
+        truncate: vi.fn(),
+        flush: vi.fn(),
+        close: vi.fn(),
+    };
+    Object.defineProperty(file.handle, 'createSyncAccessHandle', {value: async () => access});
+    return access;
 }
 
 /** @param {ReturnType<typeof fixture>} file */
@@ -321,6 +338,7 @@ describe('production import index worker', () => {
         const workerConstructor = vi.fn(() => { throw new Error('Worker unavailable'); });
         vi.stubGlobal('Worker', workerConstructor);
         const store = new TermRecordOpfsStore();
+        store.setRawTermBankSourceBytes(1024 * 1024 * 1024);
         const access = {write: vi.fn((bytes) => bytes.byteLength), truncate: vi.fn(), flush: vi.fn(), close: vi.fn()};
         const file = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({async createSyncAccessHandle() { return access; }}));
         const state = store._createShardState('tiny.mbtr', file, 0);
@@ -339,5 +357,100 @@ describe('production import index worker', () => {
         await writer.close();
         expect(access.flush).toHaveBeenCalledTimes(2);
         await store._retireImportIndexWorker();
+    });
+
+    test.each([
+        {sourceBytes: 1024 ** 3 - 1, queuedBytes: 2 * 1024 ** 2, remote: false},
+        {sourceBytes: 1024 ** 3, queuedBytes: 2 * 1024 ** 2 - 1, remote: false},
+        {sourceBytes: 1024 ** 3, queuedBytes: 2 * 1024 ** 2, remote: true},
+        {sourceBytes: 1024 ** 3 + 1, queuedBytes: 2 * 1024 ** 2, remote: true},
+    ])('requires both source and queued-byte thresholds: $sourceBytes / $queuedBytes', async ({sourceBytes, queuedBytes, remote}) => {
+        vi.stubGlobal('Worker', NodeWorker);
+        const file = fixture();
+        const local = localFallback(file);
+        const store = new TermRecordOpfsStore();
+        store.setRawTermBankSourceBytes(sourceBytes);
+        await store.beginImportSession();
+        const state = store._createShardState('eligible.mbtr', file.handle, 0);
+        state.lookupIndexFileHandle = file.handle;
+        state.lookupIndexQueuedBytes = queuedBytes;
+        const writer = await store._createLookupIndexWritable(state);
+        expect(writer).toBeInstanceOf(remote ? WorkerImportIndexWriter : SyncImportIndexWriter);
+        if (!remote) {
+            await writer.write(new Uint8Array(18 * 1024 * 1024));
+            expect(local.flush).not.toHaveBeenCalled();
+        }
+        await writer.close();
+        await store.endImportSession();
+        expect(workers).toHaveLength(remote ? 1 : 0);
+        expect(store.getLastEndImportSessionMetrics()?.lookupIndexWorkerFileCount).toBe(remote ? 1 : 0);
+        expect(local.flush).toHaveBeenCalledTimes(remote ? 0 : 1);
+    });
+
+    test.each([void 0, null, -1, 1.5, Number.NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, '1073741824'])(
+        'declines unavailable or invalid source hints without worker startup: %s',
+        async (sourceBytes) => {
+            const workerConstructor = vi.fn();
+            vi.stubGlobal('Worker', workerConstructor);
+            const file = fixture();
+            localFallback(file);
+            const store = new TermRecordOpfsStore();
+            store.setRawTermBankSourceBytes(/** @type {number|null} */ (sourceBytes));
+            await store.beginImportSession();
+            const state = store._createShardState('invalid-hint.mbtr', file.handle, 0);
+            state.lookupIndexFileHandle = file.handle;
+            state.lookupIndexQueuedBytes = 2 * 1024 * 1024;
+            const writer = await store._createLookupIndexWritable(state);
+            expect(writer).toBeInstanceOf(SyncImportIndexWriter);
+            expect(workerConstructor).not.toHaveBeenCalled();
+            await writer.close();
+            await store.endImportSession();
+        },
+    );
+
+    test.each(['finish', 'failed finish', 'rollback', 'reset'])('clears worker eligibility after %s', async (ending) => {
+        const file = fixture(ending === 'failed finish' ? {flushErrorAt: 1} : {});
+        const {store, state} = storeWithPendingIndex(file, patternedBytes(2 * 1024 * 1024));
+        await store._flushPendingLookupIndexChunks(state);
+        expect(state.lookupIndexWritable).toBeInstanceOf(WorkerImportIndexWriter);
+        switch (ending) {
+            case 'finish': await store.endImportSession(); break;
+            case 'failed finish':
+                await expect(store.endImportSession()).rejects.toThrow('Worker flush witness');
+                expect(Reflect.get(store, '_rawTermBankSourceBytes')).toBeNull();
+                await store._abandonImportWritesForRollback();
+                break;
+            case 'rollback': await store._abandonImportWritesForRollback(); break;
+            case 'reset': await store.reset(); break;
+        }
+        await store.beginImportSession();
+        const next = fixture();
+        localFallback(next);
+        const nextState = store._createShardState('next-session.mbtr', next.handle, 0);
+        nextState.lookupIndexFileHandle = next.handle;
+        nextState.lookupIndexQueuedBytes = 2 * 1024 * 1024;
+        const nextWriter = await store._createLookupIndexWritable(nextState);
+        expect(nextWriter).toBeInstanceOf(SyncImportIndexWriter);
+        expect(workers).toHaveLength(1);
+        await nextWriter.close();
+        await store.endImportSession();
+    });
+
+    test('routes and resets the source hint independently of record-write coalescing options', async () => {
+        const database = new DictionaryDatabase();
+        const store = /** @type {TermRecordOpfsStore} */ (Reflect.get(database, '_termRecordStore'));
+        const baselineCoalescing = Reflect.get(store, '_writeCoalesceTargetBytes');
+        database.setImportOptimizationFlags({rawTermBankSourceBytes: 1024 ** 3});
+        expect(Reflect.get(store, '_rawTermBankSourceBytes')).toBe(1024 ** 3);
+        expect(Reflect.get(store, '_writeCoalesceTargetBytes')).toBe(baselineCoalescing);
+        database.setImportOptimizationFlags({expectedTermRecordImportBytes: 2 * 1024 ** 3, rawTermBankSourceBytes: 1024 ** 3});
+        const largeCoalescing = Reflect.get(store, '_writeCoalesceTargetBytes');
+        expect(largeCoalescing).toBe(64 * 1024 * 1024);
+        database.setImportOptimizationFlags({expectedTermRecordImportBytes: 2 * 1024 ** 3});
+        expect(Reflect.get(store, '_rawTermBankSourceBytes')).toBeNull();
+        expect(Reflect.get(store, '_writeCoalesceTargetBytes')).toBe(largeCoalescing);
+        database.setImportOptimizationFlags();
+        expect(Reflect.get(store, '_rawTermBankSourceBytes')).toBeNull();
+        expect(Reflect.get(store, '_writeCoalesceTargetBytes')).toBe(baselineCoalescing);
     });
 });

@@ -1843,7 +1843,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
+     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
      */
     setImportOptimizationFlags(options = {}) {
         this._termContentBlockStore.setCompressionExperiments(options);
@@ -1871,6 +1871,7 @@ export class DictionaryDatabase {
         this._termContentStore.setWriteCoalesceMaxChunksOverride(null);
         this._termContentStore.setQueueImportWritesEnabled(options.queueTermContentWrites === true);
         this._termRecordStore.setExpectedImportBytes(options.expectedTermRecordImportBytes ?? null);
+        this._termRecordStore.setRawTermBankSourceBytes(options.rawTermBankSourceBytes ?? null);
     }
 
     /**
