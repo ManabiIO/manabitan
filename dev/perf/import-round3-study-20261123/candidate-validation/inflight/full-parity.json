@@ -1,0 +1,49 @@
+{
+  "description": "Correctness-only exhaustive lookup parity for every real resolved content span. Baseline generic, current candidate fast, and current candidate generic (unmarked plain copy) register, find, and unregister every source with exact offset, length, shared-slab identity, byte digest, sorted bounds, and empty post-release set. No timing observations are collected.",
+  "node": "v24.22.3",
+  "inputManifestSha256": "30297f6e107f9a7b11d2ac592cbc38e5eb85f34cabb16a9409d02112a50c760e",
+  "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+  "runnerSha256": "aefeabe51b06bb1a7b2c113fb5d49b4067b4ff1f3d28c4aa09c8bc1a72daeb80",
+  "identities": {
+    "A": {
+      "root": "/workspace/scratch/71149a79699f/manabitan-inflight-baseline",
+      "sourceSha256": "619fd5c51858ea4b3366cb92624aad13ed046dc7deff5788ba3d5abee9d79abd",
+      "digest": "b907801610807b3043955dfe6c0c95ac1431f64ddf2bba29d70e1e2f28890d73",
+      "rows": 526942,
+      "uniqueCount": 365184,
+      "groups": 20
+    },
+    "B": {
+      "root": "/workspace/scratch/71149a79699f/manabitan-inflight-round3",
+      "sourceSha256": "2199bc6b6d62e7405f3fecd22b189a041825d6d4e803919032728597571b1f10",
+      "digest": "b907801610807b3043955dfe6c0c95ac1431f64ddf2bba29d70e1e2f28890d73",
+      "rows": 526942,
+      "uniqueCount": 365184,
+      "groups": 20
+    }
+  },
+  "modes": [
+    {
+      "name": "baseline-generic",
+      "checkedRows": 365184,
+      "checkedBytes": 100797101,
+      "integerChecks": 1095552,
+      "fullLookupDigest": "9bc68ab1388e07119fdbf73a15ad84c030eb65fd34c145e320e3b2ea1977ef36"
+    },
+    {
+      "name": "candidate-fast",
+      "checkedRows": 365184,
+      "checkedBytes": 100797101,
+      "integerChecks": 365184,
+      "fullLookupDigest": "9bc68ab1388e07119fdbf73a15ad84c030eb65fd34c145e320e3b2ea1977ef36"
+    },
+    {
+      "name": "candidate-unmarked-generic",
+      "checkedRows": 365184,
+      "checkedBytes": 100797101,
+      "integerChecks": 1095552,
+      "fullLookupDigest": "9bc68ab1388e07119fdbf73a15ad84c030eb65fd34c145e320e3b2ea1977ef36"
+    }
+  ],
+  "originSemantics": "Only spans objects created inside the resolver are weakly marked. Copying an otherwise identical plain object forces generic validation. Both descriptor values and all source/persisted bounds are freshly checked at registration, even after awaits; the origin mark is not a validity cache."
+}

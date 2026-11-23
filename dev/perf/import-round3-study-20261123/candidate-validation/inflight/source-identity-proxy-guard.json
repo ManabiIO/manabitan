@@ -1,0 +1,17 @@
+{
+  "baselineCommit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "runtimeFile": "ext/js/dictionary/dictionary-database.js",
+  "baselineSourceSha256": "619fd5c51858ea4b3366cb92624aad13ed046dc7deff5788ba3d5abee9d79abd",
+  "measuredSourceSha256": "f3b85a82844a1061af63912fc9a1b541a34df6ee8d63fbda9ef816980c798255",
+  "checkedSourceSha256": "0a0717767e1bf4a814b64f72165992dcb98bd398f3e95f5efd40cfc5f705e48b",
+  "derivation": "The measured variant stored the intrinsic ArrayBuffer resizable getter, then called it with the buffer receiver. ESLint unbound-method required retaining its descriptor instead and invoking descriptor.get.call(buffer). The native intrinsic, receiver, policy, and every row-loop operation are unchanged; source bytes differ. No post-observation performance tuning. Hosted timing must identify the checked source separately.",
+  "patches": {
+    "measured-runtime.patch": "d823f915ea12c48ee36827c77fd42065b597e8c4cf66678e802a12fe7e5840c1",
+    "lint-only-derivation.patch": "2dcd2bff94035695f9adb1fb56d18e6a3a90dc3100d93a261c8a20d8287678e1",
+    "lint-checked-runtime.patch": "7146c80b6ee84afef7ac8cfcc6b6eac35fe30470b205b7d8a14b3f41ff89dbd4",
+    "guard-hardening.patch": "83024816022ed55bfe251709262089da168c33681e62f9b29859e6430b7dd011",
+    "candidate-runtime.patch": "799d703c16bb446cfa3420022e88651f88959c44bc727515ee55c5b0d2ddb58a"
+  },
+  "lintCheckedSourceSha256": "2199bc6b6d62e7405f3fecd22b189a041825d6d4e803919032728597571b1f10",
+  "guardHardening": "ArrayBuffer.isView now rejects non-views before instanceof or prototype inspection, preventing proxy getPrototypeOf traps from running during optional admission. Ordinary-view row checks, loop, policy, and integer-check counts are unchanged. Added a negative test where such a trap would otherwise conceal an invalid tail. This correctness fix was not retimed locally; the original timing receipt remains preliminary and the final source requires its own hosted qualification."
+}

@@ -1,0 +1,417 @@
+{
+  "description": "Isolated synchronous in-flight registration replay, real native/resolver content columns for every pinned JMdict term bank. No archive parsing, canonical resolution, compression, persistent storage, transfer, or import wall time is included. Each group starts with an empty registration set and an independently resolved database; physical reference positions are modeled with the exact production 20-byte stride. No cross-group persisted deduplication is modeled.",
+  "node": "v24.22.3",
+  "inputManifestSha256": "30297f6e107f9a7b11d2ac592cbc38e5eb85f34cabb16a9409d02112a50c760e",
+  "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+  "runnerSha256": "b3100164609da889f9eba5ab833f1f877ee6920cb4515692867cc0c8166883aa",
+  "identities": {
+    "A": {
+      "root": "/workspace/scratch/71149a79699f/manabitan-inflight-baseline",
+      "sourceSha256": "619fd5c51858ea4b3366cb92624aad13ed046dc7deff5788ba3d5abee9d79abd",
+      "digest": "b907801610807b3043955dfe6c0c95ac1431f64ddf2bba29d70e1e2f28890d73",
+      "rows": 526942,
+      "uniqueCount": 365184,
+      "groups": 20
+    },
+    "B": {
+      "root": "/workspace/scratch/71149a79699f/manabitan-inflight-round3",
+      "sourceSha256": "f3b85a82844a1061af63912fc9a1b541a34df6ee8d63fbda9ef816980c798255",
+      "digest": "b907801610807b3043955dfe6c0c95ac1431f64ddf2bba29d70e1e2f28890d73",
+      "rows": 526942,
+      "uniqueCount": 365184,
+      "groups": 20
+    }
+  },
+  "passesPerObservation": 20,
+  "integerCheckCounts": {
+    "A": 1095552,
+    "B": 365184
+  },
+  "observations": [
+    {
+      "index": 0,
+      "kind": "warmup",
+      "pair": 0,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 72.88386600000013,
+      "userMs": 75.144,
+      "systemMs": 0
+    },
+    {
+      "index": 1,
+      "kind": "warmup",
+      "pair": 0,
+      "slot": 1,
+      "arm": "B",
+      "elapsedMs": 25.800501000000168,
+      "userMs": 27.95,
+      "systemMs": 0
+    },
+    {
+      "index": 2,
+      "kind": "warmup",
+      "pair": 1,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 70.96949199999995,
+      "userMs": 78.385,
+      "systemMs": 0
+    },
+    {
+      "index": 3,
+      "kind": "warmup",
+      "pair": 1,
+      "slot": 1,
+      "arm": "B",
+      "elapsedMs": 27.21105199999988,
+      "userMs": 30.157,
+      "systemMs": 0
+    },
+    {
+      "index": 4,
+      "kind": "control",
+      "pair": 0,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 67.7328,
+      "userMs": 70.501,
+      "systemMs": 0
+    },
+    {
+      "index": 5,
+      "kind": "control",
+      "pair": 0,
+      "slot": 1,
+      "arm": "A",
+      "elapsedMs": 70.73541999999998,
+      "userMs": 72.784,
+      "systemMs": 0
+    },
+    {
+      "index": 6,
+      "kind": "candidate",
+      "pair": 1,
+      "slot": 0,
+      "arm": "B",
+      "elapsedMs": 27.525124000000005,
+      "userMs": 30.104,
+      "systemMs": 0
+    },
+    {
+      "index": 7,
+      "kind": "candidate",
+      "pair": 1,
+      "slot": 1,
+      "arm": "A",
+      "elapsedMs": 96.76939799999991,
+      "userMs": 93.685,
+      "systemMs": 0
+    },
+    {
+      "index": 8,
+      "kind": "candidate",
+      "pair": 2,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 80.26784100000032,
+      "userMs": 80.916,
+      "systemMs": 0
+    },
+    {
+      "index": 9,
+      "kind": "candidate",
+      "pair": 2,
+      "slot": 1,
+      "arm": "B",
+      "elapsedMs": 24.783547,
+      "userMs": 26.028,
+      "systemMs": 0.462
+    },
+    {
+      "index": 10,
+      "kind": "candidate",
+      "pair": 3,
+      "slot": 0,
+      "arm": "B",
+      "elapsedMs": 24.534700000000157,
+      "userMs": 26.233,
+      "systemMs": 0.664
+    },
+    {
+      "index": 11,
+      "kind": "candidate",
+      "pair": 3,
+      "slot": 1,
+      "arm": "A",
+      "elapsedMs": 72.93993499999988,
+      "userMs": 70.669,
+      "systemMs": 0
+    },
+    {
+      "index": 12,
+      "kind": "candidate",
+      "pair": 4,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 62.14676899999995,
+      "userMs": 60.526,
+      "systemMs": 0
+    },
+    {
+      "index": 13,
+      "kind": "candidate",
+      "pair": 4,
+      "slot": 1,
+      "arm": "B",
+      "elapsedMs": 31.902248000000327,
+      "userMs": 33.541,
+      "systemMs": 0
+    },
+    {
+      "index": 14,
+      "kind": "control",
+      "pair": 5,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 116.10026999999991,
+      "userMs": 118.025,
+      "systemMs": 0
+    },
+    {
+      "index": 15,
+      "kind": "control",
+      "pair": 5,
+      "slot": 1,
+      "arm": "A",
+      "elapsedMs": 114.61796900000036,
+      "userMs": 116.597,
+      "systemMs": 0
+    },
+    {
+      "index": 16,
+      "kind": "candidate",
+      "pair": 6,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 112.51010099999985,
+      "userMs": 114.713,
+      "systemMs": 0
+    },
+    {
+      "index": 17,
+      "kind": "candidate",
+      "pair": 6,
+      "slot": 1,
+      "arm": "B",
+      "elapsedMs": 32.380825000000186,
+      "userMs": 34.705,
+      "systemMs": 0
+    },
+    {
+      "index": 18,
+      "kind": "candidate",
+      "pair": 7,
+      "slot": 0,
+      "arm": "B",
+      "elapsedMs": 30.876729999999952,
+      "userMs": 33.09,
+      "systemMs": 0
+    },
+    {
+      "index": 19,
+      "kind": "candidate",
+      "pair": 7,
+      "slot": 1,
+      "arm": "A",
+      "elapsedMs": 114.2088689999996,
+      "userMs": 115.397,
+      "systemMs": 0
+    },
+    {
+      "index": 20,
+      "kind": "candidate",
+      "pair": 8,
+      "slot": 0,
+      "arm": "A",
+      "elapsedMs": 116.80773700000009,
+      "userMs": 120.957,
+      "systemMs": 0
+    },
+    {
+      "index": 21,
+      "kind": "candidate",
+      "pair": 8,
+      "slot": 1,
+      "arm": "B",
+      "elapsedMs": 33.7185300000001,
+      "userMs": 36.107,
+      "systemMs": 0
+    },
+    {
+      "index": 22,
+      "kind": "candidate",
+      "pair": 9,
+      "slot": 0,
+      "arm": "B",
+      "elapsedMs": 30.455235999999786,
+      "userMs": 32.417,
+      "systemMs": 0
+    },
+    {
+      "index": 23,
+      "kind": "candidate",
+      "pair": 9,
+      "slot": 1,
+      "arm": "A",
+      "elapsedMs": 120.55272299999979,
+      "userMs": 122.729,
+      "systemMs": 0
+    }
+  ],
+  "comparisons": [
+    {
+      "pair": 0,
+      "control": true,
+      "order": [
+        "A",
+        "A"
+      ],
+      "observations": [
+        4,
+        5
+      ],
+      "elapsedChangePercent": 4.433036874306073,
+      "cpuChangePercent": 3.2382519396888076
+    },
+    {
+      "pair": 1,
+      "control": false,
+      "order": [
+        "B",
+        "A"
+      ],
+      "observations": [
+        6,
+        7
+      ],
+      "elapsedChangePercent": -71.55596235082497,
+      "cpuChangePercent": -67.86678763943
+    },
+    {
+      "pair": 2,
+      "control": false,
+      "order": [
+        "A",
+        "B"
+      ],
+      "observations": [
+        8,
+        9
+      ],
+      "elapsedChangePercent": -69.12393968588255,
+      "cpuChangePercent": -67.26234613673438
+    },
+    {
+      "pair": 3,
+      "control": false,
+      "order": [
+        "B",
+        "A"
+      ],
+      "observations": [
+        10,
+        11
+      ],
+      "elapsedChangePercent": -66.36314523724185,
+      "cpuChangePercent": -61.93946426297244
+    },
+    {
+      "pair": 4,
+      "control": false,
+      "order": [
+        "A",
+        "B"
+      ],
+      "observations": [
+        12,
+        13
+      ],
+      "elapsedChangePercent": -48.66628062353434,
+      "cpuChangePercent": -44.58414565641213
+    },
+    {
+      "pair": 5,
+      "control": true,
+      "order": [
+        "A",
+        "A"
+      ],
+      "observations": [
+        14,
+        15
+      ],
+      "elapsedChangePercent": -1.276742078204951,
+      "cpuChangePercent": -1.2099131539928032
+    },
+    {
+      "pair": 6,
+      "control": false,
+      "order": [
+        "A",
+        "B"
+      ],
+      "observations": [
+        16,
+        17
+      ],
+      "elapsedChangePercent": -71.21962853806323,
+      "cpuChangePercent": -69.74623625918596
+    },
+    {
+      "pair": 7,
+      "control": false,
+      "order": [
+        "B",
+        "A"
+      ],
+      "observations": [
+        18,
+        19
+      ],
+      "elapsedChangePercent": -72.96468280409987,
+      "cpuChangePercent": -71.32507777498549
+    },
+    {
+      "pair": 8,
+      "control": false,
+      "order": [
+        "A",
+        "B"
+      ],
+      "observations": [
+        20,
+        21
+      ],
+      "elapsedChangePercent": -71.1333077191624,
+      "cpuChangePercent": -70.14889588862158
+    },
+    {
+      "pair": 9,
+      "control": false,
+      "order": [
+        "B",
+        "A"
+      ],
+      "observations": [
+        22,
+        23
+      ],
+      "elapsedChangePercent": -74.73699868231111,
+      "cpuChangePercent": -73.58651989342371
+    }
+  ],
+  "medianElapsedChangePercent": -71.17646812861281,
+  "medianCpuChangePercent": -68.80651194930797,
+  "fasterPairs": 8
+}

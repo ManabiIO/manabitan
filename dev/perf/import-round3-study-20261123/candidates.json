@@ -68,6 +68,28 @@
           "allowReferenceLayoutChange": false
         }
       ]
+    },
+    "inflight-validation": {
+      "arms": {
+        "A": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+        "B": "a628c6c7915576dcf280e98bc9129a508f2f9644"
+      },
+      "packageRules": [
+        {
+          "baseline": "A",
+          "candidate": "B",
+          "paths": [
+            "js/dictionary/dictionary-database.js"
+          ]
+        }
+      ],
+      "layoutRules": [
+        {
+          "baseline": "A",
+          "candidate": "B",
+          "allowReferenceLayoutChange": false
+        }
+      ]
     }
   },
   "memory": {

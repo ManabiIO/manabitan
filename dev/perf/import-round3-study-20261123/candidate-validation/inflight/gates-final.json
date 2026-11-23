@@ -1,0 +1,81 @@
+{
+  "sourceHashes": {
+    "ext/js/dictionary/dictionary-database.js": "289a165f28fbbd06951fd9f5d1671e754bfa50a1bafbbb691a2ff62851e940c1",
+    "test/dictionary-in-flight-content-sources.test.js": "0b162f3d4889fba176a08aaee15bd8641115db7012f75c5124dcaf43119c30fe"
+  },
+  "nodeOptions": "--max-old-space-size=1536",
+  "gates": [
+    {
+      "name": "lint",
+      "command": [
+        "./node_modules/.bin/eslint",
+        "ext/js/dictionary/dictionary-database.js",
+        "test/dictionary-in-flight-content-sources.test.js"
+      ],
+      "exitCode": 0,
+      "log": "lint-intrinsic-final.log",
+      "logSha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "startedUnixSeconds": 1795418114.7598734,
+      "elapsedSeconds": 23.870628356933594
+    },
+    {
+      "name": "types-main",
+      "command": [
+        "./node_modules/.bin/tsc",
+        "--noEmit",
+        "--project",
+        "jsconfig.json"
+      ],
+      "exitCode": 0,
+      "log": "types-main-intrinsic-final.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "startedUnixSeconds": 1795418138.632501,
+      "elapsedSeconds": 14.839841604232788
+    },
+    {
+      "name": "types-test",
+      "command": [
+        "./node_modules/.bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ],
+      "exitCode": 0,
+      "log": "types-test-intrinsic-final.log",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "startedUnixSeconds": 1795418153.474588,
+      "elapsedSeconds": 35.28792929649353
+    },
+    {
+      "name": "scoped-tests",
+      "command": [
+        "./node_modules/.bin/vitest",
+        "run",
+        "test/dictionary-in-flight-content-sources.test.js",
+        "test/dictionary-database-content-dedup.test.js",
+        "test/term-content-block-store.test.js",
+        "--maxWorkers=1",
+        "--testTimeout=30000"
+      ],
+      "exitCode": 0,
+      "log": "scoped-tests-intrinsic-final.log",
+      "logSha256": "c0edaeb741d52faabe40c443819316869a290b01638bea4847e77ea663abcbfc",
+      "startedUnixSeconds": 1795418188.7693152,
+      "elapsedSeconds": 3.8910398483276367
+    },
+    {
+      "name": "build-dry-run",
+      "command": [
+        "node",
+        "./dev/bin/build.js",
+        "--dryRun",
+        "--all"
+      ],
+      "exitCode": 0,
+      "log": "build-dry-run-intrinsic-final.log",
+      "logSha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a",
+      "startedUnixSeconds": 1795418192.6619842,
+      "elapsedSeconds": 0.5048787593841553
+    }
+  ]
+}

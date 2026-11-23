@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/71149a79699f/manabitan-inflight-round3
+
+
+ Test Files  3 passed (3)
+      Tests  216 passed (216)
+   Start at  02:04:29
+   Duration  3.76s (transform 805ms, setup 40ms, import 1.53s, tests 1.56s, environment 0ms)
+

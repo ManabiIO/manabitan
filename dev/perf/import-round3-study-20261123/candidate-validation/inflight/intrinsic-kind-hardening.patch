@@ -1,0 +1,58 @@
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -122,7 +122,9 @@
+ const BULK_IMPORT_STATE_ACTIVE = 'active';
+ const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
+ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
++const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
+ const ARRAY_BUFFER_RESIZABLE_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable');
++const TYPED_ARRAY_TAG_DESCRIPTOR = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag);
+ /** @type {WeakSet<NonNullable<InFlightTermContentSourceBatch['contentSpans']>>} */
+ const INTERNAL_PENDING_CONTENT_SPANS = new WeakSet();
+ 
+@@ -259,16 +261,23 @@
+  * @returns {boolean}
+  */
+ function hasSimpleInFlightTermContentSources(offsets, lengths, dictNames, spans, count) {
+-    if (spans === null || !INTERNAL_PENDING_CONTENT_SPANS.has(spans) || count === 0 || typeof dictNames !== 'string') { return false; }
++    if (
++        spans === null || !INTERNAL_PENDING_CONTENT_SPANS.has(spans) || count === 0 ||
++        typeof dictNames !== 'string' || typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function'
++    ) { return false; }
+     const sourceBytes = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'buffer')?.value);
+     const sourceOffsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'offsets')?.value);
+     const sourceLengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'lengths')?.value);
+     if (
+-        !ArrayBuffer.isView(sourceBytes) || !(sourceBytes instanceof Uint8Array) ||
+-        Object.getPrototypeOf(sourceBytes) !== Uint8Array.prototype || Object.hasOwn(sourceBytes, 'byteLength') ||
+-        !ArrayBuffer.isView(offsets) || !(offsets instanceof Float64Array) || Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
+-        !ArrayBuffer.isView(lengths) || !(lengths instanceof Uint32Array) || Object.getPrototypeOf(lengths) !== Uint32Array.prototype ||
+-        !ArrayBuffer.isView(sourceOffsets) || !(sourceOffsets instanceof Uint32Array) || Object.getPrototypeOf(sourceOffsets) !== Uint32Array.prototype ||
++        TYPED_ARRAY_TAG_DESCRIPTOR?.get?.call(sourceBytes) !== 'Uint8Array' ||
++        Object.getPrototypeOf(sourceBytes) !== Uint8Array.prototype || !(sourceBytes instanceof Uint8Array) ||
++        Object.hasOwn(sourceBytes, 'byteLength') ||
++        TYPED_ARRAY_TAG_DESCRIPTOR?.get?.call(offsets) !== 'Float64Array' ||
++        Object.getPrototypeOf(offsets) !== Float64Array.prototype || !(offsets instanceof Float64Array) ||
++        TYPED_ARRAY_TAG_DESCRIPTOR?.get?.call(lengths) !== 'Uint32Array' ||
++        Object.getPrototypeOf(lengths) !== Uint32Array.prototype || !(lengths instanceof Uint32Array) ||
++        TYPED_ARRAY_TAG_DESCRIPTOR?.get?.call(sourceOffsets) !== 'Uint32Array' ||
++        Object.getPrototypeOf(sourceOffsets) !== Uint32Array.prototype || !(sourceOffsets instanceof Uint32Array) ||
+         sourceLengths !== lengths
+     ) { return false; }
+     for (const column of [offsets, lengths, sourceOffsets]) {
+@@ -276,7 +285,14 @@
+             !ArrayBuffer.isView(column) || Object.hasOwn(column, 'length') || Object.hasOwn(column, 'buffer')
+         ) { return false; }
+         const buffer = column.buffer;
+-        if (!(buffer instanceof ArrayBuffer) || ARRAY_BUFFER_RESIZABLE_DESCRIPTOR?.get?.call(buffer) === true) { return false; }
++        try {
++            // Native getters prove private, fixed backing storage even when
++            // its prototype or visible capability properties were replaced.
++            ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(buffer);
++            if (ARRAY_BUFFER_RESIZABLE_DESCRIPTOR?.get?.call(buffer) === true) { return false; }
++        } catch (_) {
++            return false;
++        }
+     }
+     if (sourceOffsets.length < offsets.length) { return false; }
+     let previousOffset = -1;

@@ -1,0 +1,273 @@
+{
+  "description": "Actual full pinned native parser content columns under the production group planner. The source slab is compactly copied and rebased to zero, without changing bytes or span values. No performance observation in this preparer.",
+  "dictionary": "jmdict",
+  "sourceRoot": "/workspace/scratch/71149a79699f/manabitan-inflight-baseline",
+  "node": "v24.22.3",
+  "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+  "archiveBytes": 15587032,
+  "sourceBanks": 53,
+  "plannerHardwareConcurrency": 9,
+  "plannerWorkerCount": 5,
+  "fixtureLockSha256": "4e3e98dfd2bf06968aefaa4f72328ec3736121124e57752e374c7ee507975b13",
+  "runnerSha256": "b7f943ea0a0af0083640aa2409835351708b5502ac42ca37223b2f40f0552948",
+  "parserSha256": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+  "wasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "canonicalWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+  "rows": 526942,
+  "uniqueCount": 365184,
+  "groups": [
+    {
+      "group": 1,
+      "filename": "001.v8",
+      "bytes": 6497480,
+      "sha256": "24419ba689d67d2e6cf4e7936783a6e922801358858d71624f9a4feb1ae2af74",
+      "rows": 30000,
+      "uniqueCount": 20476,
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json"
+      ]
+    },
+    {
+      "group": 2,
+      "filename": "002.v8",
+      "bytes": 7643949,
+      "sha256": "fbb0d1c8cd3433974befb047b48d02036778832a128486d0708d5ccfa16ce8f8",
+      "rows": 30000,
+      "uniqueCount": 22683,
+      "banks": [
+        "term_bank_4.json",
+        "term_bank_5.json",
+        "term_bank_6.json"
+      ]
+    },
+    {
+      "group": 3,
+      "filename": "003.v8",
+      "bytes": 8799370,
+      "sha256": "f7845f338f6a416446529dbb056d92cf76effb7c7bee2d21685a2b74e0ef537a",
+      "rows": 30000,
+      "uniqueCount": 24658,
+      "banks": [
+        "term_bank_7.json",
+        "term_bank_8.json",
+        "term_bank_9.json"
+      ]
+    },
+    {
+      "group": 4,
+      "filename": "004.v8",
+      "bytes": 8651397,
+      "sha256": "182f1fb45f81107e8d12e536eb252e7a1fb0a359ebeec90833b72767709c5695",
+      "rows": 30000,
+      "uniqueCount": 24174,
+      "banks": [
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json"
+      ]
+    },
+    {
+      "group": 5,
+      "filename": "005.v8",
+      "bytes": 5854779,
+      "sha256": "91180a0c4de858c90a7dedc4f80c229a7afdfa9f1d15c9bdbe4977bb9982560a",
+      "rows": 20000,
+      "uniqueCount": 16398,
+      "banks": [
+        "term_bank_13.json",
+        "term_bank_14.json"
+      ]
+    },
+    {
+      "group": 6,
+      "filename": "006.v8",
+      "bytes": 5260676,
+      "sha256": "cde7c7892dc119591fd45ba6f914e02f92a8a6cba94185a34f14e3a9ca49132f",
+      "rows": 20000,
+      "uniqueCount": 13282,
+      "banks": [
+        "term_bank_15.json",
+        "term_bank_16.json"
+      ]
+    },
+    {
+      "group": 7,
+      "filename": "007.v8",
+      "bytes": 7298445,
+      "sha256": "20fcc94349759d407dca006cac4a62a315ecbc82f9fd81b7865232434938dd63",
+      "rows": 30000,
+      "uniqueCount": 21241,
+      "banks": [
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json"
+      ]
+    },
+    {
+      "group": 8,
+      "filename": "008.v8",
+      "bytes": 6732692,
+      "sha256": "6cf1c95134e4905ff90d3f5578606cbaa45b041415e89657ff280edfd2684c2c",
+      "rows": 30000,
+      "uniqueCount": 20831,
+      "banks": [
+        "term_bank_20.json",
+        "term_bank_21.json",
+        "term_bank_22.json"
+      ]
+    },
+    {
+      "group": 9,
+      "filename": "009.v8",
+      "bytes": 6973373,
+      "sha256": "481ab10ca64f3ec856e3c1e47333a37e4923603ff6f55cab03f0d356dd0a9ac6",
+      "rows": 30000,
+      "uniqueCount": 21132,
+      "banks": [
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json"
+      ]
+    },
+    {
+      "group": 10,
+      "filename": "010.v8",
+      "bytes": 4698325,
+      "sha256": "d81d23869eeffa433e7a1f24e67c7af763d5edd9c701dddcd868defc0302f039",
+      "rows": 20000,
+      "uniqueCount": 12890,
+      "banks": [
+        "term_bank_26.json",
+        "term_bank_27.json"
+      ]
+    },
+    {
+      "group": 11,
+      "filename": "011.v8",
+      "bytes": 4583955,
+      "sha256": "573a0e2ae0c063bf8657a8bcf0225208dd2094c531cbd93c4d4c4f7a202a5043",
+      "rows": 20000,
+      "uniqueCount": 12364,
+      "banks": [
+        "term_bank_28.json",
+        "term_bank_29.json"
+      ]
+    },
+    {
+      "group": 12,
+      "filename": "012.v8",
+      "bytes": 6136056,
+      "sha256": "c514ba2efd0af4b441e8c732624aaa1928e525fad3b63c91bdd9f75df19d95d0",
+      "rows": 30000,
+      "uniqueCount": 17840,
+      "banks": [
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json"
+      ]
+    },
+    {
+      "group": 13,
+      "filename": "013.v8",
+      "bytes": 6251793,
+      "sha256": "64a72f14b9b8ba88dc3575a3ebdc2fcec1ccb8e9cf7858d2fd553c87054e41d6",
+      "rows": 30000,
+      "uniqueCount": 19721,
+      "banks": [
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json"
+      ]
+    },
+    {
+      "group": 14,
+      "filename": "014.v8",
+      "bytes": 4878988,
+      "sha256": "86f3b242c66de3926709044d516ea02fffe1951210207cf548d0482cff454a68",
+      "rows": 20000,
+      "uniqueCount": 12558,
+      "banks": [
+        "term_bank_36.json",
+        "term_bank_37.json"
+      ]
+    },
+    {
+      "group": 15,
+      "filename": "015.v8",
+      "bytes": 7293673,
+      "sha256": "3d698419aa13276ed1182e7b1170ca38bbb6368085f3a9a8798a3670a59a8608",
+      "rows": 30000,
+      "uniqueCount": 19600,
+      "banks": [
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ]
+    },
+    {
+      "group": 16,
+      "filename": "016.v8",
+      "bytes": 4859382,
+      "sha256": "e65bb491ceda81726883739c7227835d4938576daf68b6a92403ccd2ed6ab618",
+      "rows": 20000,
+      "uniqueCount": 12624,
+      "banks": [
+        "term_bank_41.json",
+        "term_bank_42.json"
+      ]
+    },
+    {
+      "group": 17,
+      "filename": "017.v8",
+      "bytes": 7192091,
+      "sha256": "505f59a74d0878690a53cc83894bfb96ea29c093eea8d6ed4138b8690664e9f8",
+      "rows": 30000,
+      "uniqueCount": 18796,
+      "banks": [
+        "term_bank_43.json",
+        "term_bank_44.json",
+        "term_bank_45.json"
+      ]
+    },
+    {
+      "group": 18,
+      "filename": "018.v8",
+      "bytes": 5102822,
+      "sha256": "b189994494319a990c52c64467eaf8febb559eb3982fe8fcaec8bc7b036a5b3b",
+      "rows": 20000,
+      "uniqueCount": 12975,
+      "banks": [
+        "term_bank_46.json",
+        "term_bank_47.json"
+      ]
+    },
+    {
+      "group": 19,
+      "filename": "019.v8",
+      "bytes": 7393377,
+      "sha256": "56a1e35c394fe20a8b3edcf7e3ae2509f475b88b2c4cfd1fa03b76c7f11ac0b0",
+      "rows": 30000,
+      "uniqueCount": 20456,
+      "banks": [
+        "term_bank_48.json",
+        "term_bank_49.json",
+        "term_bank_50.json"
+      ]
+    },
+    {
+      "group": 20,
+      "filename": "020.v8",
+      "bytes": 6973836,
+      "sha256": "f37049587eaa818057e88732a84e3a01dace8c3b51b8b942e6f584e09566cc80",
+      "rows": 26942,
+      "uniqueCount": 20485,
+      "banks": [
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json"
+      ]
+    }
+  ]
+}

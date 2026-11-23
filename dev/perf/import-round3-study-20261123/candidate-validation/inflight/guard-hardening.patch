@@ -1,0 +1,18 @@
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -264,11 +264,11 @@
+     const sourceOffsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'offsets')?.value);
+     const sourceLengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(spans, 'lengths')?.value);
+     if (
+-        !(sourceBytes instanceof Uint8Array) || !ArrayBuffer.isView(sourceBytes) ||
++        !ArrayBuffer.isView(sourceBytes) || !(sourceBytes instanceof Uint8Array) ||
+         Object.getPrototypeOf(sourceBytes) !== Uint8Array.prototype || Object.hasOwn(sourceBytes, 'byteLength') ||
+-        !(offsets instanceof Float64Array) || Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
+-        !(lengths instanceof Uint32Array) || Object.getPrototypeOf(lengths) !== Uint32Array.prototype ||
+-        !(sourceOffsets instanceof Uint32Array) || Object.getPrototypeOf(sourceOffsets) !== Uint32Array.prototype ||
++        !ArrayBuffer.isView(offsets) || !(offsets instanceof Float64Array) || Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
++        !ArrayBuffer.isView(lengths) || !(lengths instanceof Uint32Array) || Object.getPrototypeOf(lengths) !== Uint32Array.prototype ||
++        !ArrayBuffer.isView(sourceOffsets) || !(sourceOffsets instanceof Uint32Array) || Object.getPrototypeOf(sourceOffsets) !== Uint32Array.prototype ||
+         sourceLengths !== lengths
+     ) { return false; }
+     for (const column of [offsets, lengths, sourceOffsets]) {

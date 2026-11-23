@@ -1,0 +1,20 @@
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -122,7 +122,7 @@
+ const BULK_IMPORT_STATE_ACTIVE = 'active';
+ const BULK_IMPORT_STATE_FINALIZING = 'finalizing';
+ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
+-const ARRAY_BUFFER_RESIZABLE_GETTER = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable')?.get;
++const ARRAY_BUFFER_RESIZABLE_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'resizable');
+ /** @type {WeakSet<NonNullable<InFlightTermContentSourceBatch['contentSpans']>>} */
+ const INTERNAL_PENDING_CONTENT_SPANS = new WeakSet();
+ 
+@@ -276,7 +276,7 @@
+             !ArrayBuffer.isView(column) || Object.hasOwn(column, 'length') || Object.hasOwn(column, 'buffer')
+         ) { return false; }
+         const buffer = column.buffer;
+-        if (!(buffer instanceof ArrayBuffer) || ARRAY_BUFFER_RESIZABLE_GETTER?.call(buffer) === true) { return false; }
++        if (!(buffer instanceof ArrayBuffer) || ARRAY_BUFFER_RESIZABLE_DESCRIPTOR?.get?.call(buffer) === true) { return false; }
+     }
+     if (sourceOffsets.length < offsets.length) { return false; }
+     let previousOffset = -1;
