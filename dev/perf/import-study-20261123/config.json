@@ -2,9 +2,13 @@
   "schemaVersion": 1,
   "stage": "discovery",
   "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
-  "candidate": "e31032d575e329e6021b96359a74e825707004b3",
+  "candidate": "c47605bdc9cffcf27b6b0fdce1d26a3639a7d5b1",
   "expectedPackageDifferences": [
-    "js/dictionary/term-record-import-index-writer.js"
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-record-import-index-worker-client.js",
+    "js/dictionary/term-record-import-index-worker.js",
+    "js/dictionary/term-record-import-index-writer.js",
+    "js/dictionary/term-record-opfs-store.js"
   ],
   "dictionaries": [
     "jmdict",
