@@ -2,9 +2,14 @@
   "schemaVersion": 1,
   "stage": "discovery",
   "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
-  "candidate": "e31032d575e329e6021b96359a74e825707004b3",
+  "candidate": "0d5a05c40410fd97b0b85a2ad5e432dc5507bb33",
   "expectedPackageDifferences": [
-    "js/dictionary/term-record-import-index-writer.js"
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-source-crc.js",
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
   ],
   "dictionaries": [
     "jmdict",
