@@ -70,7 +70,7 @@ const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -88,6 +88,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * maxPendingChunks?: number,
  * computeContentHashes?: boolean,
  * emitContentSlab?: boolean,
+ * compactContentMetadata?: boolean,
  * emitTokenBinaryContent?: boolean,
  * useNativeStringPlan?: boolean,
  * emitTermByteLists?: boolean,
@@ -96,7 +97,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
@@ -2255,6 +2256,8 @@ null :
     let nativeLookupIndexEncodeMs = 0;
     let nativeSegmentedLookupSegments = 0;
     let nativeSegmentedLookupFallbacks = segmentedLookup && nativeCompactionScratch === null ? 1 : 0;
+    let compactContentMetadataGroups = 0;
+    let compactContentMetadataBytesAvoided = 0;
     let chunkDispatchMs = 0;
     /** @type {Promise<void>[]} */
     const pendingDispatches = [];
@@ -2480,6 +2483,29 @@ null :
                 mediaRows,
             };
             if (
+                options.compactContentMetadata === true && emitContentSlab &&
+                start === 0 && end === rowCount && contentDedupPlan !== null &&
+                contentDedupPlan.uniqueCount * 2 < rowCount
+            ) {
+                // Exact native content IDs include all encoded content fields.
+                // Transfer one descriptor for each unique value; the existing
+                // per-row ID column retains every term's original reference.
+                const uniqueMetas = new Uint32Array(contentDedupPlan.uniqueCount * CONTENT_META_U32_FIELDS);
+                const uniqueRows = contentDedupPlan.uniqueRowIndexes;
+                for (let uniqueIndex = 0; uniqueIndex < uniqueRows.length; ++uniqueIndex) {
+                    const sourceOffset = uniqueRows[uniqueIndex] * CONTENT_META_U32_FIELDS;
+                    const targetOffset = uniqueIndex * CONTENT_META_U32_FIELDS;
+                    uniqueMetas[targetOffset] = contentMetaList[sourceOffset];
+                    uniqueMetas[targetOffset + 1] = contentMetaList[sourceOffset + 1];
+                    uniqueMetas[targetOffset + 2] = contentMetaList[sourceOffset + 2];
+                    uniqueMetas[targetOffset + 3] = contentMetaList[sourceOffset + 3];
+                }
+                chunk.contentMetaList = uniqueMetas;
+                chunk.contentMetaByUniqueIndex = true;
+                ++compactContentMetadataGroups;
+                compactContentMetadataBytesAvoided += contentMetaList.byteLength - uniqueMetas.byteLength;
+            }
+            if (
                 nativeLookupIndexScratch !== null &&
                 parsed.wasm !== null &&
                 nativeStringPlan !== null &&
@@ -2578,6 +2604,8 @@ null :
         nativeStringPlanChunkCount,
         nativeStringPlanFallbackChunkCount,
         nativeLookupScratchReusedBytes,
+        compactContentMetadataGroups,
+        compactContentMetadataBytesAvoided,
         nativeLookupScratchReuseGroups,
         nativeLookupScratchReuseMisses,
         nativeSegmentedLookupSegments,
@@ -4117,6 +4145,8 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         orderedSinkWaitMs: sum('orderedSinkWaitMs'),
         borrowedContentResultCount: sum('borrowedContentResultCount'),
         nativeLookupScratchReusedBytes: sum('nativeLookupScratchReusedBytes'),
+        compactContentMetadataGroups: sum('compactContentMetadataGroups'),
+        compactContentMetadataBytesAvoided: sum('compactContentMetadataBytesAvoided'),
         nativeLookupScratchReuseGroups: sum('nativeLookupScratchReuseGroups'),
         nativeLookupScratchReuseMisses: sum('nativeLookupScratchReuseMisses'),
         nativeSegmentedLookupSegments: sum('nativeSegmentedLookupSegments'),

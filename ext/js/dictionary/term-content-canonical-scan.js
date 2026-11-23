@@ -175,6 +175,9 @@ export class NativeCanonicalScanner {
         } = ctx;
         const n = last - first,
             count = chunk.rowCount;
+        const uniqueMetadata = chunk.contentMetaByUniqueIndex === true;
+        const inputRowCount = uniqueMetadata ? n : count;
+        const inputRowStart = uniqueMetadata ? first : chunk.contentRowStart;
         /**
          * @param {number} x
          * @returns {boolean}
@@ -268,11 +271,27 @@ export class NativeCanonicalScanner {
             }
             const buffer = a.memory.buffer;
             if (inputArena !== a) {
-                new Uint32Array(buffer, META, count * 4).set(chunk.contentMetaList.subarray(0, count * 4));
-                new Uint32Array(buffer, IDENT, count).set(uniqueIndexList.subarray(0, count));
-                new Uint32Array(buffer, ROWS, n).set(uniqueRowIndexes.subarray(first, last));
+                if (uniqueMetadata) {
+                    new Uint32Array(buffer, META, n * 4).set(chunk.contentMetaList.subarray(first * 4, last * 4));
+                    const identities = new Uint32Array(buffer, IDENT, n);
+                    const rows = new Uint32Array(buffer, ROWS, n);
+                    for (let i = 0; i < n; ++i) {
+                        const unique = first + i;
+                        const row = uniqueRowIndexes[unique] - chunk.contentRowStart;
+                        const validRow = row >= 0 && row < count;
+                        rows[i] = validRow ? unique : last;
+                        // Preserve native validation order, including the exact
+                        // comparison await boundary. Invalid source identities
+                        // fail when the scanner reaches that representative.
+                        identities[i] = validRow && uniqueIndexList[row] === unique ? unique : unique ^ 1;
+                    }
+                } else {
+                    new Uint32Array(buffer, META, count * 4).set(chunk.contentMetaList.subarray(0, count * 4));
+                    new Uint32Array(buffer, IDENT, count).set(uniqueIndexList.subarray(0, count));
+                    new Uint32Array(buffer, ROWS, n).set(uniqueRowIndexes.subarray(first, last));
+                }
                 new Uint32Array(buffer, SIGS, n * 3).set(uniqueSignatures.subarray(first * 3, last * 3));
-                stats.copiedInputBytes += count * 20 + n * 16;
+                stats.copiedInputBytes += inputRowCount * 20 + n * 16;
                 inputArena = a;
             }
             new Uint8Array(buffer, FLAGS + cursor, n - cursor).set(plan.resolvedFlags.subarray(first + cursor, last));
@@ -294,11 +313,11 @@ export class NativeCanonicalScanner {
                 a.signature3.byteOffset,
                 a.state.length,
                 beforeDense,
-                count,
+                inputRowCount,
                 first,
                 last,
                 cursor,
-                chunk.contentRowStart,
+                inputRowStart,
                 chunk.contentBytesBaseOffset,
                 chunk.contentBytesBuffer.byteLength,
                 persistedLookupRequired && db._termEntryContentMetaHashPairCount > 0 ? 1 : 0,
@@ -336,7 +355,7 @@ export class NativeCanonicalScanner {
                     for (let i = 0; i < exact.length; i += 2) {
                         const unique = first + exact[i],
                             row = uniqueRowIndexes[unique] - chunk.contentRowStart,
-                            m = row * 4;
+                            m = (uniqueMetadata ? unique : row) * 4;
                         const existingMeta = db._readTermEntryContentMetaHashPairIndex(exact[i + 1]);
                         if (typeof existingMeta === 'undefined') {
                             throw new Error('Invalid canonical exact descriptor');
