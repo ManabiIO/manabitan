@@ -1,0 +1,116 @@
+{
+    "schema": 1,
+    "scope": "Source-backed full-corpus component correctness and deterministic work counters only. Fixed four-bank partitions. No whole-browser speed or native arena memory claim.",
+    "baseline": {
+        "root": "/workspace/scratch/72c24f1e7bc9/manabitan",
+        "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+        "sourceSha": "467067650653c37c1f7d6b05d6737d070e1259cd",
+        "sourceTree": "934dd7011275aafa9f5b0314af8c729eb5fc96a2",
+        "sourceHashes": {
+            "ext/js/dictionary/dictionary-database.js": "9d9344feec458583fe50c8ced99f0e3da7bafa8bb885d82387b7b69d698ff741",
+            "ext/js/dictionary/dictionary-importer.js": "b04807b81b2bf769fe79f96fb0a57bf244fd9ec12396ed27074ce311fe514f90",
+            "ext/js/dictionary/term-bank-wasm-parser-worker.js": "04d295b8acf9ab621813781fe3ea84478d6b66a315febaac79cdadbec8831270",
+            "ext/js/dictionary/term-bank-wasm-parser.js": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066",
+            "ext/js/dictionary/term-content-canonical-scan.js": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4",
+            "ext/js/dictionary/wasm/term-bank-parser.c": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+            "dev/data/dictionary-wasm/manifest.json": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34",
+            "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+        }
+    },
+    "candidate": {
+        "root": "/workspace/scratch/72c24f1e7bc9/round3-parser",
+        "wasmSha256": "bf5689e5f4e57468978c717ce68e77ca07685e666141466a019e978eb1e67ce1",
+        "sourceSha": "ac04ebb5194cd0d52fba017ee3d804296b6275b8",
+        "sourceTree": "5af34f86e394aafc77540737d80efd43762eb236",
+        "sourceHashes": {
+            "ext/js/dictionary/dictionary-database.js": "7316fa0b1cbf4a44229cdad2b1ebc9b9c3ccd40fe27e021daf11e2a6088f920e",
+            "ext/js/dictionary/dictionary-importer.js": "8a3fc6559ec11d190313519099297fa9b57798e21f38214af31579e2f2931990",
+            "ext/js/dictionary/term-bank-wasm-parser-worker.js": "802c71c1dce71d3c68931eb2fd52f651d2ffe03b4b2ac86136cb031aaa7d5257",
+            "ext/js/dictionary/term-bank-wasm-parser.js": "553182ab3cc6fde76748acf46b38a83ff406ffc0b4a842a16ee178c281470587",
+            "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+            "ext/js/dictionary/wasm/term-bank-parser.c": "184cd8fd960822698107db0e86e9acf9612d466cfaa72218fa9ca4f99f371dc9",
+            "dev/data/dictionary-wasm/manifest.json": "472a505fcad91f54b1ff6da2771e16dc6e6bb42efb80de6b76c4445436651213",
+            "dev/data/dictionary-wasm/term-bank-parser.wasm": "bf5689e5f4e57468978c717ce68e77ca07685e666141466a019e978eb1e67ce1"
+        },
+        "publishedSha": "0ca9aed5ba46e7d9fe556181500c2279270445e3",
+        "testOnlyFollowupLocalSha": "1ebbc663e8e2ca1a220f9f5db1abc297d3561f98",
+        "testOnlyFollowupTree": "8d3b724f9610f7b58d49fce1f7094a72c2c22aa4"
+    },
+    "ancestorConsumer": {
+        "pullRequest": 825,
+        "originalSha": "aed295978d3ee252275ed4263c8d378a2f4b376a",
+        "rebasedLocalSha": "4e7183da4b51d5d2e7d204f3ff545a552f79e797"
+    },
+    "dictionaries": [
+        {
+            "dictionary": "jmdict",
+            "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "banks": 53,
+            "rows": 528299,
+            "sourceBytes": 171617523,
+            "fixedGroups": 14,
+            "compactedGroups": 0,
+            "nativeCompactedGroups": 0,
+            "snapshotBytesAvoided": 0,
+            "nativeDescriptorStoreBytesAvoided": 0,
+            "jsGatherBytesAvoidedByNative": 0
+        },
+        {
+            "dictionary": "jitendex",
+            "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "banks": 219,
+            "rows": 436555,
+            "sourceBytes": 538927310,
+            "fixedGroups": 55,
+            "compactedGroups": 0,
+            "nativeCompactedGroups": 0,
+            "snapshotBytesAvoided": 0,
+            "nativeDescriptorStoreBytesAvoided": 0,
+            "jsGatherBytesAvoidedByNative": 0
+        },
+        {
+            "dictionary": "vndb",
+            "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "banks": 665,
+            "rows": 6648310,
+            "sourceBytes": 4267992967,
+            "fixedGroups": 167,
+            "compactedGroups": 167,
+            "nativeCompactedGroups": 141,
+            "snapshotBytesAvoided": 103847328,
+            "nativeDescriptorStoreBytesAvoided": 88116016,
+            "jsGatherBytesAvoidedByNative": 2123984
+        }
+    ],
+    "checks": {
+        "frozenOracle": "pass",
+        "focused": {
+            "files": 4,
+            "testsPassed": 227,
+            "failures": 0
+        },
+        "fullUnitFirstAttempt": {
+            "filesPassed": 640,
+            "filesFailed": 2,
+            "testsPassed": 14380,
+            "testsSkipped": 68,
+            "cause": "MANABITAN_CLANG/CLANG unset; compiler-dependent suite setup only"
+        },
+        "fullUnitConfigured": {
+            "filesPassed": 642,
+            "testsPassed": 14401,
+            "testsSkipped": 47,
+            "failures": 0
+        },
+        "testTypeScriptInitial": "failed: one new test possibly-undefined length",
+        "testTypeScriptAfterGuard": "pass",
+        "newTestsAfterGuard": {
+            "files": 1,
+            "testsPassed": 9,
+            "failures": 0
+        },
+        "allTargetsDryBuild": "pass: seven targets",
+        "actualChromePackages": "pass: 550 non-directory members each; seven differing members",
+        "pinnedWasmCheck": "pass: Clang/LLD 21.1.8"
+    }
+}

@@ -1,0 +1,91 @@
+{
+  "output": "/workspace/scratch/72c24f1e7bc9/round3-parser-package-comparison.json",
+  "reportSha256": "37894726126ede354afa9cce51e4a38bcf83c62c94eb96193d50f3c91d58b9ec",
+  "memberCounts": {
+    "baseline": 550,
+    "candidate": 550
+  },
+  "archiveSha256": {
+    "baseline": "6ce85ad717f9717170f8b54e531585ee33621232491d6a0d5e54f9e123cf282d",
+    "candidate": "903f0d9045e0b48eb32a184c5f1d7644a5235432411b1c069781726ba81d7dae"
+  },
+  "differences": [
+    {
+      "name": "js/dictionary/dictionary-database.js",
+      "baseline": {
+        "sizeBytes": 605694,
+        "sha256": "9d9344feec458583fe50c8ced99f0e3da7bafa8bb885d82387b7b69d698ff741"
+      },
+      "candidate": {
+        "sizeBytes": 606411,
+        "sha256": "7316fa0b1cbf4a44229cdad2b1ebc9b9c3ccd40fe27e021daf11e2a6088f920e"
+      }
+    },
+    {
+      "name": "js/dictionary/dictionary-importer.js",
+      "baseline": {
+        "sizeBytes": 341812,
+        "sha256": "b04807b81b2bf769fe79f96fb0a57bf244fd9ec12396ed27074ce311fe514f90"
+      },
+      "candidate": {
+        "sizeBytes": 343146,
+        "sha256": "8a3fc6559ec11d190313519099297fa9b57798e21f38214af31579e2f2931990"
+      }
+    },
+    {
+      "name": "js/dictionary/term-bank-wasm-parser-worker.js",
+      "baseline": {
+        "sizeBytes": 15304,
+        "sha256": "04d295b8acf9ab621813781fe3ea84478d6b66a315febaac79cdadbec8831270"
+      },
+      "candidate": {
+        "sizeBytes": 15334,
+        "sha256": "802c71c1dce71d3c68931eb2fd52f651d2ffe03b4b2ac86136cb031aaa7d5257"
+      }
+    },
+    {
+      "name": "js/dictionary/term-bank-wasm-parser.js",
+      "baseline": {
+        "sizeBytes": 200103,
+        "sha256": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066"
+      },
+      "candidate": {
+        "sizeBytes": 204801,
+        "sha256": "553182ab3cc6fde76748acf46b38a83ff406ffc0b4a842a16ee178c281470587"
+      }
+    },
+    {
+      "name": "js/dictionary/term-content-canonical-scan.js",
+      "baseline": {
+        "sizeBytes": 18263,
+        "sha256": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4"
+      },
+      "candidate": {
+        "sizeBytes": 19536,
+        "sha256": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338"
+      }
+    },
+    {
+      "name": "js/dictionary/wasm/term-bank-parser.c",
+      "baseline": {
+        "sizeBytes": 149389,
+        "sha256": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4"
+      },
+      "candidate": {
+        "sizeBytes": 150994,
+        "sha256": "184cd8fd960822698107db0e86e9acf9612d466cfaa72218fa9ca4f99f371dc9"
+      }
+    },
+    {
+      "name": "lib/term-bank-parser.wasm",
+      "baseline": {
+        "sizeBytes": 62783,
+        "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+      },
+      "candidate": {
+        "sizeBytes": 63192,
+        "sha256": "bf5689e5f4e57468978c717ce68e77ca07685e666141466a019e978eb1e67ce1"
+      }
+    }
+  ]
+}

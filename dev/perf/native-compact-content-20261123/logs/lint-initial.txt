@@ -1,0 +1,44 @@
+✘ [ERROR] Could not resolve "../../lib/handlebars.js"
+
+    ext/js/templates/anki-template-renderer.js:19:25:
+      19 │ import {Handlebars} from '../../lib/handlebars.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/linkedom.js"
+
+    ext/js/templates/anki-template-renderer.js:20:25:
+      20 │ import {NodeFilter} from '../../lib/linkedom.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/handlebars.js"
+
+    ext/js/templates/template-renderer.js:19:25:
+      19 │ import {Handlebars} from '../../lib/handlebars.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/handlebars.js"
+
+    ext/js/templates/template-renderer-media-provider.js:19:25:
+      19 │ import {Handlebars} from '../../lib/handlebars.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Oops! Something went wrong! :(
+
+ESLint: 9.39.5
+
+Error: Build failed with 4 errors:
+ext/js/templates/anki-template-renderer.js:19:25: ERROR: Could not resolve "../../lib/handlebars.js"
+ext/js/templates/anki-template-renderer.js:20:25: ERROR: Could not resolve "../../lib/linkedom.js"
+ext/js/templates/template-renderer-media-provider.js:19:25: ERROR: Could not resolve "../../lib/handlebars.js"
+ext/js/templates/template-renderer.js:19:25: ERROR: Could not resolve "../../lib/handlebars.js"
+    at failureErrorWithLog (/workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:1477:15)
+    at /workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:946:25
+    at /workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:898:52
+    at buildResponseToResult (/workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:944:7)
+    at /workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:971:16
+    at responseCallbacks.<computed> (/workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:623:9)
+    at handleIncomingPacket (/workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:678:12)
+    at Socket.readFromStdout (/workspace/scratch/72c24f1e7bc9/manabitan/node_modules/esbuild/lib/main.js:601:7)
+    at Socket.emit (node:events:514:28)
+    at addChunk (node:internal/streams/readable:569:12)

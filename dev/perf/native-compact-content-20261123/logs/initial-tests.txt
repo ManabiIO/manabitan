@@ -1,0 +1,28 @@
+
+ RUN  v4.1.12 /workspace/scratch/72c24f1e7bc9/round3-parser
+
+ ❯ test/term-bank-wasm-parser.test.js (0 test)
+ ❯ test/term-content-unique-metadata.test.js (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-wasm-parser.test.js [ test/term-bank-wasm-parser.test.js ]
+ FAIL  test/term-content-unique-metadata.test.js [ test/term-content-unique-metadata.test.js ]
+Error: Cannot find module '../../lib/resvg-wasm.js' imported from /workspace/scratch/72c24f1e7bc9/round3-parser/ext/js/dictionary/dictionary-media-renderer.js
+ ❯ ext/js/dictionary/dictionary-media-renderer.js:18:1
+     16|  */
+     17|
+     18| import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
+       | ^
+     19|
+     20| /**
+ ❯ ext/js/dictionary/dictionary-database.js:22:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  18 passed (18)
+   Start at  11:16:04
+   Duration  1.82s (transform 766ms, setup 41ms, import 591ms, tests 1.03s, environment 0ms)
+

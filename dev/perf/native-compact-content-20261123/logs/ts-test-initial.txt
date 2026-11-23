@@ -1,0 +1,1 @@
+test/term-bank-native-compact-metadata.test.js(75,101): error TS18048: 'chunk.contentBytesLength' is possibly 'undefined'.

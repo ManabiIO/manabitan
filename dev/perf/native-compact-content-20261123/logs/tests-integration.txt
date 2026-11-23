@@ -1,0 +1,28 @@
+
+ RUN  v4.1.12 /workspace/scratch/72c24f1e7bc9/round3-parser
+
+ ❯ test/term-bank-wasm-parser.test.js (184 tests | 2 failed) 1903ms
+     × compacts whole-group content metadata without changing row references (fallback=false) 2ms
+     × compacts whole-group content metadata without changing row references (fallback=true) 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > compacts whole-group content metadata without changing row references (fallback=false)
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > compacts whole-group content metadata without changing row references (fallback=true)
+AssertionError: Target cannot be null or undefined.
+ ❯ test/term-bank-wasm-parser.test.js:3116:68
+    3114|         expect(compact.contentMetaByUniqueIndex).toBe(true);
+    3115|         expect(compact.contentMetaList).toHaveLength(3 * 4);
+    3116|         expect(compact.contentDedupPlan.pendingSpanOffsetsScratch).toH…
+       |                                                                    ^
+    3117|         expect(compact.contentDedupPlan.pendingSpanLengthsScratch).toH…
+    3118|         expect(profile?.compactContentMetadataGroups).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 216 passed (218)
+   Start at  11:16:57
+   Duration  3.56s (transform 1.82s, setup 71ms, import 2.76s, tests 3.10s, environment 0ms)
+
