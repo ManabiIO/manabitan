@@ -258,11 +258,14 @@ const quickImportBenchmarkMode = (
     parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_BENCH_QUICK, false)
 );
 const quickImportBenchmarkDictionaryId = quickImportBenchmarkDictionaryIdRaw || 'jmdict';
-const supportedQuickImportBenchmarkDictionaries = new Set(['jmdict', 'jmnedict', 'jitendex']);
+const supportedQuickImportBenchmarkDictionaries = new Set(['jmdict', 'jmnedict', 'jitendex', 'vndb']);
 if (quickImportBenchmarkMode && !supportedQuickImportBenchmarkDictionaries.has(quickImportBenchmarkDictionaryId)) {
     fail(`Unsupported MANABITAN_E2E_IMPORT_BENCH_DICTIONARY=${quickImportBenchmarkDictionaryId}`);
 }
 const usePinnedPerfDictionaries = parseBooleanEnv(process.env.MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK, false);
+if (quickImportBenchmarkMode && quickImportBenchmarkDictionaryId === 'vndb' && !usePinnedPerfDictionaries) {
+    fail('VNDB import benchmarks require MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK=1');
+}
 const useProductionImportDefaults = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS, false);
 const capturePhaseProfiles = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_PROFILING, !quickImportBenchmarkMode);
 const capturePhaseScreenshots = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_SCREENSHOTS, !quickImportBenchmarkMode);
@@ -924,7 +927,7 @@ async function ensureCachedDownload(url, outputPath) {
 async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
     if (usePinnedPerfDictionaries) {
-        return await ensurePinnedDictionaryCache(dictionaryCacheDir);
+        return await ensurePinnedDictionaryCache(dictionaryCacheDir, quickImportBenchmarkMode ? [quickImportBenchmarkDictionaryId] : []);
     }
     const {jitendexUrl, jmnedictUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
@@ -1164,6 +1167,18 @@ async function evalSendMessage(page, expression, arg = null) {
             const titles = dictionaryInfo.map((row) => row.title);
             const counts = await send('getDictionaryCounts', {dictionaryNames: titles, getTotal: false});
             return {dictionaryInfo, counts: counts.counts};
+        }
+        if (expression === 'benchmarkSemanticProbes') {
+            const probes = [];
+            for (const term of arg.terms) {
+                const result = await send('termsFind', {
+                    text: term,
+                    details: {primaryReading: '', matchType: 'exact', deinflect: false},
+                    optionsContext: {index: 0},
+                });
+                probes.push({term, result});
+            }
+            return probes;
         }
         if (expression === 'backendDiagnostics') {
             const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
@@ -3483,6 +3498,31 @@ async function stopBrowserTraceToFile(session, outputPath) {
     await writeFile(outputPath, chunks.join(''), 'utf8');
 }
 
+
+async function qualifyArchiveMedia(page, archive, fixture) {
+    if (fixture.mediaRows === undefined) { return null; }
+    const {stdout: listing} = await execFileAsync('unzip', ['-Z1', archive], {maxBuffer: 8 * 1024 * 1024});
+    const names = listing.split('\n').filter((name) => name.endsWith('.webp'));
+    if (names.length !== fixture.mediaRows) { fail('Source media count differs from the locked fixture'); }
+    const paths = [...new Set([names[0], names[Math.floor(names.length / 3)], names[Math.floor(names.length * 2 / 3)], names[names.length - 1], ...fixture.mediaProbePaths])];
+    const media = await evalSendMessage(page, 'readerBridgeRuntime', {
+        action: 'getMedia', params: {targets: paths.map((path) => ({path, dictionary: fixture.expectedTitle}))},
+    });
+    if (!Array.isArray(media) || media.length !== paths.length) { fail('Persisted media probes are incomplete'); }
+    const results = [];
+    for (const path of paths) {
+        const found = media.filter((entry) => entry.path === path && entry.dictionary === fixture.expectedTitle);
+        if (found.length !== 1 || typeof found[0].content !== 'string' || found[0].mediaType !== 'image/webp') { fail(`Invalid persisted media probe: ${path}`); }
+        const {stdout: source} = await execFileAsync('unzip', ['-p', archive, path], {encoding: 'buffer', maxBuffer: 4 * 1024 * 1024});
+        const actual = Buffer.from(found[0].content, 'base64');
+        const expectedHash = createHash('sha256').update(source).digest('hex');
+        const actualHash = createHash('sha256').update(actual).digest('hex');
+        if (actual.length !== source.length || actualHash !== expectedHash) { fail(`Persisted media bytes differ from source: ${path}`); }
+        results.push({path, bytes: actual.length, sha256: actualHash});
+    }
+    return results;
+}
+
 async function main() {
     const defaultZipPath = path.join(root, 'builds', packageFilename);
     const defaultReportName = browserFlavor === 'edge' ? 'edge-e2e-import-report.html' : 'chromium-e2e-import-report.html';
@@ -3529,6 +3569,7 @@ async function main() {
             jmdict: {label: 'JMdict', filePath: cachedDictionaries.jmdictPath},
             jmnedict: {label: 'JMnedict', filePath: cachedDictionaries.jmnedictPath},
             jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},
+            vndb: {label: 'VNDB', filePath: cachedDictionaries.paths?.vndb},
         };
         const initialImportSpec = quickImportBenchmarkMode ?
             quickImportBenchmarkSpecs[quickImportBenchmarkDictionaryId] :
@@ -4185,7 +4226,8 @@ async function main() {
                 const state = await evalSendMessage(page, 'benchmarkDictionaryState');
                 const info = state.dictionaryInfo;
                 if (info.length !== 1 || info[0].title !== fixture.expectedTitle || info[0].revision !== fixture.revision ||
-                state.counts[0]?.terms !== fixture.termRows) {
+                state.counts[0]?.terms !== fixture.termRows ||
+                (typeof fixture.mediaRows === 'number' && state.counts[0]?.media !== fixture.mediaRows)) {
                     fail(`Persisted benchmark fixture does not match lock: ${JSON.stringify(state)}`);
                 }
                 const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
@@ -4196,8 +4238,8 @@ async function main() {
                     if (!integrity.ok) { fail(`Unreadable benchmark content for ${term}: ${JSON.stringify(integrity)}`); }
                     probeResults.push({term, probes: integrity.probes});
                 }
-                const probeDigest = (results) => {
-                    const canonical = results.map(({term, probes}) => ({
+                const canonicalProbeResults = (results) => {
+                    return results.map(({term, probes}) => ({
                         term,
                         probes: probes.map((probe) => {
                             const diagnostics = probe.diagnostics;
@@ -4220,16 +4262,38 @@ async function main() {
                             };
                         }),
                     }));
-                    return createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
                 };
+                const digestValue = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+                const probeDigest = (results) => digestValue(canonicalProbeResults(results));
+                const preRestartSemanticProbes = await evalSendMessage(page, 'benchmarkSemanticProbes', {terms: probeTerms});
+                const semanticProbeEntryCount = preRestartSemanticProbes.reduce((count, probe) => count + (probe.result?.dictionaryEntries?.length ?? 0), 0);
+                const preRestartSemanticDigest = digestValue(preRestartSemanticProbes);
                 const preRestartOutputDigest = probeDigest(probeResults);
+                const mediaBeforeRestart = await qualifyArchiveMedia(page, initialImportSpec.filePath, fixture);
+                report.benchmark.readbackDiagnostics = {
+                    preRestart: {
+                        physicalDigestSha256: preRestartOutputDigest,
+                        physicalProbes: canonicalProbeResults(probeResults),
+                        semanticDigestSha256: preRestartSemanticDigest,
+                        semanticProbes: preRestartSemanticProbes,
+                    },
+                    postRestart: null,
+                };
+                const incompleteSemanticTerms = preRestartSemanticProbes.filter(({result}) => (
+                    !Array.isArray(result?.dictionaryEntries) || result.dictionaryEntries.length === 0 ||
+                    (result.dictionaryAvailability?.length ?? 0) > 0
+                )).map(({term}) => term);
+                if (incompleteSemanticTerms.length > 0) {
+                    fail(`Incomplete semantic lookup results for benchmark probes: ${JSON.stringify(incompleteSemanticTerms)}`);
+                }
                 await relaunchPersistentContext();
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
                 const restartedState = await evalSendMessage(page, 'benchmarkDictionaryState');
                 const restartedInfo = restartedState.dictionaryInfo;
                 if (restartedInfo.length !== 1 || restartedInfo[0].title !== fixture.expectedTitle || restartedInfo[0].revision !== fixture.revision ||
-                restartedState.counts[0]?.terms !== fixture.termRows) {
+                restartedState.counts[0]?.terms !== fixture.termRows ||
+                (typeof fixture.mediaRows === 'number' && restartedState.counts[0]?.media !== fixture.mediaRows)) {
                     fail(`Persisted benchmark fixture changed across restart: ${JSON.stringify(restartedState)}`);
                 }
                 const restartedProbeResults = [];
@@ -4239,6 +4303,19 @@ async function main() {
                     restartedProbeResults.push({term, probes: integrity.probes});
                 }
                 const postRestartOutputDigest = probeDigest(restartedProbeResults);
+                const mediaAfterRestart = await qualifyArchiveMedia(page, initialImportSpec.filePath, fixture);
+                if (JSON.stringify(mediaBeforeRestart) !== JSON.stringify(mediaAfterRestart)) { fail('Media changed across browser restart'); }
+                const postRestartSemanticProbes = await evalSendMessage(page, 'benchmarkSemanticProbes', {terms: probeTerms});
+                const postRestartSemanticDigest = digestValue(postRestartSemanticProbes);
+                report.benchmark.readbackDiagnostics.postRestart = {
+                    physicalDigestSha256: postRestartOutputDigest,
+                    physicalProbes: canonicalProbeResults(restartedProbeResults),
+                    semanticDigestSha256: postRestartSemanticDigest,
+                    semanticProbes: postRestartSemanticProbes,
+                };
+                if (preRestartSemanticDigest !== postRestartSemanticDigest) {
+                    fail(`Complete semantic probe results changed across restart: before=${preRestartSemanticDigest} after=${postRestartSemanticDigest}`);
+                }
                 if (preRestartOutputDigest !== postRestartOutputDigest) {
                     fail(`Persisted content probe digest changed across restart: before=${preRestartOutputDigest} after=${postRestartOutputDigest}`);
                 }
@@ -4246,11 +4323,25 @@ async function main() {
                     title: info[0].title,
                     revision: info[0].revision,
                     termRows: state.counts[0].terms,
+                    mediaRows: state.counts[0].media,
                     contentReadable: true,
                     probeCount: probeTerms.length,
                     probeTerms,
                     outputDigestSha256: postRestartOutputDigest,
-                    restart: {title: restartedInfo[0].title, revision: restartedInfo[0].revision, termRows: restartedState.counts[0].terms, contentReadable: true, probeCount: restartedProbeResults.length},
+                    mediaBeforeRestart,
+                    mediaAfterRestart,
+                    semanticDigestSha256: postRestartSemanticDigest,
+                    semanticProbeEntryCount,
+                    semanticProbes: postRestartSemanticProbes,
+                    physicalProbes: canonicalProbeResults(restartedProbeResults),
+                    restart: {
+                        title: restartedInfo[0].title,
+                        revision: restartedInfo[0].revision,
+                        termRows: restartedState.counts[0].terms,
+                        mediaRows: restartedState.counts[0].media,
+                        contentReadable: true,
+                        probeCount: restartedProbeResults.length,
+                    },
                 };
             }
             report.status = 'success';

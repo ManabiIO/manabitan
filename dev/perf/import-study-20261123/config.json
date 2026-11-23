@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "stage": "discovery",
+  "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "candidate": "e31032d575e329e6021b96359a74e825707004b3",
+  "expectedPackageDifferences": [
+    "js/dictionary/term-record-import-index-writer.js"
+  ],
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
+  "confirmationOf": null
+}
