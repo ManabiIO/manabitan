@@ -1,0 +1,95 @@
+name: Import runtime study (frozen sources)
+
+on:
+  push:
+    branches: [perf/jitendex-copy-hash-study-20261123]
+    paths:
+      - '.github/workflows/import-runtime-next.yml'
+      - 'dev/perf/import-runtime-next.py'
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: 'Frozen full candidate commit SHA; blank uses the reviewed workflow constant'
+        required: false
+        type: string
+      stage:
+        description: 'Independent fixed cohort; never pool a screen with qualification'
+        type: choice
+        default: screen
+        options: [screen, qualification, baseline, diagnostic]
+      dictionary:
+        description: 'Run all three complete pinned archives or narrow to one independent job'
+        type: choice
+        default: all
+        options: [all, jitendex, jmdict, vndb]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-runtime-next-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  study:
+    name: Frozen release Chrome import study (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: ${{ fromJSON(inputs.dictionary != '' && inputs.dictionary != 'all' && format('["{0}"]', inputs.dictionary) || '["jitendex","jmdict","vndb"]') }}
+    env:
+      PERF_BASELINE_SHA: 467067650653c37c1f7d6b05d6737d070e1259cd
+      # Publish this exact frozen source before pushing the tooling branch.
+      PERF_CANDIDATE_SHA: ${{ inputs.candidate_sha || '44686ef6ebaafa624e6d228494719bbed4cb8ef4' }}
+      # A separate push changing screen to qualification starts a new 12-block cohort.
+      PERF_STAGE: ${{ inputs.stage || 'screen' }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Retain workflow identity before setup
+        run: |
+          mkdir -p "$RUNNER_TEMP/import-runtime-next-evidence"
+          cp .github/workflows/import-runtime-next.yml "$RUNNER_TEMP/import-runtime-next-evidence/workflow.yml"
+          cp dev/perf/import-runtime-next.py "$RUNNER_TEMP/import-runtime-next-evidence/runner.py"
+          git rev-parse HEAD > "$RUNNER_TEMP/import-runtime-next-evidence/tooling-sha.txt"
+          git status --porcelain > "$RUNNER_TEMP/import-runtime-next-evidence/tooling-status.txt"
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Run fixed cohort and separate exhaustive diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-runtime-next.py \
+            --baseline "$PERF_BASELINE_SHA" \
+            --candidate "$PERF_CANDIDATE_SHA" \
+            --dictionary "$PERF_DICTIONARY" \
+            --stage "$PERF_STAGE" \
+            --output "$RUNNER_TEMP/import-runtime-next-evidence" \
+            2>&1 | tee "$RUNNER_TEMP/import-runtime-next-evidence/study.log"
+
+      - name: Preserve all evidence including failed observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-runtime-next-${{ env.PERF_STAGE }}-${{ env.PERF_DICTIONARY }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/import-runtime-next-evidence
+          if-no-files-found: error
+          retention-days: 14
