@@ -1,0 +1,106 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index 299422de5..af97396c7 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
++    "sourceDigest": "81a483b0f8f98b2f4274bba4815d8e53150673ff4424569d46a5fa9c624cf03b",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -58,7 +58,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
++            "sha256": "4647c8c23feb30034e64696234db1d0995cc87fd9bc5b1d88366f8ad87b0f53b"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index 153735f747f2fc2a7ac65ca2cdda27aaee9388c3..7a18f65da002dcc939df87898e0ee5fe9326730c 100644
+GIT binary patch
+delta 724
+zcmaiyzlsz=5XPsfW>)E*8TVk1&Ai%9JVZGRcDdy?m<r@r&t=Sf06}3cIuS1110xeb
+zI@Na&1`dpjd;%j;(8R#MnTU~A_w0%WVlYg1RoC~cuezUqq#vK?={3R^uiESMXpGNx
+z+PAykaf%fK<H8M!BrFaE=ekN5o6AWem-gev2sW;a5k4ruYSF;I-n%l)tYu`V3;MH!
+z{MK}q=OJ0fr1f{E+}@wnxVPq&|K*v$b5_>GG7!)IgQ&77(D--bP5<yFFC*NnJBv~y
+z8~V2L6OJ6p*Cbd2HiweVWBaDjFhrBzG)XGh4dL@@M={s!jHJz|%u(%&+b?tmY!>=6
+zs^CiA(2*cj$}3g$tcLuP#qp3ZgjT~<Yj0u`=x<kd3zS}{goC2T=-*c}Kwry+o)+{q
+zP|HPM)!UoBK*YcXt7dp!q>SyUJU+8wCfMhk%L(R8I(gIHnhze-9{^|>z^Vj{+n6|7
+zxHP(_-}l{_TirJW7ujF;t>-DUPX5byYZ(uaPS8qnPQOvAMD+~eM66RKP++GNQeAl`
+xdfYgYp}r&mrhDQ~PST^RS`3^;vI^&<uP2L|;fZAvOaw-$<<#DQcIRc^{Q{@%cNG8t
+
+delta 508
+zcmZ8du}T9$5Z#@<#ITz?0!ct2!rV2AiFO9Xpjj<KqA}Xp+sN6dg<zUsCtAt2;x`DF
+z-cN|2g@tHu#7?4}vzLgFa^Ac*@4flyi~DzR*AQ^^9Bql~Md&U>Z%YH<XwG{%^RS1e
+zwV@<3gm9iQT{4B`HIa5ybXz$ZW4ZsVnhWNvR~YFN9gfg+0je=0@aR$?^(U*j3~6<!
+zow_T~(>(V0BHT_x$B)q@;@xlp?S#IU28B`w<b^=ez(d}0K~%}cqw}d4*(3`FC{1yD
+zKaim>Nn?2eERUhIX9J~Q;xN+mt0%71$&ofm!cbSZG;KX6GBmaIjJaGb=9AVNYznSW
+zX{@^r%4lW%W+D$|$Y2`1GNh4uP`@(d%xiNpavI+kQ(ewQhrD4HSRiZ`CTtR6{M~7D
+z@R%(oXgge3IPP7dS6S5d9M{bA5l$TXiTcw5iZU?G{e;4V+TpyTnV&Mpr`ZUe2L3NX
+CJ!5A8
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index d1b26c411..ebe5c49d1 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1334,7 +1334,14 @@ static int reuse_validated_glossary(
+ }
+ 
+ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t* position) {
+-    uint32_t i = skip_ws(src, len, *position);
++    const uint32_t current = *position;
++    // A compact separator has no whitespace on either side. The following
++    // field parser still validates its token, including unexpected controls.
++    if (current < len && len - current >= 2u && src[current] == ',' && src[current + 1u] > 0x20u) {
++        *position = current + 1u;
++        return 1;
++    }
++    uint32_t i = skip_ws(src, len, current);
+     if (i >= len || src[i] != ',') { return 0; }
+     i = skip_ws(src, len, i + 1u);
+     if (i >= len) { return 0; }
+diff --git a/test/term-bank-format3-row.test.js b/test/term-bank-format3-row.test.js
+index 7feb11376..ef87b0b3e 100644
+--- a/test/term-bank-format3-row.test.js
++++ b/test/term-bank-format3-row.test.js
+@@ -72,6 +72,35 @@ parseTermBankWithWasmChunks(encoder.encode(source), 3, (chunk) => {
+ }
+ 
+ describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns) => {
++    test('preserves every JSON whitespace combination around field separators', async () => {
++        const fields = ['"key"', '"reading"', 'null', '""', '-2', '["meaning"]', 'null', '"tag"']
++        const expected = (await parse(`[[${fields.join(',')}]]`, true, columns)).rows
++        for (const before of ['', ' ', '\t', '\r', '\n', ' \t\r\n ']) {
++            for (const after of ['', ' ', '\t', '\r', '\n', ' \t\r\n ']) {
++                const source = `[[${fields.join(`${before},${after}`)}]]`
++                expect((await parse(source, true, columns)).rows).toStrictEqual(expected)
++            }
++        }
++    })
++
++    test.each([0, 8, 11, 12, 31, 127, 0x80, 0xa0, 0x3000])('rejects non-JSON separator whitespace U+%i', async (code) => {
++        const fields = ['"key"', '"reading"', 'null', '""', '0', '["meaning"]', '1', '"tag"']
++        for (let field = 1; field < fields.length; ++field) {
++            const invalid = [...fields]
++            invalid[field] = String.fromCodePoint(code) + invalid[field]
++            await expect(parse(`[[${invalid.join(',')}]]`, true, columns)).rejects.toThrow()
++        }
++    })
++
++    test('rejects a missing value after every field separator', async () => {
++        const fields = ['"key"', '"reading"', 'null', '""', '0', '["meaning"]', '1', '"tag"']
++        for (let field = 1; field < fields.length; ++field) {
++            const invalid = [...fields]
++            invalid[field] = ''
++            await expect(parse(`[[${invalid.join(',')}]]`, true, columns)).rejects.toThrow()
++        }
++    })
++
+     test.each(['', ' ', '\r\n\t'])('preserves nullable fields, escapes and reused glossary hints with whitespace %j', async (space) => {
+         const glossary = [{type: 'structured-content', content: [{tag: 'img', path: 'image.webp'}, 'definition'.repeat(600)]}]
+         const rows = [

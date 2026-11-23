@@ -1,0 +1,255 @@
+{
+  "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "scope": "Separate four-pair Node 22.22.0 resident-source parser and complete lookup component cohorts; no results pooled, no complete-import performance claim",
+  "attempts": [
+    {
+      "label": "generic-empty-string",
+      "commit": "29fec53c8884b3ba9a4ada51dbb669878659d33e",
+      "tree": "32c04eaf4fe94c0d1bbbab58c21095757718b096",
+      "decision": "reject",
+      "moduleGrowthBytes": 701,
+      "startedUtc": "2026-11-23T20:32:05Z",
+      "endedUtc": "2026-11-23T20:33:06Z",
+      "reportPath": "/workspace/scratch/3aacd533c01f/jmdict-empty-tokens/builds/perf/empty-token-jmdict-component.json",
+      "reportSha256": "edfc8af4c4a5d43082c41bf565fe1534be971e2bab9613be67250e9627fa5501",
+      "summary": {
+        "medianPairedChangePercent": 7.596592367750654,
+        "equalWorkTotalChangePercent": 13.461305367088405,
+        "fasterPairs": 2
+      },
+      "completeOutputSha256": "824881eada22d2d2f9ac8feddb66322e2bab124fe6af634ef5ded7c303c40b9b",
+      "observations": [
+        {
+          "pair": 1,
+          "arm": "A",
+          "elapsedMs": 860.5522920000012,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 1,
+          "arm": "B",
+          "elapsedMs": 777.870300999999,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 2,
+          "arm": "B",
+          "elapsedMs": 972.8632129999987,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 2,
+          "arm": "A",
+          "elapsedMs": 514.0334310000007,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 3,
+          "arm": "A",
+          "elapsedMs": 813.6461160000017,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 3,
+          "arm": "B",
+          "elapsedMs": 678.1319459999986,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 4,
+          "arm": "B",
+          "elapsedMs": 593.5370349999994,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 4,
+          "arm": "A",
+          "elapsedMs": 475.586002,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        }
+      ]
+    },
+    {
+      "label": "strict-empty-metadata",
+      "commit": "b02d58e92e497a8d5389ac0256ca5fce34a366dd",
+      "tree": "2cc01acf6eb8c4f5d7684922823ffcae63ea0092",
+      "decision": "reject",
+      "moduleGrowthBytes": 100,
+      "startedUtc": "2026-11-23T20:40:53Z",
+      "endedUtc": "2026-11-23T20:41:55Z",
+      "reportPath": "/workspace/scratch/3aacd533c01f/jmdict-empty-metadata/builds/perf/empty-metadata-jmdict-component.json",
+      "reportSha256": "2fbb7681c20fdc5797205a36d29730d2e16847e09796b55395a3e0bfc4b05c10",
+      "summary": {
+        "medianPairedChangePercent": 60.43624702217092,
+        "equalWorkTotalChangePercent": 49.59692588520215,
+        "fasterPairs": 0
+      },
+      "completeOutputSha256": "824881eada22d2d2f9ac8feddb66322e2bab124fe6af634ef5ded7c303c40b9b",
+      "observations": [
+        {
+          "pair": 1,
+          "arm": "A",
+          "elapsedMs": 782.1754979999987,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 1,
+          "arm": "B",
+          "elapsedMs": 1248.3982140000016,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 2,
+          "arm": "B",
+          "elapsedMs": 828.6335860000008,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 2,
+          "arm": "A",
+          "elapsedMs": 489.2508850000004,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 3,
+          "arm": "A",
+          "elapsedMs": 660.7410639999989,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 3,
+          "arm": "B",
+          "elapsedMs": 1065.5546339999992,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 4,
+          "arm": "B",
+          "elapsedMs": 724.3475489999964,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 4,
+          "arm": "A",
+          "elapsedMs": 652.7345889999997,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        }
+      ]
+    },
+    {
+      "label": "compact-strict-separators",
+      "commit": "a9d71878728a634672ae0c01e0951f7981fcf36d",
+      "tree": "6ea81b118adc999f1d44a542fe8b46135e350b04",
+      "decision": "hold",
+      "moduleGrowthBytes": 186,
+      "startedUtc": "2026-11-23T21:05:19Z",
+      "endedUtc": "2026-11-23T21:05:59Z",
+      "reportPath": "/workspace/scratch/3aacd533c01f/jmdict-compact-separators/builds/perf/compact-separator-jmdict-component.json",
+      "reportSha256": "77fa7d0ca9dca5ca6d8bb1ef853134074458c89a3004cd468471a5495e31671a",
+      "summary": {
+        "medianPairedChangePercent": 4.744528753592681,
+        "equalWorkTotalChangePercent": 3.476163733855686,
+        "fasterPairs": 2
+      },
+      "completeOutputSha256": "824881eada22d2d2f9ac8feddb66322e2bab124fe6af634ef5ded7c303c40b9b",
+      "observations": [
+        {
+          "pair": 1,
+          "arm": "A",
+          "elapsedMs": 471.02541100000053,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 1,
+          "arm": "B",
+          "elapsedMs": 426.00177599999915,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 2,
+          "arm": "B",
+          "elapsedMs": 530.9454290000003,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 2,
+          "arm": "A",
+          "elapsedMs": 450.6470279999994,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 3,
+          "arm": "A",
+          "elapsedMs": 577.9264619999994,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 3,
+          "arm": "B",
+          "elapsedMs": 534.2594499999977,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 4,
+          "arm": "B",
+          "elapsedMs": 522.0576279999996,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        },
+        {
+          "pair": 4,
+          "arm": "A",
+          "elapsedMs": 446.0320640000009,
+          "rows": 528299,
+          "indexBytes": 19491860,
+          "maxWasmHeapBytes": 61603840
+        }
+      ]
+    }
+  ]
+}

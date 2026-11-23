@@ -1,0 +1,46 @@
+{
+  "complete": false,
+  "node": "v22.22.0",
+  "boundary": "Resident decoded term banks through native parser and complete prepared lookup outputs; excludes browser import/storage and media bytes",
+  "baseline": {
+    "root": "/workspace/scratch/3aacd533c01f/manabitan",
+    "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+    "tree": "c540375466fc921ab05a5526a6130bc2d48010d5",
+    "trackedStatus": "",
+    "digests": {
+      "ext/js/dictionary/wasm/term-bank-parser.c": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2",
+      "ext/js/dictionary/term-lookup-index-preparation.js": "1a60e1f06859a125e812d168ce252366f40153be502bc7da9120c2e916c9dac9",
+      "ext/js/dictionary/term-lookup-index.js": "55e2107131752f0f1bb4af36b1b2cb18d2ab00954b505c3c81e98db5bfa85bb2",
+      "ext/lib/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+      "dev/data/dictionary-wasm/manifest.json": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34"
+    }
+  },
+  "candidate": {
+    "root": "/workspace/scratch/3aacd533c01f/jitendex-structured",
+    "commit": "38e5d6dbda2bf1e2a809f32cc382ab16bac9ad47",
+    "tree": "1f9015b2176056ce75c26b5e02054fcd1fd673be",
+    "trackedStatus": "",
+    "digests": {
+      "ext/js/dictionary/wasm/term-bank-parser.c": "de9c661d5c6a58f93ea9ddacd9082999034e3c02de6c69815a4d5f19a6c090db",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2",
+      "ext/js/dictionary/term-lookup-index-preparation.js": "1a60e1f06859a125e812d168ce252366f40153be502bc7da9120c2e916c9dac9",
+      "ext/js/dictionary/term-lookup-index.js": "55e2107131752f0f1bb4af36b1b2cb18d2ab00954b505c3c81e98db5bfa85bb2",
+      "ext/lib/term-bank-parser.wasm": "2951cc0320f7ad7ff4c5a64487db8075fcf8b3c6f1283b649a1b050a3b829281",
+      "dev/data/dictionary-wasm/manifest.json": "7b7a13ac52d455e084bd2080d0c13751424f5d2361852a73aff8b50e4d87bdc2"
+    }
+  },
+  "runnerSha256": "7163ec6ef2d4328fe624a840b7c4854c02cada07a04d90506afdf39f408bcfc5",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "options": {
+    "singleChunk": true,
+    "emitTermByteLists": false,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "mediaHintFastScan": true,
+    "validateGlossaryTypes": true,
+    "prepareLookupIndexes": true
+  },
+  "dictionaries": []
+}

@@ -1,0 +1,12 @@
+{
+  "dictionary": "jmdict",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "archiveBytes": 15645766,
+  "method": "Quoted-string-aware structural delimiter walk of every locked term bank; row-level delimiter positions only",
+  "counts": {
+    "rows": 528299,
+    "separators": 3698093,
+    "compactSeparators": 3698093,
+    "banks": 53
+  }
+}

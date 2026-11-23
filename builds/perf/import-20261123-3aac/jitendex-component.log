@@ -1,0 +1,11 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jitendex pair 1/4 A: 5291.77ms
+jitendex pair 1/4 B: 2534.69ms
+jitendex pair 2/4 B: 1751.50ms
+jitendex pair 2/4 A: 2124.00ms
+jitendex pair 3/4 A: 3149.39ms
+jitendex pair 3/4 B: 1232.29ms
+jitendex pair 4/4 B: 1605.72ms
+jitendex pair 4/4 A: 2265.39ms
+{"medianPairedChangePercent":-40.61030066826731,"equalWorkTotalChangePercent":-44.47469234494671,"fasterPairs":4}

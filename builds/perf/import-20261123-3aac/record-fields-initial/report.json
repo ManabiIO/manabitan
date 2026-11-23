@@ -1,0 +1,295 @@
+{
+  "signatures": {
+    "baseline": "f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9",
+    "candidate": "27cbda1907a20af8e7af94f045367a3c6799a497562b947ecca4d5d0972e9aee",
+    "wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+    "node": "v22.22.0",
+    "v8": "12.4.254.21-node.33"
+  },
+  "reports": [
+    {
+      "id": "jmdict",
+      "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "sourceGroups": 20,
+      "banks": 53,
+      "rows": 528299,
+      "fieldChunks": 20,
+      "eligibleChunks": 20,
+      "eligibleRows": 528299,
+      "repeatedRowsAvoided": 979,
+      "bulkFillRuns": 931,
+      "bulkFillRows": 1910,
+      "measuredRepeatedRowsAvoided": 979,
+      "outputBytes": 4244804,
+      "sha256": "0ddf1032a0582004fc4945ade9148ccc06fa384fa43ad79a46373f1e634c431f",
+      "timing": [
+        {
+          "pair": 1,
+          "order": "AB",
+          "A": {
+            "checksum": 4244804,
+            "ms": 90.49366599999985
+          },
+          "B": {
+            "checksum": 4244804,
+            "ms": 23.080311999999594
+          },
+          "changePct": -74.49510775704498
+        },
+        {
+          "pair": 2,
+          "order": "BA",
+          "B": {
+            "checksum": 4244804,
+            "ms": 17.306768999999804
+          },
+          "A": {
+            "checksum": 4244804,
+            "ms": 14.933696000000054
+          },
+          "changePct": 15.890727921605885
+        },
+        {
+          "pair": 3,
+          "order": "AB",
+          "A": {
+            "checksum": 4244804,
+            "ms": 13.608071000000109
+          },
+          "B": {
+            "checksum": 4244804,
+            "ms": 14.878074999999626
+          },
+          "changePct": 9.332726144649794
+        },
+        {
+          "pair": 4,
+          "order": "BA",
+          "B": {
+            "checksum": 4244804,
+            "ms": 27.86778800000002
+          },
+          "A": {
+            "checksum": 4244804,
+            "ms": 12.582656000000043
+          },
+          "changePct": 121.47778656588817
+        }
+      ],
+      "signatures": {
+        "baseline": "f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9",
+        "candidate": "27cbda1907a20af8e7af94f045367a3c6799a497562b947ecca4d5d0972e9aee",
+        "wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+        "node": "v22.22.0",
+        "v8": "12.4.254.21-node.33"
+      }
+    },
+    {
+      "id": "jitendex",
+      "fixture": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "sourceGroups": 22,
+      "banks": 219,
+      "rows": 436555,
+      "fieldChunks": 22,
+      "eligibleChunks": 22,
+      "eligibleRows": 436555,
+      "repeatedRowsAvoided": 0,
+      "bulkFillRuns": 0,
+      "bulkFillRows": 0,
+      "measuredRepeatedRowsAvoided": 0,
+      "outputBytes": 3497796,
+      "sha256": "35539428ecce574bb7f651f59227c85f044dc2dca302e0abcb342161d6aa8e2b",
+      "timing": [
+        {
+          "pair": 1,
+          "order": "AB",
+          "A": {
+            "checksum": 3497796,
+            "ms": 7.589459000000716
+          },
+          "B": {
+            "checksum": 3497796,
+            "ms": 12.94896400000016
+          },
+          "changePct": 70.6177475891093
+        },
+        {
+          "pair": 2,
+          "order": "BA",
+          "B": {
+            "checksum": 3497796,
+            "ms": 10.965131999999358
+          },
+          "A": {
+            "checksum": 3497796,
+            "ms": 10.834020000000237
+          },
+          "changePct": 1.2101879080813838
+        },
+        {
+          "pair": 3,
+          "order": "AB",
+          "A": {
+            "checksum": 3497796,
+            "ms": 7.528999999999542
+          },
+          "B": {
+            "checksum": 3497796,
+            "ms": 9.253349999999955
+          },
+          "changePct": 22.902775933065733
+        },
+        {
+          "pair": 4,
+          "order": "BA",
+          "B": {
+            "checksum": 3497796,
+            "ms": 10.114834999999402
+          },
+          "A": {
+            "checksum": 3497796,
+            "ms": 7.834386999999879
+          },
+          "changePct": 29.108186766872237
+        }
+      ],
+      "signatures": {
+        "baseline": "f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9",
+        "candidate": "27cbda1907a20af8e7af94f045367a3c6799a497562b947ecca4d5d0972e9aee",
+        "wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+        "node": "v22.22.0",
+        "v8": "12.4.254.21-node.33"
+      }
+    },
+    {
+      "id": "vndb",
+      "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      },
+      "sourceGroups": 170,
+      "banks": 665,
+      "rows": 6648310,
+      "fieldChunks": 170,
+      "eligibleChunks": 144,
+      "eligibleRows": 5648310,
+      "repeatedRowsAvoided": 5514978,
+      "bulkFillRuns": 133328,
+      "bulkFillRows": 5648306,
+      "measuredRepeatedRowsAvoided": 5514978,
+      "outputBytes": 53191240,
+      "sha256": "7cf0e6a5e89252eb2790920ab008cdea101c190e5cc59c9d1250117cebf85087",
+      "timing": [
+        {
+          "pair": 1,
+          "order": "AB",
+          "A": {
+            "checksum": 53191240,
+            "ms": 140.06036300000414
+          },
+          "B": {
+            "checksum": 53191240,
+            "ms": 62.71073400000023
+          },
+          "changePct": -55.225923554119035
+        },
+        {
+          "pair": 2,
+          "order": "BA",
+          "B": {
+            "checksum": 53191240,
+            "ms": 56.978549999999814
+          },
+          "A": {
+            "checksum": 53191240,
+            "ms": 129.5813679999992
+          },
+          "changePct": -56.02874789838601
+        },
+        {
+          "pair": 3,
+          "order": "AB",
+          "A": {
+            "checksum": 53191240,
+            "ms": 130.52704500000254
+          },
+          "B": {
+            "checksum": 53191240,
+            "ms": 191.58639199999743
+          },
+          "changePct": 46.77907708704636
+        },
+        {
+          "pair": 4,
+          "order": "BA",
+          "B": {
+            "checksum": 53191240,
+            "ms": 56.76307799999631
+          },
+          "A": {
+            "checksum": 53191240,
+            "ms": 130.3881459999975
+          },
+          "changePct": -56.46607476112331
+        }
+      ],
+      "signatures": {
+        "baseline": "f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9",
+        "candidate": "27cbda1907a20af8e7af94f045367a3c6799a497562b947ecca4d5d0972e9aee",
+        "wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+        "node": "v22.22.0",
+        "v8": "12.4.254.21-node.33"
+      }
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "allTimingsMs": {
+    "A": [
+      1824,
+      1982.1000000000058,
+      1830,
+      1821.6000000000058,
+      1865.399999999965,
+      1873.4000000000233
+    ],
+    "B": [
+      1890.5,
+      1969.5,
+      1891.6000000000058,
+      1918.2000000000116,
+      1849,
+      1905.899999999965
+    ],
+    "C": [
+      2201.6999999999825,
+      1796.8999999999942,
+      1844.2000000000116,
+      1846.5999999999767,
+      1788.6999999999534,
+      1904.5999999999767
+    ]
+  },
+  "browserVersion": "153.0.8010.12",
+  "candidate": {
+    "baselineMedianMs": 1847.6999999999825,
+    "candidateMedianMs": 1898.7499999999854,
+    "equalWorkPercent": 2.038136917786648,
+    "fasterPairs": 2,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      3.645833333333326,
+      -0.63568942031208,
+      3.3661202185795602,
+      5.303030303030609,
+      -0.8791680068599428,
+      1.734813707694105
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -0.7574287135860114,
+      4.474431818181968
+    ],
+    "pairedMedianPercent": 2.5504669631368326,
+    "pairs": 6
+  },
+  "candidateVsSecondBaseline": {
+    "baselineMedianMs": 1845.3999999999942,
+    "candidateMedianMs": 1898.7499999999854,
+    "equalWorkPercent": 0.3689809974793956,
+    "fasterPairs": 1,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -14.134532406775902,
+      9.605431576604516,
+      2.5702201496580646,
+      3.8773962958970953,
+      3.371163414773193,
+      0.06825580174254497
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -7.0331383025166785,
+      6.741413936250806
+    ],
+    "pairedMedianPercent": 2.9706917822156287,
+    "pairs": 6
+  },
+  "dictionary": "jitendex",
+  "identicalProductControl": {
+    "baselineMedianMs": 1847.6999999999825,
+    "candidateMedianMs": 1845.3999999999942,
+    "equalWorkPercent": 1.6630196936533226,
+    "fasterPairs": 2,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      20.707236842104315,
+      -9.343625447757987,
+      0.7759562841536338,
+      1.3724198506791074,
+      -4.111718666238506,
+      1.6654211593868373
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -6.727672056998246,
+      11.186329000745577
+    ],
+    "pairedMedianPercent": 1.0741880674163706,
+    "pairs": 6
+  },
+  "independentQualificationRequired": true,
+  "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+  "screeningOnly": true,
+  "stage": "screen",
+  "status": "complete"
+}

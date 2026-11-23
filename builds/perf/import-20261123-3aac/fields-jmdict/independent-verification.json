@@ -1,0 +1,281 @@
+{
+  "status": "passed",
+  "dictionary": "jmdict",
+  "archiveSha256": "b2cc5e89fe2f7d17e1e367e39352ffc31d73b47deffeecd443e5a9b8336d0695",
+  "sourceIdentities": {
+    "A": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "B": {
+      "commit": "d2ab3344a483af52ac6d0765f3fbeaf8d1e2a0ca",
+      "tree": "24e3e31fb86f8c2587f1753f940da359162427cf"
+    },
+    "C": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    }
+  },
+  "packageSha256": {
+    "A": "70d1275ed0b63c0a9042fa272a7704312f0564b456fb467853d15a25431449e9",
+    "B": "4b58f4e4c72f160dfb6167ffd7f3850e5adc360c9eb169500e2981d8827fb49f",
+    "C": "70d1275ed0b63c0a9042fa272a7704312f0564b456fb467853d15a25431449e9"
+  },
+  "packageEntryCount": 550,
+  "packageDifferences": [
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "observationsVerified": 23,
+  "failures": [],
+  "storageBytes": 43520477,
+  "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+  "lookupReceiptsPerObservation": 72,
+  "media": {
+    "sample": {
+      "mode": "sample",
+      "totalFiles": 0,
+      "totalBytes": 0,
+      "files": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "all": {
+      "mode": "all",
+      "totalFiles": 0,
+      "totalBytes": 0,
+      "files": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "timing": {
+    "A": [
+      1012.3999999999942,
+      1008.2000000000116,
+      1350.7000000000116,
+      1023.6999999999534,
+      979.7999999999884,
+      987.4000000000233
+    ],
+    "B": [
+      1009,
+      1070.0999999999767,
+      999.2000000000116,
+      1046.2999999999884,
+      1050.2000000000116,
+      1001.4000000000233
+    ],
+    "C": [
+      1418.3999999999942,
+      1042.2000000000116,
+      981.6000000000058,
+      989.5,
+      1002.7999999999884,
+      1031.7000000000116
+    ]
+  },
+  "phaseObservations": [
+    {
+      "name": "warmup-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 50.69999999998254
+    },
+    {
+      "name": "warmup-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 79.10000000000582
+    },
+    {
+      "name": "warmup-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 40.800000000104774
+    },
+    {
+      "name": "block-01-1-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 44.19999999992433
+    },
+    {
+      "name": "block-01-2-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 45.399999999965075
+    },
+    {
+      "name": "block-01-3-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 38.10000000006403
+    },
+    {
+      "name": "block-02-1-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 45.000000000029104
+    },
+    {
+      "name": "block-02-2-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 45.40000000002328
+    },
+    {
+      "name": "block-02-3-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 56.29999999998836
+    },
+    {
+      "name": "block-03-1-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 35.99999999994179
+    },
+    {
+      "name": "block-03-2-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 48.20000000001164
+    },
+    {
+      "name": "block-03-3-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 51.90000000008149
+    },
+    {
+      "name": "block-04-1-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 51.399999999965075
+    },
+    {
+      "name": "block-04-2-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 37.99999999994179
+    },
+    {
+      "name": "block-04-3-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 41.09999999991851
+    },
+    {
+      "name": "block-05-1-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 37.90000000002328
+    },
+    {
+      "name": "block-05-2-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 48.300000000104774
+    },
+    {
+      "name": "block-05-3-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 49.00000000005821
+    },
+    {
+      "name": "block-06-1-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 41.800000000104774
+    },
+    {
+      "name": "block-06-2-C",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 40.5
+    },
+    {
+      "name": "block-06-3-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 43.0999999998603
+    },
+    {
+      "name": "diagnostic-A",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 36.79999999998836
+    },
+    {
+      "name": "diagnostic-B",
+      "rows": 528299,
+      "groups": 12,
+      "compactMetadataGroups": 0,
+      "fieldEncodeMs": 45.90000000002328
+    }
+  ],
+  "coldLookup12ProbeTotalMs": {
+    "block-01-1-A": 93.0,
+    "block-01-2-B": 81.89999999996508,
+    "block-01-3-C": 155.9999999999709,
+    "block-02-1-C": 160.40000000002328,
+    "block-02-2-B": 81.69999999998254,
+    "block-02-3-A": 155.60000000006403,
+    "block-03-1-B": 154.0999999999476,
+    "block-03-2-A": 163.20000000001164,
+    "block-03-3-C": 91.89999999999418,
+    "block-04-1-C": 69.9999999999709,
+    "block-04-2-A": 82.40000000002328,
+    "block-04-3-B": 117.80000000004657,
+    "block-05-1-B": 83.79999999998836,
+    "block-05-2-C": 102.39999999984866,
+    "block-05-3-A": 131.10000000003492,
+    "block-06-1-A": 125.79999999993015,
+    "block-06-2-C": 176.79999999998836,
+    "block-06-3-B": 80.10000000003492
+  },
+  "warmLookup12ProbeMeanPassTotalMs": {
+    "block-01-1-A": 16.579999999987194,
+    "block-01-2-B": 18.519999999995342,
+    "block-01-3-C": 18.520000000024446,
+    "block-02-1-C": 18.380000000010476,
+    "block-02-2-B": 15.39999999999418,
+    "block-02-3-A": 19.499999999988358,
+    "block-03-1-B": 17.099999999970898,
+    "block-03-2-A": 17.179999999981373,
+    "block-03-3-C": 17.80000000000582,
+    "block-04-1-C": 16.05999999999767,
+    "block-04-2-A": 16.300000000011643,
+    "block-04-3-B": 17.500000000011642,
+    "block-05-1-B": 17.159999999951104,
+    "block-05-2-C": 18.540000000060537,
+    "block-05-3-A": 18.35999999998603,
+    "block-06-1-A": 17.600000000034925,
+    "block-06-2-C": 19.7,
+    "block-06-3-B": 16.900000000093133
+  },
+  "limits": "Manifest and recorded per-observation package hashes verified; release ZIP bytes are not contained in the artifact. Lookup receipts are 12 sampled probes over six passes, not exhaustive persisted-row equality. Phase sums remain scoped and are not added to whole-import elapsed time."
+}

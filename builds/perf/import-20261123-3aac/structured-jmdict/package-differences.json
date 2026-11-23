@@ -1,0 +1,4 @@
+[
+  "js/dictionary/wasm/term-bank-parser.c",
+  "lib/term-bank-parser.wasm"
+]

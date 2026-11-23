@@ -1,0 +1,12 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+file:///workspace/scratch/72c24f1e7bc9/manabitan/node_modules/@zip.js/zip.js/lib/core/zip-reader.js:213
+			throw new Error(ERR_SPLIT_ZIP_FILE);
+			      ^
+
+Error: Split zip file
+    at ZipReader.getEntriesGenerator (file:///workspace/scratch/72c24f1e7bc9/manabitan/node_modules/@zip.js/zip.js/lib/core/zip-reader.js:213:10)
+    at async ZipReader.getEntries (file:///workspace/scratch/72c24f1e7bc9/manabitan/node_modules/@zip.js/zip.js/lib/core/zip-reader.js:325:20)
+    at async file:///workspace/scratch/3aacd533c01f/verify-native-import-parity.mjs:133:26
+
+Node.js v22.22.0

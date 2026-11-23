@@ -1,0 +1,107 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index 299422de5..285daa918 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
++    "sourceDigest": "f479a045df4a9e48c30d8cd1b4a04de3b396a3ecc67e697fe41bf9d9ec674ff5",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -58,7 +58,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
++            "sha256": "2c131887846ef0d8083eb7d04b78bc2b9c511862ab8e4056af43a590f263c141"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index 153735f747f2fc2a7ac65ca2cdda27aaee9388c3..0505bff5425c6443ba52573ec2167972c6cbab3d 100644
+GIT binary patch
+delta 426
+zcmZ{fze)o^5XNt2_e6JZkAQ;hWE=k>T9}Y3$u>%I<Wk#NSzIbBU%&?tw-Fl)u@|lt
+z#9qYG!eFn3Zy?TI;$dSo%*;3Q`@V+{aq}teh629IOkA|^a;JRnTs01{k9`74)-kbq
+z;&5Ohibxk0x1-3}18&hlQ8(IQ(Nqa&KGGutm3Y482}`Xa7#r~CqcgyAH9vtR)Wk!6
+zU0!ETaQv4kYo`2{DFYK{OgUr9Uq?VPFtK8a5C*Msi#+kKz0(b>SP`k9x2b!JLLyb4
+z$oU?9FF#sQZlQXWnV2<L*p$#e4qKr7eZDCg6zZDKyIb9uBh|K2M*}0Ow@swf*?q&2
+o*%L=jP-_w-+qlaGNlx0h=U=)VKYd;{)8NNJ(@;!UevjSl55X)-i2wiq
+
+delta 215
+zcmZ4dntA^#<_%uVjNO~PnJ1YtZPD9&-(r@4ssfJ&6OR(N0;4}Kg93vBca|;#gQJo=
+zki+fBn5D!8mY96WvxS+F$zgN2S0N)OBew!j*pruW^F{A7j8GF;U?#92Oklxbf*jlg
+z9wu&X1!e^nGbRHd#ihWKZN_9WxzNL05iA3-9q24Bu%UMufbMc+ROD4)Rp8p36yUfN
+E073XD=l}o!
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index d1b26c411..fbd8c4763 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -1389,7 +1389,13 @@ static int parse_format3_row(
+     i = end;
+     if (!next_format3_field(src, len, &i)) { return 0; }
+ 
+-    if (!parse_string_span(src, len, i, &end)) { return 0; }
++    // Rules and term tags commonly contain the complete empty token. Keep
++    // this shortcut local to those strict fields, not general glossary strings.
++    if (len - i >= 2u && src[i] == '"' && src[i + 1u] == '"') {
++        end = i + 2u;
++    } else if (!parse_string_span(src, len, i, &end)) {
++        return 0;
++    }
+     meta->rules_start = i;
+     meta->rules_length = end - i;
+     i = end;
+@@ -1430,7 +1436,11 @@ static int parse_format3_row(
+     i = end;
+     if (!next_format3_field(src, len, &i)) { return 0; }
+ 
+-    if (!parse_string_span(src, len, i, &end)) { return 0; }
++    if (len - i >= 2u && src[i] == '"' && src[i + 1u] == '"') {
++        end = i + 2u;
++    } else if (!parse_string_span(src, len, i, &end)) {
++        return 0;
++    }
+     meta->term_tags_start = i;
+     meta->term_tags_length = end - i;
+     i = skip_ws(src, len, end);
+diff --git a/test/term-bank-format3-row.test.js b/test/term-bank-format3-row.test.js
+index 7feb11376..315c989f5 100644
+--- a/test/term-bank-format3-row.test.js
++++ b/test/term-bank-format3-row.test.js
+@@ -72,6 +72,31 @@ parseTermBankWithWasmChunks(encoder.encode(source), 3, (chunk) => {
+ }
+ 
+ describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns) => {
++    test('preserves empty fields between escaped keys and ordinary rows', async () => {
++        const rows = [
++            ['escaped\\key', 'escaped\nreading', 'noun', 'rule', -1, ['escaped\nmeaning'], 10, 'tag'],
++            ['', '', '', '', 0, ['', {type: 'text', text: ''}], null, ''],
++            ['after', 'after', 'noun', 'rule', 1, ['meaning'], 20, 'tag'],
++        ]
++        const source = JSON.stringify(rows)
++        const actual = await parse(source, true, columns)
++        expect(actual.rows).toStrictEqual((await parse(source, false, columns)).rows)
++        expect(actual.rows).toHaveLength(3)
++        expect(actual.rows[1]).toMatchObject({expression: '', reading: '', score: 0})
++        if (columns) {
++            expect(actual.profile?.fusedParseAttempts).toBe(1)
++            expect(actual.profile?.fusedParseFallbacks).toBe(0)
++        } else {
++            expect(actual.rows[1]).toMatchObject({definitionTags: '', rules: '', termTags: '', glossary: rows[1][5]})
++        }
++    })
++
++    test.each([0, 1, 2, 3, 7])('rejects an empty string with a missing delimiter in field %i', async (field) => {
++        const row = ['"key"', '"reading"', '"noun"', '"rule"', '0', '["meaning"]', '1', '"tag"']
++        row[field] = '"""unexpected"'
++        await expect(parse(`[[${row.join(',')}]]`, true, columns)).rejects.toThrow()
++    })
++
+     test.each(['', ' ', '\r\n\t'])('preserves nullable fields, escapes and reused glossary hints with whitespace %j', async (space) => {
+         const glossary = [{type: 'structured-content', content: [{tag: 'img', path: 'image.webp'}, 'definition'.repeat(600)]}]
+         const rows = [

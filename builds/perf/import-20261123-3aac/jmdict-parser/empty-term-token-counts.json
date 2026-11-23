@@ -1,0 +1,80 @@
+[
+  {
+    "dictionary": "jmdict",
+    "rows": 528299,
+    "stringFields": [
+      528299,
+      528299,
+      528299,
+      528299,
+      0,
+      0,
+      0,
+      528299
+    ],
+    "emptyStringFields": [
+      0,
+      20939,
+      20939,
+      471898,
+      0,
+      0,
+      0,
+      441683
+    ],
+    "emptyCount": 955459,
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f"
+  },
+  {
+    "dictionary": "jitendex",
+    "rows": 436555,
+    "stringFields": [
+      436555,
+      436555,
+      436555,
+      436555,
+      0,
+      0,
+      0,
+      436555
+    ],
+    "emptyStringFields": [
+      0,
+      134073,
+      276960,
+      399611,
+      0,
+      0,
+      0,
+      436555
+    ],
+    "emptyCount": 1247199,
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356"
+  },
+  {
+    "dictionary": "vndb",
+    "rows": 6648310,
+    "stringFields": [
+      6648310,
+      6648310,
+      6648310,
+      6648310,
+      0,
+      0,
+      0,
+      6648310
+    ],
+    "emptyStringFields": [
+      0,
+      25,
+      0,
+      6648310,
+      0,
+      0,
+      0,
+      6648310
+    ],
+    "emptyCount": 13296645,
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  }
+]

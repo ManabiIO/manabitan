@@ -1,0 +1,5 @@
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict: 528299 rows, 53 banks, exact content/hash/column/key/index/media-projection equality
+jitendex: 436555 rows, 219 banks, exact content/hash/column/key/index/media-projection equality
+vndb: 6648310 rows, 665 banks, exact content/hash/column/key/index/media-projection equality

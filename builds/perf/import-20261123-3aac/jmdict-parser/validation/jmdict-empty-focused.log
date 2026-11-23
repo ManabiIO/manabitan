@@ -1,0 +1,59 @@
+(node:87) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/3aacd533c01f/jmdict-empty-tokens
+
+(node:112) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:105) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:104) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:106) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:119) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:118) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/term-bank-format3-row.test.js (56 tests | 1 failed) 58ms
+     × preserves empty fields between escaped keys and ordinary rows 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-format3-row.test.js > strict format-3 row grammar, columns=false > preserves empty fields between escaped keys and ordinary rows
+AssertionError: expected { expression: '', reading: '', …(7) } to match object { definitionTags: '', rules: '', …(2) }
+(5 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "definitionTags": "",
+    "glossary": [
+      "",
+-     "",
++     {
++       "text": "",
++       "type": "text",
++     },
+    ],
+    "rules": "",
+    "termTags": "",
+  }
+
+ ❯ test/term-bank-format3-row.test.js:90:36
+     88|             expect(actual.profile?.fusedParseFallbacks).toBe(0)
+     89|         } else {
+     90|             expect(actual.rows[1]).toMatchObject({definitionTags: '', …
+       |                                    ^
+     91|         }
+     92|     })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 530 passed (531)
+   Start at  15:30:00
+   Duration  1.54s (transform 659ms, setup 156ms, import 934ms, tests 3.25s, environment 1ms)
+

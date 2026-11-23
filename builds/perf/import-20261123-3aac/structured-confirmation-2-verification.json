@@ -1,0 +1,153 @@
+{
+  "host": 2,
+  "status": "passed",
+  "archive": {
+    "artifactId": 14863326265,
+    "runId": 45263702223,
+    "archiveSha256": "b3fc6b9b7b86abb143e499365218a399408cd272142db4450bb4789ecbd19927",
+    "archiveBytes": 1738392,
+    "entries": 310,
+    "extraction": "all paths bounded, no symlinks, ZIP CRC checked during extraction"
+  },
+  "sourceIdentities": {
+    "A": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    },
+    "B": {
+      "commit": "09dfb90d926758205ff52d127ef3d950f0b15a65",
+      "tree": "1f9015b2176056ce75c26b5e02054fcd1fd673be"
+    },
+    "C": {
+      "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+    }
+  },
+  "hardware": [
+    "INTEL(R) XEON(R) PLATINUM 8573C",
+    4
+  ],
+  "observations": 41,
+  "timedObservations": 36,
+  "excludedWarmups": 3,
+  "exhaustiveDiagnostics": 2,
+  "sourceHashesMatchLocalFrozenBaseline": true,
+  "packageDifferences": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "identicalBaselineControl": true,
+  "packageArchives": {
+    "A": "89847a4fe04f8c172c9eb9f9d88bf713f271232ae9c71924e06bc271e5e9ec23",
+    "B": "a3e84146869a7bf72209c762ef247fbf6b5ab8c68b69bb7acd17219247d388a2",
+    "C": "89847a4fe04f8c172c9eb9f9d88bf713f271232ae9c71924e06bc271e5e9ec23"
+  },
+  "outputProbeDigest": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723",
+  "storageBytes": 67466332,
+  "exhaustiveMedia": {
+    "bytes": 4992155,
+    "files": 236,
+    "mode": "all",
+    "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402",
+    "totalBytes": 4992155,
+    "totalFiles": 236
+  },
+  "sampledMedia": {
+    "bytes": 1302012,
+    "files": 64,
+    "mode": "sample",
+    "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087",
+    "totalBytes": 4992155,
+    "totalFiles": 236
+  },
+  "lookupReceiptsPerObservation": 72,
+  "statisticsRecomputed": true,
+  "comparisons": {
+    "candidate": {
+      "pairs": 12,
+      "fasterPairs": 6,
+      "pairedChangesPercent": [
+        -0.2656111660853999,
+        0.9715725080961413,
+        -0.8030888030891026,
+        0.7234479220100898,
+        3.031714004865016,
+        1.847562901356814,
+        2.3625384044938746,
+        -0.37868963013157897,
+        0.5354684073609839,
+        -1.7996870109546204,
+        -0.6145193209034616,
+        -0.07781293770381392
+      ],
+      "pairedMedianPercent": 0.22882773482858498,
+      "pairedMedianBootstrap95Percent": [
+        -0.4966044755175203,
+        1.4095677047264776
+      ],
+      "equalWorkPercent": 0.458261459778031,
+      "baselineMedianMs": 1927.7000000000407,
+      "candidateMedianMs": 1929.6500000000087,
+      "bestPairPercent": -1.7996870109546204,
+      "worstPairPercent": 3.031714004865016
+    },
+    "candidateVsSecondBaseline": {
+      "pairs": 12,
+      "fasterPairs": 5,
+      "pairedChangesPercent": [
+        0.041792916101623945,
+        0.8782291613171456,
+        -7.9667574151019664,
+        -0.9785624211865462,
+        0.2416066844510123,
+        0.4099636741030199,
+        0.3635608185342365,
+        -1.8551643072543755,
+        1.0870679930239602,
+        -0.8584369075229747,
+        -2.1584209177122116,
+        0.30202041241043087
+      ],
+      "pairedMedianPercent": 0.14169980027631812,
+      "pairedMedianBootstrap95Percent": [
+        -1.4168633642204609,
+        0.3867622463186282
+      ],
+      "equalWorkPercent": -0.9222622072901032,
+      "baselineMedianMs": 1948.6499999999942,
+      "candidateMedianMs": 1929.6500000000087,
+      "bestPairPercent": -7.9667574151019664,
+      "worstPairPercent": 1.0870679930239602
+    },
+    "identicalProductControl": {
+      "pairs": 12,
+      "fasterPairs": 4,
+      "pairedChangesPercent": [
+        -0.3072756627271134,
+        0.09253071505621602,
+        7.783783783782883,
+        1.7188301693175978,
+        2.783382482282981,
+        1.4317296557538661,
+        1.9917364127543635,
+        1.5043834621569552,
+        -0.5456678056000586,
+        -0.9494001043272582,
+        1.5779606291005166,
+        -0.37868963013156787
+      ],
+      "pairedMedianPercent": 1.4680565589554107,
+      "pairedMedianBootstrap95Percent": [
+        -0.3429826464293406,
+        1.8552832910359807
+      ],
+      "equalWorkPercent": 1.3933742310068276,
+      "baselineMedianMs": 1927.7000000000407,
+      "candidateMedianMs": 1948.6499999999942,
+      "bestPairPercent": -0.9494001043272582,
+      "worstPairPercent": 7.783783783782883
+    }
+  },
+  "scope": "Audits retained receipts and all reported observations; no benchmark rerun, no claim of exhaustive persisted definition/index byte equality or process-memory qualification",
+  "recommendation": "Reject promotion as an import optimization: no material complete-import gain on this host; retain the draft and evidence"
+}

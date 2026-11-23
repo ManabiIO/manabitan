@@ -1,0 +1,449 @@
+{
+  "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "status": {
+    "structured": "Complete screens and two independent confirmations; no material complete-import benefit",
+    "jmdictParser": "Three complete independent component screens; none promoted",
+    "recordFields": "JMdict/Jitendex browser screens complete; VNDB and full unit still pending"
+  },
+  "productPrs": {
+    "848": "09dfb90d926758205ff52d127ef3d950f0b15a65",
+    "854": "d2ab3344a483af52ac6d0765f3fbeaf8d1e2a0ca"
+  },
+  "studies": {
+    "structuredScreen": 45261611887,
+    "structuredConfirmation": 45263702223,
+    "recordFieldsScreen": 45264553669
+  },
+  "evidenceScope": "Retained complete aggregate observations, package manifests, fixture/source identities, arithmetic, correctness receipts, executed helper scripts and failed/incomplete local logs. Full per-observation reports remain in the linked Actions artifacts. No host or stage pooled.",
+  "note": "Recorded executed helper scripts may retain original absolute workspace paths. Use the documented baseline/candidate/cache layout when reproducing; do not silently change measurement boundaries.",
+  "files": {
+    "empty-term-token-counts.json": {
+      "bytes": 1245,
+      "sha256": "c8add76ecb7d433bc5d3f677c2730bf353fc989d831054c8bf593f8224c67c89"
+    },
+    "fields-jitendex/analysis.json": {
+      "bytes": 2914,
+      "sha256": "ef691b652012858818b9fd9d802a907cc81de503550df5f1e8ffb094ef4d5b4a"
+    },
+    "fields-jitendex/correctness.json": {
+      "bytes": 11439,
+      "sha256": "e62c3b9f0c289d89e5ed57536bdeaf650d74d64ca7da1e75ed6363bc98220b56"
+    },
+    "fields-jitendex/fixture.json": {
+      "bytes": 1123,
+      "sha256": "47a3058be786968cb1dd19ba9badbce443354ca361bc99de574cc732ee02d510"
+    },
+    "fields-jitendex/independent-verification.json": {
+      "bytes": 7590,
+      "sha256": "46c43d403e2055d5a6de94bbdf00609fc97053ec2033af39d12ca3107ec672f9"
+    },
+    "fields-jitendex/observations.json": {
+      "bytes": 12048,
+      "sha256": "993b714ae4dd830020648607712685117b70513eae963e3e30d15fbf0a4a13de"
+    },
+    "fields-jitendex/package-A.json": {
+      "bytes": 60293,
+      "sha256": "bae5cb59bee43487d497a264b4b8ad081995d90735e170ac32274e1530d65b2d"
+    },
+    "fields-jitendex/package-B.json": {
+      "bytes": 60293,
+      "sha256": "56872a5714e291f0667fd0000eb86aa485fde6e3abd28cf4465d3d8f496f410d"
+    },
+    "fields-jitendex/package-C.json": {
+      "bytes": 60327,
+      "sha256": "a360cfc6d7d9fe8c02538e80783f103189c5866cd1cc9190ebd306339d9cf1e8"
+    },
+    "fields-jitendex/package-differences.json": {
+      "bytes": 48,
+      "sha256": "faa50d1dd3bbb185900ce9605ef0c212cea25d88a14cc5cdd70d12dbb94da1ab"
+    },
+    "fields-jitendex/protocol.json": {
+      "bytes": 11182,
+      "sha256": "4c6d9f8a02e12ef13ee90b3e34af56c94b799fddb03ead9a3e31fb70cdffb3f0"
+    },
+    "fields-jitendex/state.json": {
+      "bytes": 298,
+      "sha256": "ec67ab708fe0ab5b41a667f6d24d028c3ddf8a3722d49462a097589842fb55de"
+    },
+    "fields-jmdict/analysis.json": {
+      "bytes": 2880,
+      "sha256": "6d568dce534d47f7d06872cd77528decca5d5ccbc22acafdc4f1d992a0e48f37"
+    },
+    "fields-jmdict/correctness.json": {
+      "bytes": 11876,
+      "sha256": "73360dcde8d277b0322898ad83668c07db4b47a53c5d0e56061c1b7ea470f9e5"
+    },
+    "fields-jmdict/fixture.json": {
+      "bytes": 571,
+      "sha256": "6ff6538a48f79c5b6a48dea9b63bd1d6392deab72e0ffe0703b43b1e8faaeeae"
+    },
+    "fields-jmdict/independent-verification.json": {
+      "bytes": 7544,
+      "sha256": "5d8b6b745be016894c2c93bbd0035209a5f9f3b45778539f13c9733948381d12"
+    },
+    "fields-jmdict/observations.json": {
+      "bytes": 12037,
+      "sha256": "83e20fd36d80a93156ef3faa45425f752585f06aab036b1e437e5776e317bab2"
+    },
+    "fields-jmdict/package-A.json": {
+      "bytes": 60293,
+      "sha256": "74753403abc0f06d254b584b8555a99d032091faf6e8150a108b455c904204b7"
+    },
+    "fields-jmdict/package-B.json": {
+      "bytes": 60293,
+      "sha256": "14a4a3314042a52eaefcf133db6ea00dfe05cd6b152fc678276d74cb0a4d6bc1"
+    },
+    "fields-jmdict/package-C.json": {
+      "bytes": 60327,
+      "sha256": "90195cc30fece3f3d5f901fee265c9261d556d6088d7e819c7745e184e4108c1"
+    },
+    "fields-jmdict/package-differences.json": {
+      "bytes": 48,
+      "sha256": "faa50d1dd3bbb185900ce9605ef0c212cea25d88a14cc5cdd70d12dbb94da1ab"
+    },
+    "fields-jmdict/protocol.json": {
+      "bytes": 10628,
+      "sha256": "491634092ac04b44976fac2c7d1849e90492d18108e38b29e2cdde701b167695"
+    },
+    "fields-jmdict/state.json": {
+      "bytes": 296,
+      "sha256": "b2c7daac5bece7741dc5a1b9711080950a8b565172de8c3aef500145fb1041fd"
+    },
+    "jitendex-component.json": {
+      "bytes": 18414,
+      "sha256": "60c32df86bf804a18ada25968551e28b1e3264f1bbefbd41ab1fe6295bd4941a"
+    },
+    "jitendex-component.log": {
+      "bytes": 536,
+      "sha256": "b690b4ce48654d37f177f7f901f91718d88e4d6a45641471a2b975d742c8fd47"
+    },
+    "jitendex-unit.log": {
+      "bytes": 191855,
+      "sha256": "071e7e6c2f37e2eac043b15a597b2f64450462462068af777fae53b861c8a986"
+    },
+    "jmdict-parser/compact-separator-jmdict-component.json": {
+      "bytes": 18430,
+      "sha256": "77fa7d0ca9dca5ca6d8bb1ef853134074458c89a3004cd468471a5495e31671a"
+    },
+    "jmdict-parser/compact-separators-activation.json": {
+      "bytes": 383,
+      "sha256": "6d5eadab62654619ee774250c25594c6be8ba319fc978ee8c687f2529297957d"
+    },
+    "jmdict-parser/compact-strict-separators.patch": {
+      "bytes": 5414,
+      "sha256": "e8b8327dc63295e4b340ebcd50566c1811f0b82a436bc42fb3d7f3ae6b0086db"
+    },
+    "jmdict-parser/empty-metadata-jmdict-component.json": {
+      "bytes": 18400,
+      "sha256": "2fbb7681c20fdc5797205a36d29730d2e16847e09796b55395a3e0bfc4b05c10"
+    },
+    "jmdict-parser/empty-term-token-counts.json": {
+      "bytes": 1245,
+      "sha256": "c8add76ecb7d433bc5d3f677c2730bf353fc989d831054c8bf593f8224c67c89"
+    },
+    "jmdict-parser/empty-token-jmdict-component.json": {
+      "bytes": 18385,
+      "sha256": "edfc8af4c4a5d43082c41bf565fe1534be971e2bab9613be67250e9627fa5501"
+    },
+    "jmdict-parser/generic-empty-string.patch": {
+      "bytes": 16228,
+      "sha256": "245bfacfdbf1ba92ef954b289342e45974fde4af3e83369aa3c0775d08784a38"
+    },
+    "jmdict-parser/jmdict-attempts-summary.json": {
+      "bytes": 7652,
+      "sha256": "396034d4bf05dc6224c6772a2bb3b5bbe867025fd4f6e5c6af055ca0aed6f156"
+    },
+    "jmdict-parser/sources.json": {
+      "bytes": 18280,
+      "sha256": "9400e4da70efae11507f7cd832b969988f5ae115620f830a8fe0dea62b632c96"
+    },
+    "jmdict-parser/strict-empty-metadata.patch": {
+      "bytes": 5061,
+      "sha256": "b366187e485e645bb5226a4acde04cebb5d6895350c8107192238dbbc896c4ec"
+    },
+    "jmdict-parser/validation/jmdict-empty-focused-pass.log": {
+      "bytes": 1466,
+      "sha256": "156b34749ff3aa22e7db0bbb430fca4756afdef52dd97b705f3d9166391509b8"
+    },
+    "jmdict-parser/validation/jmdict-empty-focused.log": {
+      "bytes": 2610,
+      "sha256": "c657f70ba7b870e0c18f1f9ba96e12871b9230c6b5d401e0a6876733c3af2d52"
+    },
+    "jmdict-parser/validation/jmdict-empty-lint.log": {
+      "bytes": 1044,
+      "sha256": "ad99931e2a09006f69b6d05d604884fe972016e5b9d9101798eb41468d8d99f7"
+    },
+    "jmdict-parser/validation/jmdict-metadata-focused.log": {
+      "bytes": 1475,
+      "sha256": "5d67d58aa0aaf770987cf2658bf5665748787a819ab58fa41dc74d7093440f45"
+    },
+    "jmdict-parser/validation/jmdict-metadata-lint.log": {
+      "bytes": 1046,
+      "sha256": "9ea798d97a92cd663ff9120afe9287800d1399b70d480e71dfc56bd43cba9043"
+    },
+    "jmdict-parser/validation/jmdict-metadata-wasm-build.log": {
+      "bytes": 849,
+      "sha256": "615cea9976cdd5c277730f839ba4edb0db3f415134df52cbf7868c82f5ceef1c"
+    },
+    "jmdict-parser/validation/jmdict-separator-focused.log": {
+      "bytes": 1479,
+      "sha256": "4635d7d30efdbc5299f29b9d19698da5ed9188b132e800eabf9e37bc434df413"
+    },
+    "jmdict-parser/validation/jmdict-separator-lint.log": {
+      "bytes": 1046,
+      "sha256": "33c0eeccd0f464e5e4d98b34bf5d3a86903f3e39d563c696eec4c98466ee40d7"
+    },
+    "jmdict-parser/validation/jmdict-separator-wasm-build.log": {
+      "bytes": 849,
+      "sha256": "04e7c70b188e948543167c729d9c05aa05acc476f1a6304b2617cfbb03f11964"
+    },
+    "native-parity-attempt1.json": {
+      "bytes": 2566,
+      "sha256": "e55d71b571a158e49dd20e9da3fee88100158e12cf590f70f4f82e879a56723b"
+    },
+    "native-parity-attempt1.log": {
+      "bytes": 750,
+      "sha256": "3ba26ec9ff38013bf208fab5d5a29f06f949fdafc640d255b940919c6ee3db4d"
+    },
+    "native-parity.json": {
+      "bytes": 3770,
+      "sha256": "48604f9072d42c425d3e003191aa45d6efefd7bcf582e1cfe0140fe8318771dd"
+    },
+    "native-parity.log": {
+      "bytes": 456,
+      "sha256": "e782f79b082206c1af8b5295d5e998dacdadced1a0bd10f2df6f78771a79e170"
+    },
+    "record-fields-component.json": {
+      "bytes": 9565,
+      "sha256": "650b9430c47b63a295266e8b672a3a3d6a374f13076263bd15599ec25f66eb4e"
+    },
+    "record-fields-executed-harness.mjs": {
+      "bytes": 10952,
+      "sha256": "a21365698930abf6fbdea3a7a93ab862b156af945aab3c2dda04336b6461ea20"
+    },
+    "record-fields-initial/report.json": {
+      "bytes": 8747,
+      "sha256": "6b4a91237f56ce604b9360b4b6b420582e4c2224050ed7e914703abf341a27e0"
+    },
+    "structured-confirmation-1/analysis.json": {
+      "bytes": 3812,
+      "sha256": "9d9b18fa9050022be68eddb3d78668d24388ef13828280b48bf7ff2dbb1a3c79"
+    },
+    "structured-confirmation-1/correctness.json": {
+      "bytes": 11439,
+      "sha256": "e62c3b9f0c289d89e5ed57536bdeaf650d74d64ca7da1e75ed6363bc98220b56"
+    },
+    "structured-confirmation-1/fixture.json": {
+      "bytes": 1123,
+      "sha256": "47a3058be786968cb1dd19ba9badbce443354ca361bc99de574cc732ee02d510"
+    },
+    "structured-confirmation-1/observations.json": {
+      "bytes": 21418,
+      "sha256": "cac501af7c9b8a4522565851ae1921dfdcc0ede72a01a751dd9fc3a9d9cc9d3a"
+    },
+    "structured-confirmation-1/package-A.json": {
+      "bytes": 60293,
+      "sha256": "0e65616138e9e25202c8754931a37e24457473367d5db78d1ebd7e31c4700e14"
+    },
+    "structured-confirmation-1/package-B.json": {
+      "bytes": 60293,
+      "sha256": "b36145328b7e6c58f2a81c5958ff079e4b8b9dc073e2cf1a028f3f4a3ecec7cb"
+    },
+    "structured-confirmation-1/package-C.json": {
+      "bytes": 60327,
+      "sha256": "fb6e1546e7359e686dabf5bcfed8b06858e32e995194b450608aa19dabf2ef40"
+    },
+    "structured-confirmation-1/package-differences.json": {
+      "bytes": 77,
+      "sha256": "efd9350e5d6bcb9be828a8ecd1f2e1ed37d85638029e415673c1e642c00377e2"
+    },
+    "structured-confirmation-1/protocol.json": {
+      "bytes": 11310,
+      "sha256": "a49c52149d25e180858b1d4112b4a419451b82cff43e54f51287eae3b5bf41cc"
+    },
+    "structured-confirmation-1/state.json": {
+      "bytes": 305,
+      "sha256": "dd7b4f233a852d034c51c18f684b3136a8f0a44a2013b3900df1b822590fad18"
+    },
+    "structured-confirmation-1-verification.json": {
+      "bytes": 4902,
+      "sha256": "b1e96b5706234f558fbbf77eaa2fe7fe426aa99ab319416086fc32d44f6bd7b1"
+    },
+    "structured-confirmation-2/analysis.json": {
+      "bytes": 3790,
+      "sha256": "109a492bff3d4e3ce9dacfa319ada62890ad444fc0a38e7c5bb4510d6bed8c7a"
+    },
+    "structured-confirmation-2/correctness.json": {
+      "bytes": 11439,
+      "sha256": "e62c3b9f0c289d89e5ed57536bdeaf650d74d64ca7da1e75ed6363bc98220b56"
+    },
+    "structured-confirmation-2/fixture.json": {
+      "bytes": 1123,
+      "sha256": "47a3058be786968cb1dd19ba9badbce443354ca361bc99de574cc732ee02d510"
+    },
+    "structured-confirmation-2/observations.json": {
+      "bytes": 21414,
+      "sha256": "1224b7f01b51b00b7172bcda25bdc75c9b09a5d3e94d4fb60833df6e768780b5"
+    },
+    "structured-confirmation-2/package-A.json": {
+      "bytes": 60293,
+      "sha256": "fe37dd77e7f619635ef7f194ed55d9e37381658f72903d263ce4dec04da7122d"
+    },
+    "structured-confirmation-2/package-B.json": {
+      "bytes": 60293,
+      "sha256": "99ccbc94c25d0e0b7519bf84d6527b6f77933c9c22d6092e31d98a6f317aeb3a"
+    },
+    "structured-confirmation-2/package-C.json": {
+      "bytes": 60327,
+      "sha256": "79719e0b850dd29823af6d401d2e9aa1238ed57d20c1d0e7abdf9e2e667a9ff3"
+    },
+    "structured-confirmation-2/package-differences.json": {
+      "bytes": 77,
+      "sha256": "efd9350e5d6bcb9be828a8ecd1f2e1ed37d85638029e415673c1e642c00377e2"
+    },
+    "structured-confirmation-2/protocol.json": {
+      "bytes": 11309,
+      "sha256": "e022aef16d4ab28bd66c5b77f49d33efd345ff7db3946bb5e71e7079598e6729"
+    },
+    "structured-confirmation-2/state.json": {
+      "bytes": 305,
+      "sha256": "dd7b4f233a852d034c51c18f684b3136a8f0a44a2013b3900df1b822590fad18"
+    },
+    "structured-confirmation-2-verification.json": {
+      "bytes": 4909,
+      "sha256": "e204741254950c0ba54965d0341ddfba35c282271f850fb9f5217ff9ea684530"
+    },
+    "structured-jitendex/analysis.json": {
+      "bytes": 2868,
+      "sha256": "de4bcdcba2043452f47feaad3f1d2079c0ecb4695d46f8a4689cbb37e591267f"
+    },
+    "structured-jitendex/correctness.json": {
+      "bytes": 11439,
+      "sha256": "e62c3b9f0c289d89e5ed57536bdeaf650d74d64ca7da1e75ed6363bc98220b56"
+    },
+    "structured-jitendex/fixture.json": {
+      "bytes": 1123,
+      "sha256": "47a3058be786968cb1dd19ba9badbce443354ca361bc99de574cc732ee02d510"
+    },
+    "structured-jitendex/observations.json": {
+      "bytes": 12030,
+      "sha256": "f6c49328f05ef39e07aecea3160dd7f49e70587df16e69d2fa5f568499ae7a97"
+    },
+    "structured-jitendex/package-A.json": {
+      "bytes": 60293,
+      "sha256": "ffc62230207a9afb1c917fb8539b0ec3a426c79c967c4f6e5881b90d1a619d12"
+    },
+    "structured-jitendex/package-B.json": {
+      "bytes": 60293,
+      "sha256": "25c41fcb830bef1b38dbbb99210f0ce29c911643d0f1fd574c218941c655f731"
+    },
+    "structured-jitendex/package-C.json": {
+      "bytes": 60327,
+      "sha256": "d7b37949bd7669565521f9b2228006b203014dfa5123a66a1ec6148a984bd7e7"
+    },
+    "structured-jitendex/package-differences.json": {
+      "bytes": 77,
+      "sha256": "efd9350e5d6bcb9be828a8ecd1f2e1ed37d85638029e415673c1e642c00377e2"
+    },
+    "structured-jitendex/protocol.json": {
+      "bytes": 11202,
+      "sha256": "d3e8e716b773e221d3537307c56beffd133b22495a58a3182d7689ec37e91407"
+    },
+    "structured-jitendex/state.json": {
+      "bytes": 298,
+      "sha256": "ec67ab708fe0ab5b41a667f6d24d028c3ddf8a3722d49462a097589842fb55de"
+    },
+    "structured-jmdict/analysis.json": {
+      "bytes": 2888,
+      "sha256": "3b5c15072b48445a841cf03f6bc4fedfd8fc1cc122653d142bb7fdf49f2e15e2"
+    },
+    "structured-jmdict/correctness.json": {
+      "bytes": 11876,
+      "sha256": "73360dcde8d277b0322898ad83668c07db4b47a53c5d0e56061c1b7ea470f9e5"
+    },
+    "structured-jmdict/fixture.json": {
+      "bytes": 571,
+      "sha256": "6ff6538a48f79c5b6a48dea9b63bd1d6392deab72e0ffe0703b43b1e8faaeeae"
+    },
+    "structured-jmdict/observations.json": {
+      "bytes": 12050,
+      "sha256": "5bf68a65c993f85677f28ec0be640ff55abdab3384916fdc8c0e4dc394267049"
+    },
+    "structured-jmdict/package-A.json": {
+      "bytes": 60293,
+      "sha256": "acb6d8803ab01b31e371e5cdc35b942e0fc2331dbc9c2b916ee617c0a30ccbc8"
+    },
+    "structured-jmdict/package-B.json": {
+      "bytes": 60293,
+      "sha256": "8b5658e28f01cfde4c9df15357c2a670fca29faf0f86ac322846ce0b62f89dcd"
+    },
+    "structured-jmdict/package-C.json": {
+      "bytes": 60327,
+      "sha256": "e76067188e71150bef8110e3d6eb80a68b7884bb88c8c95eda2e9636c30d0f6b"
+    },
+    "structured-jmdict/package-differences.json": {
+      "bytes": 77,
+      "sha256": "efd9350e5d6bcb9be828a8ecd1f2e1ed37d85638029e415673c1e642c00377e2"
+    },
+    "structured-jmdict/protocol.json": {
+      "bytes": 10648,
+      "sha256": "9ef2b5a4a8dfc93e860a01d9a98111d17448eca37111114a44d34dd5b1b4cbf5"
+    },
+    "structured-jmdict/state.json": {
+      "bytes": 296,
+      "sha256": "b2c7daac5bece7741dc5a1b9711080950a8b565172de8c3aef500145fb1041fd"
+    },
+    "structured-vndb/analysis.json": {
+      "bytes": 2862,
+      "sha256": "1af174af64d6b7cf3d26d6121ee155d19e95ac7d6f55a1486ef7536c65b74c2e"
+    },
+    "structured-vndb/correctness.json": {
+      "bytes": 12041,
+      "sha256": "161f4ce7961779038f94e3b2fc5d067dea5c89b0f6d1f8e409729b58e3893dd7"
+    },
+    "structured-vndb/fixture.json": {
+      "bytes": 656,
+      "sha256": "ef5038c0ce9d0532f1c41492d22f2900abbcf6e0eea5bbb9d21456470a1e5308"
+    },
+    "structured-vndb/observations.json": {
+      "bytes": 12035,
+      "sha256": "d20b9f86e5f50de4491922b3131ddc2888004578cc7144154a196c675a895959"
+    },
+    "structured-vndb/package-A.json": {
+      "bytes": 60293,
+      "sha256": "1fdc7075e824537f2d3a9d30b7e703d4eda8edd5e410811ba3e14ee6ba7316f5"
+    },
+    "structured-vndb/package-B.json": {
+      "bytes": 60293,
+      "sha256": "969eb17f393a2327a81d859378942311434fbb8adec92c572eed8fc6ff15f348"
+    },
+    "structured-vndb/package-C.json": {
+      "bytes": 60327,
+      "sha256": "967787167fa921169af6fc272c47ff70fb59538302c434f48e93825398526f2a"
+    },
+    "structured-vndb/package-differences.json": {
+      "bytes": 77,
+      "sha256": "efd9350e5d6bcb9be828a8ecd1f2e1ed37d85638029e415673c1e642c00377e2"
+    },
+    "structured-vndb/protocol.json": {
+      "bytes": 10742,
+      "sha256": "7e22a8165c2a1b216da1fb10a2463e6ab9b4d2867d061a574ba5e29df2eb4e80"
+    },
+    "structured-vndb/state.json": {
+      "bytes": 294,
+      "sha256": "54a667af41160629e8721e5b07c6055941dbb5feee6b98dba0440b7448376f91"
+    },
+    "verify-native-import-parity.mjs": {
+      "bytes": 9531,
+      "sha256": "15bc9d6aa3f11d12f15af7ac1cd5c46550dd640e20390d67da7860ff5eff1171"
+    },
+    "verify-pr848-confirmation.py": {
+      "bytes": 11453,
+      "sha256": "331c3d998c6139e923745df5d1ae02f7ea4dd04e21fbe1b71f18ef6caa025114"
+    },
+    "vndb-full-unit.log": {
+      "bytes": 110739,
+      "sha256": "e123258aeac5c92ad1a019f56dbf310d7210923846bb8e1d8e6d20a93f4671f7"
+    }
+  }
+}
