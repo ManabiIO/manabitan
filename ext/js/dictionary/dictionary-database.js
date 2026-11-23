@@ -66,7 +66,7 @@ import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictio
 import {computeGenerationMediaCrc, DictionaryGenerationMediaStore, encodeGenerationMediaDescriptor, isGenerationMediaDescriptor} from './dictionary-generation-media-store.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {TermRecordOpfsStore} from './term-record-opfs-store.js';
+import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {
     createGlossarySearchQuery,
@@ -142,8 +142,8 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint32Array} resolvedLengths
  * @property {string[]|null} resolvedDictNames
  * @property {string} [resolvedUniformDictName]
- * @property {Uint32Array} pendingEpochs
- * @property {Uint32Array} pendingIndexes
+ * @property {Uint32Array|null} pendingEpochs Null together with pendingIndexes until generic deduplication needs scratch.
+ * @property {Uint32Array|null} pendingIndexes
  * @property {Uint32Array} [uniqueRowIndexes]
  * @property {Uint32Array} [uniqueSignatures]
  * @property {number} nextEpoch
@@ -1508,6 +1508,7 @@ export class DictionaryDatabase {
             let termRecordLookupIndexWriteBytes = 0;
             let termRecordLookupIndexAwaitMs = 0;
             let termRecordLookupIndexMaxQueuedBytes = 0;
+            let termRecordLookupIndexWorkerFileCount = 0;
             let termsVirtualTableSyncMs = 0;
             let createIndexesMs = 0;
             let createIndexesCheckpointCount = 0;
@@ -1578,6 +1579,7 @@ export class DictionaryDatabase {
                             termRecordLookupIndexWriteBytes = metrics.lookupIndexWriteBytes ?? 0;
                             termRecordLookupIndexAwaitMs = metrics.lookupIndexAwaitMs ?? 0;
                             termRecordLookupIndexMaxQueuedBytes = metrics.lookupIndexMaxQueuedBytes ?? 0;
+                            termRecordLookupIndexWorkerFileCount = metrics.lookupIndexWorkerFileCount ?? 0;
                         }
                     });
                 const endImportSessionResults = await Promise.allSettled([
@@ -1704,6 +1706,7 @@ export class DictionaryDatabase {
                         `termRecordLookupIndexWriteBytes=${termRecordLookupIndexWriteBytes} ` +
                         `termRecordLookupIndexAwait=${termRecordLookupIndexAwaitMs.toFixed(1)}ms ` +
                         `termRecordLookupIndexMaxQueuedBytes=${termRecordLookupIndexMaxQueuedBytes} ` +
+                        `termRecordLookupIndexWorkerFiles=${termRecordLookupIndexWorkerFileCount} ` +
                         `termsVtabSync=${termsVirtualTableSyncMs.toFixed(1)}ms ` +
                         `createIndexes=${createIndexesMs.toFixed(1)}ms ` +
                         `cacheReset=${cacheResetMs.toFixed(1)}ms ` +
@@ -1751,6 +1754,7 @@ export class DictionaryDatabase {
                     compressionExperiments: this._termContentBlockStore.getDiagnostics().compressionExperiments,
                     termRecordLookupIndexAwaitMs,
                     termRecordLookupIndexMaxQueuedBytes,
+                    termRecordLookupIndexWorkerFileCount,
                     termsVirtualTableSyncMs,
                     createIndexesMs,
                     createIndexesCheckpointCount,
@@ -1840,7 +1844,7 @@ export class DictionaryDatabase {
     }
 
     /**
-     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
+     * @param {import('dictionary-importer').ImportExperiments & {termContentStorageMode?: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows?: number|null, queueTermContentWrites?: boolean, termContentBlockTargetBytes?: number|null}} [options]
      */
     setImportOptimizationFlags(options = {}) {
         this._termContentBlockStore.setCompressionExperiments(options);
@@ -1868,6 +1872,7 @@ export class DictionaryDatabase {
         this._termContentStore.setWriteCoalesceMaxChunksOverride(null);
         this._termContentStore.setQueueImportWritesEnabled(options.queueTermContentWrites === true);
         this._termRecordStore.setExpectedImportBytes(options.expectedTermRecordImportBytes ?? null);
+        this._termRecordStore.setRawTermBankSourceBytes(options.rawTermBankSourceBytes ?? null);
     }
 
     /**
@@ -8659,8 +8664,10 @@ this._readTermContentSignature(
                 typeof candidateDedupPlan.resolvedUniformDictName === 'undefined' ||
                 typeof candidateDedupPlan.resolvedUniformDictName === 'string'
             ) &&
-            candidateDedupPlan.pendingEpochs instanceof Uint32Array &&
-            candidateDedupPlan.pendingIndexes instanceof Uint32Array
+            (
+                (candidateDedupPlan.pendingEpochs instanceof Uint32Array && candidateDedupPlan.pendingIndexes instanceof Uint32Array) ||
+                (candidateDedupPlan.pendingEpochs === null && candidateDedupPlan.pendingIndexes === null)
+            )
         ) ?
             /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) :
             null;
@@ -8684,7 +8691,7 @@ null;
         if (contentDedupPlan !== null) {
             pendingPlanEpoch = contentDedupPlan.nextEpoch >>> 0;
             if (pendingPlanEpoch === 0) {
-                contentDedupPlan.pendingEpochs.fill(0);
+                contentDedupPlan.pendingEpochs?.fill(0);
                 pendingPlanEpoch = 1;
             }
             contentDedupPlan.nextEpoch = (pendingPlanEpoch + 1) >>> 0;
@@ -9214,6 +9221,16 @@ null :
                     },
             };
         }
+        if (contentDedupPlan !== null && contentDedupPlan.pendingEpochs === null && contentDedupPlan.pendingIndexes === null) {
+            // Build both columns before publishing either. A failed allocation
+            // must leave the deferred pair intact for rollback or a later scan.
+            const epochs = new Uint32Array(contentDedupPlan.resolvedFlags.length);
+            const indexes = new Uint32Array(contentDedupPlan.resolvedFlags.length);
+            contentDedupPlan.pendingEpochs = epochs;
+            contentDedupPlan.pendingIndexes = indexes;
+        }
+        const pendingEpochs = contentDedupPlan?.pendingEpochs ?? null;
+        const pendingIndexes = contentDedupPlan?.pendingIndexes ?? null;
         let tableSize = 1;
         while (tableSize < count * 2) { tableSize *= 2; }
         const tableMask = tableSize - 1;
@@ -9259,10 +9276,10 @@ null :
          * @returns {number}
          */
         const findPendingContentIndex = (hash1, hash2, contentBytes, contentOffset, contentLength) => {
-            if (contentDedupPlan !== null && uniqueIndexList !== null) {
+            if (pendingEpochs !== null && pendingIndexes !== null && uniqueIndexList !== null) {
                 const uniqueIndex = uniqueIndexList[currentRowIndex];
-                return contentDedupPlan.pendingEpochs[uniqueIndex] === pendingPlanEpoch ?
-                    contentDedupPlan.pendingIndexes[uniqueIndex] :
+                return pendingEpochs[uniqueIndex] === pendingPlanEpoch ?
+                    pendingIndexes[uniqueIndex] :
                     -1;
             }
             let slot = getPendingHashSlot(hash1, hash2);
@@ -9294,11 +9311,11 @@ null :
          * @throws {Error} If the selected hash-table slot is unavailable.
          */
         const insertPendingContentIndex = (hash1, hash2) => {
-            if (contentDedupPlan !== null && uniqueIndexList !== null) {
+            if (pendingEpochs !== null && pendingIndexes !== null && uniqueIndexList !== null) {
                 const pendingIndex = pendingContentCount;
                 const uniqueIndex = uniqueIndexList[currentRowIndex];
-                contentDedupPlan.pendingEpochs[uniqueIndex] = pendingPlanEpoch;
-                contentDedupPlan.pendingIndexes[uniqueIndex] = pendingIndex;
+                pendingEpochs[uniqueIndex] = pendingPlanEpoch;
+                pendingIndexes[uniqueIndex] = pendingIndex;
                 pendingPlanUniqueIndexes.push(uniqueIndex);
                 return pendingIndex;
             }
@@ -9661,6 +9678,125 @@ null :
     }
     /* eslint-enable @stylistic/semi */
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Publishes a fully checked consecutive reservation without per-row table
+     * writes. The witness is local to this synchronous call. An unsupported or
+     * invalid row leaves every table untouched so the scalar path preserves its
+     * original partial-publication and error behavior.
+     * @param {{indexes: Int32Array, active: boolean}|null} staged
+     * @param {number[]|Uint32Array} hash1s
+     * @param {number[]|Uint32Array} hash2s
+     * @param {number[]|Float64Array} offsets
+     * @param {number[]|Uint32Array} lengths
+     * @param {number} dictNameId
+     * @param {boolean} metadataValidated
+     * @returns {boolean} Whether the complete range was published.
+     */
+    _tryPublishContiguousArtifactTermContentMetadata(staged, hash1s, hash2s, offsets, lengths, dictNameId, metadataValidated) {
+        if (
+            staged === null ||
+            !(staged.indexes instanceof Int32Array) ||
+            !(hash1s instanceof Uint32Array) ||
+            !(hash2s instanceof Uint32Array) ||
+            !(offsets instanceof Float64Array) ||
+            !(lengths instanceof Uint32Array) ||
+            !(staged.indexes.buffer instanceof ArrayBuffer) ||
+            !(hash1s.buffer instanceof ArrayBuffer) ||
+            !(hash2s.buffer instanceof ArrayBuffer) ||
+            !(offsets.buffer instanceof ArrayBuffer) ||
+            !(lengths.buffer instanceof ArrayBuffer)
+        ) {
+            return false
+        }
+        const count = offsets.length
+        const firstIndex = staged.indexes[0]
+        const endIndex = firstIndex + count
+        if (
+            count === 0 ||
+            staged.indexes.length !== count ||
+            hash1s.length < count || hash2s.length < count || lengths.length < count ||
+            firstIndex < 0 ||
+            endIndex > this._termEntryContentMetaStateTable.length ||
+            endIndex > this._termEntryContentMetaHash1Table.length ||
+            endIndex > this._termEntryContentMetaHash2Table.length ||
+            endIndex > this._termEntryContentMetaLengthTable.length ||
+            endIndex > this._termEntryContentMetaIdTable.length ||
+            endIndex > this._termEntryContentMetaOffsetTable.length ||
+            endIndex > this._termEntryContentMetaDictNameIdTable.length
+        ) {
+            return false
+        }
+        const indexes = staged.indexes
+        const stateTable = this._termEntryContentMetaStateTable
+        const hash1Table = this._termEntryContentMetaHash1Table
+        const hash2Table = this._termEntryContentMetaHash2Table
+        const lengthTable = this._termEntryContentMetaLengthTable
+        // Caller-owned columns may be views into metadata storage. Scalar
+        // publication interleaves its reads and writes; bulk operations require
+        // every input to remain unchanged until all writes finish. Native arena
+        // tables share one buffer but occupy disjoint byte ranges.
+        const reads = [
+            {values: indexes, start: 0},
+            {values: hash1s, start: 0},
+            {values: hash2s, start: 0},
+            {values: offsets, start: 0},
+            {values: lengths, start: 0},
+            {values: hash1Table, start: firstIndex},
+            {values: hash2Table, start: firstIndex},
+            {values: lengthTable, start: firstIndex},
+        ]
+        const writes = [
+            this._termEntryContentMetaIdTable,
+            this._termEntryContentMetaOffsetTable,
+            this._termEntryContentMetaDictNameIdTable,
+            stateTable,
+        ]
+        for (let i = 0; i < writes.length; ++i) {
+            const target = writes[i]
+            const targetStart = target.byteOffset + firstIndex * target.BYTES_PER_ELEMENT
+            const targetEnd = target.byteOffset + endIndex * target.BYTES_PER_ELEMENT
+            for (const {values, start} of reads) {
+                if (values.buffer !== target.buffer) { continue }
+                const inputStart = values.byteOffset + start * values.BYTES_PER_ELEMENT
+                const inputEnd = inputStart + count * values.BYTES_PER_ELEMENT
+                if (inputStart < targetEnd && targetStart < inputEnd) { return false }
+            }
+            for (let j = i + 1; j < writes.length; ++j) {
+                const other = writes[j]
+                if (other.buffer !== target.buffer) { continue }
+                const otherStart = other.byteOffset + firstIndex * other.BYTES_PER_ELEMENT
+                const otherEnd = other.byteOffset + endIndex * other.BYTES_PER_ELEMENT
+                if (otherStart < targetEnd && targetStart < otherEnd) { return false }
+            }
+        }
+        for (let i = 0; i < count; ++i) {
+            const index = firstIndex + i
+            const offset = offsets[i]
+            const length = lengths[i]
+            if (
+                indexes[i] !== index ||
+                stateTable[index] !== TERM_CONTENT_META_SLOT_PENDING ||
+                hash1Table[index] !== hash1s[i] || hash2Table[index] !== hash2s[i] ||
+                lengthTable[index] !== length ||
+                (!metadataValidated && (
+                    !Number.isSafeInteger(offset) || offset < 0 || length >= TERM_CONTENT_META_U32_NULL
+                ))
+            ) {
+                return false
+            }
+        }
+        this._termEntryContentMetaIdTable.fill(0, firstIndex, endIndex)
+        this._termEntryContentMetaOffsetTable.set(offsets, firstIndex)
+        this._termEntryContentMetaDictNameIdTable.fill(dictNameId, firstIndex, endIndex)
+        stateTable.fill(TERM_CONTENT_META_SLOT_PUBLISHED, firstIndex, endIndex)
+        this._termEntryContentMetaHashPairPendingCount -= count
+        this._termEntryContentMetaHashPairCount += count
+        return true
+    }
+
+    /* eslint-enable @stylistic/semi */
+
     /**
      * Publishes persisted offsets to rows and to the in-memory dedup index.
      * @param {{count: number, contentOffsets: Float64Array, contentLengths: Uint32Array, resolvedContentDictNames: string|(string|null)[], pendingRowToUniqueIndex: Int32Array|null, pendingContentBytes: Uint8Array[], pendingContentHash1s: number[]|Uint32Array, pendingContentHash2s: number[]|Uint32Array, pendingOffsets: number[]|Float64Array, pendingLengths: number[]|Uint32Array, pendingResolvedDictNames: string|string[], pendingContentSpans: {buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null, contentDedupPlan?: ArtifactTermContentDedupPlan|null, contentUniqueIndexList?: Uint32Array, stagedContentMetadata?: {indexes: Int32Array, active: boolean, collisionEntries?: Array<{key: string, meta: {id: number, offset: number, length: number, dictName: string, signature1?: number, signature2?: number, signature3?: number}}>}|null, importMetrics?: Record<string, number>, metadataValidated?: boolean, useResolvedContentReferences?: boolean}} state
@@ -9750,7 +9886,18 @@ null :
         const uniformPendingDictNameId = uniformPendingDictName === null ?
             -1 :
             this._internTermEntryContentMetaDictName(uniformPendingDictName);
-        for (let i = 0; i < pendingOffsets.length; ++i) {
+        /* eslint-disable @stylistic/semi */
+        const publishedContiguous = typeof uniformPendingDictName === 'string' && this._tryPublishContiguousArtifactTermContentMetadata(
+            stagedContentMetadata,
+            pendingContentHash1s,
+            pendingContentHash2s,
+            pendingOffsets,
+            pendingLengths,
+            uniformPendingDictNameId,
+            metadataValidated,
+        )
+        /* eslint-enable @stylistic/semi */
+        for (let i = publishedContiguous ? pendingOffsets.length : 0; i < pendingOffsets.length; ++i) {
             const dictName = uniformPendingDictName ?? pendingResolvedDictNames[i];
             const dictNameId = uniformPendingDictNameId >= 0 ?
                 uniformPendingDictNameId :
@@ -9861,23 +10008,20 @@ null :
         contentDedupPlan,
         useResolvedContentReferences,
     ) {
-        /** @type {Partial<ArtifactTermRecordChunk>} */
-        const additions = {};
-        if (preparedLookupIndexes !== null) {
-            additions.preparedLookupIndexes = preparedLookupIndexes;
-        }
         if (
             useResolvedContentReferences &&
             contentDedupPlan !== null &&
             chunk.contentUniqueIndexList instanceof Uint32Array
         ) {
-            additions.resolvedContentReferences = {
-                uniqueIndexList: chunk.contentUniqueIndexList,
-                offsets: contentDedupPlan.resolvedOffsets,
-                lengths: contentDedupPlan.resolvedLengths,
-            };
+            return createArtifactTermRecordChunkWithResolvedContent(
+                chunk,
+                chunk.contentUniqueIndexList,
+                contentDedupPlan.resolvedOffsets,
+                contentDedupPlan.resolvedLengths,
+                preparedLookupIndexes,
+            );
         }
-        return Object.keys(additions).length === 0 ? chunk : {...chunk, ...additions};
+        return preparedLookupIndexes === null ? chunk : {...chunk, preparedLookupIndexes};
     }
 
     /**

@@ -1413,7 +1413,8 @@ export class DictionaryImporter {
             ) :
             null;
         const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
-        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
+        const rawTermBankSourceBytes = useTermArtifactFiles || usePackedTermArtifact ? null : this._getRawTermBankSourceBytes(termFiles);
+        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
             termContentStorageMode: effectiveTermContentStorageMode,
@@ -1425,6 +1426,9 @@ export class DictionaryImporter {
         }
         if (expectedTermRecordImportBytes !== null) {
             importOptimizationOptions.expectedTermRecordImportBytes = expectedTermRecordImportBytes;
+        }
+        if (rawTermBankSourceBytes !== null) {
+            importOptimizationOptions.rawTermBankSourceBytes = rawTermBankSourceBytes;
         }
         dictionaryDatabase.setImportOptimizationFlags(importOptimizationOptions);
         /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
@@ -1439,7 +1443,8 @@ export class DictionaryImporter {
             `termContentDedup=${String(enableTermEntryContentDedup)} ` +
             `preloadedTermArtifacts=${String(preloadedTermArtifactBytes !== null)} ` +
             `expectedTermContentImportBytes=${String(expectedTermContentImportBytes)} ` +
-            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)}`,
+            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)} ` +
+            `rawTermBankSourceBytes=${String(rawTermBankSourceBytes)}`,
         );
 
         // Load and import data
@@ -1505,7 +1510,7 @@ export class DictionaryImporter {
             ),
             ...(rawZipPayloadReader === null ?
                 {} :
-                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal)}),
+                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal, true)}),
         });
         const uncompressedImportRunPlan = termBankSourcePipeline.createImportRunPlan(0);
         const compressedImportRunPlan = termBankSourcePipeline.createCompressedImportRunPlan(0);
@@ -1629,7 +1634,7 @@ export class DictionaryImporter {
                 `externalPackedMediaStorage=${String(useExternalPackedMediaStorage)}`,
             );
             const uniqueMediaPaths = useTermMediaRequirements ? new Set() : null;
-            /** @type {import('dictionary-importer').ImportRequirement[]} */
+            /** @type {import('dictionary-importer').DeferredMediaImportRequirement[]} */
             const deferredNoMetadataMediaRequirements = [];
 
             const canPackSourceMedia = (
@@ -1973,11 +1978,11 @@ export class DictionaryImporter {
                                 const file = fileMap.get(requirement.source.path);
                                 if (
                                     deferCachedArchiveImages &&
-                                    (requirement.type === 'image' || requirement.type === 'structured-content-image') &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
@@ -1985,7 +1990,7 @@ export class DictionaryImporter {
                                     typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
                                     size > mediaPrefetchRemainingBytes || mediaPrefetchRemainingEntries === 0
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(requirement);
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 mediaPrefetchRemainingBytes -= size;
@@ -2384,6 +2389,10 @@ export class DictionaryImporter {
                             parserSourceDeliveryMs: parserProfile.sourceDeliveryMs ?? null,
                             parserSourceTransferredBytes: parserProfile.sourceTransferredBytes ?? null,
                             parserSourceInflateMs: parserProfile.sourceInflateMs ?? null,
+                            parserSourceCrcMs: parserProfile.sourceCrcMs ?? null,
+                            parserSourceCrcScannedBytes: parserProfile.sourceCrcScannedBytes ?? null,
+                            parserSourceCrcReusedBytes: parserProfile.sourceCrcReusedBytes ?? null,
+                            parserSourceCrcReusedGlossaryCount: parserProfile.sourceCrcReusedGlossaryCount ?? null,
                             parserSourceCompressedBytes: parserProfile.sourceCompressedBytes ?? null,
                             parserSourceUncompressedBytes: parserProfile.sourceUncompressedBytes ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
@@ -2685,6 +2694,7 @@ export class DictionaryImporter {
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
+            const sourceRangeReadCounts = rawZipPayloadReader?.getCoalescedRangeReadCounts() ?? {logicalRequests: 0, physicalRanges: 0};
             const step4AccountedMs = (
                 step4TimingBreakdown.termParseMs +
                 step4TimingBreakdown.termSerializationMs +
@@ -2768,6 +2778,10 @@ export class DictionaryImporter {
                 fastPathParserSourceDeliveryMs: fastPathProfile?.sourceDeliveryMs ?? null,
                 fastPathParserSourceTransferredBytes: fastPathProfile?.sourceTransferredBytes ?? null,
                 fastPathParserSourceInflateMs: fastPathProfile?.sourceInflateMs ?? null,
+                fastPathParserSourceCrcMs: fastPathProfile?.sourceCrcMs ?? null,
+                fastPathParserSourceCrcScannedBytes: fastPathProfile?.sourceCrcScannedBytes ?? null,
+                fastPathParserSourceCrcReusedBytes: fastPathProfile?.sourceCrcReusedBytes ?? null,
+                fastPathParserSourceCrcReusedGlossaryCount: fastPathProfile?.sourceCrcReusedGlossaryCount ?? null,
                 fastPathParserSourceCompressedBytes: fastPathProfile?.sourceCompressedBytes ?? null,
                 fastPathParserSourceUncompressedBytes: fastPathProfile?.sourceUncompressedBytes ?? null,
                 fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
@@ -2787,6 +2801,8 @@ export class DictionaryImporter {
                 fastPathParserParallelOwnedContentBytes: fastPathProfile?.parallelOwnedContentBytes ?? null,
                 fastPathParserParallelPeakQueuedOwnedContentBytes: fastPathProfile?.parallelPeakQueuedOwnedContentBytes ?? null,
                 fastPathParserParallelSkipReason: fastPathProfile?.parallelSkipReason ?? null,
+                sourceZipLogicalRangeReadCount: sourceRangeReadCounts.logicalRequests,
+                sourceZipPhysicalRangeReadCount: sourceRangeReadCounts.physicalRanges,
                 sourceInitialPrefetchFileCount: initialSourcePrefetch.fileCount,
                 sourceInitialPrefetchEstimatedBytes: initialSourcePrefetch.estimatedBytes,
                 zipUseWebWorkers: zipWorkerPolicy.useWebWorkers,
@@ -3359,16 +3375,79 @@ export class DictionaryImporter {
 
     /**
      * @param {string} path
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').MediaImportEntry} entry
      * @param {import('dictionary-importer').ImportRequirement[]} requirements
      */
     _addFastMediaRequirement(path, entry, requirements) {
         requirements.push({
-            type: 'structured-content-image',
-            target: {tag: 'img', path: ''},
-            source: {tag: 'img', path},
+            type: 'image-reference',
+            source: {path},
             entry,
         });
+    }
+
+    /**
+     * Keep diagnostic keys in one owned arena per projected chunk. Successful
+     * image imports need neither decoded headwords nor one retained buffer per
+     * key. Copying the exact key bytes also releases borrowed source/WASM views.
+     * @param {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} chunk
+     * @returns {import('dictionary-importer').MediaImportDiagnosticKeys|null}
+     * @throws {TermBankWasmResourceError} If key offsets would exceed the arena's index width.
+     */
+    _createMediaReferenceDiagnostics(chunk) {
+        /** @type {Array<string|Uint8Array>} */
+        const keys = [];
+        const keyBytes = (/** @type {string} */ value, /** @type {Uint8Array|undefined} */ bytes) => (
+            value.length > 0 || typeof bytes === 'undefined' ? value : bytes
+        );
+        let byteLength = 0;
+        for (const {index, row, imagePaths} of chunk.mediaRows) {
+            if (typeof imagePaths === 'undefined') { continue; }
+            const expression = keyBytes(row.expression, row.expressionBytes ?? chunk.expressionBytesList[index]);
+            const reading = chunk.readingEqualsExpressionList[index] === 1 ?
+                expression :
+                keyBytes(row.reading, row.readingBytes ?? chunk.readingBytesList[index]);
+            keys.push(expression, reading);
+            if (typeof expression !== 'string') { byteLength += expression.byteLength; }
+            if (reading !== expression && typeof reading !== 'string') { byteLength += reading.byteLength; }
+        }
+        if (keys.length === 0) { return null; }
+        if (!Number.isSafeInteger(byteLength) || byteLength > 0xffffffff) {
+            throw new TermBankWasmResourceError('Media diagnostic keys exceed their offset budget');
+        }
+        const bytes = new Uint8Array(byteLength);
+        const spans = new Uint32Array(keys.length * 2);
+        /** @type {Map<number, string>|null} */
+        let decodedKeys = null;
+        let offset = 0;
+        for (let i = 0; i < keys.length; i += 2) {
+            const expression = keys[i];
+            const reading = keys[i + 1];
+            const expressionOffset = offset;
+            const expressionLength = typeof expression === 'string' ? 0 : expression.byteLength;
+            if (typeof expression === 'string') {
+                // Keep decoded strings verbatim, including lone surrogates
+                // that a UTF-8 encode/decode round trip would replace.
+                (decodedKeys ??= new Map()).set(i, expression);
+            } else {
+                bytes.set(expression, offset);
+                offset += expressionLength;
+            }
+            const readingOffset = reading === expression ? expressionOffset : offset;
+            const readingLength = typeof reading === 'string' ? 0 : reading.byteLength;
+            if (typeof reading === 'string') {
+                (decodedKeys ??= new Map()).set(i + 1, reading);
+            } else if (reading !== expression) {
+                bytes.set(reading, offset);
+                offset += readingLength;
+            }
+            const spanIndex = i * 2;
+            spans[spanIndex] = expressionOffset;
+            spans[spanIndex + 1] = expressionLength;
+            spans[spanIndex + 2] = readingOffset;
+            spans[spanIndex + 3] = readingLength;
+        }
+        return {bytes, spans, decodedKeys};
     }
 
     /**
@@ -3440,9 +3519,26 @@ export class DictionaryImporter {
     }
 
     /**
+     * No-metadata targets are already assigned before term serialization. Keep
+     * only the path and diagnostic text until the later media drain, so neither
+     * a full glossary nor its parser-backed content stays alive through here.
+     * @param {import('dictionary-importer').ImportRequirement} requirement
+     * @returns {import('dictionary-importer').DeferredMediaImportRequirement}
+     */
+    _createDeferredMediaRequirement({type, source: {path}, entry}) {
+        const {dictionary} = entry;
+        if ('diagnosticKeys' in entry) {
+            const {diagnosticKeys, diagnosticIndex} = entry;
+            return {type, source: {path}, dictionary, diagnosticKeys, diagnosticIndex};
+        }
+        const {expression, reading} = entry;
+        return {type, source: {path}, dictionary, expression, reading};
+    }
+
+    /**
      * Resolve and store bounded media batches in order. One raw ZIP read
      * may overlap the preceding batch’s write.
-     * @param {import('dictionary-importer').ImportRequirement[]} requirements
+     * @param {import('dictionary-importer').DeferredMediaImportRequirement[]} requirements
      * @param {import('dictionary-database').MediaDataArrayBufferContent[]} prefetched
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
      * @param {(media: import('dictionary-database').MediaDataArrayBufferContent[], processed: number, total: number) => Promise<void>} writeMedia
@@ -3486,7 +3582,7 @@ export class DictionaryImporter {
                 /** @type {Map<import('@zip.js/zip.js').Entry, string>} */
                 const pathByFile = new Map();
                 for (const requirement of batchRequirements) {
-                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { continue; }
+                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { continue; }
                     const path = requirement.source.path;
                     if (
                         filesByPath.has(path) ||
@@ -3558,8 +3654,15 @@ export class DictionaryImporter {
                         mediaMetrics.mediaZipBatchUncompressedBytes += inflated.uncompressedBytes;
                     }
                 }
-                const {media} = await this._resolveAsyncRequirements(batchRequirements, fileMap, rawMediaBytesByPath);
+                /** @type {Map<string, import('dictionary-database').MediaDataArrayBufferContent>} */
+                const mediaByPath = new Map();
+                /** @type {import('dictionary-importer').ImportRequirementContext} */
+                const context = {fileMap, media: mediaByPath, ...(typeof rawMediaBytesByPath === 'undefined' ? {} : {rawMediaBytesByPath})};
+                await this._runWithConcurrencyLimit(batchRequirements, this._mediaResolutionConcurrency, async (requirement) => {
+                    await this._getImageMedia(context, requirement.source.path, requirement);
+                });
                 this._throwIfCancelled();
+                const media = [...mediaByPath.values()];
                 processed += end - start;
                 // Start only the next raw read. The current resolver has
                 // settled so its cache updates are visible to the next plan.
@@ -3635,6 +3738,9 @@ export class DictionaryImporter {
      */
     async _resolveAsyncRequirement(context, requirement) {
         switch (requirement.type) {
+            case 'image-reference':
+                await this._getImageMedia(context, requirement.source.path, requirement.entry);
+                break;
             case 'image':
                 await this._resolveDictionaryTermGlossaryImage(
                     context,
@@ -3668,6 +3774,8 @@ export class DictionaryImporter {
         }
 
         switch (requirement.type) {
+            case 'image-reference':
+                return true;
             case 'image':
                 this._assignResolvedImageData(requirement.target, requirement.source, cachedMetadata.width, cachedMetadata.height);
                 return true;
@@ -3790,7 +3898,7 @@ export class DictionaryImporter {
     /**
      * @param {import('dictionary-importer').ImportRequirementContext} context
      * @param {string} path
-     * @param {import('dictionary-database').DatabaseTermEntry} entry
+     * @param {import('dictionary-importer').MediaImportEntry} entry
      * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent>}
      */
     async _getImageMedia(context, path, entry) {
@@ -3802,7 +3910,16 @@ export class DictionaryImporter {
          * @returns {Error}
          */
         const createError = (message) => {
-            const {expression, reading} = entry;
+            let expression;
+            let reading;
+            if ('diagnosticKeys' in entry) {
+                const {bytes, spans, decodedKeys} = entry.diagnosticKeys;
+                const index = entry.diagnosticIndex * 4;
+                expression = decodedKeys?.get(index / 2) ?? decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, bytes.subarray(spans[index], spans[index] + spans[index + 1]));
+                reading = decodedKeys?.get(index / 2 + 1) ?? decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, bytes.subarray(spans[index + 2], spans[index + 2] + spans[index + 3]));
+            } else {
+                ({expression, reading} = entry);
+            }
             const readingSource = reading.length > 0 ? ` (${reading})` : '';
             return new Error(`${message} at path ${JSON.stringify(path)} for ${expression}${readingSource} in ${dictionary}`);
         };
@@ -4668,6 +4785,33 @@ export class DictionaryImporter {
     }
 
     /**
+     * This is an eligibility hint from the selected raw term banks, not an
+     * output-size estimate. Check every entry even after the worker threshold
+     * is reached so missing or malformed metadata always declines the hint.
+     * @param {ImportFileEntry[]} termFiles
+     * @returns {number|null}
+     */
+    _getRawTermBankSourceBytes(termFiles) {
+        let total = 0;
+        try {
+            for (const file of termFiles) {
+                const size = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
+                if (
+                    typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
+                    size > Number.MAX_SAFE_INTEGER - total
+                ) {
+                    return null;
+                }
+                total += size;
+            }
+        } catch (_) {
+            // A performance hint must not add a failure to the import path.
+            return null;
+        }
+        return total;
+    }
+
+    /**
      * @param {Uint8Array|null} packedTermArtifactBytes
      * @param {Uint8Array|null} sharedGlossaryArtifactBytes
      * @param {{termBanksByArtifact: Map<string, {packedOffset: number, packedLength: number, rows: number|null}>}|null} termArtifactManifest
@@ -4993,7 +5137,14 @@ export class DictionaryImporter {
                     const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
+                        const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
+                        let diagnosticIndex = 0;
                         for (const {index, row, imagePaths} of mediaRows) {
+                            if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
+                                const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
+                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+                                continue;
+                            }
                             const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
                             let reading = expression;
                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
@@ -5010,10 +5161,6 @@ export class DictionaryImporter {
                                 termTags: row.termTags ?? '',
                                 dictionary: dictionaryTitle,
                             };
-                            if (typeof imagePaths !== 'undefined') {
-                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
-                                continue;
-                            }
                             let glossaryList;
                             if (
                                 this._skipImageMetadata &&

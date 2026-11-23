@@ -3113,8 +3113,10 @@ fallback ? i + 0.5 : i,
         const profile = consumeLastTermBankWasmParseProfile();
         expect(compact.contentMetaByUniqueIndex).toBe(true);
         expect(compact.contentMetaList).toHaveLength(3 * 4);
-        expect(compact.contentDedupPlan.pendingSpanOffsetsScratch).toHaveLength(0);
-        expect(compact.contentDedupPlan.pendingSpanLengthsScratch).toHaveLength(0);
+        expect(compact.contentDedupPlan.pendingEpochs).toBeNull();
+        expect(compact.contentDedupPlan.pendingIndexes).toBeNull();
+        expect(compact.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined();
+        expect(compact.contentDedupPlan.pendingSpanLengthsScratch).toBeUndefined();
         expect(profile?.compactContentMetadataGroups).toBe(1);
         expect(profile?.compactContentMetadataBytesAvoided).toBe((18 - 3) * 16);
         expect(profile?.fusedParseFallbacks).toBe(fallback ? 1 : 0);

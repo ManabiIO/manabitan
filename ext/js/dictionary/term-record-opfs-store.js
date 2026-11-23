@@ -16,6 +16,7 @@
  */
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
+import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -102,12 +103,17 @@ const COMPACT_SCORE_TABLE_RADIUS = 256;
 const COMPACT_SCORE_TABLE_MIN_ROWS = 64;
 const LOOKUP_INDEX_FLUSH_THRESHOLD_BYTES = 4 * 1024 * 1024;
 const EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES = 2 * 1024 * 1024;
+const MIN_INDEX_WORKER_SOURCE_BYTES = 1024 * 1024 * 1024;
 const MAX_COMPACT_LOOKUP_INDEX_ROWS = MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS;
 const PERSISTED_ONLY_IMPORT_ROW_THRESHOLD = 250000;
 const STORAGE_READ_RETRY_COUNT = 2;
 const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
+/** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
+/** @type {WeakMap<object, ResolvedContentReferences>} */
+const resolvedContentReferenceOrigins = new WeakMap();
+const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
 const EMPTY_BYTES = new Uint8Array(0);
@@ -323,6 +329,78 @@ function hasResolvedContentReferences(chunk, count) {
         references.lengths instanceof Uint32Array &&
         references.offsets.length === references.lengths.length
     );
+}
+
+/**
+ * Creates the ordinary objects required by synchronous reference validation.
+ * The origin record proves object identity only; current columns and values
+ * are checked again for every run, including after an awaited append.
+ * @template {object} T
+ * @param {T} chunk
+ * @param {Uint32Array} uniqueIndexList
+ * @param {Float64Array} offsets
+ * @param {Uint32Array} lengths
+ * @param {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} [preparedLookupIndexes=null]
+ * @returns {T & {resolvedContentReferences: ResolvedContentReferences, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>}}
+ */
+export function createArtifactTermRecordChunkWithResolvedContent(chunk, uniqueIndexList, offsets, lengths, preparedLookupIndexes = null) {
+    const references = {uniqueIndexList, offsets, lengths};
+    const result = {...chunk, ...(preparedLookupIndexes === null ? {} : {preparedLookupIndexes}), resolvedContentReferences: references};
+    resolvedContentReferenceOrigins.set(result, references);
+    return result;
+}
+
+/**
+ * Selects factory-created objects whose indexed reads cannot change during a
+ * synchronous scan. Descriptors alone cannot establish this: a Proxy can
+ * expose data descriptors while ordinary property reads return other values.
+ * External, accessor-backed or shared columns keep per-row validation.
+ * @param {{fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {number} count
+ * @returns {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}|null}
+ */
+function getSynchronousResolvedContentReferences(chunk, count) {
+    const origin = resolvedContentReferenceOrigins.get(chunk);
+    if (
+        typeof origin === 'undefined' || Object.getPrototypeOf(chunk) !== Object.prototype ||
+        typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function'
+    ) { return null; }
+    const fixedLengthDescriptor = Object.getOwnPropertyDescriptor(chunk, 'fixedContentLength');
+    if (
+        typeof fixedLengthDescriptor === 'undefined' ?
+            'fixedContentLength' in chunk :
+            !('value' in fixedLengthDescriptor) || typeof fixedLengthDescriptor.value === 'number'
+    ) { return null; }
+    const references = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')?.value);
+    if (references !== origin || Object.getPrototypeOf(references) !== Object.prototype) { return null; }
+    const uniqueIndexList = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'uniqueIndexList')?.value);
+    const offsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'offsets')?.value);
+    const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'lengths')?.value);
+    if (
+        !(uniqueIndexList instanceof Uint32Array) ||
+        !(offsets instanceof Float64Array) ||
+        !(lengths instanceof Uint32Array) ||
+        Object.getPrototypeOf(uniqueIndexList) !== Uint32Array.prototype ||
+        Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
+        Object.getPrototypeOf(lengths) !== Uint32Array.prototype
+    ) { return null; }
+    for (const column of [uniqueIndexList, offsets, lengths]) {
+        if (
+            !ArrayBuffer.isView(column) ||
+            Object.hasOwn(column, 'length') ||
+            Object.hasOwn(column, 'buffer') ||
+            !(column.buffer instanceof ArrayBuffer)
+        ) { return null; }
+        // The builtin getter establishes private ArrayBuffer storage using
+        // the buffer's internal identity, independently of its prototype.
+        try {
+            ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(column.buffer);
+        } catch {
+            return null;
+        }
+    }
+    if (uniqueIndexList.length < count || offsets.length !== lengths.length) { return null; }
+    return {uniqueIndexList, offsets, lengths};
 }
 
 /**
@@ -648,7 +726,7 @@ class DenseIdRecordStore {
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
- * @property {FileSystemWritableFileStream|SyncImportIndexWriter|null} lookupIndexWritable
+ * @property {FileSystemWritableFileStream|SyncImportIndexWriter|WorkerImportIndexWriter|null} lookupIndexWritable
  * @property {number} lookupIndexChunkCount
  * @property {number} lookupIndexRecordCount
  * @property {number} lookupIndexQueuedBytes
@@ -681,6 +759,7 @@ class DenseIdRecordStore {
  * @property {number} lookupIndexWriteBytes
  * @property {number} lookupIndexAwaitMs
  * @property {number} lookupIndexMaxQueuedBytes
+ * @property {number} lookupIndexWorkerFileCount
  */
 
 /**
@@ -754,6 +833,8 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>|null} */
+        this._importIndexWorkerPromise = null;
         /** @type {DenseIdRecordStore} */
         this._recordsById = new DenseIdRecordStore();
         /** @type {Map<string, number[]>} */
@@ -793,11 +874,13 @@ export class TermRecordOpfsStore {
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         /** @type {number|null} */
         this._expectedImportBytes = null;
+        /** @type {number|null} */
+        this._rawTermBankSourceBytes = null;
         /** @type {TermRecordEndImportSessionMetrics|null} */
         this._lastEndImportSessionMetrics = null;
         /** @type {{drainCycleCount: number, writeCallCount: number, singleChunkWriteCount: number, mergedWriteCount: number, totalWriteBytes: number, mergedWriteBytes: number, maxWriteBytes: number, minWriteBytes: number, mergedGroupChunkCount: number, maxMergedGroupChunkCount: number, minMergedGroupChunkCount: number, writeCoalesceTargetBytes: number}} */
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
-        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number}} */
+        /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
     }
 
@@ -1243,6 +1326,7 @@ export class TermRecordOpfsStore {
      */
     async _abandonImportWritesForRollback() {
         this._importSessionActive = false;
+        this._rawTermBankSourceBytes = null;
         this._deferIndexBuild = false;
         this._indexDirty = false;
         this._preinternedCompactionRemap = new Uint32Array(0);
@@ -1312,6 +1396,7 @@ export class TermRecordOpfsStore {
                 // Checkpoint restoration validates the committed sidecar bytes below.
             }
         }
+        await this._retireImportIndexWorker();
         this._invalidateAllPersistentLookupState();
     }
 
@@ -1323,6 +1408,7 @@ export class TermRecordOpfsStore {
             await this._endImportSession();
         } finally {
             this._preinternedCompactionRemap = new Uint32Array(0);
+            this._rawTermBankSourceBytes = null;
         }
     }
 
@@ -1362,6 +1448,7 @@ export class TermRecordOpfsStore {
             lookupIndexWriteBytes: this._lookupIndexWriteMetrics.writeBytes,
             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
+            lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
         };
         if (this._reloadFromShardsAfterImport) {
             this._indexByDictionary.clear();
@@ -1390,6 +1477,15 @@ export class TermRecordOpfsStore {
             null;
         this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
+    }
+
+    /**
+     * Source work controls worker eligibility independently of output-size
+     * estimates used to coalesce record writes. Invalid hints disable it.
+     * @param {number|null} value
+     */
+    setRawTermBankSourceBytes(value) {
+        this._rawTermBankSourceBytes = typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null;
     }
 
     /**
@@ -2292,15 +2388,26 @@ export class TermRecordOpfsStore {
             // across runs. The row loop itself is synchronous.
             const tValidationStart = safePerformance.now();
             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
+            const references = useFixedContentSpan ? null : getSynchronousResolvedContentReferences(chunk, count);
             let runEnd = runStart;
+            const runLimitEnd = Math.min(count, runStart + runRowLimit);
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
-            while (runEnd < count) {
-                if ((runEnd - runStart) >= runRowLimit) {
-                    break;
+            while (runEnd < runLimitEnd) {
+                let uniqueIndex = -1;
+                let contentOffset;
+                let contentLength;
+                if (references !== null) {
+                    uniqueIndex = references.uniqueIndexList[runEnd];
+                    if (uniqueIndex >= references.offsets.length) {
+                        throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+                    }
+                    contentOffset = references.offsets[uniqueIndex];
+                    contentLength = references.lengths[uniqueIndex];
+                } else {
+                    contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
+                    contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 }
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 validateContentOffset(contentOffset);
                 validateContentLength(contentLength);
                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
@@ -2315,6 +2422,13 @@ export class TermRecordOpfsStore {
                 minContentOffset = nextMinContentOffset;
                 maxContentOffset = nextMaxContentOffset;
                 ++runEnd;
+                if (references !== null) {
+                    // Consecutive aliases have the same already-validated span
+                    // and cannot change this run's minimum or maximum offset.
+                    while (runEnd < runLimitEnd && references.uniqueIndexList[runEnd] === uniqueIndex) {
+                        ++runEnd;
+                    }
+                }
             }
             const runContentOffsetBase = minContentOffset === Number.POSITIVE_INFINITY ? 0 : minContentOffset;
             const runValidationMs = safePerformance.now() - tValidationStart;
@@ -5884,7 +5998,16 @@ export class TermRecordOpfsStore {
                     state.lookupIndexWritable = await this._createLookupIndexWritable(state);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
-                await (state.lookupIndexWritable instanceof SyncImportIndexWriter ? state.lookupIndexWritable.writeChunks(chunks) : state.lookupIndexWritable.write(new Blob(chunks)));
+                if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
+                    // _createLookupIndexChunk owns each complete buffer. The
+                    // existing queue budget remains charged until this worker
+                    // acknowledges the write, including any periodic flush.
+                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
+                } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
+                    await state.lookupIndexWritable.writeChunks(chunks);
+                } else {
+                    await state.lookupIndexWritable.write(new Blob(chunks));
+                }
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
                 state.lookupIndexChunkCount += chunks.length;
@@ -5908,12 +6031,31 @@ export class TermRecordOpfsStore {
      * Creates and initializes a fresh lookup-index writer by truncating it to zero bytes.
      * The synchronous opener owns its access-handle truncation; the fallback is truncated here.
      * @param {TermRecordShardState} state
-     * @returns {Promise<FileSystemWritableFileStream|SyncImportIndexWriter>}
+     * @returns {Promise<FileSystemWritableFileStream|SyncImportIndexWriter|WorkerImportIndexWriter>}
      */
     async _createLookupIndexWritable(state) {
         const fileHandle = state.lookupIndexFileHandle;
         if (fileHandle === null) { throw new Error('Term-record lookup index file handle is unavailable'); }
         if (this._importSessionActive && state.initialFileLength === 0) {
+            // Keep the worker and periodic flushes for imports with enough
+            // source work to cover their setup and scheduling costs. Tiny
+            // sidecars first written at finalization still use the local path
+            // unless a worker already belongs to this eligible session.
+            if (
+                this._rawTermBankSourceBytes !== null &&
+                this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES &&
+                (this._importIndexWorkerPromise !== null || state.lookupIndexQueuedBytes >= EAGER_IMPORT_LOOKUP_INDEX_WRITE_START_BYTES)
+            ) {
+                this._importIndexWorkerPromise ??= createImportIndexWorkerClient();
+                const worker = await this._importIndexWorkerPromise;
+                if (worker !== null) {
+                    const writer = await worker.open(fileHandle);
+                    if (writer !== null) {
+                        ++this._lookupIndexWriteMetrics.workerFileCount;
+                        return writer;
+                    }
+                }
+            }
             const writer = await openSyncImportIndexWriter(/** @type {Parameters<typeof openSyncImportIndexWriter>[0]} */ (/** @type {unknown} */ (fileHandle)));
             if (writer !== null) { return writer; }
         }
@@ -5929,6 +6071,13 @@ export class TermRecordOpfsStore {
             throw error;
         }
         return writable;
+    }
+
+    /** @returns {Promise<void>} */
+    async _retireImportIndexWorker() {
+        const promise = this._importIndexWorkerPromise;
+        this._importIndexWorkerPromise = null;
+        if (promise !== null) { (await promise)?.dispose(); }
     }
 
     /**
@@ -5996,6 +6145,7 @@ export class TermRecordOpfsStore {
                 );
             }
         }
+        await this._retireImportIndexWorker();
         if (errors.length === 1) {
             throw errors[0];
         }
@@ -7008,7 +7158,7 @@ export class TermRecordOpfsStore {
     }
 
     /**
-     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number}}
+     * @returns {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}}
      */
     _createEmptyLookupIndexWriteMetrics() {
         return {
@@ -7016,6 +7166,7 @@ export class TermRecordOpfsStore {
             writeBytes: 0,
             awaitMs: 0,
             maxQueuedBytes: 0,
+            workerFileCount: 0,
         };
     }
 
