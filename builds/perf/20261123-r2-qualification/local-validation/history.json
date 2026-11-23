@@ -1,0 +1,30 @@
+[
+  {
+    "command": [
+      "/workspace/scratch/fcfffdc555c8/runtime/node-v22.22.0-linux-x64/bin/node",
+      "dev/bin/lint-json.js"
+    ],
+    "status": "failure",
+    "exitCode": null,
+    "source": "Captured command-session 80128 output; the surrounding shell continued, so its final exit 0 is not this check's exit status.",
+    "diagnostic": "esbuild could not resolve ext/lib/handlebars.js and ext/lib/linkedom.js from template renderer imports. Generated build:libs prerequisites were absent. The initial full diagnostic remains in the tool execution transcript."
+  },
+  {
+    "command": [
+      "/workspace/scratch/fcfffdc555c8/runtime/node-v22.22.0-linux-x64/bin/node",
+      "dev/bin/build-libs.js"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 0.6740944990015123,
+    "log": "build-libs.log"
+  },
+  {
+    "command": [
+      "/workspace/scratch/fcfffdc555c8/runtime/node-v22.22.0-linux-x64/bin/node",
+      "dev/bin/lint-json.js"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 11.859975226998358,
+    "log": "lint-json.log"
+  }
+]

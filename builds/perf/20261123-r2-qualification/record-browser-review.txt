@@ -1,0 +1,78 @@
+# Independent review: resolved content run validation (#822)
+
+**Recommendation: HOLD PR #822 as a performance candidate.** All six frozen browser cells pass the independent source, archive, work, output-probe and raw-timing audit. The change reduces the existing validation-phase counter for Jitendex and VNDB, but does not demonstrate a material complete-import benefit that repeats in the independent reversed-order cell. This HOLD decision was made after inspecting all six complete cells; the reader’s recommendation field records that manual interpretation, not a general automatic statistical verdict.
+
+## Frozen scope and verification
+
+- Browser study: workflow run `45124794707`, research source `c0c2fdc79c9b4364e1a7fdfc915e5fd13ef332bc`, research tree `2e72f22f6db3ea584af37b7c90dd91c7ea90989c`.
+- Parent runtime: `5e1f8c12f7ff798ba407323aff675cb23b22af02`. Published candidate: `cf1e18d59d08da729d4b2fe45c7a07021f42360a`; its tree `64d89a6c4d6b9722d30580d5cc834ebb7eac0057` matches local frozen commit `d0f9f604b873663ecf05a895b80e5be3326200fc`.
+- Node `22.22.0`, Chrome for Testing `153.0.8010.12`, Playwright `1.63.0`, Linux x64. Node and browser executable hashes match between cells and are retained in the JSON.
+- Three dictionaries, each with forward and independent reverse jobs. Each cell contains exactly six excluded warmups, 12 alternating adjacent A/B or B/A pairs, and six interleaved unchanged-code A/C or C/A pairs. The reverse job reverses initial warmup, candidate-pair and control-pair orders. Total: **252 successful imports, 36 excluded warmups, 216 measured imports, 72 candidate pairs and 36 control pairs**.
+- Independently verified all six provider archive SHA-256 values and sizes, all 282 expanded files per archive, exact retained runner/config/test bytes against the frozen git commit, source/tree identities, completion hashes and dependency-lock receipts. The declared observation folders and schedule match exactly, with no overlapping observation process intervals, omitted observations, failed-cell markers or extra raw reports.
+- A and C have identical package-entry maps. Only `js/dictionary/term-record-opfs-store.js` changes in B; its SHA-256 is `5c26ea8bb77ca37a809581c762d3578dcfcebc6191f9718f0ca5fb56514cecbd`, matching the immutable published runtime blob manifest. The native WASM stays unchanged. Harness overlays are symmetric.
+- Reconstructed every duration from the raw file-input-change and post-UI completion browser clock, then checked exact agreement with the summary and observation. The operation sequence, completion errors, package identity, production defaults, OPFS SAH-pool mode and import-session finalization match. Profiling, tracing, screenshots, process sampling and import-flag overrides remain disabled.
+- All imports use three parser workers. Plain JMdict uses four source-pipeline groups per worker; media-aware Jitendex and VNDB use three. Native fused parsing, native content deduplication and native segmented lookup record zero fallbacks. Recorded row, bank, chunk, compressed-source, uncompressed-source and content/record/index write-byte totals agree across every arm and direction for each dictionary.
+
+| Corpus | Rows per import | Term banks | Parser chunks | Compressed term-source bytes | Uncompressed term-source bytes |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| JMdict | 526,942 | 53 | 12 | 15,574,114 | 171,092,992 |
+| Jitendex | 435,448 | 218 | 22 | 33,696,215 | 537,538,792 |
+| VNDB | 6,648,310 | 665 | 170 | 86,850,424 | 4,267,992,967 |
+
+## Complete-import results
+
+Negative values mean less elapsed time. Equal work is `100 × (sum(B) / sum(A) − 1)` within that cell; it is not a pooled-host estimate. C/A is unchanged code and is reported separately without adjusting B/A. The intervals are the fixed protocol’s descriptive 5,000-resample paired-median bootstrap intervals. All ratios, raw paired durations, AB/BA order splits and tails are retained in the JSON.
+
+| Corpus | Direction | B/A median | B/A equal work | B/A descriptive 95% interval | C/A median | C/A equal work | Worst B/A pair |
+| --- | --- | ---: | ---: | --- | ---: | ---: | ---: |
+| JMdict | forward | +1.072% | -1.095% | [-1.974%, +2.518%] | -1.881% | -1.615% | +3.794% |
+| JMdict | reverse | -3.623% | +2.218% | [-9.277%, +13.932%] | -2.032% | -0.966% | +44.274% |
+| Jitendex | forward | -0.411% | -0.304% | [-1.526%, +1.028%] | +0.024% | +0.080% | +2.625% |
+| Jitendex | reverse | -1.120% | -1.009% | [-1.476%, +0.054%] | +0.671% | -0.029% | +1.557% |
+| VNDB | forward | -0.020% | +0.375% | [-0.435%, +0.980%] | +0.982% | +1.446% | +11.786% |
+| VNDB | reverse | -0.874% | -0.916% | [-1.273%, -0.069%] | -0.142% | +0.217% | +1.202% |
+
+**JMdict:** the forward median and equal-work results differ in sign; the independent reverse has a −3.623% paired median but +2.218% equal-work time. Its wide interval and +44.274% slow tail preclude a gain claim. The unchanged-code control also shows apparent gains in both cells. No slow observation was removed.
+
+**Jitendex:** the complete-import equal-work changes are −0.304% and −1.009%. Both paired-median intervals include zero. The repeated direction of the point estimate does not establish a material improvement beyond the observed spread.
+
+**VNDB:** the forward cell is essentially flat at −0.020% median and +0.375% equal work; the reverse is −0.874% median and −0.916% equal work. The reverse interval excludes zero, but the forward cell does not replicate a complete-import improvement. This one favorable cell is retained without treating it as evidence of a qualified repeated gain.
+
+## Mechanism and activation limits
+
+These values use the pre-existing `termRecordValidationMs` counter. They are phase observations collected during the complete import, not an isolated benchmark of the new loop. Existing importer counters overlap with broader work and cannot be added together or converted directly into critical-path milliseconds saved.
+
+| Corpus | Validation B/A median, F / R | Validation B/A equal work, F / R | Validation C/A median, F / R | Validation C/A equal work, F / R |
+| --- | ---: | ---: | ---: | ---: |
+| JMdict | +8.536% / +12.058% | +1.051% / +21.105% | -4.285% / +2.493% | -4.308% / +3.291% |
+| Jitendex | -33.007% / -40.313% | -35.567% / -35.918% | +32.021% / -3.494% | +12.211% / +12.032% |
+| VNDB | -22.184% / -16.667% | -23.539% / -18.177% | +1.634% / +1.497% | +0.325% / +0.296% |
+
+The Jitendex validation counter decreases about 35.6%/35.9% on equal work, and VNDB about 23.5%/18.2%. JMdict instead increases about 1.1%/21.1%. These observations support a bounded mechanism explanation for Jitendex/VNDB, while the complete-import qualification remains unsuccessful.
+
+Source inspection establishes that the default resolved-content flow supplies owned typed reference columns eligible for the new branch. The browser reports do not contain a dedicated branch-hit counter, so this review makes no direct activation-count claim. Native-path and default-option receipts are verified separately; they do not substitute for a record-validator hit receipt.
+
+## Correctness and remaining gates
+
+The runtime change selects the current owned reference object once per synchronous validation run and reads each unique-content index once for both offset and length. It retains per-row bounds against both reference tables, safe-integer and sentinel checks, run splitting, fixed-span/fixed-length precedence, and the original generic helpers for shared-backed columns. References and dispatch are selected again after every awaited append. Independent code review found no correctness blocker.
+
+The exact committed-source oracle in `qualification/r2-record-span-validation/oracle-committed.json` compares all serialized sidecar bytes, run boundaries and error names/messages for 23 bounded cases. It covers compact/legacy/float64 layouts, large offset splits, each shared column, generic arrays, malformed indexes and bounds, invalid numeric offsets, reserved lengths, fixed overrides, error precedence and mutation after an awaited append. All cases match the pristine baseline. The focused store/test run passed 208 tests; changed-file lint, main/scoped test types and all-target build dry run passed. Initial setup/lint failures remain in the component evidence.
+
+The retained CI snapshot for runtime PR #822, run `45124698611`, records all 19 jobs completed: 15 success and four conditional skips. Successful gates include units, all four TypeScript projects, build, lint, and Firefox/Chromium extension E2E. The skipped jobs are release-upgrade/reimport, Edge E2E, Firefox Android installation smoke and the manual Firefox Android RDP probe.
+
+Every timed import checks the persisted title, revision and full row count, plus 12 distinct source-derived readability probes and restart readback. Probe digests agree across arms and directions. This is **sampled persistence evidence**, not exhaustive equality of every stored definition, index entry or media payload. The bounded sidecar oracle also does not claim full-dictionary persistence equality. Whole-browser peak/settled memory, reopened lookup latency, ARM and browser-specific performance beyond this Linux Chromium timing cohort remain unmeasured here.
+
+The acceptance rule requires a material complete-import improvement that survives independent reversed-order qualification, or a reproduced severe exception-path fix with negligible normal-path cost, plus the separate memory/storage/lookup/reliability gates. This ordinary-path candidate has not met the complete-import gate. Keep it on hold; do not promote it solely because the Jitendex/VNDB validation-phase counter decreased.
+
+## PR update
+
+Completed all six frozen browser cells for JMdict, Jitendex and VNDB: 252 successful imports, with 12 candidate/parent pairs, six same-code controls and six excluded warmups in each direction/corpus cell. Independent archive/source/raw-timing/work/readback checks pass. Complete-import equal-work changes are JMdict −1.095% / +2.218%, Jitendex −0.304% / −1.009%, and VNDB +0.375% / −0.916%. Validation-phase counters fall for Jitendex and VNDB, but whole-import qualification does not demonstrate a material benefit repeated across independent directions. **HOLD as a performance candidate.** Full CI passes its applicable gates, and all ratios, controls, intervals and slow tails remain retained.
+
+## Review artifacts
+
+- `qualification/r2-record-browser-independent-review.py`: independent reader; supports explicit `--cells`, `--published-manifest`, `--study-repo` and `--output` paths. The study repository must contain the frozen research commit. It never alters observations or overwrites an existing report.
+- `qualification/r2-record-browser-review.json` and `.log`: final complete six-cell review with all per-pair ratios, runtime/provider hashes, work receipts, host ranges and phase comparisons.
+- `qualification/r2-record-browser-review.partial.json` / `.partial.log`: earlier four-cell snapshot; its exact reader is retained as `r2-record-browser-independent-review.v1.py`.
+- `qualification/r2-record-browser-review.five-cells.json` / `.five-cells.log`: earlier five-cell snapshot. Its reader is retained as `r2-record-browser-independent-review.v2.py`, which also produced the retained `.initial-complete.json` / `.initial-complete.log`. The final reader adds explicit archive-path/symlink checks and labels the decision as manual interpretation. These are read-only audits of the same completed cells, not additional benchmark observations or replacements.
+- Raw immutable observations: `r2-evidence/record-browser-45124794707/`. Provider archive hashes are recorded per cell in the final JSON. No raw artifact was modified by this review.
+- Published code binding: `qualification/r2-published-runtime-blobs-with-record.json`. Runtime CI snapshot: `qualification/r2-final-ci-snapshots.json`.

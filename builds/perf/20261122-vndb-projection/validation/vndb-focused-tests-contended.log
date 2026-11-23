@@ -1,0 +1,125 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/fcfffdc555c8/manabitan-vndb
+
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:22) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/dictionary-importer-media-prefetch.test.js (36 tests | 2 failed) 15138ms
+     × imports converted MDX media across bounded batches 5609ms
+     × joins a started media read before closing an archive after a term write failure 5930ms
+ ❯ test/term-bank-wasm-parser.test.js (183 tests | 1 failed) 14923ms
+     × fuses multi-bank parsing, content dedup, and lookup projection 5716ms
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/term-bank-experiments.test.js (146 tests | 4 failed) 75980ms
+     × all flag combinations preserve row content/hash/key order: 25 31567ms
+     × preserves dedup/content offsets across chunk boundaries and growth: preload=true 18601ms
+     × capacity fallback owns input before reset and still parses spans 6137ms
+     × exhausted native key arena falls back without overwriting earlier interned keys 12374ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/dictionary-importer-media-prefetch.test.js > bounded referenced-media prefetch > imports converted MDX media across bounded batches
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/dictionary-importer-media-prefetch.test.js:290:9
+    288|     });
+    289|
+    290|     test('imports converted MDX media across bounded batches', async (…
+       |         ^
+    291|         const db = database();
+    292|         const result = await run(await cssArchive(260), db);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  test/dictionary-importer-media-prefetch.test.js > bounded referenced-media prefetch > joins a started media read before closing an archive after a term write failure
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/dictionary-importer-media-prefetch.test.js:530:9
+    528|     });
+    529|
+    530|     test('joins a started media read before closing an archive after a…
+       |         ^
+    531|         const started = gate();
+    532|         const release = gate();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  test/term-bank-experiments.test.js > term-bank experiment defaults > all flag combinations preserve row content/hash/key order: 25
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-bank-experiments.test.js:189:53
+    187|         JSON.stringify([row('text', [{type: 'text', text: '  a\n b  '}…
+    188|     ]
+    189|     test.each(Array.from({length: 64}, (_, i) => i))('all flag combina…
+       |                                                     ^
+    190|         const baseline = await parse(banks)
+    191|         for (const preload of [false, true]) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  test/term-bank-experiments.test.js > term-bank experiment defaults > preserves dedup/content offsets across chunk boundaries and growth: preload=true
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-bank-experiments.test.js:202:29
+    200|     })
+    201|
+    202|     test.each([false, true])('preserves dedup/content offsets across c…
+       |                             ^
+    203|         const large = Array.from({length: 170}, (_, i) => row(`key-${i…
+    204|         const sources = [JSON.stringify(large), JSON.stringify(large.s…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  test/term-bank-experiments.test.js > term-bank experiment defaults > capacity fallback owns input before reset and still parses spans
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-bank-experiments.test.js:267:9
+    265|     })
+    266|
+    267|     test('capacity fallback owns input before reset and still parses s…
+       |         ^
+    268|         const sources = [JSON.stringify(Array.from({length: 20001}, (_…
+    269|         const baseline = await parse(sources)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  test/term-bank-experiments.test.js > native exceptional keys > exhausted native key arena falls back without overwriting earlier interned keys
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-bank-experiments.test.js:337:9
+    335|     })
+    336|
+    337|     test('exhausted native key arena falls back without overwriting ea…
+       |         ^
+    338|         const tokens = Array.from({length: 24}, (_, i) => `"${i}-${'x'…
+    339|         const bank = `[${tokens.map((token) => escapedBank(token).slic…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  test/term-bank-wasm-parser.test.js > term-bank WASM parser > fuses multi-bank parsing, content dedup, and lookup projection
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-bank-wasm-parser.test.js:2988:5
+    2986|     });
+    2987|
+    2988|     maybeTest('fuses multi-bank parsing, content dedup, and lookup pro…
+       |     ^
+    2989|         const sources = [
+    2990|             textEncoder.encode(JSON.stringify([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  7 failed | 358 passed (365)
+   Start at  21:38:56
+   Duration  103.02s (transform 139.67s, setup 441ms, import 184.12s, tests 106.04s, environment 8ms)
+

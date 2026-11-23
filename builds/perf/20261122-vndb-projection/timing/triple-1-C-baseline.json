@@ -1,0 +1,2940 @@
+{
+  "schemaVersion": 1,
+  "mode": "measure",
+  "boundary": "serialized compressed source inflation + fused column parser + owned result/image projection + prepared lookup indexes; excludes browser, parallel overlap, storage, input reads, validation hashing",
+  "runtime": "v22.22.0",
+  "v8": "12.4.254.21-node.33",
+  "baselineRoot": "/workspace/scratch/fcfffdc555c8/manabitan-baseline",
+  "candidateRoot": "/workspace/scratch/fcfffdc555c8/manabitan-baseline",
+  "archivePath": "/workspace/scratch/fcfffdc555c8/fixtures/vndb_characters_by_bee.zip",
+  "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "identities": [
+    {
+      "root": "/workspace/scratch/fcfffdc555c8/manabitan-baseline",
+      "head": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "files": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "1a60e1f06859a125e812d168ce252366f40153be502bc7da9120c2e916c9dac9",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/dictionary-image-references.js": "dd461816f58678ee25ef244cab0ad5ddadfd1a5b6ff2106e6c3995b9d8164c51",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "b8a761d41814b4ae125bf9691251d4377773a15fb3f40f32a0a13c83fe4ed82b",
+        "ext/js/dictionary/dense-zip-directory.js": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506",
+        "ext/lib/term-bank-parser.wasm": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+      }
+    },
+    {
+      "root": "/workspace/scratch/fcfffdc555c8/manabitan-baseline",
+      "head": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "files": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "1a60e1f06859a125e812d168ce252366f40153be502bc7da9120c2e916c9dac9",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/dictionary-image-references.js": "dd461816f58678ee25ef244cab0ad5ddadfd1a5b6ff2106e6c3995b9d8164c51",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "b8a761d41814b4ae125bf9691251d4377773a15fb3f40f32a0a13c83fe4ed82b",
+        "ext/js/dictionary/dense-zip-directory.js": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506",
+        "ext/lib/term-bank-parser.wasm": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96"
+      }
+    }
+  ],
+  "wasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "options": {
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "emitTermByteLists": false,
+    "mediaHintFastScan": true,
+    "projectImagePaths": true,
+    "validateGlossaryTypes": true,
+    "computeContentHashes": true,
+    "prepareLookupIndexes": true,
+    "experimentalNativeEscapedKeys": true,
+    "ownContentBytes": true,
+    "maxPendingChunks": 1,
+    "singleChunk": true
+  },
+  "totalBanks": 665,
+  "sourceBytes": 4267992967,
+  "productionGroupCount": 170,
+  "selectedGroupCount": 170,
+  "termRows": 6648310,
+  "mediaRows": 146725,
+  "rowsWithoutMediaProjection": 6501585,
+  "observations": [
+    {
+      "index": 0,
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 805,
+      "digest": null,
+      "elapsedMs": 80.32002,
+      "sourceInflateMs": 27.946140999999955,
+      "rowDecodeMs": 10,
+      "parseBankMs": 27,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 1,
+      "banks": [
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 844,
+      "digest": null,
+      "elapsedMs": 45.70566800000006,
+      "sourceInflateMs": 17.766437999999994,
+      "rowDecodeMs": 2,
+      "parseBankMs": 19,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 2,
+      "banks": [
+        "term_bank_9.json",
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 810,
+      "digest": null,
+      "elapsedMs": 44.52600599999994,
+      "sourceInflateMs": 13.335673000000043,
+      "rowDecodeMs": 5,
+      "parseBankMs": 18,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 3,
+      "banks": [
+        "term_bank_13.json",
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 792,
+      "digest": null,
+      "elapsedMs": 41.55984599999999,
+      "sourceInflateMs": 14.03140099999996,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 4,
+      "banks": [
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 819,
+      "digest": null,
+      "elapsedMs": 40.403369999999995,
+      "sourceInflateMs": 14.905360000000087,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 5,
+      "banks": [
+        "term_bank_21.json",
+        "term_bank_22.json",
+        "term_bank_23.json",
+        "term_bank_24.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 873,
+      "digest": null,
+      "elapsedMs": 41.25617599999998,
+      "sourceInflateMs": 13.589662999999973,
+      "rowDecodeMs": 1,
+      "parseBankMs": 18,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 6,
+      "banks": [
+        "term_bank_25.json",
+        "term_bank_26.json",
+        "term_bank_27.json",
+        "term_bank_28.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 941,
+      "digest": null,
+      "elapsedMs": 43.20356599999991,
+      "sourceInflateMs": 14.662106999999992,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 7,
+      "banks": [
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 785,
+      "digest": null,
+      "elapsedMs": 36.681370000000015,
+      "sourceInflateMs": 13.973731000000043,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 8,
+      "banks": [
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 823,
+      "digest": null,
+      "elapsedMs": 42.37041799999997,
+      "sourceInflateMs": 17.296494999999936,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 9,
+      "banks": [
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 844,
+      "digest": null,
+      "elapsedMs": 41.16149500000006,
+      "sourceInflateMs": 13.819049999999947,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 10,
+      "banks": [
+        "term_bank_41.json",
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 863,
+      "digest": null,
+      "elapsedMs": 47.62447099999997,
+      "sourceInflateMs": 16.083411999999953,
+      "rowDecodeMs": 1,
+      "parseBankMs": 21,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 11,
+      "banks": [
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 876,
+      "digest": null,
+      "elapsedMs": 83.52186499999993,
+      "sourceInflateMs": 14.885835999999927,
+      "rowDecodeMs": 2,
+      "parseBankMs": 25,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 12,
+      "banks": [
+        "term_bank_49.json",
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 813,
+      "digest": null,
+      "elapsedMs": 166.18906100000004,
+      "sourceInflateMs": 50.84827599999994,
+      "rowDecodeMs": 3,
+      "parseBankMs": 91,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 13,
+      "banks": [
+        "term_bank_53.json",
+        "term_bank_54.json",
+        "term_bank_55.json",
+        "term_bank_56.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 839,
+      "digest": null,
+      "elapsedMs": 38.931710000000066,
+      "sourceInflateMs": 15.987954999999829,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 14,
+      "banks": [
+        "term_bank_57.json",
+        "term_bank_58.json",
+        "term_bank_59.json",
+        "term_bank_60.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 930,
+      "digest": null,
+      "elapsedMs": 36.228642000000036,
+      "sourceInflateMs": 12.65589799999998,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 15,
+      "banks": [
+        "term_bank_61.json",
+        "term_bank_62.json",
+        "term_bank_63.json",
+        "term_bank_64.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 873,
+      "digest": null,
+      "elapsedMs": 38.67930700000011,
+      "sourceInflateMs": 13.020310999999992,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 16,
+      "banks": [
+        "term_bank_65.json",
+        "term_bank_66.json",
+        "term_bank_67.json",
+        "term_bank_68.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 810,
+      "digest": null,
+      "elapsedMs": 33.84836900000005,
+      "sourceInflateMs": 13.092828999999938,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 17,
+      "banks": [
+        "term_bank_69.json",
+        "term_bank_70.json",
+        "term_bank_71.json",
+        "term_bank_72.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1053,
+      "digest": null,
+      "elapsedMs": 38.85915499999987,
+      "sourceInflateMs": 14.072621000000026,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 18,
+      "banks": [
+        "term_bank_73.json",
+        "term_bank_74.json",
+        "term_bank_75.json",
+        "term_bank_76.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 938,
+      "digest": null,
+      "elapsedMs": 39.018831999999975,
+      "sourceInflateMs": 12.264214000000038,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 19,
+      "banks": [
+        "term_bank_77.json",
+        "term_bank_78.json",
+        "term_bank_79.json",
+        "term_bank_80.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 900,
+      "digest": null,
+      "elapsedMs": 35.709859999999935,
+      "sourceInflateMs": 13.036248999999998,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 20,
+      "banks": [
+        "term_bank_81.json",
+        "term_bank_82.json",
+        "term_bank_83.json",
+        "term_bank_84.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 884,
+      "digest": null,
+      "elapsedMs": 35.680381000000125,
+      "sourceInflateMs": 13.076113000000078,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 21,
+      "banks": [
+        "term_bank_85.json",
+        "term_bank_86.json",
+        "term_bank_87.json",
+        "term_bank_88.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 840,
+      "digest": null,
+      "elapsedMs": 36.62876900000015,
+      "sourceInflateMs": 12.576502000000119,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 22,
+      "banks": [
+        "term_bank_89.json",
+        "term_bank_90.json",
+        "term_bank_91.json",
+        "term_bank_92.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 797,
+      "digest": null,
+      "elapsedMs": 35.05047800000011,
+      "sourceInflateMs": 12.529767999999876,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 23,
+      "banks": [
+        "term_bank_93.json",
+        "term_bank_94.json",
+        "term_bank_95.json",
+        "term_bank_96.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 871,
+      "digest": null,
+      "elapsedMs": 37.02933699999994,
+      "sourceInflateMs": 14.399101999999857,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 24,
+      "banks": [
+        "term_bank_97.json",
+        "term_bank_98.json",
+        "term_bank_99.json",
+        "term_bank_100.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 803,
+      "digest": null,
+      "elapsedMs": 36.680409000000054,
+      "sourceInflateMs": 13.320359000000053,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 25,
+      "banks": [
+        "term_bank_101.json",
+        "term_bank_102.json",
+        "term_bank_103.json",
+        "term_bank_104.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 802,
+      "digest": null,
+      "elapsedMs": 34.86720699999978,
+      "sourceInflateMs": 12.572584000000006,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 26,
+      "banks": [
+        "term_bank_105.json",
+        "term_bank_106.json",
+        "term_bank_107.json",
+        "term_bank_108.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 782,
+      "digest": null,
+      "elapsedMs": 34.92735199999993,
+      "sourceInflateMs": 13.061120000000074,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 27,
+      "banks": [
+        "term_bank_109.json",
+        "term_bank_110.json",
+        "term_bank_111.json",
+        "term_bank_112.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 722,
+      "digest": null,
+      "elapsedMs": 37.39144599999986,
+      "sourceInflateMs": 13.908353000000034,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 28,
+      "banks": [
+        "term_bank_113.json",
+        "term_bank_114.json",
+        "term_bank_115.json",
+        "term_bank_116.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 802,
+      "digest": null,
+      "elapsedMs": 35.222432000000026,
+      "sourceInflateMs": 13.405744999999797,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 29,
+      "banks": [
+        "term_bank_117.json",
+        "term_bank_118.json",
+        "term_bank_119.json",
+        "term_bank_120.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 944,
+      "digest": null,
+      "elapsedMs": 37.39863000000014,
+      "sourceInflateMs": 14.074351000000206,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 30,
+      "banks": [
+        "term_bank_121.json",
+        "term_bank_122.json",
+        "term_bank_123.json",
+        "term_bank_124.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 885,
+      "digest": null,
+      "elapsedMs": 37.17593899999997,
+      "sourceInflateMs": 12.492911999999933,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 31,
+      "banks": [
+        "term_bank_125.json",
+        "term_bank_126.json",
+        "term_bank_127.json",
+        "term_bank_128.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 805,
+      "digest": null,
+      "elapsedMs": 35.20282599999996,
+      "sourceInflateMs": 13.291420000000016,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 32,
+      "banks": [
+        "term_bank_129.json",
+        "term_bank_130.json",
+        "term_bank_131.json",
+        "term_bank_132.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 850,
+      "digest": null,
+      "elapsedMs": 35.52308599999992,
+      "sourceInflateMs": 12.729786999999988,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 33,
+      "banks": [
+        "term_bank_133.json",
+        "term_bank_134.json",
+        "term_bank_135.json",
+        "term_bank_136.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 809,
+      "digest": null,
+      "elapsedMs": 37.485597999999754,
+      "sourceInflateMs": 13.235849000000144,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 34,
+      "banks": [
+        "term_bank_137.json",
+        "term_bank_138.json",
+        "term_bank_139.json",
+        "term_bank_140.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 949,
+      "digest": null,
+      "elapsedMs": 34.65120799999977,
+      "sourceInflateMs": 12.138815999999679,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 35,
+      "banks": [
+        "term_bank_141.json",
+        "term_bank_142.json",
+        "term_bank_143.json",
+        "term_bank_144.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 873,
+      "digest": null,
+      "elapsedMs": 34.63974300000018,
+      "sourceInflateMs": 12.690717999999833,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 36,
+      "banks": [
+        "term_bank_145.json",
+        "term_bank_146.json",
+        "term_bank_147.json",
+        "term_bank_148.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 870,
+      "digest": null,
+      "elapsedMs": 35.93625999999995,
+      "sourceInflateMs": 12.837418999999954,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 37,
+      "banks": [
+        "term_bank_149.json",
+        "term_bank_150.json",
+        "term_bank_151.json",
+        "term_bank_152.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 844,
+      "digest": null,
+      "elapsedMs": 33.15858500000013,
+      "sourceInflateMs": 12.126561000000038,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 38,
+      "banks": [
+        "term_bank_153.json",
+        "term_bank_154.json",
+        "term_bank_155.json",
+        "term_bank_156.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 812,
+      "digest": null,
+      "elapsedMs": 35.72756699999991,
+      "sourceInflateMs": 13.393206000000191,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 39,
+      "banks": [
+        "term_bank_157.json",
+        "term_bank_158.json",
+        "term_bank_159.json",
+        "term_bank_160.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 841,
+      "digest": null,
+      "elapsedMs": 40.54479599999968,
+      "sourceInflateMs": 13.307303999999931,
+      "rowDecodeMs": 0,
+      "parseBankMs": 18,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 40,
+      "banks": [
+        "term_bank_161.json",
+        "term_bank_162.json",
+        "term_bank_163.json",
+        "term_bank_164.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 847,
+      "digest": null,
+      "elapsedMs": 35.7833599999999,
+      "sourceInflateMs": 12.704713000000083,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 41,
+      "banks": [
+        "term_bank_165.json",
+        "term_bank_166.json",
+        "term_bank_167.json",
+        "term_bank_168.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 846,
+      "digest": null,
+      "elapsedMs": 34.714872000000014,
+      "sourceInflateMs": 13.434741000000031,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 42,
+      "banks": [
+        "term_bank_169.json",
+        "term_bank_170.json",
+        "term_bank_171.json",
+        "term_bank_172.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 845,
+      "digest": null,
+      "elapsedMs": 36.7921250000004,
+      "sourceInflateMs": 12.968392000000222,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 43,
+      "banks": [
+        "term_bank_173.json",
+        "term_bank_174.json",
+        "term_bank_175.json",
+        "term_bank_176.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 891,
+      "digest": null,
+      "elapsedMs": 36.501058999999714,
+      "sourceInflateMs": 12.52891099999988,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 44,
+      "banks": [
+        "term_bank_177.json",
+        "term_bank_178.json",
+        "term_bank_179.json",
+        "term_bank_180.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 825,
+      "digest": null,
+      "elapsedMs": 35.27670699999999,
+      "sourceInflateMs": 12.936600999999882,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 45,
+      "banks": [
+        "term_bank_181.json",
+        "term_bank_182.json",
+        "term_bank_183.json",
+        "term_bank_184.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 953,
+      "digest": null,
+      "elapsedMs": 38.411291999999776,
+      "sourceInflateMs": 13.235529999999926,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 46,
+      "banks": [
+        "term_bank_185.json",
+        "term_bank_186.json",
+        "term_bank_187.json",
+        "term_bank_188.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 801,
+      "digest": null,
+      "elapsedMs": 36.159967999999935,
+      "sourceInflateMs": 14.07017900000028,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 47,
+      "banks": [
+        "term_bank_189.json",
+        "term_bank_190.json",
+        "term_bank_191.json",
+        "term_bank_192.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 864,
+      "digest": null,
+      "elapsedMs": 34.378979999999956,
+      "sourceInflateMs": 13.086267000000134,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 48,
+      "banks": [
+        "term_bank_193.json",
+        "term_bank_194.json",
+        "term_bank_195.json",
+        "term_bank_196.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 832,
+      "digest": null,
+      "elapsedMs": 35.822569999999814,
+      "sourceInflateMs": 12.925259000000096,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 49,
+      "banks": [
+        "term_bank_197.json",
+        "term_bank_198.json",
+        "term_bank_199.json",
+        "term_bank_200.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 890,
+      "digest": null,
+      "elapsedMs": 37.14324399999987,
+      "sourceInflateMs": 13.628991000000042,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 50,
+      "banks": [
+        "term_bank_201.json",
+        "term_bank_202.json",
+        "term_bank_203.json",
+        "term_bank_204.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 882,
+      "digest": null,
+      "elapsedMs": 34.810079000000314,
+      "sourceInflateMs": 13.204921000000013,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 51,
+      "banks": [
+        "term_bank_205.json",
+        "term_bank_206.json",
+        "term_bank_207.json",
+        "term_bank_208.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 890,
+      "digest": null,
+      "elapsedMs": 36.14364699999987,
+      "sourceInflateMs": 12.323863000000074,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 52,
+      "banks": [
+        "term_bank_209.json",
+        "term_bank_210.json",
+        "term_bank_211.json",
+        "term_bank_212.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 795,
+      "digest": null,
+      "elapsedMs": 35.86721099999977,
+      "sourceInflateMs": 13.137748999999985,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 53,
+      "banks": [
+        "term_bank_213.json",
+        "term_bank_214.json",
+        "term_bank_215.json",
+        "term_bank_216.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 786,
+      "digest": null,
+      "elapsedMs": 34.660011000000395,
+      "sourceInflateMs": 13.476341999999931,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 54,
+      "banks": [
+        "term_bank_217.json",
+        "term_bank_218.json",
+        "term_bank_219.json",
+        "term_bank_220.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 795,
+      "digest": null,
+      "elapsedMs": 39.04298300000028,
+      "sourceInflateMs": 12.301684000000023,
+      "rowDecodeMs": 0,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 55,
+      "banks": [
+        "term_bank_221.json",
+        "term_bank_222.json",
+        "term_bank_223.json",
+        "term_bank_224.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 774,
+      "digest": null,
+      "elapsedMs": 49.726310999999896,
+      "sourceInflateMs": 17.582752999999684,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 56,
+      "banks": [
+        "term_bank_225.json",
+        "term_bank_226.json",
+        "term_bank_227.json",
+        "term_bank_228.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 812,
+      "digest": null,
+      "elapsedMs": 35.44931099999985,
+      "sourceInflateMs": 13.623423000000003,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 57,
+      "banks": [
+        "term_bank_229.json",
+        "term_bank_230.json",
+        "term_bank_231.json",
+        "term_bank_232.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 824,
+      "digest": null,
+      "elapsedMs": 37.725480999999945,
+      "sourceInflateMs": 13.21856600000001,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 58,
+      "banks": [
+        "term_bank_233.json",
+        "term_bank_234.json",
+        "term_bank_235.json",
+        "term_bank_236.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 886,
+      "digest": null,
+      "elapsedMs": 33.40617800000018,
+      "sourceInflateMs": 12.322764000000006,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 59,
+      "banks": [
+        "term_bank_237.json",
+        "term_bank_238.json",
+        "term_bank_239.json",
+        "term_bank_240.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 898,
+      "digest": null,
+      "elapsedMs": 35.282632999999805,
+      "sourceInflateMs": 12.966433000000052,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 60,
+      "banks": [
+        "term_bank_241.json",
+        "term_bank_242.json",
+        "term_bank_243.json",
+        "term_bank_244.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 914,
+      "digest": null,
+      "elapsedMs": 41.83563000000004,
+      "sourceInflateMs": 13.728206000000228,
+      "rowDecodeMs": 1,
+      "parseBankMs": 19,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 61,
+      "banks": [
+        "term_bank_245.json",
+        "term_bank_246.json",
+        "term_bank_247.json",
+        "term_bank_248.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 830,
+      "digest": null,
+      "elapsedMs": 34.17756100000042,
+      "sourceInflateMs": 12.726458000000093,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 62,
+      "banks": [
+        "term_bank_249.json",
+        "term_bank_250.json",
+        "term_bank_251.json",
+        "term_bank_252.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 857,
+      "digest": null,
+      "elapsedMs": 36.70752500000026,
+      "sourceInflateMs": 12.951844999999594,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 63,
+      "banks": [
+        "term_bank_253.json",
+        "term_bank_254.json",
+        "term_bank_255.json",
+        "term_bank_256.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 786,
+      "digest": null,
+      "elapsedMs": 35.67955699999993,
+      "sourceInflateMs": 12.424098999999842,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 64,
+      "banks": [
+        "term_bank_257.json",
+        "term_bank_258.json",
+        "term_bank_259.json",
+        "term_bank_260.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 839,
+      "digest": null,
+      "elapsedMs": 33.02027399999997,
+      "sourceInflateMs": 12.264918999999736,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 65,
+      "banks": [
+        "term_bank_261.json",
+        "term_bank_262.json",
+        "term_bank_263.json",
+        "term_bank_264.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 815,
+      "digest": null,
+      "elapsedMs": 43.00752399999965,
+      "sourceInflateMs": 12.989904000000024,
+      "rowDecodeMs": 2,
+      "parseBankMs": 19,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 66,
+      "banks": [
+        "term_bank_265.json",
+        "term_bank_266.json",
+        "term_bank_267.json",
+        "term_bank_268.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 827,
+      "digest": null,
+      "elapsedMs": 47.741513000000396,
+      "sourceInflateMs": 16.245108999999957,
+      "rowDecodeMs": 0,
+      "parseBankMs": 18,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 67,
+      "banks": [
+        "term_bank_269.json",
+        "term_bank_270.json",
+        "term_bank_271.json",
+        "term_bank_272.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 818,
+      "digest": null,
+      "elapsedMs": 128.94805099999985,
+      "sourceInflateMs": 47.3484169999997,
+      "rowDecodeMs": 5,
+      "parseBankMs": 53,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 68,
+      "banks": [
+        "term_bank_273.json",
+        "term_bank_274.json",
+        "term_bank_275.json",
+        "term_bank_276.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 854,
+      "digest": null,
+      "elapsedMs": 54.701886999999715,
+      "sourceInflateMs": 30.294300999999905,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 69,
+      "banks": [
+        "term_bank_277.json",
+        "term_bank_278.json",
+        "term_bank_279.json",
+        "term_bank_280.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 775,
+      "digest": null,
+      "elapsedMs": 39.94868600000018,
+      "sourceInflateMs": 13.879934000000048,
+      "rowDecodeMs": 0,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 70,
+      "banks": [
+        "term_bank_281.json",
+        "term_bank_282.json",
+        "term_bank_283.json",
+        "term_bank_284.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 888,
+      "digest": null,
+      "elapsedMs": 48.563368999999966,
+      "sourceInflateMs": 24.11707699999988,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 71,
+      "banks": [
+        "term_bank_285.json",
+        "term_bank_286.json",
+        "term_bank_287.json",
+        "term_bank_288.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 770,
+      "digest": null,
+      "elapsedMs": 37.813274999999976,
+      "sourceInflateMs": 12.93747200000007,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 72,
+      "banks": [
+        "term_bank_289.json",
+        "term_bank_290.json",
+        "term_bank_291.json",
+        "term_bank_292.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 792,
+      "digest": null,
+      "elapsedMs": 37.21577800000023,
+      "sourceInflateMs": 12.585728999999901,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 73,
+      "banks": [
+        "term_bank_293.json",
+        "term_bank_294.json",
+        "term_bank_295.json",
+        "term_bank_296.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 814,
+      "digest": null,
+      "elapsedMs": 34.22446499999978,
+      "sourceInflateMs": 13.088510999999926,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 74,
+      "banks": [
+        "term_bank_297.json",
+        "term_bank_298.json",
+        "term_bank_299.json",
+        "term_bank_300.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 805,
+      "digest": null,
+      "elapsedMs": 37.30040199999985,
+      "sourceInflateMs": 12.887735000000248,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 75,
+      "banks": [
+        "term_bank_301.json",
+        "term_bank_302.json",
+        "term_bank_303.json",
+        "term_bank_304.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 780,
+      "digest": null,
+      "elapsedMs": 38.385121000000254,
+      "sourceInflateMs": 13.086381000000074,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 76,
+      "banks": [
+        "term_bank_305.json",
+        "term_bank_306.json",
+        "term_bank_307.json",
+        "term_bank_308.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 841,
+      "digest": null,
+      "elapsedMs": 35.90254999999979,
+      "sourceInflateMs": 13.253454000000147,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 77,
+      "banks": [
+        "term_bank_309.json",
+        "term_bank_310.json",
+        "term_bank_311.json",
+        "term_bank_312.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 758,
+      "digest": null,
+      "elapsedMs": 36.683414000000084,
+      "sourceInflateMs": 13.769768999999997,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 78,
+      "banks": [
+        "term_bank_313.json",
+        "term_bank_314.json",
+        "term_bank_315.json",
+        "term_bank_316.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 904,
+      "digest": null,
+      "elapsedMs": 38.43824199999972,
+      "sourceInflateMs": 14.687072000000171,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 79,
+      "banks": [
+        "term_bank_317.json",
+        "term_bank_318.json",
+        "term_bank_319.json",
+        "term_bank_320.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 855,
+      "digest": null,
+      "elapsedMs": 36.48303699999997,
+      "sourceInflateMs": 12.816624000000047,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 80,
+      "banks": [
+        "term_bank_321.json",
+        "term_bank_322.json",
+        "term_bank_323.json",
+        "term_bank_324.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 815,
+      "digest": null,
+      "elapsedMs": 35.422267999999804,
+      "sourceInflateMs": 13.00782799999979,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 81,
+      "banks": [
+        "term_bank_325.json",
+        "term_bank_326.json",
+        "term_bank_327.json",
+        "term_bank_328.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 867,
+      "digest": null,
+      "elapsedMs": 36.72465299999976,
+      "sourceInflateMs": 13.032067999999981,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 82,
+      "banks": [
+        "term_bank_329.json",
+        "term_bank_330.json",
+        "term_bank_331.json",
+        "term_bank_332.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 853,
+      "digest": null,
+      "elapsedMs": 35.048183999999765,
+      "sourceInflateMs": 12.601889000000028,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 83,
+      "banks": [
+        "term_bank_333.json",
+        "term_bank_334.json",
+        "term_bank_335.json",
+        "term_bank_336.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 941,
+      "digest": null,
+      "elapsedMs": 38.52848199999971,
+      "sourceInflateMs": 12.707118999999693,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 84,
+      "banks": [
+        "term_bank_337.json",
+        "term_bank_338.json",
+        "term_bank_339.json",
+        "term_bank_340.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 810,
+      "digest": null,
+      "elapsedMs": 36.562824000000546,
+      "sourceInflateMs": 14.314992999999959,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 85,
+      "banks": [
+        "term_bank_341.json",
+        "term_bank_342.json",
+        "term_bank_343.json",
+        "term_bank_344.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 830,
+      "digest": null,
+      "elapsedMs": 35.70394600000054,
+      "sourceInflateMs": 13.837742999999136,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 86,
+      "banks": [
+        "term_bank_345.json",
+        "term_bank_346.json",
+        "term_bank_347.json",
+        "term_bank_348.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 791,
+      "digest": null,
+      "elapsedMs": 36.182840999999826,
+      "sourceInflateMs": 13.524153000000297,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 87,
+      "banks": [
+        "term_bank_349.json",
+        "term_bank_350.json",
+        "term_bank_351.json",
+        "term_bank_352.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 823,
+      "digest": null,
+      "elapsedMs": 35.1520759999994,
+      "sourceInflateMs": 12.89794400000028,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 88,
+      "banks": [
+        "term_bank_353.json",
+        "term_bank_354.json",
+        "term_bank_355.json",
+        "term_bank_356.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 904,
+      "digest": null,
+      "elapsedMs": 37.01243599999998,
+      "sourceInflateMs": 14.06996799999979,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 89,
+      "banks": [
+        "term_bank_357.json",
+        "term_bank_358.json",
+        "term_bank_359.json",
+        "term_bank_360.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 959,
+      "digest": null,
+      "elapsedMs": 37.96774199999982,
+      "sourceInflateMs": 14.894686999999976,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 90,
+      "banks": [
+        "term_bank_361.json",
+        "term_bank_362.json",
+        "term_bank_363.json",
+        "term_bank_364.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 837,
+      "digest": null,
+      "elapsedMs": 37.96185199999945,
+      "sourceInflateMs": 13.601397000000361,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 91,
+      "banks": [
+        "term_bank_365.json",
+        "term_bank_366.json",
+        "term_bank_367.json",
+        "term_bank_368.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 913,
+      "digest": null,
+      "elapsedMs": 36.791823999999906,
+      "sourceInflateMs": 13.761614000000009,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 92,
+      "banks": [
+        "term_bank_369.json",
+        "term_bank_370.json",
+        "term_bank_371.json",
+        "term_bank_372.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 913,
+      "digest": null,
+      "elapsedMs": 37.71898400000009,
+      "sourceInflateMs": 13.054341000000022,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 93,
+      "banks": [
+        "term_bank_373.json",
+        "term_bank_374.json",
+        "term_bank_375.json",
+        "term_bank_376.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 900,
+      "digest": null,
+      "elapsedMs": 41.10037899999952,
+      "sourceInflateMs": 16.608377000000473,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 94,
+      "banks": [
+        "term_bank_377.json",
+        "term_bank_378.json",
+        "term_bank_379.json",
+        "term_bank_380.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 816,
+      "digest": null,
+      "elapsedMs": 36.28451100000075,
+      "sourceInflateMs": 12.782788000000437,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 95,
+      "banks": [
+        "term_bank_381.json",
+        "term_bank_382.json",
+        "term_bank_383.json",
+        "term_bank_384.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 840,
+      "digest": null,
+      "elapsedMs": 35.755589999999756,
+      "sourceInflateMs": 12.072285999999622,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 96,
+      "banks": [
+        "term_bank_385.json",
+        "term_bank_386.json",
+        "term_bank_387.json",
+        "term_bank_388.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 833,
+      "digest": null,
+      "elapsedMs": 38.67827000000034,
+      "sourceInflateMs": 13.973621999999523,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 97,
+      "banks": [
+        "term_bank_389.json",
+        "term_bank_390.json",
+        "term_bank_391.json",
+        "term_bank_392.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 882,
+      "digest": null,
+      "elapsedMs": 38.84705900000063,
+      "sourceInflateMs": 14.913590000000113,
+      "rowDecodeMs": 0,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 98,
+      "banks": [
+        "term_bank_393.json",
+        "term_bank_394.json",
+        "term_bank_395.json",
+        "term_bank_396.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1040,
+      "digest": null,
+      "elapsedMs": 58.25275000000056,
+      "sourceInflateMs": 19.425720999999612,
+      "rowDecodeMs": 1,
+      "parseBankMs": 29,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 99,
+      "banks": [
+        "term_bank_397.json",
+        "term_bank_398.json",
+        "term_bank_399.json",
+        "term_bank_400.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 879,
+      "digest": null,
+      "elapsedMs": 49.853391000000556,
+      "sourceInflateMs": 22.394750000000386,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 100,
+      "banks": [
+        "term_bank_401.json",
+        "term_bank_402.json",
+        "term_bank_403.json",
+        "term_bank_404.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 856,
+      "digest": null,
+      "elapsedMs": 43.76294300000063,
+      "sourceInflateMs": 13.388629000000037,
+      "rowDecodeMs": 1,
+      "parseBankMs": 20,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 101,
+      "banks": [
+        "term_bank_405.json",
+        "term_bank_406.json",
+        "term_bank_407.json",
+        "term_bank_408.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 850,
+      "digest": null,
+      "elapsedMs": 52.765894999999546,
+      "sourceInflateMs": 24.326670999999806,
+      "rowDecodeMs": 1,
+      "parseBankMs": 21,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 102,
+      "banks": [
+        "term_bank_409.json",
+        "term_bank_410.json",
+        "term_bank_411.json",
+        "term_bank_412.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 874,
+      "digest": null,
+      "elapsedMs": 37.20978599999944,
+      "sourceInflateMs": 12.241304999999556,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 103,
+      "banks": [
+        "term_bank_413.json",
+        "term_bank_414.json",
+        "term_bank_415.json",
+        "term_bank_416.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 974,
+      "digest": null,
+      "elapsedMs": 50.507596000000376,
+      "sourceInflateMs": 21.180836999999883,
+      "rowDecodeMs": 0,
+      "parseBankMs": 22,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 104,
+      "banks": [
+        "term_bank_417.json",
+        "term_bank_418.json",
+        "term_bank_419.json",
+        "term_bank_420.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 926,
+      "digest": null,
+      "elapsedMs": 36.074157000000014,
+      "sourceInflateMs": 12.67475099999956,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 105,
+      "banks": [
+        "term_bank_421.json",
+        "term_bank_422.json",
+        "term_bank_423.json",
+        "term_bank_424.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 967,
+      "digest": null,
+      "elapsedMs": 37.12725399999999,
+      "sourceInflateMs": 12.875166000000718,
+      "rowDecodeMs": 0,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 106,
+      "banks": [
+        "term_bank_425.json",
+        "term_bank_426.json",
+        "term_bank_427.json",
+        "term_bank_428.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1039,
+      "digest": null,
+      "elapsedMs": 36.30183799999941,
+      "sourceInflateMs": 13.371071000000484,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 107,
+      "banks": [
+        "term_bank_429.json",
+        "term_bank_430.json",
+        "term_bank_431.json",
+        "term_bank_432.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1022,
+      "digest": null,
+      "elapsedMs": 36.9770010000002,
+      "sourceInflateMs": 12.103900999999496,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 108,
+      "banks": [
+        "term_bank_433.json",
+        "term_bank_434.json",
+        "term_bank_435.json",
+        "term_bank_436.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 950,
+      "digest": null,
+      "elapsedMs": 40.483156999999665,
+      "sourceInflateMs": 13.038868000000548,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 109,
+      "banks": [
+        "term_bank_437.json",
+        "term_bank_438.json",
+        "term_bank_439.json",
+        "term_bank_440.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 905,
+      "digest": null,
+      "elapsedMs": 36.27845100000013,
+      "sourceInflateMs": 13.333284000000276,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 110,
+      "banks": [
+        "term_bank_441.json",
+        "term_bank_442.json",
+        "term_bank_443.json",
+        "term_bank_444.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 810,
+      "digest": null,
+      "elapsedMs": 35.61042600000019,
+      "sourceInflateMs": 12.678259999999682,
+      "rowDecodeMs": 0,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 111,
+      "banks": [
+        "term_bank_445.json",
+        "term_bank_446.json",
+        "term_bank_447.json",
+        "term_bank_448.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 969,
+      "digest": null,
+      "elapsedMs": 36.81319699999949,
+      "sourceInflateMs": 11.369063999999526,
+      "rowDecodeMs": 1,
+      "parseBankMs": 17,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 112,
+      "banks": [
+        "term_bank_449.json",
+        "term_bank_450.json",
+        "term_bank_451.json",
+        "term_bank_452.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 811,
+      "digest": null,
+      "elapsedMs": 34.5282500000003,
+      "sourceInflateMs": 11.632628000000295,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 113,
+      "banks": [
+        "term_bank_453.json",
+        "term_bank_454.json",
+        "term_bank_455.json",
+        "term_bank_456.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1002,
+      "digest": null,
+      "elapsedMs": 38.81444300000021,
+      "sourceInflateMs": 12.199212000000443,
+      "rowDecodeMs": 1,
+      "parseBankMs": 18,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 114,
+      "banks": [
+        "term_bank_457.json",
+        "term_bank_458.json",
+        "term_bank_459.json",
+        "term_bank_460.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 889,
+      "digest": null,
+      "elapsedMs": 39.27443399999993,
+      "sourceInflateMs": 13.47613199999978,
+      "rowDecodeMs": 0,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 115,
+      "banks": [
+        "term_bank_461.json",
+        "term_bank_462.json",
+        "term_bank_463.json",
+        "term_bank_464.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 914,
+      "digest": null,
+      "elapsedMs": 35.67211599999973,
+      "sourceInflateMs": 13.756702000000587,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 116,
+      "banks": [
+        "term_bank_465.json",
+        "term_bank_466.json",
+        "term_bank_467.json",
+        "term_bank_468.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 828,
+      "digest": null,
+      "elapsedMs": 35.33482300000014,
+      "sourceInflateMs": 12.6862229999997,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 117,
+      "banks": [
+        "term_bank_469.json",
+        "term_bank_470.json",
+        "term_bank_471.json",
+        "term_bank_472.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 833,
+      "digest": null,
+      "elapsedMs": 34.414864999999736,
+      "sourceInflateMs": 12.899583999999777,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 118,
+      "banks": [
+        "term_bank_473.json",
+        "term_bank_474.json",
+        "term_bank_475.json",
+        "term_bank_476.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 916,
+      "digest": null,
+      "elapsedMs": 39.700362000000496,
+      "sourceInflateMs": 12.158448999999564,
+      "rowDecodeMs": 1,
+      "parseBankMs": 19,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 119,
+      "banks": [
+        "term_bank_477.json",
+        "term_bank_478.json",
+        "term_bank_479.json",
+        "term_bank_480.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 847,
+      "digest": null,
+      "elapsedMs": 47.970946999999796,
+      "sourceInflateMs": 15.569158000000243,
+      "rowDecodeMs": 0,
+      "parseBankMs": 20,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 120,
+      "banks": [
+        "term_bank_481.json",
+        "term_bank_482.json",
+        "term_bank_483.json",
+        "term_bank_484.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 879,
+      "digest": null,
+      "elapsedMs": 150.78890599999977,
+      "sourceInflateMs": 32.160015999999814,
+      "rowDecodeMs": 16,
+      "parseBankMs": 48,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 121,
+      "banks": [
+        "term_bank_485.json",
+        "term_bank_486.json",
+        "term_bank_487.json",
+        "term_bank_488.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 740,
+      "digest": null,
+      "elapsedMs": 38.55301599999984,
+      "sourceInflateMs": 17.146443000000545,
+      "rowDecodeMs": 1,
+      "parseBankMs": 15,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 122,
+      "banks": [
+        "term_bank_489.json",
+        "term_bank_490.json",
+        "term_bank_491.json",
+        "term_bank_492.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1078,
+      "digest": null,
+      "elapsedMs": 33.53948000000037,
+      "sourceInflateMs": 11.437872999999854,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 123,
+      "banks": [
+        "term_bank_493.json",
+        "term_bank_494.json",
+        "term_bank_495.json",
+        "term_bank_496.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 764,
+      "digest": null,
+      "elapsedMs": 33.16431900000043,
+      "sourceInflateMs": 10.9392940000007,
+      "rowDecodeMs": 0,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 124,
+      "banks": [
+        "term_bank_497.json",
+        "term_bank_498.json",
+        "term_bank_499.json",
+        "term_bank_500.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 648,
+      "digest": null,
+      "elapsedMs": 30.28095300000041,
+      "sourceInflateMs": 10.981581000000006,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 125,
+      "banks": [
+        "term_bank_501.json",
+        "term_bank_502.json",
+        "term_bank_503.json",
+        "term_bank_504.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 741,
+      "digest": null,
+      "elapsedMs": 31.034819000000425,
+      "sourceInflateMs": 11.527047999999922,
+      "rowDecodeMs": 0,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 126,
+      "banks": [
+        "term_bank_505.json",
+        "term_bank_506.json",
+        "term_bank_507.json",
+        "term_bank_508.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 719,
+      "digest": null,
+      "elapsedMs": 32.83305399999972,
+      "sourceInflateMs": 11.41728299999977,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 127,
+      "banks": [
+        "term_bank_509.json",
+        "term_bank_510.json",
+        "term_bank_511.json",
+        "term_bank_512.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 727,
+      "digest": null,
+      "elapsedMs": 30.31253299999935,
+      "sourceInflateMs": 11.193059000000176,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 128,
+      "banks": [
+        "term_bank_513.json",
+        "term_bank_514.json",
+        "term_bank_515.json",
+        "term_bank_516.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 754,
+      "digest": null,
+      "elapsedMs": 31.535689999999704,
+      "sourceInflateMs": 12.02517699999953,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 129,
+      "banks": [
+        "term_bank_517.json",
+        "term_bank_518.json",
+        "term_bank_519.json",
+        "term_bank_520.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 858,
+      "digest": null,
+      "elapsedMs": 31.776875999999902,
+      "sourceInflateMs": 10.936888000000181,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 130,
+      "banks": [
+        "term_bank_521.json",
+        "term_bank_522.json",
+        "term_bank_523.json",
+        "term_bank_524.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 763,
+      "digest": null,
+      "elapsedMs": 30.295509999999922,
+      "sourceInflateMs": 11.37044799999967,
+      "rowDecodeMs": 0,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 131,
+      "banks": [
+        "term_bank_525.json",
+        "term_bank_526.json",
+        "term_bank_527.json",
+        "term_bank_528.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 799,
+      "digest": null,
+      "elapsedMs": 29.931260999999722,
+      "sourceInflateMs": 10.908848000000035,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 132,
+      "banks": [
+        "term_bank_529.json",
+        "term_bank_530.json",
+        "term_bank_531.json",
+        "term_bank_532.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 798,
+      "digest": null,
+      "elapsedMs": 53.771850999999515,
+      "sourceInflateMs": 11.107950999999957,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 133,
+      "banks": [
+        "term_bank_533.json",
+        "term_bank_534.json",
+        "term_bank_535.json",
+        "term_bank_536.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 902,
+      "digest": null,
+      "elapsedMs": 31.143301000000065,
+      "sourceInflateMs": 11.278502999999546,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 134,
+      "banks": [
+        "term_bank_537.json",
+        "term_bank_538.json",
+        "term_bank_539.json",
+        "term_bank_540.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 847,
+      "digest": null,
+      "elapsedMs": 30.458509999999478,
+      "sourceInflateMs": 10.92776800000047,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 135,
+      "banks": [
+        "term_bank_541.json",
+        "term_bank_542.json",
+        "term_bank_543.json",
+        "term_bank_544.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 932,
+      "digest": null,
+      "elapsedMs": 34.83725400000003,
+      "sourceInflateMs": 10.95866500000011,
+      "rowDecodeMs": 1,
+      "parseBankMs": 16,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 136,
+      "banks": [
+        "term_bank_545.json",
+        "term_bank_546.json",
+        "term_bank_547.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 759,
+      "digest": null,
+      "elapsedMs": 24.412642000000233,
+      "sourceInflateMs": 8.872263999999632,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 137,
+      "banks": [
+        "term_bank_548.json",
+        "term_bank_549.json",
+        "term_bank_550.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 678,
+      "digest": null,
+      "elapsedMs": 24.29106799999954,
+      "sourceInflateMs": 8.806083999999828,
+      "rowDecodeMs": 0,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 138,
+      "banks": [
+        "term_bank_551.json",
+        "term_bank_552.json",
+        "term_bank_553.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 754,
+      "digest": null,
+      "elapsedMs": 25.060325000000375,
+      "sourceInflateMs": 9.231213000000025,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 139,
+      "banks": [
+        "term_bank_554.json",
+        "term_bank_555.json",
+        "term_bank_556.json",
+        "term_bank_557.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 943,
+      "digest": null,
+      "elapsedMs": 32.921134000000166,
+      "sourceInflateMs": 11.655440999999882,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 140,
+      "banks": [
+        "term_bank_558.json",
+        "term_bank_559.json",
+        "term_bank_560.json",
+        "term_bank_561.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 877,
+      "digest": null,
+      "elapsedMs": 31.124931999999717,
+      "sourceInflateMs": 11.003971000000092,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 141,
+      "banks": [
+        "term_bank_562.json",
+        "term_bank_563.json",
+        "term_bank_564.json",
+        "term_bank_565.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 788,
+      "digest": null,
+      "elapsedMs": 30.25106700000015,
+      "sourceInflateMs": 10.855068999999276,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 142,
+      "banks": [
+        "term_bank_566.json",
+        "term_bank_567.json",
+        "term_bank_568.json",
+        "term_bank_569.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 998,
+      "digest": null,
+      "elapsedMs": 30.84860700000081,
+      "sourceInflateMs": 10.43107499999951,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 143,
+      "banks": [
+        "term_bank_570.json",
+        "term_bank_571.json",
+        "term_bank_572.json",
+        "term_bank_573.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1180,
+      "digest": null,
+      "elapsedMs": 31.621366999999736,
+      "sourceInflateMs": 10.740401999999449,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 144,
+      "banks": [
+        "term_bank_574.json",
+        "term_bank_575.json",
+        "term_bank_576.json",
+        "term_bank_577.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1000,
+      "digest": null,
+      "elapsedMs": 30.44504700000016,
+      "sourceInflateMs": 10.801755999999841,
+      "rowDecodeMs": 0,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 145,
+      "banks": [
+        "term_bank_578.json",
+        "term_bank_579.json",
+        "term_bank_580.json",
+        "term_bank_581.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1033,
+      "digest": null,
+      "elapsedMs": 30.92862200000036,
+      "sourceInflateMs": 10.686588999999913,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 146,
+      "banks": [
+        "term_bank_582.json",
+        "term_bank_583.json",
+        "term_bank_584.json",
+        "term_bank_585.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1066,
+      "digest": null,
+      "elapsedMs": 34.67341100000067,
+      "sourceInflateMs": 11.440641000000142,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 147,
+      "banks": [
+        "term_bank_586.json",
+        "term_bank_587.json",
+        "term_bank_588.json",
+        "term_bank_589.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1072,
+      "digest": null,
+      "elapsedMs": 33.990961999999854,
+      "sourceInflateMs": 12.598915000000488,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 148,
+      "banks": [
+        "term_bank_590.json",
+        "term_bank_591.json",
+        "term_bank_592.json",
+        "term_bank_593.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1033,
+      "digest": null,
+      "elapsedMs": 31.88836700000047,
+      "sourceInflateMs": 11.137573999999404,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 149,
+      "banks": [
+        "term_bank_594.json",
+        "term_bank_595.json",
+        "term_bank_596.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 733,
+      "digest": null,
+      "elapsedMs": 24.01388600000064,
+      "sourceInflateMs": 8.631949000000532,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 150,
+      "banks": [
+        "term_bank_597.json",
+        "term_bank_598.json",
+        "term_bank_599.json",
+        "term_bank_600.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 954,
+      "digest": null,
+      "elapsedMs": 31.430543999999827,
+      "sourceInflateMs": 11.10543400000006,
+      "rowDecodeMs": 0,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 151,
+      "banks": [
+        "term_bank_601.json",
+        "term_bank_602.json",
+        "term_bank_603.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 687,
+      "digest": null,
+      "elapsedMs": 23.606088000000454,
+      "sourceInflateMs": 8.86550200000056,
+      "rowDecodeMs": 0,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 152,
+      "banks": [
+        "term_bank_604.json",
+        "term_bank_605.json",
+        "term_bank_606.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 613,
+      "digest": null,
+      "elapsedMs": 23.49865099999988,
+      "sourceInflateMs": 8.446654999999737,
+      "rowDecodeMs": 0,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 153,
+      "banks": [
+        "term_bank_607.json",
+        "term_bank_608.json",
+        "term_bank_609.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 789,
+      "digest": null,
+      "elapsedMs": 24.18747699999949,
+      "sourceInflateMs": 8.627476999999999,
+      "rowDecodeMs": 1,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 154,
+      "banks": [
+        "term_bank_610.json",
+        "term_bank_611.json",
+        "term_bank_612.json",
+        "term_bank_613.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1050,
+      "digest": null,
+      "elapsedMs": 32.977993000000424,
+      "sourceInflateMs": 10.964508999999452,
+      "rowDecodeMs": 0,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 155,
+      "banks": [
+        "term_bank_614.json",
+        "term_bank_615.json",
+        "term_bank_616.json",
+        "term_bank_617.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1067,
+      "digest": null,
+      "elapsedMs": 31.51888599999984,
+      "sourceInflateMs": 11.495539999999892,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 156,
+      "banks": [
+        "term_bank_618.json",
+        "term_bank_619.json",
+        "term_bank_620.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 847,
+      "digest": null,
+      "elapsedMs": 24.82564199999979,
+      "sourceInflateMs": 8.461323999999877,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 157,
+      "banks": [
+        "term_bank_621.json",
+        "term_bank_622.json",
+        "term_bank_623.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 755,
+      "digest": null,
+      "elapsedMs": 24.863736999999674,
+      "sourceInflateMs": 8.888264000000163,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 158,
+      "banks": [
+        "term_bank_624.json",
+        "term_bank_625.json",
+        "term_bank_626.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 701,
+      "digest": null,
+      "elapsedMs": 23.946501000000353,
+      "sourceInflateMs": 8.81626899999992,
+      "rowDecodeMs": 0,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 159,
+      "banks": [
+        "term_bank_627.json",
+        "term_bank_628.json",
+        "term_bank_629.json",
+        "term_bank_630.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1026,
+      "digest": null,
+      "elapsedMs": 31.051996999999574,
+      "sourceInflateMs": 10.98254199999974,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 160,
+      "banks": [
+        "term_bank_631.json",
+        "term_bank_632.json",
+        "term_bank_633.json",
+        "term_bank_634.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1084,
+      "digest": null,
+      "elapsedMs": 31.329713999999512,
+      "sourceInflateMs": 10.996602999999595,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 161,
+      "banks": [
+        "term_bank_635.json",
+        "term_bank_636.json",
+        "term_bank_637.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 918,
+      "digest": null,
+      "elapsedMs": 24.41298900000038,
+      "sourceInflateMs": 8.154066000000057,
+      "rowDecodeMs": 1,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 162,
+      "banks": [
+        "term_bank_638.json",
+        "term_bank_639.json",
+        "term_bank_640.json",
+        "term_bank_641.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 891,
+      "digest": null,
+      "elapsedMs": 31.348729999999705,
+      "sourceInflateMs": 11.19564900000023,
+      "rowDecodeMs": 0,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 163,
+      "banks": [
+        "term_bank_642.json",
+        "term_bank_643.json",
+        "term_bank_644.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 819,
+      "digest": null,
+      "elapsedMs": 24.56738099999984,
+      "sourceInflateMs": 8.841934000000037,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 164,
+      "banks": [
+        "term_bank_645.json",
+        "term_bank_646.json",
+        "term_bank_647.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 801,
+      "digest": null,
+      "elapsedMs": 24.09488500000043,
+      "sourceInflateMs": 8.570843999999852,
+      "rowDecodeMs": 0,
+      "parseBankMs": 11,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 165,
+      "banks": [
+        "term_bank_648.json",
+        "term_bank_649.json",
+        "term_bank_650.json",
+        "term_bank_651.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1121,
+      "digest": null,
+      "elapsedMs": 32.57082199999968,
+      "sourceInflateMs": 11.343861000000288,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 166,
+      "banks": [
+        "term_bank_652.json",
+        "term_bank_653.json",
+        "term_bank_654.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 828,
+      "digest": null,
+      "elapsedMs": 24.044264000000112,
+      "sourceInflateMs": 8.467714999999771,
+      "rowDecodeMs": 1,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 167,
+      "banks": [
+        "term_bank_655.json",
+        "term_bank_656.json",
+        "term_bank_657.json",
+        "term_bank_658.json"
+      ],
+      "termRows": 40000,
+      "mediaRows": 1006,
+      "digest": null,
+      "elapsedMs": 31.850099999999657,
+      "sourceInflateMs": 11.171611000000667,
+      "rowDecodeMs": 1,
+      "parseBankMs": 14,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 168,
+      "banks": [
+        "term_bank_659.json",
+        "term_bank_660.json",
+        "term_bank_661.json"
+      ],
+      "termRows": 30000,
+      "mediaRows": 769,
+      "digest": null,
+      "elapsedMs": 23.89430900000025,
+      "sourceInflateMs": 8.546884999999747,
+      "rowDecodeMs": 0,
+      "parseBankMs": 10,
+      "resultFallbacks": 0
+    },
+    {
+      "index": 169,
+      "banks": [
+        "term_bank_662.json",
+        "term_bank_663.json",
+        "term_bank_664.json",
+        "term_bank_665.json"
+      ],
+      "termRows": 38310,
+      "mediaRows": 1034,
+      "digest": null,
+      "elapsedMs": 30.304957999999715,
+      "sourceInflateMs": 10.315360999999939,
+      "rowDecodeMs": 1,
+      "parseBankMs": 13,
+      "resultFallbacks": 0
+    }
+  ]
+}

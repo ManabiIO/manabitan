@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "archive": "retained-evidence.tar.gz",
+  "archiveSha256": "64aa06c8d554d157bc1dbcc7217ab8ca9878fc4a1b37a47c6291ea28143e40e6",
+  "archiveBytes": 347165,
+  "entryCount": 56,
+  "entries": {
+    "reports/r2-transfer-browser-publication.json": {
+      "bytes": 561,
+      "sha256": "0bb9cf13dc207ede980781ed50bd27663883344eb352c33c3bb0063177367288"
+    },
+    "reports/r2-transfer-changed-tests-jsconfig.initial.json": {
+      "bytes": 1094,
+      "sha256": "568352116031cc93e60621251f788577aa891e9adf2c7615e5745696a50bf51a"
+    },
+    "reports/r2-transfer-changed-tests-jsconfig.json": {
+      "bytes": 1170,
+      "sha256": "54812154b7ec4620c049326410f49cac5e9f756c53cd18033f0cba00beeae013"
+    },
+    "reports/r2-transfer-committed-changed-test-types-final.log": {
+      "bytes": 513,
+      "sha256": "1466574ff5f5c97e089e8a130da09c9995e14fdca1d3e5f6a472e15352598a93"
+    },
+    "reports/r2-transfer-committed-changed-test-types-receipt.json": {
+      "bytes": 488,
+      "sha256": "075737917801230606c845447d3d686b7b5f5ce21c99fe374c33e311ae0e994d"
+    },
+    "reports/r2-transfer-committed-changed-test-types-resolved-receipt.json": {
+      "bytes": 489,
+      "sha256": "30126f6606fc23e334d7604a0be430a24716f43a9fe417dcf32e60ad53f322a3"
+    },
+    "reports/r2-transfer-committed-changed-test-types-resolved.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reports/r2-transfer-committed-changed-test-types.log": {
+      "bytes": 60,
+      "sha256": "d8e21061a32cb34f566f1c326ad444883228df1a0db27bfac753767ff86923ae"
+    },
+    "reports/r2-transfer-committed-oracle-jitendex.json": {
+      "bytes": 113155,
+      "sha256": "2e54c06cc3375bd6914b4328a5ac5612ff1a0d90e900284a78732c2bc324b387"
+    },
+    "reports/r2-transfer-committed-oracle-jitendex.log": {
+      "bytes": 455,
+      "sha256": "879e5033917d5cbbb9690bb4ee1a97e0a0b4f7b0f16f7af714b9470caa23db7a"
+    },
+    "reports/r2-transfer-committed-oracle-jmdict.json": {
+      "bytes": 55566,
+      "sha256": "9ea841794e888484ec3ed09d3f24b393c1c628dd64bb7ad77859cf70f3bbcae7"
+    },
+    "reports/r2-transfer-committed-oracle-jmdict.log": {
+      "bytes": 393,
+      "sha256": "c59021f203d3b9153c020724c274c8b41890a07b5b0a5b3e92d83ac9c8ee6232"
+    },
+    "reports/r2-transfer-committed-oracle-run.json": {
+      "bytes": 2047,
+      "sha256": "b9cb48e7a528a6083babef1c4f10172ffe660f0e79e054232d33600bd4d3aad6"
+    },
+    "reports/r2-transfer-committed-oracle-vndb.json": {
+      "bytes": 811555,
+      "sha256": "db4f411b0625c37038e973b9b6d64671837e5e5e753673d5ea24fd60095a88b2"
+    },
+    "reports/r2-transfer-committed-oracle-vndb.log": {
+      "bytes": 1366,
+      "sha256": "42de8a6a69437d65ea53319fd314de710ad894e82e820c00eb988e5f375b027c"
+    },
+    "reports/r2-transfer-evidence-format.log": {
+      "bytes": 229,
+      "sha256": "0c8e44891d24f406dd1e3bee0bfda0d32970faf3dd094fba11c60bd2c0527cc7"
+    },
+    "reports/r2-transfer-focused.log": {
+      "bytes": 603,
+      "sha256": "a59ec5b1f623884c344449bdc29c8f93b9f8b16bec6db0fb2931daff1aa29262"
+    },
+    "reports/r2-transfer-oracle-jitendex.json": {
+      "bytes": 112077,
+      "sha256": "2ae5a48d8a072fe62740825f867757ff4e4bbec588094c0c9ef51c6823edd23d"
+    },
+    "reports/r2-transfer-oracle-jitendex.log": {
+      "bytes": 445,
+      "sha256": "52c2dff321bcabdd534c209f108490968ca13a36c9762044bc6b8455e817e7db"
+    },
+    "reports/r2-transfer-oracle-jmdict.json": {
+      "bytes": 54975,
+      "sha256": "e83dfa3473ca9c75a3ba756619b2e2e29faa3478525d50ee123385aae3fed796"
+    },
+    "reports/r2-transfer-oracle-jmdict.log": {
+      "bytes": 382,
+      "sha256": "87d09f90d64ef555e4143c1a4f4d318773c20bf8184f5cd678a6667efbd3022f"
+    },
+    "reports/r2-transfer-oracle-vndb.json": {
+      "bytes": 803070,
+      "sha256": "faf2b3dc7b7e9b0cb489cc49fa5f42061f6374cb5296e5087bf02fa452c4d4ba"
+    },
+    "reports/r2-transfer-oracle-vndb.log": {
+      "bytes": 1356,
+      "sha256": "5a19a2330459fa7faaf7e6421d9d822771d3d470a46676c4fdff35e6dc78e378"
+    },
+    "reports/r2-transfer-publication.json": {
+      "bytes": 895,
+      "sha256": "178a260ee3177f6d595c6dc690b4b8d83d79c6372f526ebeb7c273ecb02b3d04"
+    },
+    "reports/r2-transfer-smoke-jmdict-v2.json": {
+      "bytes": 10052,
+      "sha256": "fb688c7f38e69c934eb78c25906c05f7170a0ecc27ec78f7036f2d0acb82b149"
+    },
+    "reports/r2-transfer-smoke-jmdict-v2.log": {
+      "bytes": 324,
+      "sha256": "1def1d1d3eca125c3dd4b38c2f8931697fbce3ed79a254103acab4d8341ea82c"
+    },
+    "reports/r2-transfer-smoke-jmdict.log": {
+      "bytes": 577,
+      "sha256": "a5e4f4d12d36889adaf300a5cfd3b2b1c908b5fbfa23969ca1d39fab77d395b3"
+    },
+    "reports/r2-transfer-v2-build-final.log": {
+      "bytes": 385,
+      "sha256": "0ba9fca8f606786fdcdcf3d9932422bdf325792bb8f899979e901ea5e02aa3c4"
+    },
+    "reports/r2-transfer-v2-build.log": {
+      "bytes": 385,
+      "sha256": "f03f3d15f9def47394c8182a7c0ac4306b5f4148829030907ad1bfbe2e251396"
+    },
+    "reports/r2-transfer-v2-focused-final.log": {
+      "bytes": 605,
+      "sha256": "45063986de5556a90b801f0fa17491d6affdf21c63a61f4eef2d1280724cf9e4"
+    },
+    "reports/r2-transfer-v2-focused.log": {
+      "bytes": 604,
+      "sha256": "3ba2493807ef20d1140a7703360346f01fd5291c2928f82c64240fd6de595a76"
+    },
+    "reports/r2-transfer-v2-lint-final.log": {
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "reports/r2-transfer-v2-lint.log": {
+      "bytes": 1750,
+      "sha256": "7ea90099c379c32f524584e345301d73522fb6230dbf26f1577c0f5a3761580f"
+    },
+    "reports/r2-transfer-v2-main-types-final.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "reports/r2-transfer-v2-main-types.log": {
+      "bytes": 232,
+      "sha256": "145b4d6e5826e13e8cfe27a42ed54c743a083cb85719a8894cb3e456049d9a09"
+    },
+    "reports/r2-transfer-v2-mechanism-summary.json": {
+      "bytes": 2304,
+      "sha256": "e57dfdbeee2f0e81ccefc9aabfc27269e8f504f1a4b109d4982b91be2f62054a"
+    },
+    "reports/r2-transfer-v2-oracle-jitendex.json": {
+      "bytes": 113155,
+      "sha256": "a4db2d370d0e1ec1ce8bba038f7e9f085f5aadfe4a4162afdc9fa93186e42638"
+    },
+    "reports/r2-transfer-v2-oracle-jitendex.log": {
+      "bytes": 448,
+      "sha256": "7a46a51eeaac71ff4902fae313eefa2280a4cf32fa3f0bebc6cf58c7e4ea302d"
+    },
+    "reports/r2-transfer-v2-oracle-jmdict.json": {
+      "bytes": 55566,
+      "sha256": "552d61f83d95ef2e6d38de5fe6e001dc86b6e73e5bf4b5cdf7520f4700a8cf3c"
+    },
+    "reports/r2-transfer-v2-oracle-jmdict.log": {
+      "bytes": 385,
+      "sha256": "f12514a4477be8e61309b9ba39deed19455ca17f58fa45025ab14d4cc8052de5"
+    },
+    "reports/r2-transfer-v2-oracle-vndb.json": {
+      "bytes": 811555,
+      "sha256": "c3b4860a1d13f5994aef8e9ab0eb88a40ac8fa08f68626fd8d8cf6728ee2a0a4"
+    },
+    "reports/r2-transfer-v2-oracle-vndb.log": {
+      "bytes": 1359,
+      "sha256": "22943dcc68a09d6bd20db8fca54978c88fbc183b4795308e033339def1bd6887"
+    },
+    "reports/r2-transfer-v2-parser-and-boundaries.log": {
+      "bytes": 943,
+      "sha256": "7acaefa8d1c72be891741dc83b0e2ede2f59d50df74da5b01c9478f310879304"
+    },
+    "reports/r2-transfer-v2-retention-focused.log": {
+      "bytes": 603,
+      "sha256": "73f09d2a74ba3facf1c451cb321b8bb7c54c5ddb13e7cb50c0f982366492f934"
+    },
+    "reports/r2-transfer-v2-store-suite.log": {
+      "bytes": 592,
+      "sha256": "2a3e5924d95c330fd462c391e91812a128dbad618614956ef8a7c45ac0d7d9ea"
+    },
+    "reports/r2-transfer-v2-test-types.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "runners/r2-parser-component.mjs": {
+      "bytes": 20563,
+      "sha256": "7044764e4eddf729101c01d0fbfabd059fa044447afa092e6166db15bbae91da"
+    },
+    "runners/r2-parser-component.setup-v1.mjs": {
+      "bytes": 20266,
+      "sha256": "bec83e5481a2c748acf7969efb6026fd3b3e8df3ad8deecd2bb07f1a153538ff"
+    },
+    "runners/r2-parser-component.v1.mjs": {
+      "bytes": 20659,
+      "sha256": "2cb33698b991957700104b31286da54d7658761b1e9504e9b86fb6e0d2bbab8d"
+    },
+    "source/candidate/ext/js/dictionary/term-bank-wasm-parser.js": {
+      "bytes": 198668,
+      "sha256": "016b0c2b88fd5feb25e1160501eed2a82d23c4df4e58df1c55382fb45ffbb703"
+    },
+    "source/candidate/ext/js/dictionary/term-record-opfs-store.js": {
+      "bytes": 336212,
+      "sha256": "c9c1bb63be00f6fc42529220be3131967111a73dc79a7db38247c1ae9905d365"
+    },
+    "source/candidate/test/term-bank-wasm-parser.test.js": {
+      "bytes": 201761,
+      "sha256": "852d1f24ae65c668fd6d5acdf84466d4cb085b1d179ba3fd93657064f6737572"
+    },
+    "source/candidate/test/term-record-opfs-store.test.js": {
+      "bytes": 328648,
+      "sha256": "0b8139a8a883c81ffbac52ec8e242e4f746c7ca6ea69946840b3a6ba6be2172d"
+    },
+    "source/change-from-baseline.patch": {
+      "bytes": 26717,
+      "sha256": "ef9b0e3f92561c7f81a6c4249b49cdb13894e4d9311e1882de946bc860e84020"
+    },
+    "source/source.json": {
+      "bytes": 1999,
+      "sha256": "1f7f6a6f6af69ea35358300b8fe4216f377e79f3899adae4e105fa9a607b7771"
+    },
+    "validation-history.json": {
+      "bytes": 2121,
+      "sha256": "95fbcb1401b5ed9d5af12bc50937ccb728b0f95bad80b7f75d36eb6160dab9eb"
+    }
+  },
+  "summarySha256": "2e2e8f0183bccc2864abca19ab4de8422a48971d7b5bcb46fd66a645c87f5b6c",
+  "readmeSha256": "669b756aa9a20541acb24f9302e09b11e0208735e0ff70a0bc9bab8c4af57f82"
+}

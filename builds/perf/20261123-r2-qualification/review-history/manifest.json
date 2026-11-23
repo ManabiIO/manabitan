@@ -1,0 +1,13 @@
+{
+  "archive": {
+    "bytes": 23072,
+    "name": "raw-evidence.tar.xz",
+    "sha256": "5f368edcfa6acf433157e88ffc109b99a44c43170325392a292dcc8671c81aad"
+  },
+  "expandedBytes": 321335,
+  "memberIndexSha256": "2d4d68dc366076e304deb3c93bcfebedde797ebbe26f688aa76ba52b5c532d9d",
+  "members": 15,
+  "packerSha256": "8816b8f851bef13484c85d73d8299527045a260bcbf853b95b6e7d75297fc2fe",
+  "schemaVersion": 1,
+  "transportIndexSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+}

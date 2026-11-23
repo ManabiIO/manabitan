@@ -39,6 +39,7 @@
         {"path": "dev/perf/import-r2-memory-20261123.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
+        {"path": "dev/perf/import-qualification-20261122.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",

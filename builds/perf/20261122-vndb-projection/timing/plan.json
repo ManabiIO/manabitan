@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "comparison": "4 baseline/candidate/baseline triples; equal-work candidate vs mean of enclosing baselines",
+  "warmup": "none; each arm uses a fresh Node22 process, parser module compiled before group timers",
+  "groups": 170,
+  "sourceBanks": 665,
+  "expectedRows": 6648310,
+  "baselineRoot": "/workspace/scratch/fcfffdc555c8/manabitan-baseline",
+  "candidateRoot": "/workspace/scratch/fcfffdc555c8/manabitan-media-projection",
+  "baselineCommit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "candidateCommit": "6e6b8180265682a9c6af92219f82d08e56ae78f2",
+  "boundary": "serialized compressed-source inflation, fused column parsing, owned result/image projection, prepared lookup indexes; source ZIP reads/sha256, module loading/compilation, output hashing, browser and storage excluded",
+  "runs": [
+    {
+      "triple": 1,
+      "position": "A",
+      "arm": "baseline"
+    },
+    {
+      "triple": 1,
+      "position": "B",
+      "arm": "candidate"
+    },
+    {
+      "triple": 1,
+      "position": "C",
+      "arm": "baseline"
+    },
+    {
+      "triple": 2,
+      "position": "A",
+      "arm": "baseline"
+    },
+    {
+      "triple": 2,
+      "position": "B",
+      "arm": "candidate"
+    },
+    {
+      "triple": 2,
+      "position": "C",
+      "arm": "baseline"
+    },
+    {
+      "triple": 3,
+      "position": "A",
+      "arm": "baseline"
+    },
+    {
+      "triple": 3,
+      "position": "B",
+      "arm": "candidate"
+    },
+    {
+      "triple": 3,
+      "position": "C",
+      "arm": "baseline"
+    },
+    {
+      "triple": 4,
+      "position": "A",
+      "arm": "baseline"
+    },
+    {
+      "triple": 4,
+      "position": "B",
+      "arm": "candidate"
+    },
+    {
+      "triple": 4,
+      "position": "C",
+      "arm": "baseline"
+    }
+  ]
+}

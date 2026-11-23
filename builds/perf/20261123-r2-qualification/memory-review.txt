@@ -1,0 +1,118 @@
+# Independent review: transfer memory campaign 45124025705
+
+All 24 browser imports completed and passed the frozen source, package, runtime,
+OPFS, native-work and persisted-content/restart checks. The frozen process-tree
+observer qualified 22 observations. Four complete cells qualify for memory
+comparisons: both Jitendex jobs and both VNDB jobs. Both JMdict cells remain
+unqualified because one observation in each contains an unreadable, stable
+two-thread zombie leader. No JMdict memory percentage or all-corpus memory
+qualification is supported by this campaign.
+
+This review recomputed every retained sample's discovery coverage, zombie
+exclusion, PSS/private-byte sum and qualification reason, then recomputed each
+observation's summary and each eligible adjacent pair. All recomputed outcomes
+agree with the frozen runner. There were no retries, discarded imports, relaxed
+observer rules or changes to the declared observation window.
+
+## Source and protocol verification
+
+- Research source: `a9a90967f1dfc9c9c68d06ae5ad4ad1e999f67b2`, tree
+  `2d18913b028a814e5af2732509c3bba7bbea94ca`.
+- Baseline: `5e1f8c12f7ff798ba407323aff675cb23b22af02`.
+- Candidate: `8fe5926cec1396a05ed4ea52be751e48784329b7`, tree
+  `df4e570212e6ef8a60f12f578b57c6d04455faa3`.
+- Observer: unchanged reviewed source `00da5cb2ec28211dd6d09d938dc6cf1e3a4334c9`,
+  SHA-256 `ca6c0f7761062761697a810d4bd0007ff0257bbce69099df45657ffdb7ee8f10`.
+- Six independent jobs used the exact four-import ABBA or BAAB schedule, giving
+  eight imports per dictionary and 24 in total. Node, Chromium, Playwright and
+  executable hashes match across all six jobs. The 180-second GNU timeout
+  wrapper and five-second kill grace are present in every command receipt.
+- Complete package-entry maps differ only in the parser and record-store
+  JavaScript files; those entry hashes equal the intended committed source
+  bytes. Dependency locks, original fixture locks, symmetric harness overlays
+  and target-fixture provenance all agree with preparation.
+- Every retained observation-file hash matches its receipt. All 24 browser
+  commands exited successfully, used the file-input event with the expected
+  sequence increment, reported no import/settings errors, and used OPFS SAH
+  storage without fallback. Start/completion events are monotonic; an optional
+  absent next-frame opportunity is accepted as the documented null value.
+- Dictionary title, revision, row count and twelve unique sampled content probes
+  passed before and after restart. Cross-arm persisted probe digests, native
+  work receipts and persisted byte totals match. These browser probes are
+  sampled correctness evidence; the separate parser oracle supplies whole-row
+  component equality.
+
+The audit examined 2,024 raw process-tree scans. Of these, 1,527 met the per-scan
+coverage rule. That count includes good scans inside the two failed observations;
+those scans were not used to salvage either failed cell's aggregate.
+
+## Qualified descriptive comparisons
+
+Percentages below compare B with its adjacent A baseline. Negative values mean
+lower sampled memory. Each cell contains two pairs; the combined corpus medians
+use the four individual paired percentages rather than averaging rounded cell
+medians.
+
+| Corpus / order  | Qualified cell | Paired PSS changes | Median PSS change | Median private-byte change |
+| --------------- | -------------- | ------------------ | ----------------: | -------------------------: |
+| JMdict / ABBA   | No             | Withheld           |                 — |                          — |
+| JMdict / BAAB   | No             | Withheld           |                 — |                          — |
+| Jitendex / ABBA | Yes            | −1.206%, +0.130%   |           −0.538% |                    −0.552% |
+| Jitendex / BAAB | Yes            | −4.119%, −5.463%   |           −4.791% |                    −5.822% |
+| VNDB / ABBA     | Yes            | −1.617%, −2.956%   |           −2.286% |                    −2.749% |
+| VNDB / BAAB     | Yes            | −1.320%, −3.727%   |           −2.523% |                    −2.879% |
+
+Jitendex's four-pair descriptive median is **−2.663% sampled PSS** and **−3.019%
+sampled private bytes**. One of its four PSS pairs increases by 0.130%, so the
+evidence supports a small, variable reduction across these sampled runs rather
+than a uniform reduction on every observation. Baseline sampled PSS maxima in
+these pairs range from 1,232.17 to 1,298.38 MiB; candidate maxima range from
+1,221.64 to 1,252.28 MiB.
+
+VNDB's four-pair descriptive median is **−2.286% sampled PSS** and **−2.749%
+sampled private bytes**, with all four pairs lower. Baseline sampled PSS maxima
+range from 1,388.31 to 1,410.78 MiB; candidate maxima range from 1,358.21 to
+1,369.99 MiB. Raw KiB values and every paired calculation are in the adjacent
+JSON review.
+
+## Exact JMdict coverage failures
+
+| Cell / observation   | Stable scan indexes (zero based) | Unreadable PID / start-time ticks | Condition                                                           |
+| -------------------- | -------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
+| ABBA / `memory-02-B` | 49                               | 4143 / 45895                      | Z state and two threads before/after; `smaps_rollup` returned ESRCH |
+| ABBA / `memory-02-B` | 52, 53                           | 4072 / 45882                      | Z state and two threads before/after; `smaps_rollup` returned ESRCH |
+| BAAB / `memory-02-A` | 47                               | 4165 / 112478                     | Z state and two threads before/after; `smaps_rollup` returned ESRCH |
+
+The reviewed exemption requires an unchanged **single-thread** zombie with no
+userspace address space. A zombie thread-group leader can still have live sibling
+threads, so these two-thread cases fail that rule. Assigning them zero PSS or
+dropping the stable unreadable scan would conceal an unmeasured address space.
+
+The ABBA candidate observation contains 57 scans, including 32 fully qualified
+scans; the BAAB baseline observation contains 49 scans, also with 32 qualified
+scans. Both entire observations correctly retain null PSS/private maxima and
+`process-smaps-coverage-unqualified`. Both cells retain a run-failure receipt and
+lack a cohort-complete receipt. Their derived comparison lists remain empty.
+Other unreadable processes occurred during changing trees and invalidate only
+those scans; the stable two-thread cases above are the complete-observation
+blockers.
+
+## Interpretation and limits
+
+The qualified Jitendex and VNDB samples show lower descriptive memory medians
+under both orders. The JMdict coverage failures prevent a complete three-corpus
+memory qualification. They are measurement-coverage failures in both arms, not
+browser import failures or measured memory regressions.
+
+These values are maxima of fully covered, discovered Chromium process trees
+during startup, import, sampled readback and restart. They are not exact import
+peaks. Scans are not atomic, short-lived or already reparented processes may be
+missed, and PSS depends on external users of shared mappings. Four pairs per
+qualified dictionary are a small diagnostic sample. All elapsed times from these
+externally sampled imports remain non-authoritative and are excluded from this
+review; speed conclusions require the separate unsampled timing campaign.
+
+The review is reproducible with `r2-audit-memory.py` against the six unchanged
+provider artifact directories. `r2-memory-review.json` records the audit script
+hash, provider archive hashes, all 24 observation outcomes, unreadable-process
+details and recomputed pair values.

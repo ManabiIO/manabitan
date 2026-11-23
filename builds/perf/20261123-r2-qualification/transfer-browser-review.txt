@@ -1,0 +1,80 @@
+# Independent review: transfer browser qualification
+
+**Recommendation: HOLD PR #820.** The six frozen timing cells are complete and pass independent raw-timing, source/package, fixture and work validation. The candidate reduces observed VNDB result-copy time and shows small memory reductions in four qualified diagnostic cells, but does not establish a repeatable material complete-import improvement. Both JMdict memory cells remain unqualified.
+
+## Frozen browser cohort
+
+- Timing workflow `45123053286`, research source `9941723a323c76e8d73a16880e658fa243f17187`.
+- Parent `5e1f8c12f7ff798ba407323aff675cb23b22af02`; candidate `8fe5926cec1396a05ed4ea52be751e48784329b7`, tree `df4e570212e6ef8a60f12f578b57c6d04455faa3`.
+- Node `22.22.0`, Chrome for Testing `153.0.8010.12`, Playwright `1.63.0`; matching executable hashes are retained in the JSON.
+- Six independent jobs: three dictionaries × forward/reverse schedule. Each contains six excluded warmups, 12 alternating candidate/parent pairs and six interleaved same-code C/A pairs: **252 successful imports, 36 excluded warmups, 216 measured imports, 72 candidate pairs and 36 control pairs**. No timing-cell preparation, run or analysis failure marker is present.
+- Independently reconstructed all durations from raw file-input operation clocks and recomputed every retained pair ratio, median, equal-work ratio, interval and worst pair. All values match exactly. No observation was discarded, no host estimates pooled and no control effect subtracted.
+- Exact runtime source/tree pins, symmetric overlays, dependency lock, completion hashes, fixture checksums/sizes, observed package hashes and work receipts agree. A and C have identical package-entry maps. The only changed entries are `js/dictionary/term-bank-wasm-parser.js` and `js/dictionary/term-record-opfs-store.js`; their hashes match the declared immutable published source blobs.
+- Each import uses fresh-profile production defaults, uninstrumented timing and OPFS SAH storage without fallback, completes publication with no errors, and passes twelve distinct source-derived readability probes and restart checks. Row counts are 526,942 / 435,448 / 6,648,310; native chunks are 12 / 22 / 170 for JMdict / Jitendex / VNDB. Term-bank/source-byte counts, recorded persisted write-byte counters, parser options and sampled output digests are identical across arms and directions. These probes and counters do not prove exhaustive persisted-content or media equality.
+
+## Complete-import results by independent job
+
+Negative values mean faster. Equal work compares sums within the same cell. C/A is unchanged code. Intervals are the frozen descriptive paired-median bootstrap intervals, not a correction for examining multiple cells.
+
+| Corpus | Direction | B/A median | B/A equal work | B/A median interval | C/A median | C/A equal work | Worst B/A pair |
+| --- | --- | ---: | ---: | --- | ---: | ---: | ---: |
+| JMdict | forward | -0.50% | +0.11% | [-1.44%, +1.01%] | -0.37% | -0.87% | +4.83% |
+| JMdict | reverse | +0.53% | +0.93% | [-1.12%, +2.74%] | +1.09% | +1.07% | +5.06% |
+| Jitendex | forward | +0.37% | +0.22% | [-1.17%, +1.22%] | -0.53% | -4.26% | +3.84% |
+| Jitendex | reverse | +1.73% | +1.60% | [-0.55%, +2.98%] | +0.66% | +0.99% | +6.16% |
+| VNDB | forward | -1.22% | +0.67% | [-1.82%, -0.17%] | -0.63% | -0.52% | +13.07% |
+| VNDB | reverse | -0.95% | -1.03% | [-2.38%, +0.93%] | +0.95% | +0.72% | +1.69% |
+
+VNDB forward has nine faster pairs and a favorable median interval, but two candidate pairs are **+12.05% and +13.07%** slower. Keeping those observations produces **+0.67% equal-work time**. Reverse improves by −1.03% equal work but its median interval includes zero. The complete plan does not support reporting a replicated VNDB speedup. Jitendex and JMdict equal-work results are slower in both directions.
+
+Jitendex forward also retains an unusually slow unchanged A control observation: its associated C/A pair is −21.32%, and the control equal-work result is −4.26%. That observation is part of the declared cohort; removing it or subtracting the aggregate control from B/A would manufacture a stronger conclusion than the evidence supports.
+
+## Observed copy mechanism
+
+These are existing `parserResultCopyMs` counters from each raw report. They are overlapping parser-worker duration sums, not an additive decomposition of complete-import time, an isolated copy benchmark, or wall-time savings.
+
+| Corpus | Direction | Copy B/A median | Copy B/A equal work | Copy C/A median | Copy C/A equal work |
+| --- | --- | ---: | ---: | ---: | ---: |
+| JMdict | forward | -13.24% | -11.60% | +11.68% | +14.65% |
+| JMdict | reverse | -3.33% | -2.91% | +17.56% | +17.08% |
+| Jitendex | forward | +1.92% | -0.04% | +2.02% | +2.90% |
+| Jitendex | reverse | -4.56% | -3.94% | +1.16% | +0.37% |
+| VNDB | forward | -7.08% | -7.24% | +3.26% | +2.69% |
+| VNDB | reverse | -5.76% | -6.21% | +0.32% | -0.36% |
+
+VNDB copy counters decrease in 12/12 forward and 11/12 reverse candidate pairs. This is consistent with avoiding duplicate key/key-length ownership copies and is useful mechanism evidence. It does not overcome the complete-import result or justify converting overlapping phase reductions into claimed end-to-end milliseconds saved.
+
+## Separate memory qualification
+
+Memory workflow `45124025705` uses the same parent and candidate with a separate observer-enabled campaign and research source `a9a90967f1dfc9c9c68d06ae5ad4ad1e999f67b2`. The process-coverage determination comes from the separately reviewed `r2-memory-review.json`; this review binds that file by SHA-256, checks matching source and cross-campaign output digests, and independently recomputes each qualified cell’s adjacent-pair arithmetic from its reported maxima. It does not claim a second audit of every raw process scan.
+
+All 24 memory-campaign browser imports succeeded. Four complete cells qualify for descriptive memory comparisons; each has only two pairs. **No combined cross-host memory estimate is used here.**
+
+| Corpus | Independent order | Qualified memory cell | Median sampled PSS change | Median sampled private-byte change |
+| --- | --- | --- | ---: | ---: |
+| JMdict | ABBA | No — coverage failure | Withheld | Withheld |
+| JMdict | BAAB | No — coverage failure | Withheld | Withheld |
+| Jitendex | ABBA | Yes | -0.54% | -0.55% |
+| Jitendex | BAAB | Yes | -4.79% | -5.82% |
+| VNDB | ABBA | Yes | -2.29% | -2.75% |
+| VNDB | BAAB | Yes | -2.52% | -2.88% |
+
+Both JMdict cells contain one observation with an unreadable stable two-thread zombie leader, which fails the frozen single-thread-zombie exemption. Their maxima and comparison lists remain withheld; good scans within those observations cannot salvage either cell. These are process-coverage failures, not browser import failures or measured memory regressions.
+
+Qualified memory values are maxima of covered, discovered Chromium process-tree samples during startup, import, readback and restart. They are not exact import peaks, settled memory, retained-buffer totals, GC behavior, or constrained-host OOM qualification. Short-lived/reparented processes can be missed, scans are not atomic, and PSS depends on external sharing. Observer-run elapsed times remain excluded from performance conclusions.
+
+## Acceptance decision and PR update
+
+The repository rule in `dev/perf/import-experiments-20260914.md` requires material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, plus memory/storage/lookup/reliability gates. The copy reduction and qualified diagnostic memory decreases are real scoped evidence, but the complete-import gate is unmet and the three-corpus memory campaign is not fully qualified. **Keep #820 on HOLD as an optimization candidate.** Full CI success does not change this performance decision.
+
+Ready-to-paste update:
+
+> All six frozen browser timing cells completed: 252 successful imports, with 12 candidate/parent pairs and six same-code controls per cell. Independent source, package, work and raw-clock checks pass. Complete-import equal-work changes are JMdict +0.11% / +0.93%, Jitendex +0.22% / +1.60%, and VNDB +0.67% / −1.03% (forward / reverse). VNDB result-copy counters decrease by 7.24% / 6.21%, but retaining the forward slow tails removes its equal-work gain. Separate memory cells show small sampled PSS/private reductions for Jitendex and VNDB; both JMdict memory cells remain unqualified because of process coverage. HOLD: useful copy/memory mechanism evidence without a replicated material complete-import win.
+
+## Reproduction and evidence
+
+- Independent reader: `qualification/r2-transfer-browser-independent-review.py`.
+- Independent browser ratios, per-cell memory arithmetic, hashes and recommendation: `qualification/r2-transfer-browser-review.json`.
+- Successful audit log: `qualification/r2-transfer-browser-independent-review.log`.
+- Raw browser cells: `r2-evidence/transfer-browser-45123053286/`.
+- Separate memory review: `qualification/r2-memory-review.md` / `.json`; its raw-scan audit and initial failures remain retained.

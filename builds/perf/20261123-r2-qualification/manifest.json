@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "scope": "Final report and source/result/review/validation evidence. Separate raw bundles retain their own manifests.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 23153,
+      "sha256": "dce4275d344100ce26fde8ad541efd2429c208f79ed2b82ba87fa9307007b47d"
+    },
+    {
+      "path": "evidence-integrity-tests.log",
+      "bytes": 106,
+      "sha256": "95d1c8f31c1f53a4d2b892f8c4df74b11200a51212a69e23650230f7e5965142"
+    },
+    {
+      "path": "local-validation/build-libs.log",
+      "bytes": 174,
+      "sha256": "e0cb71fe601c6aa0bc77d1c72b7de24eb689cec9d73775860edf39dc4fa5755c"
+    },
+    {
+      "path": "local-validation/history.json",
+      "bytes": 1044,
+      "sha256": "62a55cf476dd8c77ef50f0566ea8770eb8481a87064c86da7a66aca64ce02c2b"
+    },
+    {
+      "path": "local-validation/lint-json.log",
+      "bytes": 1044,
+      "sha256": "f30dc9f228e792ce4dc561e05ce4b8de971b4f09a1ff5045a775fa169dc606ec"
+    },
+    {
+      "path": "memory-review.txt",
+      "bytes": 7784,
+      "sha256": "942e3990ac0b931288c709b4a64abec8e348475575946eb4b9634c6fe3bee5a2"
+    },
+    {
+      "path": "native-browser-review.txt",
+      "bytes": 11451,
+      "sha256": "56891bf83e8074226fca58511da969b8781edd3e3760e0d091d5f9fc71d8b18f"
+    },
+    {
+      "path": "pr-822-body.md",
+      "bytes": 3930,
+      "sha256": "745bbc8f8378d6747f9b0f3f941376eb587b1b580d8f17760e31cf16c6013e51"
+    },
+    {
+      "path": "pr-822-final.json",
+      "bytes": 5184,
+      "sha256": "eaea3779bce7507e5aeea29bee490004e37a9870c7d371a3c0d16d1426d1cfba"
+    },
+    {
+      "path": "published-runtime-blobs-with-record.json",
+      "bytes": 7024,
+      "sha256": "09b5e572d5ded27a333ec850f35e17b0f4a029099e0d75ea9ac2e53707fbdc32"
+    },
+    {
+      "path": "published-runtime-blobs.json",
+      "bytes": 6536,
+      "sha256": "7a1e741aa969c9024c5714f54e38537bd2a225d1ecf92e7e06de1cae29c5199a"
+    },
+    {
+      "path": "record-browser-review.json",
+      "bytes": 47207,
+      "sha256": "e56463a7d2f54a52496cab71fa048678276139eae1013cef7c3bb73e4c174992"
+    },
+    {
+      "path": "record-browser-review.txt",
+      "bytes": 11932,
+      "sha256": "8675f2a242b9864bba06e63c477e3c3526d09613fb628c56fa66ba820f1c9e2c"
+    },
+    {
+      "path": "record-ci-workflows.json",
+      "bytes": 2759,
+      "sha256": "f0c033f2ca8bd467b12623bc4efab356dbe8a7c07895473c31e761bf5b172801"
+    },
+    {
+      "path": "review-history/manifest.json",
+      "bytes": 496,
+      "sha256": "6a5b3287f6fad67c131499603911fb29b6a43eca25b283a72d0141366e56e2cb"
+    },
+    {
+      "path": "review-history/original-zips.json",
+      "bytes": 3,
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+    },
+    {
+      "path": "review-history/raw-evidence.tar.xz",
+      "bytes": 23072,
+      "sha256": "5f368edcfa6acf433157e88ffc109b99a44c43170325392a292dcc8671c81aad"
+    },
+    {
+      "path": "review-history/raw-members.json",
+      "bytes": 2636,
+      "sha256": "2d4d68dc366076e304deb3c93bcfebedde797ebbe26f688aa76ba52b5c532d9d"
+    },
+    {
+      "path": "sources.json",
+      "bytes": 2374,
+      "sha256": "3ffa9fb0a371cb1cb3cf6535d6d9550a63a3d4bbe6cdfa977bcf70cb0bb4e60a"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 586626,
+      "sha256": "eb50a8591a55ccf6150f81cd683fa8859632798b3ea47d24331bcbb0578efeef"
+    },
+    {
+      "path": "transfer-browser-review.txt",
+      "bytes": 9139,
+      "sha256": "3636c9075591b73c283746a186d063723997e3476f82e9113a3341c91e7e9c32"
+    }
+  ]
+}

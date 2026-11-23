@@ -1,0 +1,77 @@
+[
+  {
+    "bytes": 106,
+    "path": "final-reviews/r2-evidence-integrity-tests.log",
+    "sha256": "95d1c8f31c1f53a4d2b892f8c4df74b11200a51212a69e23650230f7e5965142"
+  },
+  {
+    "bytes": 56693,
+    "path": "final-reviews/r2-final-ci-snapshots.json",
+    "sha256": "872257279cb6a7ac36b95e9ba3b8d08e254883960c0c33294191acb5c449fe9c"
+  },
+  {
+    "bytes": 26943,
+    "path": "final-reviews/r2-record-browser-independent-review.py",
+    "sha256": "9888ddbe2009d2d0a0d9e0e2bf8a3613c43b118d79cbd48b00bd3fd52f532c21"
+  },
+  {
+    "bytes": 25596,
+    "path": "final-reviews/r2-record-browser-independent-review.v1.py",
+    "sha256": "8dfa2254505b66a047d58fade87523c4bb39d4205c4651b6da21f05365b40932"
+  },
+  {
+    "bytes": 26017,
+    "path": "final-reviews/r2-record-browser-independent-review.v2.py",
+    "sha256": "9b37a0198ef96fe08c8f1fa333016696b7d4f7478cddb275911be9ef81df152a"
+  },
+  {
+    "bytes": 706,
+    "path": "final-reviews/r2-record-browser-publication.json",
+    "sha256": "8bb97bb7d2e3536062630a053fb5a7673c4afda82849ad9250a14480e33d0c6d"
+  },
+  {
+    "bytes": 40357,
+    "path": "final-reviews/r2-record-browser-review.five-cells.json",
+    "sha256": "ed54284617503a571e95fe35db0b1b849dc540b168e383e4fc1b37d39a753bcc"
+  },
+  {
+    "bytes": 1614,
+    "path": "final-reviews/r2-record-browser-review.five-cells.log",
+    "sha256": "e6bc491dbe863c0947c37b543aa1dfeaa976f474f51197b37ed4d961e57a493b"
+  },
+  {
+    "bytes": 46878,
+    "path": "final-reviews/r2-record-browser-review.initial-complete.json",
+    "sha256": "65544c0ab75ace387d480c51bce9f87086f7554ce668dee8ab96e9d5113fac43"
+  },
+  {
+    "bytes": 1936,
+    "path": "final-reviews/r2-record-browser-review.initial-complete.log",
+    "sha256": "2cce4c111bdbd7fd84b0ff96ff6da73d95423a243e1a2ac75a4a048e61d44bac"
+  },
+  {
+    "bytes": 47207,
+    "path": "final-reviews/r2-record-browser-review.json",
+    "sha256": "e56463a7d2f54a52496cab71fa048678276139eae1013cef7c3bb73e4c174992"
+  },
+  {
+    "bytes": 1936,
+    "path": "final-reviews/r2-record-browser-review.log",
+    "sha256": "2cce4c111bdbd7fd84b0ff96ff6da73d95423a243e1a2ac75a4a048e61d44bac"
+  },
+  {
+    "bytes": 11932,
+    "path": "final-reviews/r2-record-browser-review.md",
+    "sha256": "8675f2a242b9864bba06e63c477e3c3526d09613fb628c56fa66ba820f1c9e2c"
+  },
+  {
+    "bytes": 32071,
+    "path": "final-reviews/r2-record-browser-review.partial.json",
+    "sha256": "0336d8fb08e04edeb4f54fe8adc584a147519989cb72654bc16f1a1b79c7938c"
+  },
+  {
+    "bytes": 1343,
+    "path": "final-reviews/r2-record-browser-review.partial.log",
+    "sha256": "2a2e3eb4146bf8f8eeed06f67d5af9978503ff0a4578ff520c685066a647bfd1"
+  }
+]

@@ -231,3 +231,181 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## November 22, 2026: VNDB duplicate media projection screen
+
+[PR #799](https://github.com/ManabiIO/manabitan/pull/799) moves the existing canonical media deduplication check before duplicate source-row key projection when fused columns, an emitted content slab, and omitted term byte lists already provide the complete output. The runtime diff is nine lines. Its status is **hold: complete component parity passed, timing inconclusive**. The independent eager metadata correctness fix is [PR #798](https://github.com/ManabiIO/manabitan/pull/798).
+
+The committed [evidence package](../../builds/perf/20261122-vndb-projection/README.md) includes the exact runnable component harness, a portable four-triple scheduler and summarizer, the complete oracle, every raw timing observation and log, source-equivalence receipts, and validation history. The fixture is the explicitly selected VNDB Characters by Bee release, SHA-256 `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792`, with 6,648,310 terms in 665 banks. It is not added to unconditional fixture downloads.
+
+Baseline was `5e1f8c12f7ff798ba407323aff675cb23b22af02`. Isolated timing candidate `6e6b8180265682a9c6af92219f82d08e56ae78f2` has the same tree as published candidate `0541343dfb9426317763185db03153bdafc96228`. Node 22.22.0, the dependency lock, and WASM were fixed. The earlier complete oracle candidate `dbb19c26b9359f5abc237e5bb14ffd1c3f90d3f7` includes the independent importer fix; its recorded component sources are byte-identical to the isolated candidate and its only other tree differences are outside the component import graph.
+
+The oracle compares every deterministic row/content/deduplication/key-plan field, each complete prepared lookup map including segment plans, and projected media records across all 170 production-shaped groups. All 170 group digests match. The 146,725 per-group media representatives are not a count of the archive's 146,570 distinct WebP files. Archive and source hashes are verified outside timing. This proves component-output parity, not persisted browser database or media payload equality.
+
+Each timer covers native compressed source inflation, fused parsing, owned result/image projection copying, and completed lookup preparation. Source ZIP reads, hashing, module loading/compilation, browser workers, worker overlap, global persistence, OPFS, and UI are excluded. There are no excluded warmups; each arm starts a fresh process. The fixed schedule contains four A/B/C triples with identical baseline code in A and C. All 12 arms completed every source row with zero fused fallbacks and no source changes.
+
+Candidate measured-time changes relative to the mean enclosing baselines were **+2.99%, −24.83%, −10.60%, and +8.57%**; negative means less time. Unchanged baseline C/A drift was **−10.82%, +35.85%, +26.89%, and +15.30%**. The −3.81% median and −5.94% aggregate changes are descriptive only because control variation exceeds the apparent effect. No component or full import speedup is claimed. Preserve this entire cohort; do not retain only favorable triples.
+
+Focused sequential unit validation passed 365/365 tests, changed-file ESLint and seven build dry runs passed, and main TypeScript passed. The original contended unit failures and local full-test TypeScript OOM remain recorded. A CI-discovered test-helper type omission was fixed separately and passed focused type validation. Full CI and browser timing results are recorded below; peak memory, exhaustive persisted-output equality, and reopened lookup performance remain separate gates.
+
+## November 22, 2026: consecutive container closes
+
+Candidate `1dbc40224` against `develop` `5e1f8c12f` validates adjacent nested
+`]`/`}` tokens in one loop, retaining every container-state, depth, and glossary
+required-field check. This is distinct from the earlier close/comma experiment:
+commas still take their existing path. The pinned Clang/LLD 21.1.8 build adds
+100 WASM bytes (54,596 → 54,696); it adds no parser allocation or retained state.
+
+Initial Jitendex screen: Node 22.22.0, the locked 2026.08.11.0 archive, four
+alternating AB/BA pairs, two excluded complete warmups per child, default flags,
+and `validateGlossaryTypes: true`. The measured boundary is decoded term banks
+through parser and completed lookup construction, excluding inflation,
+compression, persistence, workers, and UI.
+
+| Pair | Order | Baseline (ms) | Candidate (ms) |  Change |
+| ---- | ----- | ------------: | -------------: | ------: |
+| 1    | AB    |      1,752.82 |       1,945.28 | +10.98% |
+| 2    | BA    |      1,733.71 |       1,624.06 |  −6.32% |
+| 3    | AB    |      1,767.80 |       1,579.38 | −10.66% |
+| 4    | BA    |      1,166.97 |       1,036.20 | −11.21% |
+
+Median paired change: −8.49%; equal-work total: −3.68%; 3/4 pairs faster.
+All observations preserve the 435,448 rows, complete output digest,
+20,031,116 index bytes, and 89,128,960-byte maximum parser WASM heap.
+The large baseline drift and one slower pair require independent reversed-order
+replication and same-code controls. **This is component screening, not evidence
+of a complete-import speedup or browser peak-memory equivalence.**
+
+Raw observations, source/tool hashes, and the exact selected roots are retained
+in `builds/perf/jitendex-close-chain-screen.json`. Reproduce with
+`node dev/perf/import-lookup-screen.js jitendex --pairs 4 --baseline-root <parent> --source-root <candidate> --cache-dir <locked-fixtures> --flags '{}' --out <report>`.
+The 1,410 focused parser/import tests, scoped ESLint, and all seven dry-build
+targets pass. Full PR #797 CI subsequently passed at the published runtime
+commit. Three incomplete local full-unit attempts contain failed-test entries
+or worker-termination timeouts; the local type run ends with `Killed`. None
+counts as a pass. Their original logs are retained with the hosted evidence.
+JMdict/VNDB controls and complete-import browser results are recorded below.
+
+## November 22, 2026: complete-import browser qualification
+
+The frozen [configuration](import-qualification-20261122.json), [driver](import-qualification-20261122.py), and [workflow](../../.github/workflows/import-qualification-20261122.yml) qualify the two proposed runtime changes against `5e1f8c12f7ff798ba407323aff675cb23b22af02`. [Run 45102947664](https://github.com/ManabiIO/manabitan/actions/runs/45102947664) uses research commit `b6a3e6567b78a1ced6fb005ec868537542ac2f87`; all source, runtime, package, and fixture identities are recorded before imports.
+
+| Case            | Dictionary             | Candidate                                  |
+| --------------- | ---------------------- | ------------------------------------------ |
+| parser-jmdict   | JMdict                 | `2663832da942d3ce0ccefb5609ef17b7d0ae9371` |
+| parser-jitendex | Jitendex               | Same shared parser candidate               |
+| parser-vndb     | VNDB Characters by Bee | Same shared parser candidate               |
+| media-vndb      | VNDB Characters by Bee | `0541343dfb9426317763185db03153bdafc96228` |
+
+Each case has separate forward/reverse jobs: eight jobs, 336 planned imports. Each job has six excluded warmup imports and twelve measured A/B/C triplets. A/C use the identical baseline package; B uses the candidate. The six permutations of A/B/C repeat twice; the reverse job reverses the complete measured stream. Every import has a fresh profile. No measurement retries, discarded tails, or pooling across jobs.
+
+The existing release harness measures the page file-input change through post-UI import completion with production defaults, without profiling/screenshots/process sampling. Its persistence probes and full browser restart run after timing. Exact package-entry allowlists and identical temporary harness overlays bind both source arms. Only VNDB cells add the extra fixture to the temporary lock. Twelve persisted-content probes are sampled validation, not exhaustive storage equality.
+
+Analysis requires all 42 imports in a cell plus a completion receipt containing the observation and source hashes, written after final source/package checks. It reports candidate B/A and B/C separately from unchanged-code C/A controls; it does not declare a winner. Failed setup or an incomplete cohort cannot emit performance aggregates. Linux Chromium timing does not establish Firefox, ARM, or peak-memory performance.
+
+Reproduce on an extension-capable host with Node 22.22.0 and the pinned Playwright Chromium. First run `python3 test/import-qualification-20261122.test.py` (eight contracts). Then run the driver phases below using a new output/source directory; retain the entire output directory even on failure.
+
+```sh
+python3 dev/perf/import-qualification-20261122.py prepare --case parser-jitendex --direction forward --output /tmp/manabitan-study-results --sources /tmp/manabitan-study-sources
+python3 dev/perf/import-qualification-20261122.py run --case parser-jitendex --direction forward --output /tmp/manabitan-study-results
+python3 dev/perf/import-qualification-20261122.py analyze --case parser-jitendex --direction forward --output /tmp/manabitan-study-results
+```
+
+The workflow is scoped to the research branch and relevant tooling paths; evidence/report-only commits do not restart the frozen cohort. All eight jobs preserve artifacts on success or failure. The completed results follow.
+
+### Completed browser results: hold both performance candidates
+
+All eight frozen cells completed, comprising **336 successful imports: 48 excluded warmups and 288 measured imports**. Runtime was Node 22.22.0, Playwright 1.63.0, and Chromium 153.0.8010.12 on Linux x64. Every import passed the exact dictionary title, revision, row-count, sampled-content, and full-browser-restart checks. Every cell's receipt, source/package identity, schedule, per-observation report, and timing arithmetic was independently reviewed.
+
+The [preserved hosted evidence](../../builds/perf/20261122-hosted-qualification/README.md) includes all nine provider artifacts: the eight successful cohorts and the original zero-observation setup failure. It retains the captured study sources, package-entry hashes, every raw observation, warmups, host snapshots, validation history, and per-file checksums. The [machine-readable summary](../../builds/perf/20261122-hosted-qualification/summary.json) includes every paired delta, descriptive bootstrap interval, faster-pair count, worst pair, and unchanged-code comparison.
+
+Negative percentages below mean less elapsed import time. Each row is one complete independent hosted cohort; no results are pooled across hosts. B is the candidate, while A and C use the identical baseline package with fresh profiles. Each value shows the paired median followed by the equal-work total change.
+
+| Candidate / dictionary | Stream  | B/A median / equal work | B/C median / equal work | C/A median / equal work |
+| ---------------------- | ------- | ----------------------: | ----------------------: | ----------------------: |
+| parser-jmdict          | forward |       -0.188% / +0.285% |       -0.872% / -0.609% |       +0.633% / +0.899% |
+| parser-jmdict          | reverse |       +1.190% / +0.965% |       +0.607% / +1.008% |       +0.330% / -0.043% |
+| parser-jitendex        | forward |       -0.611% / -0.327% |       +1.239% / +0.773% |       -1.494% / -1.092% |
+| parser-jitendex        | reverse |       +0.821% / +0.514% |       -0.203% / -0.180% |       +0.919% / +0.695% |
+| parser-vndb            | forward |       -1.939% / -1.242% |       -2.544% / -1.727% |       +1.290% / +0.493% |
+| parser-vndb            | reverse |       +0.225% / -0.202% |       +0.034% / -0.272% |       +0.137% / +0.071% |
+| media-vndb             | forward |       -0.426% / -0.550% |       -0.740% / -0.653% |       +0.039% / +0.104% |
+| media-vndb             | reverse |       -0.720% / -0.592% |       +0.127% / +0.011% |       -0.753% / -0.604% |
+
+**Shared parser, PR #797: hold.** JMdict and Jitendex do not show consistent improvement across independent cohorts or both baseline comparisons. The initially favorable VNDB result has intervals spanning zero and substantial unchanged-code variation; its recovered reversed-stream cohort is effectively flat. The local Jitendex component screen does not establish a full-import benefit. The C/WASM candidate remains a draft and is not recommended for performance promotion.
+
+**Media projection, PR #799: hold.** Both forward candidate intervals include zero. In the reversed stream, the B/A improvement (-0.592% equal work) is reproduced by unchanged C/A (-0.604%); B/C is +0.011%. The component oracle and browser checks pass, but complete-import timing does not establish a repeatable benefit. This candidate also remains a draft.
+
+Across the completed VNDB imports, diagnostics confirm 170 fused-parser attempts over 665 bank spans, zero fused fallbacks or discarded rows, three parser workers, and 170 groups. The importer reports 146,570 media records and 91,670,244 owned parser-content bytes. These observations establish the native route; there is no dedicated counter for the individual close-chain or duplicate-projection skip. Media counters do not prove persisted image-payload equality.
+
+The actual schedule consists of twelve counterbalanced A/B/C triplets per cell. Both measured streams begin `ABC`; reverse means reversal of the complete stream. The older literal adjacent AB/BA and opposite-initial-order lanes above were not executed by this study. These results provide controlled timing evidence, with no promotion recommendation. Exhaustive persisted database/index/image equality, whole-browser peak and settled memory, reopened lookup latency, ARM, and browser-specific performance remain outside this timing study. No additional qualification lanes were run after the complete-import benefit failed to distinguish itself from controls.
+
+### Setup recovery and validation record
+
+Initial job `137457712078` (`parser-vndb/reverse`) timed out during locked-fixture provisioning, before preparation completed or any import began. Its artifact records **0/42 observations**. The log does not identify which archive timed out. After all seven other cohorts completed and all eight original artifacts were downloaded and verified, only that job was rerun at the original research SHA. Recovery job `137465254519` completed the unchanged 42-import schedule. This is setup recovery, not replacement of failed or unfavorable measurements. The original failure artifact and log remain in the evidence archive alongside the successful recovered cohort.
+
+All runtime implementation heads pass complete unit, type, build, Chromium/Firefox extension, and restart/interruption CI:
+
+- Parser `2663832da942d3ce0ccefb5609ef17b7d0ae9371`: [CI 45101578986](https://github.com/ManabiIO/manabitan/actions/runs/45101578986).
+- Media projection `0541343dfb9426317763185db03153bdafc96228`: [CI 45102104773](https://github.com/ManabiIO/manabitan/actions/runs/45102104773).
+- Image-persistence fix `c1c4ad76cf298ef99a5aa747fe6641e5bdd112db`: [CI 45102616028](https://github.com/ManabiIO/manabitan/actions/runs/45102616028).
+- Research implementation `f335d1070b4cb7f208903293469ca8c060f7a8c6`: [CI 45104691201](https://github.com/ManabiIO/manabitan/actions/runs/45104691201). The one-line JSON inventory registration fixes its initial CI omission without changing frozen measurement inputs. Its eight Python contracts and all 150 JSON type tests pass.
+
+Earlier local failed or incomplete test attempts, the missing generated-library prerequisite, the initial image-test-helper type error, and the research JSON inventory failure are retained as separate validation history. Later passing CI does not turn those attempts into passes.
+
+The independent image-persistence correction in [PR #798](https://github.com/ManabiIO/manabitan/pull/798) is ready for review as a correctness fix. Its regression reproduces missing shared-image data on the parent when metadata resolution is enabled and passes after first references are resolved before duplicates. It has no performance claim and is outside the frozen timing candidate matrix.
+
+## November 23, 2026: six additional import candidates and complete qualification
+
+All six new performance proposals remain **HOLD / draft**. The [complete round report](../../builds/perf/20261123-r2-qualification/README.md) preserves exact source identities, phase boundaries, correctness oracles, all ratios/controls/tails, memory coverage failures, and reproduction instructions. Its [machine-readable results](../../builds/perf/20261123-r2-qualification/summary.json) contain all 36 independently audited timing cells. This extends the preceding report without replacing its earlier failures or conclusions.
+
+Baseline is `5e1f8c12f7ff798ba407323aff675cb23b22af02`; Node 22.22.0, Playwright 1.63.0, Chromium 153.0.8010.12 and Clang/LLD 21.1.8 are pinned. The six runtime candidates are separately based on that baseline, with no unmeasured combined stack. Local/publication mappings and complete tree hashes are in the retained source ledger.
+
+| Candidate                                                                         | Published runtime commit                   | Purpose                                                      |
+| --------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------ |
+| [#812 — SIMD inflate copy](https://github.com/ManabiIO/manabitan/pull/812)        | `5555f3efd3e0c8baa99e93b4c14e7f1889c30383` | Ordered SIMD match copying                                   |
+| [#816 — Lookup initialization](https://github.com/ManabiIO/manabitan/pull/816)    | `3a4ef7ed11dd6b0509c12ad495ab8f591b68872b` | Avoid overwritten initialization                             |
+| [#817 — CRC word halves](https://github.com/ManabiIO/manabitan/pull/817)          | `4884b4bd93d45f152ec828bcca44990f18976a05` | Replace 64-bit CRC shifts with word halves                   |
+| [#818 — Leading glossary strings](https://github.com/ManabiIO/manabitan/pull/818) | `524b41a112a1ba0b1ac31723da274c97d5525653` | Consume leading strings before generic parsing               |
+| [#820 — Owned key buffers](https://github.com/ManabiIO/manabitan/pull/820)        | `8fe5926cec1396a05ed4ea52be751e48784329b7` | Reuse owned key buffers with cache-retention safeguards      |
+| [#822 — Record validation](https://github.com/ManabiIO/manabitan/pull/822)        | `cf1e18d59d08da729d4b2fe45c7a07021f42360a` | Hoist reference dispatch within a synchronous validation run |
+
+### Completed browser timing
+
+The frozen literal adjacent AB/BA protocol and independent reversed-order jobs completed **1,512 imports: 216 excluded warmups plus 1,296 measured imports**, containing 432 candidate pairs and 216 identical-code control pairs. Each of the 36 cells has six warmups, twelve candidate pairs and six interleaved controls, with a fresh process/profile for every import. No timing observations were rerun, replaced or removed. Every source/package/native-work receipt, browser file-input clock, stored probe digest, publication and restart check passes independent audit. The twelve browser content probes remain sampled readback, not exhaustive persistence equality.
+
+Negative percentages mean faster. The compact table shows candidate/parent equal-work changes **forward / independent reverse**. Full paired medians, descriptive intervals, same-code controls and worst pairs remain in the linked report, with no host pooling or control subtraction.
+
+| Candidate                                                                         |          JMdict |        Jitendex |            VNDB |
+| --------------------------------------------------------------------------------- | --------------: | --------------: | --------------: |
+| [#812 — SIMD inflate copy](https://github.com/ManabiIO/manabitan/pull/812)        | -3.02% / +0.01% | -0.29% / +0.81% | +1.48% / +0.64% |
+| [#816 — Lookup initialization](https://github.com/ManabiIO/manabitan/pull/816)    | +1.27% / -0.10% | +0.56% / -0.49% | -0.34% / +1.12% |
+| [#817 — CRC word halves](https://github.com/ManabiIO/manabitan/pull/817)          | -0.67% / -1.21% | +0.56% / -0.78% | -0.79% / -2.96% |
+| [#818 — Leading glossary strings](https://github.com/ManabiIO/manabitan/pull/818) | -0.22% / +0.13% | -1.09% / -0.69% | +0.00% / +1.72% |
+| [#820 — Owned key buffers](https://github.com/ManabiIO/manabitan/pull/820)        | +0.11% / +0.93% | +0.22% / +1.60% | +0.67% / -1.03% |
+| [#822 — Record validation](https://github.com/ManabiIO/manabitan/pull/822)        | -1.09% / +2.22% | -0.30% / -1.01% | +0.38% / -0.92% |
+
+Native lookup preparation, CRC and key-copy phase counters show some reductions, but do not establish the material complete-import gain required above. Worker phase durations overlap and cannot be summed into critical-path savings. The favorable CRC/VNDB reverse cell does not reproduce forward. The owned-buffer VNDB forward median hides +12.05% and +13.07% slower pairs; retaining them produces its +0.67% equal-work result. Record validation has a retained +44.27% JMdict reverse pair and only small, unreplicated whole-import changes.
+
+### Copy volume, memory and correctness
+
+The owned-buffer proposal #820 removes 8,301,780 / 9,706,463 / 202,591,586 bytes of copying across full JMdict / Jitendex / VNDB component imports, with exact committed-source output parity. The retained-cache safeguard avoids keeping the full sidecar alive through row key views. These counts are cumulative copy volume, not simultaneous retained bytes or peak-memory savings.
+
+Its separate frozen ABBA/BAAB memory campaign completes 24 functional imports; 22 memory observations and four complete cells qualify. Per-host median sampled PSS changes are Jitendex −0.54% / −4.79% and VNDB −2.29% / −2.52%. Both JMdict cells remain unqualified because a stable two-thread zombie leader fails the frozen single-thread exemption. Every raw scan/failure is retained, with no retry or observer relaxation. The observer covers the discovered full Chromium descendant tree; these non-atomic sampled maxima include startup, import, readback and restart, and do not establish exact import peaks, settled memory or three-corpus memory nonregression.
+
+The inflate and CRC oracles compare all 5,169,815,579 decoded archive bytes with the parent and independent Node zlib. Lookup/flat/owned-buffer oracles compare full deterministic component outputs across all three corpora. The record-validation oracle compares 23 exact-source serialized sidecar/run/error cases, including malformed/shared/fixed references and mutations across awaits. It is not a full-dictionary persistence oracle. All six exact runtime heads pass complete executed CI, including full types, units, reproducible builds and Chromium/Firefox extension checks; conditional skipped jobs are not passes.
+
+### Retained evidence and commands
+
+The [hosted archive](../../builds/perf/20261123-r2-hosted/README.md), [record-validation hosted archive](../../builds/perf/20261123-r2-record-hosted/README.md), [component archive](../../builds/perf/20261123-r2-components/README.md) and [ownership archive](../../builds/perf/20261123-transfer-ownership/README.md) retain raw bytes, exact sources, complete schedules, provider ZIP inventories and SHA-256 member indexes. The existing fixed lookup/flat screens retain noisy controls. CRC stops at killed `02-C` after three successful arms; no component benefit is claimed. Type exit 137, lint/setup failures, original offline reviewer errors and the memory README link-check failure are preserved alongside later passing checks.
+
+Completed local protocol checks: eight browser driver contracts, eleven memory driver contracts, five compiled process-witness tests and eight new evidence integrity tests. Completed evidence checks recompute all browser results and verify every frozen archive member. Reproduce integrity checks from the repository root:
+
+```sh
+python3 test/import-r2-evidence-20261123.test.py
+python3 dev/perf/import-r2-evidence-20261123.py verify builds/perf/20261123-r2-hosted
+python3 dev/perf/import-r2-evidence-20261123.py verify builds/perf/20261123-r2-record-hosted
+python3 dev/perf/import-r2-evidence-20261123.py verify builds/perf/20261123-r2-components
+```
+
+The report links immutable workflow sources and all successful runtime CI runs. Evidence/report-only changes do not restart frozen benchmarks. Performance candidates remain draft because complete-import benefit is unqualified; no scheduler, batch, compression, format or default policy was changed in the accepted branch. Exhaustive persisted content/media/index equality, reopened lookup latency, exact/settled memory, constrained hosts and ARM/browser-specific speed remain separate gates. Do not promote reduced write/copy volume or a favorable isolated cell as a whole-import win.

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "source": "Committed git blobs from local trees verified equal to the published remote trees during Git-data publication",
+  "runtimes": {
+    "5e1f8c12f7ff798ba407323aff675cb23b22af02": {
+      "name": "baseline",
+      "tree": "e0a2c3977bca6e608d36dae6f2187a77d7a49b5d",
+      "files": {
+        "js/dictionary/term-bank-wasm-parser.js": {
+          "sourcePath": "ext/js/dictionary/term-bank-wasm-parser.js",
+          "bytes": 195404,
+          "sha256": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+          "gitBlob": "55df1b5a83be7bfe0828208d7c1c71fa5f9af7e3"
+        },
+        "js/dictionary/term-record-opfs-store.js": {
+          "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+          "bytes": 335333,
+          "sha256": "564fe2c4449a98f6d761950bc6664842565e3d7d0e0bb4778d9025719b273701",
+          "gitBlob": "166ff75cdb0791795634af9632d2cca3a20a6de9"
+        },
+        "js/dictionary/wasm/term-bank-parser.c": {
+          "sourcePath": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 136595,
+          "sha256": "6adf2e1e4b2c8f97292557a7b9cf3be0e0b8d9ac11a607538ae73776c1c1a0d8",
+          "gitBlob": "04f2d2a74d16a134c736b7bbadf3e0c6dc1ebe95"
+        },
+        "js/dictionary/wasm/vendor/libdeflate/README.md": {
+          "sourcePath": "ext/js/dictionary/wasm/vendor/libdeflate/README.md",
+          "bytes": 3338,
+          "sha256": "1aa68185f1fc2cb9a6e25612ebb07f6527a6695fbe17d60b0c43011b0e578ac9",
+          "gitBlob": "bdbf274b7f7efd3460652c27af97dde94a300fb6"
+        },
+        "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h": {
+          "sourcePath": "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+          "bytes": 25048,
+          "sha256": "ade3034c1d5c840cb31bd9738a015be804862a8dfce03c14ac2f5b3a826792b8",
+          "gitBlob": "8c874c364499bc537dffd2a1316c3d30796ca249"
+        },
+        "lib/term-bank-parser.wasm": {
+          "sourcePath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 54596,
+          "sha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+          "gitBlob": "7c2d54d085cfdcb7899cfd7ba1a544a720e11485"
+        }
+      }
+    },
+    "5555f3efd3e0c8baa99e93b4c14e7f1889c30383": {
+      "name": "inflate",
+      "tree": "a7c6e31bfb8449d9715916adb89cbf50b143bf2e",
+      "files": {
+        "js/dictionary/wasm/vendor/libdeflate/README.md": {
+          "sourcePath": "ext/js/dictionary/wasm/vendor/libdeflate/README.md",
+          "bytes": 4042,
+          "sha256": "cba86c21915164febc4280cc895cf55117e1ef4ab08380bc1080688e104bf3d5",
+          "gitBlob": "f2d6a7bf173a175b4089b6c475ad38e9554820c2"
+        },
+        "js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h": {
+          "sourcePath": "ext/js/dictionary/wasm/vendor/libdeflate/lib/decompress_template.h",
+          "bytes": 25685,
+          "sha256": "49a543b385d8f9aedfe4996e4375c94e0ad7c4520d08e571b190f8f358785f5f",
+          "gitBlob": "b93fae929d66c1831e5f3d6b2859da01ebd03b1d"
+        },
+        "lib/term-bank-parser.wasm": {
+          "sourcePath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 54658,
+          "sha256": "c9b2a31648d4e9fab93a7e89d527f031156ccaf36ee914c6182b7c37dff4a8c4",
+          "gitBlob": "d2392b0c2d6a215e8bea73913088683a993cc2f4"
+        }
+      }
+    },
+    "3a4ef7ed11dd6b0509c12ad495ab8f591b68872b": {
+      "name": "lookup",
+      "tree": "498eb640147187391a57bfbf0eea828639b80248",
+      "files": {
+        "js/dictionary/wasm/term-bank-parser.c": {
+          "sourcePath": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 137079,
+          "sha256": "b0d704168021c30a3d1b572b461efdf7abc629e1e7a158c457bf335ce81b498d",
+          "gitBlob": "e26ed7975de02faffda806ba11fbbe014e6e4a64"
+        },
+        "lib/term-bank-parser.wasm": {
+          "sourcePath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 54702,
+          "sha256": "8b2e0a50a098182055cf65747424472717155cd57dd34b4e434fc0beee4c804b",
+          "gitBlob": "fb637935a1157ac3995bf328520150a981e8b7e4"
+        }
+      }
+    },
+    "4884b4bd93d45f152ec828bcca44990f18976a05": {
+      "name": "crc-halves",
+      "tree": "3843616849501e3557b50c0689555e3736b0a31d",
+      "files": {
+        "js/dictionary/wasm/term-bank-parser.c": {
+          "sourcePath": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 136686,
+          "sha256": "dd585ea7d593d55b42736231e3a968729059551b5431e8783719d35e32a83a12",
+          "gitBlob": "e12b851596be061b9fbf5fd0946b2e758f2ae7db"
+        },
+        "lib/term-bank-parser.wasm": {
+          "sourcePath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 54482,
+          "sha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5",
+          "gitBlob": "a79b25456f2c1935a9a75f610e78ecb39b559dae"
+        }
+      }
+    },
+    "524b41a112a1ba0b1ac31723da274c97d5525653": {
+      "name": "flat-glossary",
+      "tree": "7a8c4413a707970103bd182cec83625dab2936ab",
+      "files": {
+        "js/dictionary/wasm/term-bank-parser.c": {
+          "sourcePath": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 137975,
+          "sha256": "779641bd82fc093251dcfc41158458792999942a8d7f46627a9dbf989d6fd8aa",
+          "gitBlob": "c9b767b54fbb5660666ad600a41f58fafc795769"
+        },
+        "lib/term-bank-parser.wasm": {
+          "sourcePath": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 55657,
+          "sha256": "440a9a1180e028100ac907072d5270cb0fd5a1aef6debcef301f118a62d372f9",
+          "gitBlob": "acc1d62e2654900b93f145c2575485b6eede6ac1"
+        }
+      }
+    },
+    "8fe5926cec1396a05ed4ea52be751e48784329b7": {
+      "name": "transfer",
+      "tree": "df4e570212e6ef8a60f12f578b57c6d04455faa3",
+      "files": {
+        "js/dictionary/term-bank-wasm-parser.js": {
+          "sourcePath": "ext/js/dictionary/term-bank-wasm-parser.js",
+          "bytes": 198668,
+          "sha256": "016b0c2b88fd5feb25e1160501eed2a82d23c4df4e58df1c55382fb45ffbb703",
+          "gitBlob": "896845d836b785a2ff585e91b8372c4bb6a93de2"
+        },
+        "js/dictionary/term-record-opfs-store.js": {
+          "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+          "bytes": 336212,
+          "sha256": "c9c1bb63be00f6fc42529220be3131967111a73dc79a7db38247c1ae9905d365",
+          "gitBlob": "20b4262298940594225c54e0305d13dbb054c401"
+        }
+      }
+    }
+  }
+}

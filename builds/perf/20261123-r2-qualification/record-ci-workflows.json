@@ -1,0 +1,74 @@
+{
+  "workflow_runs": [
+    {
+      "id": 45124698541,
+      "name": "Dependency Review",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 2297,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698541/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698541/logs",
+      "workflow_id": 238346709
+    },
+    {
+      "id": 45124698559,
+      "name": "Auto-Approve Safe PRs",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 2297,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698559/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698559/logs",
+      "workflow_id": 238346702
+    },
+    {
+      "id": 45124698728,
+      "name": "Lint GitHub Actions workflows",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 8148,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698728/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698728/logs",
+      "workflow_id": 238346700
+    },
+    {
+      "id": 45124698637,
+      "name": "CodeQL",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 1050,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698637/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698637/logs",
+      "workflow_id": 238346706
+    },
+    {
+      "id": 45124698690,
+      "name": "Chromium Restart Interruption",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 389,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698690/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698690/logs",
+      "workflow_id": 389251547
+    },
+    {
+      "id": 45124698582,
+      "name": "ManabiTan static web acceptance",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 1246,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698582/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698582/logs",
+      "workflow_id": 361835025
+    },
+    {
+      "id": 45124698611,
+      "name": "CI",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 2641,
+      "jobs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698611/jobs",
+      "logs_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45124698611/logs",
+      "workflow_id": 238346704
+    }
+  ]
+}

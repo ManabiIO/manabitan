@@ -1,0 +1,1533 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "independentReviewerSha256": "9888ddbe2009d2d0a0d9e0e2bf8a3613c43b118d79cbd48b00bd3fd52f532c21",
+  "publishedManifestSha256": "09b5e572d5ded27a333ec850f35e17b0f4a029099e0d75ea9ac2e53707fbdc32",
+  "source": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707",
+  "workflowRun": 45124794707,
+  "researchSha": "c0c2fdc79c9b4364e1a7fdfc915e5fd13ef332bc",
+  "researchTree": "2e72f22f6db3ea584af37b7c90dd91c7ea90989c",
+  "verifiedCells": 6,
+  "verifiedImports": 252,
+  "runtime": {
+    "browserVersion": "153.0.8010.12",
+    "chromium": "Google Chrome for Testing 153.0.8010.12",
+    "chromiumExecutableSha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e",
+    "node": "v22.22.0",
+    "nodeExecutableSha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31",
+    "playwright": "1.63.0",
+    "versions": {
+      "acorn": "8.15.0",
+      "ada": "2.9.2",
+      "amaro": "1.1.4",
+      "ares": "1.34.6",
+      "brotli": "1.1.0",
+      "cjs_module_lexer": "2.1.0",
+      "cldr": "47.0",
+      "icu": "77.1",
+      "llhttp": "9.3.0",
+      "modules": "127",
+      "napi": "10",
+      "nbytes": "0.1.1",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.64.0",
+      "node": "22.22.0",
+      "openssl": "3.5.4",
+      "simdjson": "3.13.0",
+      "simdutf": "6.4.2",
+      "sqlite": "3.50.4",
+      "tz": "2025b",
+      "undici": "6.23.0",
+      "unicode": "16.0",
+      "uv": "1.51.0",
+      "uvwasi": "0.0.23",
+      "v8": "12.4.254.21-node.33",
+      "zlib": "1.3.1-470d3a2",
+      "zstd": "1.5.7"
+    }
+  },
+  "corpora": {
+    "jmdict": {
+      "fixture": {
+        "cacheFile": "JMdict.zip",
+        "expectedTitle": "JMdict [2026-09-06]",
+        "label": "JMdict",
+        "release": "2026-09-06",
+        "revision": "JMdict.2026-09-06",
+        "sha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "sizeBytes": 15587032,
+        "termRows": 526942,
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-09-06/JMdict_english.zip"
+      },
+      "work": {
+        "rows": 526942,
+        "chunkCount": 12,
+        "parserFusedAttempts": 12,
+        "parserBankSpanCount": 53,
+        "parserSourceCompressedBytes": 15574114,
+        "parserSourceUncompressedBytes": 171092992,
+        "termContentTotalWriteBytes": 19482745,
+        "termRecordTotalWriteBytes": 45,
+        "termRecordLookupIndexWriteBytes": 23693336
+      },
+      "outputDigestSha256": "86a9f92e48d74220b4d0240f95703860825c00c5d98baff6218230b6ca3afe36",
+      "flags": [
+        {
+          "experimentalGenericSpanCompression": true,
+          "experimentalParserWorkers3": true,
+          "experimentalSkipFusedParse": false,
+          "experimentalLookupScratchReuse": true,
+          "experimentalNativeSegmentedLookup": true,
+          "experimentalDirectLookupArena": false,
+          "experimentalSinglePassLookupCompaction": false,
+          "experimentalTermBankSpans": false,
+          "experimentalNativeEscapedKeys": false,
+          "experimentalValidatedGlossaryReuse": true,
+          "experimentalFusedSingleBank": false,
+          "experimentalGlobalExactContentReuse": false,
+          "experimentalFastGlossaryNormalization": false
+        }
+      ]
+    },
+    "jitendex": {
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-08-11]",
+        "label": "Jitendex",
+        "release": "2026.08.11.0",
+        "revision": "2026.08.11.0",
+        "sha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "sizeBytes": 38698313,
+        "termRows": 435448,
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.08.11.0/jitendex-yomitan.zip"
+      },
+      "work": {
+        "rows": 435448,
+        "chunkCount": 22,
+        "parserFusedAttempts": 22,
+        "parserBankSpanCount": 218,
+        "parserSourceCompressedBytes": 33696215,
+        "parserSourceUncompressedBytes": 537538792,
+        "termContentTotalWriteBytes": 38215079,
+        "termRecordTotalWriteBytes": 45,
+        "termRecordLookupIndexWriteBytes": 23526384
+      },
+      "outputDigestSha256": "5908783776b5c1760d653c18ab547caaffa8ef97bfe01b2345ad542645f61404",
+      "flags": [
+        {
+          "experimentalGenericSpanCompression": true,
+          "experimentalParserWorkers3": true,
+          "experimentalSkipFusedParse": false,
+          "experimentalLookupScratchReuse": true,
+          "experimentalNativeSegmentedLookup": true,
+          "experimentalDirectLookupArena": false,
+          "experimentalSinglePassLookupCompaction": false,
+          "experimentalTermBankSpans": false,
+          "experimentalNativeEscapedKeys": true,
+          "experimentalValidatedGlossaryReuse": true,
+          "experimentalFusedSingleBank": false,
+          "experimentalGlobalExactContentReuse": false,
+          "experimentalFastGlossaryNormalization": false
+        }
+      ]
+    },
+    "vndb": {
+      "fixture": {
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "expectedTitle": "VNDB Characters by Bee",
+        "label": "VNDB Characters by Bee",
+        "release": "1.0.0",
+        "revision": "395525135651",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+      },
+      "work": {
+        "rows": 6648310,
+        "chunkCount": 170,
+        "parserFusedAttempts": 170,
+        "parserBankSpanCount": 665,
+        "parserSourceCompressedBytes": 86850424,
+        "parserSourceUncompressedBytes": 4267992967,
+        "termContentTotalWriteBytes": 7533449,
+        "termRecordTotalWriteBytes": 64,
+        "termRecordLookupIndexWriteBytes": 401899752
+      },
+      "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "flags": [
+        {
+          "experimentalGenericSpanCompression": true,
+          "experimentalParserWorkers3": true,
+          "experimentalSkipFusedParse": false,
+          "experimentalLookupScratchReuse": true,
+          "experimentalNativeSegmentedLookup": true,
+          "experimentalDirectLookupArena": false,
+          "experimentalSinglePassLookupCompaction": false,
+          "experimentalTermBankSpans": false,
+          "experimentalNativeEscapedKeys": true,
+          "experimentalValidatedGlossaryReuse": true,
+          "experimentalFusedSingleBank": false,
+          "experimentalGlobalExactContentReuse": false,
+          "experimentalFastGlossaryNormalization": false
+        }
+      ]
+    }
+  },
+  "cells": [
+    {
+      "candidate": "record-validation",
+      "pr": 822,
+      "dictionary": "jmdict",
+      "direction": "forward",
+      "root": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707/import-r2-qualification-record-validation-jmdict-forward",
+      "provider": {
+        "artifactId": 14795417181,
+        "archiveSha256": "8083a3e4f003f7bb3b1d5327d652c4da99dba924172695690d63dcd191b6941e",
+        "archiveBytes": 1519287,
+        "verifiedFiles": 282
+      },
+      "imports": 42,
+      "warmups": 6,
+      "measured": 36,
+      "candidateSha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+      "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "completionSha256": "8220b924e027f3a656d6f50254027c2c9e51a1aff7cec3a63ed359324243bbd5",
+      "observationsSha256": "e1fcece4353daae1a1330721d1f6223df5bd3c69466ab7dd49748b1590390c2d",
+      "candidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          735.4000000000233,
+          720.3000000000466,
+          715.0,
+          688.2999999999302,
+          860.3000000000466,
+          706.5999999999767,
+          698.1999999999534,
+          688.0,
+          664.8999999999069,
+          664.1999999999534,
+          688.1999999999534,
+          666.7999999999302
+        ],
+        "comparisonMs": [
+          738.0,
+          733.1999999999534,
+          700.6999999999534,
+          701.7999999999302,
+          717.5999999999767,
+          670.4000000000233,
+          684.5999999999767,
+          713.6999999999534,
+          677.5,
+          689.4000000000233,
+          689.0,
+          687.2999999999302
+        ],
+        "pairedPercentChanges": [
+          0.35354908892801795,
+          1.790920449799538,
+          -2.0000000000065077,
+          1.9613540607295255,
+          -16.587237010352453,
+          -5.123124823090097,
+          -1.947865940987914,
+          3.7354651162722963,
+          1.8950218078049197,
+          3.7940379403901936,
+          0.11624527754237057,
+          3.0743851229757313
+        ],
+        "medianPairedPercent": 1.072234769363778,
+        "equalWorkPercent": -1.0946070007768594,
+        "fasterPairs": 4,
+        "worstPairPercent": 3.7940379403901936,
+        "minPairPercent": -16.587237010352453,
+        "descriptiveBootstrap95": [
+          -1.9739329704972108,
+          2.5178695918526284
+        ]
+      },
+      "sameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          727.9000000000233,
+          731.8999999999069,
+          707.9000000000233,
+          667.5999999999767,
+          681.2999999999302,
+          674.8000000000466
+        ],
+        "comparisonMs": [
+          709.1999999999534,
+          670.3000000000466,
+          712.4000000000233,
+          701.1999999999534,
+          669.7999999999302,
+          660.8000000000466
+        ],
+        "pairedPercentChanges": [
+          -2.5690342080051165,
+          -8.416450334727166,
+          0.6356830060742835,
+          5.032953864586265,
+          -1.6879495082931406,
+          -2.0746887966803573
+        ],
+        "medianPairedPercent": -1.881319152486749,
+        "equalWorkPercent": -1.615212100967578,
+        "fasterPairs": 4,
+        "worstPairPercent": 5.032953864586265,
+        "minPairPercent": -8.416450334727166,
+        "descriptiveBootstrap95": [
+          -5.492742271366142,
+          2.834318435330274
+        ]
+      },
+      "hostSnapshotRanges": {
+        "freeMemoryBytes": [
+          14927667200,
+          15279276032
+        ],
+        "loadAverageOneMinute": [
+          0.98,
+          6.01
+        ],
+        "cpuModels": [
+          "AMD EPYC 9V45 96-Core Processor"
+        ]
+      },
+      "pairOrderGroups": {
+        "AB": [
+          0.35354908892801795,
+          -2.0000000000065077,
+          -16.587237010352453,
+          -1.947865940987914,
+          1.8950218078049197,
+          0.11624527754237057
+        ],
+        "BA": [
+          1.790920449799538,
+          1.9613540607295255,
+          -5.123124823090097,
+          3.7354651162722963,
+          3.7940379403901936,
+          3.0743851229757313
+        ]
+      },
+      "mechanismMetric": "termRecordValidationMs",
+      "mechanismCandidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          20.30000000016298,
+          38.300000000046566,
+          22.79999999993015,
+          15.099999999976717,
+          19.80000000016298,
+          21.400000000023283,
+          16.00000000023283,
+          14.400000000023283,
+          17.19999999983702,
+          18.899999999674037,
+          18.000000000116415,
+          25.0999999998603
+        ],
+        "comparisonMs": [
+          21.29999999993015,
+          27.700000000186265,
+          14.20000000006985,
+          16.000000000349246,
+          22,
+          15.900000000256114,
+          25.700000000186265,
+          16.600000000093132,
+          22.099999999976717,
+          24.0999999998603,
+          20.600000000325963,
+          23.700000000186265
+        ],
+        "pairedPercentChanges": [
+          4.926108373197735,
+          -27.676240208478887,
+          -37.71929824511688,
+          5.9602649031385235,
+          11.111111110196514,
+          -25.7009345783233,
+          60.62499999882676,
+          15.277777778238132,
+          28.488372094105397,
+          27.513227514687543,
+          14.444444445515181,
+          -5.577689241760275
+        ],
+        "medianPairedPercent": 8.535688006667518,
+        "equalWorkPercent": 1.0513546305593202,
+        "fasterPairs": 4,
+        "worstPairPercent": 60.62499999882676,
+        "minPairPercent": -37.71929824511688
+      },
+      "mechanismSameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          22.900000000256114,
+          17.399999999906868,
+          21.600000000209548,
+          19.600000000093132,
+          19,
+          29.500000000116415
+        ],
+        "comparisonMs": [
+          19.400000000023283,
+          16.999999999650754,
+          20.300000000279397,
+          19.099999999976717,
+          29.100000000093132,
+          19.5
+        ],
+        "pairedPercentChanges": [
+          -15.283842795605619,
+          -2.2988505761968647,
+          -6.018518518136751,
+          -2.551020408745097,
+          53.15789473733228,
+          -33.89830508500662
+        ],
+        "medianPairedPercent": -4.284769463440924,
+        "equalWorkPercent": -4.307692308102862,
+        "fasterPairs": 5,
+        "worstPairPercent": 53.15789473733228,
+        "minPairPercent": -33.89830508500662
+      }
+    },
+    {
+      "candidate": "record-validation",
+      "pr": 822,
+      "dictionary": "jmdict",
+      "direction": "reverse",
+      "root": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707/import-r2-qualification-record-validation-jmdict-reverse",
+      "provider": {
+        "artifactId": 14795701278,
+        "archiveSha256": "1629b1556861dd8287d7a9a9bf42baef6ba411d829ce6e04324d56c972ca9e34",
+        "archiveBytes": 1523250,
+        "verifiedFiles": 282
+      },
+      "imports": 42,
+      "warmups": 6,
+      "measured": 36,
+      "candidateSha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+      "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "completionSha256": "b042ecb60c38ec844e16bc92f06bf53e797255d04489bae92f63d32e04dff329",
+      "observationsSha256": "d8cbbcc2de890b2bdc773e12f4ab0caa6d37f689ea3062c1be440775634666c6",
+      "candidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          896.7000000000116,
+          865.1000000000058,
+          950.1000000000058,
+          981.1999999999825,
+          908.2999999999884,
+          1141.9000000000233,
+          880.1999999999534,
+          875.8999999999651,
+          1098.4000000000233,
+          873.2000000000116,
+          902.5,
+          829.5999999999767
+        ],
+        "comparisonMs": [
+          845.0,
+          897.6000000000058,
+          881.5,
+          870.0,
+          876.2000000000116,
+          850.5999999999767,
+          1092.4000000000233,
+          1263.7000000000116,
+          929.5,
+          1219.7000000000116,
+          869.0,
+          856.4000000000233
+        ],
+        "pairedPercentChanges": [
+          -5.765584922494815,
+          3.756791122413561,
+          -7.220292600779432,
+          -11.333061557275226,
+          -3.5340746449385785,
+          -25.510114721082466,
+          24.108157237000793,
+          44.274460554864945,
+          -15.376911871815334,
+          39.68163078332516,
+          -3.7119113573407247,
+          3.230472516881311
+        ],
+        "medianPairedPercent": -3.6229930011396516,
+        "equalWorkPercent": 2.2181360516296156,
+        "fasterPairs": 7,
+        "worstPairPercent": 44.274460554864945,
+        "minPairPercent": -25.510114721082466,
+        "descriptiveBootstrap95": [
+          -9.27667707902733,
+          13.932474179707176
+        ]
+      },
+      "sameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          866.3000000000175,
+          892.6999999999825,
+          907.6000000000349,
+          838.7999999999884,
+          897.2000000000116,
+          896.5999999999767
+        ],
+        "comparisonMs": [
+          864.0,
+          845.3999999999942,
+          886.0999999999767,
+          901.7999999999884,
+          869.2999999999884,
+          881.4000000000233
+        ],
+        "pairedPercentChanges": [
+          -0.26549694101551946,
+          -5.298532541726142,
+          -2.368884971359342,
+          7.510729613734002,
+          -3.109674543025287,
+          -1.6952933303539863
+        ],
+        "medianPairedPercent": -2.032089150856664,
+        "equalWorkPercent": -0.9661835748799974,
+        "fasterPairs": 5,
+        "worstPairPercent": 7.510729613734002,
+        "minPairPercent": -5.298532541726142,
+        "descriptiveBootstrap95": [
+          -4.204103542375714,
+          3.622616336359241
+        ]
+      },
+      "hostSnapshotRanges": {
+        "freeMemoryBytes": [
+          15037022208,
+          15447703552
+        ],
+        "loadAverageOneMinute": [
+          1.41,
+          6.97
+        ],
+        "cpuModels": [
+          "AMD EPYC 9V74 80-Core Processor"
+        ]
+      },
+      "pairOrderGroups": {
+        "AB": [
+          3.756791122413561,
+          -11.333061557275226,
+          -25.510114721082466,
+          44.274460554864945,
+          39.68163078332516,
+          3.230472516881311
+        ],
+        "BA": [
+          -5.765584922494815,
+          -7.220292600779432,
+          -3.5340746449385785,
+          24.108157237000793,
+          -15.376911871815334,
+          -3.7119113573407247
+        ]
+      },
+      "mechanismMetric": "termRecordValidationMs",
+      "mechanismCandidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          22.599999999976717,
+          22.199999999982538,
+          30.79999999993015,
+          27.499999999970896,
+          20.900000000023283,
+          30.30000000016298,
+          37.800000000104774,
+          26.499999999883585,
+          26.09999999991851,
+          27.600000000034925,
+          33.699999999953434,
+          23.300000000046566
+        ],
+        "comparisonMs": [
+          31.80000000007567,
+          55.29999999998836,
+          29.899999999965075,
+          37.999999999970896,
+          37.59999999991851,
+          28.90000000008149,
+          36.29999999998836,
+          23.999999999941792,
+          21.199999999953434,
+          42.199999999895226,
+          24.000000000058208,
+          29.59999999991851
+        ],
+        "pairedPercentChanges": [
+          40.7079646022497,
+          149.0990990992426,
+          -2.9220779219711557,
+          38.181818181858596,
+          79.90430621950537,
+          -4.620462046448715,
+          -3.96825396855095,
+          -9.43396226397274,
+          -18.773946360078064,
+          52.8985507240646,
+          -28.783382789046374,
+          27.038626608838424
+        ],
+        "medianPairedPercent": 12.058274343433634,
+        "equalWorkPercent": 21.10537503788934,
+        "fasterPairs": 6,
+        "worstPairPercent": 149.0990990992426,
+        "minPairPercent": -28.783382789046374
+      },
+      "mechanismSameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          33.10000000000582,
+          35.40000000002328,
+          30.5,
+          26.80000000016298,
+          32.399999999965075,
+          21.099999999976717
+        ],
+        "comparisonMs": [
+          35.09999999994761,
+          28.699999999982538,
+          30.20000000001164,
+          28.399999999965075,
+          31.9000000001397,
+          30.899999999906868
+        ],
+        "pairedPercentChanges": [
+          6.042296072330644,
+          -18.926553672419033,
+          -0.9836065573388786,
+          5.97014925295658,
+          -1.5432098760059132,
+          46.44549763005197
+        ],
+        "medianPairedPercent": 2.493271347808851,
+        "equalWorkPercent": 3.290574456115536,
+        "fasterPairs": 3,
+        "worstPairPercent": 46.44549763005197,
+        "minPairPercent": -18.926553672419033
+      }
+    },
+    {
+      "candidate": "record-validation",
+      "pr": 822,
+      "dictionary": "jitendex",
+      "direction": "forward",
+      "root": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707/import-r2-qualification-record-validation-jitendex-forward",
+      "provider": {
+        "artifactId": 14795696288,
+        "archiveSha256": "51fc5f81f4343c5756efbc7bd5cd1e47066deb08e9c0bd10fce4ee0bd32df1e2",
+        "archiveBytes": 1528914,
+        "verifiedFiles": 282
+      },
+      "imports": 42,
+      "warmups": 6,
+      "measured": 36,
+      "candidateSha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+      "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "completionSha256": "9781a62274e1589e8d0356b0e8db59f1b2ab093e99ac2a6a82fd5894ec810f0d",
+      "observationsSha256": "d14375fbeed7fb3f62a770b10d5c883d374ece46fd7c1fe6596489033ce4cc18",
+      "candidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          1333.2999999999884,
+          1366.6000000000058,
+          1329.5999999999767,
+          1354.2000000000116,
+          1332.399999999965,
+          1322.2000000000116,
+          1343.0,
+          1330.0,
+          1374.0999999999767,
+          1361.7000000000116,
+          1382.3000000000466,
+          1378.5
+        ],
+        "comparisonMs": [
+          1335.3999999999942,
+          1325.8999999999942,
+          1364.5,
+          1331.7999999999884,
+          1348.7999999999884,
+          1333.100000000035,
+          1343.899999999965,
+          1317.7000000000116,
+          1354.9000000000233,
+          1329.7000000000116,
+          1370.0,
+          1402.9000000000233
+        ],
+        "pairedPercentChanges": [
+          0.1575039375988796,
+          -2.978194058247585,
+          2.624849578822497,
+          -1.6541131295246703,
+          1.230861603123956,
+          0.8243836030875196,
+          0.06701414742853462,
+          -0.9248120300743179,
+          -1.397278218466902,
+          -2.3500036718807182,
+          -0.8898213123089138,
+          1.7700398984420218
+        ],
+        "medianPairedPercent": -0.4114035824401896,
+        "equalWorkPercent": -0.30417265654377745,
+        "fasterPairs": 6,
+        "worstPairPercent": 2.624849578822497,
+        "minPairPercent": -2.978194058247585,
+        "descriptiveBootstrap95": [
+          -1.525695673995786,
+          1.0276226031057378
+        ]
+      },
+      "sameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          1374.7999999999884,
+          1342.8999999999942,
+          1370.5,
+          1380.4000000000233,
+          1356.0999999999767,
+          1394.7000000000116
+        ],
+        "comparisonMs": [
+          1385.0,
+          1331.0,
+          1398.1999999999534,
+          1349.3000000000466,
+          1346.7000000000116,
+          1415.7999999999884
+        ],
+        "pairedPercentChanges": [
+          0.741926098342427,
+          -0.8861419316400498,
+          2.021160160521962,
+          -2.2529701535769497,
+          -0.6931642209251021,
+          1.5128701512853393
+        ],
+        "medianPairedPercent": 0.024380938708662425,
+        "equalWorkPercent": 0.08029783195859785,
+        "fasterPairs": 3,
+        "worstPairPercent": 2.021160160521962,
+        "minPairPercent": -2.2529701535769497,
+        "descriptiveBootstrap95": [
+          -1.5695560426084998,
+          1.7670151559036507
+        ]
+      },
+      "hostSnapshotRanges": {
+        "freeMemoryBytes": [
+          14469500928,
+          15138697216
+        ],
+        "loadAverageOneMinute": [
+          0.89,
+          6.99
+        ],
+        "cpuModels": [
+          "Intel(R) Xeon(R) 6975P-C"
+        ]
+      },
+      "pairOrderGroups": {
+        "AB": [
+          0.1575039375988796,
+          2.624849578822497,
+          1.230861603123956,
+          0.06701414742853462,
+          -1.397278218466902,
+          -0.8898213123089138
+        ],
+        "BA": [
+          -2.978194058247585,
+          -1.6541131295246703,
+          0.8243836030875196,
+          -0.9248120300743179,
+          -2.3500036718807182,
+          1.7700398984420218
+        ]
+      },
+      "mechanismMetric": "termRecordValidationMs",
+      "mechanismCandidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          36.5,
+          35.10000000000582,
+          29.199999999982538,
+          46.40000000008149,
+          29.49999999976717,
+          33.10000000015134,
+          31.20000000006985,
+          32.49999999994179,
+          42.600000000034925,
+          40.49999999994179,
+          23.5,
+          25.90000000037253
+        ],
+        "comparisonMs": [
+          17.800000000017462,
+          23.699999999982538,
+          26.800000000046566,
+          24.500000000058208,
+          22.800000000046566,
+          21.999999999883585,
+          21.299999999755528,
+          22.199999999895226,
+          21.500000000058208,
+          19.400000000023283,
+          14.899999999965075,
+          24.70000000006985
+        ],
+        "pairedPercentChanges": [
+          -51.23287671228092,
+          -32.47863247869343,
+          -8.219178081977418,
+          -47.198275862036255,
+          -22.711864406011806,
+          -33.534743203072516,
+          -31.730769231705636,
+          -31.692307692507736,
+          -49.53051643182962,
+          -52.098765431972424,
+          -36.59574468099967,
+          -4.633204634306642
+        ],
+        "medianPairedPercent": -33.006687840882975,
+        "equalWorkPercent": -35.56650246315836,
+        "fasterPairs": 12,
+        "worstPairPercent": -4.633204634306642,
+        "minPairPercent": -52.098765431972424
+      },
+      "mechanismSameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          28.29999999998836,
+          24.5,
+          26.999999999883585,
+          23.29999999993015,
+          28.200000000128057,
+          33.29999999993015
+        ],
+        "comparisonMs": [
+          37.19999999998254,
+          37.0999999998603,
+          35.80000000016298,
+          31.0999999998603,
+          26.399999999906868,
+          17.099999999802094
+        ],
+        "pairedPercentChanges": [
+          31.448763250875757,
+          51.428571428001234,
+          32.59259259376792,
+          33.47639484958598,
+          -6.382978724159627,
+          -48.648648649135254
+        ],
+        "medianPairedPercent": 32.02067792232184,
+        "equalWorkPercent": 12.211421628026642,
+        "fasterPairs": 2,
+        "worstPairPercent": 51.428571428001234,
+        "minPairPercent": -48.648648649135254
+      }
+    },
+    {
+      "candidate": "record-validation",
+      "pr": 822,
+      "dictionary": "jitendex",
+      "direction": "reverse",
+      "root": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707/import-r2-qualification-record-validation-jitendex-reverse",
+      "provider": {
+        "artifactId": 14795526989,
+        "archiveSha256": "10da2c396d3012ad3b07dcb9271d3583a7f72174a18ba13fc27c9815d8ef086f",
+        "archiveBytes": 1529376,
+        "verifiedFiles": 282
+      },
+      "imports": 42,
+      "warmups": 6,
+      "measured": 36,
+      "candidateSha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+      "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "completionSha256": "5d85c49d953eb68d1937bfe0449a4687dadfa4403d7d83952f00d2cd934da5c3",
+      "observationsSha256": "45bf77066c3c84a0f8314d20878949adb05cf76284444c1b7e078f3a5e075212",
+      "candidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          1399.5,
+          1376.8000000000175,
+          1391.5,
+          1400.0,
+          1392.2999999999884,
+          1385.5,
+          1371.2999999999884,
+          1345.4000000000233,
+          1388.4000000000233,
+          1355.5999999999767,
+          1367.600000000035,
+          1385.5
+        ],
+        "comparisonMs": [
+          1383.8999999999942,
+          1360.2999999999884,
+          1398.9000000000233,
+          1421.7999999999884,
+          1346.0,
+          1364.3000000000466,
+          1351.8000000000466,
+          1339.7999999999884,
+          1374.4000000000233,
+          1362.7000000000116,
+          1352.2000000000116,
+          1336.2000000000116
+        ],
+        "pairedPercentChanges": [
+          -1.1146838156488648,
+          -1.198431144685419,
+          0.5318002155963564,
+          1.5571428571420354,
+          -3.325432737196632,
+          -1.530133525799593,
+          -1.422008313275136,
+          -0.41623309053329116,
+          -1.0083549409391934,
+          0.5237533195658672,
+          -1.1260602515372087,
+          -3.558282208588115
+        ],
+        "medianPairedPercent": -1.1203720335930367,
+        "equalWorkPercent": -1.0090945324101042,
+        "fasterPairs": 9,
+        "worstPairPercent": 1.5571428571420354,
+        "minPairPercent": -3.558282208588115,
+        "descriptiveBootstrap95": [
+          -1.4760709195373645,
+          0.05376011451628804
+        ]
+      },
+      "sameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          1386.0,
+          1380.6000000000058,
+          1381.7000000000116,
+          1348.5,
+          1394.600000000035,
+          1363.100000000035
+        ],
+        "comparisonMs": [
+          1397.2000000000116,
+          1407.2999999999884,
+          1356.5999999999767,
+          1355.7000000000116,
+          1357.5999999999767,
+          1377.7000000000116
+        ],
+        "pairedPercentChanges": [
+          0.808080808081657,
+          1.9339417644489654,
+          -1.8166027357628067,
+          0.5339265850954122,
+          -2.653090491901422,
+          1.0710879612630286
+        ],
+        "medianPairedPercent": 0.6710036965885346,
+        "equalWorkPercent": -0.029075049974081058,
+        "fasterPairs": 2,
+        "worstPairPercent": 1.9339417644489654,
+        "minPairPercent": -2.653090491901422,
+        "descriptiveBootstrap95": [
+          -2.234846613832114,
+          1.502514862855997
+        ]
+      },
+      "hostSnapshotRanges": {
+        "freeMemoryBytes": [
+          14337269760,
+          15142866944
+        ],
+        "loadAverageOneMinute": [
+          1.02,
+          6.51
+        ],
+        "cpuModels": [
+          "Intel(R) Xeon(R) 6975P-C"
+        ]
+      },
+      "pairOrderGroups": {
+        "AB": [
+          -1.198431144685419,
+          1.5571428571420354,
+          -1.530133525799593,
+          -0.41623309053329116,
+          0.5237533195658672,
+          -3.558282208588115
+        ],
+        "BA": [
+          -1.1146838156488648,
+          0.5318002155963564,
+          -3.325432737196632,
+          -1.422008313275136,
+          -1.0083549409391934,
+          -1.1260602515372087
+        ]
+      },
+      "mechanismMetric": "termRecordValidationMs",
+      "mechanismCandidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          41.099999999889405,
+          36.10000000000582,
+          29.500000000029104,
+          31.89999999993597,
+          34.999999999883585,
+          24.500000000116415,
+          33.39999999984866,
+          27.59999999991851,
+          46.000000000116415,
+          34.40000000008149,
+          31.200000000128057,
+          29.100000000093132
+        ],
+        "comparisonMs": [
+          13.900000000052387,
+          20.300000000017462,
+          26.20000000001164,
+          30.70000000001164,
+          17.999999999941792,
+          23.0999999998603,
+          18.699999999895226,
+          21.90000000008149,
+          22.899999999965075,
+          18.400000000023283,
+          19.700000000128057,
+          22.399999999790452
+        ],
+        "pairedPercentChanges": [
+          -66.18004866158202,
+          -43.76731301935127,
+          -11.186440678014264,
+          -3.7617554856637536,
+          -48.57142857142382,
+          -5.714285715303924,
+          -44.0119760479642,
+          -20.652173912513938,
+          -50.21739130454974,
+          -46.511627907035766,
+          -36.85897435882307,
+          -23.024054983784314
+        ],
+        "medianPairedPercent": -40.31314368908717,
+        "equalWorkPercent": -35.91795897955253,
+        "fasterPairs": 12,
+        "worstPairPercent": -3.7617554856637536,
+        "minPairPercent": -66.18004866158202
+      },
+      "mechanismSameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          29.300000000017462,
+          38.699999999807915,
+          35.20000000001164,
+          27.499999999941792,
+          40.100000000034925,
+          26.999999999941792
+        ],
+        "comparisonMs": [
+          26.800000000046566,
+          33.59999999997672,
+          35.300000000104774,
+          25.5,
+          44.09999999991851,
+          56.300000000046566
+        ],
+        "pairedPercentChanges": [
+          -8.532423208086716,
+          -13.178294573272641,
+          0.2840909093553945,
+          -7.272727272530998,
+          9.975062343840646,
+          108.51851851914054
+        ],
+        "medianPairedPercent": -3.494318181587802,
+        "equalWorkPercent": 12.03235591525127,
+        "fasterPairs": 3,
+        "worstPairPercent": 108.51851851914054,
+        "minPairPercent": -13.178294573272641
+      }
+    },
+    {
+      "candidate": "record-validation",
+      "pr": 822,
+      "dictionary": "vndb",
+      "direction": "forward",
+      "root": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707/import-r2-qualification-record-validation-vndb-forward",
+      "provider": {
+        "artifactId": 14795727322,
+        "archiveSha256": "1bc04b00a349350559a0197cc01d01b65d215781c888e5e4ed7e36fc9b7f7298",
+        "archiveBytes": 1559042,
+        "verifiedFiles": 282
+      },
+      "imports": 42,
+      "warmups": 6,
+      "measured": 36,
+      "candidateSha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+      "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "completionSha256": "443a46d6d2a4172e38f5da4587c159ccfd0f952557eb904bbfb837016f1ed524",
+      "observationsSha256": "c8a9786ff7035ec7c3a4a4c635cfe3c3868c98af143fcd1175402db95fdf6945",
+      "candidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          5603.900000000023,
+          5627.700000000012,
+          5467.200000000012,
+          5513.29999999993,
+          6273.0,
+          5329.099999999977,
+          5473.800000000047,
+          5478.70000000007,
+          5501.5,
+          5452.70000000007,
+          5521.699999999953,
+          5468.699999999953
+        ],
+        "comparisonMs": [
+          5591.5,
+          5607.5,
+          5491.099999999977,
+          5597.29999999993,
+          5582.20000000007,
+          5601.400000000023,
+          5477.29999999993,
+          5501.5,
+          6149.900000000023,
+          5447.0,
+          5474.300000000047,
+          5440.79999999993
+        ],
+        "pairedPercentChanges": [
+          -0.22127446956625718,
+          -0.3589388204774835,
+          0.43715247292883674,
+          1.5235884134728872,
+          -11.01227482862952,
+          5.109680809143158,
+          0.06394095509305586,
+          0.4161571175631096,
+          11.785876579115207,
+          -0.1045353678007177,
+          -0.8584312802199956,
+          -0.5101760930389942
+        ],
+        "medianPairedPercent": -0.02029720635383092,
+        "equalWorkPercent": 0.37549860368466526,
+        "fasterPairs": 6,
+        "worstPairPercent": 11.785876579115207,
+        "minPairPercent": -11.01227482862952,
+        "descriptiveBootstrap95": [
+          -0.43455745675823887,
+          0.980370443200862
+        ]
+      },
+      "sameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          5604.099999999977,
+          5520.400000000023,
+          5363.29999999993,
+          5402.900000000023,
+          5417.5,
+          5461.0
+        ],
+        "comparisonMs": [
+          5668.600000000035,
+          5565.300000000047,
+          5370.099999999977,
+          5677.5,
+          5509.300000000047,
+          5452.199999999953
+        ],
+        "pairedPercentChanges": [
+          1.1509430595467274,
+          0.8133468589236914,
+          0.12678761210536127,
+          5.082455718224943,
+          1.6945085371489865,
+          -0.1611426478675404
+        ],
+        "medianPairedPercent": 0.9821449592352094,
+        "equalWorkPercent": 1.4458699022255717,
+        "fasterPairs": 1,
+        "worstPairPercent": 5.082455718224943,
+        "minPairPercent": -0.1611426478675404,
+        "descriptiveBootstrap95": [
+          -0.017177517881089566,
+          3.3884821276869648
+        ]
+      },
+      "hostSnapshotRanges": {
+        "freeMemoryBytes": [
+          14710734848,
+          15109431296
+        ],
+        "loadAverageOneMinute": [
+          0.9,
+          4.98
+        ],
+        "cpuModels": [
+          "Intel(R) Xeon(R) 6975P-C"
+        ]
+      },
+      "pairOrderGroups": {
+        "AB": [
+          -0.22127446956625718,
+          0.43715247292883674,
+          -11.01227482862952,
+          0.06394095509305586,
+          11.785876579115207,
+          -0.8584312802199956
+        ],
+        "BA": [
+          -0.3589388204774835,
+          1.5235884134728872,
+          5.109680809143158,
+          0.4161571175631096,
+          -0.1045353678007177,
+          -0.5101760930389942
+        ]
+      },
+      "mechanismMetric": "termRecordValidationMs",
+      "mechanismCandidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          220.7000000003609,
+          230.39999999973224,
+          198.50000000023283,
+          219.60000000032596,
+          223.79999999911524,
+          209.29999999923166,
+          201.99999999988358,
+          201.3000000010943,
+          230.40000000037253,
+          225.39999999920838,
+          226.30000000062864,
+          252.2000000004191
+        ],
+        "comparisonMs": [
+          170.10000000020955,
+          180.1999999996624,
+          155.59999999962747,
+          168.9000000010128,
+          180.40000000060536,
+          169.49999999953434,
+          163.19999999937136,
+          171.2000000004191,
+          151.09999999892898,
+          162.39999999909196,
+          175.19999999995343,
+          170.7000000004191
+        ],
+        "pairedPercentChanges": [
+          -22.927050294548522,
+          -21.788194444500085,
+          -21.61209068038037,
+          -23.087431693642024,
+          -19.392314565988144,
+          -19.01576684177899,
+          -19.207920792343856,
+          -14.952806756339587,
+          -34.418402778348664,
+          -27.950310559156023,
+          -22.58064516152597,
+          -32.315622521754385
+        ],
+        "medianPairedPercent": -22.18441980301303,
+        "equalWorkPercent": -23.538770408031628,
+        "fasterPairs": 12,
+        "worstPairPercent": -14.952806756339587,
+        "minPairPercent": -34.418402778348664
+      },
+      "mechanismSameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          251.89999999979045,
+          212.1999999990221,
+          231.60000000102445,
+          204.50000000046566,
+          204.10000000032596,
+          219.20000000006985
+        ],
+        "comparisonMs": [
+          211.60000000003492,
+          254.1999999997206,
+          206.19999999948777,
+          202.59999999997672,
+          224.7999999995809,
+          228.3999999994412
+        ],
+        "pairedPercentChanges": [
+          -15.998412068197322,
+          19.792648445283724,
+          -10.967184801996687,
+          -0.929095354760201,
+          10.142087211769656,
+          4.197080291682687
+        ],
+        "medianPairedPercent": 1.6339924684612428,
+        "equalWorkPercent": 0.32489610861665685,
+        "fasterPairs": 3,
+        "worstPairPercent": 19.792648445283724,
+        "minPairPercent": -15.998412068197322
+      }
+    },
+    {
+      "candidate": "record-validation",
+      "pr": 822,
+      "dictionary": "vndb",
+      "direction": "reverse",
+      "root": "/workspace/scratch/fcfffdc555c8/r2-evidence/record-browser-45124794707/import-r2-qualification-record-validation-vndb-reverse",
+      "provider": {
+        "artifactId": 14795559500,
+        "archiveSha256": "e9408ce27741ba708e282057a7882e18a7f58d64b02f7dc0e6112565b7930c1a",
+        "archiveBytes": 1563351,
+        "verifiedFiles": 282
+      },
+      "imports": 42,
+      "warmups": 6,
+      "measured": 36,
+      "candidateSha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+      "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "completionSha256": "63155051f2b54ff3ed411fb71fe5e2c79e7b1c63b405b2faf810745d48c2991a",
+      "observationsSha256": "3dfd7b6fc6319aa5b5a9a3bacb0d3dcf5bf8cd390f28587e7901be20c22fa444",
+      "candidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          8855.5,
+          8720.100000000035,
+          8741.0,
+          8693.400000000023,
+          8722.599999999977,
+          8781.699999999953,
+          8596.79999999993,
+          8591.900000000023,
+          8680.100000000093,
+          8619.399999999907,
+          8715.5,
+          8621.0
+        ],
+        "comparisonMs": [
+          8854.0,
+          8824.900000000023,
+          8615.300000000047,
+          8634.400000000023,
+          8739.0,
+          8684.400000000023,
+          8523.099999999977,
+          8506.400000000023,
+          8490.79999999993,
+          8542.699999999953,
+          8357.59999999986,
+          8610.5
+        ],
+        "pairedPercentChanges": [
+          -0.016938625712836775,
+          1.2018210800333495,
+          -1.438050566296234,
+          -0.6786757770262497,
+          0.18801733428133183,
+          -1.107985925275634,
+          -0.8572957379484714,
+          -0.9951233138188242,
+          -2.1808504510335225,
+          -0.8898531220265293,
+          -4.1064769663259675,
+          -0.12179561535784478
+        ],
+        "medianPairedPercent": -0.8735744299875003,
+        "equalWorkPercent": -0.9161483242125068,
+        "fasterPairs": 10,
+        "worstPairPercent": 1.2018210800333495,
+        "minPairPercent": -4.1064769663259675,
+        "descriptiveBootstrap95": [
+          -1.273018245785934,
+          -0.06936712053534078
+        ]
+      },
+      "sameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          8676.299999999988,
+          8795.099999999977,
+          8580.5,
+          8518.0,
+          8515.800000000047,
+          8555.59999999986
+        ],
+        "comparisonMs": [
+          8640.5,
+          8845.900000000023,
+          8577.599999999977,
+          8675,
+          8494.5,
+          8519.699999999953
+        ],
+        "pairedPercentChanges": [
+          -0.41261828198643213,
+          0.5775943423047769,
+          -0.0337975642447752,
+          1.8431556703451424,
+          -0.2501233002189629,
+          -0.41960820982639424
+        ],
+        "medianPairedPercent": -0.14196043223186905,
+        "equalWorkPercent": 0.2166870315040148,
+        "fasterPairs": 4,
+        "worstPairPercent": 1.8431556703451424,
+        "minPairPercent": -0.41960820982639424,
+        "descriptiveBootstrap95": [
+          -0.4161132459064132,
+          1.2103750063249596
+        ]
+      },
+      "hostSnapshotRanges": {
+        "freeMemoryBytes": [
+          15140691968,
+          15430774784
+        ],
+        "loadAverageOneMinute": [
+          0.83,
+          5.23
+        ],
+        "cpuModels": [
+          "AMD EPYC 7763 64-Core Processor"
+        ]
+      },
+      "pairOrderGroups": {
+        "AB": [
+          1.2018210800333495,
+          -0.6786757770262497,
+          -1.107985925275634,
+          -0.9951233138188242,
+          -0.8898531220265293,
+          -0.12179561535784478
+        ],
+        "BA": [
+          -0.016938625712836775,
+          -1.438050566296234,
+          0.18801733428133183,
+          -0.8572957379484714,
+          -2.1808504510335225,
+          -4.1064769663259675
+        ]
+      },
+      "mechanismMetric": "termRecordValidationMs",
+      "mechanismCandidateVsBaseline": {
+        "pairs": 12,
+        "baselineMs": [
+          286.3000000002794,
+          327.50000000046566,
+          286.50000000023283,
+          343.6000000004424,
+          263.19999999925494,
+          297.4000000000233,
+          318.19999999995343,
+          332.19999999995343,
+          276.8000000009779,
+          301.4999999983702,
+          274.99999999883585,
+          300.8000000023749
+        ],
+        "comparisonMs": [
+          246.0999999998603,
+          248.10000000003492,
+          261.29999999981374,
+          241.69999999878928,
+          240.90000000002328,
+          241.2000000004191,
+          249.5999999997439,
+          228.4000000001397,
+          261.7999999996973,
+          240.8000000002794,
+          235.29999999981374,
+          257.7999999988824
+        ],
+        "pairedPercentChanges": [
+          -14.041215508340855,
+          -24.24427480925736,
+          -8.795811518463736,
+          -29.656577416042463,
+          -8.472644376631756,
+          -18.897108271553385,
+          -21.558768070464986,
+          -31.246237206450424,
+          -5.419075144952156,
+          -20.132669982891848,
+          -14.43636363606915,
+          -14.295212767005639
+        ],
+        "medianPairedPercent": -16.66673595381127,
+        "equalWorkPercent": -18.176780271639114,
+        "fasterPairs": 12,
+        "worstPairPercent": -5.419075144952156,
+        "minPairPercent": -31.246237206450424
+      },
+      "mechanismSameCodeControl": {
+        "pairs": 6,
+        "baselineMs": [
+          284.10000000015134,
+          317.999999998603,
+          301.79999999981374,
+          337.10000000009313,
+          283.39999999967404,
+          330.89999999990687
+        ],
+        "comparisonMs": [
+          284.29999999987194,
+          327.2999999995809,
+          324.29999999981374,
+          282.1999999991385,
+          328.1000000005588,
+          314.60000000009313
+        ],
+        "pairedPercentChanges": [
+          0.07039774717370051,
+          2.924528302207152,
+          7.455268389666636,
+          -16.285968555603514,
+          15.772759351071342,
+          -4.925959504327082
+        ],
+        "medianPairedPercent": 1.4974630246904264,
+        "equalWorkPercent": 0.29644801384252073,
+        "fasterPairs": 2,
+        "worstPairPercent": 15.772759351071342,
+        "minPairPercent": -16.285968555603514
+      }
+    }
+  ],
+  "limits": [
+    "Each cell is an independent host; no pooled host estimates or control subtraction.",
+    "Stored probe digests cover 12 source-derived probes, not exhaustive persisted-content readback.",
+    "Existing importer phase counters overlap; the validation phase is not an isolated timer or additive critical-path decomposition.",
+    "No record fast-path activation-hit counter is present; production eligibility follows source inspection and typed owned-reference flow, not a direct observed hit receipt.",
+    "No whole-browser peak memory or reopened lookup latency comparison was run for this candidate."
+  ],
+  "recommendation": "HOLD",
+  "recommendationKind": "Manual interpretation of this pinned complete cohort; the reader is not an automatic promotion classifier.",
+  "reason": "HOLD: JMdict is noisy and changes sign between median/equal work or directions; both Jitendex intervals include zero; VNDB reverse improves but its flat/slower forward cell does not replicate it. Jitendex/VNDB validation-phase reductions do not establish a material repeated complete-import benefit. No pooled host estimate or control subtraction."
+}

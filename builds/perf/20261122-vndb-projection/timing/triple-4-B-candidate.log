@@ -1,0 +1,20 @@
+(node:155) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"completedGroups":10,"totalGroups":170,"termRows":400000}
+{"completedGroups":20,"totalGroups":170,"termRows":800000}
+{"completedGroups":30,"totalGroups":170,"termRows":1200000}
+{"completedGroups":40,"totalGroups":170,"termRows":1600000}
+{"completedGroups":50,"totalGroups":170,"termRows":2000000}
+{"completedGroups":60,"totalGroups":170,"termRows":2400000}
+{"completedGroups":70,"totalGroups":170,"termRows":2800000}
+{"completedGroups":80,"totalGroups":170,"termRows":3200000}
+{"completedGroups":90,"totalGroups":170,"termRows":3600000}
+{"completedGroups":100,"totalGroups":170,"termRows":4000000}
+{"completedGroups":110,"totalGroups":170,"termRows":4400000}
+{"completedGroups":120,"totalGroups":170,"termRows":4800000}
+{"completedGroups":130,"totalGroups":170,"termRows":5200000}
+{"completedGroups":140,"totalGroups":170,"termRows":5570000}
+{"completedGroups":150,"totalGroups":170,"termRows":5960000}
+{"completedGroups":160,"totalGroups":170,"termRows":6300000}
+{"completedGroups":170,"totalGroups":170,"termRows":6648310}
+{"outputPath":"/workspace/scratch/fcfffdc555c8/qualification/vndb-timing/triple-4-B-candidate.json","termRows":6648310,"mediaRows":146725,"selectedGroupCount":170,"totalComponentMs":10219.072992999998,"totalRowDecodeMs":318}
