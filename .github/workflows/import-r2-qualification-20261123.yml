@@ -20,16 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case:
-          - lookup-jmdict
-          - lookup-jitendex
-          - lookup-vndb
-          - crc-halves-jmdict
-          - crc-halves-jitendex
-          - crc-halves-vndb
-          - flat-glossary-jmdict
-          - flat-glossary-jitendex
-          - flat-glossary-vndb
+        case: [transfer-jmdict, transfer-jitendex, transfer-vndb]
         direction: [forward, reverse]
     env:
       STUDY_OUTPUT: ${{ github.workspace }}/builds/perf/import-r2-qualification/${{ matrix.case }}-${{ matrix.direction }}

@@ -100,6 +100,30 @@
                 "js/dictionary/wasm/term-bank-parser.c",
                 "lib/term-bank-parser.wasm"
             ]
+        },
+        "transfer-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "8fe5926cec1396a05ed4ea52be751e48784329b7",
+            "packageDifferences": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        },
+        "transfer-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "8fe5926cec1396a05ed4ea52be751e48784329b7",
+            "packageDifferences": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        },
+        "transfer-vndb": {
+            "dictionary": "vndb",
+            "sha": "8fe5926cec1396a05ed4ea52be751e48784329b7",
+            "packageDifferences": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/term-record-opfs-store.js"
+            ]
         }
     },
     "extraFixture": {
