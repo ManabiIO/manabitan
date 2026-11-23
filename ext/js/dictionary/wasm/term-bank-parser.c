@@ -2527,7 +2527,6 @@ int32_t encode_term_lookup_index(
     const uint32_t output_length = (uint32_t)output_length_64;
 
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
-    memset(output, 0, output_length);
     uint32_t* container_header = (uint32_t*)output;
     container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;
     container_header[1] = TERM_LOOKUP_FORMAT_VERSION;
@@ -2541,7 +2540,12 @@ int32_t encode_term_lookup_index(
     base_header[3] = TERM_LOOKUP_FORMAT_VERSION;
     base_header[4] = sequence_key_count;
     base_header[5] = reading_posting_count;
+    base_header[6] = 0u;
+    base_header[7] = 0u;
     __builtin_memcpy(base + TERM_LOOKUP_BASE_HEADER_BYTES, strings, strings_length);
+    // The arena may contain retired parser data. Initialize reserved bytes and
+    // counting tables explicitly; payload columns are completely overwritten.
+    memset(base + TERM_LOOKUP_BASE_HEADER_BYTES + strings_length, 0, aligned_string_length - strings_length);
 
     uint32_t cursor = TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length;
     uint16_t* persisted_key_lengths = (uint16_t*)(base + cursor);
@@ -2552,6 +2556,7 @@ int32_t encode_term_lookup_index(
     cursor += row_count * (uint32_t)sizeof(uint16_t);
     uint16_t* persisted_sequence_row_keys = (uint16_t*)(base + cursor);
     cursor += row_count * (uint32_t)sizeof(uint16_t);
+    memset(base + cursor, 0, align4(cursor) - cursor);
     cursor = align4(cursor);
     int32_t* persisted_sequence_keys = (int32_t*)(base + cursor);
     __builtin_memcpy(
@@ -2603,10 +2608,12 @@ int32_t encode_term_lookup_index(
     cursor += (sequence_key_count + 1u) * (uint32_t)sizeof(uint16_t);
     uint16_t* sequence_rows = (uint16_t*)(derived + cursor);
     cursor += sequence_posting_count * (uint32_t)sizeof(uint16_t);
+    memset(derived + cursor, 0, derived_length - cursor);
     memset(key_heads, 0xff, key_slot_count * sizeof(uint16_t));
-    memset(key_next, 0xff, key_count * sizeof(uint16_t));
+    memset(expression_offsets, 0, (key_count + 1u) * sizeof(uint16_t));
+    memset(reading_offsets, 0, (key_count + 1u) * sizeof(uint16_t));
     memset(sequence_heads, 0xff, sequence_hash_slot_count * sizeof(uint16_t));
-    memset(sequence_next, 0xff, sequence_key_count * sizeof(uint16_t));
+    memset(sequence_offsets, 0, (sequence_key_count + 1u) * sizeof(uint16_t));
     for (uint32_t key = 0u; key < key_count; ++key) {
         term_lookup_insert_hash(key_heads, key_next, key, string_hashes[key], key_slot_count);
     }
