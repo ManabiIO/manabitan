@@ -2292,6 +2292,14 @@ export class TermRecordOpfsStore {
             // across runs. The row loop itself is synchronous.
             const tValidationStart = safePerformance.now();
             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
+            const references = !useFixedContentSpan && typeof chunk.fixedContentLength !== 'number' ? chunk.resolvedContentReferences : null;
+            const useOwnedReferences = (
+                typeof references === 'object' && references !== null &&
+                references.uniqueIndexList instanceof Uint32Array &&
+                references.offsets instanceof Float64Array && references.lengths instanceof Uint32Array &&
+                references.uniqueIndexList.buffer instanceof ArrayBuffer &&
+                references.offsets.buffer instanceof ArrayBuffer && references.lengths.buffer instanceof ArrayBuffer
+            );
             let runEnd = runStart;
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
@@ -2299,8 +2307,19 @@ export class TermRecordOpfsStore {
                 if ((runEnd - runStart) >= runRowLimit) {
                     break;
                 }
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
+                let contentOffset;
+                let contentLength;
+                if (useOwnedReferences) {
+                    const uniqueIndex = references.uniqueIndexList[runEnd];
+                    if (uniqueIndex >= references.offsets.length || uniqueIndex >= references.lengths.length) {
+                        throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+                    }
+                    contentOffset = references.offsets[uniqueIndex];
+                    contentLength = references.lengths[uniqueIndex];
+                } else {
+                    contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
+                    contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
+                }
                 validateContentOffset(contentOffset);
                 validateContentLength(contentLength);
                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
