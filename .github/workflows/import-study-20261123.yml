@@ -1,4 +1,4 @@
-name: Import pipeline discovery and confirmation
+name: Frozen glossary byte-copy import qualification
 
 on:
   push:
@@ -59,3 +59,4 @@ jobs:
           path: builds/import-study-20261123
           if-no-files-found: error
           retention-days: 30
+          include-hidden-files: true

@@ -1,14 +1,16 @@
 # Further import qualification, 2026-11-23
 
 This campaign compares frozen current develop
-`467067650653c37c1f7d6b05d6737d070e1259cd` with native unique-content
-descriptor emission at `83cd9023e10e3bea185c165cd5e698aa9d9fecb4`. The hypothesis
-is that constructing native metadata once per unique content span, and carrying
-compact descriptors through the existing consumer path, removes redundant row
-metadata work without changing decoded content or import behavior. This candidate
-includes the compact consumer columns plus native direct emission; the browser
-claim applies to their combination. Runtime identity, all seven packaged-file
-differences, fixtures, schedule and criteria are frozen before acquisition.
+`467067650653c37c1f7d6b05d6737d070e1259cd` with the isolated shared-glossary
+view copy change at `396a87e25036963c0836ee58650e2459559189b8`. The candidate
+replaces `Uint8Array.from(sharedGlossaryView)` with the typed-array constructor
+copy at the existing media projection boundary. It still allocates an owned copy
+before JSON decoding; the source view is not transferred, exposed or reused after
+its lifetime. The hypothesis is that the constructor can copy a typed-array view
+without generic iterator overhead. This independent candidate contains neither
+the shared-content lifetime change nor native compact descriptor changes.
+Runtime identity, the single packaged-file difference, fixtures, schedule and
+criteria are frozen before acquisition.
 
 The source snapshot already contains the qualified large-import index worker and
 exact source CRC reuse, strict native row parsing, bulk metadata publication,
@@ -17,16 +19,16 @@ validation. Earlier results against older baselines are not pooled into this
 campaign. The updated JMdict and Jitendex fixtures also differ from the earlier
 round; VNDB archive bytes are unchanged.
 
-## Acquisition policy, frozen before native candidate results
+## Acquisition policy, frozen before byte-copy candidate results
 
-This independent native candidate uses the already revised acquisition policy,
-with no native candidate observations acquired or inspected when it is frozen.
+This independent byte-copy candidate uses the already revised acquisition policy,
+with no byte-copy candidate observations acquired or inspected when it is frozen.
 The separately completed baseline diagnostic at
 <https://github.com/ManabiIO/manabitan/actions/runs/45213616348> showed that
 exhaustive VNDB readback costs approximately 373 seconds per observation,
 including only about 8 seconds of actual import. A previous shared-content
 campaign exceeded its original acquisition budget; its partial observations are
-not evidence for this native candidate and are not pooled here.
+not evidence for this byte-copy candidate and are not pooled here.
 
 JMdict/Jitendex retain complete media verification after every import. VNDB
 verifies all 146,570 images on the first A and first B warmups of each cell; the C
@@ -109,7 +111,8 @@ exact SHA-256 values in the fixture lock.
 
 Material memory regressions also block promotion. This candidate uses the same
 prospective separate process-tree screen, with no memory sampling in the timing
-cohort and no memory inference from fewer encoded descriptor bytes alone. Its prospective schedule is two independent jobs per
+cohort and no memory inference from the source-level copy change alone. Its
+prospective schedule is two independent jobs per
 corpus: ABBA in replication 1 and BAAB in replication 2. All eight imports per
 corpus use fresh profiles, producing four fixed adjacent A/B pairs; there are no
 warmup exclusions, replacements or adaptive extensions.
@@ -138,8 +141,11 @@ blocks promotion rather than triggering reruns to obtain a preferred result.
 ## Run
 
 The dedicated study workflow launches on `perf/import-*-study-20261123-72c24`.
-This source is an independent native screen; shared-content outcomes are not
-combined with it.
+This source is an independent byte-copy screen; shared-content and native
+compact-descriptor outcomes are not combined with it. The two dedicated artifact
+uploads explicitly include hidden files so the exact frozen workflow source is
+retained. This prospective artifact correction does not change acquisition,
+metrics or acceptance criteria.
 The memory observer is a separate workflow and evidence stream, implementing the
 prospective protocol above. Ordinary baseline diagnosis was separately frozen at
 `b34633bc4f4211491cbc651c29c27a5ca1bc30a4`; traced diagnostics never enter timing

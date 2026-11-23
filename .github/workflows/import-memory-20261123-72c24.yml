@@ -1,8 +1,8 @@
-name: Frozen native import-window memory diagnosis
+name: Frozen glossary byte-copy import-window memory diagnosis
 
 on:
   push:
-    branches: ['perf/import-memory-native-20261123-72c24']
+    branches: ['perf/import-memory-byte-copy-20261123-72c24']
 
 permissions:
   contents: read
@@ -50,3 +50,4 @@ jobs:
           path: builds/import-memory-20261123-72c24
           if-no-files-found: error
           retention-days: 30
+          include-hidden-files: true
