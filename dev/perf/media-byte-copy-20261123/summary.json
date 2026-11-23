@@ -1,0 +1,102 @@
+{
+    "schema": 1,
+    "scope": "Exact-source component correctness with actual owned-column/media projection, not a browser speed or memory result. Fixed four-bank component partitions, not production planner counters.",
+    "sources": [
+        {
+            "root": "/workspace/scratch/72c24f1e7bc9/manabitan",
+            "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+            "sourceSha": "467067650653c37c1f7d6b05d6737d070e1259cd",
+            "sourceTree": "934dd7011275aafa9f5b0314af8c729eb5fc96a2",
+            "sourceHashes": {
+                "ext/js/dictionary/dictionary-database.js": "9d9344feec458583fe50c8ced99f0e3da7bafa8bb885d82387b7b69d698ff741",
+                "ext/js/dictionary/dictionary-importer.js": "b04807b81b2bf769fe79f96fb0a57bf244fd9ec12396ed27074ce311fe514f90",
+                "ext/js/dictionary/term-bank-wasm-parser-worker.js": "04d295b8acf9ab621813781fe3ea84478d6b66a315febaac79cdadbec8831270",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066",
+                "ext/js/dictionary/term-content-canonical-scan.js": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+                "dev/data/dictionary-wasm/manifest.json": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+        },
+        {
+            "root": "/workspace/scratch/72c24f1e7bc9/round3-media-copy",
+            "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+            "sourceSha": "5ba8d8b2e797ab09f612c398d29900d2675809d1",
+            "sourceTree": "8ece3d2c355b78573705872987e95e36555e453d",
+            "sourceHashes": {
+                "ext/js/dictionary/dictionary-database.js": "9d9344feec458583fe50c8ced99f0e3da7bafa8bb885d82387b7b69d698ff741",
+                "ext/js/dictionary/dictionary-importer.js": "b04807b81b2bf769fe79f96fb0a57bf244fd9ec12396ed27074ce311fe514f90",
+                "ext/js/dictionary/term-bank-wasm-parser-worker.js": "04d295b8acf9ab621813781fe3ea84478d6b66a315febaac79cdadbec8831270",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "1703c926979cc4582e69e535583f5e960fd43267c1ddb5e3439f19af55475f5a",
+                "ext/js/dictionary/term-content-canonical-scan.js": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+                "dev/data/dictionary-wasm/manifest.json": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+        }
+    ],
+    "publishedCandidate": {
+        "sha": "396a87e25036963c0836ee58650e2459559189b8",
+        "tree": "8ece3d2c355b78573705872987e95e36555e453d",
+        "localEquivalentSha": "5ba8d8b2e797ab09f612c398d29900d2675809d1"
+    },
+    "dictionaries": [
+        {
+            "dictionary": "jmdict",
+            "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "banks": 53,
+            "rows": 528299,
+            "sourceBytes": 171617523,
+            "fixedGroups": 14,
+            "sharedGlossarySnapshots": 17,
+            "sharedGlossarySnapshotBytes": 5264,
+            "projectedImageRows": 0
+        },
+        {
+            "dictionary": "jitendex",
+            "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "banks": 219,
+            "rows": 436555,
+            "sourceBytes": 538927310,
+            "fixedGroups": 55,
+            "sharedGlossarySnapshots": 339,
+            "sharedGlossarySnapshotBytes": 818519,
+            "projectedImageRows": 324
+        },
+        {
+            "dictionary": "vndb",
+            "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "banks": 665,
+            "rows": 6648310,
+            "sourceBytes": 4267992967,
+            "fixedGroups": 167,
+            "sharedGlossarySnapshots": 146722,
+            "sharedGlossarySnapshotBytes": 84396857,
+            "projectedImageRows": 146722
+        }
+    ],
+    "validation": {
+        "focused": {
+            "files": 3,
+            "testsPassed": 202,
+            "failures": 0
+        },
+        "fullUnit": {
+            "filesPassed": 640,
+            "testsPassed": 14374,
+            "testsSkipped": 47,
+            "failures": 0
+        },
+        "typeScript": {
+            "main": "passed",
+            "dev": "passed",
+            "test": "passed",
+            "bench": "passed"
+        },
+        "scopedLint": "passed",
+        "dryBuild": "passed: seven targets",
+        "actualChromePackage": "passed: 550 members per arm; exactly one expected product difference",
+        "fullSourceOracle": "passed with before/after source guards",
+        "evidenceLintSetup": "missing generated dependency bundles; resolved by building libraries before rerunning evidence JSON lint"
+    }
+}

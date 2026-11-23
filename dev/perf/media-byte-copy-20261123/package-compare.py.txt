@@ -1,0 +1,25 @@
+import hashlib
+import json
+import pathlib
+import subprocess
+import zipfile
+
+workspace = pathlib.Path('/workspace/scratch/72c24f1e7bc9')
+roots = [('baseline', workspace / 'round3-parser-baseline'), ('candidate', workspace / 'round3-media-copy')]
+sha256 = lambda b: hashlib.sha256(b).hexdigest()
+report = {'schema': 1, 'scope': 'Actual Chrome archives built from frozen source with Node 24.22.3 and shared npm-ci dependencies; compare uncompressed member bytes, not archive timestamps. Candidate source is the recorded frozen local commit; publication mapping is recorded separately. No runtime flags changed.', 'buildCommand': 'node dev/bin/build.js --target chrome', 'nodeVersion': subprocess.check_output(['node', '--version'], text=True).strip(), 'arms': {}, 'differences': []}
+for name, root in roots:
+    assert subprocess.check_output(['git', 'status', '--porcelain'], cwd=root, text=True).strip() == ''
+    archive = root / 'builds/manabitan-chrome.zip'
+    with zipfile.ZipFile(archive) as z:
+        members = {entry.filename: {'sizeBytes': entry.file_size, 'sha256': sha256(z.read(entry.filename))} for entry in sorted(z.infolist(), key=lambda item: item.filename) if not entry.is_dir()}
+    report['arms'][name] = {'localRoot': str(root), 'localSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(), 'tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=root, text=True).strip(), 'remoteSha': None if name == 'candidate' else '467067650653c37c1f7d6b05d6737d070e1259cd', 'archiveBytes': archive.stat().st_size, 'archiveSha256': sha256(archive.read_bytes()), 'members': members}
+base = report['arms']['baseline']['members']
+candidate = report['arms']['candidate']['members']
+for name in sorted(base.keys() | candidate.keys()):
+    if base.get(name) != candidate.get(name):
+        report['differences'].append({'name': name, 'baseline': base.get(name), 'candidate': candidate.get(name)})
+report['allowedProductDifferences'] = [entry['name'] for entry in report['differences']]
+output = workspace / 'round3-media-copy-package-comparison.json'
+output.write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps({'output': str(output), 'reportSha256': sha256(output.read_bytes()), 'memberCounts': {arm: len(data['members']) for arm, data in report['arms'].items()}, 'archiveSha256': {arm: data['archiveSha256'] for arm, data in report['arms'].items()}, 'differences': report['differences']}, indent=2))

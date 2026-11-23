@@ -1,0 +1,25 @@
+{
+  "output": "/workspace/scratch/72c24f1e7bc9/round3-media-copy-package-comparison.json",
+  "reportSha256": "be35b1f507168742504bdad1fbea46a9ae55423f74160fa625ba402d878523df",
+  "memberCounts": {
+    "baseline": 550,
+    "candidate": 550
+  },
+  "archiveSha256": {
+    "baseline": "6ce85ad717f9717170f8b54e531585ee33621232491d6a0d5e54f9e123cf282d",
+    "candidate": "a60476f5f98b34c37b26e6aeae68be1d157bddd4e291bfbd08d615d7732e6c4b"
+  },
+  "differences": [
+    {
+      "name": "js/dictionary/term-bank-wasm-parser.js",
+      "baseline": {
+        "sizeBytes": 200103,
+        "sha256": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066"
+      },
+      "candidate": {
+        "sizeBytes": 200102,
+        "sha256": "1703c926979cc4582e69e535583f5e960fd43267c1ddb5e3439f19af55475f5a"
+      }
+    }
+  ]
+}
