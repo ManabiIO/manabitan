@@ -1,0 +1,664 @@
+{
+    "schemaVersion": 1,
+    "boundary": "Resident source-derived metadata through media index creation and reference restriction",
+    "node": "v22.22.0",
+    "platform": "linux",
+    "architecture": "x64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "warmupsPerSourceAndWorkload": 4,
+    "source": {
+        "baseline": {
+            "root": "/workspace/scratch/72c24f1e7bc9/manabitan",
+            "sha256": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583"
+        },
+        "candidate": {
+            "root": "/workspace/scratch/72c24f1e7bc9/vndb-work/",
+            "sha256": "0d6263a93771a1a77ade1376a64a5b74381a24b2a4a9e408f552e3bae02d447b"
+        },
+        "harnessSha256": "fbd1bce7fde96b9640b826b7bcea448f3fdd546746bb8d3fd718690bd3f93235"
+    },
+    "fixture": {
+        "path": "/workspace/scratch/fcfffdc555c8/fixtures/vndb_characters_by_bee.zip",
+        "sizeBytes": 291705969,
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+    },
+    "entries": 146570,
+    "slots": 163034,
+    "indexBytes": 3912816,
+    "results": {
+        "full": {
+            "paths": 146570,
+            "observations": [
+                {
+                    "order": "ABC",
+                    "arms": {
+                        "A": {
+                            "createMs": 130.3008600000012,
+                            "restrictMs": 71.24053699999968,
+                            "totalMs": 201.54139700000087,
+                            "cpuUserMs": 70.181,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 73.05998399999953,
+                            "restrictMs": 58.78821400000015,
+                            "totalMs": 131.84819799999968,
+                            "cpuUserMs": 49.716,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 124.83277500000077,
+                            "restrictMs": 101.43359899999996,
+                            "totalMs": 226.26637400000072,
+                            "cpuUserMs": 75.805,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "CBA",
+                    "arms": {
+                        "C": {
+                            "createMs": 154.98218300000008,
+                            "restrictMs": 50.37887699999919,
+                            "totalMs": 205.36105999999927,
+                            "cpuUserMs": 78.029,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 73.58345800000097,
+                            "restrictMs": 55.56300799999917,
+                            "totalMs": 129.14646600000015,
+                            "cpuUserMs": 52.244,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 87.88478399999985,
+                            "restrictMs": 47.61675899999864,
+                            "totalMs": 135.5015429999985,
+                            "cpuUserMs": 70.325,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "BCA",
+                    "arms": {
+                        "B": {
+                            "createMs": 60.95369500000015,
+                            "restrictMs": 32.71334100000058,
+                            "totalMs": 93.66703600000073,
+                            "cpuUserMs": 50.914,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 63.38119099999858,
+                            "restrictMs": 45.33457300000009,
+                            "totalMs": 108.71576399999867,
+                            "cpuUserMs": 70.369,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 56.862379000000146,
+                            "restrictMs": 7778.485975000001,
+                            "totalMs": 7835.348354000002,
+                            "cpuUserMs": 90.152,
+                            "cpuSystemMs": 2703.142
+                        }
+                    }
+                },
+                {
+                    "order": "ACB",
+                    "arms": {
+                        "A": {
+                            "createMs": 167.95697400000063,
+                            "restrictMs": 140.161924,
+                            "totalMs": 308.1188980000006,
+                            "cpuUserMs": 94.061,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 57.24981900000057,
+                            "restrictMs": 99.96114800000214,
+                            "totalMs": 157.2109670000027,
+                            "cpuUserMs": 70.017,
+                            "cpuSystemMs": 1.996
+                        },
+                        "B": {
+                            "createMs": 81.48747600000206,
+                            "restrictMs": 46.236415999999736,
+                            "totalMs": 127.7238920000018,
+                            "cpuUserMs": 44.681,
+                            "cpuSystemMs": 15.062
+                        }
+                    }
+                },
+                {
+                    "order": "CAB",
+                    "arms": {
+                        "C": {
+                            "createMs": 87.22693399999844,
+                            "restrictMs": 91.21039000000019,
+                            "totalMs": 178.43732399999863,
+                            "cpuUserMs": 171.142,
+                            "cpuSystemMs": 13.702
+                        },
+                        "A": {
+                            "createMs": 93.99078100000042,
+                            "restrictMs": 45.7599029999983,
+                            "totalMs": 139.75068399999873,
+                            "cpuUserMs": 99.206,
+                            "cpuSystemMs": 9.227
+                        },
+                        "B": {
+                            "createMs": 73.8243309999998,
+                            "restrictMs": 81.79527299999972,
+                            "totalMs": 155.61960399999953,
+                            "cpuUserMs": 100.764,
+                            "cpuSystemMs": 21.19
+                        }
+                    }
+                },
+                {
+                    "order": "BAC",
+                    "arms": {
+                        "B": {
+                            "createMs": 37.741878000000725,
+                            "restrictMs": 20.46345999999903,
+                            "totalMs": 58.205337999999756,
+                            "cpuUserMs": 86.047,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 49.89562300000034,
+                            "restrictMs": 22.90721300000223,
+                            "totalMs": 72.80283600000257,
+                            "cpuUserMs": 83.66,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 34.68562699999893,
+                            "restrictMs": 25.999230999997962,
+                            "totalMs": 60.68485799999689,
+                            "cpuUserMs": 60.101,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "BAC",
+                    "arms": {
+                        "B": {
+                            "createMs": 26.067753000002995,
+                            "restrictMs": 22.428992999997718,
+                            "totalMs": 48.49674600000071,
+                            "cpuUserMs": 38.19,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 33.426933999999164,
+                            "restrictMs": 40.31658299999981,
+                            "totalMs": 73.74351699999897,
+                            "cpuUserMs": 90.055,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 74.70724100000007,
+                            "restrictMs": 22.95170599999983,
+                            "totalMs": 97.6589469999999,
+                            "cpuUserMs": 115.377,
+                            "cpuSystemMs": 10.087
+                        }
+                    }
+                },
+                {
+                    "order": "CAB",
+                    "arms": {
+                        "C": {
+                            "createMs": 38.66255100000126,
+                            "restrictMs": 32.88191799999913,
+                            "totalMs": 71.54446900000039,
+                            "cpuUserMs": 59.272,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 43.886569999998756,
+                            "restrictMs": 27.25616000000082,
+                            "totalMs": 71.14272999999957,
+                            "cpuUserMs": 58.487,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 49.734245999999985,
+                            "restrictMs": 24.256046000002243,
+                            "totalMs": 73.99029200000223,
+                            "cpuUserMs": 43.71,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "ACB",
+                    "arms": {
+                        "A": {
+                            "createMs": 57.159160999999585,
+                            "restrictMs": 40.211694999998144,
+                            "totalMs": 97.37085599999773,
+                            "cpuUserMs": 58.467,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 107.51587400000062,
+                            "restrictMs": 126.79317100000117,
+                            "totalMs": 234.3090450000018,
+                            "cpuUserMs": 124.418,
+                            "cpuSystemMs": 8.51
+                        },
+                        "B": {
+                            "createMs": 43.75680400000056,
+                            "restrictMs": 23.18814999999813,
+                            "totalMs": 66.94495399999869,
+                            "cpuUserMs": 44.259,
+                            "cpuSystemMs": 0.379
+                        }
+                    }
+                },
+                {
+                    "order": "BCA",
+                    "arms": {
+                        "B": {
+                            "createMs": 45.44657599999846,
+                            "restrictMs": 116.09085400000185,
+                            "totalMs": 161.5374300000003,
+                            "cpuUserMs": 53.626,
+                            "cpuSystemMs": 29.837
+                        },
+                        "C": {
+                            "createMs": 57.7572110000001,
+                            "restrictMs": 45.00837700000193,
+                            "totalMs": 102.76558800000203,
+                            "cpuUserMs": 76.442,
+                            "cpuSystemMs": 3.448
+                        },
+                        "A": {
+                            "createMs": 141.63260300000184,
+                            "restrictMs": 40.01374799999758,
+                            "totalMs": 181.6463509999994,
+                            "cpuUserMs": 142.274,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "CBA",
+                    "arms": {
+                        "C": {
+                            "createMs": 47.31488999999783,
+                            "restrictMs": 31.612016000002768,
+                            "totalMs": 78.9269060000006,
+                            "cpuUserMs": 60.096,
+                            "cpuSystemMs": 1.476
+                        },
+                        "B": {
+                            "createMs": 38.78447799999776,
+                            "restrictMs": 33.21643500000209,
+                            "totalMs": 72.00091299999985,
+                            "cpuUserMs": 31.001,
+                            "cpuSystemMs": 6.342
+                        },
+                        "A": {
+                            "createMs": 80.34587800000008,
+                            "restrictMs": 35.99175000000105,
+                            "totalMs": 116.33762800000113,
+                            "cpuUserMs": 60.383,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "ABC",
+                    "arms": {
+                        "A": {
+                            "createMs": 55.366957000002,
+                            "restrictMs": 41.26710499999899,
+                            "totalMs": 96.634062000001,
+                            "cpuUserMs": 51.301,
+                            "cpuSystemMs": 2.101
+                        },
+                        "B": {
+                            "createMs": 68.54139099999884,
+                            "restrictMs": 66.17829400000119,
+                            "totalMs": 134.71968500000003,
+                            "cpuUserMs": 56.868,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 96.488609,
+                            "restrictMs": 54.72795899999983,
+                            "totalMs": 151.21656799999982,
+                            "cpuUserMs": 63.668,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                }
+            ]
+        },
+        "partial": {
+            "paths": 125631,
+            "observations": [
+                {
+                    "order": "ABC",
+                    "arms": {
+                        "A": {
+                            "createMs": 103.71884599999976,
+                            "restrictMs": 46.927966000002925,
+                            "totalMs": 150.64681200000268,
+                            "cpuUserMs": 106.858,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 92.3513469999998,
+                            "restrictMs": 67.07223599999998,
+                            "totalMs": 159.42358299999978,
+                            "cpuUserMs": 57.707,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 18862.595702,
+                            "restrictMs": 195.54948400000285,
+                            "totalMs": 19058.145186,
+                            "cpuUserMs": 168.603,
+                            "cpuSystemMs": 2931.039
+                        }
+                    }
+                },
+                {
+                    "order": "CBA",
+                    "arms": {
+                        "C": {
+                            "createMs": 205.33330600000045,
+                            "restrictMs": 135.23308800000086,
+                            "totalMs": 340.5663940000013,
+                            "cpuUserMs": 81.118,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 139.05921600000147,
+                            "restrictMs": 73.91673699999956,
+                            "totalMs": 212.97595300000103,
+                            "cpuUserMs": 50.218,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 125.41053000000102,
+                            "restrictMs": 383.22747700000036,
+                            "totalMs": 508.6380070000014,
+                            "cpuUserMs": 187.03,
+                            "cpuSystemMs": 24.663
+                        }
+                    }
+                },
+                {
+                    "order": "BCA",
+                    "arms": {
+                        "B": {
+                            "createMs": 229.21534699999756,
+                            "restrictMs": 137.42161699999997,
+                            "totalMs": 366.63696399999753,
+                            "cpuUserMs": 132.3,
+                            "cpuSystemMs": 0.86
+                        },
+                        "C": {
+                            "createMs": 213.55722100000276,
+                            "restrictMs": 49.742780999993556,
+                            "totalMs": 263.3000019999963,
+                            "cpuUserMs": 76.378,
+                            "cpuSystemMs": 2.411
+                        },
+                        "A": {
+                            "createMs": 66.5970060000036,
+                            "restrictMs": 34.15114000000176,
+                            "totalMs": 100.74814600000536,
+                            "cpuUserMs": 61.413,
+                            "cpuSystemMs": 1.716
+                        }
+                    }
+                },
+                {
+                    "order": "ACB",
+                    "arms": {
+                        "A": {
+                            "createMs": 53.47172099999443,
+                            "restrictMs": 33.83437000000413,
+                            "totalMs": 87.30609099999856,
+                            "cpuUserMs": 53.85,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 32.37607000000571,
+                            "restrictMs": 44.95873500000016,
+                            "totalMs": 77.33480500000587,
+                            "cpuUserMs": 48.015,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 43.84297499999957,
+                            "restrictMs": 16.86744400000316,
+                            "totalMs": 60.71041900000273,
+                            "cpuUserMs": 43.386,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "CAB",
+                    "arms": {
+                        "C": {
+                            "createMs": 50.711741999999504,
+                            "restrictMs": 23.6554679999972,
+                            "totalMs": 74.3672099999967,
+                            "cpuUserMs": 76.527,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 64.8676290000003,
+                            "restrictMs": 28.1598559999984,
+                            "totalMs": 93.0274849999987,
+                            "cpuUserMs": 132.927,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 29.10976899999514,
+                            "restrictMs": 17.700207000001683,
+                            "totalMs": 46.80997599999682,
+                            "cpuUserMs": 37.773,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "BAC",
+                    "arms": {
+                        "B": {
+                            "createMs": 26.7216019999978,
+                            "restrictMs": 24.49579999999696,
+                            "totalMs": 51.21740199999476,
+                            "cpuUserMs": 40.023,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 34.156960000000254,
+                            "restrictMs": 59.944556000002194,
+                            "totalMs": 94.10151600000245,
+                            "cpuUserMs": 137.691,
+                            "cpuSystemMs": 1.958
+                        },
+                        "C": {
+                            "createMs": 45.726559999995516,
+                            "restrictMs": 43.46783200000209,
+                            "totalMs": 89.1943919999976,
+                            "cpuUserMs": 50.557,
+                            "cpuSystemMs": 1.213
+                        }
+                    }
+                },
+                {
+                    "order": "BAC",
+                    "arms": {
+                        "B": {
+                            "createMs": 22.322187999998278,
+                            "restrictMs": 13.725367999999435,
+                            "totalMs": 36.04755599999771,
+                            "cpuUserMs": 35.961,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 67.42180099999678,
+                            "restrictMs": 30.913612000003923,
+                            "totalMs": 98.3354130000007,
+                            "cpuUserMs": 51.873,
+                            "cpuSystemMs": 4.391
+                        },
+                        "C": {
+                            "createMs": 38.56791700000031,
+                            "restrictMs": 23.940326999996614,
+                            "totalMs": 62.50824399999692,
+                            "cpuUserMs": 50.855,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "CAB",
+                    "arms": {
+                        "C": {
+                            "createMs": 45.15892900000472,
+                            "restrictMs": 25.967109999997774,
+                            "totalMs": 71.12603900000249,
+                            "cpuUserMs": 52.157,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 34.08441600000515,
+                            "restrictMs": 21.594224000000395,
+                            "totalMs": 55.678640000005544,
+                            "cpuUserMs": 55.332,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 34.01891400000022,
+                            "restrictMs": 18.321062000002712,
+                            "totalMs": 52.339976000002935,
+                            "cpuUserMs": 39.744,
+                            "cpuSystemMs": 0
+                        }
+                    }
+                },
+                {
+                    "order": "ACB",
+                    "arms": {
+                        "A": {
+                            "createMs": 49.90680900000007,
+                            "restrictMs": 46.2097219999996,
+                            "totalMs": 96.11653099999967,
+                            "cpuUserMs": 55.52,
+                            "cpuSystemMs": 0
+                        },
+                        "C": {
+                            "createMs": 65.66424099999858,
+                            "restrictMs": 63.137503999998444,
+                            "totalMs": 128.80174499999703,
+                            "cpuUserMs": 53.945,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 37.202384999996866,
+                            "restrictMs": 17.954813999996986,
+                            "totalMs": 55.15719899999385,
+                            "cpuUserMs": 32.25,
+                            "cpuSystemMs": 2.737
+                        }
+                    }
+                },
+                {
+                    "order": "BCA",
+                    "arms": {
+                        "B": {
+                            "createMs": 34.86037699999724,
+                            "restrictMs": 39.60679800000071,
+                            "totalMs": 74.46717499999795,
+                            "cpuUserMs": 36.991,
+                            "cpuSystemMs": 4.514
+                        },
+                        "C": {
+                            "createMs": 70.22626399999717,
+                            "restrictMs": 47.42977999999857,
+                            "totalMs": 117.65604399999575,
+                            "cpuUserMs": 128.994,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 37.72360900000058,
+                            "restrictMs": 28.807623999993666,
+                            "totalMs": 66.53123299999424,
+                            "cpuUserMs": 53.311,
+                            "cpuSystemMs": 0.92
+                        }
+                    }
+                },
+                {
+                    "order": "CBA",
+                    "arms": {
+                        "C": {
+                            "createMs": 44.41378100000293,
+                            "restrictMs": 17.964310999996087,
+                            "totalMs": 62.378091999999015,
+                            "cpuUserMs": 47.771,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 31.23924000000261,
+                            "restrictMs": 14.244307000000845,
+                            "totalMs": 45.483547000003455,
+                            "cpuUserMs": 39.325,
+                            "cpuSystemMs": 0
+                        },
+                        "A": {
+                            "createMs": 101.63406899999973,
+                            "restrictMs": 20.456728999997722,
+                            "totalMs": 122.09079799999745,
+                            "cpuUserMs": 108.011,
+                            "cpuSystemMs": 2.105
+                        }
+                    }
+                },
+                {
+                    "order": "ABC",
+                    "arms": {
+                        "A": {
+                            "createMs": 116.54330299999856,
+                            "restrictMs": 37.79466500000126,
+                            "totalMs": 154.33796799999982,
+                            "cpuUserMs": 73.173,
+                            "cpuSystemMs": 0
+                        },
+                        "B": {
+                            "createMs": 47.07758299999841,
+                            "restrictMs": 17.706380999996327,
+                            "totalMs": 64.78396399999474,
+                            "cpuUserMs": 35.135,
+                            "cpuSystemMs": 3.457
+                        },
+                        "C": {
+                            "createMs": 49.48184900000342,
+                            "restrictMs": 34.02231299999403,
+                            "totalMs": 83.50416199999745,
+                            "cpuUserMs": 50.368,
+                            "cpuSystemMs": 1.947
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

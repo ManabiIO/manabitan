@@ -191,9 +191,19 @@ function createHeader(generationId, descriptorKey) {
  */
 function getPathId(path, prefix, suffix) {
     if (!path.startsWith(prefix) || !path.endsWith(suffix)) { return null; }
-    const digits = path.slice(prefix.length, -suffix.length);
-    const id = Number(digits);
-    return Number.isSafeInteger(id) && id > 0 && String(id) === digits ? id : null;
+    const start = prefix.length;
+    const end = path.length - suffix.length;
+    if (start >= end || path.charCodeAt(start) === 0x30) { return null; }
+    // Creating and restricting an index both visit every image path. Parse the
+    // canonical decimal span without allocating a substring and its round trip.
+    let id = 0;
+    for (let i = start; i < end; ++i) {
+        const digit = path.charCodeAt(i) - 0x30;
+        if (digit < 0 || digit > 9) { return null; }
+        id = id * 10 + digit;
+        if (!Number.isSafeInteger(id)) { return null; }
+    }
+    return id;
 }
 
 /**
