@@ -481,4 +481,54 @@ describe('Dictionary generation media storage', () => {
         expect(createGenerationMediaIndex([...records, {...records[0], path: 'img/card01.webp'}], blob.size)).toBeNull();
         expect(createGenerationMediaIndex([{...records[0], packedOffset: blob.size}, ...records.slice(1)], blob.size)).toBeNull();
     });
+
+    test.each([
+        '',
+        '0',
+        '02',
+        '+2',
+        '-2',
+        '2.0',
+        '2e0',
+        '0x2',
+        ' 2',
+        '2 ',
+        '2\n',
+        '\uff12',
+        '\u0662',
+        '2_0',
+        '2/0',
+        '2\0',
+        'Infinity',
+        'NaN',
+        '4294967296',
+        '9007199254740991',
+        '9007199254740992',
+        '9007199254740993',
+        '99999999999999999999999999999999999999999999999999',
+    ])('declines noncanonical or out-of-range media ID %j', (digits) => {
+        const {blob, records, plan} = createPack();
+        const path = `img/card${digits}.webp`;
+        expect(createGenerationMediaIndex([records[0], {...records[1], path}], blob.size)).toBeNull();
+        expect(restrictGenerationMediaIndex(plan, [path])).toBeNull();
+    });
+
+    test('preserves exact namespace matching and the maximum media ID', () => {
+        const {blob, records} = createPack();
+        const first = 0xfffffffe;
+        const plan = createGenerationMediaIndex(records.slice(0, 2).map((record, index) => ({
+            ...record,
+            path: `img/card${first + index}.webp`,
+        })), blob.size);
+        if (plan === null) { throw new Error('Expected the maximum media IDs to be admitted'); }
+        expect(plan.descriptor).toMatchObject({firstId: first, slotCount: 2, count: 2});
+        const selected = restrictGenerationMediaIndex(plan, ['img/card4294967295.webp']);
+        if (selected === null) { throw new Error('Expected the maximum media ID to be selected'); }
+        expect(selected.descriptor).toEqual({...plan.descriptor, count: 1});
+        expect(selected.index.slice(24)).toEqual(plan.index.slice(24));
+        expect(new DataView(selected.index.buffer).getUint32(0, true)).toBe(0);
+        expect(restrictGenerationMediaIndex(plan, ['img/card4294967295.WEBP'])).toBeNull();
+        expect(restrictGenerationMediaIndex(plan, ['img/other4294967295.webp'])).toBeNull();
+        expect(restrictGenerationMediaIndex(plan, ['img/card4294967295.webp/'])).toBeNull();
+    });
 });
