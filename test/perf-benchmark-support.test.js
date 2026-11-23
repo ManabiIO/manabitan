@@ -48,7 +48,12 @@ function validReport() {
             processSampling: false,
             importFlags: null,
             validation: {
-                title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12, probeTerms: [...probeTerms],
+                title: fixture.expectedTitle,
+                revision: fixture.revision,
+                termRows: fixture.termRows,
+                contentReadable: true,
+                probeCount: 12,
+                probeTerms: [...probeTerms],
                 restart: {title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12, mediaFiles: 0},
                 media: {mode: 'all', totalFiles: 0, totalBytes: 0, files: 0, bytes: 0, sha256: createHash('sha256').digest('hex')},
                 storage: {bytes: 1000000},
@@ -229,11 +234,24 @@ describe('benchmark report acceptance', () => {
         expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('restart validation');
     });
     test.each([
-        ['pass', undefined], ['pass', -1], ['pass', 6], ['pass', 0.5], ['pass', '0'],
-        ['term', undefined], ['term', 'other'], ['term', 0],
-        ['originalTextLength', undefined], ['originalTextLength', 1], ['originalTextLength', 100],
-        ['hasExactHeadwordMatch', undefined], ['hasExactHeadwordMatch', false],
-        ['elapsedMs', -1], ['elapsedMs', Number.NaN], ['results', 0], ['results', 0.5], ['sha256', 'bad'],
+        ['pass', undefined],
+        ['pass', -1],
+        ['pass', 6],
+        ['pass', 0.5],
+        ['pass', '0'],
+        ['term', undefined],
+        ['term', 'other'],
+        ['term', 0],
+        ['originalTextLength', undefined],
+        ['originalTextLength', 1],
+        ['originalTextLength', 100],
+        ['hasExactHeadwordMatch', undefined],
+        ['hasExactHeadwordMatch', false],
+        ['elapsedMs', -1],
+        ['elapsedMs', Number.NaN],
+        ['results', 0],
+        ['results', 0.5],
+        ['sha256', 'bad'],
     ])('rejects invalid lookup %s=%j', (field, value) => {
         const report = validReport();
         report.benchmark.validation.lookup.observations[0][field] = value;
