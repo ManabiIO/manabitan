@@ -11,6 +11,17 @@ evidence = Path(sys.argv[1])
 dictionary = sys.argv[2]
 baseline = (evidence / "baseline-sha.txt").read_text().strip()
 candidate = (evidence / "candidate-sha.txt").read_text().strip()
+qualification_path = evidence / "qualification-sha.txt"
+qualification = qualification_path.read_text().strip() if qualification_path.exists() else candidate
+kind_path = evidence / "comparison-kind.txt"
+comparison_kind = kind_path.read_text().strip() if kind_path.exists() else "revision-comparison"
+assert comparison_kind in {"revision-comparison", "same-product-control"}
+if comparison_kind == "same-product-control":
+    assert qualification_path.exists(), "Control qualification HEAD is missing"
+    assert dictionary == "jitendex" and candidate == baseline, "Control product source must match the frozen baseline"
+    assert (evidence / "product-source.txt").read_text().strip() == baseline, "Control product source record differs"
+else:
+    assert candidate == qualification, "Revision comparison product source differs from qualification HEAD"
 order = (evidence / "observation-order.txt").read_text().split()
 expected_order = "A1 B1 B2 A2 B3 A3 A4 B4 A5 B5 B6 A6 B7 A7 A8 B8".split()
 assert order == expected_order, "The predeclared observation schedule changed"
@@ -22,7 +33,7 @@ package_hashes = {}
 for name in ["warmup-A", "warmup-B", *order]:
     summary = json.loads((evidence / name / "summary.json").read_text())
     arm = name[-1] if name.startswith("warmup-") else name[0]
-    expected_sha = baseline if arm == "A" else candidate
+    expected_sha = baseline if arm == "A" else qualification
     assert summary["dictionary"] == dictionary
     assert summary["gitSha"] == expected_sha, (name, "source SHA")
     assert summary["buildTarget"] == "chrome"
@@ -71,13 +82,21 @@ allowed_entries = {
     "js/dictionary/term-bank-wasm-parser.js",
     "lib/term-bank-parser.wasm",
 }
-assert set(changed_entries) <= allowed_entries, ("Unexpected product package differences", changed_entries)
-assert "lib/term-bank-parser.wasm" in changed_entries
+if comparison_kind == "same-product-control":
+    assert "lib/term-bank-parser.wasm" in old_map, "Control parser WASM is missing"
+    assert old_map == new_map, ("Control product package entries differ", changed_entries)
+else:
+    assert set(changed_entries) <= allowed_entries, ("Unexpected product package differences", changed_entries)
+    assert "lib/term-bank-parser.wasm" in changed_entries
 
 result = {
     "dictionary": dictionary,
+    "comparisonKind": comparison_kind,
     "baselineSha": baseline,
     "candidateSha": candidate,
+    "qualificationSha": qualification,
+    "productSourceShas": {"A": baseline, "B": candidate},
+    "checkoutShas": {"A": baseline, "B": qualification},
     "browser": expected_browser,
     "fixture": expected_fixture,
     "timingBoundary": "file-input change to post-UI import-complete event",
