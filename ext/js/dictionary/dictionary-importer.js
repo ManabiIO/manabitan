@@ -159,6 +159,7 @@ const EMPTY_TERM_GLOSSARY = [];
  *   contentBytesBuffer?: Uint8Array,
  *   contentBytesBaseOffset?: number,
  *   contentMetaList?: Uint32Array,
+ *   contentMetaByUniqueIndex?: boolean,
  *   releaseBorrowedContent?: () => void,
  *   contentDictNameList: ((string|null)[]|null),
  *   uniformContentDictName?: string|null,
@@ -1504,7 +1505,7 @@ export class DictionaryImporter {
             ),
             ...(rawZipPayloadReader === null ?
                 {} :
-                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal)}),
+                {readCompressed: async (termFile, signal) => await rawZipPayloadReader.read(termFile, signal, true)}),
         });
         const uncompressedImportRunPlan = termBankSourcePipeline.createImportRunPlan(0);
         const compressedImportRunPlan = termBankSourcePipeline.createCompressedImportRunPlan(0);
@@ -2384,6 +2385,8 @@ export class DictionaryImporter {
                             parserSourceCompressedBytes: parserProfile.sourceCompressedBytes ?? null,
                             parserSourceUncompressedBytes: parserProfile.sourceUncompressedBytes ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
+                            parserCompactContentMetadataGroups: parserProfile.compactContentMetadataGroups ?? 0,
+                            parserCompactContentMetadataBytesAvoided: parserProfile.compactContentMetadataBytesAvoided ?? 0,
                             parserResultDeliveryMs: parserProfile.resultDeliveryMs ?? null,
                             parserOrderedSinkWaitMs: parserProfile.orderedSinkWaitMs ?? null,
                             parserBorrowedContentResultCount: parserProfile.borrowedContentResultCount ?? null,
@@ -2680,6 +2683,7 @@ export class DictionaryImporter {
             }
             const importDataBanksElapsedMs = Math.max(0, Date.now() - tImportBanksStart);
             const fastPathProfile = lastFastTermBankReadProfile?.parserProfile ?? null;
+            const sourceRangeReadCounts = rawZipPayloadReader?.getCoalescedRangeReadCounts() ?? {logicalRequests: 0, physicalRanges: 0};
             const step4AccountedMs = (
                 step4TimingBreakdown.termParseMs +
                 step4TimingBreakdown.termSerializationMs +
@@ -2766,6 +2770,8 @@ export class DictionaryImporter {
                 fastPathParserSourceCompressedBytes: fastPathProfile?.sourceCompressedBytes ?? null,
                 fastPathParserSourceUncompressedBytes: fastPathProfile?.sourceUncompressedBytes ?? null,
                 fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
+                fastPathParserCompactContentMetadataGroups: fastPathProfile?.compactContentMetadataGroups ?? 0,
+                fastPathParserCompactContentMetadataBytesAvoided: fastPathProfile?.compactContentMetadataBytesAvoided ?? 0,
                 fastPathParserResultDeliveryMs: fastPathProfile?.resultDeliveryMs ?? null,
                 fastPathParserOrderedSinkWaitMs: fastPathProfile?.orderedSinkWaitMs ?? null,
                 fastPathParserBorrowedContentResultCount: fastPathProfile?.borrowedContentResultCount ?? null,
@@ -2780,6 +2786,8 @@ export class DictionaryImporter {
                 fastPathParserParallelOwnedContentBytes: fastPathProfile?.parallelOwnedContentBytes ?? null,
                 fastPathParserParallelPeakQueuedOwnedContentBytes: fastPathProfile?.parallelPeakQueuedOwnedContentBytes ?? null,
                 fastPathParserParallelSkipReason: fastPathProfile?.parallelSkipReason ?? null,
+                sourceZipLogicalRangeReadCount: sourceRangeReadCounts.logicalRequests,
+                sourceZipPhysicalRangeReadCount: sourceRangeReadCounts.physicalRanges,
                 sourceInitialPrefetchFileCount: initialSourcePrefetch.fileCount,
                 sourceInitialPrefetchEstimatedBytes: initialSourcePrefetch.estimatedBytes,
                 zipUseWebWorkers: zipWorkerPolicy.useWebWorkers,

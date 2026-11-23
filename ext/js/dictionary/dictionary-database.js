@@ -166,6 +166,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {number} [contentBytesBaseOffset]
  * @property {() => void} [releaseBorrowedContent]
  * @property {Uint32Array} [contentMetaList]
+ * @property {boolean} [contentMetaByUniqueIndex]
  * @property {Uint32Array|null} [contentUniqueIndexList]
  * @property {ArtifactTermContentDedupPlan|null} [contentDedupPlan]
  * @property {boolean} [useResolvedContentReferences]
@@ -5029,7 +5030,7 @@ null;
     }
 
     /**
-     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
+     * @param {{dictionary: string, rowCount: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: boolean[]|Uint8Array, scoreList: number[]|Int32Array|Float64Array, sequenceList: (number|undefined)[]|Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List?: number[]|Uint32Array, contentHash2List?: number[]|Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentDictNameList: ((string|null)[]|null), termRecordPreinternedPlan?: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null, uniformContentDictName?: string|null, dictionaryTotalRows?: number}} chunk
      * @returns {Promise<void>}
      */
     async bulkAddArtifactTermsChunk(chunk) {
@@ -5048,7 +5049,7 @@ null;
             const hasContentSlab = (
                 chunk.contentBytesBuffer instanceof Uint8Array &&
                 chunk.contentMetaList instanceof Uint32Array &&
-                chunk.contentMetaList.length >= chunk.rowCount * 4
+                (chunk.contentMetaByUniqueIndex === true || chunk.contentMetaList.length >= chunk.rowCount * 4)
             );
             if (hasHashArrays || hasContentSlab) {
                 await this._bulkAddArtifactTermsChunkWithContentDedup(chunk);
@@ -6741,8 +6742,8 @@ null;
 
     /**
      * Retains bounded owned bytes so the next parser groups can verify exact
-     * duplicates without reading recently written OPFS blocks. Complete compact
-     * parser slabs can be adopted without changing cache coverage or cost.
+     * duplicates without reading recently written OPFS blocks. Immutable parser
+     * slabs can back a retained view when their full allocation fits the budget.
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
      * @param {Record<string, number>|null} [importMetrics]
@@ -6800,9 +6801,15 @@ null;
         const source = spans.buffer;
         const sharedSource = !(source.buffer instanceof ArrayBuffer);
         const padding = sharedSource ? (source.byteOffset + minimumOffset) & 7 : 0;
-        const byteLength = maximumEnd - minimumOffset + padding;
+        const copyByteLength = maximumEnd - minimumOffset + padding;
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
-        if (byteLength > cacheMaxBytes) { return 0; }
+        if (copyByteLength > cacheMaxBytes) { return 0; }
+        const adoptTransferredSource = (
+            source.buffer.byteLength <= cacheMaxBytes && takeOwnedTermContent(source)
+        );
+        // A retained view avoids copying an immutable slab to trim its edges.
+        // Charge the complete backing allocation, including those unused edges.
+        const byteLength = adoptTransferredSource ? source.buffer.byteLength : copyByteLength;
         while (
             this._recentTermContentSourceBatchBytes + byteLength > cacheMaxBytes &&
             this._recentTermContentSourceBatches.size > 0
@@ -6819,13 +6826,11 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const adoptTransferredSource = (
-            minimumOffset === 0 && maximumEnd === source.byteLength &&
-            takeOwnedTermContent(source)
-        );
         // Match the source alignment so the shared bytes need only one copy.
         const owned = adoptTransferredSource ?
-            source :
+            (minimumOffset === 0 && maximumEnd === source.byteLength ?
+                source :
+                source.subarray(minimumOffset, maximumEnd)) :
             (sharedSource ?
                 new Uint8Array(byteLength).subarray(padding) :
                 source.slice(minimumOffset, maximumEnd));
@@ -8291,7 +8296,7 @@ this._readTermContentSignature(
         const hasContentSlab = chunk.contentBytesBuffer instanceof Uint8Array && chunk.contentMetaList instanceof Uint32Array;
         if (
             hasContentSlab ?
-                chunk.contentMetaList.length < count * 4 :
+                (chunk.contentMetaByUniqueIndex !== true && chunk.contentMetaList.length < count * 4) :
                 (chunk.contentHash1List.length < count || chunk.contentHash2List.length < count)
         ) {
             throw new Error('Artifact chunk content hash arrays are smaller than row count');
@@ -8626,13 +8631,14 @@ this._readTermContentSignature(
         const contentBytesBuffer = chunk.contentBytesBuffer instanceof Uint8Array ? chunk.contentBytesBuffer : null;
         const contentMetaList = contentBytesBuffer !== null && chunk.contentMetaList instanceof Uint32Array ? chunk.contentMetaList : null;
         const useContentSlab = contentMetaList !== null;
+        const useUniqueContentMetadata = chunk.contentMetaByUniqueIndex === true;
         const contentBytesBaseOffset = useContentSlab ? chunk.contentBytesBaseOffset : 0;
         if (
             useContentSlab &&
             (
                 !Number.isSafeInteger(contentBytesBaseOffset) ||
                 contentBytesBaseOffset < 0 ||
-                contentMetaList.length < count * 4
+                (!useUniqueContentMetadata && contentMetaList.length < count * 4)
             )
         ) {
             throw new RangeError('Artifact term content slab metadata is invalid');
@@ -8663,6 +8669,12 @@ this._readTermContentSignature(
             /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) :
             null;
         const useResolvedContentReferences = chunk.useResolvedContentReferences === true && contentDedupPlan !== null;
+        if (
+            useUniqueContentMetadata &&
+            (!useContentSlab || contentDedupPlan === null || contentMetaList.length !== contentDedupPlan.resolvedFlags.length * 4)
+        ) {
+            throw new RangeError('Artifact term content unique metadata is invalid');
+        }
         const uniqueSignatures = (
             contentDedupPlan?.uniqueSignatures instanceof Uint32Array &&
             contentDedupPlan.uniqueSignatures.length >= contentDedupPlan.resolvedFlags.length * 3
@@ -8767,7 +8779,7 @@ null :
                     }
                     const pendingIndex = uniqueIndex - firstPendingUniqueIndex;
                     if (uniqueIndex === nextPendingUniqueIndex) {
-                        const contentMetaOffset = i * 4;
+                        const contentMetaOffset = (useUniqueContentMetadata ? uniqueIndex : i) * 4;
                         const contentOffset = useContentSlab ?
                             contentBytesBaseOffset + contentMetaList[contentMetaOffset] :
                             0;
@@ -9100,7 +9112,7 @@ null :
                             ++alreadyResolvedUniqueCount;
                             continue;
                         }
-                        const contentMetaOffset = rowIndex * 4;
+                        const contentMetaOffset = (useUniqueContentMetadata ? uniqueIndex : rowIndex) * 4;
                         const contentOffset = contentBytesBaseOffset + contentMetaList[contentMetaOffset];
                         const contentLength = contentMetaList[contentMetaOffset + 1];
                         const hash1 = contentMetaList[contentMetaOffset + 2] >>> 0;
@@ -9308,7 +9320,7 @@ null :
         try {
             for (let i = 0; i < count; ++i) {
                 currentRowIndex = i;
-                const contentMetaOffset = i * 4;
+                const contentMetaOffset = (useUniqueContentMetadata ? uniqueIndexList[i] : i) * 4;
                 const hash1 = (useContentSlab ? contentMetaList[contentMetaOffset + 2] : chunk.contentHash1List[i]) >>> 0;
                 const hash2 = (useContentSlab ? contentMetaList[contentMetaOffset + 3] : chunk.contentHash2List[i]) >>> 0;
                 const contentOffset = useContentSlab ? contentBytesBaseOffset + contentMetaList[contentMetaOffset] : 0;
