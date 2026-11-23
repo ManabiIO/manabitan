@@ -1,0 +1,13 @@
+{
+  "scope": "Observed tool completion for the first current-head sequential type gate; retain separately from a retry.",
+  "sourceSha": "61e3b7e3fd05e9e40f1e9c283faa143af32588f6",
+  "sourceTree": "f06a3ec9bfe4574cf50583cb0d77f4bf97e7de00",
+  "main": "passed",
+  "dev": "passed",
+  "test": "terminated with exit 137 and no compiler diagnostics",
+  "bench": "not started because the preceding command failed",
+  "exitCode": 137,
+  "testOutputPath": "round3-media-key-views-ts-test-final.log",
+  "shellOutput": "/bin/bash: line 1:    21 Killed                  node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json > /workspace/scratch/72c24f1e7bc9/round3-media-key-views-ts-test-final.log 2>&1\n",
+  "context": "Other full-unit and full-source correctness jobs were running concurrently. The process termination reason is not established by the empty compiler output."
+}

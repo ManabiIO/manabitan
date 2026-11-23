@@ -1,0 +1,100 @@
+import {readFile, writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import {execFileSync} from 'node:child_process'
+import {pathToFileURL} from 'node:url'
+import path from 'node:path'
+import assert from 'node:assert/strict'
+
+const root = '/workspace/scratch/72c24f1e7bc9/round3-parser-baseline'
+const cacheRoot = '/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache'
+const outputPath = '/workspace/scratch/72c24f1e7bc9/round3-media-key-counts.json'
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim()
+assert.equal(sourceSha, '467067650653c37c1f7d6b05d6737d070e1259cd')
+assert.equal(execFileSync('git', ['status', '--porcelain'], {cwd: root, encoding: 'utf8'}).trim(), '')
+const parser = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-bank-wasm-parser.js')))
+const wasm = await readFile(path.join(root, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))
+parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
+const {ZipReader, Uint8ArrayReader} = await import(pathToFileURL(path.join(root, 'node_modules/@zip.js/zip.js/index.js')))
+const locks = JSON.parse(await readFile(path.join(root, 'test/perf/dictionaries.lock.json'), 'utf8'))
+const report = {schema: 1, scope: 'Actual copied media key buffers and exact reuse eligibility in the existing owned stable string arena. Fixed four-bank groups, not production planner counters or elapsed-time claims.', sourceSha, sourceTree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {cwd: root, encoding: 'utf8'}).trim(), wasmSha256: sha256(wasm), complete: false, dictionaries: []}
+const options = {singleChunk: true, emitTermByteLists: false, computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true, validateGlossaryTypes: true, prepareLookupIndexes: true}
+try {
+    for (const dictionary of ['jmdict', 'jitendex', 'vndb']) {
+        const spec = locks.dictionaries[dictionary]
+        const archive = await readFile(path.join(cacheRoot, spec.cacheFile))
+        assert.equal(archive.length, spec.sizeBytes)
+        assert.equal(sha256(archive), spec.sha256)
+        const zip = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)), {useWebWorkers: false})
+        const entries = (await zip.getEntries()).filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+        const item = {dictionary, archiveSha256: spec.sha256, banks: entries.length, rows: 0, groups: [], mismatchExamples: []}
+        report.dictionaries.push(item)
+        for (let first = 0; first < entries.length; first += 4) {
+            const sources = entries.slice(first, first + 4).map((entry) => {
+                const start = entry.offset
+                assert.equal(archive.readUInt32LE(start), 0x04034b50)
+                const filenameLength = archive.readUInt16LE(start + 26)
+                const extraLength = archive.readUInt16LE(start + 28)
+                assert.equal(archive.subarray(start + 30, start + 30 + filenameLength).toString(), entry.filename)
+                const bytes = archive.subarray(start + 30 + filenameLength + extraLength, start + 30 + filenameLength + extraLength + entry.compressedSize)
+                return {bytes, compressionMethod: entry.compressionMethod, compressedSize: bytes.length, uncompressedSize: entry.uncompressedSize, signature: entry.signature, filename: entry.filename}
+            })
+            const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, options, true)
+            await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
+                if (preloadedSource.crcSignaturesPtr) { assert.equal(preloadedSource.crcVerified, true) }
+                const stable = parser.copyWasmBackedColumnChunk(chunk, true, true)
+                const plan = chunk.termRecordPreinternedPlan
+                assert.ok(plan.stringOffsets)
+                assert.ok(stable.termRecordPreinternedPlan.stringsBuffer.buffer instanceof ArrayBuffer)
+                const ownStrings = stable.termRecordPreinternedPlan.stringsBuffer
+                const keyBuffers = new Set()
+                const counts = {firstBank: first + 1, rows: chunk.rowCount, mediaRows: stable.mediaRows.length, projectedRows: 0, nonemptyKeyViews: 0, keyBytes: 0, reusableKeyViews: 0, reusableKeyBytes: 0, mismatchKeyViews: 0, emptyKeyViews: 0, decodedStringKeys: 0, copiedKeyBuffers: 0, existingStringArenaBytes: ownStrings.byteLength}
+                for (let j = 0; j < stable.mediaRows.length; ++j) {
+                    const {index, row, imagePaths} = stable.mediaRows[j]
+                    if (imagePaths !== undefined) { ++counts.projectedRows }
+                    for (const [key, indexes] of [['expressionBytes', plan.expressionIndexes], ['readingBytes', plan.readingIndexes]]) {
+                        const bytes = row[key]
+                        if (!(bytes instanceof Uint8Array)) { ++counts.decodedStringKeys; continue }
+                        if (bytes.byteLength === 0) { ++counts.emptyKeyViews; continue }
+                        assert.ok(bytes.buffer instanceof ArrayBuffer)
+                        keyBuffers.add(bytes.buffer)
+                        ++counts.nonemptyKeyViews
+                        counts.keyBytes += bytes.byteLength
+                        const stringIndex = indexes[index]
+                        const offset = plan.stringOffsets[stringIndex]
+                        const length = plan.stringLengths[stringIndex]
+                        const candidate = ownStrings.subarray(offset, offset + length)
+                        const matches = candidate.byteLength === bytes.byteLength && Buffer.compare(candidate, bytes) === 0
+                        if (matches) {
+                            ++counts.reusableKeyViews
+                            counts.reusableKeyBytes += bytes.byteLength
+                        } else {
+                            ++counts.mismatchKeyViews
+                            if (item.mismatchExamples.length < 5) {
+                                item.mismatchExamples.push({firstBank: first + 1, row: index, key, sourceHex: Buffer.from(bytes).toString('hex'), planHex: Buffer.from(candidate).toString('hex')})
+                            }
+                        }
+                    }
+                }
+                counts.copiedKeyBuffers = keyBuffers.size
+                item.groups.push(counts)
+                item.rows += chunk.rowCount
+            }, 2048, {...options, preloadedSource})
+            parser.consumeLastTermBankWasmParseProfile()
+            if (first % 40 === 0 || first + 4 >= entries.length) {
+                await writeFile(outputPath, JSON.stringify(report, null, 2))
+                console.log(`${dictionary} ${Math.min(first + 4, entries.length)}/${entries.length}: ${item.rows} rows counted`)
+            }
+        }
+        assert.equal(item.rows, spec.termRows)
+        await zip.close()
+    }
+    assert.equal(execFileSync('git', ['status', '--porcelain'], {cwd: root, encoding: 'utf8'}).trim(), '')
+    assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(), sourceSha)
+    report.complete = true
+} catch (error) {
+    report.error = error.stack ?? String(error)
+    throw error
+} finally {
+    await writeFile(outputPath, JSON.stringify(report, null, 2))
+}

@@ -1,0 +1,25 @@
+{
+  "output": "/workspace/scratch/72c24f1e7bc9/round3-media-key-views-package-comparison.json",
+  "reportSha256": "0a1ea8d6d49a9636858344e6d02f488b2e74ef1b464bf30de2199bbed7b789db",
+  "memberCounts": {
+    "baseline": 550,
+    "candidate": 550
+  },
+  "archiveSha256": {
+    "baseline": "6ce85ad717f9717170f8b54e531585ee33621232491d6a0d5e54f9e123cf282d",
+    "candidate": "0c3bfafc93c93002cc0bdcf89755d68a5092e584d2e00a0daed0c0f3db550aba"
+  },
+  "differences": [
+    {
+      "name": "js/dictionary/term-bank-wasm-parser.js",
+      "baseline": {
+        "sizeBytes": 200103,
+        "sha256": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066"
+      },
+      "candidate": {
+        "sizeBytes": 201479,
+        "sha256": "da1fc9f804f9718139e7bc223453e44399e319f5ed6e3156b693be2558832c59"
+      }
+    }
+  ]
+}

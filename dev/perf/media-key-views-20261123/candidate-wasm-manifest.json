@@ -1,0 +1,64 @@
+{
+    "format": 1,
+    "toolchain": {
+        "compilerVersion": "21.1.8",
+        "linkerVersion": "21.1.8"
+    },
+    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
+    "sourceFileCount": 14,
+    "targets": [
+        {
+            "name": "term-content-canonical-scan-v1.wasm",
+            "sources": [
+                "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+            ],
+            "arguments": [
+                "--target=wasm32",
+                "-O3",
+                "-nostdlib",
+                "-Wl,--no-entry",
+                "-Wl,--import-memory",
+                "-Wl,-z,stack-size=65536",
+                "-Wl,--strip-all"
+            ],
+            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+        },
+        {
+            "name": "term-bank-parser.wasm",
+            "sources": [
+                "ext/js/dictionary/wasm/term-bank-parser.c",
+                "ext/js/dictionary/wasm/term-bank-inflate.c"
+            ],
+            "arguments": [
+                "--target=wasm32-freestanding",
+                "-O3",
+                "-matomics",
+                "-mbulk-memory",
+                "-msimd128",
+                "-nostdlib",
+                "-Wl,--no-entry",
+                "-Wl,--shared-memory",
+                "-Wl,--max-memory=4294967296",
+                "-Wl,--export=wasm_reset_heap",
+                "-Wl,--export=wasm_alloc",
+                "-Wl,--export=wasm_get_last_parse_capacity",
+                "-Wl,--export=wasm_get_last_content_capacity",
+                "-Wl,--export=inflate_and_join_term_banks",
+                "-Wl,--export=verify_term_bank_source_crcs",
+                "-Wl,--export=inflate_zip_media_batch",
+                "-Wl,--export=parse_term_bank",
+                "-Wl,--export=parse_term_bank_with_media_hints",
+                "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+                "-Wl,--export=build_term_string_plan",
+                "-Wl,--export=encode_term_lookup_index",
+                "-Wl,--export=compact_term_lookup_keys",
+                "-Wl,--export=encode_term_content",
+                "-Wl,--export=encode_term_content_no_hash",
+                "-Wl,--export=encode_term_content_token_binary",
+                "-Wl,--export=encode_term_content_token_binary_dedup",
+                "-Wl,--strip-all"
+            ],
+            "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+        }
+    ]
+}

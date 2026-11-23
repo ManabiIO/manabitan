@@ -1,0 +1,147 @@
+{
+    "schema": 1,
+    "scope": "Full-source component correctness and actual copied-buffer counts. Fixed four-bank partitions; no production-planner, browser speed or peak-memory claim.",
+    "sources": [
+        {
+            "root": "/workspace/scratch/72c24f1e7bc9/manabitan",
+            "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+            "sourceSha": "467067650653c37c1f7d6b05d6737d070e1259cd",
+            "sourceTree": "934dd7011275aafa9f5b0314af8c729eb5fc96a2",
+            "sourceHashes": {
+                "ext/js/dictionary/dictionary-database.js": "9d9344feec458583fe50c8ced99f0e3da7bafa8bb885d82387b7b69d698ff741",
+                "ext/js/dictionary/dictionary-importer.js": "b04807b81b2bf769fe79f96fb0a57bf244fd9ec12396ed27074ce311fe514f90",
+                "ext/js/dictionary/term-bank-wasm-parser-worker.js": "04d295b8acf9ab621813781fe3ea84478d6b66a315febaac79cdadbec8831270",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066",
+                "ext/js/dictionary/term-content-canonical-scan.js": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+                "dev/data/dictionary-wasm/manifest.json": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+        },
+        {
+            "root": "/workspace/scratch/72c24f1e7bc9/round3-media-key-views",
+            "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+            "sourceSha": "61e3b7e3fd05e9e40f1e9c283faa143af32588f6",
+            "sourceTree": "f06a3ec9bfe4574cf50583cb0d77f4bf97e7de00",
+            "sourceHashes": {
+                "ext/js/dictionary/dictionary-database.js": "9d9344feec458583fe50c8ced99f0e3da7bafa8bb885d82387b7b69d698ff741",
+                "ext/js/dictionary/dictionary-importer.js": "b04807b81b2bf769fe79f96fb0a57bf244fd9ec12396ed27074ce311fe514f90",
+                "ext/js/dictionary/term-bank-wasm-parser-worker.js": "04d295b8acf9ab621813781fe3ea84478d6b66a315febaac79cdadbec8831270",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "da1fc9f804f9718139e7bc223453e44399e319f5ed6e3156b693be2558832c59",
+                "ext/js/dictionary/term-content-canonical-scan.js": "a2ff1662318c13419c9db28b2d1917cf26ba7b33945c387d045c0614878f28d4",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+                "dev/data/dictionary-wasm/manifest.json": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+        }
+    ],
+    "publishedCandidate": {
+        "sha": "b1b4fe3b6e396f5b30f8e006de1916e8584d9d3e",
+        "tree": "f06a3ec9bfe4574cf50583cb0d77f4bf97e7de00",
+        "localEquivalentSha": "61e3b7e3fd05e9e40f1e9c283faa143af32588f6"
+    },
+    "dictionaries": [
+        {
+            "dictionary": "jmdict",
+            "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "banks": 53,
+            "rows": 528299,
+            "sourceBytes": 171617523,
+            "fixedGroups": 14,
+            "arms": {
+                "baseline": {
+                    "mediaRows": 17,
+                    "projectedImageRows": 0,
+                    "mediaKeyBuffers": 34,
+                    "independentMediaKeyBuffers": 34,
+                    "mediaKeyBytes": 297,
+                    "reusedMediaKeyViews": 0
+                },
+                "candidate": {
+                    "mediaRows": 17,
+                    "projectedImageRows": 0,
+                    "mediaKeyBuffers": 34,
+                    "independentMediaKeyBuffers": 34,
+                    "mediaKeyBytes": 297,
+                    "reusedMediaKeyViews": 0
+                }
+            }
+        },
+        {
+            "dictionary": "jitendex",
+            "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "banks": 219,
+            "rows": 436555,
+            "sourceBytes": 538927310,
+            "fixedGroups": 55,
+            "arms": {
+                "baseline": {
+                    "mediaRows": 339,
+                    "projectedImageRows": 324,
+                    "mediaKeyBuffers": 678,
+                    "independentMediaKeyBuffers": 678,
+                    "mediaKeyBytes": 8041,
+                    "reusedMediaKeyViews": 0
+                },
+                "candidate": {
+                    "mediaRows": 339,
+                    "projectedImageRows": 324,
+                    "mediaKeyBuffers": 79,
+                    "independentMediaKeyBuffers": 30,
+                    "mediaKeyBytes": 8041,
+                    "reusedMediaKeyViews": 648
+                }
+            }
+        },
+        {
+            "dictionary": "vndb",
+            "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+            "banks": 665,
+            "rows": 6648310,
+            "sourceBytes": 4267992967,
+            "fixedGroups": 167,
+            "arms": {
+                "baseline": {
+                    "mediaRows": 146722,
+                    "projectedImageRows": 146722,
+                    "mediaKeyBuffers": 293393,
+                    "independentMediaKeyBuffers": 293393,
+                    "mediaKeyBytes": 4342421,
+                    "reusedMediaKeyViews": 0
+                },
+                "candidate": {
+                    "mediaRows": 146722,
+                    "projectedImageRows": 146722,
+                    "mediaKeyBuffers": 167,
+                    "independentMediaKeyBuffers": 0,
+                    "mediaKeyBytes": 4342421,
+                    "reusedMediaKeyViews": 293393
+                }
+            }
+        }
+    ],
+    "validation": {
+        "focused": {
+            "files": 4,
+            "testsPassed": 354,
+            "failures": 0
+        },
+        "fullUnit": {
+            "filesPassed": 640,
+            "testsPassed": 14380,
+            "testsSkipped": 47,
+            "failures": 0
+        },
+        "typeScript": {
+            "main": "passed",
+            "dev": "passed",
+            "test": "passed after sequential retry",
+            "bench": "passed sequentially"
+        },
+        "typeScriptFirstCurrentHeadAttempt": "main/dev passed; test process killed with exit137 and no diagnostics; bench not started",
+        "scopedLint": "passed after test style corrections",
+        "dryBuild": "passed: seven targets",
+        "actualChromePackage": "passed: 550 members per arm, exactly one product member differs",
+        "fullSourceOracle": "passed with before/after source guards"
+    }
+}

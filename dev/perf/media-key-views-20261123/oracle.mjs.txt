@@ -1,0 +1,222 @@
+import {readFile, writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import assert from 'node:assert/strict'
+import {inflateRawSync, crc32} from 'node:zlib'
+import {pathToFileURL} from 'node:url'
+import {execFileSync} from 'node:child_process'
+import path from 'node:path'
+
+const baselineRoot = '/workspace/scratch/72c24f1e7bc9/manabitan'
+const candidateRoot = '/workspace/scratch/72c24f1e7bc9/round3-media-key-views'
+const cacheRoot = path.join(baselineRoot, 'builds/e2e-dictionary-cache')
+const outputPath = '/workspace/scratch/72c24f1e7bc9/round3-media-key-views-oracle.json'
+const {ZipReader, Uint8ArrayReader} = await import(pathToFileURL(path.join(baselineRoot, 'node_modules/@zip.js/zip.js/index.js')))
+const {tryCollectGlossaryImagePaths} = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/dictionary/dictionary-image-references.js')))
+const {decodeRawTermContentTokenBinary} = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/raw-term-content.js')))
+const locks = JSON.parse(await readFile(path.join(candidateRoot, 'test/perf/dictionaries.lock.json'), 'utf8'))
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+const sha256 = (value) => createHash('sha256').update(value).digest('hex')
+const roots = [baselineRoot, candidateRoot]
+const productFiles = ['ext/js/dictionary/dictionary-database.js', 'ext/js/dictionary/dictionary-importer.js', 'ext/js/dictionary/term-bank-wasm-parser-worker.js', 'ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-content-canonical-scan.js', 'ext/js/dictionary/wasm/term-bank-parser.c', 'dev/data/dictionary-wasm/manifest.json', 'dev/data/dictionary-wasm/term-bank-parser.wasm']
+const parsers = await Promise.all(roots.map(async (root) => {
+    assert.equal(execFileSync('git', ['status', '--porcelain'], {cwd: root, encoding: 'utf8'}).trim(), '', 'Source must be frozen before the full oracle')
+    const sourceHashes = Object.fromEntries(await Promise.all(productFiles.map(async (file) => [file, sha256(await readFile(path.join(root, file)))])))
+    const parser = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-bank-wasm-parser.js')))
+    const wasmBytes = await readFile(path.join(root, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))
+    parser.setTermBankWasmModule(await WebAssembly.compile(wasmBytes))
+    return {root, parser, sourceHashes, sourceTree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {cwd: root, encoding: 'utf8'}).trim(), wasmSha256: sha256(wasmBytes), sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim()}
+}))
+const options = {singleChunk: true, emitTermByteLists: false, computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true, validateGlossaryTypes: true, prepareLookupIndexes: true}
+const report = {schema: 1, node: process.version, complete: false, scope: 'Every compressed source bank independently inflated and CRC/size checked using node:zlib; every row/key/numeric field and canonical content representative checked against JSON; every row content/hash/reference, all lookup bytes and all media projections compared across arms. Also exercise owned copied worker columns and image-path projection, comparing every projected path and diagnostic row with independently JSON-decoded source and between arms. Fixed four-bank component partitions, not a production planner claim. Timings are diagnostic only.', sources: parsers.map(({root, wasmSha256, sourceSha, sourceTree, sourceHashes}) => ({root, wasmSha256, sourceSha, sourceTree, sourceHashes})), dictionaries: []}
+function updateView(hash, value) {
+    const bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+    const length = Buffer.alloc(8)
+    length.writeBigUInt64LE(BigInt(bytes.length))
+    hash.update(length).update(bytes)
+}
+function normalizeGlossary(value) {
+    if (Array.isArray(value)) { return value.map(normalizeGlossary) }
+    if (value && typeof value === 'object' && value.type === 'text' && typeof value.text === 'string') { return value.text }
+    return value
+}
+try {
+    for (const dictionary of ['jmdict', 'jitendex', 'vndb']) {
+        const spec = locks.dictionaries[dictionary]
+        const archive = await readFile(path.join(cacheRoot, spec.cacheFile))
+        assert.equal(archive.length, spec.sizeBytes)
+        assert.equal(sha256(archive), spec.sha256)
+        const reader = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)), {useWebWorkers: false})
+        const entries = (await reader.getEntries()).filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+        const item = {dictionary, archiveSha256: spec.sha256, banks: entries.length, groups: [], rows: 0, sourceBytes: 0}
+        report.dictionaries.push(item)
+        for (let first = 0; first < entries.length; first += 4) {
+            const sources = []
+            const expectedRows = []
+            for (const entry of entries.slice(first, first + 4)) {
+                const start = entry.offset
+                assert.equal(archive.readUInt32LE(start), 0x04034b50)
+                assert.equal(archive.readUInt16LE(start + 8), entry.compressionMethod)
+                const filenameLength = archive.readUInt16LE(start + 26)
+                const extraLength = archive.readUInt16LE(start + 28)
+                assert.equal(archive.subarray(start + 30, start + 30 + filenameLength).toString(), entry.filename)
+                const payload = archive.subarray(start + 30 + filenameLength + extraLength, start + 30 + filenameLength + extraLength + entry.compressedSize)
+                const decoded = entry.compressionMethod === 0 ? payload : inflateRawSync(payload)
+                assert.equal(decoded.length, entry.uncompressedSize)
+                assert.equal(crc32(decoded), entry.signature)
+                expectedRows.push(...JSON.parse(decoded.toString()))
+                item.sourceBytes += decoded.length
+                sources.push({bytes: payload, compressionMethod: entry.compressionMethod, compressedSize: payload.length, uncompressedSize: decoded.length, signature: entry.signature, filename: entry.filename})
+            }
+            const results = []
+            for (const arm of parsers) {
+                const {parser} = arm
+                const started = performance.now()
+                const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, options, true)
+                let elapsedMs = 0
+                const contentDigest = createHash('sha256')
+                const lookupDigest = createHash('sha256')
+                const mediaDigest = createHash('sha256')
+                const projectionDigest = createHash('sha256')
+                let sharedGlossarySnapshots = 0
+                let sharedGlossarySnapshotBytes = 0
+                let projectedImageRows = 0
+                let copyElapsedMs = 0
+                let mediaKeyBuffers = 0
+                let independentMediaKeyBuffers = 0
+                let mediaKeyBytes = 0
+                let reusedMediaKeyViews = 0
+                let rows = 0
+                let compact = false
+                let uniqueCount = 0
+                let mediaRows = 0
+                await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
+                    elapsedMs = performance.now() - started
+                    if (preloadedSource.crcSignaturesPtr) { assert.equal(preloadedSource.crcVerified, true) }
+                    assert.equal(chunk.rowCount, expectedRows.length)
+                    assert.ok(chunk.contentBytesBuffer && chunk.contentMetaList && chunk.contentUniqueIndexList && chunk.preparedLookupIndexes)
+                    const plan = chunk.termRecordPreinternedPlan
+                    assert.ok(plan.stringOffsets)
+                    const base = chunk.contentBytesBaseOffset ?? 0
+                    compact = chunk.contentMetaByUniqueIndex === true
+                    uniqueCount = chunk.contentDedupPlan.uniqueCount
+                    const seen = new Set()
+                    for (let row = 0; row < chunk.rowCount; ++row) {
+                        const expected = expectedRows[row]
+                        const identity = chunk.contentUniqueIndexList[row]
+                        const meta = (compact ? identity : row) * 4
+                        const offset = base + chunk.contentMetaList[meta]
+                        const length = chunk.contentMetaList[meta + 1]
+                        const bytes = chunk.contentBytesBuffer.subarray(offset, offset + length)
+                        updateView(contentDigest, bytes)
+                        updateView(contentDigest, chunk.contentMetaList.subarray(meta, meta + 4))
+                        assert.equal(chunk.scoreList[row], expected[4])
+                        assert.equal(chunk.sequenceList[row], typeof expected[6] === 'number' ? expected[6] : -1)
+                        for (const [id, value] of [[plan.expressionIndexes[row], expected[0]], [plan.readingIndexes[row], expected[1] || expected[0]]]) {
+                            const key = plan.stringsBuffer.subarray(plan.stringOffsets[id], plan.stringOffsets[id] + plan.stringLengths[id])
+                            assert.equal(Buffer.compare(key, encoder.encode(value)), 0)
+                        }
+                        if (!seen.has(identity)) {
+                            seen.add(identity)
+                            const decoded = decodeRawTermContentTokenBinary(bytes, decoder)
+                            assert.ok(decoded)
+                            assert.deepEqual({rules: decoded.rules, definitionTags: decoded.definitionTags, termTags: decoded.termTags, glossary: JSON.parse(decoded.glossaryJson)}, {
+                                rules: expected[3] ?? '', definitionTags: expected[2] ?? '', termTags: expected[7] ?? '', glossary: normalizeGlossary(expected[5]),
+                            })
+                        }
+                    }
+                    assert.equal(seen.size, uniqueCount)
+                    for (const value of [chunk.readingEqualsExpressionList, chunk.scoreList, chunk.sequenceList, chunk.contentUniqueIndexList, plan.stringLengths, plan.stringOffsets, plan.stringHashes, plan.stringsBuffer, plan.expressionIndexes, plan.readingIndexes]) {
+                        assert.ok(value)
+                        updateView(contentDigest, value)
+                    }
+                    for (const [key, entry] of chunk.preparedLookupIndexes) {
+                        lookupDigest.update(key)
+                        updateView(lookupDigest, entry.bytes)
+                        for (const value of Object.values(entry.preinternedPlan)) { if (ArrayBuffer.isView(value)) { updateView(lookupDigest, value) } }
+                    }
+                    for (const {index, row} of chunk.mediaRows) {
+                        mediaDigest.update(String(index))
+                        for (const value of [row.expressionBytes, row.readingBytes, row.glossaryJsonBytes, row.termEntryContentBytes]) { if (value) { updateView(mediaDigest, value) } }
+                        mediaDigest.update(JSON.stringify([row.expression, row.reading, row.score, row.sequence, row.glossaryJson, row.termEntryContentHash1, row.termEntryContentHash2]))
+                    }
+                    for (const {row} of chunk.mediaRows) {
+                        if (row.termEntryContentBytes.length > 0 && row.glossaryJson.length === 0 && row.glossaryJsonBytes instanceof Uint8Array && !(row.glossaryJsonBytes.buffer instanceof ArrayBuffer)) {
+                            ++sharedGlossarySnapshots
+                            sharedGlossarySnapshotBytes += row.glossaryJsonBytes.byteLength
+                        }
+                    }
+                    const copyStarted = performance.now()
+                    const owned = parser.copyWasmBackedColumnChunk(chunk, false, true)
+                    copyElapsedMs += performance.now() - copyStarted
+                    assert.equal(owned.rowCount, expectedRows.length)
+                    for (const key of ['readingEqualsExpressionList', 'scoreList', 'sequenceList', 'contentHash1List', 'contentHash2List', 'contentMetaList', 'contentUniqueIndexList']) {
+                        assert.ok(ArrayBuffer.isView(owned[key]))
+                        updateView(projectionDigest, owned[key])
+                    }
+                    assert.ok(owned.contentBytesBuffer)
+                    updateView(projectionDigest, owned.contentBytesBuffer)
+                    for (const [key, value] of Object.entries(owned.termRecordPreinternedPlan)) {
+                        projectionDigest.update(key)
+                        if (ArrayBuffer.isView(value)) { updateView(projectionDigest, value) }
+                    }
+                    const keyBuffers = new Set()
+                    const independentKeyBuffers = new Set()
+                    for (const {index, imagePaths, row} of owned.mediaRows) {
+                        for (const bytes of [row.expressionBytes, row.readingBytes]) {
+                            if (!(bytes instanceof Uint8Array) || bytes.byteLength === 0) { continue }
+                            keyBuffers.add(bytes.buffer)
+                            mediaKeyBytes += bytes.byteLength
+                            if (bytes.buffer === owned.termRecordPreinternedPlan.stringsBuffer.buffer) { ++reusedMediaKeyViews } else { independentKeyBuffers.add(bytes.buffer) }
+                        }
+                        const expected = expectedRows[index]
+                        const expectedPaths = tryCollectGlossaryImagePaths(JSON.stringify(expected[5]))
+                        assert.deepEqual(imagePaths, expectedPaths.length > 0 ? expectedPaths : undefined)
+                        if (imagePaths !== undefined) { ++projectedImageRows }
+                        const expression = row.expression.length > 0 ? row.expression : new TextDecoder('utf-8', {ignoreBOM: true}).decode(row.expressionBytes)
+                        const reading = row.readingEqualsExpression ? expression : (row.reading.length > 0 ? row.reading : new TextDecoder('utf-8', {ignoreBOM: true}).decode(row.readingBytes))
+                        assert.equal(expression, expected[0])
+                        assert.equal(reading || expression, expected[1] || expected[0])
+                        projectionDigest.update(JSON.stringify([index, imagePaths]))
+                        for (const [key, value] of Object.entries(row)) {
+                            projectionDigest.update(key)
+                            if (ArrayBuffer.isView(value)) {
+                                assert.ok(value.buffer instanceof ArrayBuffer)
+                                updateView(projectionDigest, value)
+                            } else {
+                                projectionDigest.update(JSON.stringify(value) ?? 'undefined')
+                            }
+                        }
+                    }
+                    mediaKeyBuffers += keyBuffers.size
+                    independentMediaKeyBuffers += independentKeyBuffers.size
+                    rows += chunk.rowCount
+                    mediaRows += chunk.mediaRows.length
+                }, 2048, {...options, preloadedSource})
+                const profile = parser.consumeLastTermBankWasmParseProfile()
+                results.push({root: arm.root, rows, compact, uniqueCount, mediaRows, elapsedMs, contentDigest: contentDigest.digest('hex'), lookupDigest: lookupDigest.digest('hex'), mediaDigest: mediaDigest.digest('hex'), projectionDigest: projectionDigest.digest('hex'), sharedGlossarySnapshots, sharedGlossarySnapshotBytes, projectedImageRows, copyElapsedMs, mediaKeyBuffers, independentMediaKeyBuffers, mediaKeyBytes, reusedMediaKeyViews, profile: Object.fromEntries(Object.entries(profile).filter(([key]) => /compactContentMetadata|nativeCompactContentMetadata|sourceCrc|fusedParse|encodedContentBytes|metaCapacity|maxWasmHeap/.test(key)))})
+            }
+            for (const key of ['rows', 'uniqueCount', 'mediaRows', 'contentDigest', 'lookupDigest', 'mediaDigest', 'projectionDigest', 'sharedGlossarySnapshots', 'sharedGlossarySnapshotBytes', 'projectedImageRows', 'mediaKeyBytes']) { assert.deepEqual(results[0][key], results[1][key], `${dictionary}:${first}:${key}`) }
+            if (dictionary !== 'vndb') { assert.equal(results[1].compact, false) }
+            item.groups.push({firstBank: first + 1, results})
+            item.rows += expectedRows.length
+            if (first % 40 === 0 || first + 4 >= entries.length) {
+                await writeFile(outputPath, JSON.stringify(report, null, 2))
+                console.log(`${dictionary} ${Math.min(first + 4, entries.length)}/${entries.length}: ${item.rows} rows verified`)
+            }
+        }
+        assert.equal(item.rows, spec.termRows)
+        await reader.close()
+    }
+    for (const arm of parsers) {
+        assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], {cwd: arm.root, encoding: 'utf8'}).trim(), arm.sourceSha)
+        assert.equal(execFileSync('git', ['status', '--porcelain'], {cwd: arm.root, encoding: 'utf8'}).trim(), '')
+        for (const [file, expected] of Object.entries(arm.sourceHashes)) { assert.equal(sha256(await readFile(path.join(arm.root, file))), expected, `Source mutated: ${arm.root}:${file}`) }
+    }
+    report.complete = true
+} catch (error) {
+    report.error = error.stack ?? String(error)
+    throw error
+} finally {
+    await writeFile(outputPath, JSON.stringify(report, null, 2))
+}

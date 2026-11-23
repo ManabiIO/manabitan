@@ -1,0 +1,177 @@
+{
+    "schema": 1,
+    "scope": "Archived execution inputs, original outputs, source manifests, and derived summaries; excludes this inventory itself. Gzip preserves the original JSON bytes on decompression.",
+    "files": [
+        {
+            "path": "README.md",
+            "sizeBytes": 10778,
+            "sha256": "9b1e35c96199852a21396b2ae428a66efa0b04f45bd4d18330b1d6090b279d5b"
+        },
+        {
+            "path": "baseline-key-counts.json.gz",
+            "sizeBytes": 7489,
+            "sha256": "481837f41541e684f428d07c40af67b44152d60a120e37eb3fda8b098b7df987",
+            "decompressedSizeBytes": 106261,
+            "decompressedSha256": "c0ee38c4ce6f1cb34b565f0159a78b8a44dd3d5208629a1c1d5fee1f6b171e06"
+        },
+        {
+            "path": "baseline-key-counts.log.txt",
+            "sizeBytes": 981,
+            "sha256": "7d930288ac0b91399edff2c31a8968fe2177fcb2b1a65fe856d3d91cc76b9ca2"
+        },
+        {
+            "path": "baseline-key-counts.mjs.txt",
+            "sizeBytes": 7548,
+            "sha256": "d131cb0a53bc9c61fe572c80970e6a5000b65b025f621b7f70f0698926a8a1fb"
+        },
+        {
+            "path": "baseline-wasm-manifest.json",
+            "sizeBytes": 2521,
+            "sha256": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34"
+        },
+        {
+            "path": "candidate-wasm-manifest.json",
+            "sizeBytes": 2521,
+            "sha256": "f9a17c31dc28b1fcd100a22ab39358b10a13ed9c7845ab2d786112d979324a34"
+        },
+        {
+            "path": "logs/build-libs.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "logs/build.txt",
+            "sizeBytes": 210,
+            "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a"
+        },
+        {
+            "path": "logs/evidence-lint.txt",
+            "sizeBytes": 694,
+            "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        {
+            "path": "logs/focused-initial.txt",
+            "sizeBytes": 244,
+            "sha256": "ef7ac545e55d7ef4e43a857b3eaf19f212b7923c1cbfae6cb502729513719f10"
+        },
+        {
+            "path": "logs/focused.txt",
+            "sizeBytes": 244,
+            "sha256": "0fcdb977600e5d67b221c73b09f506b9d0211f71dd771b6afe32e27b5a0572c0"
+        },
+        {
+            "path": "logs/full-unit.txt",
+            "sizeBytes": 13719,
+            "sha256": "e5d96c5bdcec847cbe2e5a4363a851152b179c6a1b87b32e1a32563a989d0e28"
+        },
+        {
+            "path": "logs/lint-final.txt",
+            "sizeBytes": 694,
+            "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        {
+            "path": "logs/lint-index-cases.txt",
+            "sizeBytes": 989,
+            "sha256": "adcab9264e36f848b90c0029f1e67760297ea9e4f876440a5c3615c7334d7334"
+        },
+        {
+            "path": "logs/lint-initial.txt",
+            "sizeBytes": 3216,
+            "sha256": "f141a760d54bc2d72f7f2baad39714c1f030c1be61d61014259633b56c6575aa"
+        },
+        {
+            "path": "logs/lint.txt",
+            "sizeBytes": 694,
+            "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        {
+            "path": "logs/oracle.txt",
+            "sizeBytes": 1009,
+            "sha256": "743fbf455294cad85ddc29519dc02c8b2d30e07e7539f1300fbbcfc54d1c64aa"
+        },
+        {
+            "path": "logs/package-comparison.txt",
+            "sizeBytes": 822,
+            "sha256": "e6dc951ac32106ffe1077cb29dd6427f59eefbc8966283d01a4b993119caedfa"
+        },
+        {
+            "path": "logs/package.txt",
+            "sizeBytes": 63,
+            "sha256": "26b4dc36a3605dc5f8eae59b677e40a88c00b1c982c12a760f820f4ad6e31a8c"
+        },
+        {
+            "path": "logs/ts-bench.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "logs/ts-dev.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "logs/ts-main.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "logs/ts-test-final.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "logs/ts-test-killed.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "logs/ts-test.txt",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "oracle.json.gz",
+            "sizeBytes": 65441,
+            "sha256": "7b55b24bb2db6e83e6486800ecea7a47401e3319fb869d999743f88d60d7f92f",
+            "decompressedSizeBytes": 628260,
+            "decompressedSha256": "7770dce6f8e52ebc5e662e1dfe15a87c974ffb58b229d375103a618f383bcb20"
+        },
+        {
+            "path": "oracle.mjs.txt",
+            "sizeBytes": 17669,
+            "sha256": "01efe144cce27d2dd7b4e369945c40b3cba39d54e1585991603f65b095f0e3a3"
+        },
+        {
+            "path": "package-compare.py.txt",
+            "sizeBytes": 2477,
+            "sha256": "09eb4cc04dbf99c2955b04fb18ed1369ca521be05ffc8ee3c736112bc9c1d5cf"
+        },
+        {
+            "path": "package-comparison.json.gz",
+            "sizeBytes": 59844,
+            "sha256": "ed4c1e0ffe035156ab118c6a4858886121a6161f59ccfae9fe0ad42d2a068803",
+            "decompressedSizeBytes": 193601,
+            "decompressedSha256": "0a1ea8d6d49a9636858344e6d02f488b2e74ef1b464bf30de2199bbed7b789db"
+        },
+        {
+            "path": "pinned-clang-wrapper.sh.txt",
+            "sizeBytes": 273,
+            "sha256": "7198a466877d30d63bb425bdb958cba4c077e1439011c502b1298b0cffee87c7"
+        },
+        {
+            "path": "product.patch.txt",
+            "sizeBytes": 3755,
+            "sha256": "95d077c1f9b2214355b7a38be76fb72d8649ee0731167fe3e9839aa38aee1087"
+        },
+        {
+            "path": "summary.json",
+            "sizeBytes": 7080,
+            "sha256": "53b3324fb49fc8e197b271a853fb25b63df0fcd364858e2b2cdf69581550da91"
+        },
+        {
+            "path": "type-gate-initial-exit.json.txt",
+            "sizeBytes": 901,
+            "sha256": "0d251508502904c6332c402605008d5679a1b7df26bd0c0afc5ec2aef5eecac9"
+        }
+    ]
+}
