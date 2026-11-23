@@ -1,8 +1,8 @@
-name: Frozen glossary byte-copy import-window memory diagnosis
+name: Frozen key-view import-window memory diagnosis
 
 on:
   push:
-    branches: ['perf/import-memory-byte-copy-20261123-72c24']
+    branches: ['perf/import-memory-key-view-20261123-72c24']
 
 permissions:
   contents: read
@@ -31,6 +31,7 @@ jobs:
         run: |
           python3 dev/perf/import-memory-20261123-72c24/test_chromium_memory.py
           python3 dev/perf/import-memory-20261123-72c24/test_import_window.py
+          python3 dev/perf/import-memory-20261123-72c24/test_parallel_reads.py
           node --test dev/perf/import-study-20261123/verify.test.mjs
           python3 dev/perf/import-study-20261123/test_media_reference.py
       - name: Install pinned Chromium

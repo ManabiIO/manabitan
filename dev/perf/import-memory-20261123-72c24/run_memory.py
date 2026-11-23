@@ -84,6 +84,7 @@ def main():
                         'dev/perf/import-memory-20261123-72c24/chromium_memory.py',
                         'dev/perf/import-memory-20261123-72c24/verify-memory.mjs',
                         'dev/perf/import-memory-20261123-72c24/audit_memory.py',
+                        'dev/perf/import-memory-20261123-72c24/test_parallel_reads.py',
                         '.github/workflows/import-memory-20261123-72c24.yml']
         plan = {'schemaVersion': 1, 'dictionary': args.dictionary, 'replication': args.replication,
                 'config': config, 'fixture': fixture, 'schedule': schedule(args.replication),
@@ -98,7 +99,9 @@ def main():
                                       'everyObservationQualified': True},
                 'frozenCoverage': {'minimumFullyCoveredImportScans': 5,
                                    'maximumCoveredGapMs': 250, 'maximumBracketGapMs': 250,
-                                   'betweenScanWaitMs': 25}}
+                                   'betweenScanWaitMs': 25, 'maximumConcurrentSmapsReads': 4,
+                                   'maximumConcurrentScans': 1,
+                                   'joinAllReadsBeforeAfterInventory': True}}
         save(evidence / 'plan.json', plan)
         for name in source_files:
             target = evidence / 'source' / name

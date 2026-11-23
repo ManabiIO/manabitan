@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "stage": "discovery",
   "baseline": "467067650653c37c1f7d6b05d6737d070e1259cd",
-  "candidate": "396a87e25036963c0836ee58650e2459559189b8",
+  "candidate": "b1b4fe3b6e396f5b30f8e006de1916e8584d9d3e",
   "expectedPackageDifferences": [
     "js/dictionary/term-bank-wasm-parser.js"
   ],
@@ -24,5 +24,5 @@
   },
   "mediaReadbackPolicy": "all-jm-jt-first-ab-full-vndb-64-remaining-v1",
   "acquisitionBudgetEvidence": "https://github.com/ManabiIO/manabitan/actions/runs/45213616348",
-  "candidateKind": "shared-glossary-view-typed-array-copy"
+  "candidateKind": "owned-key-arena-views-for-media-projection"
 }

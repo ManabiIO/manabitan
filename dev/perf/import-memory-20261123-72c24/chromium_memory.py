@@ -8,16 +8,23 @@ complete peak-memory measurements. No privilege escalation is attempted.
 """
 
 import errno
+from concurrent.futures import ThreadPoolExecutor, wait
 import json
 import os
 from pathlib import Path
 import re
 import subprocess
+import threading
 import time
 
 
 BROWSER_NAMES = {"chrome", "chromium", "chromium-browser", "chrome-headless-shell"}
 GONE_ERRORS = {errno.ENOENT, errno.ESRCH}
+SMAPS_READ_CONCURRENCY = 4
+# One scan includes the complete before/read/after envelope. Sharing this lock
+# prevents parallel callers from multiplying the declared read concurrency.
+SAMPLE_LOCK = threading.Lock()
+SMAPS_READ_SLOTS = threading.BoundedSemaphore(SMAPS_READ_CONCURRENCY)
 
 
 def read_error(error, field, pid):
@@ -156,19 +163,46 @@ def confirmed_exited_zombie(before, after):
     return True
 
 
-def sample_memory(root_pid, proc=Path("/proc")):
+def read_process_smaps(process, proc):
+    with SMAPS_READ_SLOTS:
+        started = time.monotonic_ns()
+        try:
+            result = {**process, **read_smaps(process['pid'], proc)}
+        except (OSError, ValueError, KeyError, IndexError) as error:
+            result = {**process, 'smapsReadError': read_error(error, 'smaps_rollup', process['pid'])}
+        return {**result, 'smapsReadStartedAtMonotonicNs': started,
+                'smapsReadFinishedAtMonotonicNs': time.monotonic_ns()}
+
+
+def sample_memory(root_pid, proc=Path("/proc"), executor=None):
+    with SAMPLE_LOCK:
+        if executor is not None:
+            return sample_memory_locked(root_pid, proc, executor)
+        with ThreadPoolExecutor(max_workers=SMAPS_READ_CONCURRENCY, thread_name_prefix='smaps') as pool:
+            return sample_memory_locked(root_pid, proc, pool)
+
+
+def sample_memory_locked(root_pid, proc, executor):
     started = time.time()
     started_ns = time.monotonic_ns()
     before = discover_tree(root_pid, process_inventory(proc))
-    values = []
-    unavailable = []
-    for process in before["processes"]:
-        pid = process["pid"]
-        try:
-            values.append({**process, **read_smaps(pid, proc)})
-        except (OSError, ValueError, KeyError, IndexError) as error:
-            unavailable.append({**process, "smapsReadError": read_error(error, "smaps_rollup", pid)})
+    before_finished = time.monotonic_ns()
+    # Every read finishes before identity rediscovery, including failed futures.
+    # Result order follows the deterministic PID list, not completion order.
+    futures = []
+    try:
+        for process in before['processes']:
+            futures.append(executor.submit(read_process_smaps, process, proc))
+    finally:
+        # Thread creation/submission can itself fail after earlier submissions.
+        # Keep the scan lock until those already-started reads have also joined.
+        wait(futures)
+    reads = [future.result() for future in futures]
+    reads_finished = time.monotonic_ns()
+    values = [process for process in reads if 'smapsReadError' not in process]
+    unavailable = [process for process in reads if 'smapsReadError' in process]
     after = discover_tree(root_pid, process_inventory(proc))
+    after_finished = time.monotonic_ns()
     stable = tree_signature(before) == tree_signature(after)
     after_by_pid = {process["pid"]: process for process in after["processes"]}
     zombies = [{**process, "confirmationAfter": after_by_pid[process["pid"]],
@@ -196,6 +230,12 @@ def sample_memory(root_pid, proc=Path("/proc")):
         reasons.append("incomplete-process-identity-inventory")
     return {"startedAtEpochSeconds": started, "finishedAtEpochSeconds": time.time(),
             "startedAtMonotonicNs": started_ns, "finishedAtMonotonicNs": time.monotonic_ns(),
+            'smapsReadConcurrencyLimit': SMAPS_READ_CONCURRENCY,
+            'phaseIntervals': {
+                'discoveryBefore': {'startNs': started_ns, 'endNs': before_finished},
+                'smapsReads': {'startNs': before_finished, 'endNs': reads_finished},
+                'discoveryAfter': {'startNs': reads_finished, 'endNs': after_finished},
+            },
             "processes": values, "unavailableProcesses": unavailable,
             "confirmedExitedZombies": zombies, "unreadableAddressSpaces": unreadable,
             "discoveryBefore": before, "discoveryAfter": after,
@@ -297,10 +337,11 @@ def summarize_import_window(samples, markers, exit_code):
     qualified = not failures
     return {
         **raw,
-        'schemaVersion': 3,
-        'observerRule': 'import-window-stable-single-thread-zombie-esrch-v1',
+        'schemaVersion': 4,
+        'observerRule': 'import-window-four-parallel-smaps-stable-single-thread-zombie-esrch-v2',
         'scope': 'Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima',
-        'sampling': 'Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks',
+        'sampling': 'Linux /proc smaps_rollup; fixed four-read pool, one complete scan at a time; 25 ms wait between scans; non-atomic stable identity/metadata checks',
+        'smapsReadConcurrencyLimit': SMAPS_READ_CONCURRENCY,
         'authoritativeTiming': False,
         'qualifiedForWholeTreePss': qualified,
         'qualificationFailures': failures,
@@ -330,7 +371,7 @@ def run_with_sampling(args, cwd, log, receipt, markers):
     samples = []
     env = dict(os.environ, MANABITAN_IMPORT_MEMORY_MARKERS=str(markers))
     deadline = time.monotonic() + 1800
-    with log.open('x') as stream:
+    with log.open('x') as stream, ThreadPoolExecutor(max_workers=SMAPS_READ_CONCURRENCY, thread_name_prefix='smaps') as pool:
         process = subprocess.Popen(args, cwd=cwd, env=env, stdout=stream, stderr=subprocess.STDOUT)
         while process.poll() is None:
             if time.monotonic() > deadline:
@@ -340,7 +381,7 @@ def run_with_sampling(args, cwd, log, receipt, markers):
             rows = read_markers(markers)
             end = int(rows[-1]['monotonicNs']) if len(rows) == 2 and rows[-1].get('event') == 'end' and str(rows[-1].get('monotonicNs', '')).isdigit() else None
             if end is None or time.monotonic_ns() <= end + 300_000_000:
-                samples.append(sample_memory(process.pid))
+                samples.append(sample_memory(process.pid, executor=pool))
             try:
                 process.wait(timeout=0.025 if end is None else 0.1)
             except subprocess.TimeoutExpired:

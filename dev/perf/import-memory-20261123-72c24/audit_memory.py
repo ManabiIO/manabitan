@@ -8,6 +8,33 @@ import sys
 from chromium_memory import summarize_import_window, tree_signature, confirmed_exited_zombie, GONE_ERRORS
 
 
+def audit_read_intervals(sample):
+    assert sample['smapsReadConcurrencyLimit'] == 4
+    phases = sample['phaseIntervals']
+    before, reads, after = [phases[name] for name in ('discoveryBefore', 'smapsReads', 'discoveryAfter')]
+    assert set(phases) == {'discoveryBefore', 'smapsReads', 'discoveryAfter'}
+    for phase in (before, reads, after):
+        assert type(phase['startNs']) is int and type(phase['endNs']) is int
+        assert phase['startNs'] <= phase['endNs']
+    assert before['startNs'] == sample['startedAtMonotonicNs']
+    assert before['endNs'] == reads['startNs'] and reads['endNs'] == after['startNs']
+    assert after['endNs'] <= sample['finishedAtMonotonicNs']
+    events = []
+    processes = sample['processes'] + sample['unavailableProcesses']
+    for process in processes:
+        start, end = process['smapsReadStartedAtMonotonicNs'], process['smapsReadFinishedAtMonotonicNs']
+        assert type(start) is int and type(end) is int and reads['startNs'] <= start < end <= reads['endNs']
+        events.extend(((start, 1), (end, -1)))
+    active = 0
+    for _, change in sorted(events):
+        active += change
+        assert 0 <= active <= 4, 'Read concurrency exceeds the prospectively frozen bound'
+    assert active == 0
+    # The process lists are stable PID subsequences, not completion-order lists.
+    assert [p['pid'] for p in sample['processes']] == sorted(p['pid'] for p in sample['processes'])
+    assert [p['pid'] for p in sample['unavailableProcesses']] == sorted(p['pid'] for p in sample['unavailableProcesses'])
+
+
 def audit_cell(root):
     root = Path(root)
     plan = json.loads((root / 'plan.json').read_text())
@@ -19,6 +46,7 @@ def audit_cell(root):
         assert markers == memory['windowMarkers'], 'Summary markers differ from original marker bytes'
         previous_end = 0
         for sample in memory['samples']:
+            audit_read_intervals(sample)
             start, end = sample['startedAtMonotonicNs'], sample['finishedAtMonotonicNs']
             assert type(start) is int and type(end) is int and previous_end <= start <= end
             previous_end = end

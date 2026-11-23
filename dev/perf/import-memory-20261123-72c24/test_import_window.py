@@ -100,7 +100,16 @@ class ImportWindowWitness(unittest.TestCase):
             {'pid': 11, 'startTimeTicks': 110, 'parentPid': 10, 'executable': '/opt/chrome', 'comm': 'chrome', 'argv': ['chrome', '--type=renderer'], 'role': 'renderer'},
         ]
         for row in samples:
-            row['processes'] = [{**p, 'pssKiB': row['readableProcessPssKiB'] // 2, 'privateKiB': row['readableProcessPrivateKiB'] // 2} for p in processes]
+            start = row['startedAtMonotonicNs']
+            row['smapsReadConcurrencyLimit'] = 4
+            row['phaseIntervals'] = {
+                'discoveryBefore': {'startNs': start, 'endNs': start + 1_000_000},
+                'smapsReads': {'startNs': start + 1_000_000, 'endNs': start + 10_000_000},
+                'discoveryAfter': {'startNs': start + 10_000_000, 'endNs': row['finishedAtMonotonicNs']},
+            }
+            row['processes'] = [{**p, 'pssKiB': row['readableProcessPssKiB'] // 2, 'privateKiB': row['readableProcessPrivateKiB'] // 2,
+                'smapsReadStartedAtMonotonicNs': start + 2_000_000,
+                'smapsReadFinishedAtMonotonicNs': start + 8_000_000} for p in processes]
             row['readableProcessPssKiB'] = sum(p['pssKiB'] for p in row['processes'])
             row['readableProcessPrivateKiB'] = sum(p['privateKiB'] for p in row['processes'])
             row['discoveryBefore'] = {'processes': processes, 'browserSeedPids': [10, 11], 'inventoryIdentityReadErrors': []}

@@ -1,4 +1,4 @@
-name: Frozen glossary byte-copy import qualification
+name: Frozen owned key-view import qualification
 
 on:
   push:

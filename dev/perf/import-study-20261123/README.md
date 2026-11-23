@@ -1,16 +1,17 @@
 # Further import qualification, 2026-11-23
 
 This campaign compares frozen current develop
-`467067650653c37c1f7d6b05d6737d070e1259cd` with the isolated shared-glossary
-view copy change at `396a87e25036963c0836ee58650e2459559189b8`. The candidate
-replaces `Uint8Array.from(sharedGlossaryView)` with the typed-array constructor
-copy at the existing media projection boundary. It still allocates an owned copy
-before JSON decoding; the source view is not transferred, exposed or reused after
-its lifetime. The hypothesis is that the constructor can copy a typed-array view
-without generic iterator overhead. This independent candidate contains neither
-the shared-content lifetime change nor native compact descriptor changes.
-Runtime identity, the single packaged-file difference, fixtures, schedule and
-criteria are frozen before acquisition.
+`467067650653c37c1f7d6b05d6737d070e1259cd` with owned key-arena views for
+projected media diagnostics at `b1b4fe3b6e396f5b30f8e006de1916e8584d9d3e`.
+The candidate copies the existing string arena once and reuses validated bounded
+views of that owned copy for projected expression/reading keys. Empty, foreign
+or mismatching spans and unprojected rows retain independent copies. No Wasm
+view escapes through this representation. The hypothesis is that avoiding many
+small duplicate key allocations reduces projection work and garbage collection.
+This source contains neither the shared-content lifetime change, native compact
+descriptor changes nor the separate glossary byte-copy change. Runtime identity,
+the single packaged-file difference, fixtures, schedule and criteria are frozen
+before acquisition.
 
 The source snapshot already contains the qualified large-import index worker and
 exact source CRC reuse, strict native row parsing, bulk metadata publication,
@@ -19,16 +20,16 @@ validation. Earlier results against older baselines are not pooled into this
 campaign. The updated JMdict and Jitendex fixtures also differ from the earlier
 round; VNDB archive bytes are unchanged.
 
-## Acquisition policy, frozen before byte-copy candidate results
+## Acquisition policy, frozen before key-view candidate results
 
-This independent byte-copy candidate uses the already revised acquisition policy,
-with no byte-copy candidate observations acquired or inspected when it is frozen.
+This independent key-view candidate uses the already revised acquisition policy,
+with no key-view candidate observations acquired or inspected when it is frozen.
 The separately completed baseline diagnostic at
 <https://github.com/ManabiIO/manabitan/actions/runs/45213616348> showed that
 exhaustive VNDB readback costs approximately 373 seconds per observation,
 including only about 8 seconds of actual import. A previous shared-content
 campaign exceeded its original acquisition budget; its partial observations are
-not evidence for this byte-copy candidate and are not pooled here.
+not evidence for this key-view candidate and are not pooled here.
 
 JMdict/Jitendex retain complete media verification after every import. VNDB
 verifies all 146,570 images on the first A and first B warmups of each cell; the C
@@ -111,7 +112,7 @@ exact SHA-256 values in the fixture lock.
 
 Material memory regressions also block promotion. This candidate uses the same
 prospective separate process-tree screen, with no memory sampling in the timing
-cohort and no memory inference from the source-level copy change alone. Its
+cohort and no memory inference from the source-level key-view change alone. Its
 prospective schedule is two independent jobs per
 corpus: ABBA in replication 1 and BAAB in replication 2. All eight imports per
 corpus use fresh profiles, producing four fixed adjacent A/B pairs; there are no
@@ -123,7 +124,15 @@ It starts discovery before that window and retains coverage evidence around both
 boundaries. Sampling waits 25 ms between non-atomic scans. Browser seeds are
 identified by executable path; every discovered descendant is included regardless
 of process title. PID/start-time/parentage and metadata must be stable around each
-scan. Unreadable live address spaces and identity coverage failures fail closed.
+scan. A fixed four-read pool now reads the discovered address spaces concurrently
+inside that unchanged identity envelope. A global scan lock and four-slot read
+semaphore enforce one scan and no more than four reads at once. Every future,
+including a failed read, is joined before the after-inventory. Per-read and
+inventory subintervals are retained and independently audited. This prospective
+observer revision applies only to this newly frozen candidate; no prior cohort
+is rerun or reinterpreted. Prior scan widths dominated their 25 ms wait, but their
+missing subinterval data could not attribute the delay specifically to smaps.
+Unreadable live address spaces and identity coverage failures fail closed.
 Only the previously reviewed exact single-thread exited-zombie exception may be
 used; failures and original records remain retained, without invented zero values.
 
@@ -141,8 +150,8 @@ blocks promotion rather than triggering reruns to obtain a preferred result.
 ## Run
 
 The dedicated study workflow launches on `perf/import-*-study-20261123-72c24`.
-This source is an independent byte-copy screen; shared-content and native
-compact-descriptor outcomes are not combined with it. The two dedicated artifact
+This source is an independent key-view screen; shared-content, native compact-descriptor and glossary byte-copy
+outcomes are not combined with it. The two dedicated artifact
 uploads explicitly include hidden files so the exact frozen workflow source is
 retained. This prospective artifact correction does not change acquisition,
 metrics or acceptance criteria.

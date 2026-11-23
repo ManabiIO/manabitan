@@ -45,3 +45,31 @@ These are non-atomic sampled maxima, not exact peaks. Processes can arise and
 exit between scans, and external sharing can affect PSS. Private bytes are
 reported separately. The marked automation window includes dispatch and visible
 completion overhead; it excludes media verification and browser restart.
+
+## Prospective bounded-read revision for the key-view candidate
+
+This new candidate uses one persistent four-thread smaps pool. A global scan
+lock serializes the complete before/read/after envelope, and a four-slot semaphore
+bounds read concurrency even across callers. Each scan joins every future before
+its after-inventory, preserving PID order rather than completion order. An
+unexpected future failure is propagated only after the other reads have joined.
+The benchmark and observer cannot be reported complete while reads remain live.
+All previous process-tree, identity, address-space and exact exited-zombie checks
+remain intact, as do the 25 ms wait, 250 ms coverage limits and 5%/10% criteria.
+
+Previous retained VNDB scans took about 105–179 ms at the median while their
+between-scan waits stayed near 25 ms. Existing receipts did not separately time
+identity inventory and smaps reads, so the exact cause of the scan latency cannot
+be established from those receipts. The new observer records both inventory
+phases, the joined read phase and every successful or failed read interval.
+`audit_memory.py` verifies complete containment, stable PID ordering and no more
+than four overlapping read intervals. Concurrency/failure witnesses verify that
+rediscovery cannot race a pending future and no simultaneous caller can increase
+the global bound. Existing live process/zombie and import-window witnesses remain.
+
+This revision is frozen before any key-view outcomes. It changes only this
+prospective separate diagnostic cohort. Earlier shared, native and glossary
+byte-copy cells remain unchanged, including every coverage failure and null
+maximum. Increased observer parallelism may change observer CPU interference;
+A and B receive the same fixed observer, memory cohorts are never pooled, and
+none of their durations becomes authoritative timing evidence.

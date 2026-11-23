@@ -61,7 +61,8 @@ for (const observation of plan.schedule) {
   for (const key of ['index', 'arm', 'name', 'pair']) assert.equal(acquired[key], observation[key])
   assert.equal(acquired.retried, false)
   assert.equal(memory.authoritativeTiming, false)
-  assert.equal(memory.observerRule, 'import-window-stable-single-thread-zombie-esrch-v1')
+  assert.equal(memory.observerRule, 'import-window-four-parallel-smaps-stable-single-thread-zombie-esrch-v2')
+  assert.equal(memory.smapsReadConcurrencyLimit, 4)
   // Internal timing labels cannot detect this external sampler. No latency claim
   // is made from any duration in a memory-only observation.
   observations.push({name: observation.name, semanticDigestSha256: run.validation.semanticDigestSha256, media: run.validation.media, qualifiedForWholeTreePss: memory.qualifiedForWholeTreePss})
