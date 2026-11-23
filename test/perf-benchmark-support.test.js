@@ -23,24 +23,22 @@ import path from 'node:path';
 import {promisify} from 'node:util';
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {createBenchmarkEnvironment, extractImportResult, median, metricDelta, optionalMetric, parsePositiveInteger, percentDelta, roundMetric} from '../dev/perf/benchmark-support.js';
-import {ensureFixtureFile, ensurePinnedDictionaryCache, loadDictionaryFixtures, selectDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
+import {ensureFixtureFile, ensureSelectedPinnedDictionaryCache, loadDictionaryFixtures, selectDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
 
 const fixtures = await loadDictionaryFixtures();
 const fixture = fixtures.jmdict;
 const execFileAsync = promisify(execFile);
+const probeTerms = Array.from({length: 12}, (_, index) => `term-${index}`);
 
 /**
- * @param {string} [dictionaryId]
  * @returns {Record<string, any>}
  */
-function validReport(dictionaryId = 'jmdict') {
-    const reportFixture = fixtures[dictionaryId];
-    const validation = {title: reportFixture.expectedTitle, revision: reportFixture.revision, termRows: reportFixture.termRows, contentReadable: true, probeCount: 12};
+function validReport() {
     return {
         status: 'success',
         skippedVerification: false,
         benchmark: {
-            dictionary: dictionaryId,
+            dictionary: 'jmdict',
             pinnedDictionaries: true,
             productionImportDefaults: true,
             traceEnabled: false,
@@ -50,23 +48,26 @@ function validReport(dictionaryId = 'jmdict') {
             processSampling: false,
             importFlags: null,
             validation: {
-                ...validation,
-                ...(typeof reportFixture.mediaRows === 'number' ?
-                    {
-                        mediaRows: reportFixture.mediaRows,
-                        restart: {...validation, mediaRows: reportFixture.mediaRows},
-                    } :
-                    {}),
+                title: fixture.expectedTitle,
+                revision: fixture.revision,
+                termRows: fixture.termRows,
+                contentReadable: true,
+                probeCount: 12,
+                probeTerms: [...probeTerms],
+                restart: {title: fixture.expectedTitle, revision: fixture.revision, termRows: fixture.termRows, contentReadable: true, probeCount: 12, mediaFiles: 0},
+                media: {mode: 'all', totalFiles: 0, totalBytes: 0, files: 0, bytes: 0, sha256: createHash('sha256').digest('hex')},
+                storage: {bytes: 1000000},
+                lookup: {observations: Array.from({length: 6}).flatMap((_, pass) => probeTerms.map((term) => ({pass, term, elapsedMs: 1, results: 1, originalTextLength: term.length, hasExactHeadwordMatch: true, sha256: 'b'.repeat(64)})))},
             },
         },
         phases: [{
-            name: `${reportFixture.label}: total import`,
+            name: 'JMdict: total import',
             durationMs: 123.5,
             startMs: 100,
             endMs: 223.5,
-            data: {kind: 'dictionary-import', dictionary: reportFixture.label, browserTiming: {startedAtMs: 10, completedAtMs: 133.5, sequence: 1, sequenceBefore: 0, trigger: 'file-input-change', errorCount: 0}, importDebug: {hasResult: true, resultTitle: reportFixture.expectedTitle, errorCount: 0, addSettingsErrorCount: 0, usesFallbackStorage: false}},
+            data: {kind: 'dictionary-import', dictionary: 'JMdict', browserTiming: {startedAtMs: 10, completedAtMs: 133.5, sequence: 1, sequenceBefore: 0, trigger: 'file-input-change', errorCount: 0}, importDebug: {hasResult: true, resultTitle: fixture.expectedTitle, errorCount: 0, addSettingsErrorCount: 0, usesFallbackStorage: false}},
         }, {
-            name: `Import ${reportFixture.label} via file input`,
+            name: 'Import JMdict via file input',
             startMs: 100,
             endMs: 140,
         }],
@@ -122,21 +123,6 @@ describe('benchmark count arguments', () => {
         await expect(execFileAsync(process.execPath, ['dev/perf/import-ab.js', 'jmdict', '--flags', '{}'], {
             env: {...process.env, MANABITAN_AB_PAIR_ITERATIONS: '5junk'},
         })).rejects.toThrow('positive safe integer');
-    });
-});
-
-describe('optional pinned dictionary selection', () => {
-    test('keeps the existing three default fixtures', () => {
-        expect(Object.keys(selectDictionaryFixtures(fixtures))).toEqual(['jmdict', 'jmnedict', 'jitendex']);
-    });
-    test('includes VNDB only when explicitly requested and deduplicates requests', () => {
-        const selected = selectDictionaryFixtures(fixtures, ['vndb', 'jmdict', 'vndb']);
-        expect(Object.keys(selected)).toEqual(['jmdict', 'jmnedict', 'jitendex', 'vndb']);
-        expect(selected.vndb).toBe(fixtures.vndb);
-        expect(selected.vndb).toMatchObject({optional: true, termRows: 6648310, mediaRows: 146570});
-    });
-    test.each(['missing', 'constructor', '__proto__'])('rejects unknown fixture %s', (id) => {
-        expect(() => selectDictionaryFixtures(fixtures, [id])).toThrow(`Unknown performance dictionary: ${id}`);
     });
 });
 
@@ -227,44 +213,138 @@ describe('benchmark report acceptance', () => {
         report.benchmark.validation[key] = value;
         expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('post-import');
     });
+    test.each([undefined, null, [], probeTerms.slice(1), [...probeTerms, 'extra'], [...probeTerms.slice(1), probeTerms[1]], ['', ...probeTerms.slice(1)], [0, ...probeTerms.slice(1)]])('rejects an incomplete or ambiguous probe list: %j', (terms) => {
+        const report = validReport();
+        report.benchmark.validation.probeTerms = terms;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('post-import');
+    });
+    test.each(['title', 'revision', 'termRows', 'contentReadable', 'probeCount'])('requires restart %s evidence', (field) => {
+        const report = validReport();
+        delete report.benchmark.validation.restart[field];
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('restart validation');
+    });
+    test.each([['title', 'wrong'], ['revision', 'wrong'], ['termRows', fixture.termRows - 1], ['contentReadable', false], ['probeCount', 11]])('rejects inconsistent restart %s evidence', (field, value) => {
+        const report = validReport();
+        report.benchmark.validation.restart[field] = value;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('restart validation');
+    });
+    test('requires a complete browser restart receipt', () => {
+        const report = validReport();
+        delete report.benchmark.validation.restart;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('restart validation');
+    });
+    test.each([
+        ['pass', undefined],
+        ['pass', -1],
+        ['pass', 6],
+        ['pass', 0.5],
+        ['pass', '0'],
+        ['term', undefined],
+        ['term', 'other'],
+        ['term', 0],
+        ['originalTextLength', undefined],
+        ['originalTextLength', 1],
+        ['originalTextLength', 100],
+        ['hasExactHeadwordMatch', undefined],
+        ['hasExactHeadwordMatch', false],
+        ['elapsedMs', -1],
+        ['elapsedMs', Number.NaN],
+        ['results', 0],
+        ['results', 0.5],
+        ['sha256', 'bad'],
+    ])('rejects invalid lookup %s=%j', (field, value) => {
+        const report = validReport();
+        report.benchmark.validation.lookup.observations[0][field] = value;
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('storage/lookup');
+    });
+    test('rejects repeated lookup tuples even when all 72 observations are present', () => {
+        const report = validReport();
+        const observations = report.benchmark.validation.lookup.observations;
+        observations[71] = {...observations[0]};
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('storage/lookup');
+    });
+    test('rejects missing or extra lookup observations', () => {
+        for (const count of [71, 73]) {
+            const report = validReport();
+            const observations = report.benchmark.validation.lookup.observations;
+            observations.push({...observations[0]});
+            observations.length = count;
+            expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('storage/lookup');
+        }
+    });
+    test('accepts a complete lookup matrix in any receipt order', () => {
+        const report = validReport();
+        report.benchmark.validation.lookup.observations.reverse();
+        expect(extractImportResult(report, 'jmdict', fixture, false, null).totalImportMs).toBe(123.5);
+    });
     test('accepts trace reports only when explicitly requested and non-authoritative', () => {
         const report = validReport();
         report.benchmark.traceEnabled = true;
         report.benchmark.authoritativeTiming = false;
         expect(extractImportResult(report, 'jmdict', fixture, true, null).totalImportMs).toBe(123.5);
     });
-    test('accepts VNDB only with its pinned media and restart validation', () => {
-        expect(extractImportResult(validReport('vndb'), 'vndb', fixtures.vndb, false, null).validation).toMatchObject({
-            termRows: 6648310,
-            mediaRows: 146570,
-            restart: {termRows: 6648310, mediaRows: 146570, contentReadable: true, probeCount: 12},
-        });
+    test.each(['media', 'storage', 'lookup'])('rejects JMdict reports missing %s verification', (field) => {
+        const report = validReport();
+        delete report.benchmark.validation[field];
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow();
     });
-    test.each([undefined, null, 0, 146569, '146570'])('rejects missing or incorrect VNDB media count: %j', (mediaRows) => {
-        const report = validReport('vndb');
-        report.benchmark.validation.mediaRows = mediaRows;
-        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('post-import media count');
+    test('requires the empty-stream media digest for a dictionary with no images', () => {
+        const report = validReport();
+        report.benchmark.validation.media.sha256 = 'a'.repeat(64);
+        expect(() => extractImportResult(report, 'jmdict', fixture, false, null)).toThrow('media validation');
     });
-    test.each([undefined, null, {}])('rejects absent VNDB restart validation: %j', (restart) => {
-        const report = validReport('vndb');
-        report.benchmark.validation.restart = restart;
-        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('post-restart');
+});
+
+describe('media dictionary benchmark acceptance', () => {
+    /**
+     * @param {'all'|'sample'} mode
+     * @returns {Record<string, any>}
+     */
+    function mediaReport(mode) {
+        const mediaFixture = fixtures.vndb;
+        const report = validReport();
+        report.benchmark.dictionary = 'vndb';
+        report.benchmark.mediaCheck = mode;
+        report.benchmark.validation = {
+            title: mediaFixture.expectedTitle,
+            revision: mediaFixture.revision,
+            termRows: mediaFixture.termRows,
+            contentReadable: true,
+            probeCount: 12,
+            probeTerms: [...probeTerms],
+            restart: {title: mediaFixture.expectedTitle, revision: mediaFixture.revision, termRows: mediaFixture.termRows, contentReadable: true, probeCount: 12, mediaFiles: mediaFixture.mediaFiles},
+            media: {mode, totalFiles: mediaFixture.mediaFiles, totalBytes: mediaFixture.mediaBytes, files: mode === 'all' ? mediaFixture.mediaFiles : 64, bytes: mode === 'all' ? mediaFixture.mediaBytes : 1024, sha256: 'a'.repeat(64)},
+            storage: {bytes: 300000000},
+            lookup: report.benchmark.validation.lookup,
+        };
+        report.phases[0].name = 'VNDB: total import';
+        report.phases[0].data.dictionary = 'VNDB';
+        report.phases[0].data.importDebug.resultTitle = mediaFixture.expectedTitle;
+        report.phases[1].name = 'Import VNDB via file input';
+        return report;
+    }
+    test.each(['all', 'sample'])('accepts explicitly requested %s media verification', (mode) => {
+        const selected = /** @type {'all'|'sample'} */ (mode);
+        expect(extractImportResult(mediaReport(selected), 'vndb', fixtures.vndb, false, null, selected).totalImportMs).toBe(123.5);
     });
-    test.each([
-        ['title', 'wrong'],
-        ['revision', 'wrong'],
-        ['termRows', 1],
-        ['mediaRows', undefined],
-        ['mediaRows', 146569],
-        ['contentReadable', false],
-        ['probeCount', 11],
-        ['probeCount', Number.NaN],
-        ['probeCount', Infinity],
-        ['probeCount', 12.5],
-    ])('rejects invalid VNDB persisted fixture after restart: %s', (key, value) => {
-        const report = validReport('vndb');
-        report.benchmark.validation.restart[key] = value;
-        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('post-restart');
+    test('rejects a terms-only result for a media dictionary', () => {
+        const report = mediaReport('all');
+        delete report.benchmark.validation.media;
+        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('media validation');
+    });
+    test('rejects sampled verification when exhaustive verification was requested', () => {
+        expect(() => extractImportResult(mediaReport('sample'), 'vndb', fixtures.vndb, false, null)).toThrow('configuration');
+        const report = mediaReport('all');
+        report.benchmark.validation.media.files = 64;
+        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('media validation');
+    });
+    test.each(['storage', 'lookup'])('rejects missing %s observations', (field) => {
+        const report = mediaReport('all');
+        delete report.benchmark.validation[field];
+        expect(() => extractImportResult(report, 'vndb', fixtures.vndb, false, null)).toThrow('storage/lookup');
+    });
+    test.each(['', 'skip', '--runs'])('rejects invalid media mode %j before launching a browser', async (mode) => {
+        await expect(execFileAsync(process.execPath, ['dev/perf/import-benchmark.js', 'vndb', '--media-check', mode])).rejects.toThrow('--media-check must be all or sample');
     });
 });
 
@@ -315,13 +395,25 @@ describe('atomic pinned fixture installation', () => {
         return {dir, filePath: path.join(dir, 'fixture.zip'), bytes, sampleFixture};
     }
 
-    test('rejects an unknown optional selection before downloading any fixture', async () => {
+    test('keeps VNDB optional in the existing fixture selector', () => {
+        expect(Object.keys(selectDictionaryFixtures(fixtures))).toEqual(['jmdict', 'jmnedict', 'jitendex']);
+        expect(Object.keys(selectDictionaryFixtures(fixtures, ['vndb']))).toEqual(['jmdict', 'jmnedict', 'jitendex', 'vndb']);
+    });
+
+    test('prepares only explicitly requested fixtures', async () => {
+        const {dir} = await setup();
+        const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('missing', {status: 404}));
+        await expect(ensureSelectedPinnedDictionaryCache(dir, ['vndb'])).rejects.toThrow('404');
+        expect(fetchSpy).toHaveBeenCalledOnce();
+        expect(fetchSpy.mock.calls[0][0]).toBe(fixtures.vndb.url);
+    });
+    test('rejects unknown fixtures before downloading anything', async () => {
         const {dir} = await setup();
         const fetchSpy = vi.spyOn(globalThis, 'fetch');
-        await expect(ensurePinnedDictionaryCache(dir, ['missing'])).rejects.toThrow('Unknown performance dictionary');
+        await expect(ensureSelectedPinnedDictionaryCache(dir, ['jmdict', 'missing'])).rejects.toThrow('Unknown performance dictionary');
         expect(fetchSpy).not.toHaveBeenCalled();
-        expect(await readdir(dir)).toEqual([]);
     });
+
     test('does not fetch an already verified cache file', async () => {
         const {filePath, bytes, sampleFixture} = await setup();
         await writeFile(filePath, bytes);

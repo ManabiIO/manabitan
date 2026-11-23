@@ -30,7 +30,7 @@ const root = path.join(dirname, '..', '..');
 const e2eScript = path.join(root, 'test', 'chromium', 'extension-two-dictionary-import.e2e.js');
 
 /**
- * @returns {{dictionaryId: string, runs: number|null, trace: boolean, importFlagsJson: string|null, outputDir: string|null, skipBuild: boolean, buildTarget: string}}
+ * @returns {{dictionaryId: string, runs: number|null, trace: boolean, importFlagsJson: string|null, outputDir: string|null, skipBuild: boolean, buildTarget: string, mediaCheck: 'all'|'sample'}}
  * @throws {Error}
  */
 function parseArgs() {
@@ -42,6 +42,8 @@ function parseArgs() {
     let outputDir = null;
     let skipBuild = false;
     let buildTarget = 'chrome-dev';
+    /** @type {'all'|'sample'} */
+    let mediaCheck = 'all';
     for (let i = 0; i < args.length; ++i) {
         const arg = args[i];
         switch (arg) {
@@ -66,6 +68,13 @@ function parseArgs() {
 
                 break;
             }
+            case '--media-check': {
+                const value = args[++i];
+                if (value !== 'all' && value !== 'sample') { throw new Error('--media-check must be all or sample'); }
+                mediaCheck = value;
+
+                break;
+            }
             case '--flags': {
                 importFlagsJson = args[++i] ?? '';
 
@@ -86,7 +95,7 @@ function parseArgs() {
             }
         }
     }
-    return {dictionaryId: dictionaryId || 'jmdict', runs, trace, importFlagsJson, outputDir, skipBuild, buildTarget};
+    return {dictionaryId: dictionaryId || 'jmdict', runs, trace, importFlagsJson, outputDir, skipBuild, buildTarget, mediaCheck};
 }
 
 /**
@@ -99,7 +108,8 @@ async function runCommand(command, args, env) {
     await new Promise(
         /** @type {(resolve: (value: void|PromiseLike<void>) => void, reject: (reason?: unknown) => void) => void} */
         ((resolve, reject) => {
-            const child = spawn(command, args, {cwd: root, env, stdio: 'inherit', timeout: 10 * 60 * 1000, killSignal: 'SIGTERM'});
+            const timeout = options.dictionaryId === 'vndb' ? 30 * 60 * 1000 : 10 * 60 * 1000;
+            const child = spawn(command, args, {cwd: root, env, stdio: 'inherit', timeout, killSignal: 'SIGTERM'});
             child.on('error', reject);
             child.on('close', (code, signal) => {
                 if (code === 0) {
@@ -169,6 +179,7 @@ for (let index = 1; index <= runCount; ++index) {
         MANABITAN_E2E_IMPORT_BENCH_QUICK: '1',
         MANABITAN_E2E_IMPORT_BENCH_DICTIONARY: options.dictionaryId,
         MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK: '1',
+        MANABITAN_E2E_BENCH_MEDIA_CHECK: options.mediaCheck,
         MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS: '1',
         MANABITAN_E2E_PHASE_PROFILING: '0',
         MANABITAN_E2E_PHASE_SCREENSHOTS: '0',
@@ -201,7 +212,7 @@ for (let index = 1; index <= runCount; ++index) {
         tracePath: tracePath || null,
         browserVersion: report.browserVersion ?? null,
         packageSha256: report.packageSha256,
-        ...extractImportResult(report, options.dictionaryId, fixture, options.trace, options.importFlagsJson === null ? null : parseJson(options.importFlagsJson)),
+        ...extractImportResult(report, options.dictionaryId, fixture, options.trace, options.importFlagsJson === null ? null : parseJson(options.importFlagsJson), options.mediaCheck),
     });
 }
 const source = await getSourceProvenance(root);
@@ -217,6 +228,7 @@ const summary = {
     hostEnvironment: getHostEnvironment(),
     browserVersion: runs[0]?.browserVersion ?? null,
     importFlags: options.importFlagsJson === null ? null : parseJson(options.importFlagsJson),
+    mediaCheck: options.mediaCheck,
     runs,
     timingBoundary: 'page file-input change event to post-UI import-complete event; browser monotonic clock',
     timing: summarizeDurations(runs.map((run) => run.totalImportMs)),

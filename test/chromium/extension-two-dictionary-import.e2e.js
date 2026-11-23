@@ -30,7 +30,8 @@ import {fileURLToPath} from 'node:url';
 import {existsSync, readFileSync} from 'node:fs';
 import {access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {chromium, expect} from '@playwright/test';
-import {ensurePinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
+import {ensureSelectedPinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
+import {verifyBenchmarkMedia} from '../../dev/perf/import-media-validation.js';
 import {getHostEnvironment} from '../../dev/perf/host-environment.js';
 import {parseJson} from '../../ext/js/core/json.js';
 import {safePerformance} from '../../ext/js/core/safe-performance.js';
@@ -263,10 +264,12 @@ if (quickImportBenchmarkMode && !supportedQuickImportBenchmarkDictionaries.has(q
     fail(`Unsupported MANABITAN_E2E_IMPORT_BENCH_DICTIONARY=${quickImportBenchmarkDictionaryId}`);
 }
 const usePinnedPerfDictionaries = parseBooleanEnv(process.env.MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK, false);
-if (quickImportBenchmarkMode && quickImportBenchmarkDictionaryId === 'vndb' && !usePinnedPerfDictionaries) {
-    fail('VNDB import benchmarks require MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK=1');
+if (quickImportBenchmarkDictionaryId === 'vndb' && !usePinnedPerfDictionaries) {
+    fail('VNDB benchmarking requires MANABITAN_E2E_USE_PERF_DICTIONARY_LOCK=1');
 }
 const useProductionImportDefaults = parseBooleanEnv(process.env.MANABITAN_E2E_IMPORT_USE_PRODUCTION_DEFAULTS, false);
+const benchmarkMediaCheck = process.env.MANABITAN_E2E_BENCH_MEDIA_CHECK ?? 'all';
+if (benchmarkMediaCheck !== 'all' && benchmarkMediaCheck !== 'sample') { fail('MANABITAN_E2E_BENCH_MEDIA_CHECK must be all or sample'); }
 const capturePhaseProfiles = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_PROFILING, !quickImportBenchmarkMode);
 const capturePhaseScreenshots = parseBooleanEnv(process.env.MANABITAN_E2E_PHASE_SCREENSHOTS, !quickImportBenchmarkMode);
 const captureProcessSamples = parseBooleanEnv(process.env.MANABITAN_E2E_PROCESS_SAMPLING, !quickImportBenchmarkMode);
@@ -402,6 +405,7 @@ function createReport() {
             phaseScreenshots: capturePhaseScreenshots,
             processSampling: captureProcessSamples,
             importFlags: e2eImportFlags,
+            mediaCheck: benchmarkMediaCheck,
             validation: null,
         } : null,
         runtimeDiagnostics: null,
@@ -927,7 +931,10 @@ async function ensureCachedDownload(url, outputPath) {
 async function ensureRealDictionaryCache() {
     await mkdir(dictionaryCacheDir, {recursive: true});
     if (usePinnedPerfDictionaries) {
-        return await ensurePinnedDictionaryCache(dictionaryCacheDir, quickImportBenchmarkMode ? [quickImportBenchmarkDictionaryId] : []);
+        const ids = ['jmdict', 'jmnedict', 'jitendex'];
+        if (quickImportBenchmarkMode && quickImportBenchmarkDictionaryId === 'vndb') { ids.push('vndb'); }
+        const {paths, fixtures} = await ensureSelectedPinnedDictionaryCache(dictionaryCacheDir, ids);
+        return {jmdictPath: paths.jmdict, jmnedictPath: paths.jmnedict, jitendexPath: paths.jitendex, vndbPath: paths.vndb, fixtures};
     }
     const {jitendexUrl, jmnedictUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();
     const jitendexPath = path.join(dictionaryCacheDir, 'jitendex-yomitan.zip');
@@ -1167,6 +1174,33 @@ async function evalSendMessage(page, expression, arg = null) {
             const titles = dictionaryInfo.map((row) => row.title);
             const counts = await send('getDictionaryCounts', {dictionaryNames: titles, getTotal: false});
             return {dictionaryInfo, counts: counts.counts};
+        }
+        if (expression === 'benchmarkLookups') {
+            const observations = [];
+            for (let pass = 0; pass < 6; ++pass) {
+                for (const term of arg.terms) {
+                    const startedAt = performance.now();
+                    const result = await send('termsFind', {
+                        text: term,
+                        details: {primaryReading: '', matchType: 'exact', deinflect: false},
+                        optionsContext: {index: 0},
+                    });
+                    const elapsedMs = performance.now() - startedAt;
+                    const entries = result?.dictionaryEntries;
+                    const hasExactHeadwordMatch = Array.isArray(entries) && entries.some((entry) => (
+                        entry.definitions?.some((definition) => definition.dictionary === arg.title) &&
+                        entry.headwords?.some((headword) => headword.term === term || headword.reading === term)
+                    ));
+                    if (result?.originalTextLength !== term.length || !hasExactHeadwordMatch) {
+                        throw new Error(`Benchmark lookup returned no complete exact dictionary result: ${term}`);
+                    }
+                    const bytes = new TextEncoder().encode(JSON.stringify(result));
+                    const digest = await crypto.subtle.digest('SHA-256', bytes);
+                    const sha256 = [...new Uint8Array(digest)].map((value) => value.toString(16).padStart(2, '0')).join('');
+                    observations.push({pass, term, elapsedMs, results: entries.length, originalTextLength: result.originalTextLength, hasExactHeadwordMatch, sha256});
+                }
+            }
+            return {timingBoundary: 'settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing', observations};
         }
         if (expression === 'backendDiagnostics') {
             const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
@@ -3532,7 +3566,7 @@ async function main() {
             jmdict: {label: 'JMdict', filePath: cachedDictionaries.jmdictPath},
             jmnedict: {label: 'JMnedict', filePath: cachedDictionaries.jmnedictPath},
             jitendex: {label: 'Jitendex', filePath: cachedDictionaries.jitendexPath},
-            vndb: {label: 'VNDB', filePath: cachedDictionaries.paths?.vndb},
+            vndb: {label: 'VNDB', filePath: cachedDictionaries.vndbPath},
         };
         const initialImportSpec = quickImportBenchmarkMode ?
             quickImportBenchmarkSpecs[quickImportBenchmarkDictionaryId] :
@@ -4145,7 +4179,7 @@ async function main() {
             initialImportSpec.label,
             `Waited for progress clear for initial ${initialImportSpec.label} import`,
             async (onStepChange) => {
-                await waitForImportCompletion(page, initialImportSpec.label, 300000, onStepChange);
+                await waitForImportCompletion(page, initialImportSpec.label, quickImportBenchmarkDictionaryId === 'vndb' ? 900000 : 300000, onStepChange);
             },
             initialImportTriggerStart,
         );
@@ -4190,7 +4224,7 @@ async function main() {
                 const info = state.dictionaryInfo;
                 if (info.length !== 1 || info[0].title !== fixture.expectedTitle || info[0].revision !== fixture.revision ||
                 state.counts[0]?.terms !== fixture.termRows ||
-                (typeof fixture.mediaRows === 'number' && state.counts[0]?.media !== fixture.mediaRows)) {
+                (typeof fixture.mediaFiles === 'number' && state.counts[0]?.media !== fixture.mediaFiles)) {
                     fail(`Persisted benchmark fixture does not match lock: ${JSON.stringify(state)}`);
                 }
                 const probeTerms = await loadBenchmarkProbeTerms(initialImportSpec.filePath);
@@ -4235,9 +4269,10 @@ async function main() {
                 const restartedInfo = restartedState.dictionaryInfo;
                 if (restartedInfo.length !== 1 || restartedInfo[0].title !== fixture.expectedTitle || restartedInfo[0].revision !== fixture.revision ||
                 restartedState.counts[0]?.terms !== fixture.termRows ||
-                (typeof fixture.mediaRows === 'number' && restartedState.counts[0]?.media !== fixture.mediaRows)) {
+                (typeof fixture.mediaFiles === 'number' && restartedState.counts[0]?.media !== fixture.mediaFiles)) {
                     fail(`Persisted benchmark fixture changed across restart: ${JSON.stringify(restartedState)}`);
                 }
+                const lookup = await evalSendMessage(page, 'benchmarkLookups', {title: fixture.expectedTitle, terms: probeTerms});
                 const restartedProbeResults = [];
                 for (const term of probeTerms) {
                     const integrity = await waitForBackendDictionaryContentIntegrity(page, [fixture.expectedTitle], [term], 15000);
@@ -4248,23 +4283,42 @@ async function main() {
                 if (preRestartOutputDigest !== postRestartOutputDigest) {
                     fail(`Persisted content probe digest changed across restart: before=${preRestartOutputDigest} after=${postRestartOutputDigest}`);
                 }
+                const media = typeof fixture.mediaFiles === 'number' ? await verifyBenchmarkMedia(
+                    initialImportSpec.filePath,
+                    fixture,
+                    async (paths) => await evalSendMessage(page, 'readerBridgeRuntime', {
+                        action: 'getMedia',
+                        params: {targets: paths.map((mediaPath) => ({dictionary: fixture.expectedTitle, path: mediaPath}))},
+                    }),
+                    benchmarkMediaCheck,
+                ) : null;
+                const storage = await page.evaluate(async () => {
+                    const files = [];
+                    const visit = async (directory, prefix) => {
+                        for await (const [name, handle] of directory.entries()) {
+                            const filePath = `${prefix}${name}`;
+                            if (handle.kind === 'directory') { await visit(handle, `${filePath}/`); } else { files.push({path: filePath, bytes: (await handle.getFile()).size}); }
+                        }
+                    };
+                    await visit(await navigator.storage.getDirectory(), '');
+                    files.sort((a, b) => {
+                        if (a.path === b.path) { return 0; }
+                        return a.path < b.path ? -1 : 1;
+                    });
+                    return {kind: 'OPFS logical file sizes after restart and verification', bytes: files.reduce((sum, file) => sum + file.bytes, 0), files};
+                });
                 report.benchmark.validation = {
                     title: info[0].title,
                     revision: info[0].revision,
                     termRows: state.counts[0].terms,
-                    mediaRows: state.counts[0].media,
                     contentReadable: true,
                     probeCount: probeTerms.length,
                     probeTerms,
                     outputDigestSha256: postRestartOutputDigest,
-                    restart: {
-                        title: restartedInfo[0].title,
-                        revision: restartedInfo[0].revision,
-                        termRows: restartedState.counts[0].terms,
-                        mediaRows: restartedState.counts[0].media,
-                        contentReadable: true,
-                        probeCount: restartedProbeResults.length,
-                    },
+                    media,
+                    storage,
+                    lookup,
+                    restart: {title: restartedInfo[0].title, revision: restartedInfo[0].revision, termRows: restartedState.counts[0].terms, mediaFiles: restartedState.counts[0].media, contentReadable: true, probeCount: restartedProbeResults.length},
                 };
             }
             report.status = 'success';

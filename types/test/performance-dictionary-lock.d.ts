@@ -37,4 +37,7 @@ export type PerformanceDictionaryFixture = {
     termRows: number;
     mediaRows?: number;
     optional?: boolean;
+    mediaFiles?: number;
+    mediaBytes?: number;
+    unreferencedMediaPaths?: string[];
 };

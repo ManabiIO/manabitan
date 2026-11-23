@@ -26,7 +26,7 @@ const root = path.join(dirname, '..', '..');
 const lockPath = path.join(root, 'test', 'perf', 'dictionaries.lock.json');
 
 /**
- * @typedef {{label: string, cacheFile: string, release: string, url: string, sha256: string, sizeBytes: number, expectedTitle: string, revision: string, termRows: number, mediaRows?: number, optional?: boolean}} DictionaryFixture
+ * @typedef {{label: string, cacheFile: string, release: string, url: string, sha256: string, sizeBytes: number, expectedTitle: string, revision: string, termRows: number, mediaRows?: number, optional?: boolean, mediaFiles?: number, mediaBytes?: number, unreferencedMediaPaths?: string[]}} DictionaryFixture
  */
 
 /**
@@ -107,8 +107,8 @@ export async function ensureFixtureFile(fixture, filePath) {
 }
 
 /**
- * Ensures the standard locked fixtures and explicitly requested optional fixtures
- * are available and integrity checked. Existing valid files require no network access.
+ * Ensures the explicitly selected locked fixtures are available and integrity checked.
+ * Existing valid files require no network access.
  * @param {string} cacheDir
  * @param {string[]} [additionalIds]
  * @returns {Promise<{jitendexPath: string, jmnedictPath: string, jmdictPath: string, paths: Record<string, string>, fixtures: Record<string, DictionaryFixture>}>}
@@ -121,6 +121,35 @@ export async function ensurePinnedDictionaryCache(cacheDir, additionalIds = []) 
         }
     }
     const selectedFixtures = selectDictionaryFixtures(fixtures, additionalIds);
+    const result = await ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures);
+    return {jitendexPath: result.paths.jitendex, jmnedictPath: result.paths.jmnedict, jmdictPath: result.paths.jmdict, ...result};
+}
+
+/**
+ * Ensures exactly the requested locked fixtures are available and integrity checked.
+ * @param {string} cacheDir
+ * @param {string[]} dictionaryIds
+ * @returns {Promise<{paths: Record<string, string>, fixtures: Record<string, DictionaryFixture>}>}
+ * @throws {Error}
+ */
+export async function ensureSelectedPinnedDictionaryCache(cacheDir, dictionaryIds) {
+    const fixtures = await loadDictionaryFixtures();
+    /** @type {Record<string, DictionaryFixture>} */
+    const selectedFixtures = {};
+    for (const id of dictionaryIds) {
+        if (!Object.hasOwn(fixtures, id)) { throw new Error(`Unknown performance dictionary: ${id}`); }
+        selectedFixtures[id] = fixtures[id];
+    }
+    return await ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures);
+}
+
+/**
+ * @param {string} cacheDir
+ * @param {Record<string, DictionaryFixture>} fixtures
+ * @param {Record<string, DictionaryFixture>} selectedFixtures
+ * @returns {Promise<{jitendexPath?: string, jmnedictPath?: string, jmdictPath?: string, paths: Record<string, string>, fixtures: Record<string, DictionaryFixture>}>}
+ */
+async function ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures) {
     await mkdir(cacheDir, {recursive: true});
     /** @type {Record<string, string>} */
     const paths = {};
@@ -129,11 +158,5 @@ export async function ensurePinnedDictionaryCache(cacheDir, additionalIds = []) 
         await ensureFixtureFile(fixture, filePath);
         paths[id] = filePath;
     }
-    return {
-        jitendexPath: paths.jitendex,
-        jmnedictPath: paths.jmnedict,
-        jmdictPath: paths.jmdict,
-        paths,
-        fixtures,
-    };
+    return {jitendexPath: paths.jitendex, jmnedictPath: paths.jmnedict, jmdictPath: paths.jmdict, paths, fixtures};
 }

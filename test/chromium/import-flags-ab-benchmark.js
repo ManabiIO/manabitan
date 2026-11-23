@@ -195,7 +195,7 @@ async function runOnce(runId, envOverrides) {
         {
             cwd: root,
             env: createBenchmarkEnvironment(process.env, envOverrides),
-            timeout: 10 * 60 * 1000,
+            timeout: (cli.dictionaryId === 'vndb' ? 30 : 10) * 60 * 1000,
             killSignal: 'SIGTERM',
             maxBuffer: 64 * 1024 * 1024,
         },
