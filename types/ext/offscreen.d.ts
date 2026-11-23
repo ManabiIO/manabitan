@@ -255,6 +255,7 @@ type McApiSurface = {
             mode: Translator.FindTermsMode;
             text: string;
             options: Translation.FindTermsOptions;
+            responseLimit?: number;
         };
         return: Translator.FindTermsResult;
     };

@@ -324,8 +324,8 @@ export class Offscreen {
     }
 
     /** @type {import('offscreen').McApiHandler<'findTermsStructuredOffscreen'>} */
-    async _findTermsStructuredHandler({mode, text, options}) {
-        return await this._invokeDictionaryWorker('findTermsStructuredOffscreen', {mode, text, options});
+    async _findTermsStructuredHandler({mode, text, options, responseLimit}) {
+        return await this._invokeDictionaryWorker('findTermsStructuredOffscreen', {mode, text, options, ...(typeof responseLimit === 'number' ? {responseLimit} : {})});
     }
 
     /** @type {import('offscreen').ApiHandler<'getTermFrequenciesOffscreen'>} */

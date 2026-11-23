@@ -765,11 +765,12 @@ export class TranslatorProxy {
      * @param {import('translator').FindTermsMode} mode
      * @param {string} text
      * @param {import('translation').FindTermsOptions} options
+     * @param {number} [responseLimit]
      * @returns {Promise<import('translator').FindTermsResult>}
      */
-    async findTerms(mode, text, options) {
+    async findTerms(mode, text, options, responseLimit = void 0) {
         return /** @type {Promise<import('translator').FindTermsResult>} */ (
-            this._offscreen.sendMessageViaPort({action: 'findTermsStructuredOffscreen', params: {mode, text, options}}, [])
+            this._offscreen.sendMessageViaPort({action: 'findTermsStructuredOffscreen', params: {mode, text, options, ...(typeof responseLimit === 'number' ? {responseLimit} : {})}}, [])
         );
     }
 

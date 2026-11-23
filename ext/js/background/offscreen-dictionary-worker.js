@@ -720,6 +720,7 @@ export class OffscreenDictionaryWorkerHandler {
                     /** @type {import('translator').FindTermsMode} */ (params.mode),
                     /** @type {string} */ (params.text ?? ''),
                     /** @type {import('translation').FindTermsOptions} */ (params.options),
+                    /** @type {number|undefined} */ (params.responseLimit),
                 );
             case 'getTermFrequenciesOffscreen':
                 await this._ensureDatabasePrepared();

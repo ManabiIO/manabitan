@@ -84,6 +84,7 @@ export type FindTermsResult = {
     dictionaryEntries: Dictionary.TermDictionaryEntry[];
     originalTextLength: number;
     dictionaryAvailability?: DictionaryAvailability[];
+    hasExactHeadwordMatchBeforeResponseLimit?: boolean;
 };
 
 export type DictionaryAvailability = DictionaryDatabaseTypes.DictionaryAvailability;

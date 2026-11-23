@@ -85,6 +85,20 @@ describe('Offscreen control message acknowledgements', () => {
         expect(controlPort.postMessage).toHaveBeenCalledTimes(1);
     });
 
+    test('forwards the public response limit to the dictionary worker', async () => {
+        const offscreen = /** @type {Offscreen} */ (Object.create(Offscreen.prototype));
+        const invoke = vi.fn().mockResolvedValue({dictionaryEntries: [], originalTextLength: 1});
+        Reflect.set(offscreen, '_invokeDictionaryWorker', invoke);
+
+        await Reflect.get(Offscreen.prototype, '_findTermsStructuredHandler').call(offscreen, {
+            mode: 'group', text: 'フォ', options: {}, responseLimit: 32,
+        });
+
+        expect(invoke).toHaveBeenCalledWith('findTermsStructuredOffscreen', {
+            mode: 'group', text: 'フォ', options: {}, responseLimit: 32,
+        });
+    });
+
     test('acknowledges a slow structured lookup before returning its result', async () => {
         vi.useFakeTimers();
         const offscreen = /** @type {Offscreen} */ (Object.create(Offscreen.prototype));
