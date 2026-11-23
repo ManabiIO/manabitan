@@ -19,4 +19,4 @@
 
 // Isolated diagnostic build selector. This is not a production policy change.
 /** @type {'A'|'B'|'C'} */
-export const INDEX_IO_DIAGNOSTIC_ARM = 'B'
+export const INDEX_IO_DIAGNOSTIC_ARM = 'C'
