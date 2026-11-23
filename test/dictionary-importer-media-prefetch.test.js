@@ -168,7 +168,7 @@ function database() {
 /**
  * @param {ArrayBuffer|Blob} bytes
  * @param {ReturnType<typeof database>} db
- * @param {Partial<import('dictionary-importer').ImportDetails>} [options]
+ * @param {Partial<import('dictionary-importer').ImportDetails> & {disableTermBankWasmFastPath?: boolean}} [options]
  * @param {((data: import('dictionary-importer').ProgressData) => void)|undefined} [onProgress]
  * @returns {Promise<import('dictionary-importer').ImportResult>}
  */
