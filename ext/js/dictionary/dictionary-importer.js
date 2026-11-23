@@ -1412,7 +1412,8 @@ export class DictionaryImporter {
             ) :
             null;
         const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
-        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
+        const rawTermBankSourceBytes = useTermArtifactFiles || usePackedTermArtifact ? null : this._getRawTermBankSourceBytes(termFiles);
+        /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
             termContentStorageMode: effectiveTermContentStorageMode,
@@ -1424,6 +1425,9 @@ export class DictionaryImporter {
         }
         if (expectedTermRecordImportBytes !== null) {
             importOptimizationOptions.expectedTermRecordImportBytes = expectedTermRecordImportBytes;
+        }
+        if (rawTermBankSourceBytes !== null) {
+            importOptimizationOptions.rawTermBankSourceBytes = rawTermBankSourceBytes;
         }
         dictionaryDatabase.setImportOptimizationFlags(importOptimizationOptions);
         /** @type {Array<import('@zip.js/zip.js').Entry|{filename: string}>} */
@@ -1438,7 +1442,8 @@ export class DictionaryImporter {
             `termContentDedup=${String(enableTermEntryContentDedup)} ` +
             `preloadedTermArtifacts=${String(preloadedTermArtifactBytes !== null)} ` +
             `expectedTermContentImportBytes=${String(expectedTermContentImportBytes)} ` +
-            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)}`,
+            `expectedTermRecordImportBytes=${String(expectedTermRecordImportBytes)} ` +
+            `rawTermBankSourceBytes=${String(rawTermBankSourceBytes)}`,
         );
 
         // Load and import data
@@ -2383,6 +2388,10 @@ export class DictionaryImporter {
                             parserSourceDeliveryMs: parserProfile.sourceDeliveryMs ?? null,
                             parserSourceTransferredBytes: parserProfile.sourceTransferredBytes ?? null,
                             parserSourceInflateMs: parserProfile.sourceInflateMs ?? null,
+                            parserSourceCrcMs: parserProfile.sourceCrcMs ?? null,
+                            parserSourceCrcScannedBytes: parserProfile.sourceCrcScannedBytes ?? null,
+                            parserSourceCrcReusedBytes: parserProfile.sourceCrcReusedBytes ?? null,
+                            parserSourceCrcReusedGlossaryCount: parserProfile.sourceCrcReusedGlossaryCount ?? null,
                             parserSourceCompressedBytes: parserProfile.sourceCompressedBytes ?? null,
                             parserSourceUncompressedBytes: parserProfile.sourceUncompressedBytes ?? null,
                             parserResultCopyMs: parserProfile.resultCopyMs ?? null,
@@ -2765,6 +2774,10 @@ export class DictionaryImporter {
                 fastPathParserSourceDeliveryMs: fastPathProfile?.sourceDeliveryMs ?? null,
                 fastPathParserSourceTransferredBytes: fastPathProfile?.sourceTransferredBytes ?? null,
                 fastPathParserSourceInflateMs: fastPathProfile?.sourceInflateMs ?? null,
+                fastPathParserSourceCrcMs: fastPathProfile?.sourceCrcMs ?? null,
+                fastPathParserSourceCrcScannedBytes: fastPathProfile?.sourceCrcScannedBytes ?? null,
+                fastPathParserSourceCrcReusedBytes: fastPathProfile?.sourceCrcReusedBytes ?? null,
+                fastPathParserSourceCrcReusedGlossaryCount: fastPathProfile?.sourceCrcReusedGlossaryCount ?? null,
                 fastPathParserSourceCompressedBytes: fastPathProfile?.sourceCompressedBytes ?? null,
                 fastPathParserSourceUncompressedBytes: fastPathProfile?.sourceUncompressedBytes ?? null,
                 fastPathParserResultCopyMs: fastPathProfile?.resultCopyMs ?? null,
@@ -4660,6 +4673,33 @@ export class DictionaryImporter {
         ) ?
             /** @type {number} */ (totalRows) * bytesPerRowEstimate :
             null;
+    }
+
+    /**
+     * This is an eligibility hint from the selected raw term banks, not an
+     * output-size estimate. Check every entry even after the worker threshold
+     * is reached so missing or malformed metadata always declines the hint.
+     * @param {ImportFileEntry[]} termFiles
+     * @returns {number|null}
+     */
+    _getRawTermBankSourceBytes(termFiles) {
+        let total = 0;
+        try {
+            for (const file of termFiles) {
+                const size = /** @type {unknown} */ (Reflect.get(file, 'uncompressedSize'));
+                if (
+                    typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
+                    size > Number.MAX_SAFE_INTEGER - total
+                ) {
+                    return null;
+                }
+                total += size;
+            }
+        } catch (_) {
+            // A performance hint must not add a failure to the import path.
+            return null;
+        }
+        return total;
     }
 
     /**
