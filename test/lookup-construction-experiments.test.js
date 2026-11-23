@@ -471,7 +471,7 @@ describe('lookup construction experiments', () => {
             expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(key === 'experimentalLookupScratchReuse' || key === 'experimentalNativeSegmentedLookup')
         }
     })
-    test('actual worker preserves native segment plans and resets the flag', async () => {
+    test('actual worker preserves owned shared content, native segment plans and flag resets', async () => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(`import {parentPort} from 'node:worker_threads'
             globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
@@ -480,7 +480,7 @@ describe('lookup construction experiments', () => {
             parentPort.postMessage({type: 'loaded'})`)}`))
         /**
          * @param {unknown} message
-         * @returns {Promise<{type: string, chunk: Chunk, profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
+         * @returns {Promise<{type: string, chunk: Chunk, ownsContentBytes: boolean, borrowsWorkerMemory: boolean, profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
          */
         const request = (message) => new Promise((resolve, reject) => {
             const timer = setTimeout(() => reject(new Error('Worker request timed out')), 15000)
@@ -497,13 +497,19 @@ describe('lookup construction experiments', () => {
             const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
             expect((await request({type: 'initialize', module})).type).toBe('ready')
             const banks = makeBanks(70001)
+            const changedBanks = banks.map((bank) => encoder.encode(new TextDecoder().decode(bank).replaceAll('meaning ', 'glosses ')))
+            /** @type {Uint8Array|null} */
+            let firstContent = null
+            /** @type {Uint8Array|null} */
+            let firstContentSnapshot = null
             let prior = ''
             for (const enabled of [true, false, undefined, false, undefined]) {
                 const reply = await request({type: 'parse',
                     id: enabled === false ? 2 : 1,
                     version: 3,
-                    sourceBuffers: banks.map((bank) => bank.buffer),
+                    sourceBuffers: (firstContent === null ? banks : changedBanks).map((bank) => bank.buffer),
                     options: {experimentalNativeSegmentedLookup: enabled,
+                        ownContentBytes: true,
                         experimentalLookupScratchReuse: false,
                         singleChunk: true,
                         emitTermByteLists: false,
@@ -512,6 +518,20 @@ describe('lookup construction experiments', () => {
                         emitTokenBinaryContent: true,
                         prepareLookupIndexes: true}})
                 expect(reply.type).toBe('result')
+                expect(reply.ownsContentBytes).toBe(true)
+                expect(reply.borrowsWorkerMemory).toBe(false)
+                const content = reply.chunk.contentBytesBuffer
+                if (!(content instanceof Uint8Array)) { throw new Error('Missing owned content') }
+                expect(content.buffer).toBeInstanceOf(SharedArrayBuffer)
+                expect(content.byteOffset).toBe(0)
+                expect(content.byteLength).toBe(content.buffer.byteLength)
+                if (firstContent === null) {
+                    firstContent = content
+                    firstContentSnapshot = Uint8Array.from(content)
+                } else {
+                    expect(firstContent).toStrictEqual(firstContentSnapshot)
+                    expect(content).not.toStrictEqual(firstContentSnapshot)
+                }
                 expect(reply.chunk.contentDedupPlan.pendingEpochs).toBeNull()
                 expect(reply.chunk.contentDedupPlan.pendingIndexes).toBeNull()
                 expect(reply.chunk.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined()
