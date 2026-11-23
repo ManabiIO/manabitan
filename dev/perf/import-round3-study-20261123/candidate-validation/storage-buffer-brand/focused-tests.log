@@ -1,0 +1,38 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3
+
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:37) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+·······················(node:44) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/dictionary-database-artifact-fields.test.js [ test/dictionary-database-artifact-fields.test.js ]
+ FAIL  test/term-record-opfs-store.test.js [ test/term-record-opfs-store.test.js ]
+ FAIL  test/term-record-reference-origin.test.js [ test/term-record-reference-origin.test.js ]
+Error: Cannot find module '../../lib/resvg-wasm.js' imported from /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/dictionary-media-renderer.js
+ ❯ ext/js/dictionary/dictionary-media-renderer.js:18:1
+     16|  */
+     17|
+     18| import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
+       | ^
+     19|
+     20| /**
+ ❯ ext/js/dictionary/dictionary-database.js:22:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  3 failed | 1 passed (4)
+      Tests  23 passed (23)
+   Start at  02:40:51
+   Duration  2.85s (transform 972ms, setup 48ms, import 217ms, tests 117ms, environment 0ms)
+

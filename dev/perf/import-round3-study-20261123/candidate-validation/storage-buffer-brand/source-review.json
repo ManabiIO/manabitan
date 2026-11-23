@@ -1,0 +1,9 @@
+{
+  "localCommit": "5579929067f2a62d1ae45ec2d6283029281c5712",
+  "publishedCommit": "77123e6cdb3101d7c0a3ef22ace4ebb2c004f72e",
+  "tree": "14f57bd079b37b7e430e5141a432cf69a981472c",
+  "sourceSha256": "afddde0c18fc7ac6636c43943ca82f3e39610202bfc3f5218c4ff105b89c9f7c",
+  "reviewer": "independent vndb_audit agent",
+  "result": "No blocking issue found in committed diff, factory-origin gate or caller loops. Native ArrayBuffer byteLength getter establishes private internal buffer identity; unavailable/failed check retains generic per-row behavior. The check is repeated after awaits; no values are cached.",
+  "scope": "Read-only source review; no further tests or reproducer and no extension of old timing evidence."
+}

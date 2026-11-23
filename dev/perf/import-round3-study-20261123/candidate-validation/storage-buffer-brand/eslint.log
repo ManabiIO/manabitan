@@ -1,0 +1,48 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✘ [ERROR] Could not resolve "../../lib/handlebars.js"
+
+    ext/js/templates/anki-template-renderer.js:19:25:
+      19 │ import {Handlebars} from '../../lib/handlebars.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/linkedom.js"
+
+    ext/js/templates/anki-template-renderer.js:20:25:
+      20 │ import {NodeFilter} from '../../lib/linkedom.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/handlebars.js"
+
+    ext/js/templates/template-renderer.js:19:25:
+      19 │ import {Handlebars} from '../../lib/handlebars.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/handlebars.js"
+
+    ext/js/templates/template-renderer-media-provider.js:19:25:
+      19 │ import {Handlebars} from '../../lib/handlebars.js';
+         ╵                          ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Oops! Something went wrong! :(
+
+ESLint: 9.39.5
+
+Error: Build failed with 4 errors:
+ext/js/templates/anki-template-renderer.js:19:25: ERROR: Could not resolve "../../lib/handlebars.js"
+ext/js/templates/anki-template-renderer.js:20:25: ERROR: Could not resolve "../../lib/linkedom.js"
+ext/js/templates/template-renderer-media-provider.js:19:25: ERROR: Could not resolve "../../lib/handlebars.js"
+ext/js/templates/template-renderer.js:19:25: ERROR: Could not resolve "../../lib/handlebars.js"
+    at failureErrorWithLog (/workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:1477:15)
+    at /workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:946:25
+    at /workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:898:52
+    at buildResponseToResult (/workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:944:7)
+    at /workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:971:16
+    at responseCallbacks.<computed> (/workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:623:9)
+    at handleIncomingPacket (/workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:678:12)
+    at Socket.readFromStdout (/workspace/scratch/71149a79699f/manabitan/node_modules/esbuild/lib/main.js:601:7)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)

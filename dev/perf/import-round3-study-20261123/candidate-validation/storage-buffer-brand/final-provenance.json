@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "localCommit": "5579929067f2a62d1ae45ec2d6283029281c5712",
+  "tree": "14f57bd079b37b7e430e5141a432cf69a981472c",
+  "localParent": "2d462b8debc242b9332c3f3ad60316304c2bea8e",
+  "remoteParent": "de8ef886cc1e178f425176f39dc17ca9af14a99e",
+  "change": "Use the builtin ArrayBuffer byteLength getter to prove private backing storage before consecutive-reference validation. Current columns and values remain rechecked each run.",
+  "runtimeSource": [
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "bytes": 340787,
+      "sha256": "afddde0c18fc7ac6636c43943ca82f3e39610202bfc3f5218c4ff105b89c9f7c"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 597980,
+      "sha256": "b145afe6aedc517b2520568083f53c545a8bd10967d335fe5e155f235b4a5752"
+    },
+    {
+      "path": "test/term-record-reference-origin.test.js",
+      "bytes": 12795,
+      "sha256": "a3231da16fccf906efad77e16f8fa4a10986f88c63070d77711e5b4f0f322f7a"
+    }
+  ],
+  "checks": [
+    {
+      "name": "focused unit suites",
+      "exitCode": 0,
+      "files": 4,
+      "passedTests": 246,
+      "log": "focused-tests-with-libs.log"
+    },
+    {
+      "name": "scoped ESLint",
+      "exitCode": 0,
+      "log": "eslint-with-libs.log"
+    },
+    {
+      "name": "main types",
+      "exitCode": 0,
+      "log": "types-main.log"
+    },
+    {
+      "name": "test types",
+      "exitCode": 0,
+      "log": "types-test.log"
+    },
+    {
+      "name": "all-target build dry run",
+      "exitCode": 0,
+      "log": "build-dry-run.log"
+    }
+  ],
+  "initialEnvironmentFailuresRetained": [
+    "focused-tests.log",
+    "eslint.log"
+  ],
+  "environmentFailureExplanation": "The fresh checkout lacked generated ext/lib dependencies. Unchanged generated libraries were copied from the checked sibling worktree; the same focused suites and lint then passed. No source changes were made to resolve the environment errors.",
+  "additionalDelegatedReproducer": "Not executed: the delegated agent turn was rejected by automatic review as possible cybersecurity content. No retry of that reproducer was made. The standard intrinsic brand-check hardening was implemented directly and checked with existing normal buffer-type, actual-encoder, storage and producer tests.",
+  "localBrowserOrPerformanceRun": false,
+  "node": "v22.22.0",
+  "nodeOptions": "--max-old-space-size=1536",
+  "vitestMaxWorkers": 1,
+  "files": [
+    {
+      "path": "build-dry-run.log",
+      "bytes": 384,
+      "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+    },
+    {
+      "path": "eslint-with-libs.log",
+      "bytes": 1042,
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67"
+    },
+    {
+      "path": "eslint.log",
+      "bytes": 2732,
+      "sha256": "34e07bc5ed3ea0137fac45d670ddbdd048dd8d4613f924a2616c2e9a014ffca4"
+    },
+    {
+      "path": "focused-tests-with-libs.log",
+      "bytes": 6375,
+      "sha256": "dacaf55227a9dc5d2c7c0ee09306c5e65389f40982c71dfa7bd5ca26f6bff240"
+    },
+    {
+      "path": "focused-tests.log",
+      "bytes": 2030,
+      "sha256": "7ad9484a02ac345a9165fd1908f571c5671821799d39f07eb59eda0a35e8ffc4"
+    },
+    {
+      "path": "types-main.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "types-test.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

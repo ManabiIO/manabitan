@@ -1,0 +1,65 @@
+(node:7) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3
+
+(node:25) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+·········(node:32) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+····················stderr | test/term-record-opfs-store.test.js > TermRecordOpfsStore > committed deletion cannot reload or append orphan records after descriptor cleanup fails
+Extension has encountered a problem.
+Originating URL: unknown
+AggregateError: Failed to delete term-record storage:  physical-target 
+    at TermRecordOpfsStore._deleteShardByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:6788:23)
+    at TermRecordOpfsStore._deleteByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2530:9)
+    at /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2507:68
+    at TermRecordOpfsStore._runExclusiveStorageMutation (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:956:20)
+    at TermRecordOpfsStore.deleteByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2507:16)
+    at DictionaryDatabase.deleteDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/dictionary-database.js:2096:39)
+    at /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/test/term-record-opfs-store.test.js:2117:9
+    at file:///workspace/scratch/71149a79699f/manabitan/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+Issues can be reported at https://github.com/yomidevs/yomitan/issues
+
+······················································stderr | test/term-record-opfs-store.test.js > TermRecordOpfsStore > committed deletion cannot reload or append orphan records after sidecar cleanup fails
+Extension has encountered a problem.
+Originating URL: unknown
+AggregateError: Failed to delete term-record storage:  physical-target 
+    at TermRecordOpfsStore._deleteShardByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:6788:23)
+    at TermRecordOpfsStore._deleteByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2530:9)
+    at /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2507:68
+    at TermRecordOpfsStore._runExclusiveStorageMutation (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:956:20)
+    at TermRecordOpfsStore.deleteByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2507:16)
+    at DictionaryDatabase.deleteDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/dictionary-database.js:2096:39)
+    at /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/test/term-record-opfs-store.test.js:2117:9
+    at file:///workspace/scratch/71149a79699f/manabitan/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+Issues can be reported at https://github.com/yomidevs/yomitan/issues
+
+stderr | test/term-record-opfs-store.test.js > TermRecordOpfsStore > committed deletion cannot reload or append orphan records after both cleanup fails
+Extension has encountered a problem.
+Originating URL: unknown
+AggregateError: Failed to delete term-record storage:  physical-target 
+    at TermRecordOpfsStore._deleteShardByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:6788:23)
+    at TermRecordOpfsStore._deleteByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2530:9)
+    at /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2507:68
+    at TermRecordOpfsStore._runExclusiveStorageMutation (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:956:20)
+    at TermRecordOpfsStore.deleteByDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/term-record-opfs-store.js:2507:16)
+    at DictionaryDatabase.deleteDictionary (/workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/ext/js/dictionary/dictionary-database.js:2096:39)
+    at /workspace/scratch/71149a79699f/manabitan-storage-buffer-brand-round3/test/term-record-opfs-store.test.js:2117:9
+    at file:///workspace/scratch/71149a79699f/manabitan/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20
+
+Issues can be reported at https://github.com/yomidevs/yomitan/issues
+
+·······················································································································(node:39) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+·····················(node:46) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+·······················
+
+ Test Files  4 passed (4)
+      Tests  246 passed (246)
+   Start at  02:41:49
+   Duration  4.37s (transform 1.35s, setup 45ms, import 2.18s, tests 1.25s, environment 0ms)
+
