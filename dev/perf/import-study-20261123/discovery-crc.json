@@ -1,0 +1,1243 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": "45122637633",
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45122637633",
+  "harnessSha": "da8ebb76ebbdd6d19a1784631069ebe25aeb75cf",
+  "baselineSha": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "candidateSha": "0d5a05c40410fd97b0b85a2ad5e432dc5507bb33",
+  "workflowJobs": [
+    {
+      "id": 137519702211,
+      "name": "plan",
+      "conclusion": "success"
+    },
+    {
+      "id": 137519746568,
+      "name": "compare (jitendex, 1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 137519746579,
+      "name": "compare (jmdict, 1)",
+      "conclusion": "success"
+    },
+    {
+      "id": 137519746675,
+      "name": "compare (vndb, 1)",
+      "conclusion": "success"
+    }
+  ],
+  "ordinaryImports": 36,
+  "measuredImports": 27,
+  "excludedWarmups": 9,
+  "completeSampledResponsesChecked": 864,
+  "preAndPostRestartStates": 72,
+  "sourceMediaByteProbesChecked": 5784,
+  "decision": "Promising for the two predeclared independent confirmations: VNDB meets both discovery thresholds with 3/3 faster pairs against each control; JMdict and Jitendex show no material regression screen. The VNDB B/C median is only just beyond 5%, and all control variation remains in the evidence. This is not production qualification.",
+  "retention": "Every GitHub-digest-verified ZIP member and acquired observation is retained and byte-verified. No import was rerun, replaced or removed. Source archives independently match their locks; all 236 referenced Jitendex images and five VNDB references are rederived from the originals. Complete semantic/provenance verifier reproduces the original receipts; Python independently recomputes timing from raw browser timestamps and all paired arithmetic. Source CRC time is nested in parse-bank time; absent baseline counters remain null.",
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "archive": {
+        "path": "import-study-jmdict-1-attempt-1.zip",
+        "bytes": 831888,
+        "sha256": "609c1798a38cee52e73cc0df712428d492884c1a94e191f4a72936334ed36d27",
+        "githubArtifactId": 14794441685,
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "sourceTermBankCount": 53,
+      "sourceTermBankBytes": 171092992,
+      "sourceMediaProbeBytes": 0,
+      "semanticDigestSha256": "aecae8ec5a9ce8818ca119c9c3f9c6278e0f76c02ee629dcb57ec2cef6dfe57b",
+      "semanticEntryCount": 12,
+      "mediaProbesPerReadback": 0,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 1153.800000000003,
+          "phaseMetrics": {
+            "totalImportMs": 1153.800000000003,
+            "archiveAndIndexMs": 16,
+            "importDataBanksMs": 1054,
+            "bulkFinalizationMs": 30,
+            "termRecordCloseMs": 8.30000000000291,
+            "termRecordFlushPendingMs": 14.599999999991269,
+            "termRecordAwaitQueuedMs": 1.5,
+            "termContentEndSessionMs": 24.59999999999127
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 448.70000000001164,
+            "parserParseBankMs": 1273,
+            "parserParallelWorkerWallMs": 938.0999999999913,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "6fcd8fd6e2784e1e91f924e5a5a50cbcb1eb7094a49a404c9c8b55e98ec3ccd7",
+          "summarySha256": "e37b0bab6c8f98d388842d59eec5cf31a3e000206b01476c2ebfecb7684c72ae"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 1185.699999999997,
+          "phaseMetrics": {
+            "totalImportMs": 1185.699999999997,
+            "archiveAndIndexMs": 13,
+            "importDataBanksMs": 1094,
+            "bulkFinalizationMs": 28,
+            "termRecordCloseMs": 8.700000000011642,
+            "termRecordFlushPendingMs": 10,
+            "termRecordAwaitQueuedMs": 3.7999999999883585,
+            "termContentEndSessionMs": 6
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 487.09999999999127,
+            "parserParseBankMs": 1336,
+            "parserParallelWorkerWallMs": 891,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "91ca79edf3ba7662be32fe85aabcea38c9d25fbd472742e8ce65ef2a16e15856",
+          "summarySha256": "e6f16c7c9b1cc9e6fbeaeb5ab4b2d90656278737cb239282c37a01849ed7e409"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 952.7000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 952.7000000000116,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 869,
+            "bulkFinalizationMs": 30,
+            "termRecordCloseMs": 8.80000000000291,
+            "termRecordFlushPendingMs": 13.89999999999418,
+            "termRecordAwaitQueuedMs": 1,
+            "termContentEndSessionMs": 7
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 380.2000000000262,
+            "parserParseBankMs": 1076,
+            "parserParallelWorkerWallMs": 753.1999999999971,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "e47c8cdaf2802128dc5e359d7a15f2bb141ba87097a32ba7bfb0ce6dbffedad1",
+          "summarySha256": "fea51305c361d51d992621690af2dc7a0b603e5d5f429a9aae6abced010f65a6"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 956.6000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 956.6000000000058,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 871,
+            "bulkFinalizationMs": 28,
+            "termRecordCloseMs": 8.69999999999709,
+            "termRecordFlushPendingMs": 12.10000000000582,
+            "termRecordAwaitQueuedMs": 1.1999999999970896,
+            "termContentEndSessionMs": 5.099999999991269
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 347.29999999998836,
+            "parserParseBankMs": 1083,
+            "parserParallelWorkerWallMs": 760.5,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "9a1315abc44811ea88bf61114ac12c4082a77303152e3ab2c374c89b33e745c0",
+          "summarySha256": "ffb9cd14a038bfc5b950f5695de7bec960de8debb45da26216075aa8a27b3fc3"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 961.9000000000087,
+          "phaseMetrics": {
+            "totalImportMs": 961.9000000000087,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 879,
+            "bulkFinalizationMs": 27,
+            "termRecordCloseMs": 8.89999999999418,
+            "termRecordFlushPendingMs": 11.10000000000582,
+            "termRecordAwaitQueuedMs": 1.1000000000058208,
+            "termContentEndSessionMs": 6.2000000000116415
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 374.4999999999709,
+            "parserParseBankMs": 1104,
+            "parserParallelWorkerWallMs": 796.1000000000058,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "ac6ca0583b296bdf1e16a70b40745f9c3c118165d457afa079d9396b8373feb0",
+          "summarySha256": "614ed55f58bc4f3fbed4ffa51f7ac1f9da5b6c819d33476fbb15fef9252f5d28"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 983.5,
+          "phaseMetrics": {
+            "totalImportMs": 983.5,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 898,
+            "bulkFinalizationMs": 27,
+            "termRecordCloseMs": 11,
+            "termRecordFlushPendingMs": 8.599999999991269,
+            "termRecordAwaitQueuedMs": 1.8000000000029104,
+            "termContentEndSessionMs": 4.599999999991269
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 364.2000000000262,
+            "parserParseBankMs": 1043,
+            "parserParallelWorkerWallMs": 754.5999999999913,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "8633a167889522d015f09437aaf6d953541f1c4c023fe50e423d955bf46e7cc2",
+          "summarySha256": "42e65013480feea850554e2a9b657c654d5dd5379cb1b1cb6119c647f2f44c64"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 939.3999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 939.3999999999942,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 858,
+            "bulkFinalizationMs": 23,
+            "termRecordCloseMs": 8,
+            "termRecordFlushPendingMs": 6.80000000000291,
+            "termRecordAwaitQueuedMs": 2.400000000008731,
+            "termContentEndSessionMs": 6.100000000005821
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 403.49999999998545,
+            "parserParseBankMs": 1136,
+            "parserParallelWorkerWallMs": 755.6999999999971,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "f191c873edc1aef78b84adfbbfdea6309e1e19ac5cc6620bdfcd23872de63c7d",
+          "summarySha256": "ff36992310ce602111e87def75509097d62d354f909eb8f96659dcf22842af4f"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 938,
+          "phaseMetrics": {
+            "totalImportMs": 938,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 858,
+            "bulkFinalizationMs": 25,
+            "termRecordCloseMs": 7.900000000023283,
+            "termRecordFlushPendingMs": 6,
+            "termRecordAwaitQueuedMs": 5,
+            "termContentEndSessionMs": 6.2999999999883585
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 366.9000000000524,
+            "parserParseBankMs": 990,
+            "parserParallelWorkerWallMs": 752.6000000000058,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "a0cbaa9ef5e508618e281bfba6860d7133a629ef91bde641891ef7773c5c96ca",
+          "summarySha256": "8c95377322dc9bdd906eb4b2d485a27eb692693c91bca047894abcbe48c0f6f7"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 952.9000000000233,
+          "phaseMetrics": {
+            "totalImportMs": 952.9000000000233,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 870,
+            "bulkFinalizationMs": 28,
+            "termRecordCloseMs": 8,
+            "termRecordFlushPendingMs": 13.299999999988358,
+            "termRecordAwaitQueuedMs": 1.5,
+            "termContentEndSessionMs": 5.2999999999883585
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 366.39999999993597,
+            "parserParseBankMs": 1122,
+            "parserParallelWorkerWallMs": 747.3999999999942,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "7531002b7582c81499f0d292898a7e180e2f2aec060a5d79033a0f0ae07e0a7b",
+          "summarySha256": "014512069dbb316fddf2ddd2dddbd6e39ed52977b6c63d60891179ad5c686e11"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 955.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 955.8999999999942,
+            "archiveAndIndexMs": 11,
+            "importDataBanksMs": 880,
+            "bulkFinalizationMs": 19,
+            "termRecordCloseMs": 8.39999999999418,
+            "termRecordFlushPendingMs": 4.2000000000116415,
+            "termRecordAwaitQueuedMs": 0.8999999999941792,
+            "termContentEndSessionMs": 3.1000000000058208
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 390.8999999999651,
+            "parserParseBankMs": 1047,
+            "parserParallelWorkerWallMs": 778.8000000000175,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "8650af6c446b14e4c20711c439f3f9c724360e44263a5e789aed79ea7ba363fe",
+          "summarySha256": "b843d5154c76d6c6bcc8914ed1a99abe15308972f8bfcefb047d540d6ed7edf6"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 978.7999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 978.7999999999884,
+            "archiveAndIndexMs": 14,
+            "importDataBanksMs": 896,
+            "bulkFinalizationMs": 26,
+            "termRecordCloseMs": 7.600000000005821,
+            "termRecordFlushPendingMs": 11.799999999988358,
+            "termRecordAwaitQueuedMs": 1.3999999999941792,
+            "termContentEndSessionMs": 5.100000000005821
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 416.79999999998836,
+            "parserParseBankMs": 1089,
+            "parserParallelWorkerWallMs": 804,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "2b4999f90fa40b16869f76a93aeb060a3f798fc0abdd49712376dfa98a591348",
+          "summarySha256": "cceb6a63d5584496f06851828b95ff0243ba38845524fd8347eab48704ad3d65"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 955.7000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 955.7000000000116,
+            "archiveAndIndexMs": 12,
+            "importDataBanksMs": 869,
+            "bulkFinalizationMs": 29,
+            "termRecordCloseMs": 8.200000000011642,
+            "termRecordFlushPendingMs": 9.799999999988358,
+            "termRecordAwaitQueuedMs": 5.899999999994179,
+            "termContentEndSessionMs": 7.600000000005821
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 171092992,
+            "parserSourceInflateMs": 396.29999999998836,
+            "parserParseBankMs": 1066,
+            "parserParallelWorkerWallMs": 805.1999999999825,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "68761c39462eceb63835be4fffd6ec0c259c465b863d2c2441c4ab293bb1762a",
+          "summarySha256": "f82cb1ca23523f6a327fabcdfb24c02c56fbffb56b85d978781c5d5ce3777b16"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            0.5540455780893572,
+            -1.4167278833066232,
+            -2.3600326930912296
+          ],
+          "medianPairedChangePercent": -1.4167278833066232,
+          "equalWorkChangePercent": -1.0836824429596215,
+          "fasterPairs": 2
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            -2.1962379257744025,
+            0.14925373134266895,
+            -0.02092269065618879
+          ],
+          "medianPairedChangePercent": -0.02092269065618879,
+          "equalWorkChangePercent": -0.7089733787439934,
+          "fasterPairs": 2
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            2.812042651055191,
+            -1.5636478119449015,
+            -2.3395995096030298
+          ],
+          "medianPairedChangePercent": -1.5636478119449015,
+          "equalWorkChangePercent": -0.37738462071195134,
+          "fasterPairs": 2
+        }
+      },
+      "meetsDiscoveryThreshold": false
+    },
+    {
+      "dictionary": "jitendex",
+      "archive": {
+        "path": "import-study-jitendex-1-attempt-1.zip",
+        "bytes": 1798543,
+        "sha256": "38d950e5ddb62e4eed46e1bfdceef423e9ffa46fdae9c5b1578e17fc68ca86ec",
+        "githubArtifactId": 14794248099,
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "sourceTermBankCount": 218,
+      "sourceTermBankBytes": 537538792,
+      "sourceMediaProbeBytes": 4992155,
+      "semanticDigestSha256": "766e9db5b84e7883a062279304ef1b8b22921bb2cd48918535f435be666ea469",
+      "semanticEntryCount": 17,
+      "mediaProbesPerReadback": 236,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 1557.3999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1557.3999999999942,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 1475,
+            "bulkFinalizationMs": 31,
+            "termRecordCloseMs": 11.900000000008731,
+            "termRecordFlushPendingMs": 6.7000000000116415,
+            "termRecordAwaitQueuedMs": 0.7999999999883585,
+            "termContentEndSessionMs": 6.80000000000291
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 869.8999999999796,
+            "parserParseBankMs": 1203,
+            "parserParallelWorkerWallMs": 1218.3999999999942,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "5e62848bb994ff19d28efcbb58e8caab8d44eda8f5cc1ab41f3083913e98d421",
+          "summarySha256": "3f1e7c137bbee11aa881a61f9b6c3ef6425dd104ca5a8c0452352e8a3ed83e89"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 1341.199999999997,
+          "phaseMetrics": {
+            "totalImportMs": 1341.199999999997,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 1267,
+            "bulkFinalizationMs": 26,
+            "termRecordCloseMs": 11.30000000000291,
+            "termRecordFlushPendingMs": 4.100000000005821,
+            "termRecordAwaitQueuedMs": 0.5999999999912689,
+            "termContentEndSessionMs": 4.600000000005821
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 731.0999999999476,
+            "parserParseBankMs": 1046,
+            "parserParallelWorkerWallMs": 1076.699999999997,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "1cb498427311ab47350f32ee440fb2e3a73d748d65afac5bcc605bb68e83e949",
+          "summarySha256": "29dfc59a238aa112ca6b18c9263b9262c937bf9bf843c027f39553c393eb5e1f"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 1388.7999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 1388.7999999999884,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 1313,
+            "bulkFinalizationMs": 29,
+            "termRecordCloseMs": 9.800000000017462,
+            "termRecordFlushPendingMs": 8.800000000017462,
+            "termRecordAwaitQueuedMs": 0.5999999999767169,
+            "termContentEndSessionMs": 4.600000000005821
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 733.6999999999534,
+            "parserParseBankMs": 1073,
+            "parserParallelWorkerWallMs": 1109.5,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "2ca1e4931242aa051b8e0e4e23cbeba37f9d25a1c5aab22384c1b020cbd4e1f7",
+          "summarySha256": "f651d68e645ab2d8c56f97ca5c15a07d911053b4c866682b45b0289360ba6413"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 1313.8999999999942,
+          "phaseMetrics": {
+            "totalImportMs": 1313.8999999999942,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 1240,
+            "bulkFinalizationMs": 27,
+            "termRecordCloseMs": 8.800000000017462,
+            "termRecordFlushPendingMs": 4.099999999976717,
+            "termRecordAwaitQueuedMs": 4,
+            "termContentEndSessionMs": 3.099999999976717
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 755.899999999936,
+            "parserParseBankMs": 1036,
+            "parserParallelWorkerWallMs": 1022.6999999999825,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "8510293796fb2888f3d4889111031a3b1442d2912aa30c408396b481e621dd14",
+          "summarySha256": "42c666b8d0d0a23eb237eeb779a3f8a4f11a576f280f2fcdbc01711921e88950"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 1331.7000000000116,
+          "phaseMetrics": {
+            "totalImportMs": 1331.7000000000116,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 1257,
+            "bulkFinalizationMs": 27,
+            "termRecordCloseMs": 9.10000000000582,
+            "termRecordFlushPendingMs": 6.600000000005821,
+            "termRecordAwaitQueuedMs": 2.2999999999883585,
+            "termContentEndSessionMs": 6.7999999999883585
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 711.6999999999243,
+            "parserParseBankMs": 1050,
+            "parserParallelWorkerWallMs": 1064.9000000000233,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "83ab33dd5d94f3d75fb3306b8a01fad71cb82573744bc816d3aab7b5c604bd1a",
+          "summarySha256": "f371661f006820143c4453b3e8578a76afbc3a11a2888346b692717985b75d2d"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 1336.3000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1336.3000000000175,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 1260,
+            "bulkFinalizationMs": 27,
+            "termRecordCloseMs": 11.5,
+            "termRecordFlushPendingMs": 4.100000000005821,
+            "termRecordAwaitQueuedMs": 1.1000000000058208,
+            "termContentEndSessionMs": 4.2999999999883585
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 782.9999999999709,
+            "parserParseBankMs": 1047,
+            "parserParallelWorkerWallMs": 1070.0999999999767,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "5778f9d19e0e9e675d1944fac674852d3723ec81a4ad7d559de265db64bd2a94",
+          "summarySha256": "1b1923b0f0ccc7a4ea691c15131b0c63fa33dfd454180c5d4878f354ea213861"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 1341.3000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1341.3000000000175,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 1265,
+            "bulkFinalizationMs": 29,
+            "termRecordCloseMs": 9.800000000017462,
+            "termRecordFlushPendingMs": 9.700000000011642,
+            "termRecordAwaitQueuedMs": 0.29999999998835847,
+            "termContentEndSessionMs": 4.100000000005821
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 799.9999999999709,
+            "parserParseBankMs": 1087,
+            "parserParallelWorkerWallMs": 1037.4000000000233,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "1e12ad24e838da2cc0d6f485afc97441eea6d996108d91a1c3232055cb195df8",
+          "summarySha256": "3b4f81890794829650267c59b98346d18cbcdb13e91c588d4d9e6358d037c7fd"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 1353.5,
+          "phaseMetrics": {
+            "totalImportMs": 1353.5,
+            "archiveAndIndexMs": 13,
+            "importDataBanksMs": 1276,
+            "bulkFinalizationMs": 29,
+            "termRecordCloseMs": 11.10000000000582,
+            "termRecordFlushPendingMs": 3.8999999999941792,
+            "termRecordAwaitQueuedMs": 3,
+            "termContentEndSessionMs": 2.8999999999941792
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 740.0999999998603,
+            "parserParseBankMs": 977,
+            "parserParallelWorkerWallMs": 1047.7000000000116,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "967b96722466670fa83fa46df0f158dc15d33cf424b68a07a4828d70865f3e69",
+          "summarySha256": "9792ac4a1fa439b24d222bc0e860c06d2c321fff88d7f5701e0acad6d9a6906c"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 1333.8000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1333.8000000000175,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 1261,
+            "bulkFinalizationMs": 26,
+            "termRecordCloseMs": 9.199999999982538,
+            "termRecordFlushPendingMs": 6.2000000000116415,
+            "termRecordAwaitQueuedMs": 1,
+            "termContentEndSessionMs": 3
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 705.7000000000407,
+            "parserParseBankMs": 1012,
+            "parserParallelWorkerWallMs": 1030.5,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "810c77f75da2d133e51175dff0f84f2bc76bdd08859509a9ceecfccf86c1b23b",
+          "summarySha256": "9e79fbb43e1d679b2a6e344cba1124b7a5d4259fd810ad091ff7aadaaf11de97"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 1314.1000000000058,
+          "phaseMetrics": {
+            "totalImportMs": 1314.1000000000058,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 1237,
+            "bulkFinalizationMs": 30,
+            "termRecordCloseMs": 11.89999999999418,
+            "termRecordFlushPendingMs": 3.8999999999941792,
+            "termRecordAwaitQueuedMs": 5,
+            "termContentEndSessionMs": 2.2000000000116415
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 768.4999999999709,
+            "parserParseBankMs": 1134,
+            "parserParallelWorkerWallMs": 1047.3999999999942,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "c2c0da9fd15f2afec7856a75eb448db56ebfebf5c5db9af422c34c758c24f316",
+          "summarySha256": "09ae4fd66c36cf934a3aceb051074550c8e664c053616b7b4a6f15b66960bf7b"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 1409.3000000000175,
+          "phaseMetrics": {
+            "totalImportMs": 1409.3000000000175,
+            "archiveAndIndexMs": 9,
+            "importDataBanksMs": 1328,
+            "bulkFinalizationMs": 33,
+            "termRecordCloseMs": 10.799999999988358,
+            "termRecordFlushPendingMs": 9.299999999988358,
+            "termRecordAwaitQueuedMs": 1.6000000000058208,
+            "termContentEndSessionMs": 5.5
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 750.6000000000349,
+            "parserParseBankMs": 1081,
+            "parserParallelWorkerWallMs": 1095.5,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "d11f343a14269455f477604b7471e8be00e57a424e000da2d81af42691dbcde6",
+          "summarySha256": "5259580db1eb64e5f35708354a5b2c249eca7e7fb2f95424ab8a353584565327"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 1354.2999999999884,
+          "phaseMetrics": {
+            "totalImportMs": 1354.2999999999884,
+            "archiveAndIndexMs": 10,
+            "importDataBanksMs": 1277,
+            "bulkFinalizationMs": 28,
+            "termRecordCloseMs": 10.199999999982538,
+            "termRecordFlushPendingMs": 7.099999999976717,
+            "termRecordAwaitQueuedMs": 0.8000000000174623,
+            "termContentEndSessionMs": 3.099999999976717
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 537538792,
+            "parserSourceInflateMs": 749.4999999999418,
+            "parserParseBankMs": 1051,
+            "parserParallelWorkerWallMs": 1054.7000000000116,
+            "parserSourceCrcMs": 0,
+            "parserSourceCrcScannedBytes": 0,
+            "parserSourceCrcReusedBytes": 0,
+            "parserSourceCrcReusedGlossaryCount": 0
+          },
+          "reportSha256": "2bba69dd9751c06e48871346e8285fb26fc91f519e39268a11d3cdd163e87220",
+          "summarySha256": "49166de4720b6ba5dca54bfdfdca315452c8f9f585492f1823cfc12c52c50c0d"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            1.354745414416425,
+            0.5623031938821299,
+            -3.9026467040394808
+          ],
+          "medianPairedChangePercent": 0.5623031938821299,
+          "equalWorkChangePercent": -0.7320680305647365,
+          "fasterPairs": 1
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            -0.34423407917426596,
+            -0.9013668267441877,
+            3.05912792024825
+          ],
+          "medianPairedChangePercent": -0.34423407917426596,
+          "equalWorkChangePercent": 0.5844301805737917,
+          "fasterPairs": 2
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            1.7048481619623468,
+            1.476983055929093,
+            -6.755126658625588
+          ],
+          "medianPairedChangePercent": 1.476983055929093,
+          "equalWorkChangePercent": -1.3088489031305217,
+          "fasterPairs": 1
+        }
+      },
+      "meetsDiscoveryThreshold": false
+    },
+    {
+      "dictionary": "vndb",
+      "archive": {
+        "path": "import-study-vndb-1-attempt-1.zip",
+        "bytes": 907791,
+        "sha256": "a3ece35b31639f74632eaec01b1c64a46ffe83f55eefe58d9b9de3471c19f517",
+        "githubArtifactId": 14794033098,
+        "rawMembers": 115
+      },
+      "browserVersion": "153.0.8010.12",
+      "sourceTermBankCount": 665,
+      "sourceTermBankBytes": 4267992967,
+      "sourceMediaProbeBytes": 4550,
+      "semanticDigestSha256": "a45be67b068406670a6d89a640799963e1b2e080d165b1306c1e57b34d8fba22",
+      "semanticEntryCount": 13,
+      "mediaProbesPerReadback": 5,
+      "layoutDifferences": [],
+      "observations": [
+        {
+          "name": "warmup-A",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "A",
+          "totalImportMs": 7415.200000000012,
+          "phaseMetrics": {
+            "totalImportMs": 7415.200000000012,
+            "archiveAndIndexMs": 168,
+            "importDataBanksMs": 6272,
+            "bulkFinalizationMs": 914,
+            "termRecordCloseMs": 897.6000000000349,
+            "termRecordFlushPendingMs": 9,
+            "termRecordAwaitQueuedMs": 2,
+            "termContentEndSessionMs": 5.100000000034925
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 4761.100000000326,
+            "parserParseBankMs": 4960,
+            "parserParallelWorkerWallMs": 6189,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "04bfbb14c095c5173a0c52e530162740063b628ec8492afc3cb75129ad070cd9",
+          "summarySha256": "05d2b240abd795ea94d49a77c0544432047dfb9c5bf0e1614542778278d63965"
+        },
+        {
+          "name": "warmup-B",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "B",
+          "totalImportMs": 5302.099999999977,
+          "phaseMetrics": {
+            "totalImportMs": 5302.099999999977,
+            "archiveAndIndexMs": 164,
+            "importDataBanksMs": 4954,
+            "bulkFinalizationMs": 127,
+            "termRecordCloseMs": 111.40000000002328,
+            "termRecordFlushPendingMs": 5.7999999999883585,
+            "termRecordAwaitQueuedMs": 3.5,
+            "termContentEndSessionMs": 2.5
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 910.8999999996158,
+            "parserParseBankMs": 5593,
+            "parserParallelWorkerWallMs": 4884.900000000023,
+            "parserSourceCrcMs": 1167.899999999965,
+            "parserSourceCrcScannedBytes": 568284368,
+            "parserSourceCrcReusedBytes": 3699708599,
+            "parserSourceCrcReusedGlossaryCount": 6490145
+          },
+          "reportSha256": "5fc8841288c9b224a5544ed872064c9fb52aff120114a606170ab9e8c0259b04",
+          "summarySha256": "484fd50db81405da21ab151128fe6d199ad41b0c78bfec4d963407fb2db1cd85"
+        },
+        {
+          "name": "warmup-C",
+          "kind": "warmup",
+          "triplet": 0,
+          "arm": "C",
+          "totalImportMs": 5948.700000000012,
+          "phaseMetrics": {
+            "totalImportMs": 5948.700000000012,
+            "archiveAndIndexMs": 164,
+            "importDataBanksMs": 5387,
+            "bulkFinalizationMs": 343,
+            "termRecordCloseMs": 326,
+            "termRecordFlushPendingMs": 10.600000000034925,
+            "termRecordAwaitQueuedMs": 1.099999999976717,
+            "termContentEndSessionMs": 7.300000000046566
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 3832.800000000221,
+            "parserParseBankMs": 4227,
+            "parserParallelWorkerWallMs": 5316,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "7035b691a5e6298985aa844ffb21ef464dc6462a0d9faa33c268b7c2e51ccda0",
+          "summarySha256": "c613b866928e827829005d6ae58f4cf9d7adbafe79e9df97948307af9f378a12"
+        },
+        {
+          "name": "A1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "A",
+          "totalImportMs": 6036.5,
+          "phaseMetrics": {
+            "totalImportMs": 6036.5,
+            "archiveAndIndexMs": 173,
+            "importDataBanksMs": 5660,
+            "bulkFinalizationMs": 136,
+            "termRecordCloseMs": 120.89999999996508,
+            "termRecordFlushPendingMs": 8.199999999953434,
+            "termRecordAwaitQueuedMs": 0.6000000000349246,
+            "termContentEndSessionMs": 6.599999999976717
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 4218.499999999651,
+            "parserParseBankMs": 4354,
+            "parserParallelWorkerWallMs": 5589.799999999988,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "98151725d1d945e90f65b9b28c3a73fceaf6d451e7eb87ebc30783554a7a087f",
+          "summarySha256": "38b776398b42eecc62e6897231adb9a9c3c99cd7ee0219299163177fd0f3c01b"
+        },
+        {
+          "name": "B1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "B",
+          "totalImportMs": 5377.799999999988,
+          "phaseMetrics": {
+            "totalImportMs": 5377.799999999988,
+            "archiveAndIndexMs": 166,
+            "importDataBanksMs": 5022,
+            "bulkFinalizationMs": 131,
+            "termRecordCloseMs": 116.20000000001164,
+            "termRecordFlushPendingMs": 9,
+            "termRecordAwaitQueuedMs": 1.2999999999883585,
+            "termContentEndSessionMs": 3.7000000000116415
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 889.0000000001164,
+            "parserParseBankMs": 5458,
+            "parserParallelWorkerWallMs": 4945.900000000023,
+            "parserSourceCrcMs": 1151.8999999997905,
+            "parserSourceCrcScannedBytes": 568284368,
+            "parserSourceCrcReusedBytes": 3699708599,
+            "parserSourceCrcReusedGlossaryCount": 6490145
+          },
+          "reportSha256": "ebbca5dc4aa225299f2bf85bd768ca38dbb91c61e4f9a224a9b96dbfacd6da6a",
+          "summarySha256": "247cec853c6b94adae46494afd7aed78034e7350973554645bf38bd2885b1ded"
+        },
+        {
+          "name": "C1",
+          "kind": "measured",
+          "triplet": 1,
+          "arm": "C",
+          "totalImportMs": 5662.200000000012,
+          "phaseMetrics": {
+            "totalImportMs": 5662.200000000012,
+            "archiveAndIndexMs": 163,
+            "importDataBanksMs": 5312,
+            "bulkFinalizationMs": 127,
+            "termRecordCloseMs": 112.39999999996508,
+            "termRecordFlushPendingMs": 6.899999999965075,
+            "termRecordAwaitQueuedMs": 1.8000000000465661,
+            "termContentEndSessionMs": 1.5
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 3870.8999999998487,
+            "parserParseBankMs": 4127,
+            "parserParallelWorkerWallMs": 5244.299999999988,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "bf6e26a8d9cee7d7685b3751abec4e932247e287c813038d4abfdd4c992bd2d3",
+          "summarySha256": "c5cd5b6c60700ec5af4ddb9c076c912a4b1465939efe53abbfb22120b8f43726"
+        },
+        {
+          "name": "B2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "B",
+          "totalImportMs": 5412.599999999977,
+          "phaseMetrics": {
+            "totalImportMs": 5412.599999999977,
+            "archiveAndIndexMs": 166,
+            "importDataBanksMs": 5064,
+            "bulkFinalizationMs": 126,
+            "termRecordCloseMs": 110.20000000006985,
+            "termRecordFlushPendingMs": 10,
+            "termRecordAwaitQueuedMs": 0.6999999999534339,
+            "termContentEndSessionMs": 3.400000000023283
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 945.1999999997206,
+            "parserParseBankMs": 5700,
+            "parserParallelWorkerWallMs": 4974.900000000023,
+            "parserSourceCrcMs": 1179.800000000745,
+            "parserSourceCrcScannedBytes": 568284368,
+            "parserSourceCrcReusedBytes": 3699708599,
+            "parserSourceCrcReusedGlossaryCount": 6490145
+          },
+          "reportSha256": "5b6ed6f8ebc3fc1e92fb03b5688dfe42bdf240cab465085520b30e14579e2bf1",
+          "summarySha256": "a9d957f0409f207fccf7dfe5169e8e36ef6a80aca7a176a4fa652a3af7c30e8f"
+        },
+        {
+          "name": "C2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "C",
+          "totalImportMs": 5666.300000000047,
+          "phaseMetrics": {
+            "totalImportMs": 5666.300000000047,
+            "archiveAndIndexMs": 167,
+            "importDataBanksMs": 5365,
+            "bulkFinalizationMs": 77,
+            "termRecordCloseMs": 63.60000000009313,
+            "termRecordFlushPendingMs": 7.799999999930151,
+            "termRecordAwaitQueuedMs": 0.5999999999767169,
+            "termContentEndSessionMs": 2.599999999976717
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 3951.4999999987194,
+            "parserParseBankMs": 4333,
+            "parserParallelWorkerWallMs": 5291.20000000007,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "371f01003ec1d2c1aa055b4ad89bb15dd744c0f2055a7784f0dc65590b91511f",
+          "summarySha256": "292bd4316c7c817e6837e668d81973318c73ada9742379e14f9a05f508ea9971"
+        },
+        {
+          "name": "A2",
+          "kind": "measured",
+          "triplet": 2,
+          "arm": "A",
+          "totalImportMs": 5626.70000000007,
+          "phaseMetrics": {
+            "totalImportMs": 5626.70000000007,
+            "archiveAndIndexMs": 173,
+            "importDataBanksMs": 5267,
+            "bulkFinalizationMs": 131,
+            "termRecordCloseMs": 119.5,
+            "termRecordFlushPendingMs": 5.299999999930151,
+            "termRecordAwaitQueuedMs": 1.599999999976717,
+            "termContentEndSessionMs": 2.099999999976717
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 3874.699999999022,
+            "parserParseBankMs": 4169,
+            "parserParallelWorkerWallMs": 5196,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "ba24651a1842c12b532d9470b3c32e15868d069e914480a9910eea6b2fa5585d",
+          "summarySha256": "184c09f75d603d4ca30423efa19fb6f4c1e253e1b2416e1a4f0aebe696858715"
+        },
+        {
+          "name": "C3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "C",
+          "totalImportMs": 5619.5,
+          "phaseMetrics": {
+            "totalImportMs": 5619.5,
+            "archiveAndIndexMs": 168,
+            "importDataBanksMs": 5266,
+            "bulkFinalizationMs": 131,
+            "termRecordCloseMs": 119,
+            "termRecordFlushPendingMs": 4.899999999906868,
+            "termRecordAwaitQueuedMs": 2.6000000000931323,
+            "termContentEndSessionMs": 2.299999999930151
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 3789.199999999255,
+            "parserParseBankMs": 4232,
+            "parserParallelWorkerWallMs": 5199.800000000047,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "93ec799b65bdc11080af43b02631d010ceaddb69414de944aaa7c91555396ec3",
+          "summarySha256": "e0d57d3fb0189542643519718d858e71cec6b7577f689034df3081647187b408"
+        },
+        {
+          "name": "A3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "A",
+          "totalImportMs": 5502.79999999993,
+          "phaseMetrics": {
+            "totalImportMs": 5502.79999999993,
+            "archiveAndIndexMs": 162,
+            "importDataBanksMs": 5151,
+            "bulkFinalizationMs": 133,
+            "termRecordCloseMs": 118.19999999995343,
+            "termRecordFlushPendingMs": 10.599999999976717,
+            "termRecordAwaitQueuedMs": 0.2000000000698492,
+            "termContentEndSessionMs": 6.099999999976717
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 3849.0000000001164,
+            "parserParseBankMs": 4095,
+            "parserParallelWorkerWallMs": 5076.70000000007,
+            "parserSourceCrcMs": null,
+            "parserSourceCrcScannedBytes": null,
+            "parserSourceCrcReusedBytes": null,
+            "parserSourceCrcReusedGlossaryCount": null
+          },
+          "reportSha256": "7315a1acd7cc26d1762cea135f8dddc6e9a04f05b68bf517fef9fe8876feeacd",
+          "summarySha256": "8373b26cb62a91016a18f5f78364ea8b988e8055eb08b9abfdce8a4ea7c3e649"
+        },
+        {
+          "name": "B3",
+          "kind": "measured",
+          "triplet": 3,
+          "arm": "B",
+          "totalImportMs": 5165.5,
+          "phaseMetrics": {
+            "totalImportMs": 5165.5,
+            "archiveAndIndexMs": 159,
+            "importDataBanksMs": 4826,
+            "bulkFinalizationMs": 126,
+            "termRecordCloseMs": 116.19999999995343,
+            "termRecordFlushPendingMs": 3.800000000046566,
+            "termRecordAwaitQueuedMs": 0.5999999999767169,
+            "termContentEndSessionMs": 1.7999999999301508
+          },
+          "sourceCrc": {
+            "parserSourceUncompressedBytes": 4267992967,
+            "parserSourceInflateMs": 893.2999999996973,
+            "parserParseBankMs": 5289,
+            "parserParallelWorkerWallMs": 4748.199999999953,
+            "parserSourceCrcMs": 1044.2000000010012,
+            "parserSourceCrcScannedBytes": 568284368,
+            "parserSourceCrcReusedBytes": 3699708599,
+            "parserSourceCrcReusedGlossaryCount": 6490145
+          },
+          "reportSha256": "254e8ecce15f944b285a7700a2a85b20bd0f5975cdda3dc3db6f2c71471e7756",
+          "summarySha256": "f6e37c3960cd5adab15da96e7c5442416a0ab9091383fdf6da4d0074b77152c4"
+        }
+      ],
+      "comparisons": {
+        "candidateVersusA": {
+          "pairedChangesPercent": [
+            -10.911952290234606,
+            -3.8050722448342844,
+            -6.129606745655569
+          ],
+          "medianPairedChangePercent": -6.129606745655569,
+          "equalWorkChangePercent": -7.049399976698323,
+          "fasterPairs": 3
+        },
+        "candidateVersusC": {
+          "pairedChangesPercent": [
+            -5.0227826639825945,
+            -4.477348534318127,
+            -8.07901058813062
+          ],
+          "medianPairedChangePercent": -5.0227826639825945,
+          "equalWorkChangePercent": -5.853788057588449,
+          "fasterPairs": 3
+        },
+        "identicalCodeControl": {
+          "pairedChangesPercent": [
+            -6.200612937960548,
+            0.7037872998378436,
+            2.1207385331117212
+          ],
+          "medianPairedChangePercent": 0.7037872998378436,
+          "equalWorkChangePercent": -1.26995223115427,
+          "fasterPairs": 1
+        }
+      },
+      "meetsDiscoveryThreshold": true
+    }
+  ]
+}
