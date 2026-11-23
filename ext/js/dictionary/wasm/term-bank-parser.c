@@ -1669,6 +1669,88 @@ static void hash_content_xxh32_pair(const uint8_t* src, uint32_t length, uint32_
     *out2 = xxh32_finalize(h2);
 }
 
+/* The token header is already in output. Consume its final partial stripe,
+ * then copy and hash the unchanged glossary together. The caller checks the
+ * complete destination range and only selects this path for long glossaries. */
+static void copy_content_suffix_xxh32_pair(
+    uint8_t* output,
+    uint32_t prefix_length,
+    const uint8_t* suffix,
+    uint32_t suffix_length,
+    uint32_t* out1,
+    uint32_t* out2
+) {
+    const uint32_t join_length = (0u - prefix_length) & 15u;
+    __builtin_memcpy(output + prefix_length, suffix, join_length);
+    uint8_t* destination = output + prefix_length + join_length;
+    const uint8_t* p = output;
+    uint32_t a1 = FNV1A_OFFSET + 2654435761u + 2246822519u;
+    uint32_t b1 = FNV1A_OFFSET + 2246822519u;
+    uint32_t c1 = FNV1A_OFFSET;
+    uint32_t d1 = FNV1A_OFFSET - 2654435761u;
+    uint32_t a2 = MIX_OFFSET + 2654435761u + 2246822519u;
+    uint32_t b2 = MIX_OFFSET + 2246822519u;
+    uint32_t c2 = MIX_OFFSET;
+    uint32_t d2 = MIX_OFFSET - 2654435761u;
+    while (p < destination) {
+        uint32_t value = read_u32_le(p); p += 4u;
+        a1 = xxh32_round(a1, value);
+        a2 = xxh32_round(a2, value);
+        value = read_u32_le(p); p += 4u;
+        b1 = xxh32_round(b1, value);
+        b2 = xxh32_round(b2, value);
+        value = read_u32_le(p); p += 4u;
+        c1 = xxh32_round(c1, value);
+        c2 = xxh32_round(c2, value);
+        value = read_u32_le(p); p += 4u;
+        d1 = xxh32_round(d1, value);
+        d2 = xxh32_round(d2, value);
+    }
+    p = suffix + join_length;
+    const uint8_t* const end = suffix + suffix_length;
+    const uint8_t* const limit = end - 16u;
+    while (p <= limit) {
+        uint32_t value = read_u32_le(p); p += 4u;
+        __builtin_memcpy(destination, &value, 4u); destination += 4u;
+        a1 = xxh32_round(a1, value);
+        a2 = xxh32_round(a2, value);
+        value = read_u32_le(p); p += 4u;
+        __builtin_memcpy(destination, &value, 4u); destination += 4u;
+        b1 = xxh32_round(b1, value);
+        b2 = xxh32_round(b2, value);
+        value = read_u32_le(p); p += 4u;
+        __builtin_memcpy(destination, &value, 4u); destination += 4u;
+        c1 = xxh32_round(c1, value);
+        c2 = xxh32_round(c2, value);
+        value = read_u32_le(p); p += 4u;
+        __builtin_memcpy(destination, &value, 4u); destination += 4u;
+        d1 = xxh32_round(d1, value);
+        d2 = xxh32_round(d2, value);
+    }
+    uint32_t h1 = rotl32(a1, 1u) + rotl32(b1, 7u) + rotl32(c1, 12u) + rotl32(d1, 18u);
+    uint32_t h2 = rotl32(a2, 1u) + rotl32(b2, 7u) + rotl32(c2, 12u) + rotl32(d2, 18u);
+    h1 += prefix_length + suffix_length;
+    h2 += prefix_length + suffix_length;
+    while ((p + 4u) <= end) {
+        const uint32_t value = read_u32_le(p); p += 4u;
+        __builtin_memcpy(destination, &value, 4u); destination += 4u;
+        h1 += value * 3266489917u;
+        h1 = rotl32(h1, 17u) * 668265263u;
+        h2 += value * 3266489917u;
+        h2 = rotl32(h2, 17u) * 668265263u;
+    }
+    while (p < end) {
+        const uint32_t value = (uint32_t)(*p++);
+        *destination++ = (uint8_t)value;
+        h1 += value * 374761393u;
+        h1 = rotl32(h1, 11u) * 2654435761u;
+        h2 += value * 374761393u;
+        h2 = rotl32(h2, 11u) * 2654435761u;
+    }
+    *out1 = xxh32_finalize(h1);
+    *out2 = xxh32_finalize(h2);
+}
+
 static inline int write_content_byte(
     uint8_t* out,
     uint32_t out_capacity,
@@ -2018,6 +2100,22 @@ static int encode_term_content_token_binary_row(
             if (!write_content_bytes(out, out_capacity, cursor, EMPTY_QUOTED, sizeof(EMPTY_QUOTED) - 1u)) { return 0; }
         }
         if (!write_content_byte(out, out_capacity, cursor, 0u)) { return 0; }
+    }
+
+    if (row->glossary_length > 512u && row->glossary_requires_text_normalization == 0u) {
+        const uint32_t end = *cursor + row->glossary_length;
+        if (end < *cursor || end > out_capacity) { return 0; }
+        uint32_t h1 = 0u;
+        uint32_t h2 = 0u;
+        copy_content_suffix_xxh32_pair(
+            out + row_start, *cursor - row_start,
+            src + row->glossary_start, row->glossary_length, &h1, &h2
+        );
+        *cursor = end;
+        if ((h1 | h2) == 0u) { h1 = 1u; }
+        *out_h1 = h1;
+        *out_h2 = h2;
+        return 1;
     }
 
     if (row->glossary_length > 0u && row->glossary_requires_text_normalization == 0u) {
