@@ -5,6 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
+import {runInNewContext} from 'node:vm'
 import {extractImportResult} from '../benchmark-support.js'
 import {compare, schedule, sourceFiles, verifyStudy} from './verify.mjs'
 
@@ -154,4 +155,46 @@ test('optional phase metrics retain missing pairs and zero-valued candidates', (
   assert.equal(result.missingOrZeroBaselinePairs, 1)
   assert.equal(result.medianPairedChangePercent, -100)
   assert.equal(result.pairs[1].changePercent, null)
+})
+
+async function runMediaProbe(mutate) {
+  const source = readFileSync(path.join(repository, 'test/chromium/extension-two-dictionary-import.e2e.js'), 'utf8')
+  const helper = source.slice(source.indexOf('async function qualifyArchiveMedia('), source.indexOf('\nasync function main()', source.indexOf('async function qualifyArchiveMedia(')))
+  const original = new Map([['a.svg', Buffer.from('first image')], ['b.avif', Buffer.from('last image')], ['unused.svg', Buffer.from('unused image')]])
+  const media = [
+    {path: 'a.svg', dictionary: 'Fixture', mediaType: 'image/svg+xml', content: original.get('a.svg').toString('base64')},
+    {path: 'b.avif', dictionary: 'Fixture', mediaType: 'image/avif', content: original.get('b.avif').toString('base64')}
+  ]
+  mutate?.(media)
+  const requested = []
+  const qualify = runInNewContext(`${helper}\nqualifyArchiveMedia`, {
+    Buffer, createHash,
+    fail: (message) => { throw new Error(message) },
+    execFileAsync: async (command, args) => {
+      assert.equal(command, 'unzip')
+      if (args[0] === '-Z1') return {stdout: [...original.keys()].join('\n')}
+      assert.equal(args[0], '-p')
+      requested.push(args[2])
+      return {stdout: original.get(args[2])}
+    },
+    evalSendMessage: async (_page, action, request) => {
+      assert.equal(action, 'readerBridgeRuntime')
+      assert.equal(request.action, 'getMedia')
+      assert.equal(JSON.stringify(request.params.targets.map((value) => value.path)), '["a.svg","b.avif"]')
+      return media
+    }
+  })
+  const result = await qualify(null, 'fixture.zip', {expectedTitle: 'Fixture', mediaRows: 2, mediaProbeMode: 'all-referenced-images', mediaProbePaths: ['a.svg', 'b.avif']})
+  assert.deepEqual(requested, ['a.svg', 'b.avif'])
+  return JSON.parse(JSON.stringify(result))
+}
+
+test('browser helper reads both referenced SVG and AVIF bytes and excludes unused images', async () => {
+  assert.equal((await runMediaProbe()).length, 2)
+})
+
+test('browser helper rejects corrupt final image bytes, wrong MIME and missing media', async () => {
+  await assert.rejects(runMediaProbe((media) => { media[1].content = Buffer.from('corrupt').toString('base64') }), /bytes differ/)
+  await assert.rejects(runMediaProbe((media) => { media[1].mediaType = 'image/webp' }), /Invalid persisted media/)
+  await assert.rejects(runMediaProbe((media) => { media.pop() }), /incomplete/)
 })

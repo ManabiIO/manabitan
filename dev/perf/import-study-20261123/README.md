@@ -43,8 +43,11 @@ campaign in `confirmationOf`. Both replications must independently retain at
 least a 5% median improvement against A and C, improve equal-work totals and
 have at least five of six faster pairs against each baseline in a benefiting
 corpus. No material regression may remain in the other corpora. Compare complete
-packaged member maps and `harnessFileSha256` between discovery and confirmation;
-the config's stage/reference change is excluded from that harness comparison.
+packaged member maps and all measurement-source hashes across replications.
+The media-readback revision below is an explicit difference from discovery;
+compare that small source diff instead of asserting identical whole-harness
+hashes across the two stages. The dependency lock, production package members,
+timing boundary, import controls and fixed acquisition schedules remain frozen.
 
 Report the identical-code C/A controls separately, without subtracting them.
 Unstable controls make a result inconclusive and call for a separately declared
@@ -74,9 +77,24 @@ All corpus row and media counts must match before and after restart. VNDB also
 compares five deterministic persisted image byte streams to the locked ZIP,
 including the first, one-third, two-thirds and last source images plus
 `img/cc18737.webp`. Their expected sizes and SHA-256 hashes are independently
-computed from the locked archive before timing. Jitendex currently has count and
-sampled full-response checks, but no image-byte comparison. This limitation is
-explicit; no exhaustive media-content claim is made.
+computed from the locked archive before timing.
+
+The discovery harness at `6427e3d801f797271cd1e68b038f9babe13ac18d` has Jitendex
+media-count and sampled complete-response checks, but no image-byte comparison.
+This separately prepared revision adds every one of its 236 referenced images:
+201 AVIF and 35 SVG files, totalling 4,992,155 uncompressed bytes. The locked ZIP
+contains 249 image members; 13 unreferenced SVG files are correctly excluded.
+Before timing, the Python driver independently traverses every source term bank
+and requires its complete image-reference set to equal the frozen probe list.
+It computes source byte lengths and hashes directly from that verified ZIP.
+
+After import and again after browser restart, the browser harness retrieves all
+236 persisted images and compares each MIME type, byte length and SHA-256 digest
+with its source member. Raw media probe receipts are retained and independently
+checked by the verifier. These stronger checks run after the timed import;
+they do not alter runtime code or import options. The original discovery scope
+and artifacts remain intact. This does not establish exhaustive all-term
+semantic readback or exhaustive VNDB image readback.
 
 The verifier recomputes authoritative timing and all comparison arithmetic from
 raw reports. It rejects source/package/fixture/browser mismatches, unexpected
@@ -128,6 +146,7 @@ the Chromium sandbox enabled; no sandbox or application-security bypass is used.
 
 ```sh
 node --test dev/perf/import-study-20261123/verify.test.mjs
+python3 dev/perf/import-study-20261123/test_media_reference.py
 python3 dev/perf/import-study-20261123/run.py --matrix
 python3 dev/perf/import-study-20261123/run.py --dictionary vndb --replication 1
 node dev/perf/import-study-20261123/verify.mjs builds/import-study-20261123/vndb/1

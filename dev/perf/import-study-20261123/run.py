@@ -91,11 +91,32 @@ def media_reference(archive_path, fixture):
     if fixture.get("mediaRows", 0) == 0 or "mediaProbePaths" not in fixture:
         return None
     with zipfile.ZipFile(archive_path) as archive:
-        names = [name for name in archive.namelist() if name.endswith(".webp")]
-        if len(names) != fixture["mediaRows"]:
-            raise ValueError("Locked source-media count differs")
-        paths = list(dict.fromkeys([names[0], names[len(names) // 3], names[len(names) * 2 // 3],
-                                   names[-1], *fixture["mediaProbePaths"]]))
+        if fixture.get("mediaProbeMode") == "all-referenced-images":
+            references = set()
+            for name in archive.namelist():
+                if re.fullmatch(r"term_bank_[0-9]+\.json", name) is None:
+                    continue
+                pending = [json.loads(archive.read(name))]
+                while pending:
+                    value = pending.pop()
+                    if isinstance(value, dict):
+                        if value.get("tag") == "img" or value.get("type") == "image":
+                            image_path = value.get("path")
+                            if not isinstance(image_path, str) or not image_path:
+                                raise ValueError("Invalid referenced source image")
+                            references.add(image_path)
+                        pending.extend(value.values())
+                    elif isinstance(value, list):
+                        pending.extend(value)
+            paths = sorted(references)
+            if paths != fixture["mediaProbePaths"] or len(paths) != fixture["mediaRows"]:
+                raise ValueError("Locked image probes differ from complete source references")
+        else:
+            names = [name for name in archive.namelist() if name.endswith(".webp")]
+            if len(names) != fixture["mediaRows"]:
+                raise ValueError("Locked source-media count differs")
+            paths = list(dict.fromkeys([names[0], names[len(names) // 3], names[len(names) * 2 // 3],
+                                       names[-1], *fixture["mediaProbePaths"]]))
         return [{"path": name, "bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}
                 for name in paths for data in [archive.read(name)]]
 

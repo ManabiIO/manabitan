@@ -2,7 +2,7 @@ name: Import pipeline discovery and confirmation
 
 on:
   push:
-    branches: [perf/import-pipeline-study-20261123-72c24]
+    branches: ['perf/import-*-study-20261123-72c24']
 
 permissions:
   contents: read
@@ -39,7 +39,9 @@ jobs:
         with:
           node-version: '22.22.0'
       - name: Check comparison guards
-        run: node --test dev/perf/import-study-20261123/verify.test.mjs
+        run: |
+          node --test dev/perf/import-study-20261123/verify.test.mjs
+          python3 dev/perf/import-study-20261123/test_media_reference.py
       - name: Install matching Chromium
         run: npx playwright install --with-deps chromium
       - name: Restore verified dictionary archives

@@ -198,9 +198,10 @@ export function verifyStudy(directory) {
   assert.deepEqual(packageDifferences, load('package-differences.json'))
   assert.ok(packageDifferences.length > 0)
   const mediaReference = load('media-reference.json')
-  if (dictionary === 'vndb') {
-    assert.equal(mediaReference.length, 5)
+  if (dictionary === 'vndb' || fixture.mediaProbeMode === 'all-referenced-images') {
+    assert.equal(mediaReference.length, dictionary === 'vndb' ? 5 : fixture.mediaRows)
     assert.ok(mediaReference.every((value) => isDigest(value.sha256) && Number.isSafeInteger(value.bytes) && value.bytes > 0))
+    if (fixture.mediaProbeMode === 'all-referenced-images') assert.deepEqual(mediaReference.map((value) => value.path), fixture.mediaProbePaths)
   } else assert.equal(mediaReference, null)
   const observations = []
   const physical = new Map()
@@ -267,6 +268,8 @@ export function verifyStudy(directory) {
     packages: identities, packageDifferences, warmups: 3, measuredImports: triplets.length * 3,
     observations, comparisons, semanticDigestSha256: jsonSha(semantic), semanticEntryCount: expectedEntries[dictionary],
     layoutDifferences, meetsMaterialityAndDirectionThreshold: meetsThreshold,
+    mediaProbeCount: mediaReference?.length ?? 0,
+    mediaProbeScope: fixture.mediaProbeMode === 'all-referenced-images' ? 'all referenced images' : (mediaReference === null ? 'count only' : 'five source images'),
     decision: config.stage === 'discovery' ? (meetsThreshold ? 'promising; requires two independent confirmations' : 'not promising under the predeclared screen') : 'combine both independent replications before any promotion claim',
     limits: 'All observations and tails retained. Sampled complete responses, not exhaustive all-term readback. Phase times may overlap. Identical-code controls are reported separately without subtraction. No peak-memory claim.'
   }

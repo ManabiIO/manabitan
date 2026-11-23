@@ -3502,9 +3502,18 @@ async function stopBrowserTraceToFile(session, outputPath) {
 async function qualifyArchiveMedia(page, archive, fixture) {
     if (fixture.mediaRows === undefined) { return null; }
     const {stdout: listing} = await execFileAsync('unzip', ['-Z1', archive], {maxBuffer: 8 * 1024 * 1024});
-    const names = listing.split('\n').filter((name) => name.endsWith('.webp'));
-    if (names.length !== fixture.mediaRows) { fail('Source media count differs from the locked fixture'); }
-    const paths = [...new Set([names[0], names[Math.floor(names.length / 3)], names[Math.floor(names.length * 2 / 3)], names[names.length - 1], ...fixture.mediaProbePaths])];
+    const allNames = new Set(listing.split('\n'));
+    let paths;
+    if (fixture.mediaProbeMode === 'all-referenced-images') {
+        paths = fixture.mediaProbePaths;
+        if (paths.length !== fixture.mediaRows || new Set(paths).size !== paths.length || paths.some((name) => !allNames.has(name))) {
+            fail('Complete referenced-media probes differ from the locked archive');
+        }
+    } else {
+        const names = [...allNames].filter((name) => name.endsWith('.webp'));
+        if (names.length !== fixture.mediaRows) { fail('Source media count differs from the locked fixture'); }
+        paths = [...new Set([names[0], names[Math.floor(names.length / 3)], names[Math.floor(names.length * 2 / 3)], names[names.length - 1], ...fixture.mediaProbePaths])];
+    }
     const media = await evalSendMessage(page, 'readerBridgeRuntime', {
         action: 'getMedia', params: {targets: paths.map((path) => ({path, dictionary: fixture.expectedTitle}))},
     });
@@ -3512,7 +3521,8 @@ async function qualifyArchiveMedia(page, archive, fixture) {
     const results = [];
     for (const path of paths) {
         const found = media.filter((entry) => entry.path === path && entry.dictionary === fixture.expectedTitle);
-        if (found.length !== 1 || typeof found[0].content !== 'string' || found[0].mediaType !== 'image/webp') { fail(`Invalid persisted media probe: ${path}`); }
+        const expectedType = {webp: 'image/webp', avif: 'image/avif', svg: 'image/svg+xml'}[path.split('.').at(-1)];
+        if (typeof expectedType !== 'string' || found.length !== 1 || typeof found[0].content !== 'string' || found[0].mediaType !== expectedType) { fail(`Invalid persisted media probe: ${path}`); }
         const {stdout: source} = await execFileAsync('unzip', ['-p', archive, path], {encoding: 'buffer', maxBuffer: 4 * 1024 * 1024});
         const actual = Buffer.from(found[0].content, 'base64');
         const expectedHash = createHash('sha256').update(source).digest('hex');
