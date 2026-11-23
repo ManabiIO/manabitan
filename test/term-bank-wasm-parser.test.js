@@ -1601,8 +1601,80 @@ describe('term-bank WASM parser', () => {
         }
     });
 
+    /* eslint-disable @stylistic/semi */
+    maybeTest.each([
+        {sourceBytes: 512 * 1024 * 1024 - 1, projectImagePaths: true, explicitNative: false, expectedNative: false},
+        {sourceBytes: 512 * 1024 * 1024, projectImagePaths: true, explicitNative: false, expectedNative: true},
+        {sourceBytes: 512 * 1024 * 1024 + 1, projectImagePaths: true, explicitNative: false, expectedNative: true},
+        {sourceBytes: 512 * 1024 * 1024, projectImagePaths: false, explicitNative: false, expectedNative: false},
+        {sourceBytes: 512 * 1024 * 1024 - 1, projectImagePaths: true, explicitNative: true, expectedNative: true},
+        {sourceBytes: 512 * 1024 * 1024 - 1, projectImagePaths: false, explicitNative: true, expectedNative: true},
+    ])('preserves native-key admission while deferring content ownership: %j', async ({sourceBytes, projectImagePaths, explicitNative, expectedNative}) => {
+        const originalNavigator = globalThis.navigator
+        /** @type {unknown[]} */
+        const workerOptions = []
+        /** @implements {WorkerMock} */
+        class PolicyWorker {
+            constructor() {
+                /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
+                this.listeners = new Map()
+            }
+
+            addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                addWorkerListener(this.listeners, type, listener)
+            }
+
+            removeEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
+                this.listeners.get(type)?.delete(listener)
+            }
+
+            postMessage(/** @type {WorkerMessage} */ message) {
+                queueMicrotask(() => {
+                    if (message.type === 'initialize') {
+                        emitWorkerMessage(this.listeners, {type: 'ready'})
+                        return
+                    }
+                    workerOptions.push(message.options)
+                    emitSuccessfulWorkerResult(this.listeners, getWorkerMessageId(message))
+                })
+            }
+
+            terminate() {}
+        }
+
+        vi.stubGlobal('navigator', {hardwareConcurrency: 4, deviceMemory: 8})
+        vi.stubGlobal('Worker', PolicyWorker)
+        try {
+            const sourceBanks = Array.from({length: 4}, () => textEncoder.encode('[]'))
+            const estimatedBytes = sourceBanks.map(() => Math.floor(sourceBytes / sourceBanks.length))
+            estimatedBytes[0] += sourceBytes % sourceBanks.length
+            await expect(parseTermBankWithWasmColumnChunksParallelLazy(
+                sourceBanks.map((source) => async () => source),
+                estimatedBytes,
+                3,
+                () => {},
+                {emitContentSlab: true, projectImagePaths, experimentalNativeEscapedKeys: explicitNative},
+            )).resolves.toBe(true)
+            expect(workerOptions).toHaveLength(sourceBanks.length)
+            for (const options of workerOptions) {
+                expect(options).toMatchObject({
+                    ownContentBytes: false,
+                    projectImagePaths,
+                    experimentalNativeEscapedKeys: expectedNative,
+                })
+            }
+        } finally {
+            await disposeParallelTermBankParser()
+            vi.stubGlobal('navigator', originalNavigator)
+            vi.stubGlobal('Worker', void 0)
+        }
+    })
+    /* eslint-enable @stylistic/semi */
+
     maybeTest.each([
         {ownership: 'borrowed', media: false, cancel: false},
+        {ownership: 'borrowed', media: true, cancel: false},
+        {ownership: 'borrowed', media: true, cancel: true},
         {ownership: 'owned', media: false, cancel: false},
         {ownership: 'owned', media: true, cancel: false},
         {ownership: 'owned', media: true, cancel: true},
@@ -1612,12 +1684,12 @@ describe('term-bank WASM parser', () => {
         const workerCount = getParallelTermBankParserWorkerCount();
         let parseCount = 0;
         let cancelled = false;
-        const sharedContent = new Uint8Array(new SharedArrayBuffer(1));
         /** @implements {WorkerMock} */
         class BorrowingWorker {
             constructor() {
                 /** @type {Map<string, Set<(event: MessageEvent<unknown>) => void>>} */
                 this.listeners = new Map();
+                this.sharedContent = new Uint8Array(new SharedArrayBuffer(1));
             }
 
             addEventListener(/** @type {string} */ type, /** @type {(event: MessageEvent<unknown>) => void} */ listener) {
@@ -1637,7 +1709,7 @@ describe('term-bank WASM parser', () => {
                     ++parseCount;
                     const content = ownership === 'owned' ?
                         new Uint8Array(new SharedArrayBuffer(1)) :
-                        (ownership === 'partial' ? new Uint8Array(new SharedArrayBuffer(2)).subarray(1) : sharedContent);
+                        (ownership === 'partial' ? new Uint8Array(new SharedArrayBuffer(2)).subarray(1) : this.sharedContent);
                     content[0] = parseCount;
                     emitWorkerMessage(this.listeners, {
                         type: 'result',
@@ -1667,14 +1739,16 @@ describe('term-bank WASM parser', () => {
             const sourceBanks = Array.from({length: workerCount * 6}, () => textEncoder.encode('[]'));
             const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
                 sourceBanks.map((source) => async () => source),
-                sourceBanks.map(() => 24 * 1024 * 1024),
+                sourceBanks.map(() => (media ? 64 : 24) * 1024 * 1024),
                 3,
-                async (_chunk, progress) => {
+                async (chunk, progress) => {
                     if (progress.chunkIndex !== 1) { return; }
+                    const contentValue = chunk.contentBytesBuffer?.[0];
                     firstSinkStarted();
                     await firstSinkGate;
+                    expect(chunk.contentBytesBuffer?.[0]).toBe(contentValue);
                 },
-                {emitContentSlab: true, mediaHintFastScan: media},
+                {emitContentSlab: true, mediaHintFastScan: media, projectImagePaths: media},
                 () => cancelled,
             );
             await firstSinkStart;
@@ -1684,7 +1758,7 @@ describe('term-bank WASM parser', () => {
             releaseFirstSink();
             if (cancel) {
                 await expect(parsing).rejects.toThrow(/cancel/i);
-                expect(parseCount).toBe(leadGroups);
+                expect(parseCount).toBe(ownership === 'owned' ? leadGroups : workerCount);
             } else {
                 await expect(parsing).resolves.toBe(true);
                 expect(parseCount).toBe(workerCount * 6);

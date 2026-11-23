@@ -60,7 +60,7 @@ const LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES = 24 * 1024 * 1024;
 const PARALLEL_WORKER_READY_TIMEOUT_MS = 60_000;
 const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
 const PARALLEL_WORKER_CANCELLATION_POLL_MS = 25;
-const OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES = 512 * 1024 * 1024;
+const NATIVE_ESCAPED_KEY_MIN_SOURCE_BYTES = 512 * 1024 * 1024;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
@@ -2799,12 +2799,14 @@ class ParallelTermBankPipelineRun {
         this._version = version;
         /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
-        const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
+        const largeProjectedImport = options.projectImagePaths === true && totalBytes >= NATIVE_ESCAPED_KEY_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
         this._options = {
             ...options,
             ...snapshotTermBankExperiments(options),
-            ownContentBytes: largeProjectedImport,
+            // Cacheable groups own compact snapshots. Other groups retain the
+            // existing borrowed-slab lease through durable content completion.
+            ownContentBytes: false,
             experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true || largeProjectedImport,
         };
         /** @type {() => boolean} */
