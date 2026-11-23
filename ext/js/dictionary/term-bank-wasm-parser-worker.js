@@ -114,7 +114,7 @@ async function parse(data) {
                     signature: /** @type {number} */ (metadata.signature),
                     filename: typeof metadata.filename === 'string' ? metadata.filename : void 0,
                 };
-            }), experiments);
+            }), experiments, data.version === 3 && options.validateGlossaryTypes === true);
         }
         /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
         let resultChunk = null;
@@ -178,6 +178,10 @@ async function parse(data) {
             if (typeof preloadedSource !== 'undefined') {
                 Object.assign(profile, {
                     sourceInflateMs: preloadedSource.inflateMs,
+                    sourceCrcMs: preloadedSource.crcMs ?? 0,
+                    sourceCrcScannedBytes: preloadedSource.crcScannedBytes ?? 0,
+                    sourceCrcReusedBytes: preloadedSource.crcReusedBytes ?? 0,
+                    sourceCrcReusedGlossaryCount: preloadedSource.crcReusedGlossaryCount ?? 0,
                     sourceCompressedBytes: preloadedSource.compressedBytes,
                     sourceUncompressedBytes: preloadedSource.uncompressedBytes,
                 });
