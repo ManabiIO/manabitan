@@ -37,6 +37,10 @@
         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
+        {"path": "dev/perf/results/vndb-media-index-20261122/screen.json", "ignore": true},
+        {"path": "dev/perf/results/vndb-media-index-20261122/confirmation.json", "ignore": true},
+        {"path": "dev/perf/results/vndb-media-index-20261122/contended-source.json", "ignore": true},
+        {"path": "dev/perf/results/vndb-media-index-20261122/current-source.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",
