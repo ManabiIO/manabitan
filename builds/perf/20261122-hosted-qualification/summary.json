@@ -1,0 +1,770 @@
+{
+  "cohorts": {
+    "media-vndb-forward": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -1.157628965134827,
+            0.12839466311171388
+          ],
+          "equalWorkPercent": -0.5501083943112106,
+          "fasterPairs": 9,
+          "medianPairedPercent": -0.4260412898980548,
+          "pairedPercentChanges": [
+            -1.0011612568637807,
+            -3.051009600601584,
+            -1.483218930012753,
+            -0.15940304713860654,
+            1.0310381733864782,
+            -0.36811966810798014,
+            1.0080931421263761,
+            -1.3140966734058734,
+            -0.48396291168812944,
+            0.4161923733620343,
+            -0.6941522928049726,
+            -0.3345266741005881
+          ],
+          "pairs": 12,
+          "worstPairPercent": 1.0310381733864782
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -1.2221357402799837,
+            0.18524974448643206
+          ],
+          "equalWorkPercent": -0.6530793139617019,
+          "fasterPairs": 9,
+          "medianPairedPercent": -0.7403415600580721,
+          "pairedPercentChanges": [
+            -1.2338874766608776,
+            -1.2103840038990898,
+            0.5480191513339117,
+            -3.1366967747721963,
+            -0.5257241879964236,
+            -0.9549589321197205,
+            -1.430600297896334,
+            0.6879578083805349,
+            1.1661049021358005,
+            -1.0376862401407672,
+            -0.35295911068211616,
+            -0.17751966236104755
+          ],
+          "pairs": 12,
+          "worstPairPercent": 1.1661049021358005
+        },
+        "case": "media-vndb",
+        "complete": true,
+        "dictionary": "vndb",
+        "direction": "forward",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -1.7471126388109104,
+            1.5170566988793488
+          ],
+          "equalWorkPercent": 0.10364782213623247,
+          "fasterPairs": 6,
+          "medianPairedPercent": 0.039173724238694696,
+          "pairedPercentChanges": [
+            0.23563367419376924,
+            -1.8631771954403908,
+            -2.0201671783204977,
+            3.0737065828849053,
+            1.5649898917837302,
+            0.5924973705746073,
+            2.4740877466971734,
+            -1.988375298659384,
+            -1.63104808218143,
+            1.4691235059749674,
+            -0.3424017201893892,
+            -0.15728622571637985
+          ],
+          "pairs": 12,
+          "worstPairPercent": 3.0737065828849053
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14787261387,
+      "attempt": 1,
+      "jobId": 137457712151
+    },
+    "media-vndb-reverse": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -1.227154001139219,
+            -0.033374260542679
+          ],
+          "equalWorkPercent": -0.5923727989104455,
+          "fasterPairs": 10,
+          "medianPairedPercent": -0.720456318454743,
+          "pairedPercentChanges": [
+            -1.5344410911065087,
+            -0.009273212008675813,
+            -1.2346111208353827,
+            -1.2196968814430553,
+            -0.05747530907668219,
+            -1.0327685198137981,
+            -0.2846123463687622,
+            -1.1367231903249508,
+            -0.4081441170956879,
+            1.2083091947372449,
+            0.5168930031483443,
+            -1.8705886443463826
+          ],
+          "pairs": 12,
+          "worstPairPercent": 1.2083091947372449
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -0.946049847765873,
+            0.4973961423019646
+          ],
+          "equalWorkPercent": 0.011353681871772991,
+          "fasterPairs": 5,
+          "medianPairedPercent": 0.12717339969937624,
+          "pairedPercentChanges": [
+            -0.9549287583597188,
+            1.4978408970578228,
+            -0.5113315779574967,
+            -1.1436898863302458,
+            0.11279653150637614,
+            0.45247260882523843,
+            0.5423196757786908,
+            -1.4968766419517054,
+            0.37352245862856126,
+            0.14155026789237635,
+            2.130605521670126,
+            -0.9371709371720272
+          ],
+          "pairs": 12,
+          "worstPairPercent": 2.130605521670126
+        },
+        "case": "media-vndb",
+        "complete": true,
+        "dictionary": "vndb",
+        "direction": "reverse",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -1.2103996366269187,
+            -0.12348316630615419
+          ],
+          "equalWorkPercent": -0.6036579433797318,
+          "fasterPairs": 10,
+          "medianPairedPercent": -0.7528773241509856,
+          "pairedPercentChanges": [
+            -0.5850996172570344,
+            -1.4848730729110304,
+            -0.7269969076374116,
+            -0.07688633636580011,
+            -0.17007999624650827,
+            -1.4785510899495202,
+            -0.8224715968500496,
+            0.3656264282276833,
+            -0.7787577406645596,
+            1.0652510611141253,
+            -1.5800479300784875,
+            -0.9422481833043173
+          ],
+          "pairs": 12,
+          "worstPairPercent": 1.0652510611141253
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14786554749,
+      "attempt": 1,
+      "jobId": 137457712058
+    },
+    "parser-jitendex-forward": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -1.743558057069028,
+            1.2684813855688648
+          ],
+          "equalWorkPercent": -0.32736307862554215,
+          "fasterPairs": 8,
+          "medianPairedPercent": -0.6111039227069848,
+          "pairedPercentChanges": [
+            -1.7978314095845827,
+            -1.128399215025011,
+            2.333957642992579,
+            -0.07102272727272929,
+            1.183094576293664,
+            -2.069449316029459,
+            -1.8728162124421077,
+            1.3538681948440656,
+            -1.6892847045534731,
+            -0.09380863038895848,
+            1.7956391620401524,
+            -1.6574960940169636
+          ],
+          "pairs": 12,
+          "worstPairPercent": 2.333957642992579
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -0.4592720956350993,
+            2.6647250887758323
+          ],
+          "equalWorkPercent": 0.7726742386356733,
+          "fasterPairs": 5,
+          "medianPairedPercent": 1.2392974643187005,
+          "pairedPercentChanges": [
+            1.2769641439977608,
+            1.6720720720729165,
+            2.392965258758184,
+            -2.413649604660051,
+            2.9364849187934805,
+            -0.7959067652083207,
+            -0.10670840150814875,
+            1.2016307846396401,
+            -4.08247707054371,
+            -0.12263742606187789,
+            4.797535211260517,
+            2.9438953281679225
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.797535211260517
+        },
+        "case": "parser-jitendex",
+        "complete": true,
+        "dictionary": "jitendex",
+        "direction": "forward",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -2.809443735878375,
+            0.08964699670136467
+          ],
+          "equalWorkPercent": -1.0916027837628461,
+          "fasterPairs": 8,
+          "medianPairedPercent": -1.4935655955083282,
+          "pairedPercentChanges": [
+            -3.036026582718787,
+            -2.754415475188443,
+            -0.057628583776714315,
+            2.400568181817353,
+            -1.703371106836482,
+            -1.2837600841801744,
+            -1.767994409507101,
+            0.1504297994252557,
+            2.49505230420759,
+            0.02886419397747364,
+            -2.8644719965683074,
+            -4.469805040421681
+          ],
+          "pairs": 12,
+          "worstPairPercent": 2.49505230420759
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14786453273,
+      "attempt": 1,
+      "jobId": 137457712027
+    },
+    "parser-jitendex-reverse": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -1.4027997987163643,
+            1.910308092312707
+          ],
+          "equalWorkPercent": 0.5135588507038547,
+          "fasterPairs": 5,
+          "medianPairedPercent": 0.82135076163804,
+          "pairedPercentChanges": [
+            1.4375068583348583,
+            0.20519466494122174,
+            -1.2201073694516396,
+            2.7012396470537325,
+            -1.585492227981089,
+            4.0491204779262935,
+            1.7438692098092679,
+            -1.6305216603661798,
+            1.7086622688490705,
+            -2.513255567339512,
+            2.076746974816146,
+            -0.4816753926738193
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.0491204779262935
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -0.7287774991155793,
+            0.25522399699869913
+          ],
+          "equalWorkPercent": -0.18039767665557482,
+          "fasterPairs": 7,
+          "medianPairedPercent": -0.20328562624959412,
+          "pairedPercentChanges": [
+            -2.293626466545018,
+            -0.31693167167839986,
+            0.8861320336697842,
+            -0.23663038334121866,
+            -0.19966372425328505,
+            -0.2069075282459032,
+            0.4249367973763407,
+            -1.1406233265527588,
+            0.04254866503812238,
+            -2.087549259769672,
+            0.08551119662105755,
+            2.990897269178272
+          ],
+          "pairs": 12,
+          "worstPairPercent": 2.990897269178272
+        },
+        "case": "parser-jitendex",
+        "complete": true,
+        "dictionary": "jitendex",
+        "direction": "reverse",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -0.9420758684861696,
+            2.467186458127002
+          ],
+          "equalWorkPercent": 0.6952106712582395,
+          "fasterPairs": 5,
+          "medianPairedPercent": 0.9185689400955321,
+          "pairedPercentChanges": [
+            3.8187205091613885,
+            0.523786381554725,
+            -2.087739276611855,
+            2.9448384128199834,
+            -1.3886010362718415,
+            4.264852306663247,
+            1.3133514986363393,
+            -0.4955507007004978,
+            1.6654049962175899,
+            -0.4347826086993578,
+            1.9895345034340206,
+            -3.3717277486923214
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.264852306663247
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14786446682,
+      "attempt": 1,
+      "jobId": 137457711890
+    },
+    "parser-jmdict-forward": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -1.0385468681624488,
+            1.7756134913740396
+          ],
+          "equalWorkPercent": 0.28486618470875413,
+          "fasterPairs": 6,
+          "medianPairedPercent": -0.1876498537069171,
+          "pairedPercentChanges": [
+            -0.5016482728966487,
+            -1.3367830961604432,
+            3.39524085897025,
+            -2.09513023782405,
+            -0.46069680390923295,
+            2.1023633463910674,
+            -1.3517400057471263,
+            0.08539709649539873,
+            1.4488636363570118,
+            0.11604293587614833,
+            2.79520821450292,
+            -0.7403106401644544
+          ],
+          "pairs": 12,
+          "worstPairPercent": 3.39524085897025
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -1.9644237296458866,
+            0.5800200293052504
+          ],
+          "equalWorkPercent": -0.6085481441073348,
+          "fasterPairs": 8,
+          "medianPairedPercent": -0.8723392850539913,
+          "pairedPercentChanges": [
+            -0.9841677364092583,
+            -1.970865467007732,
+            1.5244336800130043,
+            -0.7605108336987243,
+            0.9932807478888028,
+            3.0888596106039667,
+            -1.9579819922840414,
+            -0.34013605442507755,
+            -1.408061844278674,
+            -2.376237623768962,
+            0.16675931072169803,
+            -3.1170303202203153
+          ],
+          "pairs": 12,
+          "worstPairPercent": 3.0888596106039667
+        },
+        "case": "parser-jmdict",
+        "complete": true,
+        "dictionary": "jmdict",
+        "direction": "forward",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -0.2649761582730725,
+            2.503065414214789
+          ],
+          "equalWorkPercent": 0.8988844735978496,
+          "fasterPairs": 3,
+          "medianPairedPercent": 0.6325898409875963,
+          "pairedPercentChanges": [
+            0.48731546509459545,
+            0.6468305304010213,
+            1.8427161926888314,
+            -1.344847112109604,
+            -1.439677512237303,
+            -0.9569377990397476,
+            0.6183491515741713,
+            0.4269854824936026,
+            2.8977272727140457,
+            2.5529445894946434,
+            2.624073017704065,
+            2.4531862389349346
+          ],
+          "pairs": 12,
+          "worstPairPercent": 2.8977272727140457
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14786202711,
+      "attempt": 1,
+      "jobId": 137457712053
+    },
+    "parser-jmdict-reverse": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            0.27073313782648434,
+            2.216281307026746
+          ],
+          "equalWorkPercent": 0.9647517989981758,
+          "fasterPairs": 2,
+          "medianPairedPercent": 1.1900068371951678,
+          "pairedPercentChanges": [
+            1.7912200851321947,
+            0.6208425720551913,
+            1.2416851441276133,
+            -4.692881745114342,
+            2.507507507500506,
+            1.1383285302627222,
+            4.305454545451148,
+            1.9250551065529864,
+            4.19724097446077,
+            0.13090909091246772,
+            -1.828206616363548,
+            0.41055718474050096
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.305454545451148
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -0.5395851567346177,
+            3.1906960890857317
+          ],
+          "equalWorkPercent": 1.007870172655445,
+          "fasterPairs": 4,
+          "medianPairedPercent": 0.606946852951562,
+          "pairedPercentChanges": [
+            4.255639097733854,
+            3.7494284407830536,
+            1.6986412276764895e-11,
+            -1.4980717887833617,
+            1.0658771280463997,
+            2.6319637373884097,
+            4.411764705889576,
+            -0.7299270072958608,
+            1.5446224256191465,
+            -2.8232636928288146,
+            0.1480165778567244,
+            -0.3492433061733746
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.411764705889576
+        },
+        "case": "parser-jmdict",
+        "complete": true,
+        "dictionary": "jmdict",
+        "direction": "reverse",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -2.168562803356605,
+            2.0193476423331136
+          ],
+          "equalWorkPercent": -0.04268813270053018,
+          "fasterPairs": 6,
+          "medianPairedPercent": 0.33032258063667164,
+          "pairedPercentChanges": [
+            -2.3638232271459336,
+            -3.0155210643049934,
+            1.2416851441104049,
+            -3.2433983926491106,
+            1.4264264264264304,
+            -1.4553314121003913,
+            -0.10181818182833924,
+            2.674504041156478,
+            2.612268858239797,
+            3.0400000000033955,
+            -1.9733023795672766,
+            0.7624633431016825
+          ],
+          "pairs": 12,
+          "worstPairPercent": 3.0400000000033955
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14787100655,
+      "attempt": 1,
+      "jobId": 137457712081
+    },
+    "parser-vndb-forward": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -4.418259748944282,
+            2.1268268796337586
+          ],
+          "equalWorkPercent": -1.242021552414807,
+          "fasterPairs": 7,
+          "medianPairedPercent": -1.9391380229529687,
+          "pairedPercentChanges": [
+            4.531137508998917,
+            2.3105346504790125,
+            -3.1267518780137116,
+            -4.575611360894671,
+            -2.916320310335274,
+            2.2546751352068073,
+            -0.9619557355706632,
+            1.99897862406071,
+            -4.3367209038313925,
+            1.5260907726726058,
+            -5.640790461101075,
+            -4.49979859405717
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.531137508998917
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -4.098732793253889,
+            0.4809390096745303
+          ],
+          "equalWorkPercent": -1.7267077977438205,
+          "fasterPairs": 9,
+          "medianPairedPercent": -2.5440248059034607,
+          "pairedPercentChanges": [
+            1.1215902495645524,
+            -4.25940300613914,
+            -3.4879012552541333,
+            -1.704296748139833,
+            -5.011386433877507,
+            -0.15971223021549186,
+            -4.5850463382342665,
+            2.122655291299713,
+            -1.2499476863393144,
+            -3.9380625803686398,
+            -3.383752863667089,
+            4.38141767621365
+          ],
+          "pairs": 12,
+          "worstPairPercent": 4.38141767621365
+        },
+        "case": "parser-vndb",
+        "complete": true,
+        "dictionary": "vndb",
+        "direction": "forward",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -2.628591871564595,
+            3.5844619773104935
+          ],
+          "equalWorkPercent": 0.49320240979764396,
+          "fasterPairs": 5,
+          "medianPairedPercent": 1.2898991309708174,
+          "pairedPercentChanges": [
+            3.371730261578887,
+            6.8622275846467184,
+            0.37420114362614054,
+            -2.9210988046931785,
+            2.2055971183154943,
+            2.4182496057999048,
+            3.7971936930421,
+            -0.12110600423209661,
+            -3.125844640251463,
+            5.688156516323373,
+            -2.3360849384360116,
+            -8.508426564793304
+          ],
+          "pairs": 12,
+          "worstPairPercent": 6.8622275846467184
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14786891634,
+      "attempt": 1,
+      "jobId": 137457712031
+    },
+    "parser-vndb-reverse": {
+      "analysis": {
+        "candidateVsBaseline": {
+          "descriptiveBootstrap95": [
+            -0.9049224562020064,
+            0.39568351713062944
+          ],
+          "equalWorkPercent": -0.20172043598943867,
+          "fasterPairs": 5,
+          "medianPairedPercent": 0.22508743031911527,
+          "pairedPercentChanges": [
+            0.4035332621671772,
+            0.9567970248678614,
+            0.38783377209408165,
+            0.1664986046956196,
+            -1.260833460041011,
+            0.2836762559426109,
+            -1.8182875079917116,
+            0.36363207046017365,
+            -1.121021478492712,
+            0.49122477930221287,
+            -0.547347968769818,
+            -0.6888234339113009
+          ],
+          "pairs": 12,
+          "worstPairPercent": 0.9567970248678614
+        },
+        "candidateVsControl": {
+          "descriptiveBootstrap95": [
+            -0.9393825274229994,
+            0.6051008445527306
+          ],
+          "equalWorkPercent": -0.2721547963380866,
+          "fasterPairs": 5,
+          "medianPairedPercent": 0.03365380785432803,
+          "pairedPercentChanges": [
+            1.5242094275607965,
+            0.9069201181000075,
+            0.16299440659373055,
+            -1.4091334002697797,
+            -0.1313112194209598,
+            -0.46963165457621914,
+            0.03553618175711204,
+            0.031771433951544026,
+            0.3694697577781181,
+            -2.3535576769735056,
+            -2.6295643297911453,
+            0.8407319313273431
+          ],
+          "pairs": 12,
+          "worstPairPercent": 1.5242094275607965
+        },
+        "case": "parser-vndb",
+        "complete": true,
+        "dictionary": "vndb",
+        "direction": "reverse",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 42,
+        "plannedImports": 42,
+        "sameCodeControl": {
+          "descriptiveBootstrap95": [
+            -1.3080059867996707,
+            1.1775072379053841
+          ],
+          "equalWorkPercent": 0.07062657395717764,
+          "fasterPairs": 5,
+          "medianPairedPercent": 0.13695105743225522,
+          "pairedPercentChanges": [
+            -1.1038511619174463,
+            0.049428628591075,
+            0.22447348627343544,
+            1.5981520999935217,
+            -1.131007380202731,
+            0.7568623758172466,
+            -1.8531651456144105,
+            0.3317552331138618,
+            -1.4850045933966105,
+            2.913349824732814,
+            2.1384482329664722,
+            -1.5168031170978424
+          ],
+          "pairs": 12,
+          "worstPairPercent": 2.913349824732814
+        },
+        "successfulImports": 42,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14788485215,
+      "attempt": 2,
+      "jobId": 137465254519
+    }
+  },
+  "completedImports": 336,
+  "excludedWarmupImports": 48,
+  "measuredImports": 288,
+  "pooledEstimate": null,
+  "researchSha": "b6a3e6567b78a1ced6fb005ec868537542ac2f87",
+  "runId": 45102947664,
+  "schemaVersion": 1,
+  "setupFailures": [
+    {
+      "analysis": {
+        "case": "parser-vndb",
+        "complete": false,
+        "dictionary": "vndb",
+        "direction": "reverse",
+        "failedImports": [],
+        "limitations": "Linux x64 Chromium only; twelve source-derived probes are sampled persisted-content evidence, not exhaustive equality",
+        "observedImports": 0,
+        "plannedImports": 42,
+        "successfulImports": 0,
+        "timingBoundary": "file-input change to post-UI import-complete event; fresh profile every import"
+      },
+      "artifactId": 14785569456,
+      "attempt": 1,
+      "failure": {
+        "error": "ValueError: Command failed (1); see /home/runner/work/manabitan/manabitan/builds/perf/import-qualification/parser-vndb-reverse/fixtures.log",
+        "unixTime": 1795402883.8682125
+      },
+      "jobId": 137457712078
+    }
+  ]
+}

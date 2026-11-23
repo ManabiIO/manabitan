@@ -246,7 +246,7 @@ Each timer covers native compressed source inflation, fused parsing, owned resul
 
 Candidate measured-time changes relative to the mean enclosing baselines were **+2.99%, −24.83%, −10.60%, and +8.57%**; negative means less time. Unchanged baseline C/A drift was **−10.82%, +35.85%, +26.89%, and +15.30%**. The −3.81% median and −5.94% aggregate changes are descriptive only because control variation exceeds the apparent effect. No component or full import speedup is claimed. Preserve this entire cohort; do not retain only favorable triples.
 
-Focused sequential unit validation passed 365/365 tests, changed-file ESLint and seven build dry runs passed, and main TypeScript passed. The original contended unit failures and local full-test TypeScript OOM remain recorded. A CI-discovered test-helper type omission was fixed separately and passed focused type validation. Full CI, actual browser imports, peak memory, persisted outputs, and reopened lookup behavior remain separate gates.
+Focused sequential unit validation passed 365/365 tests, changed-file ESLint and seven build dry runs passed, and main TypeScript passed. The original contended unit failures and local full-test TypeScript OOM remain recorded. A CI-discovered test-helper type omission was fixed separately and passed focused type validation. Full CI and browser timing results are recorded below; peak memory, exhaustive persisted-output equality, and reopened lookup performance remain separate gates.
 
 ## November 22, 2026: consecutive container closes
 
@@ -280,9 +280,11 @@ Raw observations, source/tool hashes, and the exact selected roots are retained
 in `builds/perf/jitendex-close-chain-screen.json`. Reproduce with
 `node dev/perf/import-lookup-screen.js jitendex --pairs 4 --baseline-root <parent> --source-root <candidate> --cache-dir <locked-fixtures> --flags '{}' --out <report>`.
 The 1,410 focused parser/import tests, scoped ESLint, and all seven dry-build
-targets pass. Full validation awaits PR #797 CI. Local full-suite/type attempts
-were stopped after resource contention caused a timeout; none counts as a pass.
-JMdict/VNDB controls and complete-import browser qualification remain pending.
+targets pass. Full PR #797 CI subsequently passed at the published runtime
+commit. Three incomplete local full-unit attempts contain failed-test entries
+or worker-termination timeouts; the local type run ends with `Killed`. None
+counts as a pass. Their original logs are retained with the hosted evidence.
+JMdict/VNDB controls and complete-import browser results are recorded below.
 
 ## November 22, 2026: complete-import browser qualification
 
@@ -309,4 +311,46 @@ python3 dev/perf/import-qualification-20261122.py run --case parser-jitendex --d
 python3 dev/perf/import-qualification-20261122.py analyze --case parser-jitendex --direction forward --output /tmp/manabitan-study-results
 ```
 
-The workflow is scoped to the research branch and relevant tooling paths; evidence/report-only commits do not restart the frozen cohort. All eight jobs preserve artifacts on success or failure. At this handoff revision the hosted run is pending; no complete-import speedup is claimed.
+The workflow is scoped to the research branch and relevant tooling paths; evidence/report-only commits do not restart the frozen cohort. All eight jobs preserve artifacts on success or failure. The completed results follow.
+
+### Completed browser results: hold both performance candidates
+
+All eight frozen cells completed, comprising **336 successful imports: 48 excluded warmups and 288 measured imports**. Runtime was Node 22.22.0, Playwright 1.63.0, and Chromium 153.0.8010.12 on Linux x64. Every import passed the exact dictionary title, revision, row-count, sampled-content, and full-browser-restart checks. Every cell's receipt, source/package identity, schedule, per-observation report, and timing arithmetic was independently reviewed.
+
+The [preserved hosted evidence](../../builds/perf/20261122-hosted-qualification/README.md) includes all nine provider artifacts: the eight successful cohorts and the original zero-observation setup failure. It retains the captured study sources, package-entry hashes, every raw observation, warmups, host snapshots, validation history, and per-file checksums. The [machine-readable summary](../../builds/perf/20261122-hosted-qualification/summary.json) includes every paired delta, descriptive bootstrap interval, faster-pair count, worst pair, and unchanged-code comparison.
+
+Negative percentages below mean less elapsed import time. Each row is one complete independent hosted cohort; no results are pooled across hosts. B is the candidate, while A and C use the identical baseline package with fresh profiles. Each value shows the paired median followed by the equal-work total change.
+
+| Candidate / dictionary | Stream  | B/A median / equal work | B/C median / equal work | C/A median / equal work |
+| ---------------------- | ------- | ----------------------: | ----------------------: | ----------------------: |
+| parser-jmdict          | forward |       -0.188% / +0.285% |       -0.872% / -0.609% |       +0.633% / +0.899% |
+| parser-jmdict          | reverse |       +1.190% / +0.965% |       +0.607% / +1.008% |       +0.330% / -0.043% |
+| parser-jitendex        | forward |       -0.611% / -0.327% |       +1.239% / +0.773% |       -1.494% / -1.092% |
+| parser-jitendex        | reverse |       +0.821% / +0.514% |       -0.203% / -0.180% |       +0.919% / +0.695% |
+| parser-vndb            | forward |       -1.939% / -1.242% |       -2.544% / -1.727% |       +1.290% / +0.493% |
+| parser-vndb            | reverse |       +0.225% / -0.202% |       +0.034% / -0.272% |       +0.137% / +0.071% |
+| media-vndb             | forward |       -0.426% / -0.550% |       -0.740% / -0.653% |       +0.039% / +0.104% |
+| media-vndb             | reverse |       -0.720% / -0.592% |       +0.127% / +0.011% |       -0.753% / -0.604% |
+
+**Shared parser, PR #797: hold.** JMdict and Jitendex do not show consistent improvement across independent cohorts or both baseline comparisons. The initially favorable VNDB result has intervals spanning zero and substantial unchanged-code variation; its recovered reversed-stream cohort is effectively flat. The local Jitendex component screen does not establish a full-import benefit. The C/WASM candidate remains a draft and is not recommended for performance promotion.
+
+**Media projection, PR #799: hold.** Both forward candidate intervals include zero. In the reversed stream, the B/A improvement (-0.592% equal work) is reproduced by unchanged C/A (-0.604%); B/C is +0.011%. The component oracle and browser checks pass, but complete-import timing does not establish a repeatable benefit. This candidate also remains a draft.
+
+Across the completed VNDB imports, diagnostics confirm 170 fused-parser attempts over 665 bank spans, zero fused fallbacks or discarded rows, three parser workers, and 170 groups. The importer reports 146,570 media records and 91,670,244 owned parser-content bytes. These observations establish the native route; there is no dedicated counter for the individual close-chain or duplicate-projection skip. Media counters do not prove persisted image-payload equality.
+
+The actual schedule consists of twelve counterbalanced A/B/C triplets per cell. Both measured streams begin `ABC`; reverse means reversal of the complete stream. The older literal adjacent AB/BA and opposite-initial-order lanes above were not executed by this study. These results provide controlled timing evidence, with no promotion recommendation. Exhaustive persisted database/index/image equality, whole-browser peak and settled memory, reopened lookup latency, ARM, and browser-specific performance remain outside this timing study. No additional qualification lanes were run after the complete-import benefit failed to distinguish itself from controls.
+
+### Setup recovery and validation record
+
+Initial job `137457712078` (`parser-vndb/reverse`) timed out during locked-fixture provisioning, before preparation completed or any import began. Its artifact records **0/42 observations**. The log does not identify which archive timed out. After all seven other cohorts completed and all eight original artifacts were downloaded and verified, only that job was rerun at the original research SHA. Recovery job `137465254519` completed the unchanged 42-import schedule. This is setup recovery, not replacement of failed or unfavorable measurements. The original failure artifact and log remain in the evidence archive alongside the successful recovered cohort.
+
+All runtime implementation heads pass complete unit, type, build, Chromium/Firefox extension, and restart/interruption CI:
+
+- Parser `2663832da942d3ce0ccefb5609ef17b7d0ae9371`: [CI 45101578986](https://github.com/ManabiIO/manabitan/actions/runs/45101578986).
+- Media projection `0541343dfb9426317763185db03153bdafc96228`: [CI 45102104773](https://github.com/ManabiIO/manabitan/actions/runs/45102104773).
+- Image-persistence fix `c1c4ad76cf298ef99a5aa747fe6641e5bdd112db`: [CI 45102616028](https://github.com/ManabiIO/manabitan/actions/runs/45102616028).
+- Research implementation `f335d1070b4cb7f208903293469ca8c060f7a8c6`: [CI 45104691201](https://github.com/ManabiIO/manabitan/actions/runs/45104691201). The one-line JSON inventory registration fixes its initial CI omission without changing frozen measurement inputs. Its eight Python contracts and all 150 JSON type tests pass.
+
+Earlier local failed or incomplete test attempts, the missing generated-library prerequisite, the initial image-test-helper type error, and the research JSON inventory failure are retained as separate validation history. Later passing CI does not turn those attempts into passes.
+
+The independent image-persistence correction in [PR #798](https://github.com/ManabiIO/manabitan/pull/798) is ready for review as a correctness fix. Its regression reproduces missing shared-image data on the parent when metadata resolution is enabled and passes after first references are resolved before duplicates. It has no performance claim and is outside the frozen timing candidate matrix.
