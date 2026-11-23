@@ -30,7 +30,7 @@ import {fileURLToPath} from 'node:url';
 import {existsSync, readFileSync} from 'node:fs';
 import {access, copyFile, mkdir, mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {chromium, expect} from '@playwright/test';
-import {ensurePinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
+import {ensureSelectedPinnedDictionaryCache} from '../../dev/perf/dictionary-fixtures.js';
 import {verifyBenchmarkMedia} from '../../dev/perf/import-media-validation.js';
 import {getHostEnvironment} from '../../dev/perf/host-environment.js';
 import {parseJson} from '../../ext/js/core/json.js';
@@ -933,7 +933,7 @@ async function ensureRealDictionaryCache() {
     if (usePinnedPerfDictionaries) {
         const ids = ['jmdict', 'jmnedict', 'jitendex'];
         if (quickImportBenchmarkMode && quickImportBenchmarkDictionaryId === 'vndb') { ids.push('vndb'); }
-        const {paths, fixtures} = await ensurePinnedDictionaryCache(dictionaryCacheDir, ids);
+        const {paths, fixtures} = await ensureSelectedPinnedDictionaryCache(dictionaryCacheDir, ids);
         return {jmdictPath: paths.jmdict, jmnedictPath: paths.jmnedict, jitendexPath: paths.jitendex, vndbPath: paths.vndb, fixtures};
     }
     const {jitendexUrl, jmnedictUrl, jmdictUrl} = await loadRecommendedDictionaryUrls();

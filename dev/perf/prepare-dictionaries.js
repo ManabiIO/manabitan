@@ -18,14 +18,14 @@
 
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {ensurePinnedDictionaryCache, loadDictionaryFixtures} from './dictionary-fixtures.js';
+import {ensurePinnedDictionaryCache, ensureSelectedPinnedDictionaryCache, loadDictionaryFixtures} from './dictionary-fixtures.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(dirname, '..', '..');
 const cacheDir = path.join(root, 'builds', 'e2e-dictionary-cache');
 const args = process.argv.slice(2);
 const dictionaryIds = args.length === 1 && args[0] === '--all' ? Object.keys((await loadDictionaryFixtures())) : args;
-const result = await ensurePinnedDictionaryCache(cacheDir, dictionaryIds);
+const result = args.length === 0 ? await ensurePinnedDictionaryCache(cacheDir) : await ensureSelectedPinnedDictionaryCache(cacheDir, dictionaryIds);
 for (const [id, filePath] of Object.entries(result.paths)) {
     console.log(`${id}: ${filePath} sha256=${result.fixtures[id].sha256}`);
 }

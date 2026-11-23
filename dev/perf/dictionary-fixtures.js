@@ -120,12 +120,34 @@ export async function ensurePinnedDictionaryCache(cacheDir, additionalIds = []) 
             throw new Error(`Performance dictionary lock is missing ${id}`);
         }
     }
-    const selectedFixtures = additionalIds.length === 0 ?
-        selectDictionaryFixtures(fixtures) :
-        Object.fromEntries(additionalIds.map((id) => {
-            if (!Object.hasOwn(fixtures, id)) { throw new Error(`Unknown performance dictionary: ${id}`); }
-            return [id, fixtures[id]];
-        }));
+    const selectedFixtures = selectDictionaryFixtures(fixtures, additionalIds);
+    return await ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures);
+}
+
+/**
+ * Ensures exactly the requested locked fixtures are available and integrity checked.
+ * @param {string} cacheDir
+ * @param {string[]} dictionaryIds
+ * @returns {Promise<{paths: Record<string, string>, fixtures: Record<string, DictionaryFixture>}>}
+ * @throws {Error}
+ */
+export async function ensureSelectedPinnedDictionaryCache(cacheDir, dictionaryIds) {
+    const fixtures = await loadDictionaryFixtures();
+    const selectedFixtures = {};
+    for (const id of dictionaryIds) {
+        if (!Object.hasOwn(fixtures, id)) { throw new Error(`Unknown performance dictionary: ${id}`); }
+        selectedFixtures[id] = fixtures[id];
+    }
+    return await ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures);
+}
+
+/**
+ * @param {string} cacheDir
+ * @param {Record<string, DictionaryFixture>} fixtures
+ * @param {Record<string, DictionaryFixture>} selectedFixtures
+ * @returns {Promise<{jitendexPath?: string, jmnedictPath?: string, jmdictPath?: string, paths: Record<string, string>, fixtures: Record<string, DictionaryFixture>}>}
+ */
+async function ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures) {
     await mkdir(cacheDir, {recursive: true});
     /** @type {Record<string, string>} */
     const paths = {};

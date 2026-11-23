@@ -23,7 +23,7 @@ import path from 'node:path';
 import {promisify} from 'node:util';
 import {afterEach, describe, expect, test, vi} from 'vitest';
 import {createBenchmarkEnvironment, extractImportResult, median, metricDelta, optionalMetric, parsePositiveInteger, percentDelta, roundMetric} from '../dev/perf/benchmark-support.js';
-import {ensureFixtureFile, ensurePinnedDictionaryCache, loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
+import {ensureFixtureFile, ensureSelectedPinnedDictionaryCache, loadDictionaryFixtures, selectDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js';
 
 const fixtures = await loadDictionaryFixtures();
 const fixture = fixtures.jmdict;
@@ -395,17 +395,22 @@ describe('atomic pinned fixture installation', () => {
         return {dir, filePath: path.join(dir, 'fixture.zip'), bytes, sampleFixture};
     }
 
+    test('keeps VNDB optional in the existing fixture selector', () => {
+        expect(Object.keys(selectDictionaryFixtures(fixtures))).toEqual(['jmdict', 'jmnedict', 'jitendex']);
+        expect(Object.keys(selectDictionaryFixtures(fixtures, ['vndb']))).toEqual(['jmdict', 'jmnedict', 'jitendex', 'vndb']);
+    });
+
     test('prepares only explicitly requested fixtures', async () => {
         const {dir} = await setup();
         const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('missing', {status: 404}));
-        await expect(ensurePinnedDictionaryCache(dir, ['vndb'])).rejects.toThrow('404');
+        await expect(ensureSelectedPinnedDictionaryCache(dir, ['vndb'])).rejects.toThrow('404');
         expect(fetchSpy).toHaveBeenCalledOnce();
         expect(fetchSpy.mock.calls[0][0]).toBe(fixtures.vndb.url);
     });
     test('rejects unknown fixtures before downloading anything', async () => {
         const {dir} = await setup();
         const fetchSpy = vi.spyOn(globalThis, 'fetch');
-        await expect(ensurePinnedDictionaryCache(dir, ['jmdict', 'missing'])).rejects.toThrow('Unknown performance dictionary');
+        await expect(ensureSelectedPinnedDictionaryCache(dir, ['jmdict', 'missing'])).rejects.toThrow('Unknown performance dictionary');
         expect(fetchSpy).not.toHaveBeenCalled();
     });
 
