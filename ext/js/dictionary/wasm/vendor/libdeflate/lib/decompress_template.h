@@ -31,6 +31,10 @@
  * target instruction sets.
  */
 
+#if defined(__wasm_simd128__)
+#  include <wasm_simd128.h>
+#endif
+
 #ifndef ATTRIBUTES
 #  define ATTRIBUTES
 #endif
@@ -587,6 +591,22 @@ have_decode_tables:
 		 * overrun.  FASTLOOP_MAX_BYTES_WRITTEN needs to be updated if
 		 * the maximum possible overrun here is changed.
 		 */
+#if defined(__wasm_simd128__)
+		if (offset >= 16) {
+			/* Each load follows the preceding store.  This preserves
+			 * forward expansion even when the match overlaps at a
+			 * distance of 16..31 bytes.  Rounding to 32 bytes overruns
+			 * by at most 31, within the existing fastloop guard. */
+			STATIC_ASSERT(FASTLOOP_MAX_BYTES_WRITTEN >=
+				      2 + DEFLATE_MAX_MATCH_LEN + 31);
+			do {
+				wasm_v128_store(dst, wasm_v128_load(src));
+				wasm_v128_store(dst + 16, wasm_v128_load(src + 16));
+				src += 32;
+				dst += 32;
+			} while (dst < out_next);
+		} else
+#endif
 		if (UNALIGNED_ACCESS_IS_FAST && offset >= WORDBYTES) {
 			store_word_unaligned(load_word_unaligned(src), dst);
 			src += WORDBYTES;
