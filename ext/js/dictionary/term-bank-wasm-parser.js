@@ -3940,6 +3940,30 @@ function isCompressedTermBankSource(value) {
 }
 
 /**
+ * Projected diagnostics can reuse the result's owned key arena. Check the
+ * actual bytes so foreign or incomplete plans keep the independent-copy path.
+ * @param {Uint8Array|undefined} bytes
+ * @param {number} index
+ * @param {Uint32Array} offsets
+ * @param {Uint16Array} lengths
+ * @param {Uint8Array} ownedStrings
+ * @returns {Uint8Array|undefined}
+ */
+function copyProjectedMediaKeyBytes(bytes, index, offsets, lengths, ownedStrings) {
+    if (!(bytes instanceof Uint8Array)) { return void 0; }
+    const offset = offsets[index];
+    const length = lengths[index];
+    if (
+        bytes.byteLength === 0 || bytes.byteLength !== length ||
+        !Number.isInteger(offset) || offset + length > ownedStrings.byteLength
+    ) { return new Uint8Array(bytes); }
+    for (let i = 0; i < length; ++i) {
+        if (bytes[i] !== ownedStrings[offset + i]) { return new Uint8Array(bytes); }
+    }
+    return ownedStrings.subarray(offset, offset + length);
+}
+
+/**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
@@ -3981,6 +4005,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     if (!(stringOffsets instanceof Uint32Array)) {
         throw new Error('Term record string offsets are unavailable');
     }
+    const ownedStrings = new Uint8Array(plan.stringsBuffer);
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
@@ -3995,8 +4020,12 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
             ...(useProjectedPaths ? {imagePaths} : {}),
             row: {
                 ...row,
-                expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
-                readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
+                expressionBytes: useProjectedPaths ?
+                    copyProjectedMediaKeyBytes(row.expressionBytes, plan.expressionIndexes[index], stringOffsets, plan.stringLengths, ownedStrings) :
+                    (row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0),
+                readingBytes: useProjectedPaths ?
+                    copyProjectedMediaKeyBytes(row.readingBytes, plan.readingIndexes[index], stringOffsets, plan.stringLengths, ownedStrings) :
+                    (row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0),
                 glossaryJsonBytes: !useProjectedPaths && row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
                 termEntryContentBytes: useProjectedPaths ? EMPTY_UINT8_ARRAY : new Uint8Array(row.termEntryContentBytes),
             },
@@ -4014,7 +4043,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     new Uint32Array(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: new Uint8Array(plan.stringsBuffer),
+        stringsBuffer: ownedStrings,
         expressionIndexes: new Uint32Array(plan.expressionIndexes),
         readingIndexes: new Uint32Array(plan.readingIndexes),
     };

@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
     })
 })
 
-/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown}} WorkerReply */
+/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number}}} WorkerReply */
 /**
  * One request at a time, as required by the production parser worker's lease.
  * @param {Worker} worker
@@ -599,6 +599,78 @@ function requestWorker(worker, request) {
 }
 
 describe('actual parser worker flag propagation', () => {
+    test('transfers the diagnostic key arena once and preserves its views after another request', async () => {
+        const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
+        const bridge = `import {parentPort} from 'node:worker_threads'
+            globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
+                postMessage: (data, transfer = []) => {
+                    if (data.type === 'result' && data.chunk) {
+                        const arena = data.chunk.termRecordPreinternedPlan.stringsBuffer.buffer
+                        const keys = data.chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes]).filter(bytes => bytes?.byteLength > 0)
+                        data.transferObservation = {count: transfer.length, uniqueCount: new Set(transfer).size,
+                            keyArenaOccurrences: transfer.filter(buffer => buffer === arena).length,
+                            keyBuffers: new Set(keys.map(bytes => bytes.buffer)).size,
+                            keyBuffersOutsideArena: keys.filter(bytes => bytes.buffer !== arena).length}
+                    }
+                    parentPort.postMessage(data, transfer)
+                }}
+            await import(${JSON.stringify(workerUrl)})
+            parentPort.postMessage({type: 'loaded'})`
+        const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`))
+        try {
+            expect((await requestWorker(worker, null)).type).toBe('loaded')
+            const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
+            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
+            const rows = Array.from({length: 32}, (_, index) => [
+                index === 0 ? 'quoted"\ud800' : `head${index}`,
+                index % 2 === 0 ? '' : `reading${index}`,
+                '',
+                '',
+                index,
+                [{type: 'image', path: `${index}.png`}],
+                index,
+                '',
+            ])
+            const options = {singleChunk: true,
+                emitTermByteLists: false,
+                computeContentHashes: true,
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                mediaHintFastScan: true,
+                projectImagePaths: true,
+                ownContentBytes: true,
+                prepareLookupIndexes: true}
+            const reply = await requestWorker(worker, {type: 'parse',
+                id: 1,
+                version: 3,
+                sourceBuffers: [encoder.encode(JSON.stringify(rows)).buffer],
+                options})
+            expect(reply.type, JSON.stringify(reply.error)).toBe('result')
+            const {chunk, transferObservation} = reply
+            if (!chunk || !transferObservation) { throw new Error('Missing copied worker result') }
+            expect(transferObservation.count).toBe(transferObservation.uniqueCount)
+            expect(transferObservation.keyArenaOccurrences).toBe(1)
+            expect(transferObservation.keyBuffers).toBe(1)
+            expect(transferObservation.keyBuffersOutsideArena).toBe(0)
+            expect(chunk.mediaRows[0].row.expression).toBe('quoted"\ud800')
+            expect(chunk.mediaRows[0].row.expressionBytes).toBeUndefined()
+            const keys = chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes])
+                .filter((bytes) => bytes instanceof Uint8Array)
+            for (const bytes of keys) { expect(bytes.buffer).toBe(chunk.termRecordPreinternedPlan.stringsBuffer.buffer) }
+            const snapshots = keys.map((bytes) => new Uint8Array(bytes))
+            const imagePaths = chunk.mediaRows.map(({imagePaths}) => imagePaths)
+            expect(imagePaths).toEqual(rows.map((_, index) => [`${index}.png`]))
+            const next = await requestWorker(worker, {type: 'parse',
+                id: 2,
+                version: 3,
+                sourceBuffers: [encoder.encode(JSON.stringify([row('replacement'.repeat(100), ['later'])])).buffer],
+                options})
+            expect(next.type, JSON.stringify(next.error)).toBe('result')
+            expect(keys).toEqual(snapshots)
+            expect(chunk.mediaRows.map(({imagePaths}) => imagePaths)).toEqual(imagePaths)
+        } finally { await worker.terminate() }
+    })
+
     test('projects exact image paths without losing the owned term content', async () => {
         const glossary = [{
             type: 'structured-content',

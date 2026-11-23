@@ -49,6 +49,73 @@ async function collectReferences(rows, inspect = () => {}) {
 }
 
 describe('preformatted image references', () => {
+    test('keeps exact diagnostic key views in the owned string arena across native reuse', async () => {
+        /** @type {Uint8Array[]} */
+        const keys = []
+        const expected = ['画像', 'がぞう', '別名', '別名'].map((value) => encoder.encode(value))
+        await collectReferences([
+            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'first.png'}], 0, ''],
+            ['別名', '', '', '', 0, [{type: 'image', path: 'second.png'}], 0, ''],
+        ], (chunk) => {
+            const arena = chunk.termRecordPreinternedPlan.stringsBuffer
+            expect(arena.buffer).toBeInstanceOf(ArrayBuffer)
+            for (const {row} of chunk.mediaRows) {
+                for (const bytes of [row.expressionBytes, row.readingBytes]) {
+                    if (!(bytes instanceof Uint8Array)) { throw new Error('Expected an encoded key') }
+                    expect(bytes.buffer).toBe(arena.buffer)
+                    expect(bytes.byteLength).toBeLessThan(arena.byteLength)
+                    keys.push(bytes)
+                }
+            }
+        })
+        expect(keys).toEqual(expected)
+        await nativeParse(encoder.encode(JSON.stringify([
+            ['replacement'.repeat(100), '', '', '', 0, ['later glossary'], 1, ''],
+        ])), 3, () => {})
+        expect(keys).toEqual(expected)
+    })
+
+    test.each(['bytes', 'offset', 'length', 'string-index', 'row-index'])('copies the original diagnostic key when the plan has a mismatched %s', async (mismatch) => {
+        const source = encoder.encode(JSON.stringify([
+            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'image.png'}], 0, ''],
+        ]))
+        await nativeParse(source, 3, (chunk) => {
+            const plan = chunk.termRecordPreinternedPlan
+            if (!(plan.stringOffsets instanceof Uint32Array)) { throw new Error('Expected key offsets') }
+            const index = plan.expressionIndexes[0]
+            switch (mismatch) {
+                case 'bytes': {
+                    plan.stringsBuffer[plan.stringOffsets[index]] ^= 1
+
+                    break
+                }
+                case 'offset': {
+                    plan.stringOffsets[index] = plan.stringsBuffer.byteLength + 1
+
+                    break
+                }
+                case 'length': {
+                    plan.stringLengths[index] = 0
+
+                    break
+                }
+                case 'string-index': {
+                    plan.expressionIndexes[0] = 0xffffffff
+
+                    break
+                }
+                default: {
+                    chunk.mediaRows[0].index = chunk.rowCount
+                }
+            }
+            const copy = parser.copyWasmBackedColumnChunk(chunk, false, true)
+            const row = copy.mediaRows[0].row
+            expect(copy.mediaRows[0].imagePaths).toEqual(['image.png'])
+            expect(row.expressionBytes).toEqual(encoder.encode('画像'))
+            expect(row.expressionBytes?.buffer).not.toBe(copy.termRecordPreinternedPlan.stringsBuffer.buffer)
+        }, 2048, {singleChunk: true, emitTermByteLists: false, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true})
+    })
+
     test('stores projected image bytes without decoding diagnostic keys or allocating a presentation target', async () => {
         const decode = vi.spyOn(TextDecoder.prototype, 'decode')
         let decodedBeforeMaterialization = -1
