@@ -1,0 +1,153 @@
+{
+  "runId": 45110694360,
+  "scope": "Original post-timing memory diagnostics only; authoritative import timings are unaffected.",
+  "samplerSha256": "416df57d5b9bce8f88c60c095bfbac50359d4b2875b083254352dcaa4a01bb4c",
+  "memoryRuns": 16,
+  "samples": 2164,
+  "discoveredPidCountHistogram": {
+    "1": 2161,
+    "2": 1,
+    "3": 2
+  },
+  "wholeTreeCoverageEstablished": false,
+  "suitableForMemoryNonRegressionClaim": false,
+  "finding": "The original sampler filters the basename of the first NUL-delimited cmdline segment against exact executable names. Chromium process-title rewriting can put executable and arguments in that segment, excluding renderer/zygote processes. Nearly every recorded sample contains only one PID; full Chromium/import-worker coverage is not established. Preserve the original readings, but do not interpret them as whole-tree peaks or memory non-regression.",
+  "sourceEvidence": [
+    "https://chromium.googlesource.com/chromium/src/+/HEAD/base/process/set_process_title.cc",
+    "https://chromium.googlesource.com/chromium/src/+/HEAD/base/process/set_process_title_linux.cc"
+  ],
+  "sourceQualification": "Chromium primary-source behavior plus original sampler predicate and observed PID counts; excluded process inventories were not recorded, so individual omitted PIDs cannot be reconstructed.",
+  "runs": [
+    {
+      "path": "owned-shared-jmdict-1/owned-shared/jmdict/1/memory-00-A/chromium-memory.json",
+      "sha256": "e62bec27a99c667048bc0f284f84ef61238f2b4b91f4eff81783a03ace45fb55",
+      "samples": 61,
+      "discoveredPidCountHistogram": {
+        "1": 61
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-1/owned-shared/jmdict/1/memory-01-B/chromium-memory.json",
+      "sha256": "33ac93f07c5259b13f0b856d2d18527e093a4d43662efb6df47e10cd2181b68a",
+      "samples": 59,
+      "discoveredPidCountHistogram": {
+        "1": 59
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-1/owned-shared/jmdict/1/memory-02-B/chromium-memory.json",
+      "sha256": "56f4282caecf5769b93646e4b83d0dcfd75cda2baa2ba1886dd4866657db33ea",
+      "samples": 61,
+      "discoveredPidCountHistogram": {
+        "1": 61
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-1/owned-shared/jmdict/1/memory-03-A/chromium-memory.json",
+      "sha256": "db33977c1ebfc315fab1b4a78775a2ac1a5a9efdd0fd88b9a5584264b6116bcd",
+      "samples": 59,
+      "discoveredPidCountHistogram": {
+        "1": 59
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-2/owned-shared/jmdict/2/memory-00-B/chromium-memory.json",
+      "sha256": "120d4c16361af8db6ff973c0c4589e90b1facfa2706eb8341422383a61cc4856",
+      "samples": 57,
+      "discoveredPidCountHistogram": {
+        "1": 57
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-2/owned-shared/jmdict/2/memory-01-A/chromium-memory.json",
+      "sha256": "1fed2650ee6dfc0e7f4304b3110377625cd6ca5524f849bdb642650f7d80fc52",
+      "samples": 58,
+      "discoveredPidCountHistogram": {
+        "1": 58
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-2/owned-shared/jmdict/2/memory-02-A/chromium-memory.json",
+      "sha256": "24524c7e70e64f44781112b456a2d370a99d6c21d7259848356fd05f608c8497",
+      "samples": 58,
+      "discoveredPidCountHistogram": {
+        "1": 58
+      }
+    },
+    {
+      "path": "owned-shared-jmdict-2/owned-shared/jmdict/2/memory-03-B/chromium-memory.json",
+      "sha256": "79e6d6b1c179a64860a4be2149d50b09812dfa321331a04d971d93dba3840c70",
+      "samples": 58,
+      "discoveredPidCountHistogram": {
+        "1": 58
+      }
+    },
+    {
+      "path": "owned-shared-vndb-1/owned-shared/vndb/1/memory-00-A/chromium-memory.json",
+      "sha256": "1fff836e1871c60b584df71f9450ab00673efbd0e059756de00138c2748d8e51",
+      "samples": 202,
+      "discoveredPidCountHistogram": {
+        "1": 202
+      }
+    },
+    {
+      "path": "owned-shared-vndb-1/owned-shared/vndb/1/memory-01-B/chromium-memory.json",
+      "sha256": "cac9b4e5ecc8f25eef35858955c541739e8863676b6c2abd6b901e9da7ec9897",
+      "samples": 200,
+      "discoveredPidCountHistogram": {
+        "1": 199,
+        "2": 1
+      }
+    },
+    {
+      "path": "owned-shared-vndb-1/owned-shared/vndb/1/memory-02-B/chromium-memory.json",
+      "sha256": "ecd01ac652b28eb318a1cc91ad3c85dba2194b3b6c0e1e780d2c7ada5a8e63d1",
+      "samples": 204,
+      "discoveredPidCountHistogram": {
+        "1": 204
+      }
+    },
+    {
+      "path": "owned-shared-vndb-1/owned-shared/vndb/1/memory-03-A/chromium-memory.json",
+      "sha256": "80d926de7a0e73583b7cbe06a5e497263bd5a1457b77a5e92921aaf6c434ddad",
+      "samples": 204,
+      "discoveredPidCountHistogram": {
+        "3": 1,
+        "1": 203
+      }
+    },
+    {
+      "path": "owned-shared-vndb-2/owned-shared/vndb/2/memory-00-B/chromium-memory.json",
+      "sha256": "85db50700945d775caac723f4cf88bd0d8099ef8f9087fc6fe1af81bee5cf788",
+      "samples": 218,
+      "discoveredPidCountHistogram": {
+        "1": 217,
+        "3": 1
+      }
+    },
+    {
+      "path": "owned-shared-vndb-2/owned-shared/vndb/2/memory-01-A/chromium-memory.json",
+      "sha256": "05f311f7ece817c82079bae92cd00c61b200aa8a1db841814782ecdd9f040be5",
+      "samples": 222,
+      "discoveredPidCountHistogram": {
+        "1": 222
+      }
+    },
+    {
+      "path": "owned-shared-vndb-2/owned-shared/vndb/2/memory-02-A/chromium-memory.json",
+      "sha256": "d7f12c8f4db6621c6b18542fa076a4f67fe74b718c0d4b5ca98f26431b6eef99",
+      "samples": 222,
+      "discoveredPidCountHistogram": {
+        "1": 222
+      }
+    },
+    {
+      "path": "owned-shared-vndb-2/owned-shared/vndb/2/memory-03-B/chromium-memory.json",
+      "sha256": "a19021bb4178be47b4bbd2f6192e0b1911b62312756e228f460b87eaad8bb41c",
+      "samples": 221,
+      "discoveredPidCountHistogram": {
+        "1": 221
+      }
+    }
+  ]
+}

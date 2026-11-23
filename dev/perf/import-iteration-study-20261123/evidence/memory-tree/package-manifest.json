@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "runId": 45114745900,
+  "harness": "75dc67eb4a4f67e56c7270a278c4d034b1955c6f",
+  "archive": "raw-receipts.tar.xz",
+  "compression": "Python stdlib lzma FORMAT_XZ preset=6 (8 MiB dictionary)",
+  "uncompressedTarSha256": "1c71da30bafff9f1bb24a76209c04923f781bb1be03599ff595c120f78a7fed3",
+  "uncompressedTarBytes": 107939840,
+  "rawMemberCount": 285,
+  "rawMemberBytes": 107708564,
+  "qualification": "original campaign remains unqualified; no failures reclassified",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 5428,
+      "sha256": "d14b8ecac7468970b8c1041544a187a002486cc6064ad40677bd62a17e976a6b"
+    },
+    {
+      "path": "audit_memory.py",
+      "bytes": 22722,
+      "sha256": "405b0230a720b0e007398c92ce16a4c34579597820000f196d96d8458a9bcdd6"
+    },
+    {
+      "path": "freeze_memory_package.py",
+      "bytes": 5726,
+      "sha256": "649cd23e10c8794bf92ab18d6ec6b1cb5995a65d21eac9e55290ec691b6f00b0"
+    },
+    {
+      "path": "memory-audit.json",
+      "bytes": 65066,
+      "sha256": "3a88e70a287ecd159a7ef40f02b8c97baf07e8c395e26fddc53e1792f78d21c8"
+    },
+    {
+      "path": "original-zips.json",
+      "bytes": 49165,
+      "sha256": "17bb6976ee4b8bac4d381e67102a196e5b2a79a7d5362496dcd66150907ee88a"
+    },
+    {
+      "path": "raw-members.json",
+      "bytes": 49656,
+      "sha256": "76b3e08aa67bd178b21dc9dacad94b3e4d9c07eab6de8cedf5868163ef251eab"
+    },
+    {
+      "path": "raw-receipts.tar.xz",
+      "bytes": 678768,
+      "sha256": "028826dd7b7fb3542249f2f1a9e1a82af22f44ca841e7142a8674e19535f4e04"
+    },
+    {
+      "path": "verify_memory_package.py",
+      "bytes": 5358,
+      "sha256": "92ff2f626923583f1a2150231bb98155a55aabeefb7a70ffa0f4afe18abe11a1"
+    }
+  ]
+}

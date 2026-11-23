@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "operation": "lossless-gzip-to-xz-transport",
+  "rawTarBytesIdentical": true,
+  "compression": "Python stdlib lzma FORMAT_XZ preset=6 (8 MiB dictionary)",
+  "sourceManifest": {
+    "path": "package-manifest.json",
+    "bytes": 1988,
+    "sha256": "e7c2de50ddb6f936b4ced9e17ecacbc986d64ace5f882badcdca841deddb7bdd"
+  },
+  "sourceArchive": {
+    "path": "raw-receipts.tar.gz",
+    "bytes": 14594749,
+    "sha256": "38165e306a653e98a420b824e91ce500f1806afe53e4e3f2bdbced67ab3813f6",
+    "uncompressedTarBytes": 217794560,
+    "uncompressedTarSha256": "14ecaff029b2e2a55dc7114e5c8c18f635b694405ac8a30f2c56ccba1089c41f"
+  },
+  "destinationArchive": {
+    "path": "raw-receipts.tar.xz",
+    "bytes": 1701032,
+    "sha256": "92bebaaeefdca3a85294f0801a5fec7cb9f5bda8098346714edec027531ed33f",
+    "uncompressedTarBytes": 217794560,
+    "uncompressedTarSha256": "14ecaff029b2e2a55dc7114e5c8c18f635b694405ac8a30f2c56ccba1089c41f"
+  },
+  "changedSupportFiles": [
+    {
+      "path": "README.md",
+      "sourceSha256": "0fbaeee8a83197acc272f510fbd42694d794f2804795eba5995fa7061fe9e6cc",
+      "destinationSha256": "75b15262933fa5360a7da7c00bd77d6785c033b6f2ed7775b0a3f490649fb9c6"
+    },
+    {
+      "path": "verify_package.py",
+      "sourceSha256": "c97e0bc1626a388ce226aa6a795afb274cb8d656be3b2b72c24da935074352ce",
+      "destinationSha256": "19e72eeb37ea9c316bf8c9a1353ee390ae0c1827aab58ef76f15ebf08bbe06b4"
+    }
+  ],
+  "unchangedPayloadFiles": [
+    {
+      "path": "audit_readback.mjs",
+      "sha256": "1e12414f9400ca7d7d860c450fb4545ca9b9fa9424d2c5a74d955c22e723f4ca"
+    },
+    {
+      "path": "build_evidence_package.py",
+      "sha256": "860f382f907776ef442fe96f44fd96d2d10445ef35ac350e284a448c30c57f1a"
+    },
+    {
+      "path": "collect_readback_artifacts.py",
+      "sha256": "33df7dee1b6e81a711abfccd77ce778845db0cb368187266347b842ea0761f9b"
+    },
+    {
+      "path": "corrective-to-final-driver.patch",
+      "sha256": "76fe4629de8619cb77514af109316d07b8d17b349c6c510e1126d3609aa58a77"
+    },
+    {
+      "path": "original-zip-verification.json",
+      "sha256": "14e871e6aa007b087d6f37e2c3fb749c5152708eca48605813b516b6b687f238"
+    },
+    {
+      "path": "raw-members.json",
+      "sha256": "900b6c4c0d7b8db24995ac4a41193e1b159f7f3ac09de3b893267fc136654a1b"
+    },
+    {
+      "path": "readback-audit.json",
+      "sha256": "66511b2de93df0c15907f2726a2a9e249d4dc43c0eb11ee86a5c3125dd33f4b7"
+    }
+  ],
+  "signedAcquisitionUrlScan": {
+    "supportFiles": 10,
+    "rawMembers": 1526,
+    "matches": 0,
+    "downloadRequestFilesRetained": false
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "pullRequests": [
+    {
+      "pr": 809,
+      "localHead": "61b3db4caa76a8d6af2af147d88d0dc85a6f356a",
+      "publishedHead": "6a558cb4d48e781418a37cf27637c428fb929712",
+      "measuredRuntime": "6a558cb4d48e781418a37cf27637c428fb929712",
+      "measuredLocal": "61b3db4caa76a8d6af2af147d88d0dc85a6f356a",
+      "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+      "ciRun": 45110240923,
+      "publishedHeadTree": "33f6a5fd12126b0fba59ed1e4048bad1b8e217ff",
+      "runtimeSha256": {
+        "ext/js/dictionary/term-record-opfs-store.js": "355f1b5011e6aa9d785daffe12e1460af291e19de3dfbb5fdb7245199be11ef0"
+      },
+      "url": "https://github.com/ManabiIO/manabitan/pull/809",
+      "runtimeUnchangedSinceMeasurement": true,
+      "reviewStatus": "ready for review",
+      "currentCheckRuns": {
+        "success": 27,
+        "skipped": 4,
+        "nonSuccess": 0
+      }
+    },
+    {
+      "pr": 810,
+      "localHead": "6de73ad7b3e0f7520c789f64c234b4ed1d9b5c7d",
+      "publishedHead": "5754e7837a6cea28debfd5d37a95c380d9bd4871",
+      "measuredRuntime": "51f095912b11ddd158ac173698eb322e2be99d12",
+      "measuredLocal": "6f0d6c921697479f2a2050bad316a129217c29b0",
+      "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+      "ciRun": 45110941136,
+      "publishedHeadTree": "311a7f8da95a7ca51deac559b5576abb8f8c1b38",
+      "runtimeSha256": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "a1dcb899a4882a5b8fd9a67c86eb2d268bc4602d98915908fa8bafa7ac773972",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "88a0690bf7918bdf2745375924b117ccbf78c2bb750867314962dd812c2702fd"
+      },
+      "url": "https://github.com/ManabiIO/manabitan/pull/810",
+      "runtimeUnchangedSinceMeasurement": true,
+      "reviewStatus": "draft: observed time/memory tradeoff",
+      "currentCheckRuns": {
+        "success": 22,
+        "skipped": 4,
+        "nonSuccess": 0
+      }
+    },
+    {
+      "pr": 811,
+      "localHead": "6cb16bd28626d597c6be736068d0cc71773200db",
+      "publishedHead": "1e8235cf8a15d6788ae6fd8e039a71f3543bdc1b",
+      "measuredRuntime": "7272ea938fd3de01bd40efcd4ee838c3249d0587",
+      "measuredLocal": "f836c595bce05ae7e97fdb0a8ea03dc8215a27f5",
+      "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+      "ciRun": 45111105160,
+      "publishedHeadTree": "ac547e528ddbfaae8b5f3a8c3ccb40e9296a1a66",
+      "runtimeSha256": {
+        "ext/js/dictionary/dictionary-importer.js": "734f8c162846258451451acff2fcd87f3981b4f6a5bde94322437e7d2b8c7edc",
+        "ext/js/dictionary/source-zip-media-pack.js": "8e9f213cb2c9d616b1f276cacc7fe097a1134b5d7623c32f588f571d125adbef"
+      },
+      "url": "https://github.com/ManabiIO/manabitan/pull/811",
+      "runtimeUnchangedSinceMeasurement": true,
+      "reviewStatus": "ready for review",
+      "currentCheckRuns": {
+        "success": 23,
+        "skipped": 4,
+        "nonSuccess": 0
+      }
+    }
+  ],
+  "combined": {
+    "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+    "publishedCommit": "62891eb93d64877a404c9fc8025e0e051f6b5cfb",
+    "tree": "0fd0a2a237b66eb95061d3072d07d2c432abe1a5",
+    "runtimeExactlyMatchesPrHeads": true,
+    "testsPassed": 782,
+    "testFiles": 21,
+    "allTargetBuildCheck": "passed",
+    "browserRun": 45114362649,
+    "browserHarness": "b910f2502300b8fe8ff0a28185317ec22d704247"
+  },
+  "memoryQualification": {
+    "run": 45116158450,
+    "harness": "00da5cb2ec28211dd6d09d938dc6cf1e3a4334c9",
+    "runtimeCandidate": "51f095912b11ddd158ac173698eb322e2be99d12",
+    "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+    "scope": "separate startup/import/readback/restart sampled process-tree PSS, not exact import-only peaks",
+    "qualifiedObservations": 22,
+    "observations": 24,
+    "memoryNonRegressionEstablished": false,
+    "jitendexPssPairChangesPercent": [
+      11.108525,
+      10.952125,
+      9.703045,
+      8.160535
+    ],
+    "sourceForExactValues": "memory-zombies package audit"
+  }
+}

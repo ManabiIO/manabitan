@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "scope": "Immutable evidence index; all component/original/corrective/combined/memory packages remain separate",
+  "packages": [
+    {
+      "directory": "components",
+      "manifest": "package-manifest.json",
+      "manifestSha256": "27d35870de9385724dbe91ddbc5e1789b0d44ad2d13368864673f80fdb65e50f",
+      "files": 75,
+      "bytes": 976468
+    },
+    {
+      "directory": "original-browser",
+      "manifest": "manifest.json",
+      "manifestSha256": "4c020a576ed0f20a42fb15e35034828ec8bccd713912e6351bf509aa4a0d05ea",
+      "files": 45,
+      "bytes": 5279347
+    },
+    {
+      "directory": "corrective-readback",
+      "manifest": "package-manifest.json",
+      "manifestSha256": "677e3e80eb13deb5bb5ddf9c7074672e1e9826daf95236a03984cb605d73043a",
+      "files": 13,
+      "bytes": 2921128
+    },
+    {
+      "directory": "combined",
+      "manifest": "package-manifest.json",
+      "manifestSha256": "a70a0c444ade30984d638aafc6beef0de2506802dd1b5f55f706af9d04f68847",
+      "files": 10,
+      "bytes": 2004018
+    },
+    {
+      "directory": "memory-tree",
+      "manifest": "package-manifest.json",
+      "manifestSha256": "10980ee825c0255f3ab944194648b4b19227012228b2d062939c13e0c9f447d0",
+      "files": 9,
+      "bytes": 883627
+    },
+    {
+      "directory": "memory-zombies",
+      "manifest": "package-manifest.json",
+      "manifestSha256": "eafdac7d2f21a60ba8bf828280367212b020cdd27cde211ed6c09ac2c26a92bb",
+      "files": 9,
+      "bytes": 1053240
+    }
+  ],
+  "indexFiles": {
+    "README.md": "e4fe15133e8ec59633c7e695ca1aa8285346aa995aa8637c1be40cd1465337f3",
+    "production-provenance.json": "e1f0ef2719ed27cd98cc8c28c52a39b5caae5e79ea0597396a8d3fa89f30588b",
+    "ownership-lifetime-review.md": "5f77532f1a66eaf4315a8303b5f07140c8ae95fb275f6397af6fe419f69f701b"
+  },
+  "productionDecision": {
+    "809": "ready for review",
+    "810": "draft: measured time/memory tradeoff",
+    "811": "ready for review",
+    "crc-words": "not promoted"
+  }
+}

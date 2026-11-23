@@ -1,0 +1,14 @@
+{
+  "harness": "088d9c22ccd2b0dc05b240355c76320c9660ce3e",
+  "files": {
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/perf/dictionaries.lock.json": "9c0698d7b16e282f51823ea9b85b3fd5b809ebcb84e7a3ced49127b032cc3573",
+    "dev/perf/benchmark-support.js": "cc629515c5accab66785f4217761bc4fa9aadf0c560b0e0bf188be1c8c3fe558",
+    "dev/perf/dictionary-fixtures.js": "6dd239bf8b4c9914d4a7581ac85529cdb63cc1daeab07415f844a12f3bfe8f10",
+    "dev/perf/import-benchmark.js": "bdd7af08657d421fd18d0fcd49d6c45383af559fef87fd1c3bd068aa38870d2b",
+    "test/chromium/import-flags-ab-benchmark.js": "6e2fbbfa27d1565c600d7092b33cf51a05167b76d4451d50c1f2661efde2676f",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "dbccf958930c4403d61a814ed4175b3e9e76c9d6652c9cd997c144f52e968e7e",
+    "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+    "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307"
+  }
+}

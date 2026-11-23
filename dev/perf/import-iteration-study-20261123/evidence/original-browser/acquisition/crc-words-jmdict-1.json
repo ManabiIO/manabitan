@@ -1,0 +1,873 @@
+{
+  "artifact": {
+    "id": 14790391785,
+    "name": "import-iteration-20261123-crc-words-jmdict-1",
+    "size_in_bytes": 881017,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14790391785",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14790391785/zip",
+    "expired": false,
+    "created_at": "2026-11-23T04:38:03Z",
+    "expires_at": "2026-12-23T04:38:02Z",
+    "updated_at": "2026-11-23T04:38:03Z",
+    "digest": "sha256:7f498b1fc945ccc712f337806658b59e3f5c59745c742fd7a8e2d27f0e0dca56",
+    "workflow_run": {
+      "id": 45110694360,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-qualification-20261123-71149b",
+      "head_sha": "088d9c22ccd2b0dc05b240355c76320c9660ce3e"
+    }
+  },
+  "verifiedZipSha256": "7f498b1fc945ccc712f337806658b59e3f5c59745c742fd7a8e2d27f0e0dca56",
+  "verifiedZipBytes": 881017,
+  "preexistingZipRetained": false,
+  "safeExtraction": true,
+  "memberCount": 169,
+  "members": [
+    {
+      "path": "crc-words/jmdict/1/00-warmup-0-A/host-after.json",
+      "bytes": 109,
+      "sha256": "4cfb0040aab063634b3bf2bead920ba1c672b36c461950b954b1c4363d77fe84"
+    },
+    {
+      "path": "crc-words/jmdict/1/00-warmup-0-A/run-1.html",
+      "bytes": 81168,
+      "sha256": "5ea9d23c34ee8e63971fd025ce907a47b0b034dc232769d874951999ec91d4ab"
+    },
+    {
+      "path": "crc-words/jmdict/1/00-warmup-0-A/host-before.json",
+      "bytes": 111,
+      "sha256": "ae435a0e63c59203d39ff791eb2bb08f553ca718bb0787f721a4fa9a071b156a"
+    },
+    {
+      "path": "crc-words/jmdict/1/00-warmup-0-A/run-1.json",
+      "bytes": 121933,
+      "sha256": "fb47fb59600a9c0c8a6634d299e9688d21c0f358dade4c9eeb2be25ad86ec7b1"
+    },
+    {
+      "path": "crc-words/jmdict/1/00-warmup-0-A/run.log",
+      "bytes": 1732,
+      "sha256": "2a5582e7e04d349de79c52512c0ae1b7b7ce926cb2104f2abaa5380d82191aed"
+    },
+    {
+      "path": "crc-words/jmdict/1/00-warmup-0-A/summary.json",
+      "bytes": 31340,
+      "sha256": "a5972d9193ff07467cd9f9c7c1eac851a25a15b02bf8d962915bfa5c2d45c8a4"
+    },
+    {
+      "path": "crc-words/jmdict/1/01-warmup-0-B/host-after.json",
+      "bytes": 110,
+      "sha256": "b3e38a3f5ec50ebd79710de365acff61fc7d00754eb75258a22486124b6a73a3"
+    },
+    {
+      "path": "crc-words/jmdict/1/01-warmup-0-B/host-before.json",
+      "bytes": 110,
+      "sha256": "8f4533f1f1bf2b2e736d77ba8a4aca0a45c46bf1126d402313ac41e740eaf6d2"
+    },
+    {
+      "path": "crc-words/jmdict/1/01-warmup-0-B/run-1.html",
+      "bytes": 81015,
+      "sha256": "4b33eba956185279ab3e45c82d7798e79a4fb8c7b7eefb92fe934f2c5fceb0a1"
+    },
+    {
+      "path": "crc-words/jmdict/1/01-warmup-0-B/run-1.json",
+      "bytes": 121695,
+      "sha256": "801c20bdae2ec001f6c11feaaa1b30db7f0d7a000a5a75df7c629776f8eb7faf"
+    },
+    {
+      "path": "crc-words/jmdict/1/01-warmup-0-B/run.log",
+      "bytes": 1733,
+      "sha256": "8a9e724d067e7ddecb232864d85cf8fabb8552b57cf16180942d5209f51109e9"
+    },
+    {
+      "path": "crc-words/jmdict/1/01-warmup-0-B/summary.json",
+      "bytes": 31269,
+      "sha256": "57608a2f942eb08da8187a1eb8f62d80a486ebbfecf1a423a73938d5b6d26eb8"
+    },
+    {
+      "path": "crc-words/jmdict/1/02-control-before-0-A/host-after.json",
+      "bytes": 107,
+      "sha256": "60fc2faeb1de7a75444486b9b103c5c2cd05022c2c8953708afa13cdb5328880"
+    },
+    {
+      "path": "crc-words/jmdict/1/02-control-before-0-A/host-before.json",
+      "bytes": 109,
+      "sha256": "be6bf45d05bb673cb72e854c64c0d0a2fa423e3a98c5b2eac43920c85d9139dd"
+    },
+    {
+      "path": "crc-words/jmdict/1/02-control-before-0-A/run-1.html",
+      "bytes": 80910,
+      "sha256": "099cfe63915a1fa3d1719cf58b59e926dc6ae59fb09b7e92604d3eacf12b261f"
+    },
+    {
+      "path": "crc-words/jmdict/1/02-control-before-0-A/run-1.json",
+      "bytes": 121481,
+      "sha256": "a2a070f6184a3dd44411979b004ad8b2a0fb8d7cab2ad8eae912a938b57a6cb4"
+    },
+    {
+      "path": "crc-words/jmdict/1/02-control-before-0-A/run.log",
+      "bytes": 1757,
+      "sha256": "d24eb66c174612a40de25cd4659b66fcafde77f3e32251f36db2b0dfe26351b5"
+    },
+    {
+      "path": "crc-words/jmdict/1/02-control-before-0-A/summary.json",
+      "bytes": 31245,
+      "sha256": "34ffd676056cc1d799bc6c240d29078669e0b475c0c77af2fd3b44d1d7a5b74f"
+    },
+    {
+      "path": "crc-words/jmdict/1/03-control-before-0-A/host-after.json",
+      "bytes": 111,
+      "sha256": "a641eff7b0ddb2bd4ebe2aa61aae5a97e3f40d68a7813bdc62f4e207cd9b1860"
+    },
+    {
+      "path": "crc-words/jmdict/1/03-control-before-0-A/host-before.json",
+      "bytes": 108,
+      "sha256": "5ab56313fe3e7878b2209b99ac9e98472d5c874d9ce3a17ece911b2a18f2196a"
+    },
+    {
+      "path": "crc-words/jmdict/1/03-control-before-0-A/run-1.html",
+      "bytes": 81607,
+      "sha256": "25fc75912ab41ee51b8ed9db943cc43ea9606c375625e878bdb2f76320124d9b"
+    },
+    {
+      "path": "crc-words/jmdict/1/03-control-before-0-A/run-1.json",
+      "bytes": 121859,
+      "sha256": "f3b14e14c7e43e03cfbdda2185c0d8ea299400abde3eeb79dcecd93213352266"
+    },
+    {
+      "path": "crc-words/jmdict/1/03-control-before-0-A/run.log",
+      "bytes": 1846,
+      "sha256": "4aadca4a0d9f1594c43d4dfe0424bdb08ae83df9066e6834c7260d4b03c31e92"
+    },
+    {
+      "path": "crc-words/jmdict/1/03-control-before-0-A/summary.json",
+      "bytes": 31219,
+      "sha256": "056c85950601680197ea48fa16e14588dac3d5b1655f04c34c95ec7a3c26c190"
+    },
+    {
+      "path": "crc-words/jmdict/1/04-control-before-1-A/host-after.json",
+      "bytes": 111,
+      "sha256": "a0c0e39c12704449472796535b100d51b68d8561a5c86715fb062bedf43b9006"
+    },
+    {
+      "path": "crc-words/jmdict/1/04-control-before-1-A/host-before.json",
+      "bytes": 112,
+      "sha256": "4494ef175f1348d9cb465151849a71039d73e06383d75ad3aa42cdf8061b1ce3"
+    },
+    {
+      "path": "crc-words/jmdict/1/04-control-before-1-A/run-1.html",
+      "bytes": 81099,
+      "sha256": "0114992d7178591177082a532bdd1a5ff9dbda4a4ed6b955f6eabdb17a433b8f"
+    },
+    {
+      "path": "crc-words/jmdict/1/04-control-before-1-A/run-1.json",
+      "bytes": 121795,
+      "sha256": "96fb3f79829bdb38e4f4fed4cb467804733d80fdb598ee54a321a87a75a4c5eb"
+    },
+    {
+      "path": "crc-words/jmdict/1/04-control-before-1-A/run.log",
+      "bytes": 1758,
+      "sha256": "7c0373823a692ca2517f862ba20dfa60c272ca1705543bd13192e7b9b127ae70"
+    },
+    {
+      "path": "crc-words/jmdict/1/04-control-before-1-A/summary.json",
+      "bytes": 31173,
+      "sha256": "e45f22a0d1b9e3abc9e827ba000318df0a64d62686dbc3850a7d929bbe6be267"
+    },
+    {
+      "path": "crc-words/jmdict/1/05-control-before-1-A/host-after.json",
+      "bytes": 104,
+      "sha256": "13c2bdd87515f88f9f58f881fd11d90d656a7a844aa0eb57d691091b8e348f7a"
+    },
+    {
+      "path": "crc-words/jmdict/1/05-control-before-1-A/host-before.json",
+      "bytes": 111,
+      "sha256": "07c1e1810eda8a15dddea1cd778b21aa84828fab386555ccfcd8af6a919ed1ff"
+    },
+    {
+      "path": "crc-words/jmdict/1/05-control-before-1-A/run-1.html",
+      "bytes": 81159,
+      "sha256": "4dff4d5961e48eba6c4e3c6708a1c5e3f0d591f176ce1b4a8393783f59a0c8ca"
+    },
+    {
+      "path": "crc-words/jmdict/1/05-control-before-1-A/run-1.json",
+      "bytes": 121940,
+      "sha256": "1ba0842f122a2af4d97164282dd5ce0c86c26092b64b3386d66412bd038bc5fb"
+    },
+    {
+      "path": "crc-words/jmdict/1/05-control-before-1-A/run.log",
+      "bytes": 1757,
+      "sha256": "e365fd4abfefd1914c3b8192671f9456f0a071f54816f0aea09cebb2183bedf3"
+    },
+    {
+      "path": "crc-words/jmdict/1/05-control-before-1-A/summary.json",
+      "bytes": 31355,
+      "sha256": "d35df8ade6466a0f3a4e2b52ef14ae10b34fa1837def7b16da37305001a772ce"
+    },
+    {
+      "path": "crc-words/jmdict/1/06-candidate-0-A/host-after.json",
+      "bytes": 110,
+      "sha256": "4167516e9f8491676aed75c926d6eb35abde59ae02e18211d80cfeac1dfc6aac"
+    },
+    {
+      "path": "crc-words/jmdict/1/06-candidate-0-A/host-before.json",
+      "bytes": 105,
+      "sha256": "354a951d7b0bb13375b5a6d0bd3df815714f8195ce805e29e41d889a25ab2599"
+    },
+    {
+      "path": "crc-words/jmdict/1/06-candidate-0-A/run-1.html",
+      "bytes": 80293,
+      "sha256": "92f44112a8e3be46a730db3a87cb98a39bd6ea2874a6f4c141acfc6348d5c32f"
+    },
+    {
+      "path": "crc-words/jmdict/1/06-candidate-0-A/run-1.json",
+      "bytes": 121323,
+      "sha256": "5fbf21ec7618a3d1f8eae4dfb8765770b1bbb9873ae4dab220deb6c667f8df7a"
+    },
+    {
+      "path": "crc-words/jmdict/1/06-candidate-0-A/run.log",
+      "bytes": 1635,
+      "sha256": "393a02a68a6a7f884893b6c51a4990359f21689383f7d4c99e2f322e75d527e8"
+    },
+    {
+      "path": "crc-words/jmdict/1/06-candidate-0-A/summary.json",
+      "bytes": 31286,
+      "sha256": "96d7ca0eb8b7dcf3c6176e90f9cfd57ec38e7eab7fc61b8d3714fd4c9f8813f4"
+    },
+    {
+      "path": "crc-words/jmdict/1/07-candidate-0-B/host-after.json",
+      "bytes": 110,
+      "sha256": "fd89359714cabc36d3b00806167d568c7e7f45109ae9d89d07c6351f3291c251"
+    },
+    {
+      "path": "crc-words/jmdict/1/07-candidate-0-B/host-before.json",
+      "bytes": 111,
+      "sha256": "e1f2eff0342eb7fdab096589dadcf6762bbe62f81c427cc3dc6e003b74c3a706"
+    },
+    {
+      "path": "crc-words/jmdict/1/07-candidate-0-B/run-1.html",
+      "bytes": 80681,
+      "sha256": "3403e65d91f23c8dee217aaed9cb330bc7e06b1a7eb20db13938aa33159427b0"
+    },
+    {
+      "path": "crc-words/jmdict/1/07-candidate-0-B/run-1.json",
+      "bytes": 121138,
+      "sha256": "6cc622525ed83d5b295dce2af75ba8d8da28b51351fa5acc6a1515e1a45cf650"
+    },
+    {
+      "path": "crc-words/jmdict/1/07-candidate-0-B/run.log",
+      "bytes": 1741,
+      "sha256": "b81f08ec547c09ec4b3e7dfe3efe088d386a46056a81a062f257a296942b2ae9"
+    },
+    {
+      "path": "crc-words/jmdict/1/07-candidate-0-B/summary.json",
+      "bytes": 31167,
+      "sha256": "787a07c699b81f54a70f348fdac6df8dbd3eb9e01389c122705326eb59f4e267"
+    },
+    {
+      "path": "crc-words/jmdict/1/08-candidate-1-B/host-after.json",
+      "bytes": 110,
+      "sha256": "401d221de3793fe8a88bfccf348bcebc6170babaf998da821719ed6a0d5da46f"
+    },
+    {
+      "path": "crc-words/jmdict/1/08-candidate-1-B/host-before.json",
+      "bytes": 110,
+      "sha256": "8a1a103039969ab221df4378263b9de064bc69f843c6625e1adc765d3d7a1283"
+    },
+    {
+      "path": "crc-words/jmdict/1/08-candidate-1-B/run-1.html",
+      "bytes": 81004,
+      "sha256": "4009dcf615c24d1b7064ccd82c8791f015cb01d2b227887b252e8526e750e6af"
+    },
+    {
+      "path": "crc-words/jmdict/1/08-candidate-1-B/run-1.json",
+      "bytes": 121659,
+      "sha256": "61d59c9e7eedbf7e0921e0fd4b998f52a4a9bd568543f62d1970e1649888876a"
+    },
+    {
+      "path": "crc-words/jmdict/1/08-candidate-1-B/run.log",
+      "bytes": 1741,
+      "sha256": "bae41e25fd26071b20fef4b178b6e784d7c85aa02b48b85ed3c7ab26742c717a"
+    },
+    {
+      "path": "crc-words/jmdict/1/08-candidate-1-B/summary.json",
+      "bytes": 31254,
+      "sha256": "76de7774bf9761e0d96511fbdf3c7d68ba4c2abe47c11823d23562025a7eb0ad"
+    },
+    {
+      "path": "crc-words/jmdict/1/09-candidate-1-A/host-after.json",
+      "bytes": 111,
+      "sha256": "de28f76a64476c5c606236534c7c96e4b6047cca8aa09fc6bdb2e8f6d9da4fcc"
+    },
+    {
+      "path": "crc-words/jmdict/1/09-candidate-1-A/host-before.json",
+      "bytes": 111,
+      "sha256": "74a2abac76aaf93a9ad656268c6d87bdc07dd4da99f0edd169a46402edd156e5"
+    },
+    {
+      "path": "crc-words/jmdict/1/09-candidate-1-A/run-1.html",
+      "bytes": 81609,
+      "sha256": "9a8306c89d3c9ee6bbb09633a864a8f190377ac141575c04d8efe30e75be3067"
+    },
+    {
+      "path": "crc-words/jmdict/1/09-candidate-1-A/run-1.json",
+      "bytes": 121891,
+      "sha256": "feb5b3e79ec56313bda50f21663df58c6cf5226afc322a760e79d405aa7cb417"
+    },
+    {
+      "path": "crc-words/jmdict/1/09-candidate-1-A/run.log",
+      "bytes": 1830,
+      "sha256": "423a38180261b77a8030385f4058eb75f52053bce3e9b9b3b566008017c5defc"
+    },
+    {
+      "path": "crc-words/jmdict/1/09-candidate-1-A/summary.json",
+      "bytes": 31259,
+      "sha256": "aea676e46446259db30c6db51ed0c874f3b1daf6579315f93875b3d3ab8452d2"
+    },
+    {
+      "path": "crc-words/jmdict/1/10-candidate-2-A/host-after.json",
+      "bytes": 111,
+      "sha256": "347e82e3b8dc3d516c3e96c928836142903da9e74a696c4f56d63c340d1cf6c9"
+    },
+    {
+      "path": "crc-words/jmdict/1/10-candidate-2-A/run-1.html",
+      "bytes": 81126,
+      "sha256": "3324db97fa6bc7c416b98d3d68bb13a7410169cdc3dfc57ac0a09a9f2eee4011"
+    },
+    {
+      "path": "crc-words/jmdict/1/10-candidate-2-A/host-before.json",
+      "bytes": 112,
+      "sha256": "0a864ce94e52705a769c4e3dee8d298544b2a68e523647bd11cd71592e99dd9e"
+    },
+    {
+      "path": "crc-words/jmdict/1/10-candidate-2-A/run-1.json",
+      "bytes": 121841,
+      "sha256": "614241756244d16d4e8e6118ff2b5b64b1c2d239341ffa215abd6c2593ea39e8"
+    },
+    {
+      "path": "crc-words/jmdict/1/10-candidate-2-A/run.log",
+      "bytes": 1741,
+      "sha256": "6d8f6d3bdcb0ed023c6297282b8b5984432e70fb37d190e97590b31fb85ca138"
+    },
+    {
+      "path": "crc-words/jmdict/1/10-candidate-2-A/summary.json",
+      "bytes": 31308,
+      "sha256": "8e83bb805aa78664661c4f8fce4b7108d6719ea7ac02ccd6a0f173e95989ddca"
+    },
+    {
+      "path": "crc-words/jmdict/1/11-candidate-2-B/host-after.json",
+      "bytes": 105,
+      "sha256": "40b51a00e6a1202899eeed4c1140bb096e2e274295cc97b352690373473c66f6"
+    },
+    {
+      "path": "crc-words/jmdict/1/11-candidate-2-B/run-1.html",
+      "bytes": 80282,
+      "sha256": "9dd2ce8c03f4bc0f5be8ebd253b0f89365a683c9e3656ea2675136121123eecd"
+    },
+    {
+      "path": "crc-words/jmdict/1/11-candidate-2-B/host-before.json",
+      "bytes": 112,
+      "sha256": "591eb4cbc5acb13063769d45389b11cbcedc39ed7a085ceb44634a17f76dead1"
+    },
+    {
+      "path": "crc-words/jmdict/1/11-candidate-2-B/run.log",
+      "bytes": 1634,
+      "sha256": "3c8707594c672f644b3616865ef7e731080302f6a18a4a0ae85b4004a0f9f08a"
+    },
+    {
+      "path": "crc-words/jmdict/1/11-candidate-2-B/run-1.json",
+      "bytes": 121292,
+      "sha256": "a0caa93e0611a9617f05ceee9ad0196af8b988e7b704e21b851051b638477d8b"
+    },
+    {
+      "path": "crc-words/jmdict/1/11-candidate-2-B/summary.json",
+      "bytes": 31170,
+      "sha256": "e6168fdf7344650dfc4fec7f1dca0ebad5403f366f9ab8d3099e49f8e6f4f980"
+    },
+    {
+      "path": "crc-words/jmdict/1/12-candidate-3-B/host-after.json",
+      "bytes": 111,
+      "sha256": "24e772e44428c6d4132d1e5ec4a25f35cbf5e658d39ca25d31c2a98d3a0ed646"
+    },
+    {
+      "path": "crc-words/jmdict/1/12-candidate-3-B/host-before.json",
+      "bytes": 105,
+      "sha256": "008bc406963851fda940424f9367e087b087cde689266043859347ab110c5810"
+    },
+    {
+      "path": "crc-words/jmdict/1/12-candidate-3-B/run-1.html",
+      "bytes": 81054,
+      "sha256": "999e239002ce0b8395d59d483c18077ea2a56b7753d19341cf09e44e7e1423ba"
+    },
+    {
+      "path": "crc-words/jmdict/1/12-candidate-3-B/run-1.json",
+      "bytes": 121737,
+      "sha256": "690df57540d3dee0d05fd6d75269469113f292564224e7a1dc04a67ead1a50d0"
+    },
+    {
+      "path": "crc-words/jmdict/1/12-candidate-3-B/run.log",
+      "bytes": 1741,
+      "sha256": "b344d9c400c4253cfa86b3899a493afd998fcefcd43c9bbb6610c05bd467a425"
+    },
+    {
+      "path": "crc-words/jmdict/1/12-candidate-3-B/summary.json",
+      "bytes": 31245,
+      "sha256": "e548096f020d50a341b3362b3f99b31613cc7c5fcc63413e7544755514184213"
+    },
+    {
+      "path": "crc-words/jmdict/1/13-candidate-3-A/host-after.json",
+      "bytes": 111,
+      "sha256": "e429b27ef814b1bafb4bad841d53bd31420fdfcd245078557c1b35b46693a99e"
+    },
+    {
+      "path": "crc-words/jmdict/1/13-candidate-3-A/host-before.json",
+      "bytes": 111,
+      "sha256": "0ad72ff9c91e60a83d59d20b9d9bb57488c8fb54568c626bbd7f73c740988e4d"
+    },
+    {
+      "path": "crc-words/jmdict/1/13-candidate-3-A/run-1.html",
+      "bytes": 80291,
+      "sha256": "c77c275f094066cad82151dd3ba2d3d6c919c8f161d79d771cd6c42a81929cb3"
+    },
+    {
+      "path": "crc-words/jmdict/1/13-candidate-3-A/run-1.json",
+      "bytes": 121309,
+      "sha256": "e407bd9201fab45fd5248e1e00386fda8faae82d2a8f733dfc2c9fcc53f988d9"
+    },
+    {
+      "path": "crc-words/jmdict/1/13-candidate-3-A/run.log",
+      "bytes": 1634,
+      "sha256": "710174fd7f2bfa2935203b6a56d6203e5a592aee9ccda17be0719c882623ec70"
+    },
+    {
+      "path": "crc-words/jmdict/1/13-candidate-3-A/summary.json",
+      "bytes": 31235,
+      "sha256": "bd2aa5235a0c10ebc9949c0a4a775b9783ca81716fe45d46efc3f0b12a811dde"
+    },
+    {
+      "path": "crc-words/jmdict/1/14-candidate-4-A/host-after.json",
+      "bytes": 112,
+      "sha256": "10afbc5eeaf9b46827b087510d482a705ff0a71b8080278be831b99f96d010ac"
+    },
+    {
+      "path": "crc-words/jmdict/1/14-candidate-4-A/host-before.json",
+      "bytes": 111,
+      "sha256": "04fa9a3740b44bd04290a8c48b5b7434430dc3a258f8cef01c9d71dfec00de1b"
+    },
+    {
+      "path": "crc-words/jmdict/1/14-candidate-4-A/run-1.html",
+      "bytes": 80435,
+      "sha256": "7948024a8bda9cbc7cd46ee6296c14ec919c962959d70395632629c582653c3f"
+    },
+    {
+      "path": "crc-words/jmdict/1/14-candidate-4-A/run-1.json",
+      "bytes": 121585,
+      "sha256": "ea406cfd9f4117b3158141b231c8a68e14d6b3566e7b5e61f516fed8e01ed7f9"
+    },
+    {
+      "path": "crc-words/jmdict/1/14-candidate-4-A/run.log",
+      "bytes": 1634,
+      "sha256": "bfd981897a89f18ff4f12bf654c146879643b194e6f5159be85cd1c5cac07b6e"
+    },
+    {
+      "path": "crc-words/jmdict/1/14-candidate-4-A/summary.json",
+      "bytes": 31343,
+      "sha256": "24dd2f8e5fc3c62bdd3cc2a225a82e7def4561f9613b133313c9c0ceae3e8846"
+    },
+    {
+      "path": "crc-words/jmdict/1/15-candidate-4-B/host-after.json",
+      "bytes": 105,
+      "sha256": "5919b5b4c2b6a17f701345fd7641f7ef1e789e775bf837e09ad7a0892ce15b2d"
+    },
+    {
+      "path": "crc-words/jmdict/1/15-candidate-4-B/run-1.html",
+      "bytes": 80025,
+      "sha256": "1d2e35b55b01947d68e1a3c7d96a93d790fa0cc04d9432149ad609aa3f464fd6"
+    },
+    {
+      "path": "crc-words/jmdict/1/15-candidate-4-B/host-before.json",
+      "bytes": 112,
+      "sha256": "38a60bdae5bd4534e0d5bf02bb5c1c9537b788c962c400481c480190d1995a00"
+    },
+    {
+      "path": "crc-words/jmdict/1/15-candidate-4-B/run-1.json",
+      "bytes": 120862,
+      "sha256": "171ffdeb00f3834cfd1ee18b59cd02718446d85f92c47bace90af34b0b895bdb"
+    },
+    {
+      "path": "crc-words/jmdict/1/15-candidate-4-B/run.log",
+      "bytes": 1634,
+      "sha256": "6b9af4450fe38752c3bdcbe5515e1192b454dddb18445198667b2d1ab46e229f"
+    },
+    {
+      "path": "crc-words/jmdict/1/15-candidate-4-B/summary.json",
+      "bytes": 31190,
+      "sha256": "7fc1799ee107f7e8e20436feb16faac1f802588654db4ce319618823a38677f0"
+    },
+    {
+      "path": "crc-words/jmdict/1/16-candidate-5-B/host-after.json",
+      "bytes": 110,
+      "sha256": "253fea8b920e503d7e331ac493a68212e9b0467dca4797a947719d6520a202fa"
+    },
+    {
+      "path": "crc-words/jmdict/1/16-candidate-5-B/host-before.json",
+      "bytes": 104,
+      "sha256": "0ed6904c671e97148bd909d16aedff172824295df1b7323fb67428011573da17"
+    },
+    {
+      "path": "crc-words/jmdict/1/16-candidate-5-B/run-1.html",
+      "bytes": 80372,
+      "sha256": "ee66195d4535a746f7645553c119c97dab675975d1ae076e2ccb4657753401a3"
+    },
+    {
+      "path": "crc-words/jmdict/1/16-candidate-5-B/run-1.json",
+      "bytes": 121461,
+      "sha256": "c9b93a4c26516691ca32092ffbd4d52c7bf083d9b9a67c667d788964f3c9f94f"
+    },
+    {
+      "path": "crc-words/jmdict/1/16-candidate-5-B/run.log",
+      "bytes": 1634,
+      "sha256": "6de797865f53a483584dd8b769165bb762b5d4296a3e417a6228700e9cf16400"
+    },
+    {
+      "path": "crc-words/jmdict/1/16-candidate-5-B/summary.json",
+      "bytes": 31335,
+      "sha256": "87ca901b26d1a74aa3a7512468c0f737384c80458bc2eccc3d479c678b5f4240"
+    },
+    {
+      "path": "crc-words/jmdict/1/17-candidate-5-A/host-after.json",
+      "bytes": 106,
+      "sha256": "feaecc8e0a51cac937597b032038d404936fa5458ff7903d59577b4ef9bc3b84"
+    },
+    {
+      "path": "crc-words/jmdict/1/17-candidate-5-A/host-before.json",
+      "bytes": 109,
+      "sha256": "b62c2cf82511614718431fde4697c7cee3f93b03dbcbb5d3efabce97edbd8be7"
+    },
+    {
+      "path": "crc-words/jmdict/1/17-candidate-5-A/run-1.html",
+      "bytes": 80234,
+      "sha256": "d982a83f4791289fc7fc211c91febd5a8eb39a5831835e489c512ca0dc56abe8"
+    },
+    {
+      "path": "crc-words/jmdict/1/17-candidate-5-A/run-1.json",
+      "bytes": 121245,
+      "sha256": "6053eb304bb751e3c3c6fc510f43750d129653ca7d84ef322125f13af630a98e"
+    },
+    {
+      "path": "crc-words/jmdict/1/17-candidate-5-A/run.log",
+      "bytes": 1635,
+      "sha256": "699035b041f168e68d84390c5e63254879d06a044c8db702361bf5d71183d72f"
+    },
+    {
+      "path": "crc-words/jmdict/1/17-candidate-5-A/summary.json",
+      "bytes": 31224,
+      "sha256": "b652e7f26adbeef9e5058e53f2531027dcde5f603a092ec88170e3250b97f125"
+    },
+    {
+      "path": "crc-words/jmdict/1/18-candidate-6-A/host-after.json",
+      "bytes": 108,
+      "sha256": "20be8fc120c9dfbb5fc69544f2430bd087085e91fa287b6ee44eade07ee973b2"
+    },
+    {
+      "path": "crc-words/jmdict/1/18-candidate-6-A/host-before.json",
+      "bytes": 106,
+      "sha256": "bd171a471c1933dc3de299d937c98e2a6630d6f00f673030239ccae19880d418"
+    },
+    {
+      "path": "crc-words/jmdict/1/18-candidate-6-A/run-1.html",
+      "bytes": 81078,
+      "sha256": "f9b7e94dea00867befee02a0660ee4fcd6c4de95ba9190c88f24459029a18da9"
+    },
+    {
+      "path": "crc-words/jmdict/1/18-candidate-6-A/run-1.json",
+      "bytes": 121783,
+      "sha256": "4cdd36adc0b6baa22146b2905df0d1b7ef0fffef9d768e56d098e87c743ae47f"
+    },
+    {
+      "path": "crc-words/jmdict/1/18-candidate-6-A/run.log",
+      "bytes": 1741,
+      "sha256": "941134aa766cfdead7f1ac95b6831890f7f4696b87cfa417a073b09f83f2933c"
+    },
+    {
+      "path": "crc-words/jmdict/1/19-candidate-6-B/host-after.json",
+      "bytes": 110,
+      "sha256": "fbe5f06c7795d50c06f0d8d20144d9f977e241f4ee87865a9d20e10cfd902c5b"
+    },
+    {
+      "path": "crc-words/jmdict/1/19-candidate-6-B/host-before.json",
+      "bytes": 108,
+      "sha256": "d27e31d7a4304243770edd1b68125e926956a9697455640bdaaa151c0048032f"
+    },
+    {
+      "path": "crc-words/jmdict/1/18-candidate-6-A/summary.json",
+      "bytes": 31224,
+      "sha256": "6bccd0ec17fd070bc9345b88b4138106756015e9a45f2d6cfc40fd3232f7f9a0"
+    },
+    {
+      "path": "crc-words/jmdict/1/19-candidate-6-B/run-1.html",
+      "bytes": 80957,
+      "sha256": "f3ec6aa5e10fb481e0a0529555e6637cc9d6e9dede9f2ccf5a83bf35e2441e26"
+    },
+    {
+      "path": "crc-words/jmdict/1/19-candidate-6-B/run-1.json",
+      "bytes": 121654,
+      "sha256": "2ddb96d7219325436a64c248d949180f1fa295d9b9a8aae35ddfebb6938d2d21"
+    },
+    {
+      "path": "crc-words/jmdict/1/19-candidate-6-B/run.log",
+      "bytes": 1723,
+      "sha256": "28afc2658d47429c4035d5556679b674c2503c97c3ff172787cb59a07e10db67"
+    },
+    {
+      "path": "crc-words/jmdict/1/19-candidate-6-B/summary.json",
+      "bytes": 31273,
+      "sha256": "ac2fb457f846cbdc47a79ba06bb84b6a2fe2df58575701c450392346c89e11ca"
+    },
+    {
+      "path": "crc-words/jmdict/1/20-candidate-7-B/host-after.json",
+      "bytes": 110,
+      "sha256": "8a7dac404d88f3e4cc8ef8d8dd9a703adc15740c43a4b2eef26c5ec6b924a7a1"
+    },
+    {
+      "path": "crc-words/jmdict/1/20-candidate-7-B/host-before.json",
+      "bytes": 111,
+      "sha256": "520755e071ce9c7126ffc2eabf2b6aa4dcfae22d0149c248d24c8e9a0db4edd7"
+    },
+    {
+      "path": "crc-words/jmdict/1/20-candidate-7-B/run-1.html",
+      "bytes": 81150,
+      "sha256": "8cf646af9b08a26239d2ca5f59c5e29da3be62090ca17479203fd7cb7c0f0202"
+    },
+    {
+      "path": "crc-words/jmdict/1/20-candidate-7-B/run-1.json",
+      "bytes": 121923,
+      "sha256": "e3354905027dc4b4945c2c992565e0a2fc1714428b5ac25c9de92a6f1d9ef2bc"
+    },
+    {
+      "path": "crc-words/jmdict/1/20-candidate-7-B/run.log",
+      "bytes": 1742,
+      "sha256": "572d181b89ac56d60cf33e556c2a3239d8e35662eebe1a44dc4667b050b86d2f"
+    },
+    {
+      "path": "crc-words/jmdict/1/20-candidate-7-B/summary.json",
+      "bytes": 31324,
+      "sha256": "dbd7591743915a0b898f72d19ca64a7b72a4ce651a04da38b60480fb153f83e7"
+    },
+    {
+      "path": "crc-words/jmdict/1/21-candidate-7-A/host-after.json",
+      "bytes": 106,
+      "sha256": "0a3fc0d5d4d77b56e0f9f1fda5ec45335da1250d0797eb0b288769643785bb55"
+    },
+    {
+      "path": "crc-words/jmdict/1/21-candidate-7-A/host-before.json",
+      "bytes": 110,
+      "sha256": "3f88e735a739a38097fdac4333a275a501fd022157ed85d1f319c528c41ddf74"
+    },
+    {
+      "path": "crc-words/jmdict/1/21-candidate-7-A/run-1.html",
+      "bytes": 80851,
+      "sha256": "66ae12238a58bb9ce4f640aa3b084fcfbbf96fe02288d8283c6ffcc1accc1c91"
+    },
+    {
+      "path": "crc-words/jmdict/1/21-candidate-7-A/run-1.json",
+      "bytes": 121400,
+      "sha256": "049bda75cd0d37b43e19850d6032cf4eafcb65c2ae024189d527d2f93a35e2e1"
+    },
+    {
+      "path": "crc-words/jmdict/1/21-candidate-7-A/run.log",
+      "bytes": 1742,
+      "sha256": "cdf478fe583225bed8b01efe88a8772f686106523cbde2082508b8a689388e67"
+    },
+    {
+      "path": "crc-words/jmdict/1/21-candidate-7-A/summary.json",
+      "bytes": 31236,
+      "sha256": "28d594ff1ec2527215e7bc66c50e6523442c05d0a6252fd2d13fe4536dcfc6eb"
+    },
+    {
+      "path": "crc-words/jmdict/1/22-control-after-0-A/host-after.json",
+      "bytes": 111,
+      "sha256": "33e984003b70fe646e436068f87c52e4a615ec7b3e277991d28d5c33af893fbf"
+    },
+    {
+      "path": "crc-words/jmdict/1/22-control-after-0-A/host-before.json",
+      "bytes": 106,
+      "sha256": "9da63101a0a9c122dd9a71f851ae2e2acd65900a841928eee9ee01bab611d53f"
+    },
+    {
+      "path": "crc-words/jmdict/1/22-control-after-0-A/run-1.html",
+      "bytes": 81102,
+      "sha256": "3a2e2a45e448d50c5e82b651e63ecaf5cb86c4e81b1cc35a6be6d74b83fe13e5"
+    },
+    {
+      "path": "crc-words/jmdict/1/22-control-after-0-A/run-1.json",
+      "bytes": 121834,
+      "sha256": "f57ca56b4a968678031140ccb1627a45181662aa3bc76906fdc30a40eeb295ea"
+    },
+    {
+      "path": "crc-words/jmdict/1/22-control-after-0-A/summary.json",
+      "bytes": 31314,
+      "sha256": "55acd3911dfe6eb7c21f771bcb78fda8a2228f4ed441124f7beda3cd2725741f"
+    },
+    {
+      "path": "crc-words/jmdict/1/22-control-after-0-A/run.log",
+      "bytes": 1753,
+      "sha256": "d6748786fa1e7968a9943918738321aa73f35d3c90899257fb6a6322f285a9ce"
+    },
+    {
+      "path": "crc-words/jmdict/1/23-control-after-0-A/host-after.json",
+      "bytes": 107,
+      "sha256": "5fb661d618a17c315d8fb25937c251bed4105c8b408993af4cf1e2141ef3c9b2"
+    },
+    {
+      "path": "crc-words/jmdict/1/23-control-after-0-A/host-before.json",
+      "bytes": 111,
+      "sha256": "6ed5c7f52dd24f0ce6c758319fc880ba37bbcc42995759c4925cfaa271a81f8b"
+    },
+    {
+      "path": "crc-words/jmdict/1/23-control-after-0-A/run-1.html",
+      "bytes": 81115,
+      "sha256": "7917291d8ec9f99e1936279dc96a528a518de31601fec3a5a0eb2a6473f98db6"
+    },
+    {
+      "path": "crc-words/jmdict/1/23-control-after-0-A/run-1.json",
+      "bytes": 121886,
+      "sha256": "a7a30bbbc1371077f2db0710743de89cf4d3b19b3d551a8c0a0aab6b9201e804"
+    },
+    {
+      "path": "crc-words/jmdict/1/23-control-after-0-A/run.log",
+      "bytes": 1753,
+      "sha256": "cb9f909e6543639439552791f18eac4add312e6f995c867dd9a3c65aee7d74a7"
+    },
+    {
+      "path": "crc-words/jmdict/1/23-control-after-0-A/summary.json",
+      "bytes": 31268,
+      "sha256": "25fd3e956899ef58281b541718fc4b713e6cae2d5759870f150feb42f743f736"
+    },
+    {
+      "path": "crc-words/jmdict/1/24-control-after-1-A/host-after.json",
+      "bytes": 109,
+      "sha256": "9b95f66b0ac3b183e2700cf5a4bfdf2260d4ad6146bdda48f5966f7aa56e7c88"
+    },
+    {
+      "path": "crc-words/jmdict/1/24-control-after-1-A/host-before.json",
+      "bytes": 107,
+      "sha256": "e1513705115dd04145aed138320c12d18adde2f04552ac925951fb88801a0b07"
+    },
+    {
+      "path": "crc-words/jmdict/1/24-control-after-1-A/run-1.html",
+      "bytes": 80143,
+      "sha256": "ee881c6418ef8ddc85ff4d4effec9471038c845ad043894f279bd0edc3af112e"
+    },
+    {
+      "path": "crc-words/jmdict/1/24-control-after-1-A/run-1.json",
+      "bytes": 121065,
+      "sha256": "43f814b35ed02ad27b78e34ec567a809049233d0a4d5692713fa7427979ad4bf"
+    },
+    {
+      "path": "crc-words/jmdict/1/24-control-after-1-A/run.log",
+      "bytes": 1646,
+      "sha256": "3cbf323bf03b423d8da8b7ddd28bb56bb5d12275c526c3256f8645c9f9dc8e1e"
+    },
+    {
+      "path": "crc-words/jmdict/1/24-control-after-1-A/summary.json",
+      "bytes": 31223,
+      "sha256": "65046f9ed89173a5be686a4330b1cef1c9f8b87d1bbe2d3f483559fab7df6c9f"
+    },
+    {
+      "path": "crc-words/jmdict/1/25-control-after-1-A/host-after.json",
+      "bytes": 105,
+      "sha256": "97b06c19b5a4f9a9414bd4274258a8c2f307a2d7f936ba6c6fe602b0fd1831a3"
+    },
+    {
+      "path": "crc-words/jmdict/1/25-control-after-1-A/host-before.json",
+      "bytes": 109,
+      "sha256": "4d43ca7a17671287ae962659bde005e02af4081e6292764c956a0210ab6c1960"
+    },
+    {
+      "path": "crc-words/jmdict/1/25-control-after-1-A/run-1.json",
+      "bytes": 121230,
+      "sha256": "a44bc85cf4ceccd36d2f19b67b1174c10130e12c439e9ecec00693ed1fbc4071"
+    },
+    {
+      "path": "crc-words/jmdict/1/25-control-after-1-A/run-1.html",
+      "bytes": 80218,
+      "sha256": "343cd8c56b115c997588fa08c0a2797318cb19bd84467de9fa03e4be7229c3b8"
+    },
+    {
+      "path": "crc-words/jmdict/1/25-control-after-1-A/run.log",
+      "bytes": 1646,
+      "sha256": "4d0192a6056a998e35ead866185b222c6e4cec6e24a587447a192ebf54c3b8de"
+    },
+    {
+      "path": "crc-words/jmdict/1/25-control-after-1-A/summary.json",
+      "bytes": 31292,
+      "sha256": "0e4c7b4d0d5653c5c8b5554c4225fe1f1f18ce03a45c92301e21a569fb54d4fa"
+    },
+    {
+      "path": "crc-words/jmdict/1/A-build.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "crc-words/jmdict/1/A-identity.json",
+      "bytes": 716,
+      "sha256": "4a36ee2339d8a86ea7f1d339845dc40baf9f9d802f6737b1746941545fa12fbf"
+    },
+    {
+      "path": "crc-words/jmdict/1/A-libs.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "crc-words/jmdict/1/A-package-entries.json",
+      "bytes": 58593,
+      "sha256": "702be6e388df891f2549f50aea30f3f63bded72e4d21f0fd637f0dcf3e1c356a"
+    },
+    {
+      "path": "crc-words/jmdict/1/B-build.log",
+      "bytes": 128,
+      "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+    },
+    {
+      "path": "crc-words/jmdict/1/B-identity.json",
+      "bytes": 716,
+      "sha256": "85a52e755125b1bf8d2a96453b7c26ae38e30d22e613586c13aac89a92e5cd0e"
+    },
+    {
+      "path": "crc-words/jmdict/1/B-libs.log",
+      "bytes": 60,
+      "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+    },
+    {
+      "path": "crc-words/jmdict/1/B-package-entries.json",
+      "bytes": 58593,
+      "sha256": "1c5360d2f46a97684c37d2c234cda710dab2204433b214acaf07f066f20ea5d7"
+    },
+    {
+      "path": "crc-words/jmdict/1/fixtures.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "crc-words/jmdict/1/observations.json",
+      "bytes": 31767,
+      "sha256": "5f740f0d1fb364951a36137e8bb0e21b0ac2cd63b1905a7b450727e4c9675c3f"
+    },
+    {
+      "path": "crc-words/jmdict/1/package-differences.json",
+      "bytes": 77,
+      "sha256": "efd9350e5d6bcb9be828a8ecd1f2e1ed37d85638029e415673c1e642c00377e2"
+    },
+    {
+      "path": "crc-words/jmdict/1/plan.json",
+      "bytes": 2856,
+      "sha256": "7c5d4e4494114eaadc1ea04a4796408473564ec12f79458a4f7f2e6754666fb8"
+    },
+    {
+      "path": "crc-words/jmdict/1/results.json",
+      "bytes": 2260,
+      "sha256": "71cbdbb09ca26e3c6ed65f7a2b4cfba349397b21f301b5ba1bc41ed09212e17a"
+    }
+  ]
+}

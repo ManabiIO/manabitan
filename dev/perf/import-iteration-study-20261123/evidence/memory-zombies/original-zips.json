@@ -1,0 +1,1345 @@
+{
+  "runId": 45116158450,
+  "artifacts": [
+    {
+      "artifactId": 14791194621,
+      "name": "import-memory-zombies-20261123-jitendex-1",
+      "bytes": 705375,
+      "sha256": "b033230e05ba23b7a8491d17d22b616a371118b0b8bbbf0997f4cdd496a47723",
+      "manifestPath": "artifacts/jitendex-1/artifact-manifest.json",
+      "members": [
+        {
+          "path": "jitendex/1/A-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jitendex/1/A-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jitendex/1/A-identity.json",
+          "bytes": 424,
+          "sha256": "cdd509a010b4ce0446149e956916d9da1c91f66f28c2e9016f2c69168698eb86"
+        },
+        {
+          "path": "jitendex/1/A-package-entries.json",
+          "bytes": 58593,
+          "sha256": "d70ddb064875e6f73c148db274efeede230c1fcf91a359a14dd6f7de06d527af"
+        },
+        {
+          "path": "jitendex/1/B-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jitendex/1/B-identity.json",
+          "bytes": 424,
+          "sha256": "1b03de307ae71b428ce255201e203ff487544b15cc0e620a5f3fc21b1c27a390"
+        },
+        {
+          "path": "jitendex/1/B-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jitendex/1/B-package-entries.json",
+          "bytes": 58593,
+          "sha256": "f124b5c2ac0bb346fca9ed86674cad7fb083613def53378500e0b5dbf56c8dd9"
+        },
+        {
+          "path": "jitendex/1/fixtures.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/chromium-memory.json",
+          "bytes": 2584333,
+          "sha256": "aed4e4dbc89fec94bf91336427a92882f4c3baec121b6c7e4a2dd31d511eea3f"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/identity.json",
+          "bytes": 1431,
+          "sha256": "bd486b54e3a1814c608599f03e1ec78173674cdb4b6e15084e5e271eec77ff6e"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/observation.json",
+          "bytes": 164875,
+          "sha256": "00bb445406f5a09079c85f72bd64d832557b2fde519a1c7bc0d6a34b3710c5b6"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/run-1.html",
+          "bytes": 81345,
+          "sha256": "ac14a70232e2fb46afaf3f3143ac3bd85a067ad63a4cd41e13e3b030561e848a"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/run-1.json",
+          "bytes": 634712,
+          "sha256": "729db23cfa305f711fe3f2d4ceb5abe49816daf81f32ed05e973e596d76a4865"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/run.log",
+          "bytes": 1731,
+          "sha256": "621a350f40141f003547718b37e5a10c448ae3564bb81025859ef1957ed7ecfd"
+        },
+        {
+          "path": "jitendex/1/memory-00-A/summary.json",
+          "bytes": 204550,
+          "sha256": "90e7b55506e891b0b21e7779884a6c29108c778cb18e170713c1f2e61858c738"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/chromium-memory.json",
+          "bytes": 2758389,
+          "sha256": "93be59b81e37f3906433cd9999defec85b0e1a9b1d89ed5ab505da8af28c2e63"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/identity.json",
+          "bytes": 1427,
+          "sha256": "29764ac602e23e3c2f12d6a0ebceae73c2ab7bf16f91f013c5685b9b81ace3ca"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/run-1.html",
+          "bytes": 81519,
+          "sha256": "abfac31fecdaa7da05a1f065ad7eb9a18fc7d0074b33436ee40e8c052ff09cc5"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/observation.json",
+          "bytes": 165108,
+          "sha256": "c995401778f1034212914a1c941168d4a0d87a7b25b2f677e186e5ef4728ac73"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/run-1.json",
+          "bytes": 635206,
+          "sha256": "b44f560a98faff42063489f2dbbafc1988971d2012f7cfb6b46c81b3a4ec5d09"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/run.log",
+          "bytes": 1730,
+          "sha256": "ff44026b53edf8889d005f6f0fd4beb39fbd16017a5efef545954bff570321cc"
+        },
+        {
+          "path": "jitendex/1/memory-01-B/summary.json",
+          "bytes": 204725,
+          "sha256": "4b2311a4f37405cb8af5b2553f3a3db872162ccd24fca346d85755f0f4e1b431"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/chromium-memory.json",
+          "bytes": 2971349,
+          "sha256": "c4ca1db5b7018434c7a6b8b768d6138db5fd715fee388e7d23d29f808def4dbb"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/identity.json",
+          "bytes": 1426,
+          "sha256": "7fe41ae27809fb674682149e399946184ca25bccf0a52e00f5228397056ce342"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/observation.json",
+          "bytes": 165108,
+          "sha256": "8f28a1dcbc46827fbd1dbf02afdc60794e900267a719ac1920e6fcbb288cfe25"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/run-1.html",
+          "bytes": 81298,
+          "sha256": "cf7524f6f2e10cf3944cecc910b9793c6db63dfe6a349baecc1da44492a912dc"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/run-1.json",
+          "bytes": 634806,
+          "sha256": "282a71cb52c1cf3d9b00f733b9eb99d52b1a84e03618e822efb8e00d5227ed75"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/run.log",
+          "bytes": 1731,
+          "sha256": "92e5f88e3b0ef42f49fe7cbd1191ff565e1492d834a1f2a1584abe319e1340b5"
+        },
+        {
+          "path": "jitendex/1/memory-02-B/summary.json",
+          "bytes": 204657,
+          "sha256": "d601d023091526d52ee8e5083e4dd5d36877321cda5ec584ad195ef85dae16e5"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/chromium-memory.json",
+          "bytes": 2548539,
+          "sha256": "59b70096557ac77cd1d9d6533611dab0921002f382e6769f56a5e9d18579558a"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/identity.json",
+          "bytes": 1430,
+          "sha256": "16e7f21f35761126b1283286342c2c4e5aa00692d19bd7418a7de0c388c1c6b2"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/observation.json",
+          "bytes": 164873,
+          "sha256": "244f010a2d80da66cc3ec4c5d5bb56b99176dec328ac28e6867a70d7c5e5a61b"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/run-1.html",
+          "bytes": 81260,
+          "sha256": "00d0f8cab3c51cb4225fa5649bbe874414e247ff110ebe9f5a55479e4bb09320"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/run-1.json",
+          "bytes": 634536,
+          "sha256": "5e29169a1cf3645f8db072020074be906ea8f9b6c1e4403492b4ad03660adb98"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/run.log",
+          "bytes": 1731,
+          "sha256": "04da51ab8d1be4be83bb83398272aee6a5b235863b438eca91626be77a5ba64e"
+        },
+        {
+          "path": "jitendex/1/memory-03-A/summary.json",
+          "bytes": 204494,
+          "sha256": "2eee068b421ee75ebfefc02d42089b33dcd0ef76155233fc1d33c56a43544db3"
+        },
+        {
+          "path": "jitendex/1/memory-comparison.json",
+          "bytes": 961,
+          "sha256": "8c87a38b7efdfdc23bd443747ca3c647f21f1ec15b79d0e3decb610352014a30"
+        },
+        {
+          "path": "jitendex/1/observations.json",
+          "bytes": 690331,
+          "sha256": "484c2916c711b88bc3efc0570c01f193c46e78e9ac8f97288e4018ede9e13302"
+        },
+        {
+          "path": "jitendex/1/package-differences.json",
+          "bytes": 98,
+          "sha256": "6407eb0c0dab77d4cc5ee0838cd1f8b957897ee0e5c57244acbd6478d23e8edc"
+        },
+        {
+          "path": "jitendex/1/plan.json",
+          "bytes": 2498,
+          "sha256": "5b1f59ecc6256500748bc33c4acaf6a401f6694b58361eed5081723c407c0e29"
+        },
+        {
+          "path": "jitendex/1/readback-comparison.json",
+          "bytes": 16737,
+          "sha256": "497448a5f39835ee31902e9be06deda064f70764f3c53170a56fa26e62da0358"
+        },
+        {
+          "path": "process-witness.log",
+          "bytes": 8949,
+          "sha256": "3ff63892ee4e9adadae18357d2cf653e372642d43d2a32c628e64304a82b899e"
+        }
+      ]
+    },
+    {
+      "artifactId": 14791926019,
+      "name": "import-memory-zombies-20261123-jitendex-2",
+      "bytes": 598949,
+      "sha256": "67fd2c2ebc5488c93d02b3bf6a562a8d658932c1332e9620b9f96f54e1ba17eb",
+      "manifestPath": "artifacts/jitendex-2/artifact-manifest.json",
+      "members": [
+        {
+          "path": "jitendex/2/A-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jitendex/2/A-identity.json",
+          "bytes": 424,
+          "sha256": "3d739b75799587ab784454ea35b8246bdc822e27555b358163e1b26b1309abe6"
+        },
+        {
+          "path": "jitendex/2/A-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jitendex/2/A-package-entries.json",
+          "bytes": 58593,
+          "sha256": "d70ddb064875e6f73c148db274efeede230c1fcf91a359a14dd6f7de06d527af"
+        },
+        {
+          "path": "jitendex/2/B-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jitendex/2/B-identity.json",
+          "bytes": 424,
+          "sha256": "3245e169eeb9b4090619d5a24beee57eb5fe362dae230a1a2407d916a3c36961"
+        },
+        {
+          "path": "jitendex/2/B-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jitendex/2/B-package-entries.json",
+          "bytes": 58593,
+          "sha256": "f124b5c2ac0bb346fca9ed86674cad7fb083613def53378500e0b5dbf56c8dd9"
+        },
+        {
+          "path": "jitendex/2/fixtures.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/chromium-memory.json",
+          "bytes": 1743352,
+          "sha256": "77e42e6160561e5df17b00654dc79ec7dc69d1249ca3008d61a85107faa86e1a"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/identity.json",
+          "bytes": 1431,
+          "sha256": "86d721b34227fc97bd0c4c4d9a3fd5e951861f6f57c8e737ecb6f535ee9b03e3"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/observation.json",
+          "bytes": 165108,
+          "sha256": "e4bf490d6e97f87286058e103b14fa7c856f74e54d1420e9a7588db6c5269bd1"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/run-1.html",
+          "bytes": 81515,
+          "sha256": "44c3ab4e992e4ea74cad94309cb900bae01347bd859767eaec60484dfd22c28d"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/run-1.json",
+          "bytes": 635184,
+          "sha256": "a12f664dc704d713de1c1e80cd6bac5a5810013ea40016832062889b309d68ae"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/summary.json",
+          "bytes": 204663,
+          "sha256": "7338144abebb35f6192b7665f54b4981ad9e2a9bba8ed68fb9b24b41ac63c2f5"
+        },
+        {
+          "path": "jitendex/2/memory-00-B/run.log",
+          "bytes": 1729,
+          "sha256": "93691afcbcd9fcf4f65883f169761066383313e806ec17aa14e6dea0182c90b0"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/chromium-memory.json",
+          "bytes": 1742933,
+          "sha256": "6fe0e162dda34a1715a6adca2efbbbcbe33c618e463314ae68d6b4ac24fc15fb"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/identity.json",
+          "bytes": 1428,
+          "sha256": "06013c29f93cb9cbcd86db4103a784837a4f0f7282caf4c03e5032571ce905f0"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/observation.json",
+          "bytes": 164873,
+          "sha256": "21fee9bae9b72574c68e0a56c7c529ba9ed70a5beb24bd1fe6996f179338da55"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/run-1.html",
+          "bytes": 81424,
+          "sha256": "62952c3926259645d57aa181c9c108d72c0a1043af180100c8a787cb0a1990f5"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/run-1.json",
+          "bytes": 634819,
+          "sha256": "6644e8a12ded8579816bcb4a250d320b78856ec54901b258811c3a96349c1ab5"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/run.log",
+          "bytes": 1731,
+          "sha256": "20221681c254915d2e72f290dfdc0e3b82e3a09dfb07a8429578272e18806f3c"
+        },
+        {
+          "path": "jitendex/2/memory-01-A/summary.json",
+          "bytes": 204628,
+          "sha256": "c5b9071259c7750b75352d2bee56f2444746d22e4ec61d30efe852a04f979d25"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/chromium-memory.json",
+          "bytes": 1648716,
+          "sha256": "f85623ba6f3a88e8eb07e7208bc54b62850218fc57923ff090ba3bf1b2d255fd"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/identity.json",
+          "bytes": 1429,
+          "sha256": "b34f8feff6e0b553f062cb477e9d79737163403ad08c6589c5732c15861b1eef"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/observation.json",
+          "bytes": 164873,
+          "sha256": "5ff7b9266b78efd23a9a93ec5da5b543dc0046dabb35b4586ecc800432c73da2"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/run-1.html",
+          "bytes": 81517,
+          "sha256": "935040d154464955d275d6e7c4f80206c3d9ce7e0f95494b0eb174f5d33a09d0"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/run-1.json",
+          "bytes": 635023,
+          "sha256": "04bdedbd9373204cc48173bd7630e8d835bfed3aebe1da94f56ca5c0c87afbe9"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/run.log",
+          "bytes": 1729,
+          "sha256": "7c7e1a4b8d85aa8c1c7607c69146db0e5a9adaf65f1a5f93adffd6b8de035353"
+        },
+        {
+          "path": "jitendex/2/memory-02-A/summary.json",
+          "bytes": 204691,
+          "sha256": "7cc79378568e77754523050b572cd0bd43c275d78e4ea69a4818f11012714eee"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/chromium-memory.json",
+          "bytes": 1652479,
+          "sha256": "c4db039d80ef5721198306fffc938784a362b1c8e6b0fc10055c47d05dc5701b"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/identity.json",
+          "bytes": 1431,
+          "sha256": "610492d7011896fd27f1b540f7c404a59d32c131ffea5b5ff16d6289c389e71f"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/observation.json",
+          "bytes": 165108,
+          "sha256": "0e69814b5c1fbdb108f7a85904c9f529521cae852e9b1532f63187a409fcbacd"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/run-1.html",
+          "bytes": 82003,
+          "sha256": "b83809378f762f200eebaf007b30530964f56716aca65299887c4db832100b5e"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/run-1.json",
+          "bytes": 635242,
+          "sha256": "40bf1a589753a465e781160ab0c72431073717d85903300ef49bc05c1d163243"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/run.log",
+          "bytes": 1818,
+          "sha256": "d5d535abcda51d6db0cd7d85b63ca31f44b8cdc89d560ca4702eb7405a86c982"
+        },
+        {
+          "path": "jitendex/2/memory-03-B/summary.json",
+          "bytes": 204641,
+          "sha256": "c630599d5f5a1556eccf3dcd0a3ec2ace262cd03da8dd4c8f153322038cfbbfe"
+        },
+        {
+          "path": "jitendex/2/memory-comparison.json",
+          "bytes": 958,
+          "sha256": "5c60a5676ebf79c6ba0bce627a009963e12a174c6bb7a20c100a1c82378e9ccf"
+        },
+        {
+          "path": "jitendex/2/observations.json",
+          "bytes": 690329,
+          "sha256": "b6c95f8478551276019ae3eafb1a8d98d1e22fef67c7b333309a9dd091fd2a7c"
+        },
+        {
+          "path": "jitendex/2/package-differences.json",
+          "bytes": 98,
+          "sha256": "6407eb0c0dab77d4cc5ee0838cd1f8b957897ee0e5c57244acbd6478d23e8edc"
+        },
+        {
+          "path": "jitendex/2/plan.json",
+          "bytes": 2498,
+          "sha256": "fea66273efd9c18e5f7f00d2bc1fbdaf0ac932d433e57c22b7be50e55795cef4"
+        },
+        {
+          "path": "jitendex/2/readback-comparison.json",
+          "bytes": 16737,
+          "sha256": "497448a5f39835ee31902e9be06deda064f70764f3c53170a56fa26e62da0358"
+        },
+        {
+          "path": "process-witness.log",
+          "bytes": 8949,
+          "sha256": "b45066e3b9853b5237bd7084773d70564a1ad5476547ec50b290913d0190a4d2"
+        }
+      ]
+    },
+    {
+      "artifactId": 14791618226,
+      "name": "import-memory-zombies-20261123-jmdict-1",
+      "bytes": 584065,
+      "sha256": "fca86af84cd45037dbf6c8f2b230703299d3565b872d2abc2b04674664cf562a",
+      "manifestPath": "artifacts/jmdict-1/artifact-manifest.json",
+      "members": [
+        {
+          "path": "jmdict/1/A-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jmdict/1/A-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jmdict/1/A-identity.json",
+          "bytes": 424,
+          "sha256": "93b7409a796bce9ae60b557df9d4fb4abca672b42c36f8d8b25ac21d064902ca"
+        },
+        {
+          "path": "jmdict/1/A-package-entries.json",
+          "bytes": 58593,
+          "sha256": "d70ddb064875e6f73c148db274efeede230c1fcf91a359a14dd6f7de06d527af"
+        },
+        {
+          "path": "jmdict/1/B-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jmdict/1/B-identity.json",
+          "bytes": 424,
+          "sha256": "fe20fcfc2c1df987b95a723fcd430dc04886eeb798f26483518885be56e305fa"
+        },
+        {
+          "path": "jmdict/1/B-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jmdict/1/B-package-entries.json",
+          "bytes": 58593,
+          "sha256": "f124b5c2ac0bb346fca9ed86674cad7fb083613def53378500e0b5dbf56c8dd9"
+        },
+        {
+          "path": "jmdict/1/fixtures.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/chromium-memory.json",
+          "bytes": 2595291,
+          "sha256": "c26e622ed2f0feeb0bb2e2f0c769973161a0d6cef4c234c94e711c5cb3ad6bc3"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/identity.json",
+          "bytes": 1426,
+          "sha256": "f659dc259e51b09bef3c872745bb15d505c4f2e426d6fb02171ff94e35f5207c"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/observation.json",
+          "bytes": 71914,
+          "sha256": "8d9b6d0cba1a2a4e16dbc825b0a3a18277756e5ad7ee45db66f3fc9a7aec4dc2"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/run-1.html",
+          "bytes": 81288,
+          "sha256": "7c9e447ad41e582729846dae41dbe9cded0b0e73d86c510ecb693186ef7bcf24"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/run.log",
+          "bytes": 1713,
+          "sha256": "4c8f1bc8132e761a6182f8e1fb7b71be7b9ea0d863cf45cbc9bb7ca4342e46a3"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/run-1.json",
+          "bytes": 338322,
+          "sha256": "b48e4632354f47c41275aedd11efa55d69ff6f788aec3650644f5a2bf4d34790"
+        },
+        {
+          "path": "jmdict/1/memory-00-A/summary.json",
+          "bytes": 104485,
+          "sha256": "7d888273649cfca61d537c06d15f851012876ae155a07e3b9fc5b5b7d955796c"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/identity.json",
+          "bytes": 1422,
+          "sha256": "5ebcd9b0c2357996fcce03e76779e8864219087e1bbc58c52d7c41c4b26d1227"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/chromium-memory.json",
+          "bytes": 2726985,
+          "sha256": "2c882b38a33b9eaed31d34d4e2e6ca62b09e3921a387d8d51a8192eb2adf080d"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/observation.json",
+          "bytes": 71912,
+          "sha256": "151d77880d78717c0e05b2f5e39a90c70db7217ef96e9cf16c20f65ea5bcf8a2"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/run-1.html",
+          "bytes": 81033,
+          "sha256": "b45b379ff99f2f1ec2c1a78193b35f3157b2200945eb241e85b6ca8d9fda0618"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/run-1.json",
+          "bytes": 337882,
+          "sha256": "663b0097318b5c816faa7038dd86dc94d4522a0109fe5edcdda292d91d7b84cb"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/run.log",
+          "bytes": 1715,
+          "sha256": "64ffa226c51ed23485b6201516468029e9e96291299e6f38d45976879352e6d3"
+        },
+        {
+          "path": "jmdict/1/memory-01-B/summary.json",
+          "bytes": 104470,
+          "sha256": "90a737b044334b9273f5ce1df0ef9d3b257931a8ebd374ae526cc937652e57fe"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/chromium-memory.json",
+          "bytes": 2277390,
+          "sha256": "0e9ad8f627cd32693e686ce207183d4480c9c4203dde57f852932b16a48b5cc0"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/identity.json",
+          "bytes": 1428,
+          "sha256": "e0a4c349c2097edced81d117ce659743e06c02d17f90935522ab5121c7a26078"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/observation.json",
+          "bytes": 71913,
+          "sha256": "dd73e52248770f4a0f29649a3f486e6212329adbda2fe713e8c658263d8e5459"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/run-1.html",
+          "bytes": 81067,
+          "sha256": "8a45a324be5bb482a53ca5539dfc706d432f9924eea965f6ec19d9f2838133e5"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/run-1.json",
+          "bytes": 337961,
+          "sha256": "bab9bf2b473ac5ee27f8c9fbdf60401bf1582f0e999059dbb42561a24acaa9e9"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/run.log",
+          "bytes": 1712,
+          "sha256": "211eda3bfa85a7c9a5a250faaa6f732d286327160b4d79814d4c34373d81c676"
+        },
+        {
+          "path": "jmdict/1/memory-02-B/summary.json",
+          "bytes": 104480,
+          "sha256": "684fc15a12932e9cf631b61e2bd883e73f4b7b398e9e60ca89fb98f9c9d7a501"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/chromium-memory.json",
+          "bytes": 2363622,
+          "sha256": "965b30aa67f6011041b88dd783a16730bcde87f67bb16c7aea4cbb51d536f806"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/identity.json",
+          "bytes": 1422,
+          "sha256": "4fbceb3890cf53c5ca0b5f157f1eaa1f38e56aabfbfb7b9adf4ec73db2f500d2"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/observation.json",
+          "bytes": 71912,
+          "sha256": "e8673d417cf0c3f39db3da1bed95ff8065de3ec2eebc629245c1d299e48e17aa"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/run-1.html",
+          "bytes": 81043,
+          "sha256": "e2df6bdff890484554618ca4871fbb327602a96d1115986fdfc982d89ecdb7e2"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/run-1.json",
+          "bytes": 337921,
+          "sha256": "fbf4240754118d82083380bbe4f683fd52988d6baf54005c6f859017c984b882"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/run.log",
+          "bytes": 1714,
+          "sha256": "cf84b84b61b7230cc89eab150fbb326edd723f45a7e747299137f78f86156cd5"
+        },
+        {
+          "path": "jmdict/1/memory-03-A/summary.json",
+          "bytes": 104416,
+          "sha256": "b3930f19b5cb61d9ef6e412a099fc8b3083980557bfd383ea6e43b4781efc318"
+        },
+        {
+          "path": "jmdict/1/memory-comparison.json",
+          "bytes": 956,
+          "sha256": "03acd6e0288035f2775080cffeed9dd2baf4260d720739e02cdbd241c4494d1e"
+        },
+        {
+          "path": "jmdict/1/observations.json",
+          "bytes": 302714,
+          "sha256": "f987de3c0de6d5bb72e4a8b5d8e18b13d305a075f6b881edf93bb39eda63864e"
+        },
+        {
+          "path": "jmdict/1/package-differences.json",
+          "bytes": 98,
+          "sha256": "6407eb0c0dab77d4cc5ee0838cd1f8b957897ee0e5c57244acbd6478d23e8edc"
+        },
+        {
+          "path": "jmdict/1/plan.json",
+          "bytes": 2471,
+          "sha256": "3c975536aafbab9e9446757d1011400087f1128548235e011f935f808170670c"
+        },
+        {
+          "path": "jmdict/1/readback-comparison.json",
+          "bytes": 299,
+          "sha256": "7b28ccda9450e801af59a2c14cf95af7a575510804355aa65781c88afdb34ae8"
+        },
+        {
+          "path": "process-witness.log",
+          "bytes": 8935,
+          "sha256": "ffaaf91a5d94d4454e7edfbc0eba2cfe6fd3b73f63323429c39fedb1e1d10e9b"
+        }
+      ]
+    },
+    {
+      "artifactId": 14791687027,
+      "name": "import-memory-zombies-20261123-jmdict-2",
+      "bytes": 499787,
+      "sha256": "1fa9e00c2ba62df86f1add8929891d7d7af1dcd4d019a91d7f86a4bd27bcd857",
+      "manifestPath": "artifacts/jmdict-2/artifact-manifest.json",
+      "members": [
+        {
+          "path": "jmdict/2/A-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jmdict/2/A-identity.json",
+          "bytes": 424,
+          "sha256": "b7e0397eb7f37dba90e8a0dd7394120c6fdb5fa617153890a7a7d6de19712012"
+        },
+        {
+          "path": "jmdict/2/A-package-entries.json",
+          "bytes": 58593,
+          "sha256": "d70ddb064875e6f73c148db274efeede230c1fcf91a359a14dd6f7de06d527af"
+        },
+        {
+          "path": "jmdict/2/A-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jmdict/2/B-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "jmdict/2/B-identity.json",
+          "bytes": 424,
+          "sha256": "9a15a3e62cf27a6de3ab6f41f97f613ade3450bd6e0f16a777284dc497293e5d"
+        },
+        {
+          "path": "jmdict/2/B-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "jmdict/2/B-package-entries.json",
+          "bytes": 58593,
+          "sha256": "f124b5c2ac0bb346fca9ed86674cad7fb083613def53378500e0b5dbf56c8dd9"
+        },
+        {
+          "path": "jmdict/2/fixtures.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/chromium-memory.json",
+          "bytes": 1781949,
+          "sha256": "766879e36e5ec2db990a5044902a4cf218f1d5bcb76cad163b1f43434368533d"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/identity.json",
+          "bytes": 1425,
+          "sha256": "9381f37af182f43dccede9246c4c4cb38597e7c7c1f48f89a9ff5b780d51d913"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/observation.json",
+          "bytes": 71914,
+          "sha256": "1052f3dbd6fb37cc95ee00d6a7399834f15d808f587890b6d539cf55a3030474"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/run-1.html",
+          "bytes": 81861,
+          "sha256": "f3c856711ce21c84c9d63da4c23ed88fa544eabdc40b183263bf89cde4eec06f"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/run-1.json",
+          "bytes": 338459,
+          "sha256": "5996548f66640626744bd64ac89cdbc21e824c417e7d79542e2fd6d779f57763"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/run.log",
+          "bytes": 1795,
+          "sha256": "0ad3ac39958295d17d723949ae273f9318cdddb9836a5d6ae93187a90261d24c"
+        },
+        {
+          "path": "jmdict/2/memory-00-B/summary.json",
+          "bytes": 104475,
+          "sha256": "4e4b3172e278a0c2dff0c646e2458afcf38df1ceab6a1d5b25c170856f481cc6"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/chromium-memory.json",
+          "bytes": 1604186,
+          "sha256": "3b6faae7f1a3f078f74ecbce8f9d2c59bf64f08bf20b1d4d59571c01d658b457"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/identity.json",
+          "bytes": 1429,
+          "sha256": "33fd0c389bb307d025e5439cb766d68679837ddbc7910b1fb2f82a77e797c1a3"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/observation.json",
+          "bytes": 71956,
+          "sha256": "7afc23ae7bf086bae18e6f9194cb140d7f64074f3bd35b7ff536935bd5b94f74"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/run-1.html",
+          "bytes": 80252,
+          "sha256": "b4f43f58ccf6b2900ae967f6994a088ae8d5c785b5f86956861cb3ba9bd1d231"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/run-1.json",
+          "bytes": 337434,
+          "sha256": "81157654a5acec8b5c5a9531de955b46565335abe44de7d781e66be080107fb8"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/run.log",
+          "bytes": 1599,
+          "sha256": "f466472d935f35dcb18abf726337aad87b52c8bcbac0d069caf5f12d885c588f"
+        },
+        {
+          "path": "jmdict/2/memory-01-A/summary.json",
+          "bytes": 104385,
+          "sha256": "db94689d560d1423c6256effff4770d4c4e41f307385a92d5a2ea43e65e3c9cf"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/chromium-memory.json",
+          "bytes": 1745251,
+          "sha256": "4785989e7b7236621efcc2ca132d2d9458cb07a886ef84b36a158e1761e67448"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/identity.json",
+          "bytes": 1428,
+          "sha256": "b35e14d6ef1d4279aefb6fbc6f503ee9e12f3506e94eef1d0e7328ac20541909"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/observation.json",
+          "bytes": 71956,
+          "sha256": "1f9271b4239c58956978e9ed7b1a6f98d51324633c9ab8a9f6042e58afceaa40"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/run-1.html",
+          "bytes": 80941,
+          "sha256": "dfd7b22f147fb6543ad571a2c46171d220271e6bc2d3cdc0a1d8921c37cefe19"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/run-1.json",
+          "bytes": 337766,
+          "sha256": "91e9be5aa66919945f0fe794cc8c9b80d4a03369275c7ad27de964d24bd2053c"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/run.log",
+          "bytes": 1707,
+          "sha256": "9cfd40071260c553315042362fb35a36d6d33e436b97bf01a02ad047557b2292"
+        },
+        {
+          "path": "jmdict/2/memory-02-A/summary.json",
+          "bytes": 104437,
+          "sha256": "b0ceacf7d906a7e640d176180405b7d5693f27176ac94630568099f6ea9275b5"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/chromium-memory.json",
+          "bytes": 1690176,
+          "sha256": "eb1c1a49c0e96a9dfbbd98bc4681b931f883d1bf4d874a19a477c605182fccd5"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/identity.json",
+          "bytes": 1428,
+          "sha256": "545435e4955e114bbf5eaa4913a8051527042435b2bcdc8a4021d0f621399ef8"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/observation.json",
+          "bytes": 71912,
+          "sha256": "2b06d97b25880854ee87df1ecde75949082c30cbc6ef12ebb73f53cc62429000"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/run-1.html",
+          "bytes": 80416,
+          "sha256": "eed730f76a8670af2bc95f960c1d4b87ce8b57eb90cbc78d892c7aa2d8955a8a"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/run-1.json",
+          "bytes": 337744,
+          "sha256": "533dea4d88d0b942a067213614cd6badd530bc546c381c587b19959d129ccbe7"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/run.log",
+          "bytes": 1604,
+          "sha256": "020d3f18b798270655b5f773b9478ef24c190993617caf845b345cb93378a1a5"
+        },
+        {
+          "path": "jmdict/2/memory-03-B/summary.json",
+          "bytes": 104467,
+          "sha256": "911c88d8ca91cc0d5bb0c8b0108901f8be265ea6b71e83e5495747955170cc96"
+        },
+        {
+          "path": "jmdict/2/memory-comparison.json",
+          "bytes": 244,
+          "sha256": "81a32b9f64cfd60688fa47f04b6f1fa9ce8c3aa8012600d909b2216de4b460a1"
+        },
+        {
+          "path": "jmdict/2/package-differences.json",
+          "bytes": 98,
+          "sha256": "6407eb0c0dab77d4cc5ee0838cd1f8b957897ee0e5c57244acbd6478d23e8edc"
+        },
+        {
+          "path": "jmdict/2/observations.json",
+          "bytes": 302809,
+          "sha256": "e07edd963ef89c5349c39cac1b1a21de338ed3c31d091a5a1ba95c7e82da1e98"
+        },
+        {
+          "path": "jmdict/2/plan.json",
+          "bytes": 2471,
+          "sha256": "0dfa79308d3dd0636adadf73713872f4dc7a718c941f9559cf4b0d51d2a065ab"
+        },
+        {
+          "path": "process-witness.log",
+          "bytes": 8935,
+          "sha256": "94daf8946397ee0cbe95934669370b45dd34a0a4b7d179096375fb781d1cebcf"
+        }
+      ]
+    },
+    {
+      "artifactId": 14792070978,
+      "name": "import-memory-zombies-20261123-vndb-1",
+      "bytes": 954815,
+      "sha256": "8d74d53888bdd1c808af6227242f2a290ba79a2321a7b4143eb60a406eaf7b52",
+      "manifestPath": "artifacts/vndb-1/artifact-manifest.json",
+      "members": [
+        {
+          "path": "process-witness.log",
+          "bytes": 8935,
+          "sha256": "7975a87f63f115e1b1219e8d814c953242f016b5914475a496ff1f4d3f2a7eff"
+        },
+        {
+          "path": "vndb/1/A-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "vndb/1/A-identity.json",
+          "bytes": 424,
+          "sha256": "f333068be2a9c6286170fac92d3433c8e86f969958e921a940d2ca3f5d2f3766"
+        },
+        {
+          "path": "vndb/1/A-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "vndb/1/A-package-entries.json",
+          "bytes": 58593,
+          "sha256": "d70ddb064875e6f73c148db274efeede230c1fcf91a359a14dd6f7de06d527af"
+        },
+        {
+          "path": "vndb/1/B-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "vndb/1/B-identity.json",
+          "bytes": 424,
+          "sha256": "4a48870e33eaf5e14304d0fddaa2063f653ad76dbce5a193066900d958c2216d"
+        },
+        {
+          "path": "vndb/1/B-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "vndb/1/B-package-entries.json",
+          "bytes": 58593,
+          "sha256": "f124b5c2ac0bb346fca9ed86674cad7fb083613def53378500e0b5dbf56c8dd9"
+        },
+        {
+          "path": "vndb/1/fixtures.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "vndb/1/memory-00-A/chromium-memory.json",
+          "bytes": 5778489,
+          "sha256": "7571934f950e088f0644b52d0bf234f33243f0cfe6f19d9131ea7d014dfb715d"
+        },
+        {
+          "path": "vndb/1/memory-00-A/identity.json",
+          "bytes": 1415,
+          "sha256": "10752bdb5a61a501d5d131af1f400c8ea3b188447fd9b8fe4d1ce544b8d340cf"
+        },
+        {
+          "path": "vndb/1/memory-00-A/observation.json",
+          "bytes": 136061,
+          "sha256": "5d50233465ba7146c31e1e4220f7b7b4c854c2c5678d01d4457f521bc9f9322e"
+        },
+        {
+          "path": "vndb/1/memory-00-A/run-1.html",
+          "bytes": 82592,
+          "sha256": "2ad103cc7ed3ecb35268a25504017e59860911db81c649960bb0c5f6b71dec77"
+        },
+        {
+          "path": "vndb/1/memory-00-A/run-1.json",
+          "bytes": 546115,
+          "sha256": "cbb22893ddd926efe3d32c0e7cc8ffbe68a47c2d151129d102b88092841371e4"
+        },
+        {
+          "path": "vndb/1/memory-00-A/run.log",
+          "bytes": 1790,
+          "sha256": "1b45d367686768b42c7940b4a564cf3ee0f4bdabbc6e2377f292482484a82451"
+        },
+        {
+          "path": "vndb/1/memory-00-A/summary.json",
+          "bytes": 174625,
+          "sha256": "a5f000607f3fe246c85438dd3895c25ca494e61ed252435155bf109b3ddce628"
+        },
+        {
+          "path": "vndb/1/memory-01-B/chromium-memory.json",
+          "bytes": 5860824,
+          "sha256": "c9aa4ffb707d5d9edb8a56fc057bbb2f5a27189f445233f9cfca95d56b1b9751"
+        },
+        {
+          "path": "vndb/1/memory-01-B/identity.json",
+          "bytes": 1423,
+          "sha256": "a805e522ef23fbe4eaeaa2f8c083ac9ec9686814f43ff1516224207f3ab064c8"
+        },
+        {
+          "path": "vndb/1/memory-01-B/observation.json",
+          "bytes": 136061,
+          "sha256": "f9e82e0c17b72a107e5fc670f686bf3c096ab33afb10cfee411f370f9fadea30"
+        },
+        {
+          "path": "vndb/1/memory-01-B/run-1.html",
+          "bytes": 81735,
+          "sha256": "663b77b94fc990a9d1fa6ba4faec2de8c9e8c30e041c653b959e3f7a5b7c6002"
+        },
+        {
+          "path": "vndb/1/memory-01-B/run-1.json",
+          "bytes": 545438,
+          "sha256": "f70df7b4f4fd80736b270c181e5ede8dd791224cd794e6c350b26dcec64a3928"
+        },
+        {
+          "path": "vndb/1/memory-01-B/run.log",
+          "bytes": 1700,
+          "sha256": "8c1ba520ee3cdebc383dfe3c856148eee9f40a141f958c6fc70a94730688489c"
+        },
+        {
+          "path": "vndb/1/memory-01-B/summary.json",
+          "bytes": 174610,
+          "sha256": "87951471a2393164711d3f35866ff3f58dc36c40e5197fe8491823f9365a426a"
+        },
+        {
+          "path": "vndb/1/memory-02-B/chromium-memory.json",
+          "bytes": 5640026,
+          "sha256": "ac8c388d232e96fa739ef382d5c978d040563cf09dc23e1f73e2552a653b5983"
+        },
+        {
+          "path": "vndb/1/memory-02-B/identity.json",
+          "bytes": 1419,
+          "sha256": "a92857138883fb16e437a710c2590b1ecc4ca908deb4819fd00dbe7c6c1a1b69"
+        },
+        {
+          "path": "vndb/1/memory-02-B/observation.json",
+          "bytes": 136061,
+          "sha256": "d54cc826635175e8a49c76183d08ea3a2365216fe4158485599fb33310f2a99c"
+        },
+        {
+          "path": "vndb/1/memory-02-B/run-1.html",
+          "bytes": 81654,
+          "sha256": "2af419d3fbde7b44b144aaeafb429debdf08eb9f288eb874d7d50d3c57fbcda0"
+        },
+        {
+          "path": "vndb/1/memory-02-B/run-1.json",
+          "bytes": 545362,
+          "sha256": "84a934a618d275454428c5d1dad9f33760cadfb6caad5aed329697c33de3628d"
+        },
+        {
+          "path": "vndb/1/memory-02-B/run.log",
+          "bytes": 1696,
+          "sha256": "4e58a5461e2fedb5b33b2711ec0d33c83bfd3e58661774fbb2aa9136929b1018"
+        },
+        {
+          "path": "vndb/1/memory-02-B/summary.json",
+          "bytes": 174572,
+          "sha256": "dd4059bbe63f7f59d217b46069a77579e330765e4f018ea16b87a8115688ad4f"
+        },
+        {
+          "path": "vndb/1/memory-03-A/chromium-memory.json",
+          "bytes": 5698765,
+          "sha256": "4962d66c8f7014ae7c178da0bfc29f48375ee92f17f9ac10bc3a9ce02590ec96"
+        },
+        {
+          "path": "vndb/1/memory-03-A/identity.json",
+          "bytes": 1422,
+          "sha256": "beb733e9fdf21f2f1f235a0bb58840872a206c2053c749015ce507012a4f821e"
+        },
+        {
+          "path": "vndb/1/memory-03-A/observation.json",
+          "bytes": 136061,
+          "sha256": "c5b8bb5178797c4acc46d4d87abc3ca4399438d149aca4c196c83217b7680fdc"
+        },
+        {
+          "path": "vndb/1/memory-03-A/run-1.html",
+          "bytes": 81941,
+          "sha256": "cd5b1b1dcc6f364df267dcdab878f70b14b137050794c5ff0b99cb3fab3503fb"
+        },
+        {
+          "path": "vndb/1/memory-03-A/run-1.json",
+          "bytes": 545826,
+          "sha256": "4a646dcca92e84ed72d90c98c6bcef9c43e8648dbeaf699e44348236519d5854"
+        },
+        {
+          "path": "vndb/1/memory-03-A/run.log",
+          "bytes": 1696,
+          "sha256": "4213dd8c8c63180839a712ff2a1ce6fd8774c94ce729ab251d06fa96d3efc75c"
+        },
+        {
+          "path": "vndb/1/memory-03-A/summary.json",
+          "bytes": 174650,
+          "sha256": "f18192736078328e815a54c27af2aeae336a33e20d32bed9b5a02ec352ba3413"
+        },
+        {
+          "path": "vndb/1/memory-comparison.json",
+          "bytes": 961,
+          "sha256": "13e44258cf5c04a33d8b432763e461dc80c41f2b9a62bd993cd81921de9e530d"
+        },
+        {
+          "path": "vndb/1/observations.json",
+          "bytes": 571539,
+          "sha256": "aaab3de6ad4825a28093ba344d732e19345a244a912b31457f827ff23b6010a5"
+        },
+        {
+          "path": "vndb/1/package-differences.json",
+          "bytes": 98,
+          "sha256": "6407eb0c0dab77d4cc5ee0838cd1f8b957897ee0e5c57244acbd6478d23e8edc"
+        },
+        {
+          "path": "vndb/1/plan.json",
+          "bytes": 2540,
+          "sha256": "a7656e0e5dcbe1c988ee7c69cfb014b6abdba10dece537cd2d125d7ad01b3783"
+        },
+        {
+          "path": "vndb/1/readback-comparison.json",
+          "bytes": 299,
+          "sha256": "343ce0973cb5148b62d84b617821751fe180a3abc6253ee52af802e308fb53d5"
+        }
+      ]
+    },
+    {
+      "artifactId": 14791897392,
+      "name": "import-memory-zombies-20261123-vndb-2",
+      "bytes": 969570,
+      "sha256": "a32e488630318f395414f083bb7e69ece6fe9e8f37b475890453af6a6595d031",
+      "manifestPath": "artifacts/vndb-2/artifact-manifest.json",
+      "members": [
+        {
+          "path": "process-witness.log",
+          "bytes": 8935,
+          "sha256": "16bb575960e6ba95ac37755133f1335a394b020d0c4b2e4c5b027bb6b203c6be"
+        },
+        {
+          "path": "vndb/2/A-identity.json",
+          "bytes": 424,
+          "sha256": "b1de903a6799c5562f1c5f2d1478f29aaa80d95a032d911f7ac348cb804737e5"
+        },
+        {
+          "path": "vndb/2/A-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "vndb/2/A-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "vndb/2/A-package-entries.json",
+          "bytes": 58593,
+          "sha256": "d70ddb064875e6f73c148db274efeede230c1fcf91a359a14dd6f7de06d527af"
+        },
+        {
+          "path": "vndb/2/B-build.log",
+          "bytes": 128,
+          "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        {
+          "path": "vndb/2/B-identity.json",
+          "bytes": 424,
+          "sha256": "cd4534e47b5f83f8e7d7341c526faec944b1f44255adf1ae05c95025406d4f9c"
+        },
+        {
+          "path": "vndb/2/B-libs.log",
+          "bytes": 60,
+          "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        {
+          "path": "vndb/2/B-package-entries.json",
+          "bytes": 58593,
+          "sha256": "f124b5c2ac0bb346fca9ed86674cad7fb083613def53378500e0b5dbf56c8dd9"
+        },
+        {
+          "path": "vndb/2/fixtures.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "vndb/2/memory-00-B/chromium-memory.json",
+          "bytes": 6539343,
+          "sha256": "c140a392de27c0e2f61ccfd9c0efc89550a0d524e16c35cd9e85981cf2d1ba23"
+        },
+        {
+          "path": "vndb/2/memory-00-B/identity.json",
+          "bytes": 1423,
+          "sha256": "eba781ced36980f44ac1e31fa59a49ed2558c8d4d594b6e64660482e2dceb00e"
+        },
+        {
+          "path": "vndb/2/memory-00-B/observation.json",
+          "bytes": 136061,
+          "sha256": "f92bc64183b5d3c584682b09de4d792801e75313672a18de496f4bac1ca3a1d6"
+        },
+        {
+          "path": "vndb/2/memory-00-B/run-1.json",
+          "bytes": 545586,
+          "sha256": "577a916a917f27d4f03462a758d01063dc30277b12febbf01ddc1131e20f0d28"
+        },
+        {
+          "path": "vndb/2/memory-00-B/run-1.html",
+          "bytes": 81818,
+          "sha256": "8e6734d6f77fd03498a0928299e1109b0e615cf8b181c5da7e52f05438bab8e8"
+        },
+        {
+          "path": "vndb/2/memory-00-B/run.log",
+          "bytes": 1701,
+          "sha256": "adc558f8dd98dd98c2916094e9ec5c7a563f22b08ca3ffaa0e3988543e246910"
+        },
+        {
+          "path": "vndb/2/memory-01-A/chromium-memory.json",
+          "bytes": 5665194,
+          "sha256": "7b1b9c64fa97386aff7c4f5e805afb01490a22d90224581bbb61ef8352274ab2"
+        },
+        {
+          "path": "vndb/2/memory-00-B/summary.json",
+          "bytes": 174627,
+          "sha256": "8b16a780149216d6e7618bab77d166a70684c6b810e4ac4678629a41d43c5d4f"
+        },
+        {
+          "path": "vndb/2/memory-01-A/identity.json",
+          "bytes": 1422,
+          "sha256": "bc232d9ff0d0bc2ca4a2e0854c2d882f6573528c50198f8aa0ac68b19af3ff5d"
+        },
+        {
+          "path": "vndb/2/memory-01-A/observation.json",
+          "bytes": 136063,
+          "sha256": "aeeaa8188d7f24b0ce3d849cfe31bddf6779ba671275eb5dc75eaec25e1b594e"
+        },
+        {
+          "path": "vndb/2/memory-01-A/run-1.html",
+          "bytes": 81719,
+          "sha256": "b4be971ca6241485f4629afd3ae0edccfd5ac38a4bc4a755a5330a5ae5edf1a5"
+        },
+        {
+          "path": "vndb/2/memory-01-A/run-1.json",
+          "bytes": 545464,
+          "sha256": "2ba67d733e08ffee092a819e7b2661a091b9c2815eee1f29db46b1ea5153d346"
+        },
+        {
+          "path": "vndb/2/memory-01-A/run.log",
+          "bytes": 1697,
+          "sha256": "4f9ca4967156ca44b441debf7874d8f72f1c66c0b606887b1ac5f54dccc21c06"
+        },
+        {
+          "path": "vndb/2/memory-01-A/summary.json",
+          "bytes": 174624,
+          "sha256": "d31d3b71c707317d00e35d7dca285771cecab15efebaf4801103f187c8cb1966"
+        },
+        {
+          "path": "vndb/2/memory-02-A/identity.json",
+          "bytes": 1419,
+          "sha256": "4d827b40c32954c36d0af87d30e71c1d8298e92121a3daaca5873a9be3d5c381"
+        },
+        {
+          "path": "vndb/2/memory-02-A/chromium-memory.json",
+          "bytes": 5725138,
+          "sha256": "f190bb076020f83aec62e4dab28ad50520fc40eba0f61244b4c9d56c1d7caf16"
+        },
+        {
+          "path": "vndb/2/memory-02-A/observation.json",
+          "bytes": 136061,
+          "sha256": "cee02467b64df2409b63d991d68582bd610a0056352632dd5ee84c333c9d6506"
+        },
+        {
+          "path": "vndb/2/memory-02-A/run-1.html",
+          "bytes": 82572,
+          "sha256": "a3066829aa09f09c9191ecd266413026f753924f21dd2735fb42cf6052000968"
+        },
+        {
+          "path": "vndb/2/memory-02-A/run-1.json",
+          "bytes": 546067,
+          "sha256": "bc944a870f19df6bc79fdac8b9af6872dd772984707cce12b3325fba38e88780"
+        },
+        {
+          "path": "vndb/2/memory-02-A/run.log",
+          "bytes": 1785,
+          "sha256": "b12f90313533ed1e39f77aeb8d8c69e07fd94ce3106e108f5ec163d39b12e7e6"
+        },
+        {
+          "path": "vndb/2/memory-02-A/summary.json",
+          "bytes": 174627,
+          "sha256": "901fc9e16e3fefad9aa164530e5a2010a2a69bfa2a1c6e9f20eb2d036f59eeda"
+        },
+        {
+          "path": "vndb/2/memory-03-B/chromium-memory.json",
+          "bytes": 5596443,
+          "sha256": "d88972677b9d7d03867c2a9f1e66ebfade7100af6be8384809789bf6f06b1ecb"
+        },
+        {
+          "path": "vndb/2/memory-03-B/identity.json",
+          "bytes": 1424,
+          "sha256": "0e42ceb0d91558a1f5ad5100fb9ab3d46a130dcba64fc231b42ebb17a0105812"
+        },
+        {
+          "path": "vndb/2/memory-03-B/observation.json",
+          "bytes": 136061,
+          "sha256": "92b59c2559cf957631f867df25c7ad1810a60f2c79241f3b99bd1081b1c835d4"
+        },
+        {
+          "path": "vndb/2/memory-03-B/run-1.html",
+          "bytes": 81654,
+          "sha256": "1248f5ff56065268dd9a60243f4ed9666bfa79a6e921d55ce664d190536f20d2"
+        },
+        {
+          "path": "vndb/2/memory-03-B/run-1.json",
+          "bytes": 545337,
+          "sha256": "ffec2691f5ad4ee5efc96a27a14ff3e0696defbffcf7cb8fa2e7b0f149dfff65"
+        },
+        {
+          "path": "vndb/2/memory-03-B/run.log",
+          "bytes": 1697,
+          "sha256": "b6b647d9ae86bced00a9858ef9442aed01bedaee97086c68e8a3064d4ee8f159"
+        },
+        {
+          "path": "vndb/2/memory-03-B/summary.json",
+          "bytes": 174550,
+          "sha256": "6c594fa65f64735531246a781a91cce5dfdc7671beb03c93104e771cd74de58a"
+        },
+        {
+          "path": "vndb/2/memory-comparison.json",
+          "bytes": 956,
+          "sha256": "83f0e5f758b2b3ad155e34468b795e2bb4b50611971e292102712ecca1713c5d"
+        },
+        {
+          "path": "vndb/2/observations.json",
+          "bytes": 571541,
+          "sha256": "70cd2649b822e403b5a29dc9830e68ed2b50a6082f33f556fc7e0720da144642"
+        },
+        {
+          "path": "vndb/2/package-differences.json",
+          "bytes": 98,
+          "sha256": "6407eb0c0dab77d4cc5ee0838cd1f8b957897ee0e5c57244acbd6478d23e8edc"
+        },
+        {
+          "path": "vndb/2/plan.json",
+          "bytes": 2540,
+          "sha256": "65d0cec93d8774b234248e2d872f60a96bae0f4bd0ef0c7cb09536c4491d33d6"
+        },
+        {
+          "path": "vndb/2/readback-comparison.json",
+          "bytes": 299,
+          "sha256": "343ce0973cb5148b62d84b617821751fe180a3abc6253ee52af802e308fb53d5"
+        }
+      ]
+    }
+  ],
+  "limit": "Original API ZIP bytes were independently checked at collection and packaging. This compact transport retains every uncompressed member, but original ZIP-container hash verification additionally needs the original downloaded ZIP."
+}

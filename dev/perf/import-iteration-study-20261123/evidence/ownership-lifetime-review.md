@@ -1,0 +1,45 @@
+# Owned shared content: lifetime review
+
+This is a read-only source audit of baseline `1e235059a4c05c2509e8757fccba43a2d60222df` and measured #810 candidate `51f095912b11ddd158ac173698eb322e2be99d12`. The current #810 runtime files have the same bytes as that candidate. No runtime code was changed and no new import, timing or memory experiment was run for this review.
+
+## Decision and evidential limit
+
+Keep #810 in draft with its documented speed/memory tradeoff. The separate qualified memory campaign observes higher sampled Jitendex PSS in all four fixed comparisons (approximately 8–11%) and higher sampled private memory (approximately 10–14%). These are sampled maxima over startup, import, readback and restart, not complete peaks or import-only measurements. This source audit does **not** establish the cause of that increase.
+
+A read-only breakdown of the eight retained Jitendex receipts finds that all sampled PSS maxima include three renderer processes. Their aggregate PSS is 1,006,798–1,037,491 KiB in A and 1,137,732–1,156,189 KiB in B. The extra footprint is therefore concentrated in renderer processes at these sampled maxima. This does not identify individual Web Workers, JavaScript heaps, backing stores, or the lifecycle phase; it cannot isolate an allocator or GC cause.
+
+## Established source behavior
+
+1. **The new object is a fresh, owned full content slab.** The [parser worker](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/term-bank-wasm-parser-worker.js#L136) selects an owned `SharedArrayBuffer` for large projected imports. The [copy helper](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/term-bank-wasm-parser.js#L3875) copies the same content bytes that baseline copies into a private `ArrayBuffer`. It never aliases reusable parser WASM memory. The parser-to-sink transfer list includes only private ArrayBuffers, so baseline detaches the sender's content buffer; the new shared buffer remains referenced independently in sender and receiver isolates. Sharing does not itself create a physical copy per worker.
+
+2. **The parser lead is bounded by group count, not a byte-admission test.** [The pipeline](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/term-bank-wasm-parser.js#L2790) limits lead to worker count times groups per worker and clears each settled result's `chunk` and `consume` fields when the sink takes it. `_queuedOwnedContentBytes` and its peak are incremented/decremented for diagnostics, but [the actual wait predicate](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/term-bank-wasm-parser.js#L2995) checks only group distance. Both baseline private slabs and candidate owned shared slabs use this same ownership/scheduling path. This change does not remove a previously enforced owned-byte cap; such a cap is not present in this predicate.
+
+3. **Each shared compression job references the full source slab.** [Span dispatch](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/zstd-term-content.js#L180) posts the same `source` with per-block offset/length views; all blocks are queued to four compression workers. The worker [gathers the needed spans into Zstd memory](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/zstd-term-content-compression-worker.js#L38), posts `source-consumed`, then finishes compression. In baseline's packed path, [individual packed ArrayBuffers are transferred](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/zstd-term-content.js#L250) and detached in the sender. Candidate source wrappers can keep a whole slab reachable while a job requires only its selected spans. The default block target is 4 MiB; the whole source may be larger.
+
+4. **There is a real concurrency difference.** Shared storage admits the [existing reservation path](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/term-content-block-store.js#L737), including Jitendex's JMdict codec. [Database persistence](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/dictionary-database.js#L8363) can publish reserved offsets and append term records while content compression/storage continues, then joins both operations and unregisters in-flight sources in `finally`. This overlap can increase simultaneously live data while reducing elapsed time. The baseline private-buffer path cannot enter this shared-only reservation branch. The size of its contribution to the observed PSS is unmeasured.
+
+5. **Persistent cache and queue leaks were not found in this audit.** Ownership registration is a [WeakSet](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/ext/js/dictionary/term-content-ownership.js#L25). Compression `_pending` holds resolvers and timers, not a source field, and removes jobs at completion. Parser message listeners are removed when a result arrives. Settled slot chunks are cleared; in-flight database source registration is removed after terminal completion, including errors. The recent-source cache keeps its existing byte and average-definition limits; retained Jitendex A/B summaries report zero recent-source cache bytes. No explicit global `lastJob` source retention was found.
+
+6. **Zstd retains working allocations in both arms.** [Context buffers](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/dev/lib/zstd-wasm.js#L80) grow to the largest requested source/destination and are reused. The span [prepared handle](https://github.com/ManabiIO/manabitan/blob/51f095912b11ddd158ac173698eb322e2be99d12/dev/lib/zstd-wasm.js#L297) contains pointers and sizes, not the original JavaScript source, and is cleared before compression. Shared aligned gathering requests up to seven extra source bytes; this fact alone does not explain a roughly 100-MiB-scale difference. Allocator growth/fragmentation and V8 GC accounting remain hypotheses, not established causes.
+
+## Concrete next experiment; not implemented
+
+A narrow ownership-cleanup candidate is to clear the compression worker's `data.source`, `data.sourceOffsets` and `data.sourceLengths` after `prepareWrappedTermContentZstdSpans` succeeds and before posting `source-consumed`. At that exact boundary, `finishWrappedTermContentZstdSpans` uses only its prepared WASM state. Clearing message fields would remove references even if a completed event/async context survives until a later GC. It must not clear or overwrite shared bytes, change the failure/drain contract, or clear input before the gather completes. A similar sender-only cleanup after successful parser `postMessage` could drop its reference to the newly published owned slab.
+
+These are lifecycle hypotheses to test separately, not proven fixes. Preserve the current frozen candidate and memory receipts. First validate source overwrite, multiple queued jobs, malformed input and all error-drain cases; then compare the same fixed memory schedule and semantic guards. If that has no meaningful effect, an explicit byte-aware lead limit is a separate scheduling experiment, with potential throughput cost. Disabling reservation or reducing worker counts at the same time would confound attribution. Do not present forced GC, terminating workers, or changing the observer as a production memory fix.
+
+## Pinned source byte identities
+
+All SHA-256 values below are for the exact Git blobs at `51f095912b11ddd158ac173698eb322e2be99d12`. Files marked unchanged have identical bytes at baseline. The per-file links above use the same immutable candidate revision.
+
+| Source | SHA-256 | Identical to baseline |
+|---|---|---|
+| `ext/js/dictionary/term-bank-wasm-parser-worker.js` | `88a0690bf7918bdf2745375924b117ccbf78c2bb750867314962dd812c2702fd` | no |
+| `ext/js/dictionary/term-bank-wasm-parser.js` | `a1dcb899a4882a5b8fd9a67c86eb2d268bc4602d98915908fa8bafa7ac773972` | no |
+| `ext/js/dictionary/term-content-ownership.js` | `10fbf48dc6cc3bf874f0edd1c60474c788ff9dd22786185198d8809ce936a4d5` | yes |
+| `ext/js/dictionary/zstd-term-content.js` | `6b0c31f7d2cd5cd5b09ab12ab355c2cad96ee55c8539160d2aa9e599a1b248b3` | yes |
+| `ext/js/dictionary/zstd-term-content-compression-worker.js` | `125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247` | yes |
+| `ext/js/dictionary/term-content-block-store.js` | `d27395a9ce7402f1bb745b0bd0da95e8a0686bd496e19a3657179abcf9086056` | yes |
+| `ext/js/dictionary/dictionary-database.js` | `c017f3508ee039e514eae7082829eb7af7a7b672c8b69b9e6380e07615e001e8` | yes |
+| `ext/js/dictionary/term-content-opfs-store.js` | `e4c8c6fcf40b7ec13b3c9888a2fe01cd1eb755968a5de17609f6423e585d28e1` | yes |
+| `dev/lib/zstd-wasm.js` | `67bfbc665b0c25bcb19b4b660e68d81995f39c273292de7a934cd0bf6136d86c` | yes |

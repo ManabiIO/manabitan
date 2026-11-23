@@ -1,0 +1,2442 @@
+{
+  "schemaVersion": 1,
+  "runId": 45114745900,
+  "harness": "75dc67eb4a4f67e56c7270a278c4d034b1955c6f",
+  "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "candidate": "51f095912b11ddd158ac173698eb322e2be99d12",
+  "authoritativeTiming": false,
+  "qualifiedWholeCampaign": false,
+  "memoryNonRegressionEstablished": false,
+  "status": "original-failed-measurement-preserved-without-reclassification",
+  "cells": [
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "artifactId": 14790967164,
+      "artifactZipSha256": "0ee3660ade786840fbf1e9b30defb4f8576994cc9433bda725f074a6d52bea43",
+      "artifactZipBytes": 570928,
+      "observations": [
+        {
+          "index": 0,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "a1d33af35eb4f626fdb3e72f23a4852c70107ae4da5b731013d8abd8ce37019b",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 71,
+          "eligibleSamples": 44,
+          "stableUnreadableSamples": 4,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-1/jmdict/1/memory-00-A/chromium-memory.json",
+            "bytes": 2397345,
+            "sha256": "79e98f66ee6353ff5ecd28d9c79a0248951a19ec1c09bc18deedc3ff17cd1b27"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 1,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "3614cbf3e128a69e153c3502e24d43eef7d27581332a93ac355dc8f0f0ce8af4",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 70,
+          "eligibleSamples": 38,
+          "stableUnreadableSamples": 14,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-1/jmdict/1/memory-01-B/chromium-memory.json",
+            "bytes": 2458415,
+            "sha256": "3b72e7314b7658b7fd4c1b172cb1e09b6abb803af782f90f836f59ff7126e9d6"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 2,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "3614cbf3e128a69e153c3502e24d43eef7d27581332a93ac355dc8f0f0ce8af4",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 86,
+          "eligibleSamples": 56,
+          "stableUnreadableSamples": 8,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-1/jmdict/1/memory-02-B/chromium-memory.json",
+            "bytes": 3093324,
+            "sha256": "8d6856248579dfc2d54965efdef3daf58f320a10a6330d25904ccde57822b36b"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 3,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "a1d33af35eb4f626fdb3e72f23a4852c70107ae4da5b731013d8abd8ce37019b",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 67,
+          "eligibleSamples": 44,
+          "stableUnreadableSamples": 4,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-1/jmdict/1/memory-03-A/chromium-memory.json",
+            "bytes": 2294374,
+            "sha256": "0d6385c91e280816cda70bec7e40bf35e6c370afc0db203b2dbf6345b0c3a904"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        }
+      ],
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "jobId": 137494894379,
+      "jobConclusion": "failure",
+      "qualifiedMemoryMeasurement": false,
+      "qualificationFailures": [
+        "observation-0-unqualified",
+        "observation-1-unqualified",
+        "observation-2-unqualified",
+        "observation-3-unqualified"
+      ],
+      "pairs": [],
+      "physicalDifferenceCount": 0
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "artifactId": 14790848572,
+      "artifactZipSha256": "9d8783b593a32cb1e9a7460c3bff5c3bc62f3e311657a0bf695ec5ef94636759",
+      "artifactZipBytes": 503466,
+      "observations": [
+        {
+          "index": 0,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "89b593e7e58ea49abdb494acfba8b465b3f2600278cdc74576f280ca6d1021d9",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 56,
+          "eligibleSamples": 36,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-2/jmdict/2/memory-00-B/chromium-memory.json",
+            "bytes": 1854261,
+            "sha256": "f2f3a46c297850033036452555f58dbff0eff8abe4fb0fc9196f2a494032245f"
+          },
+          "maxSampledPssKiB": 981715,
+          "maxSampledPrivateKiB": 752580
+        },
+        {
+          "index": 1,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "db99f732a51dade31d8aabef0fd034be271768455a56828651abe8b232fc1b18",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 53,
+          "eligibleSamples": 27,
+          "stableUnreadableSamples": 9,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-2/jmdict/2/memory-01-A/chromium-memory.json",
+            "bytes": 1758795,
+            "sha256": "6f02ae985b2ebd1ae5ec4e1faef612e1fc64756bb4794a988718a4e3accc4bc8"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 2,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "db99f732a51dade31d8aabef0fd034be271768455a56828651abe8b232fc1b18",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 62,
+          "eligibleSamples": 42,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-2/jmdict/2/memory-02-A/chromium-memory.json",
+            "bytes": 2065611,
+            "sha256": "25042a623bb44304ba5cdb02febca427cd5f13a1cd971559aac949ac507dd797"
+          },
+          "maxSampledPssKiB": 1037662,
+          "maxSampledPrivateKiB": 804652
+        },
+        {
+          "index": 3,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "89b593e7e58ea49abdb494acfba8b465b3f2600278cdc74576f280ca6d1021d9",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 58,
+          "eligibleSamples": 36,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/jmdict-2/jmdict/2/memory-03-B/chromium-memory.json",
+            "bytes": 1895348,
+            "sha256": "91c2c24a7b23e2dc70e559dbecadc136134af1ede68f0b69c2cba7cd98a5cced"
+          },
+          "maxSampledPssKiB": 1001201,
+          "maxSampledPrivateKiB": 772728
+        }
+      ],
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "jobId": 137494894219,
+      "jobConclusion": "failure",
+      "qualifiedMemoryMeasurement": false,
+      "qualificationFailures": [
+        "observation-1-unqualified"
+      ],
+      "pairs": [],
+      "physicalDifferenceCount": 0
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "artifactId": 14790833604,
+      "artifactZipSha256": "24811a0f5bc994035b7faedfe8e289b1a649ce86f61a395f76b844f037fa9ddf",
+      "artifactZipBytes": 606991,
+      "observations": [
+        {
+          "index": 0,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "fba1792165c41409e6f40b4123c9efe33d2991e16bc4b94169b4eb1a274728e0",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 59,
+          "eligibleSamples": 35,
+          "stableUnreadableSamples": 3,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-1/jitendex/1/memory-00-A/chromium-memory.json",
+            "bytes": 1942218,
+            "sha256": "669a8ae17bff65a55ab08251d584d2081e5e720ddec71a27d11186cba5062e16"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 1,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "f25c4a16274347beca50da6e893f850b2f387e2fc6664b4482ac71f80aab255f",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 58,
+          "eligibleSamples": 37,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-1/jitendex/1/memory-01-B/chromium-memory.json",
+            "bytes": 1943227,
+            "sha256": "73e2b4b1c23dbe42df469a0d319a5d7db09c15115a450c03a2762d8de35244d3"
+          },
+          "maxSampledPssKiB": 1387754,
+          "maxSampledPrivateKiB": 1155756
+        },
+        {
+          "index": 2,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "f25c4a16274347beca50da6e893f850b2f387e2fc6664b4482ac71f80aab255f",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 59,
+          "eligibleSamples": 40,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-1/jitendex/1/memory-02-B/chromium-memory.json",
+            "bytes": 1968798,
+            "sha256": "2493526387bbb4d777130d5290341bfad33de69786517fb5f1131ee894606b79"
+          },
+          "maxSampledPssKiB": 1374035,
+          "maxSampledPrivateKiB": 1140596
+        },
+        {
+          "index": 3,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "fba1792165c41409e6f40b4123c9efe33d2991e16bc4b94169b4eb1a274728e0",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 60,
+          "eligibleSamples": 38,
+          "stableUnreadableSamples": 3,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-1/jitendex/1/memory-03-A/chromium-memory.json",
+            "bytes": 2027130,
+            "sha256": "52150873416989ca7e905f9f549f76d766ced33c06ebd9fc4c61df8861c592a4"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        }
+      ],
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "jobId": 137494894202,
+      "jobConclusion": "failure",
+      "qualifiedMemoryMeasurement": false,
+      "qualificationFailures": [
+        "observation-0-unqualified",
+        "observation-3-unqualified"
+      ],
+      "pairs": [],
+      "physicalDifferenceCount": 25
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "artifactId": 14791047691,
+      "artifactZipSha256": "d67c212f824f67f064a11c22190c31c5463dc56b8694cbc04a14c4010138559c",
+      "artifactZipBytes": 685238,
+      "observations": [
+        {
+          "index": 0,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "5b6894742dfce633b3a16e4c9ad571008febf53a0f5c045b962abfdc3255004c",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 77,
+          "eligibleSamples": 44,
+          "stableUnreadableSamples": 7,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-2/jitendex/2/memory-00-B/chromium-memory.json",
+            "bytes": 2531521,
+            "sha256": "7061c85d466a41498507b8c1c5f34ccfa75273719380c87879163342551e407e"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 1,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "920cb9f2ed4c3e8118a7f9abf349aa2c7ffaf2dca2ad80fa66688594dda6aee1",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 95,
+          "eligibleSamples": 54,
+          "stableUnreadableSamples": 19,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-2/jitendex/2/memory-01-A/chromium-memory.json",
+            "bytes": 3369381,
+            "sha256": "dc5accb0697c31128e3cf4004054c88c81b2c86630e0b5911a475e4d8e97f221"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 2,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "920cb9f2ed4c3e8118a7f9abf349aa2c7ffaf2dca2ad80fa66688594dda6aee1",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 75,
+          "eligibleSamples": 52,
+          "stableUnreadableSamples": 4,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-2/jitendex/2/memory-02-A/chromium-memory.json",
+            "bytes": 2626487,
+            "sha256": "fa06792e089a08a64f786e4a4c9179bf42b71f96284e3d4373c048c189d74f59"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 3,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "5b6894742dfce633b3a16e4c9ad571008febf53a0f5c045b962abfdc3255004c",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 74,
+          "eligibleSamples": 48,
+          "stableUnreadableSamples": 5,
+          "memoryReceipt": {
+            "path": "artifacts/jitendex-2/jitendex/2/memory-03-B/chromium-memory.json",
+            "bytes": 2563708,
+            "sha256": "6df153b01143280104c6a8e250315b78a8ca0691a7eab5a9dc1744c86468f089"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        }
+      ],
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "jobId": 137494894218,
+      "jobConclusion": "failure",
+      "qualifiedMemoryMeasurement": false,
+      "qualificationFailures": [
+        "observation-0-unqualified",
+        "observation-1-unqualified",
+        "observation-2-unqualified",
+        "observation-3-unqualified"
+      ],
+      "pairs": [],
+      "physicalDifferenceCount": 25
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 1,
+      "artifactId": 14790634812,
+      "artifactZipSha256": "e31dbee03b418d4908e38a173d61eee4ef7c1053621219152e2ffa6f9f78478f",
+      "artifactZipBytes": 892122,
+      "observations": [
+        {
+          "index": 0,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "3b181e391867fd65cddb544d074e19fce777e1f36bc2a0aae1f673f648f25868",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 155,
+          "eligibleSamples": 131,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-1/vndb/1/memory-00-A/chromium-memory.json",
+            "bytes": 5736586,
+            "sha256": "d631f8271ade02a133b23ad37f589adb9ec1626d63d3b8748e53f328d478d842"
+          },
+          "maxSampledPssKiB": 1406439,
+          "maxSampledPrivateKiB": 1173816
+        },
+        {
+          "index": 1,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "1987a1559b68de965c9950cbd023566f19252362b1aedffb77a3305d1e818591",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 153,
+          "eligibleSamples": 130,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-1/vndb/1/memory-01-B/chromium-memory.json",
+            "bytes": 5658779,
+            "sha256": "7419e19211088457e1ad38931829c103d1cde99cf39d26783a314590fa398385"
+          },
+          "maxSampledPssKiB": 1465435,
+          "maxSampledPrivateKiB": 1234348
+        },
+        {
+          "index": 2,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "1987a1559b68de965c9950cbd023566f19252362b1aedffb77a3305d1e818591",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 149,
+          "eligibleSamples": 124,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-1/vndb/1/memory-02-B/chromium-memory.json",
+            "bytes": 5512998,
+            "sha256": "01ef6775738c4af12d06f7d16993b870fd5d52c30abaf571567cb2dd4889db48"
+          },
+          "maxSampledPssKiB": 1432474,
+          "maxSampledPrivateKiB": 1200472
+        },
+        {
+          "index": 3,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "3b181e391867fd65cddb544d074e19fce777e1f36bc2a0aae1f673f648f25868",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 151,
+          "eligibleSamples": 129,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-1/vndb/1/memory-03-A/chromium-memory.json",
+            "bytes": 5545778,
+            "sha256": "e142032f0c375351982a544f039ff289e8ef91484a57c7540871ea4db21eb025"
+          },
+          "maxSampledPssKiB": 1430923,
+          "maxSampledPrivateKiB": 1199156
+        }
+      ],
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "jobId": 137494893987,
+      "jobConclusion": "success",
+      "qualifiedMemoryMeasurement": true,
+      "qualificationFailures": [],
+      "pairs": [
+        {
+          "indices": [
+            0,
+            1
+          ],
+          "metrics": {
+            "maxSampledPssKiB": {
+              "baseline": 1406439,
+              "candidate": 1465435,
+              "changePercent": 4.194707342444293
+            },
+            "maxSampledPrivateKiB": {
+              "baseline": 1173816,
+              "candidate": 1234348,
+              "changePercent": 5.156855929719817
+            }
+          }
+        },
+        {
+          "indices": [
+            2,
+            3
+          ],
+          "metrics": {
+            "maxSampledPssKiB": {
+              "baseline": 1430923,
+              "candidate": 1432474,
+              "changePercent": 0.10839157662572152
+            },
+            "maxSampledPrivateKiB": {
+              "baseline": 1199156,
+              "candidate": 1200472,
+              "changePercent": 0.10974385317672475
+            }
+          }
+        }
+      ],
+      "physicalDifferenceCount": 0
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "artifactId": 14791181571,
+      "artifactZipSha256": "021a2e3fbdbf2de3ee9993f33feb7184b188a5d076d7a2cfc58151434a9356e8",
+      "artifactZipBytes": 887014,
+      "observations": [
+        {
+          "index": 0,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "0d64c53b11e908ea2b948788f330a17ccdfbef795057399da1a351bca1e7d732",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 189,
+          "eligibleSamples": 140,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-2/vndb/2/memory-00-B/chromium-memory.json",
+            "bytes": 6586192,
+            "sha256": "6a2123416a1981af9bea1be26e0a18f9102a2b7d8b4e65d1b61f26b3c377c9e1"
+          },
+          "maxSampledPssKiB": 1425229,
+          "maxSampledPrivateKiB": 1204136
+        },
+        {
+          "index": 1,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "11a35ba82f25fe55241f042da9d8c19b2956eeb9e4051a8e0199c1f247b92d33",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 140,
+          "eligibleSamples": 119,
+          "stableUnreadableSamples": 4,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-2/vndb/2/memory-01-A/chromium-memory.json",
+            "bytes": 5270553,
+            "sha256": "c631de96be1f1def8fd43c07720412c9cb20dac039d465e8528d97acd6c2bdbc"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 2,
+          "arm": "A",
+          "sourceCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+          "packageSha256": "11a35ba82f25fe55241f042da9d8c19b2956eeb9e4051a8e0199c1f247b92d33",
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "samples": 145,
+          "eligibleSamples": 129,
+          "stableUnreadableSamples": 0,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-2/vndb/2/memory-02-A/chromium-memory.json",
+            "bytes": 5490361,
+            "sha256": "e0dfbf653a8e7626c9ab43425d909b62c142e159a50ef647240421005ffbf871"
+          },
+          "maxSampledPssKiB": 1414093,
+          "maxSampledPrivateKiB": 1191772
+        },
+        {
+          "index": 3,
+          "arm": "B",
+          "sourceCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+          "packageSha256": "0d64c53b11e908ea2b948788f330a17ccdfbef795057399da1a351bca1e7d732",
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "process-smaps-coverage-unqualified"
+          ],
+          "samples": 139,
+          "eligibleSamples": 116,
+          "stableUnreadableSamples": 3,
+          "memoryReceipt": {
+            "path": "artifacts/vndb-2/vndb/2/memory-03-B/chromium-memory.json",
+            "bytes": 5263982,
+            "sha256": "50d5f5c5ceccb4d9c4b6925a715e8a3f27af766f40a841dd8a17e1b6f652230f"
+          },
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        }
+      ],
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js"
+      ],
+      "jobId": 137494894260,
+      "jobConclusion": "failure",
+      "qualifiedMemoryMeasurement": false,
+      "qualificationFailures": [
+        "observation-1-unqualified",
+        "observation-3-unqualified"
+      ],
+      "pairs": [],
+      "physicalDifferenceCount": 0
+    }
+  ],
+  "totals": {
+    "checkedPhysicalCounters": 576,
+    "observations": 24,
+    "samples": 2301,
+    "eligibleStableFullyReadSamples": 1689,
+    "unqualifiedObservations": 13,
+    "stableUnreadableSamples": 87,
+    "stableUnreadableProcessRecords": 89
+  },
+  "stableUnreadableProcessRecords": [
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 15,
+      "pid": 3288,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3288,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3288/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 16,
+      "pid": 3288,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3288,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3288/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 17,
+      "pid": 3288,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3288,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3288/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 18,
+      "pid": 3288,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3288,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3288/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 14,
+      "pid": 3657,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3657,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3657/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 15,
+      "pid": 3657,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3657,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3657/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 16,
+      "pid": 3657,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3657,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3657/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 17,
+      "pid": 3657,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3657,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3657/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 56,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 57,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 58,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 59,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 60,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 61,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 62,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 63,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 64,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 1,
+      "arm": "B",
+      "sample": 65,
+      "pid": 3827,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3827,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3827/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 14,
+      "pid": 4013,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4013,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4013/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 15,
+      "pid": 4013,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4013,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4013/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 16,
+      "pid": 4013,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4013,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4013/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 17,
+      "pid": 4013,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4013,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4013/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 18,
+      "pid": 4013,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4013,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4013/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 71,
+      "pid": 4195,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4195,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4195/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 72,
+      "pid": 4195,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4195,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4195/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 2,
+      "arm": "B",
+      "sample": 73,
+      "pid": 4195,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4195,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4195/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 14,
+      "pid": 4379,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4379,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4379/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 15,
+      "pid": 4379,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4379,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4379/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 16,
+      "pid": 4379,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4379,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4379/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 17,
+      "pid": 4379,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4379,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4379/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 24,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 25,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 26,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 27,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 28,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 29,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 30,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 31,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 32,
+      "pid": 4246,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4246,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4246/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 14,
+      "pid": 3318,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3318,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3318/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 15,
+      "pid": 3318,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3318,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3318/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "observation": 0,
+      "arm": "A",
+      "sample": 16,
+      "pid": 3318,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3318,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3318/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 12,
+      "pid": 4406,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4406,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4406/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 13,
+      "pid": 4406,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4406,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4406/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "observation": 3,
+      "arm": "A",
+      "sample": 14,
+      "pid": 4406,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4406,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4406/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 22,
+      "pid": 3302,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3302,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3302/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 23,
+      "pid": 3302,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3302,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3302/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 24,
+      "pid": 3302,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3302,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3302/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 25,
+      "pid": 3302,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3302,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3302/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 63,
+      "pid": 3480,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3480,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3480/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 64,
+      "pid": 3480,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3480,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3480/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 0,
+      "arm": "B",
+      "sample": 65,
+      "pid": 3480,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3480,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3480/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 14,
+      "pid": 3664,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3664,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3664/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 15,
+      "pid": 3664,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3664,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3664/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 16,
+      "pid": 3664,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3664,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3664/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 17,
+      "pid": 3664,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3664,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3664/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 68,
+      "pid": 3653,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3653,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3653/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 68,
+      "pid": 3684,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3684,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3684/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 69,
+      "pid": 3684,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3684,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3684/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 70,
+      "pid": 3684,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3684,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3684/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 71,
+      "pid": 3684,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3684,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3684/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 72,
+      "pid": 3610,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3610,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3610/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 72,
+      "pid": 3684,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3684,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3684/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 81,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 82,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 83,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 84,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 85,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 86,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 87,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 88,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 89,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 90,
+      "pid": 3834,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3834,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3834/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 2,
+      "arm": "A",
+      "sample": 58,
+      "pid": 4214,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4214,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4214/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 2,
+      "arm": "A",
+      "sample": 59,
+      "pid": 4214,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4214,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4214/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 2,
+      "arm": "A",
+      "sample": 60,
+      "pid": 4214,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4214,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4214/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 2,
+      "arm": "A",
+      "sample": 61,
+      "pid": 4214,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4214,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4214/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 14,
+      "pid": 4397,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4397,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4397/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 15,
+      "pid": 4397,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4397,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4397/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 16,
+      "pid": 4397,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4397,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4397/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 17,
+      "pid": 4397,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4397,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4397/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 18,
+      "pid": 4397,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4397,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4397/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 13,
+      "pid": 3624,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3624,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3624/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 14,
+      "pid": 3624,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3624,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3624/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 15,
+      "pid": 3624,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3624,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3624/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 1,
+      "arm": "A",
+      "sample": 16,
+      "pid": 3624,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 3624,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/3624/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 14,
+      "pid": 4320,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4320,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4320/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 15,
+      "pid": 4320,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4320,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4320/smaps_rollup'"
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": 3,
+      "arm": "B",
+      "sample": 16,
+      "pid": 4320,
+      "state": "Z",
+      "executable": null,
+      "argv": [
+        ""
+      ],
+      "smapsReadError": {
+        "pid": 4320,
+        "field": "smaps_rollup",
+        "error": "ProcessLookupError",
+        "errno": 3,
+        "message": "[Errno 3] No such process: '/proc/4320/smaps_rollup'"
+      }
+    }
+  ],
+  "semanticAudit": {
+    "path": "semantic-audit.json",
+    "bytes": 12356,
+    "sha256": "86d220e038e0b2880b665254db24b7f0288ece4a787dc65dc3de2185b992ae1e"
+  },
+  "sourceGitVerification": {
+    "path": "source-git-verification.json",
+    "bytes": 4570,
+    "sha256": "f59314690931c6ce5614b63658cf3959766c0f5f2ad48640a8b29eda595414ca"
+  },
+  "limitation": "This reproduces the original qualification rules exactly. Stable Z-state ESRCH observations remain failed; no sample, observation, or failed job is removed or reclassified. No elapsed time is authoritative. One passing VNDB job does not establish campaign-wide memory nonregression or a complete peak."
+}

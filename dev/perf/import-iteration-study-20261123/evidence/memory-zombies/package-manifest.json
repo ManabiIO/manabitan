@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "runId": 45116158450,
+  "harness": "00da5cb2ec28211dd6d09d938dc6cf1e3a4334c9",
+  "archive": "raw-receipts.tar.xz",
+  "compression": "Python stdlib lzma FORMAT_XZ preset=6 (8 MiB dictionary)",
+  "uncompressedTarSha256": "5c0e2124ae52d4c1b1b809f42f5d94f19b800c92277b369b29bb03c78161f6e9",
+  "uncompressedTarBytes": 107130880,
+  "rawMemberCount": 290,
+  "rawMemberBytes": 106901671,
+  "qualification": "frozen confirmed-zombie campaign remains unqualified; all 24 observations and failures retained",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 8824,
+      "sha256": "4b97683474a44c49cb4f3ac90be68a044bc82edd213fd9b1a4ce485c09e15d3c"
+    },
+    {
+      "path": "audit_memory.py",
+      "bytes": 26446,
+      "sha256": "0c479ee1cb6fef5d4ebba097cb1efb7c2a4d2d25ddb4d340371f46ee5895c87c"
+    },
+    {
+      "path": "freeze_memory_package.py",
+      "bytes": 5772,
+      "sha256": "1a6029f744f18179254d3c74b092a007b8b6471a884fee88106e594960c6a53a"
+    },
+    {
+      "path": "memory-audit.json",
+      "bytes": 216627,
+      "sha256": "052177b3ada3e028b73f3048e27ed8296e313bf8af309fd158efc59dbcc1abda"
+    },
+    {
+      "path": "original-zips.json",
+      "bytes": 49937,
+      "sha256": "73cfd24b1b73b1d2fe6e32a391e924487d386d5adbd6794856fc86a521d331d8"
+    },
+    {
+      "path": "raw-members.json",
+      "bytes": 50559,
+      "sha256": "52b67b0214cbfee438d2e603e86ac96b4a5e23aaa7b5621e33a9b11ac20adaac"
+    },
+    {
+      "path": "raw-receipts.tar.xz",
+      "bytes": 687956,
+      "sha256": "c075089d48ca1aa446bd024e93dccc78895af273b45e05dbdcb9f7439843a410"
+    },
+    {
+      "path": "verify_memory_package.py",
+      "bytes": 5348,
+      "sha256": "5155650025ec1a39d4ce580f43d04eab46692b8e58bb03aaf700ea275dc6c815"
+    }
+  ]
+}

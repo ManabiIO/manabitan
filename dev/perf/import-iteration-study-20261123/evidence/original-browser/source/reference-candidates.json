@@ -1,0 +1,37 @@
+{
+    "owned-shared": {
+        "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+        "candidate": "51f095912b11ddd158ac173698eb322e2be99d12",
+        "pr": 810,
+        "expectedPackageDifferences": [
+            "js/dictionary/term-bank-wasm-parser-worker.js",
+            "js/dictionary/term-bank-wasm-parser.js"
+        ]
+    },
+    "content-validation": {
+        "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+        "candidate": "6a558cb4d48e781418a37cf27637c428fb929712",
+        "pr": 809,
+        "expectedPackageDifferences": [
+            "js/dictionary/term-record-opfs-store.js"
+        ]
+    },
+    "media-diagnostics": {
+        "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+        "candidate": "7272ea938fd3de01bd40efcd4ee838c3249d0587",
+        "pr": 811,
+        "expectedPackageDifferences": [
+            "js/dictionary/dictionary-importer.js",
+            "js/dictionary/source-zip-media-pack.js"
+        ]
+    },
+    "crc-words": {
+        "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+        "candidate": "930083af581bd4d8fe8dc42fe7e443e57666f8f9",
+        "status": "unqualified-performance-experiment",
+        "expectedPackageDifferences": [
+            "js/dictionary/wasm/term-bank-parser.c",
+            "lib/term-bank-parser.wasm"
+        ]
+    }
+}

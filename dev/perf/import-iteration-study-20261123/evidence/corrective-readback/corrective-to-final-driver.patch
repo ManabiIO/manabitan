@@ -1,0 +1,50 @@
+diff --git a/dev/perf/import-iteration-study-20261123/run.py b/dev/perf/import-iteration-study-20261123/run.py
+index f8216620a7..f2c09d241f 100644
+--- a/dev/perf/import-iteration-study-20261123/run.py
++++ b/dev/perf/import-iteration-study-20261123/run.py
+@@ -63,9 +63,9 @@ def main():
+             raise ValueError("Expected immutable source SHA")
+         run(["git", "cat-file", "-e", commit + "^{commit}"])
+ 
+-    evidence = ROOT / "builds" / "import-shared-readback-study" / candidate_name / dictionary / str(replication)
++    evidence = ROOT / "builds" / "import-shared-readback-final-study" / candidate_name / dictionary / str(replication)
+     evidence.mkdir(parents=True, exist_ok=False)
+-    stage = Path(os.environ["RUNNER_TEMP"]) / ("import-shared-readback-71149b-" + candidate_name + "-" + dictionary + "-" + str(replication))
++    stage = Path(os.environ["RUNNER_TEMP"]) / ("import-shared-readback-final-71149b-" + candidate_name + "-" + dictionary + "-" + str(replication))
+     stage.mkdir(exist_ok=False)
+     schedule = [("warmup", 0, arm) for arm in ("AB" if replication == 1 else "BA")]
+     for pair in range(2):
+@@ -159,6 +159,21 @@ def main():
+         save(output / "host-after.json", {"time": time.time(), "loadAverage": os.getloadavg()})
+ 
+     validations = [item["validation"] for item in observations]
++    # Raw previews read physical reference storage, so their readable count is
++    # a derived layout diagnostic. Verify the derivation for every observation.
++    for validation in validations:
++        for term in validation["physicalProbes"]:
++            for probe in term["probes"]:
++                rows = probe["rowSample"]
++                if probe["rowSampleCount"] != len(rows):
++                    raise ValueError("Physical probe sample count does not match rows")
++                previews = [row["rawContentPreview"] for row in rows]
++                if any(value is not None and not isinstance(value, str) for value in previews):
++                    raise ValueError("Invalid raw preview type")
++                readable = sum(isinstance(value, str) and len(value) > 0 and
++                               value not in ("<read-null>", "<read-failed>") for value in previews)
++                if probe["readablePreviewRowCount"] != readable:
++                    raise ValueError("Physical preview counter does not match encoded reference previews")
+     output_digests = {item["outputDigestSha256"] for item in validations}
+     semantic_digests = {item["semanticDigestSha256"] for item in validations}
+     if len(semantic_digests) != 1 or any(re.fullmatch(r"[0-9a-f]{64}", value) is None for value in semantic_digests):
+@@ -187,9 +202,9 @@ def main():
+     layout_changes = differences(physical_probes["A"], physical_probes["B"])
+     save(evidence / "layout-differences.json", {"physicalDigests": physical_digests,
+          "semanticDigests": sorted(semantic_digests), "differences": layout_changes})
+-    if any(item["path"].rsplit("/", 1)[-1] not in ("rawEntryContentOffset", "rawContentPreview")
++    if any(item["path"].rsplit("/", 1)[-1] not in ("rawEntryContentOffset", "rawContentPreview", "readablePreviewRowCount")
+            for item in layout_changes):
+-        raise ValueError("Physical probes differ beyond reference locations and encoded reference bytes")
++        raise ValueError("Physical probes differ beyond reference locations, encoded reference bytes and their verified preview counter")
+     results = {}
+     for kind in ("candidate", "control-before", "control-after"):
+         pairs = []
