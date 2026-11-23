@@ -9,35 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  code-validation:
-    if: "!contains(github.event.head_commit.message, '[study-report]')"
-    name: Validate ${{ matrix.arm }}
-    runs-on: ubuntu-26.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - arm: reservations
-            ref: 335d2385e9d202edcd046cd653674ffad9c1be13
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          ref: ${{ matrix.ref }}
-          persist-credentials: false
-      - uses: ./.github/actions/setup
-      - name: Install pinned native toolchain
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
-      - name: Validate native artifacts, JavaScript, and types
-        run: |
-          npm run build:dictionary-wasm -- --check
-          npm run test:js
-          npm run test:ts
-      - name: Run full unit suite and all-target build
-        run: |
-          npm run test:unit
-          npm run test:build
-
+  # Candidate validation completed in run 45103076565 (14,016 tests and all targets).
+  # This follow-up repeats Jitendex after correcting its unused archive-image oracle.
   imports:
     if: "!contains(github.event.head_commit.message, '[study-report]')"
     name: Complete import (${{ matrix.dictionary }})
@@ -46,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, vndb]
+        dictionary: [jitendex]
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:

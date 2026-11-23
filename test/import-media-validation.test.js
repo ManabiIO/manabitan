@@ -92,6 +92,28 @@ describe('complete import media verification', () => {
         expect(calls).toEqual([])
     })
 
+    test('excludes only explicitly pinned unused images and verifies every other payload', async () => {
+        const {archivePath, fixture, readMedia, calls} = await setup()
+        const referenced = {...fixture, mediaFiles: 2, mediaBytes: fixture.mediaBytes - Buffer.byteLength('image bytes 1'), unreferencedMediaPaths: ['images/0001.png']}
+        await expect(verifyBenchmarkMedia(archivePath, referenced, readMedia)).resolves.toMatchObject({mode: 'all', totalFiles: 2, totalBytes: referenced.mediaBytes, files: 2, bytes: referenced.mediaBytes})
+        expect(calls).toEqual([['images/0000.png', 'images/0002.png']])
+
+        await expect(verifyBenchmarkMedia(archivePath, {...referenced, unreferencedMediaPaths: []}, readMedia)).rejects.toThrow('image count')
+        await expect(verifyBenchmarkMedia(archivePath, {...referenced, mediaBytes: fixture.mediaBytes}, readMedia)).rejects.toThrow('Referenced image bytes')
+        await expect(verifyBenchmarkMedia(archivePath, referenced, async (paths) => (await readMedia(paths)).slice(0, 1))).rejects.toThrow('response count')
+    })
+
+    test.each([
+        {paths: ['images/missing.png'], message: 'absent from archive'},
+        {paths: ['index.json'], message: 'absent from archive'},
+        {paths: ['images/0001.png', 'images/0001.png'], message: 'Duplicate unreferenced'},
+        {paths: [''], message: 'Invalid unreferenced'},
+    ])('rejects an invalid unused-image allowlist: $paths', async ({paths, message}) => {
+        const {archivePath, fixture, readMedia, calls} = await setup()
+        await expect(verifyBenchmarkMedia(archivePath, {...fixture, unreferencedMediaPaths: paths}, readMedia)).rejects.toThrow(message)
+        expect(calls).toEqual([])
+    })
+
     test('records zero image bytes without requesting unrelated media', async () => {
         const {archivePath, fixture, readMedia, calls} = await setup(0)
         expect(await verifyBenchmarkMedia(archivePath, fixture, readMedia)).toMatchObject({files: 0, bytes: 0})

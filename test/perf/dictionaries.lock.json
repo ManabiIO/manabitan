@@ -35,8 +35,23 @@
             "expectedTitle": "Jitendex.org [2026-10-03]",
             "revision": "2026.10.03.0",
             "termRows": 436555,
-            "mediaFiles": 249,
-            "mediaBytes": 5026554
+            "mediaFiles": 236,
+            "mediaBytes": 4992155,
+            "unreferencedMediaPaths": [
+                "jitendex/HanaMinA/05167.svg",
+                "jitendex/HanaMinA/05641.svg",
+                "jitendex/HanaMinA/0576b.svg",
+                "jitendex/HanaMinA/05bda.svg",
+                "jitendex/HanaMinA/06207.svg",
+                "jitendex/HanaMinA/07055.svg",
+                "jitendex/HanaMinA/07575.svg",
+                "jitendex/HanaMinA/076a5.svg",
+                "jitendex/HanaMinA/0793d.svg",
+                "jitendex/HanaMinA/080ed.svg",
+                "jitendex/HanaMinA/09093.svg",
+                "jitendex/HanaMinA/09c81.svg",
+                "jitendex/HanaMinA/20bb7.svg"
+            ]
         },
         "vndb": {
             "label": "VNDB",

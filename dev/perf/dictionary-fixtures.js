@@ -26,7 +26,7 @@ const root = path.join(dirname, '..', '..');
 const lockPath = path.join(root, 'test', 'perf', 'dictionaries.lock.json');
 
 /**
- * @typedef {{label: string, cacheFile: string, release: string, url: string, sha256: string, sizeBytes: number, expectedTitle: string, revision: string, termRows: number, mediaFiles?: number, mediaBytes?: number}} DictionaryFixture
+ * @typedef {{label: string, cacheFile: string, release: string, url: string, sha256: string, sizeBytes: number, expectedTitle: string, revision: string, termRows: number, mediaFiles?: number, mediaBytes?: number, unreferencedMediaPaths?: string[]}} DictionaryFixture
  */
 
 /**
