@@ -1,0 +1,74 @@
+name: Import qualification 2026-11-22
+
+on:
+  push:
+    branches: [perf/import-qualification-20261122-fcff]
+    paths:
+      - .github/workflows/import-qualification-20261122.yml
+      - dev/perf/import-qualification-20261122.py
+      - dev/perf/import-qualification-20261122.json
+      - test/import-qualification-20261122.test.py
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: ${{ matrix.case }} / ${{ matrix.direction }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [parser-jmdict, parser-jitendex, parser-vndb, media-vndb]
+        direction: [forward, reverse]
+    env:
+      STUDY_OUTPUT: ${{ github.workspace }}/builds/perf/import-qualification/${{ matrix.case }}-${{ matrix.direction }}
+      STUDY_SOURCES: ${{ github.workspace }}/builds/import-qualification-sources/${{ matrix.case }}-${{ matrix.direction }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create evidence directory before setup
+        run: |
+          mkdir -p "$STUDY_OUTPUT/research-sources"
+          cp --parents .github/workflows/import-qualification-20261122.yml \
+            dev/perf/import-qualification-20261122.py \
+            dev/perf/import-qualification-20261122.json \
+            test/import-qualification-20261122.test.py \
+            "$STUDY_OUTPUT/research-sources"
+          git rev-parse HEAD > "$STUDY_OUTPUT/research-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$STUDY_OUTPUT/research-tree.txt"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Validate study contracts
+        run: python3 test/import-qualification-20261122.test.py
+      - name: Prepare frozen packages and fixture overlay
+        run: >-
+          python3 dev/perf/import-qualification-20261122.py prepare
+          --case '${{ matrix.case }}' --direction '${{ matrix.direction }}'
+          --output "$STUDY_OUTPUT" --sources "$STUDY_SOURCES"
+      - name: Run fixed imports without retries
+        run: >-
+          python3 dev/perf/import-qualification-20261122.py run
+          --case '${{ matrix.case }}' --direction '${{ matrix.direction }}'
+          --output "$STUDY_OUTPUT"
+      - name: Analyze complete cohorts only
+        if: always()
+        run: >-
+          python3 dev/perf/import-qualification-20261122.py analyze
+          --case '${{ matrix.case }}' --direction '${{ matrix.direction }}'
+          --output "$STUDY_OUTPUT"
+      - name: Preserve evidence and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-qualification-${{ matrix.case }}-${{ matrix.direction }}
+          path: ${{ env.STUDY_OUTPUT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
