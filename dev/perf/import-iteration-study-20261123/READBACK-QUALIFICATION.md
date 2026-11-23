@@ -1,0 +1,13 @@
+# Owned shared content: semantic and storage readback qualification
+
+The original fixed campaign is retained unchanged at workflow commit `088d9c22ccd2b0dc05b240355c76320c9660ce3e`, run 45110694360. Its Jitendex cross-arm digest check failed after the individual imports and restart checks passed. The digest hashes physical content-reference offsets and raw encoded reference previews, so its failure is a qualification blocker until the underlying difference is identified.
+
+Code inspection found that Jitendex selects the existing JMdict compression dictionary. Its owned shared buffers also become eligible for the existing initial reservation path. That path writes reference slabs before compressed blocks; the private packed path writes compressed blocks first. A separate real-codec witness on pinned Jitendex banks 1, 110 and 218 verifies identical complete compressed blocks, identical decoded content for all 4,534 distinct spans, and the predicted offset shifts. It does not by itself clear the hosted result.
+
+This corrective campaign changes only benchmark harness files, applied identically to both arms. The frozen runtime candidate remains `51f095912b11ddd158ac173698eb322e2be99d12`, compared with `1e235059a4c05c2509e8757fccba43a2d60222df`. Later ownership-test assertions do not modify either packaged runtime file.
+
+The enhanced readback retains the original canonical physical probes and their digest. Each individual import must still preserve that exact digest across browser restart, and each package must have one stable physical digest across every observation. Cross-arm physical differences may occur only in reference offsets and raw encoded reference previews; all other previously hashed fields must match.
+
+The harness additionally records complete public exact-lookup responses for all 12 deterministic source-derived probe terms, before and after restart. Every requested term must return a nonempty response without degraded dictionary availability. Pre- and post-restart physical and semantic objects are retained before the equality assertions run, including on failure. Their complete JSON digest must match across restart and across all baseline/candidate observations. Raw responses and physical differences are retained for review. This expands sampled semantic validation; it is not an exhaustive all-term browser readback.
+
+The same two independent eight-pair schedules, four A/A control pairs per job, exact package guards, pinned archive checks and fresh profiles remain. Timing still ends before any readback begins. Four subsequent PSS diagnostic observations per job are excluded from timing. No original failed run is replaced, and no observation is removed for its timing.

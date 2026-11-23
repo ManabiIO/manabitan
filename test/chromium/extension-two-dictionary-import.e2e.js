@@ -1168,6 +1168,18 @@ async function evalSendMessage(page, expression, arg = null) {
             const counts = await send('getDictionaryCounts', {dictionaryNames: titles, getTotal: false});
             return {dictionaryInfo, counts: counts.counts};
         }
+        if (expression === 'benchmarkSemanticProbes') {
+            const probes = [];
+            for (const term of arg.terms) {
+                const result = await send('termsFind', {
+                    text: term,
+                    details: {primaryReading: '', matchType: 'exact', deinflect: false},
+                    optionsContext: {index: 0},
+                });
+                probes.push({term, result});
+            }
+            return probes;
+        }
         if (expression === 'backendDiagnostics') {
             const term = String((arg && typeof arg === 'object') ? (arg.term || '打') : (arg || '打'));
             const includeExpensiveDebugState = !(arg && typeof arg === 'object' && arg.includeExpensiveDebugState === false);
@@ -4201,8 +4213,8 @@ async function main() {
                     if (!integrity.ok) { fail(`Unreadable benchmark content for ${term}: ${JSON.stringify(integrity)}`); }
                     probeResults.push({term, probes: integrity.probes});
                 }
-                const probeDigest = (results) => {
-                    const canonical = results.map(({term, probes}) => ({
+                const canonicalProbeResults = (results) => {
+                    return results.map(({term, probes}) => ({
                         term,
                         probes: probes.map((probe) => {
                             const diagnostics = probe.diagnostics;
@@ -4225,9 +4237,29 @@ async function main() {
                             };
                         }),
                     }));
-                    return createHash('sha256').update(JSON.stringify(canonical)).digest('hex');
                 };
+                const digestValue = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+                const probeDigest = (results) => digestValue(canonicalProbeResults(results));
+                const preRestartSemanticProbes = await evalSendMessage(page, 'benchmarkSemanticProbes', {terms: probeTerms});
+                const semanticProbeEntryCount = preRestartSemanticProbes.reduce((count, probe) => count + (probe.result?.dictionaryEntries?.length ?? 0), 0);
+                const preRestartSemanticDigest = digestValue(preRestartSemanticProbes);
                 const preRestartOutputDigest = probeDigest(probeResults);
+                report.benchmark.readbackDiagnostics = {
+                    preRestart: {
+                        physicalDigestSha256: preRestartOutputDigest,
+                        physicalProbes: canonicalProbeResults(probeResults),
+                        semanticDigestSha256: preRestartSemanticDigest,
+                        semanticProbes: preRestartSemanticProbes,
+                    },
+                    postRestart: null,
+                };
+                const incompleteSemanticTerms = preRestartSemanticProbes.filter(({result}) => (
+                    !Array.isArray(result?.dictionaryEntries) || result.dictionaryEntries.length === 0 ||
+                    (result.dictionaryAvailability?.length ?? 0) > 0
+                )).map(({term}) => term);
+                if (incompleteSemanticTerms.length > 0) {
+                    fail(`Incomplete semantic lookup results for benchmark probes: ${JSON.stringify(incompleteSemanticTerms)}`);
+                }
                 await relaunchPersistentContext();
                 await page.goto(`${extensionBaseUrl}/settings.html?popup-preview=false`);
                 await waitForSettingsPageReady(page);
@@ -4245,6 +4277,17 @@ async function main() {
                     restartedProbeResults.push({term, probes: integrity.probes});
                 }
                 const postRestartOutputDigest = probeDigest(restartedProbeResults);
+                const postRestartSemanticProbes = await evalSendMessage(page, 'benchmarkSemanticProbes', {terms: probeTerms});
+                const postRestartSemanticDigest = digestValue(postRestartSemanticProbes);
+                report.benchmark.readbackDiagnostics.postRestart = {
+                    physicalDigestSha256: postRestartOutputDigest,
+                    physicalProbes: canonicalProbeResults(restartedProbeResults),
+                    semanticDigestSha256: postRestartSemanticDigest,
+                    semanticProbes: postRestartSemanticProbes,
+                };
+                if (preRestartSemanticDigest !== postRestartSemanticDigest) {
+                    fail(`Complete semantic probe results changed across restart: before=${preRestartSemanticDigest} after=${postRestartSemanticDigest}`);
+                }
                 if (preRestartOutputDigest !== postRestartOutputDigest) {
                     fail(`Persisted content probe digest changed across restart: before=${preRestartOutputDigest} after=${postRestartOutputDigest}`);
                 }
@@ -4257,6 +4300,10 @@ async function main() {
                     probeCount: probeTerms.length,
                     probeTerms,
                     outputDigestSha256: postRestartOutputDigest,
+                    semanticDigestSha256: postRestartSemanticDigest,
+                    semanticProbeEntryCount,
+                    semanticProbes: postRestartSemanticProbes,
+                    physicalProbes: canonicalProbeResults(restartedProbeResults),
                     restart: {
                         title: restartedInfo[0].title,
                         revision: restartedInfo[0].revision,

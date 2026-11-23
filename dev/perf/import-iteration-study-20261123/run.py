@@ -63,9 +63,9 @@ def main():
             raise ValueError("Expected immutable source SHA")
         run(["git", "cat-file", "-e", commit + "^{commit}"])
 
-    evidence = ROOT / "builds" / "import-iteration-study" / candidate_name / dictionary / str(replication)
+    evidence = ROOT / "builds" / "import-shared-readback-study" / candidate_name / dictionary / str(replication)
     evidence.mkdir(parents=True, exist_ok=False)
-    stage = Path(os.environ["RUNNER_TEMP"]) / ("import-iteration-71149b-" + candidate_name + "-" + dictionary + "-" + str(replication))
+    stage = Path(os.environ["RUNNER_TEMP"]) / ("import-shared-readback-71149b-" + candidate_name + "-" + dictionary + "-" + str(replication))
     stage.mkdir(exist_ok=False)
     schedule = [("warmup", 0, arm) for arm in ("AB" if replication == 1 else "BA")]
     for pair in range(2):
@@ -88,7 +88,7 @@ def main():
         "schedule": schedule,
         "overlaidHarnessFiles": {name: digest(ROOT / name) for name in OVERLAY},
         "boundary": "file-input change to post-UI import completion; restart/readback outside timing",
-        "scope": "Linux Chromium; two predetermined independent eight-pair replications, reversed initial order, four baseline control pairs each; timing excludes separate owned-shared memory diagnostics",
+        "scope": "Corrective semantic/readback qualification: original physical-layout mismatch retained; Linux Chromium; two predetermined independent eight-pair replications, reversed initial order, four baseline control pairs each; timing excludes separate owned-shared memory diagnostics",
     }
     save(evidence / "plan.json", identities)
     # Download only this optional dictionary in addition to the standard three
@@ -160,8 +160,36 @@ def main():
 
     validations = [item["validation"] for item in observations]
     output_digests = {item["outputDigestSha256"] for item in validations}
-    if len(output_digests) != 1 or any(re.fullmatch(r"[0-9a-f]{64}", value) is None for value in output_digests):
-        raise ValueError("Sampled content changed between import arms")
+    semantic_digests = {item["semanticDigestSha256"] for item in validations}
+    if len(semantic_digests) != 1 or any(re.fullmatch(r"[0-9a-f]{64}", value) is None for value in semantic_digests):
+        raise ValueError("Complete semantic probe results changed between import arms")
+    physical_digests = {}
+    physical_probes = {}
+    for arm in ("A", "B"):
+        selected = [item["validation"] for item in observations if item["arm"] == arm]
+        physical_digests[arm] = sorted({item["outputDigestSha256"] for item in selected})
+        if len(physical_digests[arm]) != 1:
+            raise ValueError("Physical probe layout changed within the same package")
+        physical_probes[arm] = selected[0]["physicalProbes"]
+    def differences(a, b, location=""):
+        if type(a) is not type(b):
+            return [{"path": location, "baseline": a, "candidate": b}]
+        if isinstance(a, dict):
+            if a.keys() != b.keys():
+                return [{"path": location, "baseline": a, "candidate": b}]
+            return [item for key in a for item in differences(a[key], b[key], location + "/" + key)]
+        if isinstance(a, list):
+            if len(a) != len(b):
+                return [{"path": location, "baseline": a, "candidate": b}]
+            return [item for index, (x, y) in enumerate(zip(a, b))
+                    for item in differences(x, y, location + "/" + str(index))]
+        return [] if a == b else [{"path": location, "baseline": a, "candidate": b}]
+    layout_changes = differences(physical_probes["A"], physical_probes["B"])
+    save(evidence / "layout-differences.json", {"physicalDigests": physical_digests,
+         "semanticDigests": sorted(semantic_digests), "differences": layout_changes})
+    if any(item["path"].rsplit("/", 1)[-1] not in ("rawEntryContentOffset", "rawContentPreview")
+           for item in layout_changes):
+        raise ValueError("Physical probes differ beyond reference locations and encoded reference bytes")
     results = {}
     for kind in ("candidate", "control-before", "control-after"):
         pairs = []
@@ -195,7 +223,8 @@ def main():
             result = summary["runs"][0]
             if (summary["gitSha"] != (baseline if arm == "A" else candidate) or
                     result["packageSha256"] != packages[arm] or
-                    result["validation"]["outputDigestSha256"] not in output_digests):
+                    result["validation"]["outputDigestSha256"] not in physical_digests[arm] or
+                    result["validation"]["semanticDigestSha256"] not in semantic_digests):
                 raise ValueError("Memory diagnostic source, package or content changed")
             memory_observations.append({"index": index, "arm": arm, **memory})
             save(evidence / "memory-observations.json", memory_observations)
