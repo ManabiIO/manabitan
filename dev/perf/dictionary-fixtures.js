@@ -121,7 +121,8 @@ export async function ensurePinnedDictionaryCache(cacheDir, additionalIds = []) 
         }
     }
     const selectedFixtures = selectDictionaryFixtures(fixtures, additionalIds);
-    return await ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures);
+    const result = await ensureSelectedFixtures(cacheDir, fixtures, selectedFixtures);
+    return {jitendexPath: result.paths.jitendex, jmnedictPath: result.paths.jmnedict, jmdictPath: result.paths.jmdict, ...result};
 }
 
 /**
@@ -133,6 +134,7 @@ export async function ensurePinnedDictionaryCache(cacheDir, additionalIds = []) 
  */
 export async function ensureSelectedPinnedDictionaryCache(cacheDir, dictionaryIds) {
     const fixtures = await loadDictionaryFixtures();
+    /** @type {Record<string, DictionaryFixture>} */
     const selectedFixtures = {};
     for (const id of dictionaryIds) {
         if (!Object.hasOwn(fixtures, id)) { throw new Error(`Unknown performance dictionary: ${id}`); }
