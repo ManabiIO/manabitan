@@ -104,7 +104,8 @@ for (const outcome of ['resolve', 'reject']) {
             expect(settled).toBe(true);
             expect(failure).toMatchObject({name: 'AbortError'});
             expect(workers).toHaveLength(0);
-            expect(sourceLoads).toBe(0);
+            // Only the already-admitted first group overlaps module startup.
+            expect(sourceLoads).toBe(1);
             expect(vi.getTimerCount()).toBe(0);
             await parser.disposeParallelTermBankParser();
             replacement = parser.prewarmParallelTermBankParser();

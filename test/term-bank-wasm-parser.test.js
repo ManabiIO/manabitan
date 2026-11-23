@@ -2065,7 +2065,8 @@ describe('term-bank WASM parser', () => {
                 expect(failure).toMatchObject(mode === 'callback-error' ? {message: callbackError.message} : {name: 'AbortError'});
                 await parse;
                 if (prewarm !== null) { await expect(prewarm).resolves.toBe(false); }
-                expect(sourceLoads).toBe(0);
+                // Startup overlaps only the first admitted source group.
+                expect(sourceLoads).toBe(1);
                 expect(sinkCalls).toBe(0);
                 expect(instances.length).toBeGreaterThanOrEqual(2);
                 expect(instances.every((worker) => worker.terminated)).toBe(true);
@@ -2093,6 +2094,7 @@ describe('term-bank WASM parser', () => {
 
     maybeTest('cancels while deferred ZIP sources are unresolved', async () => {
         let terminateCount = 0;
+        let readyCount = 0;
         /** @implements {WorkerMock} */
         class ReadyWorker {
             constructor() {
@@ -2112,6 +2114,7 @@ describe('term-bank WASM parser', () => {
                 if (message.type === 'initialize') {
                     queueMicrotask(() => {
                         emitWorkerMessage(this.listeners, {type: 'ready'});
+                        ++readyCount;
                     });
                 }
             }
@@ -2120,7 +2123,6 @@ describe('term-bank WASM parser', () => {
         }
 
         vi.stubGlobal('Worker', ReadyWorker);
-        let cancellationChecks = 0;
         try {
             const never = new Promise(() => {});
             await expect(parseTermBankWithWasmColumnChunksParallelDeferred(
@@ -2129,7 +2131,7 @@ describe('term-bank WASM parser', () => {
                 3,
                 () => {},
                 {emitContentSlab: true},
-                () => ++cancellationChecks >= 3,
+                () => readyCount === getParallelTermBankParserWorkerCount(),
             )).rejects.toMatchObject({name: 'AbortError'});
             expect(terminateCount).toBeGreaterThanOrEqual(2);
         } finally {
