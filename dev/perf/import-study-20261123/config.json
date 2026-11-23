@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "discovery",
+  "stage": "confirmation",
   "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
   "candidate": "958099525e6017c9faa3d912168da51575527b7d",
   "expectedPackageDifferences": [
@@ -21,7 +21,7 @@
     "jitendex",
     "vndb"
   ],
-  "confirmationOf": null,
+  "confirmationOf": "https://github.com/ManabiIO/manabitan/actions/runs/45129037078",
   "revisionOf": "https://github.com/ManabiIO/manabitan/actions/runs/45127809761",
   "expectedCandidateIndexWorkerFiles": {
     "jmdict": 0,
