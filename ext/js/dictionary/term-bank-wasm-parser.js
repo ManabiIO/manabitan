@@ -2230,10 +2230,10 @@ null :
             resolvedLengths: new Uint32Array(contentUniqueCount),
             resolvedDictNames: null,
             resolvedUniformDictName: void 0,
-            pendingEpochs: new Uint32Array(contentUniqueCount),
-            pendingIndexes: new Uint32Array(contentUniqueCount),
-            pendingSpanOffsetsScratch: new Uint32Array(normalizedChunkSize),
-            pendingSpanLengthsScratch: new Uint32Array(normalizedChunkSize),
+            // Canonical scans do not use generic pending-row scratch. The
+            // storage owner allocates it only if a chunk takes that fallback.
+            pendingEpochs: null,
+            pendingIndexes: null,
             nextEpoch: 1,
             nextUnresolvedUniqueIndex: 0,
             persistedLookupRequired: null,

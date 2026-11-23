@@ -194,7 +194,8 @@ export type SummaryMetaCount = {
 
 export type ImportRequirement = (
     ImageImportRequirement |
-    StructuredContentImageImportRequirement
+    StructuredContentImageImportRequirement |
+    ImageReferenceImportRequirement
 );
 
 export type ImageImportRequirement = {
@@ -209,6 +210,29 @@ export type StructuredContentImageImportRequirement = {
     target: StructuredContent.ImageElement;
     source: StructuredContent.ImageElement;
     entry: DictionaryDatabase.DatabaseTermEntry;
+};
+
+export type MediaImportDiagnosticKeys = {
+    bytes: Uint8Array;
+    spans: Uint32Array;
+    decodedKeys: Map<number, string> | null;
+};
+
+export type MediaImportEntry = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> | {
+    dictionary: string;
+    diagnosticKeys: MediaImportDiagnosticKeys;
+    diagnosticIndex: number;
+};
+
+export type ImageReferenceImportRequirement = {
+    type: 'image-reference';
+    source: {path: string};
+    entry: MediaImportEntry;
+};
+
+export type DeferredMediaImportRequirement = MediaImportEntry & {
+    type: ImportRequirement['type'];
+    source: {path: string};
 };
 
 export type ImportRequirementContext = {
