@@ -193,8 +193,13 @@ export class NativeCanonicalScanner {
             Array.isArray(chunk.contentDictNameList) ||
             typeof chunk.uniformContentDictName !== 'string' ||
             chunk.uniformContentDictName.length === 0 ||
-            plan.pendingEpochs.length < last ||
-            plan.pendingIndexes.length < last ||
+            (
+                !(plan.pendingEpochs === null && plan.pendingIndexes === null) &&
+                (
+                    !(plan.pendingEpochs instanceof Uint32Array) || plan.pendingEpochs.length < last ||
+                    !(plan.pendingIndexes instanceof Uint32Array) || plan.pendingIndexes.length < last
+                )
+            ) ||
             uniqueSignatures.length < last * 3 ||
             db._termEntryContentMetaFreeIndexes.length > 0 ||
             (db._termContentMetadataArena !== null && db._termContentMetadataArena.slots.byteOffset < PREFIX)
