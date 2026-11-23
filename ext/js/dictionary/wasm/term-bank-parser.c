@@ -839,18 +839,25 @@ static int parse_composite_span_impl(
             continue;
         }
         if (c == ']' || c == '}') {
-            if (c == ']') {
-                if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
-            } else {
-                if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
-                if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { return 0; }
-            }
-            ++i;
-            if (--depth == 0u) {
-                *out_end = i;
-                return 1;
-            }
-            state = parents[depth - 1u];
+            // Structured content commonly closes several nested containers at
+            // once. Validate each frame without redispatching its terminator.
+            uint8_t closing = c;
+            do {
+                if (closing == ']') {
+                    if (state != ARRAY_FIRST && state != ARRAY_AFTER_VALUE) { return 0; }
+                } else {
+                    if (state != OBJECT_FIRST && state != OBJECT_AFTER_VALUE) { return 0; }
+                    if (validate_top_level_objects && depth == 2u && (glossary_valid_fields & glossary_object_type) == 0u) { return 0; }
+                }
+                ++i;
+                if (--depth == 0u) {
+                    *out_end = i;
+                    return 1;
+                }
+                state = parents[depth - 1u];
+                if (i >= len) { return 0; }
+                closing = src[i];
+            } while (closing == ']' || closing == '}');
             continue;
         }
         if (c == ',') {

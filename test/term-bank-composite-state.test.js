@@ -167,6 +167,36 @@ describe('composite parser state transitions', () => {
         expect(parseGlossary(json, false).count).toBeLessThan(0)
     })
 
+    test.each([
+        {json: '[{"a":[{"b":["image"]}]}]', flags: [1, 0, 0]},
+        {json: '[{"a":[{"b":[]}]},"image"]', flags: [1, 0, 0]},
+        {json: '[{"a":[{"b":[]}],"c":"image"}]', flags: [1, 0, 0]},
+        {json: '[{"a":[{"b":[]}]} , "image"]', flags: [1, 1, 0]},
+        {json: '[{"a":[{"b":[]}]},\n"image"]', flags: [1, 1, 0]},
+        {json: '[{"a":[{"b":[]}]}\t]', flags: [0, 1, 0]},
+        {json: '[{"a":[{"b":[{"type":"text","text":"value"}]}]}]', flags: [0, 1, 1]},
+    ])('preserves hints and parent state after consecutive closes: $json', ({json, flags}) => {
+        const result = parseGlossary(json)
+        expect(result.count).toBe(1)
+        expect(result.metadata.slice(14)).toEqual(flags)
+        const withoutMediaHints = parseGlossary(json, false)
+        expect(withoutMediaHints.count).toBe(1)
+        expect(withoutMediaHints.metadata.slice(14)).toEqual([0, ...flags.slice(1)])
+    })
+
+    test.each([
+        '[{"a":[{"b":[]}]}',
+        '[{"a":[{"b":[]}]]]',
+        '[{"a":[{"b":[]}]}]]',
+        '[{"a":[{"b":[]},]}]',
+        '[{"a":[{"b":[]}]} "last"]',
+        '[{"a":[{"b":[]}]}:]',
+        '[{"a":[{"b":[]}]} ,]',
+    ])('rejects incomplete or mismatched consecutive closes: %s', (json) => {
+        expect(parseGlossary(json).count).toBeLessThan(0)
+        expect(parseGlossary(json, false).count).toBeLessThan(0)
+    })
+
     test('matches JSON validity for deterministic mutations of nested values', () => {
         let seed = 0x315ca7e1
         const random = () => {
