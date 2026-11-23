@@ -19,6 +19,7 @@
 import {safePerformance} from '../core/safe-performance.js';
 import {reportDiagnosticsLazy} from '../core/diagnostics-reporter.js';
 import {applyTextReplacement} from '../general/regex-util.js';
+import {limitFindTermsResponse} from './find-terms-response.js';
 import {isCodePointJapanese, isCodePointKanji} from './ja/japanese.js';
 import {isCodePointKorean} from './ko/korean.js';
 import {LanguageTransformer} from './language-transformer.js';
@@ -109,15 +110,22 @@ export class Translator {
      * @param {import('translator').FindTermsMode} mode The mode to use for finding terms, which determines the format of the resulting array.
      * @param {string} text The text to find terms for.
      * @param {import('translation').FindTermsOptions} options A object describing settings about the lookup.
+     * @param {number} [responseLimit] Optional limit applied after ranking and before the result leaves the worker.
      * @returns {Promise<import('translator').FindTermsResult>} Entries, source span, and any degraded dictionaries for this lookup.
      */
-    async findTerms(mode, text, options) {
+    async findTerms(mode, text, options, responseLimit = void 0) {
         safePerformance.mark('translator:findTerms:start');
         const tagAggregator = new TranslatorTagAggregator();
         /** @type {import('translator').DictionaryAvailability[]} */
         const observedAvailability = [];
         const {dictionaryEntries, originalTextLength} = await this._findTermsInternal(text, options, tagAggregator, options.primaryReading, observedAvailability);
         const result = await this._finalizeTermDictionaryEntries(mode, dictionaryEntries, options, tagAggregator, observedAvailability);
+        const hasExactHeadwordMatchBeforeResponseLimit = (
+            typeof responseLimit === 'number' &&
+            text.length > 0 &&
+            result.some((entry) => entry.type === 'term' && entry.headwords.some(({term, reading}) => term === text || reading === text))
+        );
+        limitFindTermsResponse(result, responseLimit);
         safePerformance.mark('translator:findTerms:end');
         safePerformance.measure('translator:findTerms', 'translator:findTerms:start', 'translator:findTerms:end');
         const currentAvailability = typeof this._database.getDictionaryAvailability === 'function' ?
@@ -132,6 +140,7 @@ export class Translator {
         return {
             dictionaryEntries: result,
             originalTextLength,
+            ...(typeof responseLimit === 'number' ? {hasExactHeadwordMatchBeforeResponseLimit} : {}),
             ...(dictionaryAvailability.length > 0 ? {dictionaryAvailability} : {}),
         };
     }

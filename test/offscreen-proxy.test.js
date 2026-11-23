@@ -127,8 +127,9 @@ describe('TranslatorProxy', () => {
 
         await proxy.findTerms('group', 'first', options);
         await proxy.findTerms('group', 'second', options);
+        await proxy.findTerms('group', 'limited', options, 32);
 
-        expect(sendMessageViaPort).toHaveBeenCalledTimes(2);
+        expect(sendMessageViaPort).toHaveBeenCalledTimes(3);
         expect(sendMessageViaPort.mock.calls[0][0]).toEqual({
             action: 'findTermsStructuredOffscreen',
             params: {mode: 'group', text: 'first', options},
@@ -140,5 +141,9 @@ describe('TranslatorProxy', () => {
         const firstReplacementGroup = firstCall[0].params.options.textReplacements[0];
         expect(firstReplacementGroup).toHaveLength(1);
         expect(firstReplacementGroup?.[0]?.pattern).toBeInstanceOf(RegExp);
+        expect(sendMessageViaPort.mock.calls[2]?.[0]).toEqual({
+            action: 'findTermsStructuredOffscreen',
+            params: {mode: 'group', text: 'limited', options, responseLimit: 32},
+        });
     });
 });

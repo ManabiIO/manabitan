@@ -68,6 +68,7 @@ describe('Backend lookup refresh gating', () => {
         await promise;
 
         expect(findTerms).toHaveBeenCalledOnce();
+        expect(findTerms.mock.calls[0]?.[3]).toBe(32);
     });
 
     test('terms lookup waits for dictionary refresh to settle before querying translator', async () => {

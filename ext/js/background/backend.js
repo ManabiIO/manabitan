@@ -1525,8 +1525,8 @@ export class Backend {
         const options = this._getProfileOptions(optionsContext, false);
         const {general: {resultOutputMode: mode, maxResults}} = options;
         const findTermsOptions = this._getTranslatorFindTermsOptions(mode, details, options);
-        const {dictionaryEntries, originalTextLength, dictionaryAvailability} = await this._translator.findTerms(mode, text, findTermsOptions);
-        const hasExactHeadwordMatch = (
+        const {dictionaryEntries, originalTextLength, dictionaryAvailability, hasExactHeadwordMatchBeforeResponseLimit} = await this._translator.findTerms(mode, text, findTermsOptions, maxResults);
+        const hasExactHeadwordMatch = hasExactHeadwordMatchBeforeResponseLimit ?? (
             text.length > 0 &&
             dictionaryEntries.some((entry) => (
                 entry.type === 'term' &&
@@ -1534,7 +1534,6 @@ export class Backend {
             ))
         );
         const includeDetailedLookupSnapshot = dictionaryEntries.length === 0 || !hasExactHeadwordMatch;
-        dictionaryEntries.splice(maxResults);
         reportDiagnosticsLazy('dictionary-lookup-snapshot', () => ({
             text,
             textLength: text.length,

@@ -42,6 +42,7 @@ const importControl = vi.hoisted(() => ({
     cancelledAtStart: false,
     translatorClearCount: 0,
     lastFindTermsOptions: /** @type {import('translation').FindTermsOptions|null} */ (null),
+    findTermsResult: /** @type {{dictionaryEntries: unknown[], originalTextLength: number}|null} */ (null),
 }));
 
 vi.mock('../ext/js/core/log.js', () => ({
@@ -90,9 +91,10 @@ vi.mock('../ext/js/language/translator.js', () => ({
          * @param {import('translator').FindTermsMode} _mode
          * @param {string} _text
          * @param {import('translation').FindTermsOptions} options
+         * @param {number|undefined} responseLimit
          * @returns {Promise<{dictionaryEntries: unknown[], originalTextLength: number}>}
          */
-        async findTerms(_mode, _text, options) {
+        async findTerms(_mode, _text, options, responseLimit) {
             importControl.lastFindTermsOptions = options;
             if (importControl.waitForLookupRelease) {
                 importControl.lookupStarted = true;
@@ -104,7 +106,9 @@ vi.mock('../ext/js/language/translator.js', () => ({
                 }
                 await importControl.lookupGate;
             }
-            return {dictionaryEntries: [], originalTextLength: 0};
+            const result = importControl.findTermsResult ?? {dictionaryEntries: [], originalTextLength: 0};
+            if (typeof responseLimit === 'number') { result.dictionaryEntries.splice(responseLimit); }
+            return result;
         }
     },
 }));
@@ -183,6 +187,7 @@ describe('Offscreen dictionary worker import response port handling', () => {
         importControl.cancelledAtStart = false;
         importControl.translatorClearCount = 0;
         importControl.lastFindTermsOptions = null;
+        importControl.findTermsResult = null;
     });
 
     test('rejects standard reads while an import owns the worker instead of timing out queued work', async () => {
@@ -296,6 +301,35 @@ describe('Offscreen dictionary worker import response port handling', () => {
         expect(pattern?.flags).toBe('giu');
         expect(importControl.lastFindTermsOptions?.enabledDictionaryMap).toBeInstanceOf(Map);
         expect(importControl.lastFindTermsOptions?.excludeDictionaryDefinitions).toBeInstanceOf(Set);
+    });
+
+    test('passes the response limit to the translator before worker serialization', async () => {
+        /** @type {Map<string, (event: MessageEvent) => void>} */
+        const listeners = new Map();
+        const workerPostMessage = vi.fn();
+        vi.stubGlobal('self', {
+            addEventListener: vi.fn((type, listener) => { listeners.set(type, listener); }),
+            postMessage: workerPostMessage,
+        });
+        importControl.findTermsResult = {
+            dictionaryEntries: [{id: 'rank-1'}, {id: 'rank-2'}, {id: 'rank-3'}],
+            originalTextLength: 1,
+        };
+
+        await import('../ext/js/background/offscreen-dictionary-worker.js');
+        listeners.get('message')?.(/** @type {MessageEvent} */ (/** @type {unknown} */ ({
+            data: {
+                id: 7,
+                action: 'findTermsStructuredOffscreen',
+                params: {mode: 'group', text: 'フォ', options: {}, responseLimit: 2},
+            },
+            ports: [],
+        })));
+
+        await vi.waitFor(() => expect(workerPostMessage).toHaveBeenCalledWith({
+            id: 7,
+            result: {dictionaryEntries: [{id: 'rank-1'}, {id: 'rank-2'}], originalTextLength: 1},
+        }));
     });
 
     test('continues import work when progress delivery fails', async () => {
