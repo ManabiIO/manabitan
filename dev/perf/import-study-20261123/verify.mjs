@@ -25,6 +25,10 @@ const read = (file) => JSON.parse(readFileSync(file, 'utf8'))
 const isDigest = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
 const isCommit = (value) => typeof value === 'string' && /^[a-f0-9]{40}$/.test(value)
 
+export function mediaCheckFor(dictionary, observation) {
+  return dictionary === 'vndb' && !(observation.kind === 'warmup' && ['A', 'B'].includes(observation.arm)) ? 'sample' : 'all'
+}
+
 export function schedule(stage, replication) {
   let orders
   if (stage === 'discovery') {
@@ -181,9 +185,11 @@ export function verifyStudy(directory) {
   assert.ok(isCommit(config.baseline) && isCommit(config.candidate) && isCommit(plan.harnessSha))
   assert.notEqual(config.baseline, config.candidate)
   assert.deepEqual(config.dictionaries, ['jmdict', 'jitendex', 'vndb'])
+  assert.equal(config.mediaReadbackPolicy, 'all-jm-jt-first-ab-full-vndb-64-remaining-v1')
   assert.ok(config.dictionaries.includes(dictionary))
   assert.equal(plan.nodeVersion, 'v22.22.0')
   assert.deepEqual(plan.schedule, schedule(config.stage, replication))
+  assert.deepEqual(plan.mediaChecks, Object.fromEntries(plan.schedule.map((item) => [item.name, mediaCheckFor(dictionary, item)])))
   assert.deepEqual(Object.keys(plan.sourceFiles).sort(), [...sourceFiles].sort())
   for (const [name, hash] of Object.entries(plan.sourceFiles)) assert.equal(sha(readFileSync(path.join(root, 'source', name))), hash)
   assert.deepEqual(load('source/dev/perf/import-study-20261123/config.json'), config)
@@ -200,25 +206,30 @@ export function verifyStudy(directory) {
   assert.deepEqual(packageDifferences, config.expectedPackageDifferences)
   assert.deepEqual(packageDifferences, load('package-differences.json'))
   assert.ok(packageDifferences.length > 0)
-  const mediaReference = load('media-reference.json')
-  assert.deepEqual(Object.keys(mediaReference).sort(), ['mode', 'totalFiles', 'totalBytes', 'files', 'bytes', 'sha256'].sort())
-  assert.equal(mediaReference.mode, 'all')
-  assert.equal(mediaReference.files, fixture.mediaFiles)
-  assert.equal(mediaReference.totalFiles, fixture.mediaFiles)
-  assert.equal(mediaReference.bytes, fixture.mediaBytes)
-  assert.equal(mediaReference.totalBytes, fixture.mediaBytes)
-  assert.ok(isDigest(mediaReference.sha256))
+  const mediaReferences = load('media-reference.json')
+  assert.deepEqual(Object.keys(mediaReferences).sort(), ['all', 'sample'])
+  for (const [mode, reference] of Object.entries(mediaReferences)) {
+    assert.deepEqual(Object.keys(reference).sort(), ['mode', 'totalFiles', 'totalBytes', 'files', 'bytes', 'sha256'].sort())
+    assert.equal(reference.mode, mode)
+    assert.equal(reference.files, mode === 'all' ? fixture.mediaFiles : Math.min(fixture.mediaFiles, 64))
+    assert.equal(reference.totalFiles, fixture.mediaFiles)
+    assert.equal(reference.totalBytes, fixture.mediaBytes)
+    assert.ok(Number.isSafeInteger(reference.bytes) && reference.bytes >= 0 && reference.bytes <= fixture.mediaBytes)
+    if (mode === 'all') assert.equal(reference.bytes, fixture.mediaBytes)
+    assert.ok(isDigest(reference.sha256))
+  }
   const observations = []
   const physical = new Map()
   let semantic = null
   let browserVersion = null
   for (const observation of plan.schedule) {
     const arm = observation.arm === 'B' ? 'B' : 'A'
+    const mediaCheck = plan.mediaChecks[observation.name]
     const summary = load(`${observation.name}/summary.json`)
     const report = load(`${observation.name}/run-1.json`)
     assert.equal(summary.runs.length, 1)
     const run = summary.runs[0]
-    const recomputed = extractImportResult(report, dictionary, fixture, false, null)
+    const recomputed = extractImportResult(report, dictionary, fixture, false, null, mediaCheck)
     assert.deepEqual(Object.fromEntries(Object.keys(recomputed).map((name) => [name, run[name]])), recomputed)
     assert.equal(summary.gitSha, identities[arm].sha)
     assert.equal(summary.source.gitSha, identities[arm].sha)
@@ -233,13 +244,13 @@ export function verifyStudy(directory) {
     assert.equal(summary.authoritativeTiming, true)
     assert.equal(summary.traceEnabled, false)
     assert.equal(summary.importFlags, null)
-    assert.equal(summary.mediaCheck, 'all')
+    assert.equal(summary.mediaCheck, mediaCheck)
     assert.equal(report.browserVersion, summary.browserVersion)
     assert.equal(report.browserVersion, run.browserVersion)
     assert.ok(typeof report.browserVersion === 'string' && report.browserVersion.length > 0)
     browserVersion ??= report.browserVersion
     assert.equal(report.browserVersion, browserVersion)
-    verifyReadback(run.validation, report.benchmark, dictionary, fixture, mediaReference)
+    verifyReadback(run.validation, report.benchmark, dictionary, fixture, mediaReferences[mediaCheck])
     semantic ??= run.validation.semanticProbes
     assert.deepEqual(run.validation.semanticProbes, semantic, `${observation.name}: complete public lookup changed`)
     if (physical.has(arm)) assert.deepEqual(run.validation.physicalProbes, physical.get(arm), `${observation.name}: same-package layout changed`)
@@ -249,7 +260,7 @@ export function verifyStudy(directory) {
       assert.equal(host.nodeVersion, 'v22.22.0')
       assert.ok(Array.isArray(host.loadAverage) && host.loadAverage.length === 3)
     }
-    observations.push({...observation, metrics: metrics(run), packageSha256: run.packageSha256})
+    observations.push({...observation, metrics: metrics(run), packageSha256: run.packageSha256, mediaCheck, mediaFilesVerified: run.validation.media.files, mediaBytesVerified: run.validation.media.bytes})
   }
   const layoutDifferences = verifyLayout(physical.get('A'), physical.get('B'))
   const triplets = []
@@ -274,8 +285,10 @@ export function verifyStudy(directory) {
     packages: identities, packageDifferences, warmups: 3, measuredImports: triplets.length * 3,
     observations, comparisons, semanticDigestSha256: jsonSha(semantic), semanticEntryCount: semantic.reduce((sum, {result}) => sum + result.dictionaryEntries.length, 0),
     layoutDifferences, meetsMaterialityAndDirectionThreshold: meetsThreshold,
-    mediaProbeCount: mediaReference.files,
-    mediaProbeScope: 'all referenced image bytes after restart, independently matched against complete source references',
+    mediaProbeCount: mediaReferences.all.files,
+    totalMediaFilesVerified: observations.reduce((sum, row) => sum + row.mediaFilesVerified, 0),
+    mediaCheckCounts: {all: observations.filter((row) => row.mediaCheck === 'all').length, sample: observations.filter((row) => row.mediaCheck === 'sample').length},
+    mediaProbeScope: dictionary === 'vndb' ? 'all image bytes in first A/B warmups; fixed 64-image sample in all other imports; both independently matched against complete source references' : 'all referenced image bytes after every restart, independently matched against complete source references',
     decision: config.stage === 'discovery' ? (meetsThreshold ? 'promising; requires two independent confirmations' : 'not promising under the predeclared screen') : 'combine both independent replications before any promotion claim',
     limits: 'All observations and tails retained. Sampled complete responses, not exhaustive all-term readback. Phase times may overlap. Identical-code controls are reported separately without subtraction. No peak-memory claim.'
   }

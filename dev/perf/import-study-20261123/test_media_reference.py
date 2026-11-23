@@ -30,7 +30,7 @@ class MediaReferenceTest(unittest.TestCase):
         self.temporary.cleanup()
 
     def test_all_referenced_images_exclude_only_actual_unreferenced_members(self):
-        result = media_reference(self.archive, self.fixture)
+        result = media_reference(self.archive, self.fixture)['all']
         digest = hashlib.sha256()
         for name, data in [('a.svg', b'source-a'), ('b.avif', b'source-b')]:
             digest.update((json.dumps([name, len(data), hashlib.sha256(data).hexdigest()], separators=(',', ':')) + '\n').encode())
@@ -61,9 +61,24 @@ class MediaReferenceTest(unittest.TestCase):
     def test_empty_media_is_independently_validated(self):
         with zipfile.ZipFile(self.archive, 'w') as archive:
             archive.writestr('term_bank_1.json', '[[]]')
-        result = media_reference(self.archive, {'mediaFiles': 0, 'mediaBytes': 0})
+        result = media_reference(self.archive, {'mediaFiles': 0, 'mediaBytes': 0})['all']
         self.assertEqual(result['sha256'], hashlib.sha256().hexdigest())
         self.assertEqual(result['files'], 0)
+
+    def test_fixed_64_image_digest_spans_complete_sorted_source(self):
+        with zipfile.ZipFile(self.archive, 'w') as archive:
+            refs = [{'tag': 'img', 'path': f'img/{i:03d}.webp'} for i in range(70)]
+            archive.writestr('term_bank_1.json', json.dumps(refs))
+            for i in range(70):
+                archive.writestr(f'img/{i:03d}.webp', bytes([i]))
+        result = media_reference(self.archive, {'mediaFiles': 70, 'mediaBytes': 70})
+        expected = hashlib.sha256()
+        for i in (index * 69 // 63 for index in range(64)):
+            row = [f'img/{i:03d}.webp', 1, hashlib.sha256(bytes([i])).hexdigest()]
+            expected.update((json.dumps(row, separators=(',', ':')) + '\n').encode())
+        self.assertEqual(result['all']['files'], 70)
+        self.assertEqual(result['sample'], {'mode': 'sample', 'totalFiles': 70, 'totalBytes': 70,
+                                          'files': 64, 'bytes': 64, 'sha256': expected.hexdigest()})
 
 
 if __name__ == '__main__':

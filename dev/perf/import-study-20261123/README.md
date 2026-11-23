@@ -15,6 +15,30 @@ validation. Earlier results against older baselines are not pooled into this
 campaign. The updated JMdict and Jitendex fixtures also differ from the earlier
 round; VNDB archive bytes are unchanged.
 
+## Acquisition-budget revision, frozen before candidate results
+
+The original unchanged discovery is retained at
+<https://github.com/ManabiIO/manabitan/actions/runs/45215444963>. No candidate
+performance output from that campaign was opened or used to select this revision.
+The independently completed baseline diagnostic showed that exhaustive VNDB
+readback costs approximately 373 seconds per observation, including only about
+8 seconds of actual import. Twelve or twenty-one such observations exceed the
+original 45-minute job budget. The original campaign may time out before artifact
+upload; its original job logs and any surviving partial artifacts remain evidence,
+not substitute performance observations.
+
+This separate, prospectively declared acquisition revision preserves all runtime
+code, fixtures, timing boundaries, schedules, controls, metrics and promotion
+criteria. JMdict/Jitendex retain complete media verification after every import.
+VNDB verifies all 146,570 images on the first A and first B warmups of each cell;
+the C warmup and every measured import verify exactly the same 64 deterministic
+images spanning the sorted complete source list through the existing benchmark
+sample mode. Complete counts, restart checks and sampled full public responses
+remain mandatory on every import. Both full and sampled media digests are
+independently derived from the complete source before acquisition. Each job has a
+60-minute budget. Failed or partial original observations are never pooled into
+this revised campaign.
+
 ## Fixed timing protocol
 
 | Stage          | Excluded warmups | Measured triplets            | Imports per corpus |
@@ -66,14 +90,16 @@ semantic checks, not exhaustive all-term browser readback. Stable same-package
 physical probes are required; across packages only encoded-reference offsets,
 raw previews and their independently recomputed preview counts may differ.
 
-The current production benchmark's exhaustive media verification is retained:
-all 236 referenced Jitendex images and all 146,570 VNDB images are compared
-byte-for-byte to the locked original ZIP after restart. Before any observation,
+The current production benchmark's exhaustive media verification is retained
+for every Jitendex import and each cell's first A/B VNDB warmups. All 236
+referenced Jitendex images and all 146,570 VNDB images are compared byte-for-byte
+to the locked original ZIP after restart in those designated observations. Before any observation,
 an independent Python reader traverses every term bank to prove that the exact
 selected image set equals all source references, verifies unused-image exclusions,
 checks total bytes, reads every original image and computes the same framed
 path/size/SHA-256 digest. The browser receipt must match that independent source
-digest. JMdict's zero-image set is also validated. This strengthens the earlier
+full or sampled digest according to the frozen observation schedule. JMdict's
+zero-image set is also validated. This strengthens the earlier
 campaign's five-image VNDB sampling. All media work is outside import timing.
 
 The source media byte counts are 0 / 4,992,155 / 188,131,284 for JMdict, Jitendex,

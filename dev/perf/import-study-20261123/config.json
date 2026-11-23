@@ -8,8 +8,22 @@
     "js/dictionary/term-bank-wasm-parser.js",
     "js/dictionary/zstd-term-content-compression-worker.js"
   ],
-  "dictionaries": ["jmdict", "jitendex", "vndb"],
+  "dictionaries": [
+    "jmdict",
+    "jitendex",
+    "vndb"
+  ],
   "confirmationOf": null,
-  "expectedCandidateIndexWorkerFiles": {"jmdict": 0, "jitendex": 0, "vndb": 2},
-  "expectedSourceCrcCoverageBytes": {"jmdict": 0, "jitendex": 0, "vndb": 4267992967}
+  "expectedCandidateIndexWorkerFiles": {
+    "jmdict": 0,
+    "jitendex": 0,
+    "vndb": 2
+  },
+  "expectedSourceCrcCoverageBytes": {
+    "jmdict": 0,
+    "jitendex": 0,
+    "vndb": 4267992967
+  },
+  "mediaReadbackPolicy": "all-jm-jt-first-ab-full-vndb-64-remaining-v1",
+  "acquisitionBudgetRevisionOf": "https://github.com/ManabiIO/manabitan/actions/runs/45215444963"
 }

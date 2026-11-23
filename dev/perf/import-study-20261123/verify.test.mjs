@@ -6,7 +6,7 @@ import path from 'node:path'
 import {fileURLToPath} from 'node:url'
 import test from 'node:test'
 import {extractImportResult} from '../benchmark-support.js'
-import {compare, schedule, sourceFiles, verifyStudy} from './verify.mjs'
+import {compare, mediaCheckFor, schedule, sourceFiles, verifyStudy} from './verify.mjs'
 
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 const digest = (value) => createHash('sha256').update(value).digest('hex')
@@ -20,7 +20,7 @@ const load = (root, name) => JSON.parse(readFileSync(path.join(root, name), 'utf
 
 function fixtureDirectory() {
   const root = mkdtempSync(path.join(os.tmpdir(), 'import-study-verifier-'))
-  const config = {schemaVersion: 1, stage: 'discovery', baseline: 'a'.repeat(40), candidate: 'b'.repeat(40), expectedPackageDifferences: ['js/dictionary/term-record-opfs-store.js'], dictionaries: ['jmdict', 'jitendex', 'vndb'], confirmationOf: null}
+  const config = {schemaVersion: 1, stage: 'discovery', baseline: 'a'.repeat(40), candidate: 'b'.repeat(40), expectedPackageDifferences: ['js/dictionary/term-record-opfs-store.js'], dictionaries: ['jmdict', 'jitendex', 'vndb'], confirmationOf: null, mediaReadbackPolicy: 'all-jm-jt-first-ab-full-vndb-64-remaining-v1'}
   const fixture = JSON.parse(readFileSync(path.join(repository, 'test/perf/dictionaries.lock.json'), 'utf8')).dictionaries.jmdict
   const hashes = {}
   for (const name of sourceFiles) {
@@ -30,9 +30,9 @@ function fixtureDirectory() {
     writeFileSync(target, bytes)
     hashes[name] = digest(bytes)
   }
-  save(root, 'plan.json', {schemaVersion: 1, config, dictionary: 'jmdict', replication: 1, fixture, nodeVersion: 'v22.22.0', harnessSha: 'c'.repeat(40), sourceFiles: hashes, schedule: schedule('discovery', 1)})
+  save(root, 'plan.json', {schemaVersion: 1, config, dictionary: 'jmdict', replication: 1, fixture, nodeVersion: 'v22.22.0', harnessSha: 'c'.repeat(40), sourceFiles: hashes, schedule: schedule('discovery', 1), mediaChecks: Object.fromEntries(schedule('discovery', 1).map((item) => [item.name, 'all']))})
   const media = {mode: 'all', totalFiles: 0, totalBytes: 0, files: 0, bytes: 0, sha256: digest('')}
-  save(root, 'media-reference.json', media)
+  save(root, 'media-reference.json', {all: media, sample: {...media, mode: 'sample'}})
   save(root, 'package-differences.json', config.expectedPackageDifferences)
   for (const arm of ['A', 'B']) {
     save(root, `${arm}-identity.json`, {sha: arm === 'A' ? config.baseline : config.candidate, packageSha256: arm.toLowerCase().repeat(64), statusWithHarnessOverlay: ''})
@@ -175,4 +175,18 @@ test('rejects complete lookup receipts inconsistent with public response bytes',
     validation.lookup.observations[0].sha256 = 'f'.repeat(64)
   })
   assert.throws(() => verifyStudy(root), /Complete public lookup differs/)
+}))
+
+test('media policy preserves exhaustive first A/B warmups and predeclared 64-image VNDB samples', () => {
+  for (const [stage, replication] of [['discovery', 1], ['confirmation', 1], ['confirmation', 2]]) {
+    const order = schedule(stage, replication)
+    assert.deepEqual(order.filter((item) => mediaCheckFor('vndb', item) === 'all').map(({name}) => name).sort(), ['warmup-A', 'warmup-B'])
+    assert.equal(order.filter((item) => item.kind === 'measured' && mediaCheckFor('vndb', item) !== 'sample').length, 0)
+    for (const dictionary of ['jmdict', 'jitendex']) assert.ok(order.every((item) => mediaCheckFor(dictionary, item) === 'all'))
+  }
+})
+
+test('rejects an altered media schedule before inspecting timing', () => withFixture((root) => {
+  alter(root, 'plan.json', (value) => { value.mediaChecks.B1 = 'sample' })
+  assert.throws(() => verifyStudy(root))
 }))

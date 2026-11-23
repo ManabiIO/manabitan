@@ -66,7 +66,13 @@ def read_config():
         raise ValueError("Every candidate must retain all three corpus cells")
     if config["stage"] == "confirmation" and not config["confirmationOf"]:
         raise ValueError("Confirmation must name the retained discovery campaign")
+    if config.get('mediaReadbackPolicy') != 'all-jm-jt-first-ab-full-vndb-64-remaining-v1':
+        raise ValueError('Unknown frozen media readback policy')
     return config
+
+
+def media_check_for(dictionary, observation):
+    return 'sample' if dictionary == 'vndb' and not (observation['kind'] == 'warmup' and observation['arm'] in ('A', 'B')) else 'all'
 
 
 def schedule(stage, replication):
@@ -120,17 +126,25 @@ def media_reference(archive_path, fixture):
                     pending.extend(value)
         if paths != sorted(references):
             raise ValueError('Selected image coverage differs from complete term-bank references')
-        combined = hashlib.sha256()
-        total_bytes = 0
+        selected = paths if len(paths) <= 64 else [paths[index * (len(paths) - 1) // 63] for index in range(64)]
+        selected_set = set(selected)
+        combined, sampled = hashlib.sha256(), hashlib.sha256()
+        total_bytes, sampled_bytes = 0, 0
         for name in paths:
             data = archive.read(name)
             total_bytes += len(data)
             row = [name, len(data), hashlib.sha256(data).hexdigest()]
-            combined.update((json.dumps(row, ensure_ascii=False, separators=(',', ':')) + '\n').encode('utf-8'))
+            framed = (json.dumps(row, ensure_ascii=False, separators=(',', ':')) + '\n').encode('utf-8')
+            combined.update(framed)
+            if name in selected_set:
+                sampled.update(framed)
+                sampled_bytes += len(data)
         if total_bytes != fixture['mediaBytes']:
             raise ValueError('Source image byte total differs from lock')
-        return {'mode': 'all', 'totalFiles': len(paths), 'totalBytes': total_bytes,
-                'files': len(paths), 'bytes': total_bytes, 'sha256': combined.hexdigest()}
+        common = {'totalFiles': len(paths), 'totalBytes': total_bytes}
+        return {'all': {**common, 'mode': 'all', 'files': len(paths), 'bytes': total_bytes, 'sha256': combined.hexdigest()},
+                'sample': {**common, 'mode': 'sample', 'files': len(selected), 'bytes': sampled_bytes, 'sha256': sampled.hexdigest()}}
+
 
 
 def main():
@@ -159,6 +173,7 @@ def main():
                "dev/perf/import-study-20261123/config.json"]
     plan = {"schemaVersion": 1, "config": config, "dictionary": args.dictionary,
             "replication": args.replication, "schedule": order, "fixture": fixture,
+            "mediaChecks": {item["name"]: media_check_for(args.dictionary, item) for item in order},
             "nodeVersion": node, "harnessSha": command(["git", "rev-parse", "HEAD"]),
             "workflowRun": os.environ.get("GITHUB_RUN_ID"), "workflowAttempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
             "sourceFiles": {name: digest(ROOT / name) for name in sources},
@@ -221,7 +236,7 @@ def main():
             started = time.time()
             try:
                 command(["node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1", "--no-build",
-                         "--build-target", "chrome", "--media-check", "all", "--output", str(output)], cwd=source, log=output / "run.log")
+                         "--build-target", "chrome", "--media-check", plan["mediaChecks"][observation["name"]], "--output", str(output)], cwd=source, log=output / "run.log")
             finally:
                 save(output / "acquisition.json", {**observation, "startedEpochSeconds": started,
                                                    "endedEpochSeconds": time.time()})
