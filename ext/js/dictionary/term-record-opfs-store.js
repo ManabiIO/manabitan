@@ -404,6 +404,42 @@ function getSynchronousResolvedContentReferences(chunk, count) {
 }
 
 /**
+ * Repeated fields can be filled as one run only when both the reference and
+ * score columns have stable indexed reads for this synchronous encode. Keep
+ * uncompressed metadata and external/accessor/shared columns on the scalar
+ * path. The parser's existing compact-metadata signal selects this work; it
+ * does not establish column ownership or permit skipping current-value checks.
+ * @param {{scoreList: number[]|Int32Array|Float64Array, contentMetaByUniqueIndex?: boolean, fixedContentLength?: number, resolvedContentReferences?: ResolvedContentReferences}} chunk
+ * @param {number} count
+ * @returns {{uniqueIndexList: Uint32Array, scores: Int32Array}|null}
+ */
+function getRepeatedArtifactRecordFields(chunk, count) {
+    if (
+        count < COMPACT_SCORE_TABLE_MIN_ROWS ||
+        !resolvedContentReferenceOrigins.has(chunk) ||
+        Object.getOwnPropertyDescriptor(chunk, 'contentMetaByUniqueIndex')?.value !== true
+    ) { return null; }
+    const references = getSynchronousResolvedContentReferences(chunk, count);
+    if (references === null || references.offsets.length >= count) { return null; }
+    const scores = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value);
+    if (
+        !ArrayBuffer.isView(scores) ||
+        !(scores instanceof Int32Array) ||
+        Object.getPrototypeOf(scores) !== Int32Array.prototype ||
+        Object.hasOwn(scores, 'length') ||
+        Object.hasOwn(scores, 'buffer') ||
+        !(scores.buffer instanceof ArrayBuffer) ||
+        scores.length < count
+    ) { return null; }
+    try {
+        ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get?.call(scores.buffer);
+    } catch {
+        return null;
+    }
+    return {uniqueIndexList: references.uniqueIndexList, scores};
+}
+
+/**
  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number} start
  * @param {number} end
@@ -5515,7 +5551,7 @@ export class TermRecordOpfsStore {
      * Encodes the hot artifact path as columnar random-access fields. Content
      * lengths use u16 and repeated scores use per-chunk u16 dictionary keys;
      * unusual chunks fall back to the legacy fixed-width rows.
-     * @param {{rowCount: number, scoreList: number[]|Int32Array|Float64Array, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+     * @param {{rowCount: number, scoreList: number[]|Int32Array|Float64Array, contentMetaByUniqueIndex?: boolean, fixedContentOffsetBase?: number, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
      * @param {number[]|Uint32Array|Float64Array} contentOffsets
      * @param {number[]|Uint32Array} contentLengths
      * @param {number} contentOffsetBase
@@ -5550,34 +5586,79 @@ export class TermRecordOpfsStore {
         const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
             null;
+        const repeatedFields = useFixedContentSpan ? null : getRepeatedArtifactRecordFields(chunk, count);
         let compact = true;
-        for (let i = 0; i < count; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
-            if (contentLength >= U16_NULL) {
-                compact = false;
-                break;
-            }
-            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
-            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
-            const score = chunk.scoreList[i] ?? 0;
-            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
-            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
-            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
-            if (scoreIndex < 0) {
-                scoreIndex = scores.length;
-                if (scoreIndex >= U16_NULL) {
+        if (repeatedFields === null) {
+            for (let i = 0; i < count; ++i) {
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                if (contentLength >= U16_NULL) {
                     compact = false;
                     break;
                 }
-                if (useInlineScore) {
-                    inlineScoreIndexes[inlineScore] = scoreIndex + 1;
-                } else {
-                    scoreIndexes.set(score, scoreIndex);
+                offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+                lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+                const score = chunk.scoreList[i] ?? 0;
+                const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+                const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+                let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+                if (scoreIndex < 0) {
+                    scoreIndex = scores.length;
+                    if (scoreIndex >= U16_NULL) {
+                        compact = false;
+                        break;
+                    }
+                    if (useInlineScore) {
+                        inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+                    } else {
+                        scoreIndexes.set(score, scoreIndex);
+                    }
+                    scores.push(score);
                 }
-                scores.push(score);
+                scoreKeys[i] = scoreIndex;
             }
-            scoreKeys[i] = scoreIndex;
+        } else {
+            for (let i = 0; i < count;) {
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                if (contentLength >= U16_NULL) {
+                    compact = false;
+                    break;
+                }
+                const score = chunk.scoreList[i] ?? 0;
+                const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+                const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+                let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+                if (scoreIndex < 0) {
+                    scoreIndex = scores.length;
+                    if (scoreIndex >= U16_NULL) {
+                        compact = false;
+                        break;
+                    }
+                    if (useInlineScore) {
+                        inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+                    } else {
+                        scoreIndexes.set(score, scoreIndex);
+                    }
+                    scores.push(score);
+                }
+                let end = i + 1;
+                const {uniqueIndexList, scores: repeatedScores} = repeatedFields;
+                const uniqueIndex = uniqueIndexList[i];
+                while (end < count && uniqueIndexList[end] === uniqueIndex && repeatedScores[end] === score) { ++end; }
+                const offset = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+                const length = contentLength < 0 ? U16_NULL : contentLength;
+                if (end === i + 1) {
+                    offsets[i] = offset;
+                    lengths[i] = length;
+                    scoreKeys[i] = scoreIndex;
+                } else {
+                    offsets.fill(offset, i, end);
+                    lengths.fill(length, i, end);
+                    scoreKeys.fill(scoreIndex, i, end);
+                }
+                i = end;
+            }
         }
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
         (scores.length * 4) +
