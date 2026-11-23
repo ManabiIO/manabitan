@@ -1293,6 +1293,112 @@ static int reuse_validated_glossary(
     return 0;
 }
 
+static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t* position) {
+    uint32_t i = skip_ws(src, len, *position);
+    if (i >= len || src[i] != ',') { return 0; }
+    i = skip_ws(src, len, i + 1u);
+    if (i >= len) { return 0; }
+    *position = i;
+    return 1;
+}
+
+/* Strict source validation has exactly eight fields with known token types.
+ * Keep its grammar explicit instead of dispatching each field twice through
+ * the permissive row parser and set_field. Every metadata word is assigned
+ * before success; failed rows are never published. */
+static int parse_format3_row(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t row_start,
+    TermRowMeta* meta,
+    int media_hints,
+    uint32_t* out_next,
+    const TermRowMeta* prior_rows,
+    uint32_t prior_count,
+    uint32_t* glossary_witness,
+    uint32_t glossary_lookback,
+    uint32_t* key_escape_mask
+) {
+    if (row_start >= len || src[row_start] != '[') { return 0; }
+    uint32_t i = skip_ws(src, len, row_start + 1u);
+    uint32_t end = 0u;
+    uint32_t expression_escaped = 0u;
+    uint32_t reading_escaped = 0u;
+
+    if (!parse_string_span_with_escape(src, len, i, &end, &expression_escaped)) { return 0; }
+    meta->expression_start = i;
+    meta->expression_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!parse_string_span_with_escape(src, len, i, &end, &reading_escaped)) { return 0; }
+    meta->reading_start = i;
+    meta->reading_length = end - i;
+    if (key_escape_mask != 0) { *key_escape_mask = expression_escaped | (reading_escaped << 1u); }
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (src[i] == 'n') {
+        if (len - i < 4u || !is_null_token(src, i, 4u)) { return 0; }
+        end = i + 4u;
+    } else if (!parse_string_span(src, len, i, &end)) {
+        return 0;
+    }
+    meta->definition_tags_start = i;
+    meta->definition_tags_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!parse_string_span(src, len, i, &end)) { return 0; }
+    meta->rules_start = i;
+    meta->rules_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) { return 0; }
+    meta->score_start = i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (src[i] != '[') { return 0; }
+    meta->glossary_may_contain_media = 0u;
+    meta->glossary_requires_normalization = 0u;
+    meta->glossary_requires_text_normalization = 0u;
+    if (
+        !(glossary_witness != 0 && reuse_validated_glossary(
+            src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
+        )) &&
+        !parse_value_span_with_glossary_hints(
+            src, len, i, &end,
+            media_hints ? &meta->glossary_may_contain_media : 0,
+            &meta->glossary_requires_normalization,
+            &meta->glossary_requires_text_normalization,
+            1
+        )) { return 0; }
+    meta->glossary_start = i;
+    meta->glossary_length = end - i;
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!scan_scalar_span(src, len, i, &end)) { return 0; }
+    if (is_null_token(src, i, end - i)) {
+        meta->sequence_start = 0xffffffffu;
+    } else {
+        if (!is_valid_json_number(src, i, end)) { return 0; }
+        meta->sequence_start = i;
+    }
+    i = end;
+    if (!next_format3_field(src, len, &i)) { return 0; }
+
+    if (!parse_string_span(src, len, i, &end)) { return 0; }
+    meta->term_tags_start = i;
+    meta->term_tags_length = end - i;
+    i = skip_ws(src, len, end);
+    if (i >= len || src[i] != ']') { return 0; }
+    *out_next = i + 1u;
+    return 1;
+}
+
 static int parse_row_single_pass(
     const uint8_t* src,
     uint32_t len,
@@ -1307,6 +1413,12 @@ static int parse_row_single_pass(
     int validate_glossary_types,
     uint32_t* key_escape_mask
 ) {
+    if (validate_glossary_types) {
+        return parse_format3_row(
+            src, len, row_start, out_meta, media_hints, out_next,
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+        );
+    }
     if (row_start >= len || src[row_start] != '[') { return 0; }
     clear_term_row_meta(out_meta);
     // Missing generic keys remain conservative; only validated literal keys
