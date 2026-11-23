@@ -116,7 +116,7 @@ describe('preformatted image references', () => {
         }, 2048, {singleChunk: true, emitTermByteLists: false, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true})
     })
 
-    test('decodes an owned exact-span snapshot of a shared glossary before parser storage is reused', async () => {
+    test('decodes an owned exact-length view of a shared glossary before parser storage is reused', async () => {
         const glossary = String.raw`[{"type":"structured-content","content":{"tag":"\u0069mg","pa\u0074h":"img/\u732b.webp"}}]`
         const expected = encoder.encode(glossary)
         const source = encoder.encode(`[["image","reading","","",0,${glossary},1,""]]`)
@@ -137,7 +137,8 @@ describe('preformatted image references', () => {
             expect(snapshot.buffer).toBeInstanceOf(ArrayBuffer)
             expect(snapshot.buffer).not.toBe(bytes.buffer)
             expect(snapshot.byteOffset).toBe(0)
-            expect(snapshot.buffer.byteLength).toBe(expected.byteLength)
+            expect(snapshot.byteLength).toBe(expected.byteLength)
+            expect(snapshot.buffer.byteLength).toBeLessThanOrEqual(64 * 1024)
             expect(snapshot).toEqual(expected)
 
             bytes.fill(0)
