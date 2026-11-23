@@ -383,8 +383,14 @@ describe('bounded referenced-media prefetch', () => {
         state.sizeOverride = void 0;
         const path = 'portrait.png';
         const presentation = {
-            path, width: 40, height: 60, title: 'Portrait', alt: 'Character',
-            description: 'Retained presentation', collapsed: false, collapsible: true,
+            path,
+            width: 40,
+            height: 60,
+            title: 'Portrait',
+            alt: 'Character',
+            description: 'Retained presentation',
+            collapsed: false,
+            collapsible: true,
             data: {caption: 'kept in glossary'},
         };
         const glossary = type === 'image' ?
@@ -400,7 +406,11 @@ describe('bounded referenced-media prefetch', () => {
         const compact = vi.spyOn(DictionaryImporter.prototype, '_createDeferredMediaRequirement');
         const expected = {
             ...(type === 'image' ? {type: 'image'} : {tag: 'img', border: '1px solid', sizeUnits: 'em'}),
-            ...presentation, width: 0, height: 0, preferredWidth: 40, preferredHeight: 60,
+            ...presentation,
+            width: 0,
+            height: 0,
+            preferredWidth: 40,
+            preferredHeight: 60,
         };
         /** @type {unknown[]} */
         const written = [];
