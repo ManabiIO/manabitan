@@ -1,0 +1,79 @@
+{
+  "outputParity": true,
+  "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing.",
+  "candidate": {
+    "pairs": [
+      {
+        "pair": 0,
+        "baselineMs": 432.688576,
+        "comparisonMs": 168.13268599999992,
+        "changePercent": -61.14233300210821
+      },
+      {
+        "pair": 1,
+        "baselineMs": 368.715376,
+        "comparisonMs": 156.19463399999995,
+        "changePercent": -57.638155562028984
+      },
+      {
+        "pair": 2,
+        "baselineMs": 229.33486000000005,
+        "comparisonMs": 213.804713,
+        "changePercent": -6.771821344561424
+      },
+      {
+        "pair": 3,
+        "baselineMs": 263.61926399999993,
+        "comparisonMs": 254.10953200000006,
+        "changePercent": -3.6073737008839646
+      },
+      {
+        "pair": 4,
+        "baselineMs": 274.859106,
+        "comparisonMs": 173.224608,
+        "changePercent": -36.97694410750212
+      },
+      {
+        "pair": 5,
+        "baselineMs": 373.5560539999999,
+        "comparisonMs": 188.943535,
+        "changePercent": -49.420299048345754
+      }
+    ],
+    "medianChangePercent": -43.19862157792394
+  },
+  "control-before": {
+    "pairs": [
+      {
+        "pair": 0,
+        "baselineMs": 277.7085309999999,
+        "comparisonMs": 329.168942,
+        "changePercent": 18.53036736563205
+      },
+      {
+        "pair": 1,
+        "baselineMs": 297.40752,
+        "comparisonMs": 256.070056,
+        "changePercent": -13.899266568646262
+      }
+    ],
+    "medianChangePercent": 2.315550398492894
+  },
+  "control-after": {
+    "pairs": [
+      {
+        "pair": 0,
+        "baselineMs": 246.55591700000002,
+        "comparisonMs": 294.18216099999995,
+        "changePercent": 19.316609627340608
+      },
+      {
+        "pair": 1,
+        "baselineMs": 268.0818949999999,
+        "comparisonMs": 285.666656,
+        "changePercent": 6.559473551915951
+      }
+    ],
+    "medianChangePercent": 12.938041589628279
+  }
+}

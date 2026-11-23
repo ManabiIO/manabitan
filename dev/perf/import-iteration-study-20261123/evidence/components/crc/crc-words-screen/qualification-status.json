@@ -1,0 +1,574 @@
+{
+  "candidateLocalCommit": "520ce235948da06ebc99fa5d67772ae5614f779c",
+  "candidateRemoteCommit": "930083af581bd4d8fe8dc42fe7e443e57666f8f9",
+  "candidateTree": "f726010c10886c1ba0cebe8a84f2b23a37ab2b98",
+  "verdict": "Unqualified local performance experiment; no production speed claim",
+  "reason": "Short observations had coarse thread CPU accounting; single longer fixed qualification still showed noisy A/A controls and mixed whole-work JMdict. No additional local tuning or repeats will be performed. Independent fixed browser comparison will decide retention.",
+  "scope": "CRC-only over resident first/middle/last term banks, not full imports",
+  "artifacts": {
+    "screen-1.json": {
+      "plan": {
+        "pairsPerCorpusPerComparison": 8,
+        "comparisons": [
+          "AA",
+          "AB"
+        ],
+        "warmupsPerObservation": 2,
+        "minimumBytesPerObservation": 67108864,
+        "alignments": [
+          0,
+          1,
+          3
+        ],
+        "boundary": "CRC-only over resident first/middle/last term banks; excludes archive IO, inflation, allocation, copies, compilation and warmups",
+        "node": "v22.22.0",
+        "v8": "12.4.254.21-node.33",
+        "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+        "availableParallelism": 9,
+        "loadBefore": [
+          0.79,
+          1.22,
+          2.08
+        ],
+        "inputsSha256": "90f8ac889612eb3809e7f0407489020bf8b9ddcf7f78a2adec1bb27ba89efbae"
+      },
+      "summaries": {
+        "AA": {
+          "jmdict": {
+            "medianPairedCpuPercent": -0.0748384545207148,
+            "equalWorkCpuPercent": -16.807651713006834,
+            "medianPairedWallPercent": 0.1833514685763704,
+            "fasterCpuPairs": 4,
+            "deltas": [
+              {
+                "threadCpuPercent": 16.76744089070512,
+                "wallPercent": 6.425134550632916
+              },
+              {
+                "threadCpuPercent": 16.874660879001624,
+                "wallPercent": 1.9756401624330788
+              },
+              {
+                "threadCpuPercent": -0.18897525493831724,
+                "wallPercent": 1.827444065618944
+              },
+              {
+                "threadCpuPercent": -25.14753177006901,
+                "wallPercent": -8.330388313415348
+              },
+              {
+                "threadCpuPercent": -14.448967930862079,
+                "wallPercent": -10.2334443630828
+              },
+              {
+                "threadCpuPercent": 17.992846623185365,
+                "wallPercent": 10.102264546965433
+              },
+              {
+                "threadCpuPercent": -61.019615486349906,
+                "wallPercent": -55.63215253498611
+              },
+              {
+                "threadCpuPercent": 0.03929834589688763,
+                "wallPercent": -1.460741128466203
+              }
+            ]
+          },
+          "jitendex": {
+            "medianPairedCpuPercent": 0.057228189589753065,
+            "equalWorkCpuPercent": 7.300713928425262,
+            "medianPairedWallPercent": 6.036773803721596,
+            "fasterCpuPairs": 2,
+            "deltas": [
+              {
+                "threadCpuPercent": 0.04649000464900244,
+                "wallPercent": 1.0964674780136408
+              },
+              {
+                "threadCpuPercent": 0.021431633090451818,
+                "wallPercent": 7.4857605915287895
+              },
+              {
+                "threadCpuPercent": 0.06796637453050369,
+                "wallPercent": 0.12772222114239007
+              },
+              {
+                "threadCpuPercent": 33.290349417637266,
+                "wallPercent": 17.259120842872598
+              },
+              {
+                "threadCpuPercent": 14.39082758867023,
+                "wallPercent": 14.256583013828683
+              },
+              {
+                "threadCpuPercent": -0.23208483593387674,
+                "wallPercent": 3.204944716723035
+              },
+              {
+                "threadCpuPercent": 14.510645911612086,
+                "wallPercent": 4.587787015914402
+              },
+              {
+                "threadCpuPercent": -0.017852679687224704,
+                "wallPercent": 8.361917879781423
+              }
+            ]
+          },
+          "vndb": {
+            "medianPairedCpuPercent": 0.010698619878035664,
+            "equalWorkCpuPercent": 3.58724117791136,
+            "medianPairedWallPercent": -0.41215135141982606,
+            "fasterCpuPairs": 3,
+            "deltas": [
+              {
+                "threadCpuPercent": 0,
+                "wallPercent": -4.1062484622055635
+              },
+              {
+                "threadCpuPercent": -12.785843354726145,
+                "wallPercent": -6.713599450671504
+              },
+              {
+                "threadCpuPercent": -0.3990309248966817,
+                "wallPercent": -2.6686616007126185
+              },
+              {
+                "threadCpuPercent": 16.627098171519016,
+                "wallPercent": 0.6683500861435876
+              },
+              {
+                "threadCpuPercent": 16.332652806133076,
+                "wallPercent": 8.216108926851785
+              },
+              {
+                "threadCpuPercent": 0.02139723975607133,
+                "wallPercent": -1.4926527889832397
+              },
+              {
+                "threadCpuPercent": 16.64653197250574,
+                "wallPercent": 0.7966158250729105
+              },
+              {
+                "threadCpuPercent": -0.29197080291970545,
+                "wallPercent": 8.668041266554848
+              }
+            ]
+          }
+        },
+        "AB": {
+          "jmdict": {
+            "medianPairedCpuPercent": -1.8127809180883248,
+            "equalWorkCpuPercent": 0.3105011801057822,
+            "medianPairedWallPercent": -6.329344485442528,
+            "fasterCpuPairs": 7,
+            "deltas": [
+              {
+                "threadCpuPercent": -0.4798664719382395,
+                "wallPercent": -4.842105101126181
+              },
+              {
+                "threadCpuPercent": 42.875508892222,
+                "wallPercent": 31.15666518293283
+              },
+              {
+                "threadCpuPercent": -13.031565103024988,
+                "wallPercent": -15.201445590051732
+              },
+              {
+                "threadCpuPercent": -16.88192650612449,
+                "wallPercent": -6.249913299500265
+              },
+              {
+                "threadCpuPercent": -3.14569536423841,
+                "wallPercent": -5.147310089281842
+              },
+              {
+                "threadCpuPercent": -12.105821040544118,
+                "wallPercent": -6.408775671384792
+              },
+              {
+                "threadCpuPercent": -0.43331527853007756,
+                "wallPercent": -11.196997975900203
+              },
+              {
+                "threadCpuPercent": -0.1293661060802198,
+                "wallPercent": -12.852656708558797
+              }
+            ]
+          },
+          "jitendex": {
+            "medianPairedCpuPercent": -0.5576310861423295,
+            "equalWorkCpuPercent": -4.063175428825449,
+            "medianPairedWallPercent": -5.70459368812391,
+            "fasterCpuPairs": 4,
+            "deltas": [
+              {
+                "threadCpuPercent": -16.96276263781985,
+                "wallPercent": -7.232141672872006
+              },
+              {
+                "threadCpuPercent": 16.64653197250574,
+                "wallPercent": 13.829105371747197
+              },
+              {
+                "threadCpuPercent": 0.1874843763019829,
+                "wallPercent": -4.9203884175399
+              },
+              {
+                "threadCpuPercent": -14.326534985891348,
+                "wallPercent": -6.960550774435803
+              },
+              {
+                "threadCpuPercent": -16.44734093662531,
+                "wallPercent": -6.675287840800214
+              },
+              {
+                "threadCpuPercent": 1.2656625743576733,
+                "wallPercent": -6.455747140013468
+              },
+              {
+                "threadCpuPercent": 0.008333333333321313,
+                "wallPercent": 17.78169189158905
+              },
+              {
+                "threadCpuPercent": -1.1235955056179803,
+                "wallPercent": -4.953440236234352
+              }
+            ]
+          },
+          "vndb": {
+            "medianPairedCpuPercent": -0.020881163386649026,
+            "equalWorkCpuPercent": 0.2216633494309228,
+            "medianPairedWallPercent": -5.235585444949692,
+            "fasterCpuPairs": 4,
+            "deltas": [
+              {
+                "threadCpuPercent": 12.279166666666663,
+                "wallPercent": 11.865734196474676
+              },
+              {
+                "threadCpuPercent": -0.14583333333333393,
+                "wallPercent": -5.852996534656818
+              },
+              {
+                "threadCpuPercent": 0.01250156269534397,
+                "wallPercent": -4.9933955856046435
+              },
+              {
+                "threadCpuPercent": -0.16638935108153063,
+                "wallPercent": -5.477775304294741
+              },
+              {
+                "threadCpuPercent": -0.054263889468642024,
+                "wallPercent": -2.709234821415085
+              },
+              {
+                "threadCpuPercent": 0.4730210557160275,
+                "wallPercent": -2.042226429498084
+              },
+              {
+                "threadCpuPercent": 1.1872184566160016,
+                "wallPercent": -6.301806800692433
+              },
+              {
+                "threadCpuPercent": -10.543595866134392,
+                "wallPercent": -7.30287195070527
+              }
+            ]
+          }
+        }
+      },
+      "status": "success",
+      "observationCount": 96
+    },
+    "screen-long-1.json": {
+      "plan": {
+        "pairsPerCorpusPerComparison": 8,
+        "comparisons": [
+          "AA",
+          "AB"
+        ],
+        "warmupsPerObservation": 2,
+        "minimumBytesPerObservation": 1073741824,
+        "reason": "Single longer qualification after 64MiB screening observations had about 24-28ms CPU with about 4ms accounting granularity; no further retuning planned",
+        "previousScreen": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/screen-1.json",
+        "alignments": [
+          0,
+          1,
+          3
+        ],
+        "boundary": "CRC-only over resident first/middle/last term banks; excludes archive IO, inflation, allocation, copies, compilation and warmups",
+        "node": "v22.22.0",
+        "v8": "12.4.254.21-node.33",
+        "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+        "availableParallelism": 9,
+        "loadBefore": [
+          1.3,
+          1.28,
+          1.89
+        ],
+        "inputsSha256": "90f8ac889612eb3809e7f0407489020bf8b9ddcf7f78a2adec1bb27ba89efbae",
+        "harnessSha256": "f48cd46d82e8184e7c7a43e161b1b6fc6a58ae6dec707c236e69b28919e0c90f"
+      },
+      "summaries": {
+        "AA": {
+          "jmdict": {
+            "medianPairedCpuPercent": -4.545490878365205,
+            "equalWorkCpuPercent": -8.279454866307724,
+            "medianPairedWallPercent": -4.8403321294687105,
+            "fasterCpuPairs": 7,
+            "deltas": [
+              {
+                "threadCpuPercent": -1.9761905929307155,
+                "wallPercent": -2.4652532087213186
+              },
+              {
+                "threadCpuPercent": 2.963008799178257,
+                "wallPercent": 3.0478544541181707
+              },
+              {
+                "threadCpuPercent": -22.321122337238364,
+                "wallPercent": -22.656390020718366
+              },
+              {
+                "threadCpuPercent": -19.000971114778807,
+                "wallPercent": -19.446386529015637
+              },
+              {
+                "threadCpuPercent": -7.114791163799694,
+                "wallPercent": -7.215411050216103
+              },
+              {
+                "threadCpuPercent": -1.0140913400015328,
+                "wallPercent": -0.07708154564459724
+              },
+              {
+                "threadCpuPercent": -12.323817350526022,
+                "wallPercent": -12.197803323759604
+              },
+              {
+                "threadCpuPercent": -0.9498693805791825,
+                "wallPercent": -0.9963405537433245
+              }
+            ]
+          },
+          "jitendex": {
+            "medianPairedCpuPercent": -0.8437694791725237,
+            "equalWorkCpuPercent": 0.26493056581538,
+            "medianPairedWallPercent": -1.739132790820841,
+            "fasterCpuPairs": 4,
+            "deltas": [
+              {
+                "threadCpuPercent": 12.004669293144055,
+                "wallPercent": 12.657194770725155
+              },
+              {
+                "threadCpuPercent": 3.640391512938823,
+                "wallPercent": 3.205998679835065
+              },
+              {
+                "threadCpuPercent": -6.1426672690824695,
+                "wallPercent": -5.516447452842321
+              },
+              {
+                "threadCpuPercent": 0.9788975760398166,
+                "wallPercent": 0.6636628550374057
+              },
+              {
+                "threadCpuPercent": 10.74772642726547,
+                "wallPercent": 12.34730813191669
+              },
+              {
+                "threadCpuPercent": -5.104214954633801,
+                "wallPercent": -4.160421011886051
+              },
+              {
+                "threadCpuPercent": -2.666436534384864,
+                "wallPercent": -4.141928436679088
+              },
+              {
+                "threadCpuPercent": -8.560884494599176,
+                "wallPercent": -9.21044785943873
+              }
+            ]
+          },
+          "vndb": {
+            "medianPairedCpuPercent": 1.9717120171767466,
+            "equalWorkCpuPercent": 2.08256981968975,
+            "medianPairedWallPercent": 1.8773575848217428,
+            "fasterCpuPairs": 4,
+            "deltas": [
+              {
+                "threadCpuPercent": -0.0029278817676225977,
+                "wallPercent": -0.17997936233903333
+              },
+              {
+                "threadCpuPercent": -4.226957688045485,
+                "wallPercent": -5.116553889856446
+              },
+              {
+                "threadCpuPercent": 6.431091867846916,
+                "wallPercent": 5.410710095263194
+              },
+              {
+                "threadCpuPercent": -8.479201802078052,
+                "wallPercent": -8.639429184675917
+              },
+              {
+                "threadCpuPercent": 19.352370068415926,
+                "wallPercent": 21.140699185345134
+              },
+              {
+                "threadCpuPercent": 3.946351916121116,
+                "wallPercent": 3.934694531982519
+              },
+              {
+                "threadCpuPercent": 15.429023739561654,
+                "wallPercent": 14.692187289376403
+              },
+              {
+                "threadCpuPercent": -10.890887271720228,
+                "wallPercent": -10.917829444064363
+              }
+            ]
+          }
+        },
+        "AB": {
+          "jmdict": {
+            "medianPairedCpuPercent": -5.984114408377206,
+            "equalWorkCpuPercent": 7.569997188019517,
+            "medianPairedWallPercent": -6.286367182488057,
+            "fasterCpuPairs": 5,
+            "deltas": [
+              {
+                "threadCpuPercent": -7.365717413577744,
+                "wallPercent": -6.9897064463517955
+              },
+              {
+                "threadCpuPercent": -4.602511403176668,
+                "wallPercent": -5.5830279186243175
+              },
+              {
+                "threadCpuPercent": -9.920240076686094,
+                "wallPercent": -10.142016742761351
+              },
+              {
+                "threadCpuPercent": -15.259776777989265,
+                "wallPercent": -14.980213749522786
+              },
+              {
+                "threadCpuPercent": 20.403081455598084,
+                "wallPercent": 19.878981635385994
+              },
+              {
+                "threadCpuPercent": -8.38865405330884,
+                "wallPercent": -9.637285765962067
+              },
+              {
+                "threadCpuPercent": 29.697591348854967,
+                "wallPercent": 29.612278079414402
+              },
+              {
+                "threadCpuPercent": 66.8098507073646,
+                "wallPercent": 66.51618683306029
+              }
+            ]
+          },
+          "jitendex": {
+            "medianPairedCpuPercent": -6.085469055789655,
+            "equalWorkCpuPercent": -10.026898656597583,
+            "medianPairedWallPercent": -6.406505877016578,
+            "fasterCpuPairs": 7,
+            "deltas": [
+              {
+                "threadCpuPercent": -3.182524313166346,
+                "wallPercent": -4.168200707388737
+              },
+              {
+                "threadCpuPercent": -6.758738143306664,
+                "wallPercent": -6.547589592385306
+              },
+              {
+                "threadCpuPercent": 2.1082768034845323,
+                "wallPercent": 1.2539082358286047
+              },
+              {
+                "threadCpuPercent": -21.922290635924856,
+                "wallPercent": -22.143550582027405
+              },
+              {
+                "threadCpuPercent": -5.412199968272646,
+                "wallPercent": -6.265422161647849
+              },
+              {
+                "threadCpuPercent": -3.8590327068644403,
+                "wallPercent": -3.712384487714604
+              },
+              {
+                "threadCpuPercent": -15.888180182706012,
+                "wallPercent": -15.9204717629149
+              },
+              {
+                "threadCpuPercent": -19.497381226120382,
+                "wallPercent": -21.79787476963214
+              }
+            ]
+          },
+          "vndb": {
+            "medianPairedCpuPercent": -2.3015624971804485,
+            "equalWorkCpuPercent": -2.304686807807088,
+            "medianPairedWallPercent": -2.001364632747943,
+            "fasterCpuPairs": 5,
+            "deltas": [
+              {
+                "threadCpuPercent": -3.6919647362096075,
+                "wallPercent": -4.126107274002456
+              },
+              {
+                "threadCpuPercent": 5.192518142123714,
+                "wallPercent": 6.22471835956504
+              },
+              {
+                "threadCpuPercent": 0.9441990958499069,
+                "wallPercent": 4.149600879245652
+              },
+              {
+                "threadCpuPercent": -8.929942504106837,
+                "wallPercent": -8.94713196075989
+              },
+              {
+                "threadCpuPercent": -8.215789534069929,
+                "wallPercent": -8.283860794454402
+              },
+              {
+                "threadCpuPercent": -0.911160258151289,
+                "wallPercent": 0.12337800850656944
+              },
+              {
+                "threadCpuPercent": 2.3522877178365764,
+                "wallPercent": 8.587539083349792
+              },
+              {
+                "threadCpuPercent": -5.655451204958506,
+                "wallPercent": -6.227536995970717
+              }
+            ]
+          }
+        }
+      },
+      "status": "success",
+      "observationCount": 96
+    }
+  },
+  "validation": {
+    "focusedTestFiles": 7,
+    "focusedTestsPassed": 97,
+    "artifactCheck": "passed exact clang/LLD21.1.8",
+    "changedProductFunctions": [
+      2
+    ],
+    "allOtherProductSectionsAndFunctionBodiesUnchanged": true,
+    "productAndTestCrcBodiesIdentical": true,
+    "eslint": "passed scoped test/term-bank-crc.test.js with 1536MiB cap"
+  }
+}

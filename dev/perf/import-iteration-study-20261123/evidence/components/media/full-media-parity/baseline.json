@@ -1,0 +1,86 @@
+{
+  "root": "/workspace/scratch/71149a79699f/manabitan",
+  "head": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "node": "v24.22.3",
+  "expectedType": "structured-content-image",
+  "sourceHashes": {
+    "ext/js/dictionary/dictionary-importer.js": "eccfbaebb28478dbfee87fb472a6169cfc3275d1c91e1f8611ec3160b0de3488",
+    "ext/js/dictionary/source-zip-media-pack.js": "33bbd6315276a8b264da36ef3442eb4bda174da3be3f89c14d48fa2cb9cefb0d",
+    "types/ext/dictionary-importer.d.ts": "255594d42f07afedd204e55fa24bef468d80f98b20285518a772387d5c9b2f0c",
+    "ext/js/dictionary/term-bank-source-pipeline.js": "b8a761d41814b4ae125bf9691251d4377773a15fb3f40f32a0a13c83fe4ed82b",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "1e88979fa1e3228c8128ace3ab3434ea91760327e4f70b279d923f3468d8390a",
+    "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583"
+  },
+  "fixture": {
+    "path": "/workspace/scratch/fcfffdc555c8/fixtures/vndb_characters_by_bee.zip",
+    "bytes": 291705969,
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "capture": {
+    "path": "/workspace/scratch/71149a79699f/media-diagnostics-study-20261123/native-media-chunks.bin",
+    "sha256": "9344108f0b5728772d15ce5fc7b4e1872e7324b9a689d174785f7fc2218a4ee1",
+    "mediaRows": 146725
+  },
+  "wasm": {
+    "path": "/workspace/scratch/71149a79699f/manabitan/ext/lib/term-bank-parser.wasm",
+    "sha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f"
+  },
+  "caps": {
+    "maxFiles": 1024,
+    "maxPayloadBytes": 4194304
+  },
+  "totalRequirements": 146725,
+  "uniqueRequirements": 146570,
+  "allArchiveImagesCovered": true,
+  "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+  "recordsSha256": "a92e1a70c6305a3eecdc3d6a2152ef44fc7ccb97e4fe8ab94b381cc51b3d7bcd",
+  "blobSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+  "perImagePackedPayloadsSha256": "2c85e632aacdf6fd65af0b4398c37cb90638d4c49c3107158384e3bdf65e1231",
+  "records": 146570,
+  "compressedBytes": 188864129,
+  "uncompressedBytes": 188131284,
+  "blobBytes": 195649882,
+  "rangeReadCount": 144,
+  "rangeReadBytes": 205086922,
+  "compressionMethods": {
+    "0": 146569,
+    "8": 1
+  },
+  "descriptor": {
+    "version": 2,
+    "prefix": "img/cc",
+    "suffix": ".webp",
+    "firstId": 1,
+    "slotCount": 163034,
+    "count": 146570,
+    "dataBytes": 195649882
+  },
+  "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+  "checkedIndexSlots": 163034,
+  "checkedOccupiedIndexEntries": 146570,
+  "checkedIndexHoles": 16464,
+  "missingErrors": [
+    {
+      "path": "img/cc1.webp",
+      "errorName": "Error",
+      "error": "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee"
+    },
+    {
+      "path": "img/cc78672.webp",
+      "errorName": "Error",
+      "error": "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee"
+    },
+    {
+      "path": "img/cc163034.webp",
+      "errorName": "Error",
+      "error": "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    }
+  ],
+  "corruptError": {
+    "path": "img/cc78672.webp",
+    "offset": 185486398,
+    "errorName": "DictionarySourceIntegrityError",
+    "error": "Compressed ZIP media source failed validation: inflated bytes do not match the ZIP CRC32"
+  },
+  "scope": "One full-corpus correctness comparison. Actual importer requirements from captured native projection, actual source ZIP pack/validator and generation index. Complete packed Blob and per-image payload hashes, every index entry/hole, three missing-image fallbacks and one corrupted real image payload. No timing claim and no database publication."
+}

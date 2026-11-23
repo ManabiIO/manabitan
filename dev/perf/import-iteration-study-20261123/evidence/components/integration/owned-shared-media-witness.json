@@ -1,0 +1,9 @@
+{
+  "sourceTest": "/workspace/scratch/71149a79699f/manabitan-round2-integration-review/test/dictionary-importer-media-reference.test.js",
+  "sourceTestSha256": "ef2fa580ab95483bbc43019c360d6454f48b23150111c718c37e102dd1a8bfcb",
+  "temporaryTest": "dictionary-importer-owned-shared-media.review.test.js",
+  "temporaryTestSha256": "fd7f9cfb10ff4889d4ebf35996b7a1aac98a714febafebd89f2f74f897b17280",
+  "change": "Run every frozen pooled image diagnostic test with owned SharedArrayBuffer projection and assert the returned backing kind",
+  "runtimeCommit": "8a9cc4360c32f4bf0ba0d1004905acec28ae1c41",
+  "runtimeTree": "0fd0a2a237b66eb95061d3072d07d2c432abe1a5"
+}

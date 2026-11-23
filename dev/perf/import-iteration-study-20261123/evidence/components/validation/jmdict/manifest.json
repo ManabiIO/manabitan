@@ -1,0 +1,333 @@
+{
+  "description": "All pinned term banks parsed with the production five-worker grouping planner, sequentially. Copies exact native row/lookup/score columns. Reference offsets are translated raw content-slab offsets, not compressed persistent storage offsets. Isolated record-validation and encoder qualification only; not full import timing.",
+  "dictionary": "jmdict",
+  "sourceRoot": "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base",
+  "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+  "archiveBytes": 15587032,
+  "node": "v24.22.3",
+  "plannerHardwareConcurrency": 9,
+  "plannerWorkerCount": 5,
+  "fixtureLockSha256": "9c0698d7b16e282f51823ea9b85b3fd5b809ebcb84e7a3ced49127b032cc3573",
+  "runnerSha256": "09a514a7109f593e8138fccedcbe24613cecf8061559b7b7fb1cfeac423f26a8",
+  "parserSha256": "fe17c565339b27701f75af881b14da2347dd80aa9273fd9f4cec34c0220b1e23",
+  "wasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "sourceBanks": 53,
+  "rows": 526942,
+  "contentRuns": 517833,
+  "repeatedValidationsRemoved": 9109,
+  "groups": [
+    {
+      "id": 1,
+      "filename": "001.v8",
+      "sha256": "8c96776f959302283cc1e33580c76ecf6c5b0e784601ad4ce1da61cd1b43bc49",
+      "rowCount": 30000,
+      "uniqueCount": 20476,
+      "contentRuns": 29515,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json"
+      ]
+    },
+    {
+      "id": 2,
+      "filename": "002.v8",
+      "sha256": "a7fc97d2366422264af7e785d3c298c42fb97f250fc9ccf4ce0d1452c619c857",
+      "rowCount": 30000,
+      "uniqueCount": 22683,
+      "contentRuns": 29448,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_4.json",
+        "term_bank_5.json",
+        "term_bank_6.json"
+      ]
+    },
+    {
+      "id": 3,
+      "filename": "003.v8",
+      "sha256": "eee6feb09334a87156d4d6b23ff0838aec826d3658fab55865f4adfeddb4918f",
+      "rowCount": 30000,
+      "uniqueCount": 24658,
+      "contentRuns": 29372,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_7.json",
+        "term_bank_8.json",
+        "term_bank_9.json"
+      ]
+    },
+    {
+      "id": 4,
+      "filename": "004.v8",
+      "sha256": "5347e7406d6714e736d997d3fc77b6d4382bbaf2983ad0a1b2a6848ca134b554",
+      "rowCount": 30000,
+      "uniqueCount": 24174,
+      "contentRuns": 29406,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json"
+      ]
+    },
+    {
+      "id": 5,
+      "filename": "005.v8",
+      "sha256": "9231828b59458cebf1191f4d7dee84c002a29512dc16c02376fa6156e721317e",
+      "rowCount": 20000,
+      "uniqueCount": 16398,
+      "contentRuns": 19610,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_13.json",
+        "term_bank_14.json"
+      ]
+    },
+    {
+      "id": 6,
+      "filename": "006.v8",
+      "sha256": "e37fcae3833c981395526f59ee1e697bb570ddcc219b767e661538af75e7c102",
+      "rowCount": 20000,
+      "uniqueCount": 13282,
+      "contentRuns": 19485,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_15.json",
+        "term_bank_16.json"
+      ]
+    },
+    {
+      "id": 7,
+      "filename": "007.v8",
+      "sha256": "c72d6f7afed36efa67d16034276e47f7eb3a162675e1fc85682b7059ab6245a0",
+      "rowCount": 30000,
+      "uniqueCount": 21241,
+      "contentRuns": 29313,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json"
+      ]
+    },
+    {
+      "id": 8,
+      "filename": "008.v8",
+      "sha256": "b27999297e1760bed4a38bf3f4934b47a66588b0168ba3d88ee3a15bbbfaf43f",
+      "rowCount": 30000,
+      "uniqueCount": 20831,
+      "contentRuns": 29353,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_20.json",
+        "term_bank_21.json",
+        "term_bank_22.json"
+      ]
+    },
+    {
+      "id": 9,
+      "filename": "009.v8",
+      "sha256": "6f2b83b08e00029f46277a7fcb62cc9fe493a3937f7d5ab7c02870ab01106206",
+      "rowCount": 30000,
+      "uniqueCount": 21132,
+      "contentRuns": 29509,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json"
+      ]
+    },
+    {
+      "id": 10,
+      "filename": "010.v8",
+      "sha256": "9963e9827fae5383a499eeea328acc94eb7787c810139afd648f2bfa802bfbe7",
+      "rowCount": 20000,
+      "uniqueCount": 12890,
+      "contentRuns": 19542,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_26.json",
+        "term_bank_27.json"
+      ]
+    },
+    {
+      "id": 11,
+      "filename": "011.v8",
+      "sha256": "781182db425f48e179cc7d592009c28016b06df9390180499c070ead67a28014",
+      "rowCount": 20000,
+      "uniqueCount": 12364,
+      "contentRuns": 19700,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_28.json",
+        "term_bank_29.json"
+      ]
+    },
+    {
+      "id": 12,
+      "filename": "012.v8",
+      "sha256": "e759788578a4a856de7b03db05711b2e2107d32fda9d53841ce1b9f97e6af409",
+      "rowCount": 30000,
+      "uniqueCount": 17840,
+      "contentRuns": 29637,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json"
+      ]
+    },
+    {
+      "id": 13,
+      "filename": "013.v8",
+      "sha256": "19367da2a6c32bc848733a769d1097607c8e3783859b51165f5654b71c86b1f9",
+      "rowCount": 30000,
+      "uniqueCount": 19721,
+      "contentRuns": 29585,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json"
+      ]
+    },
+    {
+      "id": 14,
+      "filename": "014.v8",
+      "sha256": "e4e848493e0ed52b9c1e10159f76df357c5979a82df6d7084b007b42c84a9f80",
+      "rowCount": 20000,
+      "uniqueCount": 12558,
+      "contentRuns": 19806,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_36.json",
+        "term_bank_37.json"
+      ]
+    },
+    {
+      "id": 15,
+      "filename": "015.v8",
+      "sha256": "cc2989991d81743fead518d33b45fec372871c19baec54090b0b7d183dde6f2b",
+      "rowCount": 30000,
+      "uniqueCount": 19600,
+      "contentRuns": 29684,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ]
+    },
+    {
+      "id": 16,
+      "filename": "016.v8",
+      "sha256": "4063c0bcffec52717e94587a35e6f8e1766503fb0b78b0ba35341900730729ec",
+      "rowCount": 20000,
+      "uniqueCount": 12624,
+      "contentRuns": 19719,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_41.json",
+        "term_bank_42.json"
+      ]
+    },
+    {
+      "id": 17,
+      "filename": "017.v8",
+      "sha256": "3b4955d6f758f7fc453f83817c5bd20fc7caaaaebfa5d01b546e57f8b90e3b92",
+      "rowCount": 30000,
+      "uniqueCount": 18796,
+      "contentRuns": 29631,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_43.json",
+        "term_bank_44.json",
+        "term_bank_45.json"
+      ]
+    },
+    {
+      "id": 18,
+      "filename": "018.v8",
+      "sha256": "8af88e8cb91e435d7ee336c6edc09b61a94e8741d7173d5201538735e891d0e7",
+      "rowCount": 20000,
+      "uniqueCount": 12975,
+      "contentRuns": 19811,
+      "preparedLookupKeys": [
+        "0:20000"
+      ],
+      "banks": [
+        "term_bank_46.json",
+        "term_bank_47.json"
+      ]
+    },
+    {
+      "id": 19,
+      "filename": "019.v8",
+      "sha256": "6b37b1c50badb1943dab185ca82ffeb9567864c8a8ccb394f31cc5d9084cccbe",
+      "rowCount": 30000,
+      "uniqueCount": 20456,
+      "contentRuns": 29359,
+      "preparedLookupKeys": [
+        "0:30000"
+      ],
+      "banks": [
+        "term_bank_48.json",
+        "term_bank_49.json",
+        "term_bank_50.json"
+      ]
+    },
+    {
+      "id": 20,
+      "filename": "020.v8",
+      "sha256": "d1dd1440f88460bd9f68ef34743be0fbc3747b74010d2bc383696ea244e64217",
+      "rowCount": 26942,
+      "uniqueCount": 20485,
+      "contentRuns": 26348,
+      "preparedLookupKeys": [
+        "0:26942"
+      ],
+      "banks": [
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json"
+      ]
+    }
+  ]
+}

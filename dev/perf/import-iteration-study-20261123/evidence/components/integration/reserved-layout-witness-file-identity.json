@@ -1,0 +1,9 @@
+{
+  "originalFilename": "reserved-layout-witness.json",
+  "originalBytes": 3268350,
+  "originalSha256": "45907fa8b718a548a1315b2e1420818e2183df14ada57cebd10b3dac38d5ca13",
+  "storedFilename": "reserved-layout-witness.json.gz",
+  "storedBytes": 301688,
+  "storedSha256": "46a765127568e1187a6b138afddc1205e89b68ed5797d1503c4f9e2870d8f19d",
+  "encoding": "gzip; original JSON bytes are unchanged after decompression"
+}

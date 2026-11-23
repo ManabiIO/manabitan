@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "sourceDigest": "c4d29ef5aa55a1570eb56c19fe3a274860f564fcd08da9b8f67cbd9eb6982a48",
+  "compilerVersion": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)",
+  "linkerVersion": "Debian LLD 21.1.8",
+  "pinnedBaselineSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "manifestBaselineSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "diagnosticSha256": "d88a87c4abb561b587e338c327590bb7475f6ec745071f64098b718f39d00e92",
+  "allNonCustomSectionsIdentical": true,
+  "nonCustomSectionsSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "baselineCustomSections": [],
+  "diagnosticCustomSections": [
+    "name"
+  ],
+  "functionNameCount": 44,
+  "diagnosticPath": "/workspace/scratch/71149a79699f/native-round2-diagnostics/baseline-with-names.wasm",
+  "functionNamesPath": "/workspace/scratch/71149a79699f/native-round2-diagnostics/function-names.json"
+}

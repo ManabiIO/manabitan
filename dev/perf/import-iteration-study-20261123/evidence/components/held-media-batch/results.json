@@ -1,0 +1,31 @@
+{
+  "pairs": [
+    {
+      "pair": 0,
+      "baselineMs": 1363.751011,
+      "candidateMs": 944.934355,
+      "changePercent": -30.710639451177645
+    },
+    {
+      "pair": 1,
+      "baselineMs": 971.6411639999999,
+      "candidateMs": 891.86177,
+      "changePercent": -8.21078778420301
+    },
+    {
+      "pair": 2,
+      "baselineMs": 812.5378509999999,
+      "candidateMs": 1130.793416,
+      "changePercent": 39.1680910136456
+    },
+    {
+      "pair": 3,
+      "baselineMs": 919.816734,
+      "candidateMs": 997.287726,
+      "changePercent": 8.422437767913028
+    }
+  ],
+  "medianChangePercent": 0.10582499185500893,
+  "outputParity": true,
+  "crcErrorParity": true
+}

@@ -1,0 +1,12 @@
+{
+  "baselineSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "candidateSha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5",
+  "nonCodeSectionsChanged": [],
+  "changedFunctionBodies": [
+    {
+      "index": 2,
+      "baselineBytes": 6609,
+      "candidateBytes": 6495
+    }
+  ]
+}

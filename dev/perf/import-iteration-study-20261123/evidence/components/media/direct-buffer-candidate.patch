@@ -1,0 +1,334 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index 4e0c1aa5e3..78b5064ae5 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -218,6 +218,21 @@ function decodeUtf8Bytes(decoder, bytes) {
+         decoder.decode(bytes);
+ }
+ 
++/**
++ * Projected worker media rows own their key buffers. Retain those small keys
++ * for error diagnostics without decoding them on every successful import.
++ * A fallback view must not keep a source bank alive or change with WASM reuse.
++ * @param {string} value
++ * @param {Uint8Array|undefined} bytes
++ * @returns {string|Uint8Array}
++ */
++function retainMediaDiagnosticKey(value, bytes) {
++    if (value.length > 0 || typeof bytes === 'undefined' || bytes.byteLength === 0) { return value; }
++    return bytes.buffer instanceof ArrayBuffer && bytes.byteOffset === 0 && bytes.byteLength === bytes.buffer.byteLength ?
++        bytes :
++        Uint8Array.from(bytes);
++}
++
+ /**
+  * @param {unknown} value
+  * @returns {value is Record<string, unknown>}
+@@ -1991,7 +2006,7 @@ export class DictionaryImporter {
+                                 const file = fileMap.get(requirement.source.path);
+                                 if (
+                                     deferCachedArchiveImages &&
+-                                    (requirement.type === 'image' || requirement.type === 'structured-content-image') &&
++                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
+                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                 ) {
+@@ -3352,14 +3367,13 @@ export class DictionaryImporter {
+ 
+     /**
+      * @param {string} path
+-     * @param {import('dictionary-database').DatabaseTermEntry} entry
++     * @param {import('dictionary-importer').MediaImportEntry} entry
+      * @param {import('dictionary-importer').ImportRequirement[]} requirements
+      */
+     _addFastMediaRequirement(path, entry, requirements) {
+         requirements.push({
+-            type: 'structured-content-image',
+-            target: {tag: 'img', path: ''},
+-            source: {tag: 'img', path},
++            type: 'image-reference',
++            source: {path},
+             entry,
+         });
+     }
+@@ -3490,7 +3504,7 @@ export class DictionaryImporter {
+                 /** @type {Map<import('@zip.js/zip.js').Entry, string>} */
+                 const pathByFile = new Map();
+                 for (const requirement of batchRequirements) {
+-                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { continue; }
++                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { continue; }
+                     const path = requirement.source.path;
+                     if (
+                         filesByPath.has(path) ||
+@@ -3646,6 +3660,9 @@ export class DictionaryImporter {
+      */
+     async _resolveAsyncRequirement(context, requirement) {
+         switch (requirement.type) {
++            case 'image-reference':
++                await this._getImageMedia(context, requirement.source.path, requirement.entry);
++                break;
+             case 'image':
+                 await this._resolveDictionaryTermGlossaryImage(
+                     context,
+@@ -3679,6 +3696,8 @@ export class DictionaryImporter {
+         }
+ 
+         switch (requirement.type) {
++            case 'image-reference':
++                return true;
+             case 'image':
+                 this._assignResolvedImageData(requirement.target, requirement.source, cachedMetadata.width, cachedMetadata.height);
+                 return true;
+@@ -3801,7 +3820,7 @@ export class DictionaryImporter {
+     /**
+      * @param {import('dictionary-importer').ImportRequirementContext} context
+      * @param {string} path
+-     * @param {Pick<import('dictionary-database').DatabaseTermEntry, 'dictionary'|'expression'|'reading'>} entry
++     * @param {import('dictionary-importer').MediaImportEntry} entry
+      * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent>}
+      */
+     async _getImageMedia(context, path, entry) {
+@@ -3813,7 +3832,8 @@ export class DictionaryImporter {
+          * @returns {Error}
+          */
+         const createError = (message) => {
+-            const {expression, reading} = entry;
++            const expression = typeof entry.expression === 'string' ? entry.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, entry.expression);
++            const reading = typeof entry.reading === 'string' ? entry.reading : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, entry.reading);
+             const readingSource = reading.length > 0 ? ` (${reading})` : '';
+             return new Error(`${message} at path ${JSON.stringify(path)} for ${expression}${readingSource} in ${dictionary}`);
+         };
+@@ -5005,6 +5025,15 @@ export class DictionaryImporter {
+                     const {mediaRows, ...columnPayload} = columnChunk;
+                     if (requirementsForChunk !== null) {
+                         for (const {index, row, imagePaths} of mediaRows) {
++                            if (typeof imagePaths !== 'undefined') {
++                                const expression = retainMediaDiagnosticKey(row.expression, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
++                                const reading = columnChunk.readingEqualsExpressionList[index] === 1 ?
++                                    expression :
++                                    retainMediaDiagnosticKey(row.reading, row.readingBytes ?? columnChunk.readingBytesList[index]);
++                                const entry = {dictionary: dictionaryTitle, expression, reading};
++                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
++                                continue;
++                            }
+                             const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
+                             let reading = expression;
+                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
+@@ -5021,10 +5050,6 @@ export class DictionaryImporter {
+                                 termTags: row.termTags ?? '',
+                                 dictionary: dictionaryTitle,
+                             };
+-                            if (typeof imagePaths !== 'undefined') {
+-                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+-                                continue;
+-                            }
+                             let glossaryList;
+                             if (
+                                 this._skipImageMetadata &&
+diff --git a/ext/js/dictionary/source-zip-media-pack.js b/ext/js/dictionary/source-zip-media-pack.js
+index 9935329251..81b0f967d5 100644
+--- a/ext/js/dictionary/source-zip-media-pack.js
++++ b/ext/js/dictionary/source-zip-media-pack.js
+@@ -46,7 +46,7 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
+     let rangeEndLowerBound = 0;
+     let compressedTotal = 0;
+     for (const requirement of requirements) {
+-        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { return null; }
++        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { return null; }
+         const {path} = requirement.source;
+         const entry = fileMap.get(path);
+         const mediaType = getImageMediaTypeFromFileName(path);
+diff --git a/test/raw-zip-range-reader.test.js b/test/raw-zip-range-reader.test.js
+index a5fa140efd..1f740efcbf 100644
+--- a/test/raw-zip-range-reader.test.js
++++ b/test/raw-zip-range-reader.test.js
+@@ -280,7 +280,9 @@ describe('bounded large ZIP entry reads', () => {
+                     encrypted: false,
+                 };
+                 entryMap.set(filename, metadata);
+-                requests.push({type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row});
++                requests.push(i % 2 === 0 ?
++                    {type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row} :
++                    {type: 'image-reference', source: {path: filename}, entry: row});
+                 offset += header.length + data.length;
+             }
+             const archive = new TrackedBlob([...parts, padding]);
+diff --git a/types/ext/dictionary-importer.d.ts b/types/ext/dictionary-importer.d.ts
+index 981bf9786c..0d1fbc48d0 100644
+--- a/types/ext/dictionary-importer.d.ts
++++ b/types/ext/dictionary-importer.d.ts
+@@ -194,7 +194,8 @@ export type SummaryMetaCount = {
+ 
+ export type ImportRequirement = (
+     ImageImportRequirement |
+-    StructuredContentImageImportRequirement
++    StructuredContentImageImportRequirement |
++    ImageReferenceImportRequirement
+ );
+ 
+ export type ImageImportRequirement = {
+@@ -211,7 +212,19 @@ export type StructuredContentImageImportRequirement = {
+     entry: DictionaryDatabase.DatabaseTermEntry;
+ };
+ 
+-export type DeferredMediaImportRequirement = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> & {
++export type MediaImportEntry = {
++    dictionary: string;
++    expression: string | Uint8Array;
++    reading: string | Uint8Array;
++};
++
++export type ImageReferenceImportRequirement = {
++    type: 'image-reference';
++    source: {path: string};
++    entry: MediaImportEntry;
++};
++
++export type DeferredMediaImportRequirement = MediaImportEntry & {
+     type: ImportRequirement['type'];
+     source: {path: string};
+ };
+diff --git a/test/dictionary-importer-media-reference.test.js b/test/dictionary-importer-media-reference.test.js
+new file mode 100644
+index 0000000000..ddfc6e62dd
+--- /dev/null
++++ b/test/dictionary-importer-media-reference.test.js
+@@ -0,0 +1,138 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {readFile} from 'node:fs/promises'
++import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest'
++import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
++import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
++import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
++
++/** @typedef {Parameters<typeof parser.copyWasmBackedColumnChunk>[0]} ColumnChunk */
++
++const encoder = new TextEncoder()
++const nativeParse = parser.parseTermBankWithWasmColumnChunks
++
++beforeAll(async () => {
++    parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))))
++})
++afterEach(() => { vi.restoreAllMocks() })
++
++/**
++ * Exercise the actual native parser and the worker's owned-result projection.
++ * Only worker transport is replaced so ownership and diagnostic behavior can
++ * be observed without spawning a browser for this unit test.
++ * @param {unknown[]} rows
++ * @param {(chunk: ColumnChunk) => void} [inspect]
++ */
++async function collectReferences(rows, inspect = () => {}) {
++    vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (source, version, onChunk, size, options) => {
++        return await nativeParse(source, version, async (chunk, progress) => {
++            const projected = parser.copyWasmBackedColumnChunk(chunk, false, true)
++            inspect(projected)
++            await onChunk(projected, progress)
++        }, size, options)
++    })
++    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
++    Reflect.set(importer, '_skipImageMetadata', true)
++    /** @type {import('dictionary-importer').ImportRequirement[]} */
++    const requirements = []
++    const file = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'}))
++    const source = encoder.encode(JSON.stringify(rows))
++    await importer._readTermBankFileFast(file, 3, 'Media references', false, true, true, 'raw-bytes', (_terms, chunkRequirements) => {
++        requirements.push(...(chunkRequirements ?? []))
++    }, source)
++    return {importer, requirements}
++}
++
++describe('preformatted image references', () => {
++    test('stores projected image bytes without decoding diagnostic keys or allocating a presentation target', async () => {
++        /** @type {Set<unknown>} */
++        const keys = new Set()
++        const decode = vi.spyOn(TextDecoder.prototype, 'decode')
++        const {importer, requirements} = await collectReferences([
++            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'image.png', width: 40, title: 'Image'}], 0, ''],
++            ['別名', '', '', '', 0, [{type: 'structured-content', content: {tag: 'img', path: 'image.png', height: 60}}], 0, ''],
++        ], (chunk) => {
++            for (const {row, imagePaths} of chunk.mediaRows) {
++                expect(imagePaths).toEqual(['image.png'])
++                keys.add(row.expressionBytes)
++                keys.add(row.readingBytes)
++            }
++        })
++        expect(requirements).toHaveLength(2)
++        for (const requirement of requirements) {
++            expect(requirement.type).toBe('image-reference')
++            expect(requirement).not.toHaveProperty('target')
++            expect(Object.keys(requirement.entry).sort()).toEqual(['dictionary', 'expression', 'reading'])
++            expect(keys.has(requirement.entry.expression)).toBe(true)
++        }
++        const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
++        expect(compact[0].expression).toBe(requirements[0].entry.expression)
++        expect(compact[1].reading).toBe(compact[1].expression)
++        const bytes = Uint8Array.of(7, 17, 255)
++        /** @type {import('dictionary-importer').ArchiveFileMap} */
++        const files = new Map([['image.png', {filename: 'image.png', bytes}]])
++        /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
++        const written = []
++        const count = await importer._importDeferredMediaRequirements(compact, [], files, async (media) => { written.push(...media) })
++        expect(count).toBe(1)
++        expect(written).toEqual([{dictionary: 'Media references', path: 'image.png', mediaType: 'image/png', width: 0, height: 0, content: bytes.buffer}])
++        expect(decode.mock.calls.filter(([input]) => keys.has(input))).toHaveLength(0)
++    })
++
++    test.each([
++        ['画像', 'がぞう'],
++        ['猫', ''],
++        ['same', 'same'],
++        ['', 'reading'],
++        ['quoted"head', 'escaped\\reading'],
++        ['日本😀', 'にほん'],
++    ])('preserves missing-image diagnostics for %s and %s', async (expression, reading) => {
++        const {importer, requirements} = await collectReferences([
++            [expression, reading, '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++            ['別名', 'べつめい', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++        ])
++        const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
++        const expectedReading = reading || expression
++        const readingSource = expectedReading.length > 0 ? ` (${expectedReading})` : ''
++        await expect(importer._importDeferredMediaRequirements(compact, [], new Map(), async () => {}))
++            .rejects.toThrow(`Could not find image at path "missing.png" for ${expression}${readingSource} in Media references`)
++    })
++
++    test.each(['source-subview', 'shared-memory'])('copies %s diagnostic keys before the parser reuses their storage', async (storage) => {
++        /** @type {Uint8Array[]} */
++        const sourceKeys = []
++        const {importer, requirements} = await collectReferences([
++            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++        ], (chunk) => {
++            for (const {row} of chunk.mediaRows) {
++                for (const key of /** @type {const} */ (['expressionBytes', 'readingBytes'])) {
++                    const bytes = row[key]
++                    if (!(bytes instanceof Uint8Array)) { throw new Error('Expected an encoded diagnostic key') }
++                    const source = storage === 'shared-memory' ?
++                        new Uint8Array(new SharedArrayBuffer(bytes.byteLength)) :
++                        new Uint8Array(64 * 1024).subarray(10, 10 + bytes.byteLength)
++                    source.set(bytes)
++                    sourceKeys.push(source)
++                    row[key] = source
++                }
++            }
++        })
++        expect(requirements).toHaveLength(1)
++        const {expression, reading} = requirements[0].entry
++        for (const key of [expression, reading]) {
++            expect(key).toBeInstanceOf(Uint8Array)
++            if (!(key instanceof Uint8Array)) { throw new Error('Expected retained key bytes') }
++            expect(sourceKeys).not.toContain(key)
++            expect(key.buffer).toBeInstanceOf(ArrayBuffer)
++            expect(key.buffer.byteLength).toBe(key.byteLength)
++        }
++        for (const key of sourceKeys) { key.fill(0) }
++        const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
++        await expect(importer._importDeferredMediaRequirements(compact, [], new Map(), async () => {}))
++            .rejects.toThrow('Could not find image at path "missing.png" for 画像 (がぞう) in Media references')
++    })
++})

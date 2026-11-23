@@ -1,0 +1,20 @@
+[
+  {
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base",
+    "mode": "crc-error",
+    "elapsedMs": 720.9447789999999,
+    "maxFiles": 1024,
+    "errorName": "DictionarySourceIntegrityError",
+    "error": "Compressed ZIP media source failed validation: inflated bytes do not match the ZIP CRC32"
+  },
+  {
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "mode": "crc-error",
+    "elapsedMs": 519.514148,
+    "maxFiles": 4096,
+    "errorName": "DictionarySourceIntegrityError",
+    "error": "Compressed ZIP media source failed validation: inflated bytes do not match the ZIP CRC32"
+  }
+]

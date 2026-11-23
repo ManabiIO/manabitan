@@ -1,0 +1,40 @@
+{
+  "baseline": {
+    "head": "1e235059a4c05c2509e8757fccba43a2d60222df",
+    "files": {
+      "ext/js/dictionary/dictionary-importer.js": "eccfbaebb28478dbfee87fb472a6169cfc3275d1c91e1f8611ec3160b0de3488",
+      "ext/js/dictionary/source-zip-media-pack.js": "33bbd6315276a8b264da36ef3442eb4bda174da3be3f89c14d48fa2cb9cefb0d",
+      "types/ext/dictionary-importer.d.ts": "255594d42f07afedd204e55fa24bef468d80f98b20285518a772387d5c9b2f0c"
+    }
+  },
+  "candidate": {
+    "head": "1e235059a4c05c2509e8757fccba43a2d60222df",
+    "files": {
+      "ext/js/dictionary/dictionary-importer.js": "734f8c162846258451451acff2fcd87f3981b4f6a5bde94322437e7d2b8c7edc",
+      "ext/js/dictionary/source-zip-media-pack.js": "8e9f213cb2c9d616b1f276cacc7fe097a1134b5d7623c32f588f571d125adbef",
+      "types/ext/dictionary-importer.d.ts": "41acb104ab0a7f80a6eb4c931e73e6e3c95bf2646c1e3b6c0bdd330d366e9714"
+    }
+  },
+  "fixture": {
+    "path": "/workspace/scratch/fcfffdc555c8/fixtures/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "node": "v24.22.3",
+  "capture": {
+    "source": "/workspace/scratch/71149a79699f/manabitan",
+    "fixtureBytes": 291705969,
+    "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "wasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+    "payloadSha256": "9344108f0b5728772d15ce5fc7b4e1872e7324b9a689d174785f7fc2218a4ee1",
+    "payloadBytes": 64449222,
+    "workers": 3,
+    "banks": 665,
+    "chunks": 170,
+    "rows": 6648310,
+    "mediaRows": 146725,
+    "ownedKeyBuffers": 293399,
+    "ownedKeyBufferBytes": 4342625,
+    "scope": "Actual production native parser/worker and importer, with Node worker transport adapter and no database sink. Only media result columns retained for materialization replay."
+  },
+  "note": "Pooled replay replaces only worker transport with captured media columns. The actual importer handles every captured media row; no parser/storage/full-import performance claim."
+}

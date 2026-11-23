@@ -1,0 +1,936 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index 4e0c1aa5e3695221a49e4a2590776d4a2be9fd1b..ba139007b4999cc5f82e99947f8cb1915f7e886a 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -1991,7 +1991,7 @@ export class DictionaryImporter {
+                                 const file = fileMap.get(requirement.source.path);
+                                 if (
+                                     deferCachedArchiveImages &&
+-                                    (requirement.type === 'image' || requirement.type === 'structured-content-image') &&
++                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
+                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                 ) {
+@@ -3352,18 +3352,81 @@ export class DictionaryImporter {
+ 
+     /**
+      * @param {string} path
+-     * @param {import('dictionary-database').DatabaseTermEntry} entry
++     * @param {import('dictionary-importer').MediaImportEntry} entry
+      * @param {import('dictionary-importer').ImportRequirement[]} requirements
+      */
+     _addFastMediaRequirement(path, entry, requirements) {
+         requirements.push({
+-            type: 'structured-content-image',
+-            target: {tag: 'img', path: ''},
+-            source: {tag: 'img', path},
++            type: 'image-reference',
++            source: {path},
+             entry,
+         });
+     }
+ 
++    /**
++     * Keep diagnostic keys in one owned arena per projected chunk. Successful
++     * image imports need neither decoded headwords nor one retained buffer per
++     * key. Copying the exact key bytes also releases borrowed source/WASM views.
++     * @param {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} chunk
++     * @returns {import('dictionary-importer').MediaImportDiagnosticKeys|null}
++     * @throws {TermBankWasmResourceError} If key offsets would exceed the arena's index width.
++     */
++    _createMediaReferenceDiagnostics(chunk) {
++        /** @type {Array<string|Uint8Array>} */
++        const keys = [];
++        const keyBytes = (/** @type {string} */ value, /** @type {Uint8Array|undefined} */ bytes) => (
++            value.length > 0 || typeof bytes === 'undefined' ? value : bytes
++        );
++        let byteLength = 0;
++        for (const {index, row, imagePaths} of chunk.mediaRows) {
++            if (typeof imagePaths === 'undefined') { continue; }
++            const expression = keyBytes(row.expression, row.expressionBytes ?? chunk.expressionBytesList[index]);
++            const reading = chunk.readingEqualsExpressionList[index] === 1 ?
++                expression :
++                keyBytes(row.reading, row.readingBytes ?? chunk.readingBytesList[index]);
++            keys.push(expression, reading);
++            if (typeof expression !== 'string') { byteLength += expression.byteLength; }
++            if (reading !== expression && typeof reading !== 'string') { byteLength += reading.byteLength; }
++        }
++        if (keys.length === 0) { return null; }
++        if (!Number.isSafeInteger(byteLength) || byteLength > 0xffffffff) {
++            throw new TermBankWasmResourceError('Media diagnostic keys exceed their offset budget');
++        }
++        const bytes = new Uint8Array(byteLength);
++        const spans = new Uint32Array(keys.length * 2);
++        /** @type {Map<number, string>|null} */
++        let decodedKeys = null;
++        let offset = 0;
++        for (let i = 0; i < keys.length; i += 2) {
++            const expression = keys[i];
++            const reading = keys[i + 1];
++            const expressionOffset = offset;
++            const expressionLength = typeof expression === 'string' ? 0 : expression.byteLength;
++            if (typeof expression === 'string') {
++                // Keep decoded strings verbatim, including lone surrogates
++                // that a UTF-8 encode/decode round trip would replace.
++                (decodedKeys ??= new Map()).set(i, expression);
++            } else {
++                bytes.set(expression, offset);
++                offset += expressionLength;
++            }
++            const readingOffset = reading === expression ? expressionOffset : offset;
++            const readingLength = typeof reading === 'string' ? 0 : reading.byteLength;
++            if (typeof reading === 'string') {
++                (decodedKeys ??= new Map()).set(i + 1, reading);
++            } else if (reading !== expression) {
++                bytes.set(reading, offset);
++                offset += readingLength;
++            }
++            const spanIndex = i * 2;
++            spans[spanIndex] = expressionOffset;
++            spans[spanIndex + 1] = expressionLength;
++            spans[spanIndex + 2] = readingOffset;
++            spans[spanIndex + 3] = readingLength;
++        }
++        return {bytes, spans, decodedKeys};
++    }
++
+     /**
+      * @param {import('structured-content').Content} content
+      * @param {import('dictionary-database').DatabaseTermEntry} entry
+@@ -3439,7 +3502,13 @@ export class DictionaryImporter {
+      * @param {import('dictionary-importer').ImportRequirement} requirement
+      * @returns {import('dictionary-importer').DeferredMediaImportRequirement}
+      */
+-    _createDeferredMediaRequirement({type, source: {path}, entry: {dictionary, expression, reading}}) {
++    _createDeferredMediaRequirement({type, source: {path}, entry}) {
++        const {dictionary} = entry;
++        if ('diagnosticKeys' in entry) {
++            const {diagnosticKeys, diagnosticIndex} = entry;
++            return {type, source: {path}, dictionary, diagnosticKeys, diagnosticIndex};
++        }
++        const {expression, reading} = entry;
+         return {type, source: {path}, dictionary, expression, reading};
+     }
+ 
+@@ -3490,7 +3559,7 @@ export class DictionaryImporter {
+                 /** @type {Map<import('@zip.js/zip.js').Entry, string>} */
+                 const pathByFile = new Map();
+                 for (const requirement of batchRequirements) {
+-                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { continue; }
++                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { continue; }
+                     const path = requirement.source.path;
+                     if (
+                         filesByPath.has(path) ||
+@@ -3646,6 +3715,9 @@ export class DictionaryImporter {
+      */
+     async _resolveAsyncRequirement(context, requirement) {
+         switch (requirement.type) {
++            case 'image-reference':
++                await this._getImageMedia(context, requirement.source.path, requirement.entry);
++                break;
+             case 'image':
+                 await this._resolveDictionaryTermGlossaryImage(
+                     context,
+@@ -3679,6 +3751,8 @@ export class DictionaryImporter {
+         }
+ 
+         switch (requirement.type) {
++            case 'image-reference':
++                return true;
+             case 'image':
+                 this._assignResolvedImageData(requirement.target, requirement.source, cachedMetadata.width, cachedMetadata.height);
+                 return true;
+@@ -3801,7 +3875,7 @@ export class DictionaryImporter {
+     /**
+      * @param {import('dictionary-importer').ImportRequirementContext} context
+      * @param {string} path
+-     * @param {Pick<import('dictionary-database').DatabaseTermEntry, 'dictionary'|'expression'|'reading'>} entry
++     * @param {import('dictionary-importer').MediaImportEntry} entry
+      * @returns {Promise<import('dictionary-database').MediaDataArrayBufferContent>}
+      */
+     async _getImageMedia(context, path, entry) {
+@@ -3813,7 +3887,16 @@ export class DictionaryImporter {
+          * @returns {Error}
+          */
+         const createError = (message) => {
+-            const {expression, reading} = entry;
++            let expression;
++            let reading;
++            if ('diagnosticKeys' in entry) {
++                const {bytes, spans, decodedKeys} = entry.diagnosticKeys;
++                const index = entry.diagnosticIndex * 4;
++                expression = decodedKeys?.get(index / 2) ?? decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, bytes.subarray(spans[index], spans[index] + spans[index + 1]));
++                reading = decodedKeys?.get(index / 2 + 1) ?? decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, bytes.subarray(spans[index + 2], spans[index + 2] + spans[index + 3]));
++            } else {
++                ({expression, reading} = entry);
++            }
+             const readingSource = reading.length > 0 ? ` (${reading})` : '';
+             return new Error(`${message} at path ${JSON.stringify(path)} for ${expression}${readingSource} in ${dictionary}`);
+         };
+@@ -5004,7 +5087,14 @@ export class DictionaryImporter {
+                     const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
+                     const {mediaRows, ...columnPayload} = columnChunk;
+                     if (requirementsForChunk !== null) {
++                        const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
++                        let diagnosticIndex = 0;
+                         for (const {index, row, imagePaths} of mediaRows) {
++                            if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
++                                const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
++                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
++                                continue;
++                            }
+                             const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);
+                             let reading = expression;
+                             if (columnChunk.readingEqualsExpressionList[index] !== 1) {
+@@ -5021,10 +5111,6 @@ export class DictionaryImporter {
+                                 termTags: row.termTags ?? '',
+                                 dictionary: dictionaryTitle,
+                             };
+-                            if (typeof imagePaths !== 'undefined') {
+-                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+-                                continue;
+-                            }
+                             let glossaryList;
+                             if (
+                                 this._skipImageMetadata &&
+diff --git a/ext/js/dictionary/source-zip-media-pack.js b/ext/js/dictionary/source-zip-media-pack.js
+index 9935329251cd3b440dcd3ad47dbc16118b828f6d..81b0f967d50817d98800421e43c249ecf0768149 100644
+--- a/ext/js/dictionary/source-zip-media-pack.js
++++ b/ext/js/dictionary/source-zip-media-pack.js
+@@ -46,7 +46,7 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
+     let rangeEndLowerBound = 0;
+     let compressedTotal = 0;
+     for (const requirement of requirements) {
+-        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { return null; }
++        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { return null; }
+         const {path} = requirement.source;
+         const entry = fileMap.get(path);
+         const mediaType = getImageMediaTypeFromFileName(path);
+diff --git a/ext/js/dictionary/term-bank-wasm-parser-worker.js b/ext/js/dictionary/term-bank-wasm-parser-worker.js
+index 22d700d2d7ca97aca911a5963d8506b9b2ad27e5..a4f2c396f3acf7b36c17e8d661472d6c557ac7f1 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser-worker.js
++++ b/ext/js/dictionary/term-bank-wasm-parser-worker.js
+@@ -139,8 +139,11 @@ async function parse(data) {
+                     chunk.contentDedupPlan?.sourceRowCount,
+                     chunk.rowCount,
+                 );
+-                const shareContentBytes = options.ownContentBytes !== true;
+-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
++                // Owned projected slabs also remain shareable with compression
++                // workers, without borrowing the reusable parser heap.
++                const ownSharedContentBytes = options.ownContentBytes === true && typeof SharedArrayBuffer === 'function';
++                const shareContentBytes = options.ownContentBytes !== true || ownSharedContentBytes;
++                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, ownSharedContentBytes);
+                 if (
+                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
+                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
+@@ -152,7 +155,7 @@ async function parse(data) {
+                     owned.set(resultChunk.contentBytesBuffer);
+                     resultChunk.contentBytesBuffer = owned;
+                 }
+-                ownsContentBytes = ownCacheableContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
++                ownsContentBytes = ownCacheableContent || ownSharedContentBytes || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
+                 borrowsWorkerMemory = (
+                     typeof SharedArrayBuffer === 'function' &&
+                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+diff --git a/ext/js/dictionary/term-bank-wasm-parser.js b/ext/js/dictionary/term-bank-wasm-parser.js
+index 1e5c334e59d6e0720a04c5adc6a73c0d1e32b4d6..fa1d7e6361eb85221d0f9593fa846639155f5d69 100644
+--- a/ext/js/dictionary/term-bank-wasm-parser.js
++++ b/ext/js/dictionary/term-bank-wasm-parser.js
+@@ -3868,10 +3868,11 @@ function isCompressedTermBankSource(value) {
+  * @param {TermBankColumnChunk} chunk
+  * @param {boolean} [shareContentBytes=false]
+  * @param {boolean} [projectImagePaths=false]
++ * @param {boolean} [ownSharedContentBytes=false]
+  * @returns {TermBankColumnChunk}
+  * @throws {Error} If the native string plan is incomplete.
+  */
+-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false) {
++export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, ownSharedContentBytes = false) {
+     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
+     const contentMetaList = new Uint32Array(sourceContentMetaList);
+     let {contentBytesLength} = chunk;
+@@ -3892,7 +3893,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
+         shareContentBytes &&
+         typeof SharedArrayBuffer === 'function'
+     ) {
+-        if (contentBytesSource.buffer instanceof SharedArrayBuffer) {
++        if (contentBytesSource.buffer instanceof SharedArrayBuffer && !ownSharedContentBytes) {
+             contentBytesBuffer = contentBytesSource;
+         } else {
+             contentBytesBuffer = new Uint8Array(new SharedArrayBuffer(contentBytesLength));
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index 166ff75cdb0791795634af9632d2cca3a20a6de9..049ad7b10f5ca9f7e3ade5e0fa5548978c226dfd 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -325,6 +325,45 @@ function hasResolvedContentReferences(chunk, count) {
+     );
+ }
+ 
++/**
++ * Selects columns whose indexed reads cannot change during a synchronous scan.
++ * Accessor-backed or shared columns keep the ordinary per-row validation path.
++ * @param {{fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
++ * @param {number} count
++ * @returns {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}|null}
++ */
++function getSynchronousResolvedContentReferences(chunk, count) {
++    const fixedLengthDescriptor = Object.getOwnPropertyDescriptor(chunk, 'fixedContentLength');
++    if (
++        typeof fixedLengthDescriptor === 'undefined' ?
++            'fixedContentLength' in chunk :
++            !('value' in fixedLengthDescriptor) || typeof fixedLengthDescriptor.value === 'number'
++    ) { return null; }
++    const references = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')?.value);
++    if (typeof references !== 'object' || references === null) { return null; }
++    const uniqueIndexList = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'uniqueIndexList')?.value);
++    const offsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'offsets')?.value);
++    const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'lengths')?.value);
++    if (
++        !(uniqueIndexList instanceof Uint32Array) ||
++        !(offsets instanceof Float64Array) ||
++        !(lengths instanceof Uint32Array) ||
++        Object.getPrototypeOf(uniqueIndexList) !== Uint32Array.prototype ||
++        Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
++        Object.getPrototypeOf(lengths) !== Uint32Array.prototype
++    ) { return null; }
++    for (const column of [uniqueIndexList, offsets, lengths]) {
++        if (
++            !ArrayBuffer.isView(column) ||
++            Object.hasOwn(column, 'length') ||
++            Object.hasOwn(column, 'buffer') ||
++            !(column.buffer instanceof ArrayBuffer)
++        ) { return null; }
++    }
++    if (uniqueIndexList.length < count || offsets.length !== lengths.length) { return null; }
++    return {uniqueIndexList, offsets, lengths};
++}
++
+ /**
+  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+  * @param {number} start
+@@ -2292,15 +2331,26 @@ export class TermRecordOpfsStore {
+             // across runs. The row loop itself is synchronous.
+             const tValidationStart = safePerformance.now();
+             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
++            const references = useFixedContentSpan ? null : getSynchronousResolvedContentReferences(chunk, count);
+             let runEnd = runStart;
++            const runLimitEnd = Math.min(count, runStart + runRowLimit);
+             let minContentOffset = Number.POSITIVE_INFINITY;
+             let maxContentOffset = Number.NEGATIVE_INFINITY;
+-            while (runEnd < count) {
+-                if ((runEnd - runStart) >= runRowLimit) {
+-                    break;
++            while (runEnd < runLimitEnd) {
++                let uniqueIndex = -1;
++                let contentOffset;
++                let contentLength;
++                if (references !== null) {
++                    uniqueIndex = references.uniqueIndexList[runEnd];
++                    if (uniqueIndex >= references.offsets.length) {
++                        throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
++                    }
++                    contentOffset = references.offsets[uniqueIndex];
++                    contentLength = references.lengths[uniqueIndex];
++                } else {
++                    contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
++                    contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
+                 }
+-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
+-                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
+                 validateContentOffset(contentOffset);
+                 validateContentLength(contentLength);
+                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
+@@ -2315,6 +2365,13 @@ export class TermRecordOpfsStore {
+                 minContentOffset = nextMinContentOffset;
+                 maxContentOffset = nextMaxContentOffset;
+                 ++runEnd;
++                if (references !== null) {
++                    // Consecutive aliases have the same already-validated span
++                    // and cannot change this run's minimum or maximum offset.
++                    while (runEnd < runLimitEnd && references.uniqueIndexList[runEnd] === uniqueIndex) {
++                        ++runEnd;
++                    }
++                }
+             }
+             const runContentOffsetBase = minContentOffset === Number.POSITIVE_INFINITY ? 0 : minContentOffset;
+             const runValidationMs = safePerformance.now() - tValidationStart;
+diff --git a/test/dictionary-importer-media-reference.test.js b/test/dictionary-importer-media-reference.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..578573100cf8478b330e4b9780f4f8dfae162e67
+--- /dev/null
++++ b/test/dictionary-importer-media-reference.test.js
+@@ -0,0 +1,154 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {readFile} from 'node:fs/promises'
++import {afterEach, beforeAll, describe, expect, test, vi} from 'vitest'
++import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
++import * as parser from '../ext/js/dictionary/term-bank-wasm-parser.js'
++import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
++
++/** @typedef {Parameters<typeof parser.copyWasmBackedColumnChunk>[0]} ColumnChunk */
++
++const encoder = new TextEncoder()
++const nativeParse = parser.parseTermBankWithWasmColumnChunks
++
++beforeAll(async () => {
++    parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))))
++})
++afterEach(() => { vi.restoreAllMocks() })
++
++/**
++ * Exercise the actual native parser and the worker's owned-result projection.
++ * Only worker transport is replaced so ownership and diagnostic behavior can
++ * be observed without spawning a browser for this unit test.
++ * @param {unknown[]} rows
++ * @param {(chunk: ColumnChunk) => void} [inspect]
++ * @returns {Promise<{importer: DictionaryImporter, requirements: import('dictionary-importer').ImportRequirement[]}>}
++ */
++async function collectReferences(rows, inspect = () => {}) {
++    vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (source, version, onChunk, size, options) => {
++        return await nativeParse(source, version, async (chunk, progress) => {
++            const projected = parser.copyWasmBackedColumnChunk(chunk, false, true)
++            inspect(projected)
++            await onChunk(projected, progress)
++        }, size, options)
++    })
++    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
++    Reflect.set(importer, '_skipImageMetadata', true)
++    /** @type {import('dictionary-importer').ImportRequirement[]} */
++    const requirements = []
++    const file = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'}))
++    const source = encoder.encode(JSON.stringify(rows))
++    await importer._readTermBankFileFast(file, 3, 'Media references', false, true, true, 'raw-bytes', (_terms, chunkRequirements) => {
++        requirements.push(...(chunkRequirements ?? []))
++    }, source)
++    return {importer, requirements}
++}
++
++describe('preformatted image references', () => {
++    test('stores projected image bytes without decoding diagnostic keys or allocating a presentation target', async () => {
++        const decode = vi.spyOn(TextDecoder.prototype, 'decode')
++        let decodedBeforeMaterialization = -1
++        const {importer, requirements} = await collectReferences([
++            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'image.png', width: 40, title: 'Image'}], 0, ''],
++            ['別名', '', '', '', 0, [{type: 'structured-content', content: {tag: 'img', path: 'image.png', height: 60}}], 0, ''],
++        ], (chunk) => {
++            for (const {imagePaths} of chunk.mediaRows) {
++                expect(imagePaths).toEqual(['image.png'])
++            }
++            decodedBeforeMaterialization = decode.mock.calls.length
++        })
++        expect(requirements).toHaveLength(2)
++        for (const requirement of requirements) {
++            expect(requirement.type).toBe('image-reference')
++            expect(requirement).not.toHaveProperty('target')
++            expect(Object.keys(requirement.entry).sort()).toEqual(['diagnosticIndex', 'diagnosticKeys', 'dictionary'])
++        }
++        const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
++        if (!('diagnosticKeys' in compact[0]) || !('diagnosticKeys' in compact[1])) { throw new Error('Expected encoded diagnostics') }
++        expect(compact[0].diagnosticKeys).toBe(compact[1].diagnosticKeys)
++        const {bytes: keyBytes, spans} = compact[0].diagnosticKeys
++        expect(keyBytes.buffer.byteLength).toBe(keyBytes.byteLength)
++        expect(spans).toEqual(new Uint32Array([0, 6, 6, 9, 15, 6, 15, 6]))
++        expect(keyBytes).toEqual(encoder.encode('画像がぞう別名'))
++        const bytes = Uint8Array.of(7, 17, 255)
++        /** @type {import('dictionary-importer').ArchiveFileMap} */
++        const files = new Map([['image.png', {filename: 'image.png', bytes}]])
++        /** @type {import('dictionary-database').MediaDataArrayBufferContent[]} */
++        const written = []
++        const count = await importer._importDeferredMediaRequirements(compact, [], files, async (media) => { written.push(...media) })
++        expect(count).toBe(1)
++        expect(written).toEqual([{dictionary: 'Media references', path: 'image.png', mediaType: 'image/png', width: 0, height: 0, content: bytes.buffer}])
++        expect(decode.mock.calls).toHaveLength(decodedBeforeMaterialization)
++    })
++
++    test.each([
++        ['画像', 'がぞう'],
++        ['猫', ''],
++        ['same', 'same'],
++        ['', 'reading'],
++        ['quoted"head', 'escaped\\reading'],
++        ['日本😀', 'にほん'],
++        ['\ufeff画像', '\ufeffがぞう'],
++        ['unpaired\ud800', 'unpaired\udfff'],
++    ])('preserves missing-image diagnostics for %s and %s', async (expression, reading) => {
++        const {importer, requirements} = await collectReferences([
++            [expression, reading, '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++            ['別名', 'べつめい', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++        ])
++        const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
++        const expectedReading = reading || expression
++        const readingSource = expectedReading.length > 0 ? ` (${expectedReading})` : ''
++        await expect(importer._importDeferredMediaRequirements(compact, [], new Map(), async () => {}))
++            .rejects.toThrow(`Could not find image at path "missing.png" for ${expression}${readingSource} in Media references`)
++    })
++
++    test.each(['source-subview', 'shared-memory'])('copies %s diagnostic keys before the parser reuses their storage', async (storage) => {
++        /** @type {Uint8Array[]} */
++        const sourceKeys = []
++        const {importer, requirements} = await collectReferences([
++            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++        ], (chunk) => {
++            for (const {row} of chunk.mediaRows) {
++                for (const key of /** @type {const} */ (['expressionBytes', 'readingBytes'])) {
++                    const bytes = row[key]
++                    if (!(bytes instanceof Uint8Array)) { throw new Error('Expected an encoded diagnostic key') }
++                    const source = storage === 'shared-memory' ?
++                        new Uint8Array(new SharedArrayBuffer(bytes.byteLength)) :
++                        new Uint8Array(64 * 1024).subarray(10, 10 + bytes.byteLength)
++                    source.set(bytes)
++                    sourceKeys.push(source)
++                    row[key] = source
++                }
++            }
++        })
++        expect(requirements).toHaveLength(1)
++        const {entry} = requirements[0]
++        if (!('diagnosticKeys' in entry)) { throw new Error('Expected encoded diagnostics') }
++        const {bytes, spans} = entry.diagnosticKeys
++        expect(sourceKeys).not.toContain(bytes)
++        expect(bytes.buffer).toBeInstanceOf(ArrayBuffer)
++        expect(bytes.buffer.byteLength).toBe(bytes.byteLength)
++        expect(bytes).toEqual(encoder.encode('画像がぞう'))
++        expect(spans).toEqual(new Uint32Array([0, 6, 6, 9]))
++        for (const key of sourceKeys) { key.fill(0) }
++        const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
++        await expect(importer._importDeferredMediaRequirements(compact, [], new Map(), async () => {}))
++            .rejects.toThrow('Could not find image at path "missing.png" for 画像 (がぞう) in Media references')
++    })
++
++    test('keeps diagnostic row indexes aligned after an empty projected image list', async () => {
++        const {importer, requirements} = await collectReferences([
++            ['先行', 'せんこう', '', '', 0, [{type: 'image', path: 'ignored.png'}], 0, ''],
++            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
++        ], (chunk) => { chunk.mediaRows[0].imagePaths = [] })
++        expect(requirements).toHaveLength(1)
++        expect(requirements[0].entry).toMatchObject({diagnosticIndex: 1})
++        const compact = importer._createDeferredMediaRequirement(requirements[0])
++        await expect(importer._importDeferredMediaRequirements([compact], [], new Map(), async () => {}))
++            .rejects.toThrow('Could not find image at path "missing.png" for 画像 (がぞう) in Media references')
++    })
++})
+diff --git a/test/lookup-construction-experiments.test.js b/test/lookup-construction-experiments.test.js
+index 1b769c996eafe4780e4c55cbac874c650dfc3981..25c8d3c51e20beb9082c75aab0b7fac99ca7063d 100644
+--- a/test/lookup-construction-experiments.test.js
++++ b/test/lookup-construction-experiments.test.js
+@@ -471,7 +471,7 @@ describe('lookup construction experiments', () => {
+             expect(Reflect.get(snapshotTermBankExperiments(), key)).toBe(key === 'experimentalLookupScratchReuse' || key === 'experimentalNativeSegmentedLookup')
+         }
+     })
+-    test('actual worker preserves native segment plans and resets the flag', async () => {
++    test('actual worker preserves owned shared content, native segment plans and flag resets', async () => {
+         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
+         const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(`import {parentPort} from 'node:worker_threads'
+             globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
+@@ -480,7 +480,7 @@ describe('lookup construction experiments', () => {
+             parentPort.postMessage({type: 'loaded'})`)}`))
+         /**
+          * @param {unknown} message
+-         * @returns {Promise<{type: string, chunk: Chunk, profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
++         * @returns {Promise<{type: string, chunk: Chunk, ownsContentBytes: boolean, borrowsWorkerMemory: boolean, profile: NonNullable<ReturnType<typeof consumeLastTermBankWasmParseProfile>>}>}
+          */
+         const request = (message) => new Promise((resolve, reject) => {
+             const timer = setTimeout(() => reject(new Error('Worker request timed out')), 15000)
+@@ -497,13 +497,19 @@ describe('lookup construction experiments', () => {
+             const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
+             expect((await request({type: 'initialize', module})).type).toBe('ready')
+             const banks = makeBanks(70001)
++            const changedBanks = banks.map((bank) => encoder.encode(new TextDecoder().decode(bank).replaceAll('meaning ', 'glosses ')))
++            /** @type {Uint8Array|null} */
++            let firstContent = null
++            /** @type {Uint8Array|null} */
++            let firstContentSnapshot = null
+             let prior = ''
+             for (const enabled of [true, false, undefined, false, undefined]) {
+                 const reply = await request({type: 'parse',
+                     id: enabled === false ? 2 : 1,
+                     version: 3,
+-                    sourceBuffers: banks.map((bank) => bank.buffer),
++                    sourceBuffers: (firstContent === null ? banks : changedBanks).map((bank) => bank.buffer),
+                     options: {experimentalNativeSegmentedLookup: enabled,
++                        ownContentBytes: true,
+                         experimentalLookupScratchReuse: false,
+                         singleChunk: true,
+                         emitTermByteLists: false,
+@@ -512,6 +518,20 @@ describe('lookup construction experiments', () => {
+                         emitTokenBinaryContent: true,
+                         prepareLookupIndexes: true}})
+                 expect(reply.type).toBe('result')
++                expect(reply.ownsContentBytes).toBe(true)
++                expect(reply.borrowsWorkerMemory).toBe(false)
++                const content = reply.chunk.contentBytesBuffer
++                if (!(content instanceof Uint8Array)) { throw new Error('Missing owned content') }
++                expect(content.buffer).toBeInstanceOf(SharedArrayBuffer)
++                expect(content.byteOffset).toBe(0)
++                expect(content.byteLength).toBe(content.buffer.byteLength)
++                if (firstContent === null) {
++                    firstContent = content
++                    firstContentSnapshot = Uint8Array.from(content)
++                } else {
++                    expect(firstContent).toStrictEqual(firstContentSnapshot)
++                    expect(content).not.toStrictEqual(firstContentSnapshot)
++                }
+                 expect(reply.chunk.contentDedupPlan.pendingEpochs).toBeNull()
+                 expect(reply.chunk.contentDedupPlan.pendingIndexes).toBeNull()
+                 expect(reply.chunk.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined()
+diff --git a/test/raw-zip-range-reader.test.js b/test/raw-zip-range-reader.test.js
+index a5fa140efda76f5d4603676241a7f9840b011992..1f740efcbfeee693940167481b36d84fbfdfa6b5 100644
+--- a/test/raw-zip-range-reader.test.js
++++ b/test/raw-zip-range-reader.test.js
+@@ -280,7 +280,9 @@ describe('bounded large ZIP entry reads', () => {
+                     encrypted: false,
+                 };
+                 entryMap.set(filename, metadata);
+-                requests.push({type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row});
++                requests.push(i % 2 === 0 ?
++                    {type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row} :
++                    {type: 'image-reference', source: {path: filename}, entry: row});
+                 offset += header.length + data.length;
+             }
+             const archive = new TrackedBlob([...parts, padding]);
+diff --git a/test/term-bank-experiments.test.js b/test/term-bank-experiments.test.js
+index e709ac09b90e8826c6ff1b6479d5cc980dc2893c..21fe6a9dab534296437e9e0428ea9942a45fd6bf 100644
+--- a/test/term-bank-experiments.test.js
++++ b/test/term-bank-experiments.test.js
+@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
+     })
+ })
+ 
+-/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown}} WorkerReply */
++/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, ownsContentBytes?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown}} WorkerReply */
+ /**
+  * One request at a time, as required by the production parser worker's lease.
+  * @param {Worker} worker
+@@ -664,7 +664,8 @@ describe('actual parser worker flag propagation', () => {
+                 if (!chunk) { throw new Error('Missing worker chunk') }
+                 expect(snapshotChunk(chunk)).toEqual(oracle.rows)
+                 expect(reply.borrowsWorkerMemory).toBe(false)
+-                expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(mask === 15 ? ArrayBuffer : SharedArrayBuffer)
++                expect(reply.ownsContentBytes).toBe(true)
++                expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(SharedArrayBuffer)
+                 if (previousOwnedContent) { expect(previousOwnedContent).toEqual(previousOwnedContentCopy) }
+                 previousOwnedContent = chunk.contentBytesBuffer
+                 previousOwnedContentCopy = chunk.contentBytesBuffer?.slice()
+diff --git a/test/term-bank-wasm-parser.test.js b/test/term-bank-wasm-parser.test.js
+index 2cacac9c8a1698459d7f9bbae9127aba10b4c15c..a728b3bb05bbe59327b3ddfea0e328e193425e2d 100644
+--- a/test/term-bank-wasm-parser.test.js
++++ b/test/term-bank-wasm-parser.test.js
+@@ -594,7 +594,7 @@ describe('term-bank WASM parser', () => {
+         expect([...mediaContentBytes]).toStrictEqual([40, 41, 42]);
+     });
+ 
+-    test('borrows an exact shared content span while copying mutable metadata', () => {
++    test.each([false, true])('copies mutable metadata with owned shared content: %s', (ownSharedContentBytes) => {
+         const heap = new Uint8Array(new SharedArrayBuffer(128));
+         heap.set([1, 2, 3, 4], 64);
+         const contentMetaList = new Uint32Array(heap.buffer, 8, 8);
+@@ -623,13 +623,18 @@ describe('term-bank WASM parser', () => {
+                 readingIndexes: new Uint32Array(2),
+             },
+             mediaRows: [],
+-        }, true);
++        }, true, false, ownSharedContentBytes);
+ 
+-        expect(result.contentBytesBuffer?.buffer).toBe(heap.buffer);
+-        expect(result.contentBytesBuffer?.byteOffset).toBe(64);
+-        if (!(result.contentBytesBuffer instanceof Uint8Array)) { throw new Error('Expected borrowed content buffer'); }
++        expect(result.contentBytesBuffer?.buffer === heap.buffer).toBe(!ownSharedContentBytes);
++        expect(result.contentBytesBuffer?.buffer).toBeInstanceOf(SharedArrayBuffer);
++        expect(result.contentBytesBuffer?.byteOffset).toBe(ownSharedContentBytes ? 0 : 64);
++        expect(result.contentBytesBuffer?.byteLength).toBe(4);
++        if (!(result.contentBytesBuffer instanceof Uint8Array)) { throw new Error('Expected content buffer'); }
+         expect([...result.contentBytesBuffer]).toStrictEqual([1, 2, 3, 4]);
+         expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
++        heap.fill(0);
++        expect([...result.contentBytesBuffer]).toStrictEqual(ownSharedContentBytes ? [1, 2, 3, 4] : [0, 0, 0, 0]);
++        expect(result.contentMetaList).toStrictEqual(new Uint32Array([0, 2, 11, 12, 2, 2, 13, 14]));
+     });
+ 
+     maybeTest('uses the native slab extent for a complete group and row extents for partial chunks', async () => {
+diff --git a/test/term-record-validation-runs.test.js b/test/term-record-validation-runs.test.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..6126b758c959cf19a47141c1f697130982a65525
+--- /dev/null
++++ b/test/term-record-validation-runs.test.js
+@@ -0,0 +1,234 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * (at your option) any later version.
++ */
++
++import {describe, expect, test, vi} from 'vitest';
++import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
++
++/** @typedef {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[1]} ArtifactChunk */
++/** @typedef {NonNullable<ArtifactChunk['resolvedContentReferences']>} ContentReferences */
++
++/**
++ * @param {ContentReferences} references
++ * @param {number} [rowCount]
++ * @returns {ArtifactChunk}
++ */
++function createChunk(references, rowCount = references.uniqueIndexList.length) {
++    const expressionBytes = new TextEncoder().encode('term');
++    return {
++        dictionary: 'Content reference validation',
++        rowCount,
++        expressionBytesList: new Array(rowCount).fill(expressionBytes),
++        readingBytesList: new Array(rowCount).fill(expressionBytes),
++        readingEqualsExpressionList: new Uint8Array(rowCount).fill(1),
++        scoreList: new Int32Array(rowCount),
++        sequenceList: new Int32Array(rowCount).fill(-1),
++        resolvedContentReferences: references,
++    };
++}
++
++/**
++ * @param {TermRecordOpfsStore} store
++ * @param {ArtifactChunk} chunk
++ * @param {Float64Array} [offsets]
++ * @param {Uint32Array} [lengths]
++ * @param {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[7]} [prepared]
++ * @returns {ReturnType<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>}
++ */
++function encode(store, chunk, offsets = new Float64Array(0), lengths = new Uint32Array(0), prepared = null) {
++    return store._encodeAndAppendArtifactChunkForState(
++        /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
++        chunk,
++        1,
++        offsets,
++        lengths,
++        null,
++        'raw',
++        prepared,
++    );
++}
++
++/** @returns {TermRecordOpfsStore} */
++function createValidationStore() {
++    const store = new TermRecordOpfsStore();
++    vi.spyOn(store, '_encodeArtifactChunkRecords').mockImplementation(async (_chunk, _offsets, _lengths, _plan, _lookupBytes, base) => ({
++        contentOffsetBase: base ?? 0,
++        lookupIndexBytes: new Uint8Array(0),
++        recordFields: new Uint8Array(0),
++        recordFieldsFormat: 1,
++        validationMs: 0,
++        recordFieldEncodeMs: 0,
++        lookupIndexEncodeMs: 0,
++    }));
++    vi.spyOn(store, '_appendEncodedChunk').mockResolvedValue();
++    return store;
++}
++
++describe('resolved content reference validation runs', () => {
++    test.each(['ordinary', 'aliased', 'shared'])('matches exact record and lookup bytes with %s columns', async (kind) => {
++        const buffer = kind === 'shared' ? new SharedArrayBuffer(16) : new ArrayBuffer(16);
++        const offsets = new Float64Array(buffer);
++        offsets.set([16, 32]);
++        const lengths = kind === 'aliased' ? new Uint32Array(buffer, 0, 2) : Uint32Array.of(7, 9);
++        const references = {
++            uniqueIndexList: Uint32Array.from({length: 120}, (_, index) => Math.floor(index / 2) % 2),
++            offsets,
++            lengths,
++        };
++        const chunk = createChunk(references);
++        const resolvedStore = new TermRecordOpfsStore();
++        const resolvedAppend = vi.spyOn(resolvedStore, '_appendEncodedChunk').mockResolvedValue();
++        await encode(resolvedStore, chunk);
++        const plainStore = new TermRecordOpfsStore();
++        const plainAppend = vi.spyOn(plainStore, '_appendEncodedChunk').mockResolvedValue();
++        await encode(
++            plainStore,
++            {...chunk, resolvedContentReferences: void 0},
++            Float64Array.from(references.uniqueIndexList, (index) => offsets[index]),
++            Uint32Array.from(references.uniqueIndexList, (index) => lengths[index]),
++        );
++        expect(resolvedAppend.mock.calls).toStrictEqual(plainAppend.mock.calls);
++    });
++
++    test('keeps the exact uint32 offset boundary and sentinel spans when aliases cross a split', async () => {
++        const references = {
++            uniqueIndexList: Uint32Array.of(0, 0, 1, 1, 2, 2, 3, 3),
++            offsets: Float64Array.of(16, 16 + 0xfffffffe, 16 + 0xffffffff, -1),
++            lengths: Uint32Array.of(7, 9, 11, 0),
++        };
++        const chunk = createChunk(references);
++        const resolvedStore = new TermRecordOpfsStore();
++        const resolvedAppend = vi.spyOn(resolvedStore, '_appendEncodedChunk').mockResolvedValue();
++        await encode(resolvedStore, chunk);
++        const plainStore = new TermRecordOpfsStore();
++        const plainAppend = vi.spyOn(plainStore, '_appendEncodedChunk').mockResolvedValue();
++        await encode(
++            plainStore,
++            {...chunk, resolvedContentReferences: void 0},
++            Float64Array.from(references.uniqueIndexList, (index) => references.offsets[index]),
++            Uint32Array.from(references.uniqueIndexList, (index) => references.lengths[index]),
++        );
++        expect(resolvedAppend.mock.calls).toStrictEqual(plainAppend.mock.calls);
++        expect(resolvedAppend.mock.calls.map((args) => [args[2], args[4]])).toStrictEqual([[4, 16], [4, 16 + 0xffffffff]]);
++    });
++
++    test.each([
++        [Uint32Array.of(0, 0, 2, 2), Float64Array.of(16, 32), Uint32Array.of(7, 9), 'Invalid resolved term content reference index: 2'],
++        [Uint32Array.of(0, 0, 1, 1), Float64Array.of(16, Number.NaN), Uint32Array.of(7, 9), 'Invalid term content offset: NaN'],
++        [Uint32Array.of(0, 0, 1, 1), Float64Array.of(16, 32), Uint32Array.of(7, 0xffffffff), 'Invalid term content length: 4294967295'],
++        [Uint32Array.of(0, 0, 1, 1), Float64Array.of(16, 32), Uint32Array.of(7), 'Invalid resolved term content reference index: 1'],
++        [Uint32Array.of(0, 0, 1), Float64Array.of(16, 32), Uint32Array.of(7, 9), 'Invalid term content offset: undefined'],
++    ])('rejects malformed columns after valid aliases (%#)', async (uniqueIndexList, offsets, lengths, message) => {
++        const store = createValidationStore();
++        await expect(encode(store, createChunk({uniqueIndexList, offsets, lengths}, 4))).rejects.toThrow(message);
++        expect(store._appendEncodedChunk).not.toHaveBeenCalled();
++    });
++
++    test.each(['offset', 'length', 'index', 'replace'])('revalidates %s changes after an awaited append at the row limit', async (change) => {
++        const references = {
++            uniqueIndexList: new Uint32Array(30_001),
++            offsets: Float64Array.of(16),
++            lengths: Uint32Array.of(7),
++        };
++        const chunk = createChunk(references);
++        const store = createValidationStore();
++        vi.mocked(store._appendEncodedChunk).mockImplementationOnce(async () => {
++            switch (change) {
++                case 'offset': references.offsets[0] = Number.NaN; break;
++                case 'length': references.lengths[0] = 0xffffffff; break;
++                case 'index': references.uniqueIndexList[30_000] = 1; break;
++                case 'replace': chunk.resolvedContentReferences = {...references, offsets: Float64Array.of(Number.NaN)}; break;
++            }
++        });
++        await expect(encode(store, chunk)).rejects.toThrow(/Invalid (term content|resolved term content reference)/);
++        expect(store._encodeArtifactChunkRecords).toHaveBeenCalledTimes(1);
++        expect(vi.mocked(store._encodeArtifactChunkRecords).mock.calls[0][0].rowCount).toBe(30_000);
++    });
++
++    test('keeps consecutive aliases in a complete prepared whole-chunk index beyond the row limit', async () => {
++        const chunk = createChunk({uniqueIndexList: new Uint32Array(30_001), offsets: Float64Array.of(16), lengths: Uint32Array.of(7)});
++        const store = createValidationStore();
++        const expressionBytes = chunk.expressionBytesList[0];
++        const prepared = store.prepareArtifactChunkLookupIndexes({
++            ...chunk,
++            termRecordPreinternedPlan: {
++                stringLengths: Uint16Array.of(expressionBytes.byteLength),
++                stringOffsets: Uint32Array.of(0),
++                stringsBuffer: expressionBytes,
++                expressionIndexes: new Uint32Array(chunk.rowCount),
++                readingIndexes: new Uint32Array(chunk.rowCount),
++            },
++        });
++        expect(prepared?.indexes.size).toBe(1);
++        await encode(store, chunk, void 0, void 0, prepared?.indexes);
++        expect(store._encodeArtifactChunkRecords).toHaveBeenCalledTimes(1);
++        expect(vi.mocked(store._encodeArtifactChunkRecords).mock.calls[0][0].rowCount).toBe(30_001);
++    });
++
++    test.each(['fixed', 'fixed-length', 'invalid-fixed-base'])('preserves %s overrides over invalid referenced lengths', async (mode) => {
++        const chunk = createChunk({uniqueIndexList: Uint32Array.of(0, 0), offsets: Float64Array.of(16), lengths: Uint32Array.of(0xffffffff)});
++        chunk.fixedContentLength = 7;
++        if (mode !== 'fixed-length') { chunk.fixedContentOffsetBase = mode === 'fixed' ? 32 : -1; }
++        const store = createValidationStore();
++        await encode(store, chunk);
++        expect(vi.mocked(store._encodeArtifactChunkRecords).mock.calls[0][5]).toBe(mode === 'fixed' ? 32 : 16);
++    });
++
++    test('retains per-row reads for accessor-backed references', async () => {
++        const offsets = Float64Array.of(16);
++        const references = {uniqueIndexList: Uint32Array.of(0, 0), offsets, lengths: Uint32Array.of(7)};
++        let reads = 0;
++        Object.defineProperty(references, 'offsets', {
++            get() {
++                if (++reads > 2) { offsets[0] = Number.NaN; }
++                return offsets;
++            },
++        });
++        const store = createValidationStore();
++        await expect(encode(store, createChunk(references))).rejects.toThrow('Invalid term content offset: NaN');
++        expect(store._appendEncodedChunk).not.toHaveBeenCalled();
++    });
++
++    test.each(['own', 'inherited'])('retains per-row reads for an %s fixed-length accessor', async (kind) => {
++        const chunk = createChunk({uniqueIndexList: Uint32Array.of(0, 0), offsets: Float64Array.of(16), lengths: Uint32Array.of(7)});
++        let reads = 0;
++        const target = kind === 'own' ? chunk : {};
++        Object.defineProperty(target, 'fixedContentLength', {
++            get() { return ++reads > 2 ? 0xffffffff : 7; },
++        });
++        if (kind === 'inherited') { Object.setPrototypeOf(chunk, target); }
++        await expect(encode(createValidationStore(), chunk)).rejects.toThrow('Invalid term content length: 4294967295');
++    });
++
++    test('retains per-row bounds checks for a typed column with an own length accessor', async () => {
++        const offsets = Float64Array.of(16);
++        let reads = 0;
++        Object.defineProperty(offsets, 'length', {get() { return ++reads > 1 ? 0 : 1; }});
++        const references = {uniqueIndexList: Uint32Array.of(0, 0), offsets, lengths: Uint32Array.of(7)};
++        await expect(encode(createValidationStore(), createChunk(references))).rejects.toThrow('Invalid resolved term content reference index: 0');
++    });
++
++    test('does not invoke a typed column buffer accessor when selecting the fallback', async () => {
++        const offsets = Float64Array.of(16);
++        Object.defineProperty(offsets, 'buffer', {get() { throw new Error('Unexpected buffer getter'); }});
++        const references = {uniqueIndexList: Uint32Array.of(0, 0), offsets, lengths: Uint32Array.of(7)};
++        const store = createValidationStore();
++        await encode(store, createChunk(references));
++        expect(store._appendEncodedChunk).toHaveBeenCalledTimes(1);
++    });
++
++    test('retains per-row validation for untyped external reference columns', async () => {
++        const offsets = [16];
++        const indexes = [0, 0];
++        Object.defineProperty(indexes, 1, {
++            get() { offsets[0] = Number.NaN; return 0; },
++        });
++        const references = /** @type {ContentReferences} */ (/** @type {unknown} */ ({uniqueIndexList: indexes, offsets, lengths: [7]}));
++        await expect(encode(createValidationStore(), createChunk(references))).rejects.toThrow('Invalid term content offset: NaN');
++    });
++});
+diff --git a/types/ext/dictionary-importer.d.ts b/types/ext/dictionary-importer.d.ts
+index 981bf9786caeb537d72d7290a84b7426dd96ec7e..6c7b7f76893c9a7dd6863faad8ff7e3f023a9685 100644
+--- a/types/ext/dictionary-importer.d.ts
++++ b/types/ext/dictionary-importer.d.ts
+@@ -194,7 +194,8 @@ export type SummaryMetaCount = {
+ 
+ export type ImportRequirement = (
+     ImageImportRequirement |
+-    StructuredContentImageImportRequirement
++    StructuredContentImageImportRequirement |
++    ImageReferenceImportRequirement
+ );
+ 
+ export type ImageImportRequirement = {
+@@ -211,7 +212,25 @@ export type StructuredContentImageImportRequirement = {
+     entry: DictionaryDatabase.DatabaseTermEntry;
+ };
+ 
+-export type DeferredMediaImportRequirement = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> & {
++export type MediaImportDiagnosticKeys = {
++    bytes: Uint8Array;
++    spans: Uint32Array;
++    decodedKeys: Map<number, string> | null;
++};
++
++export type MediaImportEntry = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> | {
++    dictionary: string;
++    diagnosticKeys: MediaImportDiagnosticKeys;
++    diagnosticIndex: number;
++};
++
++export type ImageReferenceImportRequirement = {
++    type: 'image-reference';
++    source: {path: string};
++    entry: MediaImportEntry;
++};
++
++export type DeferredMediaImportRequirement = MediaImportEntry & {
+     type: ImportRequirement['type'];
+     source: {path: string};
+ };

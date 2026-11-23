@@ -1,0 +1,2010 @@
+{
+  "status": "success",
+  "plan": {
+    "pairsPerCorpusPerComparison": 8,
+    "comparisons": [
+      "AA",
+      "AB"
+    ],
+    "warmupsPerObservation": 2,
+    "minimumBytesPerObservation": 1073741824,
+    "reason": "Single longer qualification after 64MiB screening observations had about 24-28ms CPU with about 4ms accounting granularity; no further retuning planned",
+    "previousScreen": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/screen-1.json",
+    "alignments": [
+      0,
+      1,
+      3
+    ],
+    "boundary": "CRC-only over resident first/middle/last term banks; excludes archive IO, inflation, allocation, copies, compilation and warmups",
+    "node": "v22.22.0",
+    "v8": "12.4.254.21-node.33",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "availableParallelism": 9,
+    "loadBefore": [
+      1.3,
+      1.28,
+      1.89
+    ],
+    "inputsSha256": "90f8ac889612eb3809e7f0407489020bf8b9ddcf7f78a2adec1bb27ba89efbae",
+    "harnessSha256": "f48cd46d82e8184e7c7a43e161b1b6fc6a58ae6dec707c236e69b28919e0c90f"
+  },
+  "inputs": {
+    "preparedAtUtc": "2026-11-23T03:53:24.858269+00:00",
+    "variants": {
+      "baseline": {
+        "root": "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base",
+        "commit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+        "manifestSha256": "507e2d4854da13c40bda522435e397d158c8d995ba17a1e614d073726ad27bd3",
+        "productWasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+        "testModulePath": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/baseline-crc-test.wasm",
+        "testModuleSha256": "06645f7addcac8fe29821ff69c4defab1c665935a192f51f79d096cb4346dbff",
+        "sources": {
+          "ext/js/dictionary/wasm/term-bank-parser.c": "6adf2e1e4b2c8f97292557a7b9cf3be0e0b8d9ac11a607538ae73776c1c1a0d8",
+          "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc"
+        },
+        "command": [
+          "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin/clang-21",
+          "-fuse-ld=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin/wasm-ld-21",
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all",
+          "-DTERM_BANK_CRC_TEST",
+          "-Wl,--export=term_bank_crc32_test",
+          "-o",
+          "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/baseline-crc-test.wasm",
+          "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base/ext/js/dictionary/wasm/term-bank-parser.c",
+          "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base/ext/js/dictionary/wasm/term-bank-inflate.c"
+        ]
+      },
+      "candidate": {
+        "root": "/workspace/scratch/71149a79699f/manabitan-native-round2",
+        "commit": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+        "manifestSha256": "73802a10007a1007af61a5ff55f2c7a5933c655b954fee2498e6f45c5dd79859",
+        "productWasmSha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5",
+        "testModulePath": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/candidate-crc-test.wasm",
+        "testModuleSha256": "1776055ab2e50c6b4f4e3f9d606d23b2bed57e58a8b608cba6628be816e6f83c",
+        "sources": {
+          "ext/js/dictionary/wasm/term-bank-parser.c": "c15d6e6247c7330d1ff0ab644266e3f56bfc6c0ead0103742b74f18fdf101d59",
+          "ext/js/dictionary/wasm/term-bank-inflate.c": "6d86d0a56f524cdccd1701a9ac7c466c50ecc699ef68d377a82b9f2aaaa317cc"
+        },
+        "command": [
+          "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin/clang-21",
+          "-fuse-ld=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin/wasm-ld-21",
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all",
+          "-DTERM_BANK_CRC_TEST",
+          "-Wl,--export=term_bank_crc32_test",
+          "-o",
+          "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/candidate-crc-test.wasm",
+          "/workspace/scratch/71149a79699f/manabitan-native-round2/ext/js/dictionary/wasm/term-bank-parser.c",
+          "/workspace/scratch/71149a79699f/manabitan-native-round2/ext/js/dictionary/wasm/term-bank-inflate.c"
+        ]
+      }
+    },
+    "corpora": {
+      "jmdict": {
+        "archive": "/workspace/scratch/71149a79699f/manabitan/builds/e2e-dictionary-cache/JMdict.zip",
+        "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+        "termBankCount": 53,
+        "banks": [
+          {
+            "name": "term_bank_1.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/jmdict-term_bank_1.json.bin",
+            "bytes": 3226520,
+            "crc32": 3340828512,
+            "sha256": "af9817d0ecb4d57541bc3703547ada0eeefb09d57d60862d836ca6d228441624"
+          },
+          {
+            "name": "term_bank_27.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/jmdict-term_bank_27.json.bin",
+            "bytes": 3365796,
+            "crc32": 4220974904,
+            "sha256": "f9721cff24bdbbc38395fa2ea82131166928b95bdf0658a7a5930170268512f8"
+          },
+          {
+            "name": "term_bank_53.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/jmdict-term_bank_53.json.bin",
+            "bytes": 1985723,
+            "crc32": 599591877,
+            "sha256": "f0578e17831efc1c48b9ee03a5d01d658b762be5cb15914211c5ba73c274c6ca"
+          }
+        ]
+      },
+      "jitendex": {
+        "archive": "/workspace/scratch/71149a79699f/manabitan/builds/e2e-dictionary-cache/jitendex-yomitan.zip",
+        "archiveSha256": "8364e69e7bd0881c42011e96af921a7399d7fe06e2bf4fff4da6d18affff74fc",
+        "termBankCount": 218,
+        "banks": [
+          {
+            "name": "term_bank_1.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/jitendex-term_bank_1.json.bin",
+            "bytes": 4856182,
+            "crc32": 857090955,
+            "sha256": "95a36e50faf1ee1f0c4c8de03dc157499ba8ccf58961356a5651afae190e9e37"
+          },
+          {
+            "name": "term_bank_110.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/jitendex-term_bank_110.json.bin",
+            "bytes": 2384668,
+            "crc32": 2248469861,
+            "sha256": "a6b81467f2b88bdf70f1050b861ef91ac064969d90abf1aa80a3a58bd4a449ae"
+          },
+          {
+            "name": "term_bank_218.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/jitendex-term_bank_218.json.bin",
+            "bytes": 1672406,
+            "crc32": 4037280826,
+            "sha256": "c5818c28d3de57cecd05130ef1f3618f8a3e8065c240e01155eebc1f6dc52f0a"
+          }
+        ]
+      },
+      "vndb": {
+        "archive": "/workspace/scratch/fcfffdc555c8/fixtures/vndb_characters_by_bee.zip",
+        "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "termBankCount": 665,
+        "banks": [
+          {
+            "name": "term_bank_1.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/vndb-term_bank_1.json.bin",
+            "bytes": 6736363,
+            "crc32": 267222465,
+            "sha256": "5de77aab89f627f5f9a75d4773b9723c32c12c5eb79207b4522ddb21cf6f3354"
+          },
+          {
+            "name": "term_bank_333.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/vndb-term_bank_333.json.bin",
+            "bytes": 6244862,
+            "crc32": 3175336543,
+            "sha256": "80265f789fbb532a3b7624790fd9aa453572cca23174fbb1f9af4842dda71cde"
+          },
+          {
+            "name": "term_bank_665.json",
+            "path": "/workspace/scratch/71149a79699f/native-round2-diagnostics/crc-words-screen/vndb-term_bank_665.json.bin",
+            "bytes": 4852252,
+            "crc32": 2512888906,
+            "sha256": "df7cd13661f41fe5f48bf44e41c0a7561bb69e92d732ce7707aec63e5c8ac603"
+          }
+        ]
+      }
+    },
+    "compilerVersion": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)",
+    "linkerVersion": "Debian LLD 21.1.8",
+    "candidatePatchSha256": "7ed6e56ede369278f8c5c9a67550838b7cbe4fc33688773c36a60204f8397074"
+  },
+  "observations": [
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 0,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 408.7133510000001,
+      "threadCpuMs": 407.906,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 0,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 398.6375320000002,
+      "threadCpuMs": 399.845,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 1,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 416.3290199999992,
+      "threadCpuMs": 415.986,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 1,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 404.01522399999976,
+      "threadCpuMs": 404.015,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 2,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 483.7844329999998,
+      "threadCpuMs": 483.99,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 2,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 374.17634499999895,
+      "threadCpuMs": 375.958,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 3,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 373.2839279999989,
+      "threadCpuMs": 372.001,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 3,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 463.3981169999988,
+      "threadCpuMs": 459.266,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 4,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 491.8597950000003,
+      "threadCpuMs": 490.935,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 4,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 456.370089,
+      "threadCpuMs": 456.006,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 5,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 402.771510999999,
+      "threadCpuMs": 399.91,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 5,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 403.08221299999786,
+      "threadCpuMs": 404.007,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 6,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 458.60841100000107,
+      "threadCpuMs": 459.963,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 6,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 402.66825900000185,
+      "threadCpuMs": 403.278,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 7,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 400.3932359999999,
+      "threadCpuMs": 400.009,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jmdict",
+      "pair": 7,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 404.42266299999756,
+      "threadCpuMs": 403.845,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 0,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 432.48687399999835,
+      "threadCpuMs": 431.757,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 0,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 487.22757999999885,
+      "threadCpuMs": 483.588,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 1,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 452.56595899999957,
+      "threadCpuMs": 451.926,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 1,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 438.5074170000007,
+      "threadCpuMs": 436.052,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 2,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 455.07037299999865,
+      "threadCpuMs": 455.942,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 2,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 429.9666550000002,
+      "threadCpuMs": 427.935,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 3,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 411.02862900000036,
+      "threadCpuMs": 412.004,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 3,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 408.31876900000134,
+      "threadCpuMs": 408.01,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 4,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 380.7085519999964,
+      "threadCpuMs": 379.029,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 4,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 427.71580999999424,
+      "threadCpuMs": 419.766,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 5,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 438.48979800000234,
+      "threadCpuMs": 436.03,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 5,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 457.5247539999982,
+      "threadCpuMs": 459.483,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 6,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 458.2451940000028,
+      "threadCpuMs": 451.914,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 6,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 439.26500600000145,
+      "threadCpuMs": 439.864,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 7,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 425.10287500000413,
+      "threadCpuMs": 423.941,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "jitendex",
+      "pair": 7,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 468.2288489999992,
+      "threadCpuMs": 463.632,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 0,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 445.6183139999994,
+      "threadCpuMs": 444.007,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 0,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 444.8162929999962,
+      "threadCpuMs": 443.994,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 1,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 448.68261399999756,
+      "threadCpuMs": 451.998,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 1,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 472.87765399999626,
+      "threadCpuMs": 471.947,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 2,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 381.1599150000038,
+      "threadCpuMs": 379.469,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 2,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 401.78337300000567,
+      "threadCpuMs": 403.873,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 3,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 387.14740699999675,
+      "threadCpuMs": 388.007,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 3,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 423.7576489999992,
+      "threadCpuMs": 423.955,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 4,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 390.91594500000065,
+      "threadCpuMs": 392.014,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 4,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 473.558309,
+      "threadCpuMs": 467.878,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 5,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 440.2782479999951,
+      "threadCpuMs": 439.981,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 5,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 423.6104699999996,
+      "threadCpuMs": 423.277,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 6,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 444.90419099999417,
+      "threadCpuMs": 443.437,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 6,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 510.2703479999982,
+      "threadCpuMs": 511.855,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 7,
+      "arm": "B",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 463.7862979999991,
+      "threadCpuMs": 463.346,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AA",
+      "corpus": "vndb",
+      "pair": 7,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 520.6275229999956,
+      "threadCpuMs": 519.976,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 0,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 426.30933400000504,
+      "threadCpuMs": 427.494,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 0,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 396.5115630000073,
+      "threadCpuMs": 396.006,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 1,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 423.22415100000217,
+      "threadCpuMs": 423.313,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 1,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 448.2500779999973,
+      "threadCpuMs": 443.736,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 2,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 440.2076740000048,
+      "threadCpuMs": 439.193,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 2,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 395.56173800000397,
+      "threadCpuMs": 395.624,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 3,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 394.73070699999516,
+      "threadCpuMs": 391.771,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 3,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 464.28099199999997,
+      "threadCpuMs": 462.32,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 4,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 469.01394000000437,
+      "threadCpuMs": 467.052,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 4,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 562.2491350000055,
+      "threadCpuMs": 562.345,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 5,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 393.1016690000106,
+      "threadCpuMs": 392.059,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 5,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 435.02640699999756,
+      "threadCpuMs": 427.959,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 6,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 388.617001000006,
+      "threadCpuMs": 388.018,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 6,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 503.6953480000084,
+      "threadCpuMs": 503.25,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 7,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 630.1042330000055,
+      "threadCpuMs": 627.16,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jmdict",
+      "pair": 7,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 126,
+      "bytes": 1080832914,
+      "elapsedMs": 378.40419299999485,
+      "threadCpuMs": 375.973,
+      "crc32": [
+        3340828512,
+        4220974904,
+        599591877
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 0,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 378.08915899999556,
+      "threadCpuMs": 375.928,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 0,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 362.32964399999764,
+      "threadCpuMs": 363.964,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 1,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 497.18740999999864,
+      "threadCpuMs": 496.023,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 1,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 532.0220289999997,
+      "threadCpuMs": 531.978,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 2,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 385.05608799999754,
+      "threadCpuMs": 383.868,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 2,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 389.88433799998893,
+      "threadCpuMs": 391.961,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 3,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 386.7123980000033,
+      "threadCpuMs": 387.267,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 3,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 496.69924699999683,
+      "threadCpuMs": 496.002,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 4,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 374.24228399999265,
+      "threadCpuMs": 371.919,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 4,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 350.79442500000005,
+      "threadCpuMs": 351.79,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 5,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 411.1285680000001,
+      "threadCpuMs": 407.705,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 5,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 426.9796959999949,
+      "threadCpuMs": 424.07,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 6,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 429.1791349999985,
+      "threadCpuMs": 428.01,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 6,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 360.8517920000013,
+      "threadCpuMs": 360.007,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 7,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 418.64533500000834,
+      "threadCpuMs": 415.92,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "jitendex",
+      "pair": 7,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 121,
+      "bytes": 1078503976,
+      "elapsedMs": 535.3375419999938,
+      "threadCpuMs": 516.654,
+      "crc32": [
+        857090955,
+        2248469861,
+        4037280826
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 0,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 435.6973730000027,
+      "threadCpuMs": 436.028,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 0,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 417.720032000012,
+      "threadCpuMs": 419.93,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 1,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 483.4271359999984,
+      "threadCpuMs": 479.66,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 1,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 455.09853399998974,
+      "threadCpuMs": 455.983,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 2,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 461.8458149999933,
+      "threadCpuMs": 459.437,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 2,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 481.0105729999923,
+      "threadCpuMs": 463.775,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 3,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 407.77700800000457,
+      "threadCpuMs": 408.023,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 3,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 447.846418000001,
+      "threadCpuMs": 448.032,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 4,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 435.77761499999906,
+      "threadCpuMs": 435.795,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 4,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 399.6784040000057,
+      "threadCpuMs": 399.991,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 5,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 463.2830060000124,
+      "threadCpuMs": 459.687,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 5,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 462.7121210000041,
+      "threadCpuMs": 463.914,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 6,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 430.30697900000087,
+      "threadCpuMs": 432.09,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 6,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 467.25975900000776,
+      "threadCpuMs": 442.254,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 7,
+      "arm": "B",
+      "variant": "candidate",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 399.12098299998615,
+      "threadCpuMs": 400.019,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    },
+    {
+      "comparison": "AB",
+      "corpus": "vndb",
+      "pair": 7,
+      "arm": "A",
+      "variant": "baseline",
+      "passes": 61,
+      "bytes": 1087842097,
+      "elapsedMs": 425.6270660000009,
+      "threadCpuMs": 423.998,
+      "crc32": [
+        267222465,
+        3175336543,
+        2512888906
+      ]
+    }
+  ],
+  "summaries": {
+    "AA": {
+      "jmdict": {
+        "medianPairedCpuPercent": -4.545490878365205,
+        "equalWorkCpuPercent": -8.279454866307724,
+        "medianPairedWallPercent": -4.8403321294687105,
+        "fasterCpuPairs": 7,
+        "deltas": [
+          {
+            "threadCpuPercent": -1.9761905929307155,
+            "wallPercent": -2.4652532087213186
+          },
+          {
+            "threadCpuPercent": 2.963008799178257,
+            "wallPercent": 3.0478544541181707
+          },
+          {
+            "threadCpuPercent": -22.321122337238364,
+            "wallPercent": -22.656390020718366
+          },
+          {
+            "threadCpuPercent": -19.000971114778807,
+            "wallPercent": -19.446386529015637
+          },
+          {
+            "threadCpuPercent": -7.114791163799694,
+            "wallPercent": -7.215411050216103
+          },
+          {
+            "threadCpuPercent": -1.0140913400015328,
+            "wallPercent": -0.07708154564459724
+          },
+          {
+            "threadCpuPercent": -12.323817350526022,
+            "wallPercent": -12.197803323759604
+          },
+          {
+            "threadCpuPercent": -0.9498693805791825,
+            "wallPercent": -0.9963405537433245
+          }
+        ]
+      },
+      "jitendex": {
+        "medianPairedCpuPercent": -0.8437694791725237,
+        "equalWorkCpuPercent": 0.26493056581538,
+        "medianPairedWallPercent": -1.739132790820841,
+        "fasterCpuPairs": 4,
+        "deltas": [
+          {
+            "threadCpuPercent": 12.004669293144055,
+            "wallPercent": 12.657194770725155
+          },
+          {
+            "threadCpuPercent": 3.640391512938823,
+            "wallPercent": 3.205998679835065
+          },
+          {
+            "threadCpuPercent": -6.1426672690824695,
+            "wallPercent": -5.516447452842321
+          },
+          {
+            "threadCpuPercent": 0.9788975760398166,
+            "wallPercent": 0.6636628550374057
+          },
+          {
+            "threadCpuPercent": 10.74772642726547,
+            "wallPercent": 12.34730813191669
+          },
+          {
+            "threadCpuPercent": -5.104214954633801,
+            "wallPercent": -4.160421011886051
+          },
+          {
+            "threadCpuPercent": -2.666436534384864,
+            "wallPercent": -4.141928436679088
+          },
+          {
+            "threadCpuPercent": -8.560884494599176,
+            "wallPercent": -9.21044785943873
+          }
+        ]
+      },
+      "vndb": {
+        "medianPairedCpuPercent": 1.9717120171767466,
+        "equalWorkCpuPercent": 2.08256981968975,
+        "medianPairedWallPercent": 1.8773575848217428,
+        "fasterCpuPairs": 4,
+        "deltas": [
+          {
+            "threadCpuPercent": -0.0029278817676225977,
+            "wallPercent": -0.17997936233903333
+          },
+          {
+            "threadCpuPercent": -4.226957688045485,
+            "wallPercent": -5.116553889856446
+          },
+          {
+            "threadCpuPercent": 6.431091867846916,
+            "wallPercent": 5.410710095263194
+          },
+          {
+            "threadCpuPercent": -8.479201802078052,
+            "wallPercent": -8.639429184675917
+          },
+          {
+            "threadCpuPercent": 19.352370068415926,
+            "wallPercent": 21.140699185345134
+          },
+          {
+            "threadCpuPercent": 3.946351916121116,
+            "wallPercent": 3.934694531982519
+          },
+          {
+            "threadCpuPercent": 15.429023739561654,
+            "wallPercent": 14.692187289376403
+          },
+          {
+            "threadCpuPercent": -10.890887271720228,
+            "wallPercent": -10.917829444064363
+          }
+        ]
+      }
+    },
+    "AB": {
+      "jmdict": {
+        "medianPairedCpuPercent": -5.984114408377206,
+        "equalWorkCpuPercent": 7.569997188019517,
+        "medianPairedWallPercent": -6.286367182488057,
+        "fasterCpuPairs": 5,
+        "deltas": [
+          {
+            "threadCpuPercent": -7.365717413577744,
+            "wallPercent": -6.9897064463517955
+          },
+          {
+            "threadCpuPercent": -4.602511403176668,
+            "wallPercent": -5.5830279186243175
+          },
+          {
+            "threadCpuPercent": -9.920240076686094,
+            "wallPercent": -10.142016742761351
+          },
+          {
+            "threadCpuPercent": -15.259776777989265,
+            "wallPercent": -14.980213749522786
+          },
+          {
+            "threadCpuPercent": 20.403081455598084,
+            "wallPercent": 19.878981635385994
+          },
+          {
+            "threadCpuPercent": -8.38865405330884,
+            "wallPercent": -9.637285765962067
+          },
+          {
+            "threadCpuPercent": 29.697591348854967,
+            "wallPercent": 29.612278079414402
+          },
+          {
+            "threadCpuPercent": 66.8098507073646,
+            "wallPercent": 66.51618683306029
+          }
+        ]
+      },
+      "jitendex": {
+        "medianPairedCpuPercent": -6.085469055789655,
+        "equalWorkCpuPercent": -10.026898656597583,
+        "medianPairedWallPercent": -6.406505877016578,
+        "fasterCpuPairs": 7,
+        "deltas": [
+          {
+            "threadCpuPercent": -3.182524313166346,
+            "wallPercent": -4.168200707388737
+          },
+          {
+            "threadCpuPercent": -6.758738143306664,
+            "wallPercent": -6.547589592385306
+          },
+          {
+            "threadCpuPercent": 2.1082768034845323,
+            "wallPercent": 1.2539082358286047
+          },
+          {
+            "threadCpuPercent": -21.922290635924856,
+            "wallPercent": -22.143550582027405
+          },
+          {
+            "threadCpuPercent": -5.412199968272646,
+            "wallPercent": -6.265422161647849
+          },
+          {
+            "threadCpuPercent": -3.8590327068644403,
+            "wallPercent": -3.712384487714604
+          },
+          {
+            "threadCpuPercent": -15.888180182706012,
+            "wallPercent": -15.9204717629149
+          },
+          {
+            "threadCpuPercent": -19.497381226120382,
+            "wallPercent": -21.79787476963214
+          }
+        ]
+      },
+      "vndb": {
+        "medianPairedCpuPercent": -2.3015624971804485,
+        "equalWorkCpuPercent": -2.304686807807088,
+        "medianPairedWallPercent": -2.001364632747943,
+        "fasterCpuPairs": 5,
+        "deltas": [
+          {
+            "threadCpuPercent": -3.6919647362096075,
+            "wallPercent": -4.126107274002456
+          },
+          {
+            "threadCpuPercent": 5.192518142123714,
+            "wallPercent": 6.22471835956504
+          },
+          {
+            "threadCpuPercent": 0.9441990958499069,
+            "wallPercent": 4.149600879245652
+          },
+          {
+            "threadCpuPercent": -8.929942504106837,
+            "wallPercent": -8.94713196075989
+          },
+          {
+            "threadCpuPercent": -8.215789534069929,
+            "wallPercent": -8.283860794454402
+          },
+          {
+            "threadCpuPercent": -0.911160258151289,
+            "wallPercent": 0.12337800850656944
+          },
+          {
+            "threadCpuPercent": 2.3522877178365764,
+            "wallPercent": 8.587539083349792
+          },
+          {
+            "threadCpuPercent": -5.655451204958506,
+            "wallPercent": -6.227536995970717
+          }
+        ]
+      }
+    }
+  },
+  "loadAfter": [
+    2.02,
+    1.51,
+    1.89
+  ]
+}

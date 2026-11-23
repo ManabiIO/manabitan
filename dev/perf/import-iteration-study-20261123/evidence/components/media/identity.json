@@ -1,0 +1,8 @@
+{
+  "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "candidateLocal": "f836c595bce05ae7e97fdb0a8ea03dc8215a27f5",
+  "candidatePublished": "7272ea938fd3de01bd40efcd4ee838c3249d0587",
+  "pullRequest": "https://github.com/ManabiIO/manabitan/pull/811",
+  "patchSha256": "934432761ba6dd73f88dd82b6b16a6997bfb9c12028662eba45439f16d387bd6",
+  "note": "Local and published commits have the same frozen candidate files. Missing @returns test JSDoc follow-up is validation-only; runtime file hashes remain those in provenance.json. retention.py transcribes the exact Python stdin loop used to produce retention.json."
+}

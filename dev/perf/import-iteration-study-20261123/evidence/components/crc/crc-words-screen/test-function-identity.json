@@ -1,0 +1,14 @@
+{
+  "baseline": {
+    "productCrcBodyIndex": 2,
+    "identicalTestBodyIndices": [
+      2
+    ]
+  },
+  "candidate": {
+    "productCrcBodyIndex": 2,
+    "identicalTestBodyIndices": [
+      2
+    ]
+  }
+}

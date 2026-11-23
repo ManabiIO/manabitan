@@ -1,0 +1,237 @@
+{
+  "description": "Exact all-row record/lookup encoder oracle, followed by isolated validation/planning timing. Actual encoder and append are stubbed only in timing; this is not full import timing or persistent storage qualification.",
+  "dictionary": "jmdict",
+  "node": "v24.22.3",
+  "archiveSha256": "7681ee09f9edfef48a5e50773565da237424eb750bdb0e1e59660784ecd53e8a",
+  "inputManifestSha256": "43b80b96bdcb230067a5f30d2c6b8739b0b7cbacad8cacf7800b7dfb60f8f507",
+  "runnerSha256": "130a66899c88c9855a5c203871f5708693d2a5db47ef8fbceabbf602ff70bdee",
+  "sourceRoots": {
+    "baseline": "/workspace/scratch/71149a79699f/manabitan-plan-scratch-base",
+    "candidate": "/workspace/scratch/71149a79699f/manabitan-storage-round2"
+  },
+  "sourceHashes": {
+    "baseline": "564fe2c4449a98f6d761950bc6664842565e3d7d0e0bb4778d9025719b273701",
+    "candidate": "355f1b5011e6aa9d785daffe12e1460af291e19de3dfbb5fdb7245199be11ef0"
+  },
+  "rows": 526942,
+  "contentRuns": 517833,
+  "repeatedValidationsRemoved": 9109,
+  "oracles": {
+    "baseline": {
+      "digest": "9fbfd289e89a295c226a247cc01da361776365c936fbeb7c5e353558bdd9c69b",
+      "rows": 526942,
+      "segments": 20,
+      "fieldBytes": 4234004,
+      "lookupBytes": 19454368
+    },
+    "candidate": {
+      "digest": "9fbfd289e89a295c226a247cc01da361776365c936fbeb7c5e353558bdd9c69b",
+      "rows": 526942,
+      "segments": 20,
+      "fieldBytes": 4234004,
+      "lookupBytes": 19454368
+    }
+  },
+  "summary": {
+    "validationMs": {
+      "baselineMedian": 8.546352399999659,
+      "candidateMedian": 7.356371400000194,
+      "pairMedianChangePercent": -12.167016707401345,
+      "candidateFasterPairs": 8,
+      "pairCount": 12,
+      "baselineRange": [
+        7.486452199999803,
+        29.396111799999563
+      ],
+      "candidateRange": [
+        6.541428200000337,
+        14.944201599999815
+      ]
+    },
+    "planningWallMs": {
+      "baselineMedian": 10.060774399999993,
+      "candidateMedian": 8.522519100000022,
+      "pairMedianChangePercent": -11.385912363698763,
+      "candidateFasterPairs": 8,
+      "pairCount": 12,
+      "baselineRange": [
+        8.435397000000012,
+        31.13421980000003
+      ],
+      "candidateRange": [
+        7.537609599999996,
+        17.910767399999987
+      ]
+    }
+  },
+  "observations": [
+    {
+      "pair": 0,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 11.509078800000044,
+      "planningWallMs": 14.806972199999972
+    },
+    {
+      "pair": 0,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 14.944201599999815,
+      "planningWallMs": 16.35157180000001
+    },
+    {
+      "pair": 1,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 8.592074399999774,
+      "planningWallMs": 10.214783799999987
+    },
+    {
+      "pair": 1,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 8.344541199999549,
+      "planningWallMs": 9.772029600000042
+    },
+    {
+      "pair": 2,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 8.325558399999954,
+      "planningWallMs": 9.545745399999987
+    },
+    {
+      "pair": 2,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 7.3460484000001545,
+      "planningWallMs": 8.51207159999999
+    },
+    {
+      "pair": 3,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 9.766317799999934,
+      "planningWallMs": 12.288595200000008
+    },
+    {
+      "pair": 3,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 13.10298019999991,
+      "planningWallMs": 15.751888599999983
+    },
+    {
+      "pair": 4,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 11.41034400000026,
+      "planningWallMs": 25.521927800000004
+    },
+    {
+      "pair": 4,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 7.366694400000233,
+      "planningWallMs": 8.532966600000055
+    },
+    {
+      "pair": 5,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 6.541428200000337,
+      "planningWallMs": 7.537609599999996
+    },
+    {
+      "pair": 5,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 7.981653400000141,
+      "planningWallMs": 9.120608999999968
+    },
+    {
+      "pair": 6,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 7.486452199999803,
+      "planningWallMs": 8.520972400000028
+    },
+    {
+      "pair": 6,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 8.48251900000032,
+      "planningWallMs": 10.070009000000027
+    },
+    {
+      "pair": 7,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 13.701169600000503,
+      "planningWallMs": 17.910767399999987
+    },
+    {
+      "pair": 7,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 8.74816359999977,
+      "planningWallMs": 10.349519199999941
+    },
+    {
+      "pair": 8,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 10.60969059999934,
+      "planningWallMs": 12.975436600000013
+    },
+    {
+      "pair": 8,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 6.60468379999993,
+      "planningWallMs": 7.731215599999996
+    },
+    {
+      "pair": 9,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 7.106526400000439,
+      "planningWallMs": 8.069645200000014
+    },
+    {
+      "pair": 9,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 8.128148200000215,
+      "planningWallMs": 9.164135400000031
+    },
+    {
+      "pair": 10,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 29.396111799999563,
+      "planningWallMs": 31.13421980000003
+    },
+    {
+      "pair": 10,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 6.842499800000132,
+      "planningWallMs": 7.8929614000000585
+    },
+    {
+      "pair": 11,
+      "repetitions": 5,
+      "label": "candidate",
+      "validationMs": 6.845936399999755,
+      "planningWallMs": 7.889591800000017
+    },
+    {
+      "pair": 11,
+      "repetitions": 5,
+      "label": "baseline",
+      "validationMs": 7.525501600000188,
+      "planningWallMs": 8.435397000000012
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index a91e6b706c..20bfa46bed 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "c4d29ef5aa55a1570eb56c19fe3a274860f564fcd08da9b8f67cbd9eb6982a48",
++    "sourceDigest": "62de775e08292f9fa89ae5ba0f3a8d8628b7a43af6b6b62410c590dfdecd74a6",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -57,7 +57,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f"
++            "sha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index 7c2d54d085cfdcb7899cfd7ba1a544a720e11485..a79b25456f2c1935a9a75f610e78ecb39b559dae 100644
+GIT binary patch
+delta 1475
+zcmb`{ze~eF6bJBYU#)G^CTSD27Qtsx%-~SOp+lD&I*6l#e}d3O%85&b*4-_FgKl;4
+z#~=j3QK*C9=070*2l)d8y<A_Eo?|lJclaE4eBXPyh4&kHScmN7BG`aKFg~_&nL%ba
+zHz*H-aXv5&hNWH;JjT%Q!^Q4C@LW%xnnnJd>GSN7mmS@oj+nqA&mZ%z`MwOUDKO*U
+zih_kWIFEu=1A(_A4NbB;soAEqTgtY`-cHT7r0pr&CVMkA+m<#eyGr(2YIarHb!FGc
+zUQW%fN!wPoL$;fm?MS<zY&WtGfR~jGdIv%8AaJdNz_kv#SmMvD*DPUWr@{<mSo!Vy
+zS);r6zwhDQXtwX+n1cAO@REY~uFzM39HW9j*Ppu6H~h^}BG(q^kgNZDBDXHEMy}qK
+zL@o-flB@SSk?RSx$<=2vk=qhzMeY!|zDE+dZGonc%QW7d;Y2n??$UU<hHtao@}C+@
+P0KDUWTD!r?%Io6~hRd=y
+
+delta 1707
+zcmcJOze~eF7>1J`t)(?Tn@H&(p8+v$0herYh2rS$pnDc65to9An|mAtT|}W&9fa7e
+zgJ3sZ)PE#@fKb1liJrRV#(OV$o*UlxZA7Lw<bIV@#%Jjo*(b{DMpYijQFX8w$w%pB
+zEmhSfNYDrzvMx!EJxuoO-mcw+lOdhSeOftiEAicNEQMfqT|T_dLyr$H^3cbS{dzhN
+zR+^v!p?)Axp@N1APozQv9Tl!fg$@QPK%~L|6BTWd3KLqW&^bj^cB5Kgp`xBELWj`W
+zA^lkBV_T<KIlTLB?+c!z5EHfdV!~QV=u#0pu%PTWTF{`6Qs6W|Nj5uGHZ<jDXxp9M
+z&TnOQ8~-0#c9n<x(6aM9EQXdPEWi=hal|25i6Fer@GVjJHp82u@WAkfD7?$?x+uKI
+o@Y)>zXHcay$7gtzA5->(wc^H<J%81VCKC;|N@{O9TYevZ0^8gh)&Kwi
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 04f2d2a74d..da5b4af028 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -112,15 +112,19 @@ static __attribute__((always_inline)) inline uint32_t crc32_bytes_serial(const u
+ static uint32_t crc32_braid_table[8][256];
+ static uint32_t crc32_braid_initialized;
+ 
+-static inline uint32_t crc32_word8(uint64_t word, uint32_t table[8][256]) {
+-    return table[7][(word >> 0u) & 0xffu] ^
+-        table[6][(word >> 8u) & 0xffu] ^
+-        table[5][(word >> 16u) & 0xffu] ^
+-        table[4][(word >> 24u) & 0xffu] ^
+-        table[3][(word >> 32u) & 0xffu] ^
+-        table[2][(word >> 40u) & 0xffu] ^
+-        table[1][(word >> 48u) & 0xffu] ^
+-        table[0][word >> 56u];
++static inline uint32_t crc32_word8(const uint8_t* data, uint32_t crc, uint32_t table[8][256]) {
++    // Table addresses are 32-bit in WASM. Load each half directly instead of
++    // shifting and narrowing the upper bytes of an eight-byte word.
++    const uint32_t low = crc32_read_u32_le(data) ^ crc;
++    const uint32_t high = crc32_read_u32_le(data + 4u);
++    return table[7][low & 0xffu] ^
++        table[6][(low >> 8u) & 0xffu] ^
++        table[5][(low >> 16u) & 0xffu] ^
++        table[4][low >> 24u] ^
++        table[3][high & 0xffu] ^
++        table[2][(high >> 8u) & 0xffu] ^
++        table[1][(high >> 16u) & 0xffu] ^
++        table[0][high >> 24u];
+ }
+ 
+ static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
+@@ -141,16 +145,12 @@ static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
+     const uint32_t final_group = (length / step - 1u) * step;
+     for (uint32_t offset = 0u; offset < final_group; offset += step) {
+         for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
+-            uint64_t word;
+-            __builtin_memcpy(&word, data + offset + i * 8u, sizeof(word));
+-            state[i] = crc32_word8(word ^ state[i], crc32_braid_table);
++            state[i] = crc32_word8(data + offset + i * 8u, state[i], crc32_braid_table);
+         }
+     }
+     uint32_t crc = 0u;
+     for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
+-        uint64_t word;
+-        __builtin_memcpy(&word, data + final_group + i * 8u, sizeof(word));
+-        crc = crc32_word8(word ^ state[i] ^ crc, crc32_table);
++        crc = crc32_word8(data + final_group + i * 8u, state[i] ^ crc, crc32_table);
+     }
+     for (uint32_t offset = final_group + step; offset < length; ++offset) {
+         crc = (crc >> 8u) ^ crc32_table[0][(crc ^ data[offset]) & 0xffu];
+diff --git a/test/term-bank-crc.test.js b/test/term-bank-crc.test.js
+index cb34e6bcc9..2738a4ceb1 100644
+--- a/test/term-bank-crc.test.js
++++ b/test/term-bank-crc.test.js
+@@ -133,6 +133,21 @@ describe('term bank CRC32', () => {
+         }
+     })
+ 
++    test('preserves every braided tail at unaligned and physical memory ends', () => {
++        for (let tail = 0; tail < 64; ++tail) {
++            const bytes = randomBytes(262144 + tail, 0x81b4e761 ^ tail)
++            const expected = crc32(bytes) >>> 0
++            for (const alignment of [0, 1, 3, 7]) {
++                expect(candidateCrc(bytes, alignment)).toBe(expected)
++            }
++            wasm.wasm_reset_heap()
++            wasm.wasm_alloc(bytes.length)
++            const input = wasm.memory.buffer.byteLength - bytes.length
++            new Uint8Array(wasm.memory.buffer, input, bytes.length).set(bytes)
++            expect(wasm.term_bank_crc32_test(input, bytes.length) >>> 0).toBe(expected)
++        }
++    })
++
+     /**
+      * @param {Uint8Array} bytes
+      */

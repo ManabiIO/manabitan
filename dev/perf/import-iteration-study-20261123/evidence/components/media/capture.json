@@ -1,0 +1,16 @@
+{
+  "source": "/workspace/scratch/71149a79699f/manabitan",
+  "fixtureBytes": 291705969,
+  "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "wasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "payloadSha256": "9344108f0b5728772d15ce5fc7b4e1872e7324b9a689d174785f7fc2218a4ee1",
+  "payloadBytes": 64449222,
+  "workers": 3,
+  "banks": 665,
+  "chunks": 170,
+  "rows": 6648310,
+  "mediaRows": 146725,
+  "ownedKeyBuffers": 293399,
+  "ownedKeyBufferBytes": 4342625,
+  "scope": "Actual production native parser/worker and importer, with Node worker transport adapter and no database sink. Only media result columns retained for materialization replay."
+}

@@ -1,0 +1,101 @@
+{
+  "status": "unqualified-performance-experiment",
+  "branch": "perf/native-crc-words-20261123-71149",
+  "commit": "520ce235948da06ebc99fa5d67772ae5614f779c",
+  "base": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+  "files": {
+    "ext/js/dictionary/wasm/term-bank-parser.c": {
+      "sha256": "c15d6e6247c7330d1ff0ab644266e3f56bfc6c0ead0103742b74f18fdf101d59",
+      "bytes": 136680
+    },
+    "test/term-bank-crc.test.js": {
+      "sha256": "b523a674477873d2e970a4f7b6c99ea72831bfd7fe72f62789058090104719dd",
+      "bytes": 7558
+    },
+    "dev/data/dictionary-wasm/manifest.json": {
+      "sha256": "73802a10007a1007af61a5ff55f2c7a5933c655b954fee2498e6f45c5dd79859",
+      "bytes": 2460
+    },
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": {
+      "sha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5",
+      "bytes": 54482
+    },
+    "ext/lib/term-bank-parser.wasm": {
+      "sha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5",
+      "bytes": 54482
+    }
+  },
+  "baselineProductWasmSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "focusedValidation": {
+    "files": 7,
+    "passedTests": 97
+  },
+  "qualification": [
+    "screen-1.json",
+    "screen-long-1.json"
+  ],
+  "sourcePatchSha256": "7ed6e56ede369278f8c5c9a67550838b7cbe4fc33688773c36a60204f8397074",
+  "manifest": {
+    "format": 1,
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "sourceDigest": "62de775e08292f9fa89ae5ba0f3a8d8628b7a43af6b6b62410c590dfdecd74a6",
+    "sourceFileCount": 14,
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+        ],
+        "arguments": [
+          "--target=wasm32",
+          "-O3",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--import-memory",
+          "-Wl,-z,stack-size=65536",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-bank-parser.c",
+          "ext/js/dictionary/wasm/term-bank-inflate.c"
+        ],
+        "arguments": [
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "f0dd04f21bd2c472691910bc8a04fb499a7eed42d7e566ca016332e04e8b02e5"
+      }
+    ]
+  }
+}

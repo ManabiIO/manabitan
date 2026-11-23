@@ -1,0 +1,13 @@
+diff --git a/ext/js/dictionary/term-bank-source-pipeline.js b/ext/js/dictionary/term-bank-source-pipeline.js
+index 6064433303..fec7a5820f 100644
+--- a/ext/js/dictionary/term-bank-source-pipeline.js
++++ b/ext/js/dictionary/term-bank-source-pipeline.js
+@@ -31,7 +31,7 @@ const RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES = 128 * 1024 * 1024;
+ const RAW_ZIP_BATCH_MAX_RANGE_BYTES = 16 * 1024 * 1024;
+ const RAW_ZIP_BATCH_MAX_GAP_BYTES = 256 * 1024;
+ 
+-export const RAW_ZIP_BATCH_MAX_FILES = 1024;
++export const RAW_ZIP_BATCH_MAX_FILES = 4096;
+ 
+ export const RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES = 4 * 1024 * 1024;
+ 

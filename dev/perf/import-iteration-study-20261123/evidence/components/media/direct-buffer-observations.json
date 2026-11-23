@@ -1,0 +1,398 @@
+[
+  {
+    "kind": "warmup",
+    "pair": 0,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 520.01135,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "warmup",
+    "pair": 0,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 193.65357600000004,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-before",
+    "pair": 0,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 277.7085309999999,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-before",
+    "pair": 0,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 329.168942,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-before",
+    "pair": 1,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 297.40752,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-before",
+    "pair": 1,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 256.070056,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 0,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 432.688576,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 0,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 168.13268599999992,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 1,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 156.19463399999995,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 1,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 368.715376,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 2,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 229.33486000000005,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 2,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 213.804713,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 3,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 254.10953200000006,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 3,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 263.61926399999993,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 4,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 274.859106,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 4,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 173.224608,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 5,
+    "arm": "B",
+    "root": "/workspace/scratch/71149a79699f/manabitan-media-iteration2",
+    "elapsedMs": 188.943535,
+    "decoderCalls": 0,
+    "references": 146570,
+    "retainedKeyBuffers": 270429,
+    "retainedKeyBufferBytes": 4201470,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "candidate",
+    "pair": 5,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 373.5560539999999,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-after",
+    "pair": 0,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 246.55591700000002,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-after",
+    "pair": 0,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 294.18216099999995,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-after",
+    "pair": 1,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 268.0818949999999,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  },
+  {
+    "kind": "control-after",
+    "pair": 1,
+    "arm": "A",
+    "root": "/workspace/scratch/71149a79699f/manabitan",
+    "elapsedMs": 285.666656,
+    "decoderCalls": 270731,
+    "references": 146570,
+    "retainedKeyBuffers": 0,
+    "retainedKeyBufferBytes": 0,
+    "referencesSha256": "5d4fd03480e1be2d3ea194eb6475ffe23f4b3a077b9902ddab92a15d4c6897ce",
+    "diagnosticSamples": [
+      "Could not find image at path \"img/cc1.webp\" for \u30d5\u30a9\u30fc\u30cb (\u3075\u3049\u30fc\u306b) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc78672.webp\" for \u79cb\u5c71\u7530 \u96c4\u592a (\u3042\u304d\u3084\u307e\u305f\u3086\u3046\u305f) in VNDB Characters by Bee",
+      "Could not find image at path \"img/cc163034.webp\" for \u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8 (\u304f\u308c\u3044\u3050\u30fb\u3046\u3041\u3058\u3047\u3068) in VNDB Characters by Bee"
+    ],
+    "scope": "Native VNDB media results replayed at worker transport; production importer materialization and compaction only. No archive reading, parsing, database writes, image payload work, or full-import timing."
+  }
+]

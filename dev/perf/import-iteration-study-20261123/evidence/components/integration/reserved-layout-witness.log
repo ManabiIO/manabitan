@@ -1,0 +1,77 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "status": "success",
+  "groups": [
+    {
+      "bank": "term_bank_1.json",
+      "bankSha256": "95a36e50faf1ee1f0c4c8de03dc157499ba8ccf58961356a5651afae190e9e37",
+      "rowCount": 2000,
+      "uniqueSpanCount": 1551,
+      "sourceStart": 0,
+      "sourceEnd": 282563,
+      "compressedBytes": 251543,
+      "uncompressedBytes": 3342709,
+      "referenceBytes": 31020,
+      "contentDictName": "raw-block-v2:jmdict",
+      "ordinaryReferenceStart": 251543,
+      "reservedReferenceStart": 0,
+      "blocks": [
+        {
+          "ordinaryOffset": 0,
+          "reservedOffset": 31020,
+          "bytes": 251543,
+          "sha256": "260faf11ba2ba79dd4c8ce5d564e56c2d1195efc9b3220889d3cca0bba97035d"
+        }
+      ],
+      "fullDecodedBytesVerified": true
+    },
+    {
+      "bank": "term_bank_110.json",
+      "bankSha256": "a6b81467f2b88bdf70f1050b861ef91ac064969d90abf1aa80a3a58bd4a449ae",
+      "rowCount": 2000,
+      "uniqueSpanCount": 1710,
+      "sourceStart": 282563,
+      "sourceEnd": 467461,
+      "compressedBytes": 150698,
+      "uncompressedBytes": 1762671,
+      "referenceBytes": 34200,
+      "contentDictName": "raw-block-v2:jmdict",
+      "ordinaryReferenceStart": 433261,
+      "reservedReferenceStart": 282563,
+      "blocks": [
+        {
+          "ordinaryOffset": 282563,
+          "reservedOffset": 316763,
+          "bytes": 150698,
+          "sha256": "a6b44ac18bee82d999e4b4f09cacfd46ecff90e66566bd62f3535a4d50ac8855"
+        }
+      ],
+      "fullDecodedBytesVerified": true
+    },
+    {
+      "bank": "term_bank_218.json",
+      "bankSha256": "c5818c28d3de57cecd05130ef1f3618f8a3e8065c240e01155eebc1f6dc52f0a",
+      "rowCount": 1448,
+      "uniqueSpanCount": 1273,
+      "sourceStart": 467461,
+      "sourceEnd": 608537,
+      "compressedBytes": 115616,
+      "uncompressedBytes": 1289635,
+      "referenceBytes": 25460,
+      "contentDictName": "raw-block-v2:jmdict",
+      "ordinaryReferenceStart": 583077,
+      "reservedReferenceStart": 467461,
+      "blocks": [
+        {
+          "ordinaryOffset": 467461,
+          "reservedOffset": 492921,
+          "bytes": 115616,
+          "sha256": "20af46c10a460119733c4da4361d4adb54f2584a459de9e3c673a03fe66186d3"
+        }
+      ],
+      "fullDecodedBytesVerified": true
+    }
+  ],
+  "conclusion": "On these pinned real term banks, only the physical ordering/offsets differ: compressed block bytes and every decoded content span are identical after source overwrite and cache invalidation. This does not by itself prove the hosted browser probe mismatch is offset-only."
+}

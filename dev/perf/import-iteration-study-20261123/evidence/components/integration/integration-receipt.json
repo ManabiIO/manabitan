@@ -1,0 +1,93 @@
+{
+  "status": "focused correctness and dry-run build passed; browser qualification is separate",
+  "commit": "8a9cc4360c32f4bf0ba0d1004905acec28ae1c41",
+  "tree": "0fd0a2a237b66eb95061d3072d07d2c432abe1a5",
+  "base": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "branch": "perf/import-round2-integration-review-20261123",
+  "originalCommits": [
+    "61b3db4caa76a8d6af2af147d88d0dc85a6f356a",
+    "6f0d6c921697479f2a2050bad316a129217c29b0",
+    "f836c595bce05ae7e97fdb0a8ea03dc8215a27f5",
+    "6de73ad7b3e0f7520c789f64c234b4ed1d9b5c7d",
+    "6cb16bd28626d597c6be736068d0cc71773200db"
+  ],
+  "cherryPickHistory": [
+    "8a9cc4360c32f4bf0ba0d1004905acec28ae1c41 Document media reference test helper return type",
+    "e2db12776d8dcc80f81c1215401a40b1f3c5d7bc Assert owned shared content in parser worker experiment tests",
+    "e38e3b5d6d7a85f8aef5d264048b16ef42d5dfa5 Defer projected media diagnostic decoding",
+    "7f20fc27c1147f6aba4b3b18598ddc14003f4802 Keep owned projected import content shareable with compression workers",
+    "e709c1da7fec8e2c1bdcbce9a2ead49bb0b356b8 Avoid repeated validation of consecutive resolved content spans"
+  ],
+  "sourceFiles": {
+    "ext/js/dictionary/term-record-opfs-store.js": "355f1b5011e6aa9d785daffe12e1460af291e19de3dfbb5fdb7245199be11ef0",
+    "ext/js/dictionary/term-bank-wasm-parser-worker.js": "88a0690bf7918bdf2745375924b117ccbf78c2bb750867314962dd812c2702fd",
+    "ext/js/dictionary/term-bank-wasm-parser.js": "a1dcb899a4882a5b8fd9a67c86eb2d268bc4602d98915908fa8bafa7ac773972",
+    "ext/js/dictionary/dictionary-importer.js": "734f8c162846258451451acff2fcd87f3981b4f6a5bde94322437e7d2b8c7edc",
+    "ext/js/dictionary/source-zip-media-pack.js": "8e9f213cb2c9d616b1f276cacc7fe097a1134b5d7623c32f588f571d125adbef"
+  },
+  "nativeParserSha256": "cc749c53fc32dfb28eefbd69f99868f8c303caa1a3f1354231516dfa5a6e1b0f",
+  "validation": {
+    "testFiles": 21,
+    "passedTests": 782,
+    "durationSeconds": 23.91,
+    "maxWorkers": 1,
+    "nodeOptions": "--max-old-space-size=1536",
+    "nativeCompilerEnvironment": "source /workspace/scratch/f34c9c9fae89/toolchains/llvm21-env.sh",
+    "node": "/workspace/scratch/fcfffdc555c8/runtime/node-v22.22.0-linux-x64/bin/node",
+    "testCommand": [
+      "node",
+      "./node_modules/vitest/vitest.mjs",
+      "run",
+      "test/term-record-validation-runs.test.js",
+      "test/dictionary-database-content-dedup.test.js",
+      "test/term-content-ownership.test.js",
+      "test/generic-span-codec-integration.test.js",
+      "test/term-content-block-store.test.js",
+      "test/zstd-term-content-pool.test.js",
+      "test/zstd-term-content-pool-drain.test.js",
+      "test/lookup-construction-experiments.test.js",
+      "test/term-bank-wasm-parser.test.js",
+      "test/term-bank-experiments.test.js",
+      "test/term-bank-parallel-source-timing.test.js",
+      "test/dictionary-importer-media-reference.test.js",
+      "test/dictionary-importer-owned-shared-media.review.test.js",
+      "test/dictionary-importer-media-batch.test.js",
+      "test/dictionary-importer-media-keys.test.js",
+      "test/dictionary-importer-media-prefetch.test.js",
+      "test/dictionary-importer-artifact-media-manifest.test.js",
+      "test/dictionary-importer-source-cancellation.test.js",
+      "test/dictionary-importer-direct-read-cancellation.test.js",
+      "test/raw-zip-range-reader.test.js",
+      "test/dictionary-generation-media-store.test.js",
+      "--maxWorkers=1"
+    ],
+    "buildCommand": [
+      "node",
+      "dev/bin/build.js",
+      "--dryRun",
+      "--all"
+    ],
+    "buildExitCode": 0,
+    "temporaryWitnessExcludedFromCommittedTree": true
+  },
+  "files": {
+    "owned-shared-media-witness.json": {
+      "sha256": "8f02aa435d9eedbc3cf29fa8b41a8f9cfdec2a803fe57693208cc7bc5b9d6fff",
+      "bytes": 660
+    },
+    "dictionary-importer-owned-shared-media.review.test.js": {
+      "sha256": "fd7f9cfb10ff4889d4ebf35996b7a1aac98a714febafebd89f2f74f897b17280",
+      "bytes": 9070
+    },
+    "focused-suite.log": {
+      "sha256": "78cb08fecdacf5f2c1e6880cc975bb68d7574fd6f071a3d24a87e2803b843768",
+      "bytes": 4649
+    },
+    "build-dry-run.log": {
+      "sha256": "7bae6d7881a82eaab8c71c487df4688f58184de655f7df88dc604051c649016d",
+      "bytes": 384
+    }
+  },
+  "trackedDiff": "",
+  "statusPorcelain": "?? node_modules"
+}
