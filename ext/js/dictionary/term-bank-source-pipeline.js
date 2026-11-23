@@ -233,6 +233,7 @@ export class RawZipPayloadReader {
             let rangeEnd = firstOffset;
             /* eslint-disable @stylistic/semi */
             let minimumRangeEnd = firstOffset
+            let contiguousMedia = borrowPayloadViews
             /* eslint-enable @stylistic/semi */
             while (endIndex < entries.length) {
                 const entry = entries[endIndex];
@@ -255,6 +256,7 @@ export class RawZipPayloadReader {
                 rangeEnd = Math.max(rangeEnd, entryUpperEnd);
                 /* eslint-disable @stylistic/semi */
                 if (borrowPayloadViews) {
+                    if (endIndex > startIndex && entry.offset !== minimumRangeEnd) { contiguousMedia = false }
                     minimumRangeEnd = Math.max(minimumRangeEnd, entry.offset + Math.min(archiveSize - entry.offset, entryUpperLength - 0xffff))
                 }
                 /* eslint-enable @stylistic/semi */
@@ -263,7 +265,11 @@ export class RawZipPayloadReader {
             const boundedEnd = Math.min(archiveSize, rangeEnd);
             const rangeLength = boundedEnd - firstOffset;
             /* eslint-disable @stylistic/semi */
-            const initialLength = borrowPayloadViews ? minimumRangeEnd - firstOffset : rangeLength
+            // Isolated or nonadjacent media retain the original single read.
+            // Adjacency supplies evidence for omitting unused tail slack; an
+            // exceptional extra field on the last member can still retry.
+            const tightRange = contiguousMedia && endIndex - startIndex >= 2
+            const initialLength = tightRange ? minimumRangeEnd - firstOffset : rangeLength
             let bytes = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES ?
                 await this._readBlobRange(firstOffset, initialLength, signal) :
                 (await this._getArchiveBytes()).subarray(firstOffset, boundedEnd)
