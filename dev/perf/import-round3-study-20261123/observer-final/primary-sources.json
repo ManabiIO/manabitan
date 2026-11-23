@@ -1,0 +1,40 @@
+{
+  "reviewedDateUtc": "2026-11-23",
+  "scope": "Primary Linux kernel and Linux man-pages references for the separate live-sibling observer; no source is asserted to describe the exact host kernel build.",
+  "sources": [
+    {
+      "url": "https://man7.org/linux/man-pages/man2/clone.2.html",
+      "title": "clone(2)",
+      "sections": ["CLONE_THREAD", "CLONE_SIGHAND", "CLONE_VM"],
+      "supports": "Same-thread-group tasks share TGID and parentage. CLONE_THREAD requires CLONE_SIGHAND, which requires CLONE_VM on modern Linux. This is the reason one live sibling represents the shared address space rather than adding another process contribution."
+    },
+    {
+      "url": "https://man7.org/linux/man-pages/man3/pthread_exit.3.html",
+      "title": "pthread_exit(3)",
+      "supports": "Exiting the calling thread does not itself terminate all other threads or release all process-shared resources."
+    },
+    {
+      "url": "https://man7.org/linux/man-pages/man5/proc_pid_task.5.html",
+      "title": "proc_pid_task(5)",
+      "supports": "Task directories are named by TID and expose per-task attributes. The documentation warns that the directory may be unavailable after the main thread terminates; the candidate requires successful complete reads instead of assuming availability."
+    },
+    {
+      "url": "https://man7.org/linux/man-pages/man5/proc_pid_status.5.html",
+      "title": "proc_pid_status(5)",
+      "supports": "Tgid identifies the thread group, Pid identifies the task, and Threads gives the process thread count; State describes task state."
+    },
+    {
+      "url": "https://docs.kernel.org/filesystems/proc.html",
+      "title": "The /proc Filesystem",
+      "supports": "smaps_rollup aggregates mapping statistics for the process. These observations remain non-atomic and do not prove an absolute peak."
+    },
+    {
+      "url": "https://kernel.googlesource.com/pub/scm/linux/kernel/git/torvalds/linux/+/141b164bbe186423e295b139e40e8e2d11cf1341/fs/proc/task_mmu.c",
+      "title": "fs/proc/task_mmu.c",
+      "gitCommit": "141b164bbe186423e295b139e40e8e2d11cf1341",
+      "gitBlob": "b87d3e86442d0cf0f604ddeeb30c956deb6bbde5",
+      "symbols": ["smaps_rollup_open", "show_smaps_rollup"],
+      "supports": "The rollup reads the selected task's memory context and can return ESRCH when the context or task is unavailable. The shared address-space interpretation comes from clone semantics; host behavior is separately demonstrated by the C witness."
+    }
+  ]
+}

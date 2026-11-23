@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "candidate": "byte-aware ordered parser admission",
+  "baseLocalCommit": "6de73ad7b3e0f7520c789f64c234b4ed1d9b5c7d",
+  "basePublishedCommit": "5754e7837a6cea28debfd5d37a95c380d9bd4871",
+  "measuredPriorRuntimeCommit": "51f095912b11ddd158ac173698eb322e2be99d12",
+  "branch": "perf/parser-byte-lead-20261123-71149a",
+  "budget": {
+    "groupTargetBytes": 25165824,
+    "formula": "unchanged parser worker count multiplied by existing LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES",
+    "twoWorkers": 50331648,
+    "threeWorkers": 75497472,
+    "fiveWorkers": 125829120
+  },
+  "fixedRule": [
+    "Retain existing worker count, group partitioning, count lead and source prefetch window.",
+    "Admit parser groups in index order only; atomically reserve their validated estimated uncompressed source bytes before loading/dispatch.",
+    "At each completed result atomically replace its reservation with exact owned backing-buffer bytes; borrowed content contributes zero owned bytes and retains its existing consume acknowledgment.",
+    "Retain exact owned bytes until the ordered sink callback settles.",
+    "Admit only when owned plus reserved plus next estimate fits; admit one indivisible oversized group exclusively when all prior groups have drained and charged bytes are zero.",
+    "Allow completion of already admitted parses whose encoded output exceeds estimates; stop further admission until drain.",
+    "Wake waiters on admission, result replacement, sink progress and terminal failure; preserve existing 25 ms cancellation polling and callback drain."
+  ],
+  "limits": [
+    "This bounds admission estimates, not complete process memory or WASM heap capacity.",
+    "It does not change parser worker count, grouping, compression workers, OPFS reservation or source prefetch limits.",
+    "Any throughput/memory comparison must be fresh full-import qualification; no performance claim is made from these source changes or unit tests.",
+    "The policy is fixed before new timing; no per-corpus tuning or outcome-dependent adjustment."
+  ],
+  "priorCounters": [
+    {
+      "corpus": "jmdict",
+      "replication": 1,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jmdict-1/jmdict/1/memory-01-B/summary.json",
+      "receiptSha256": "90a737b044334b9273f5ce1df0ef9d3b257931a8ebd374ae526cc937652e57fe",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 4,
+      "parserParallelGroupCount": 12,
+      "parserParallelOwnedContentBytes": 100725122,
+      "parserParallelPeakQueuedOwnedContentBytes": 47783299
+    },
+    {
+      "corpus": "jmdict",
+      "replication": 1,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jmdict-1/jmdict/1/memory-02-B/summary.json",
+      "receiptSha256": "684fc15a12932e9cf631b61e2bd883e73f4b7b398e9e60ca89fb98f9c9d7a501",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 4,
+      "parserParallelGroupCount": 12,
+      "parserParallelOwnedContentBytes": 100725122,
+      "parserParallelPeakQueuedOwnedContentBytes": 56380184
+    },
+    {
+      "corpus": "jmdict",
+      "replication": 2,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jmdict-2/jmdict/2/memory-00-B/summary.json",
+      "receiptSha256": "4e4b3172e278a0c2dff0c646e2458afcf38df1ceab6a1d5b25c170856f481cc6",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 4,
+      "parserParallelGroupCount": 12,
+      "parserParallelOwnedContentBytes": 100725122,
+      "parserParallelPeakQueuedOwnedContentBytes": 52076219
+    },
+    {
+      "corpus": "jmdict",
+      "replication": 2,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jmdict-2/jmdict/2/memory-03-B/summary.json",
+      "receiptSha256": "911c88d8ca91cc0d5bb0c8b0108901f8be265ea6b71e83e5495747955170cc96",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 4,
+      "parserParallelGroupCount": 12,
+      "parserParallelOwnedContentBytes": 100725122,
+      "parserParallelPeakQueuedOwnedContentBytes": 56229498
+    },
+    {
+      "corpus": "jitendex",
+      "replication": 1,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jitendex-1/jitendex/1/memory-01-B/summary.json",
+      "receiptSha256": "4b2311a4f37405cb8af5b2553f3a3db872162ccd24fca346d85755f0f4e1b431",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 22,
+      "parserParallelOwnedContentBytes": 388336969,
+      "parserParallelPeakQueuedOwnedContentBytes": 91381851
+    },
+    {
+      "corpus": "jitendex",
+      "replication": 1,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jitendex-1/jitendex/1/memory-02-B/summary.json",
+      "receiptSha256": "d601d023091526d52ee8e5083e4dd5d36877321cda5ec584ad195ef85dae16e5",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 22,
+      "parserParallelOwnedContentBytes": 388336969,
+      "parserParallelPeakQueuedOwnedContentBytes": 76295474
+    },
+    {
+      "corpus": "jitendex",
+      "replication": 2,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jitendex-2/jitendex/2/memory-00-B/summary.json",
+      "receiptSha256": "7338144abebb35f6192b7665f54b4981ad9e2a9bba8ed68fb9b24b41ac63c2f5",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 22,
+      "parserParallelOwnedContentBytes": 388336969,
+      "parserParallelPeakQueuedOwnedContentBytes": 109613481
+    },
+    {
+      "corpus": "jitendex",
+      "replication": 2,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/jitendex-2/jitendex/2/memory-03-B/summary.json",
+      "receiptSha256": "c630599d5f5a1556eccf3dcd0a3ec2ace262cd03da8dd4c8f153322038cfbbfe",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 22,
+      "parserParallelOwnedContentBytes": 388336969,
+      "parserParallelPeakQueuedOwnedContentBytes": 112429748
+    },
+    {
+      "corpus": "vndb",
+      "replication": 1,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/vndb-1/vndb/1/memory-01-B/summary.json",
+      "receiptSha256": "87951471a2393164711d3f35866ff3f58dc36c40e5197fe8491823f9365a426a",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 170,
+      "parserParallelOwnedContentBytes": 91670244,
+      "parserParallelPeakQueuedOwnedContentBytes": 3660710
+    },
+    {
+      "corpus": "vndb",
+      "replication": 1,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/vndb-1/vndb/1/memory-02-B/summary.json",
+      "receiptSha256": "dd4059bbe63f7f59d217b46069a77579e330765e4f018ea16b87a8115688ad4f",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 170,
+      "parserParallelOwnedContentBytes": 91670244,
+      "parserParallelPeakQueuedOwnedContentBytes": 4169513
+    },
+    {
+      "corpus": "vndb",
+      "replication": 2,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/vndb-2/vndb/2/memory-00-B/summary.json",
+      "receiptSha256": "8b16a780149216d6e7618bab77d166a70684c6b810e4ac4678629a41d43c5d4f",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 170,
+      "parserParallelOwnedContentBytes": 91670244,
+      "parserParallelPeakQueuedOwnedContentBytes": 4169513
+    },
+    {
+      "corpus": "vndb",
+      "replication": 2,
+      "sourceReceipt": "/workspace/scratch/71149a79699f/round2-memory-zombie-artifacts/artifacts/vndb-2/vndb/2/memory-03-B/summary.json",
+      "receiptSha256": "6c594fa65f64735531246a781a91cce5dfdc7671beb03c93104e771cd74de58a",
+      "parserParallelWorkerCount": 3,
+      "parserParallelPipelineGroupsPerWorker": 3,
+      "parserParallelGroupCount": 170,
+      "parserParallelOwnedContentBytes": 91670244,
+      "parserParallelPeakQueuedOwnedContentBytes": 4169513
+    }
+  ]
+}

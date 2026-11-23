@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "status": "frozen-candidate-local-correctness-gates-passed-performance-unqualified",
+  "localCommit": "7c6491f875f2e61f11fb087ccd7c66a50b082b8e",
+  "publishedCommit": "c763a4c8e628e1cd0417102dfbddcc70b6440735",
+  "tree": "b7e7acad1f652e85faa754c1c98a5d63524de8c0",
+  "baseLocalCommit": "6de73ad7b3e0f7520c789f64c234b4ed1d9b5c7d",
+  "basePublishedCommit": "5754e7837a6cea28debfd5d37a95c380d9bd4871",
+  "branch": "perf/parser-byte-lead-20261123-71149a",
+  "files": [
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 198472,
+      "sha256": "1e2bb35023f138173037e193cb7827b92a04d6cf8ad3101d69dba77009653d14"
+    },
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "bytes": 335112,
+      "sha256": "f233770307a406cd373e1a40c75c095d8951beacd03635e6fad5ddf87937c742"
+    },
+    {
+      "path": "test/term-bank-parser-byte-lead.test.js",
+      "bytes": 14089,
+      "sha256": "c1482497caff5c68dac623881a81a2e3e31fbf48c3064fb3095bae1f20cbd302"
+    }
+  ],
+  "checkEnvironment": {
+    "node": "v22.22.0",
+    "nodeOptions": "--max-old-space-size=1536",
+    "vitestMaxWorkers": 1
+  },
+  "checks": [
+    {
+      "name": "focused suites",
+      "exitCode": 0,
+      "files": 7,
+      "passedTests": 351,
+      "note": "Includes the initial 9 new interaction cases.",
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/focused-tests.log",
+        "bytes": 2006,
+        "sha256": "c2f8591b3e467e0fa62d425ecb35dafa02fd5ef2406fb45c11f77feb4913c46c"
+      }
+    },
+    {
+      "name": "final expanded edge suite",
+      "exitCode": 0,
+      "files": 1,
+      "passedTests": 11,
+      "note": "Adds whole-group sum and zero-estimate cases to the original 9; final unique test coverage across both runs is 353 tests.",
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/edge-tests.log",
+        "bytes": 602,
+        "sha256": "59a58a9dc75e4d706995dd1fb4c6c872dd7b8948c4522da2177bd2be1df39459"
+      }
+    },
+    {
+      "name": "scoped ESLint",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/eslint-final.log",
+        "bytes": 1042,
+        "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+      }
+    },
+    {
+      "name": "main TypeScript",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/types-main.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test TypeScript",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/types-test.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "all-target build dry-run",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/build-dry-run-final.log",
+        "bytes": 384,
+        "sha256": "7bae6d7881a82eaab8c71c487df4688f58184de655f7df88dc604051c649016d"
+      }
+    }
+  ],
+  "uniqueFocusedTests": 353,
+  "fullRepositoryUnitSuiteRunLocally": false,
+  "performanceExperimentsRun": false,
+  "browserLaunchesRun": false,
+  "predeclaredPolicy": {
+    "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/predeclared-plan.json",
+    "bytes": 8504,
+    "sha256": "41b244cc910d157bdbc9e7488643d9e340eaad12107ddce1dc44511c91333748"
+  },
+  "scopeAddendum": {
+    "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/scope-addendum.json",
+    "bytes": 569,
+    "sha256": "7ea38a413c5bceada994cee63a6111bb6ff41467ee9ed53a65c1cef917f15adf"
+  },
+  "earlierCheckReceiptsRetained": [
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/eslint.log",
+      "bytes": 1506,
+      "sha256": "560e78389f3db549899cea33b7fcb09db62b673f382fec2d0df0a237e3c8490d"
+    },
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-parser-byte-lead-evidence/build-dry-run.log",
+      "bytes": 1481,
+      "sha256": "3a12b68f9fe23d2e8cf3d468ed8ec9ee5ebc77532ff968c6fbff713c93b40eda"
+    }
+  ],
+  "earlierCheckNotes": [
+    "Initial lint found only three test-array constructor style findings; final lint passed after using Array.from.",
+    "Initial dry-run rejected the worktree ext/lib symlink; a real worktree-local generated directory fixed the environment, and final dry-run passed. No WASM source, artifact or build guard was changed."
+  ],
+  "independentStudyReview": {
+    "status": "no-protocol-blocker-in-reviewed-files",
+    "sourceSnapshotsAtReceipt": [
+      {
+        "path": "common.py",
+        "bytes": 8778,
+        "sha256": "6dc10c7ea6e273f996dd222f69fea031ce08558eb5a9460e237ec33a7e096a3e"
+      },
+      {
+        "path": "run_timing.py",
+        "bytes": 3612,
+        "sha256": "7bd0a19aefd213440d69145345c26fc94e7d289171a425d5d313706a772c2a52"
+      },
+      {
+        "path": "run_memory.py",
+        "bytes": 4144,
+        "sha256": "b115f25036270eed9765ac96ff92c4a2d4f73a5b9965cd4b2a20ec5ddfaf4f7f"
+      },
+      {
+        "path": "readback.py",
+        "bytes": 6262,
+        "sha256": "2e7c3c39f5ea073ab6152e1e1d4306790fa4edc50090cb2704c2aee56762ae0c"
+      },
+      {
+        "path": "candidates.json",
+        "bytes": 2930,
+        "sha256": "c32e50238bafd0caaaad47f730756060f87568e4f666b44d3a69e223e144225a"
+      }
+    ],
+    "findings": [
+      "Timing schedules contain 26 observations: 17 A and 9 B, eight adjacent candidate pairs with reversed order between replications, and four separate A/A controls.",
+      "Memory schedules ABCDDCBA/CDABBADC contain two reversed four-arm blocks; B/A, C/B, D/B, C/A and D/A contrast arithmetic has correct arm denominators.",
+      "Package-rule edges cover every arm; B/C/D must retain identical physical probes, A/B permits only previously verified reference offsets/raw previews/derived counters.",
+      "All observations require complete public semantic equality and restart readback; preview counters are recomputed. Failed memory observations retain the complete fixed schedule and suppress block comparisons."
+    ],
+    "integrationFollowUp": "The initial declared observer-rule string differed from SIBLING_RECOVERY_RULE; root fixed the import before publication and is adding returned schema/rule assertions. New observer proof remains under separate pre-freeze review."
+  },
+  "failureLifetimeAudit": {
+    "status": "no-concrete-correctness-blocker-found",
+    "findings": [
+      "Admission is atomic and ordered before source dispatch. Later smaller groups cannot consume the capacity needed by an earlier required group.",
+      "All bank estimates in a group are summed; estimates are already validated nonnegative safe integers under the existing total-source cap. Zero estimates retain the same rule and can only overshoot through already admitted work.",
+      "An indivisible oversized group is admitted only at the current sink frontier with zero charged bytes. Completed oversized output blocks later admission until drain.",
+      "Each worker owns at most one reservation. Result publication replaces it with exact owned backing-buffer bytes without awaiting; source/worker/validation/cancellation failure retires the outstanding reservation exactly once.",
+      "Owned bytes remain charged through the ordered callback finally block. Empty results retire reservations without creating sink calls.",
+      "Borrowed results continue to wait for the existing idempotent consumption acknowledgment; they contribute zero owned bytes and preserve reusable-WASM-heap lifetime.",
+      "Terminal failure wakes byte waiters, observes outstanding worker loops, releases borrowed acknowledgments, preserves the first error and waits for an already-admitted sink callback.",
+      "Pool disposal remains drain-only rather than implicit cancellation: it waits for a successful active run before retiring workers.",
+      "ZIP source prefetch, retained WASM heaps, compression buffers and downstream storage are unchanged and excluded from this accounting. This is not a whole-import/RSS ceiling."
+    ]
+  }
+}

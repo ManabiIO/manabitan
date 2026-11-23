@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "observerRuntimeSha256": "7ff7c3917b519c6241cb604cf141c1e1264053461f6bac9f61eab3aa78ede919",
+  "studyLocalTests": {
+    "passed": 31,
+    "logSha256": "ae1a135a2572ca5f467ee99994d7ae403632a02940fcace19bc86482b0f63706"
+  },
+  "candidateSourceRevisions": {
+    "source-release": "bcdb64934e6191ef72324d3c238e6a79edc23d34",
+    "parser-budget": "c763a4c8e628e1cd0417102dfbddcc70b6440735"
+  },
+  "fullCI": {
+    "source-release": {
+      "runId": 45125522551,
+      "conclusion": "success",
+      "unitPassed": 14017,
+      "unitFiles": 629,
+      "skipped": 47,
+      "chromiumE2E": "success",
+      "firefoxE2E": "success"
+    },
+    "parser-budget": {
+      "runId": 45126600047,
+      "conclusion": "success"
+    }
+  },
+  "independentReview": "A second agent reviewed study schedules, package relationships, full semantic/physical guards, byte-budget lifetime/drain behavior and final observer recovery. A third agent independently reviewed the registration fast-path guards. No remaining concrete blocker reported. No hosted round-three data existed at freeze."
+}

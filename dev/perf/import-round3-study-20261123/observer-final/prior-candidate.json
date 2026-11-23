@@ -1,0 +1,6 @@
+{
+  "directory": "/workspace/scratch/71149a79699f/round3-memory-observer-candidate",
+  "manifestSha256": "80cf8f27b36461fd793820648d5a9e87ab78c85f6eb91a3d26a5db603b5b9ad3",
+  "runtimeSha256": "0f898f7fa4930693ef791a49ae8863330dd2b8440f190a307b5023cfbe21f856",
+  "reason": "Independent pre-hosted-data review found early count/read failure returns could mask independently observable wrong TGID proof in observation-level classification. Prior frozen bytes are preserved unchanged."
+}

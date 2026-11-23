@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "frozenBeforeHostedData": true,
+  "observerRule": "stable-zombie-leader-live-sibling-smaps-v1",
+  "receiptSchemaVersion": 3,
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "euid": 1000,
+  "commands": [
+    {
+      "name": "unit-witness",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v",
+        "test_chromium_memory",
+        "test_sibling_recovery"
+      ],
+      "exitCode": 0,
+      "startedAtEpochSeconds": 1795416633.5513816,
+      "finishedAtEpochSeconds": 1795416634.4115608,
+      "stdout": "unit-witness.stdout.log",
+      "stderr": "unit-witness.stderr.log"
+    },
+    {
+      "name": "syntax",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "chromium_memory.py",
+        "test_chromium_memory.py",
+        "test_sibling_recovery.py"
+      ],
+      "exitCode": 0,
+      "startedAtEpochSeconds": 1795416634.4115677,
+      "finishedAtEpochSeconds": 1795416634.4856393,
+      "stdout": "syntax.stdout.log",
+      "stderr": "syntax.stderr.log"
+    }
+  ],
+  "passedTestMethods": 21,
+  "unchangedBaseFunctions": [
+    "confirmed_exited_zombie",
+    "process_inventory",
+    "descendants",
+    "browser_identity",
+    "process_role",
+    "discover_tree",
+    "read_smaps",
+    "tree_signature"
+  ],
+  "testedFiles": {
+    "chromium_memory.py": {
+      "bytes": 26045,
+      "sha256": "0f898f7fa4930693ef791a49ae8863330dd2b8440f190a307b5023cfbe21f856"
+    },
+    "test_chromium_memory.py": {
+      "bytes": 15173,
+      "sha256": "937ba1bc1e84d4060b211b05d0f425801834dea5305cf4c03cb88c0ba189687d"
+    },
+    "test_sibling_recovery.py": {
+      "bytes": 19465,
+      "sha256": "2f2bfd89b5c6da54d7dd88e109982aa76f77d9a49afaa05f303a3d826311b895"
+    },
+    "README.md": {
+      "bytes": 6728,
+      "sha256": "fe2aac29ebd0990438ef99e9a9b592e92ddf21de5d35b68ff9cab30c1a4aeb30"
+    },
+    "primary-sources.json": {
+      "bytes": 2498,
+      "sha256": "3d6f0546e43b4d308884ec168124ad14cbcfc7db6a3ca23726aefa6d8305fa68"
+    },
+    "base-identity.json": {
+      "bytes": 569,
+      "sha256": "5f7a77b87c60d02b0d8b469d5f8dd5248a10c0b4b8b4d55d8fa1573a5973cb46"
+    }
+  },
+  "scope": "Small Python/C correctness tests only; no Chromium or dictionary import."
+}

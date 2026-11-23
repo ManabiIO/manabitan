@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "predeclaredPlanSha256": "41b244cc910d157bdbc9e7488643d9e340eaad12107ddce1dc44511c91333748",
+  "clarification": "The fixed byte accounting covers active parser source estimates plus exact completed owned content awaiting its ordered sink. It excludes unchanged ZIP source prefetch, retained WASM heaps, compression buffers and downstream storage. It is not a whole-import memory or RSS ceiling.",
+  "sourcePrefetch": "Unchanged, still bounded by the existing group-count lead.",
+  "policyChange": false,
+  "performanceExperimentsRun": false
+}

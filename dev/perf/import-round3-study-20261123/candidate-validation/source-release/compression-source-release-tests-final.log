@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/71149a79699f/manabitan-compression-release-round3
+
+
+ Test Files  4 passed (4)
+      Tests  35 passed (35)
+   Start at  01:28:30
+   Duration  2.50s (transform 246ms, setup 76ms, import 288ms, tests 1.13s, environment 1ms)
+

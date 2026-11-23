@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "frozenAtEpochSeconds": 1795416773.031037,
+  "observerRule": "stable-zombie-leader-live-sibling-smaps-v1",
+  "files": {
+    "README.md": {
+      "bytes": 7182,
+      "sha256": "ad5d9326380d3c994b1669229a90c08244a4fa592caf868ba24a6d77dc931117"
+    },
+    "base-identity.json": {
+      "bytes": 569,
+      "sha256": "5f7a77b87c60d02b0d8b469d5f8dd5248a10c0b4b8b4d55d8fa1573a5973cb46"
+    },
+    "chromium_memory.py": {
+      "bytes": 26268,
+      "sha256": "7ff7c3917b519c6241cb604cf141c1e1264053461f6bac9f61eab3aa78ede919"
+    },
+    "primary-sources.json": {
+      "bytes": 2498,
+      "sha256": "3d6f0546e43b4d308884ec168124ad14cbcfc7db6a3ca23726aefa6d8305fa68"
+    },
+    "prior-candidate.json": {
+      "bytes": 484,
+      "sha256": "aba203ca88c40a33eb90b17404960f6d0a3d6666e3214639d5d9879a073fa86b"
+    },
+    "syntax.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "syntax.stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "test_chromium_memory.py": {
+      "bytes": 15173,
+      "sha256": "937ba1bc1e84d4060b211b05d0f425801834dea5305cf4c03cb88c0ba189687d"
+    },
+    "test_sibling_recovery.py": {
+      "bytes": 20835,
+      "sha256": "ed7fd99a57e1deac37f93f03a6a8143effe332e28e3dfd143d2bf931bdfe3c11"
+    },
+    "unit-witness.stderr.log": {
+      "bytes": 3670,
+      "sha256": "6f0a52fcf095ab3229c36fd301601dc992ff4da3336a7b325f650f5edecac404"
+    },
+    "unit-witness.stdout.log": {
+      "bytes": 15745,
+      "sha256": "f7e3d5d93cb661ff026c6db97cdb37446f5def5fae3a10bf9e63374cdc8d8453"
+    },
+    "validation.json": {
+      "bytes": 2502,
+      "sha256": "ba3fc37ee58c898bffe6b43bbb6a5e8b279f0105b0a3c8a18c315ad12ede3bea"
+    }
+  }
+}

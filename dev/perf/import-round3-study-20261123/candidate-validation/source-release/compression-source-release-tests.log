@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 /workspace/scratch/71149a79699f/manabitan-compression-release-round3
+
+ ❯ test/zstd-compression-worker-source-release.test.js (6 tests | 1 failed) 7939ms
+     × releases each queued event without changing a shared slab still needed by later jobs 6227ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/zstd-compression-worker-source-release.test.js > production compression worker source ownership > releases each queued event without changing a shared slab still needed by later jobs
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/zstd-compression-worker-source-release.test.js:126:9
+    124|     })
+    125|
+    126|     test('releases each queued event without changing a shared slab st…
+       |         ^
+    127|         const worker = await startWorker()
+    128|         try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 34 passed (35)
+   Start at  01:27:51
+   Duration  9.80s (transform 264ms, setup 59ms, import 283ms, tests 8.37s, environment 0ms)
+

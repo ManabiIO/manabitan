@@ -1,0 +1,35 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/71149a79699f/manabitan-compression-release-round3/test/fixtures/compression-source-release/worker-node.mjs
+  38:21  error  Expected newline between test and consequent of ternary expression       @stylistic/multiline-ternary
+  38:29  error  Expected newline between consequent and alternate of ternary expression  @stylistic/multiline-ternary
+
+/workspace/scratch/71149a79699f/manabitan-compression-release-round3/test/zstd-compression-worker-source-release.test.js
+   28:39  error  Remove the `./` prefix from the relative URL                                 unicorn/relative-url-style
+   33:57  error  Do not use useless `undefined`                                               unicorn/no-useless-undefined
+   33:77  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line
+   63:46  error  This line has 3 statements. Maximum allowed is 2                             @stylistic/max-statements-per-line
+   92:27  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   92:42  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   92:57  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   92:71  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   92:81  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   93:78  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  130:41  error  Prefer the spread operator over `Array#slice()`                              unicorn/prefer-spread
+
+✖ 13 problems (13 errors, 0 warnings)
+  11 errors and 0 warnings potentially fixable with the `--fix` option.
+

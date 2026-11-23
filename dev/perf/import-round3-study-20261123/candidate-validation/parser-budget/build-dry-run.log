@@ -1,0 +1,18 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Restoring manifest...
+file:///workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3/dev/dictionary-wasm.js:125
+    if (typeof directoryState !== 'undefined' && !directoryState.isDirectory()) { throw new Error(`Unexpected dictionary WASM output directory: ${outputDirectory}`); }
+                                                                                        ^
+
+Error: Unexpected dictionary WASM output directory: /workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3/ext/lib
+    at copyDictionaryWasm (file:///workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3/dev/dictionary-wasm.js:125:89)
+    at buildLibs (file:///workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3/dev/build-libs.js:97:5)
+    at main (file:///workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3/dev/bin/build.js:415:15)
+    at file:///workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3/dev/bin/build.js:430:78
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.22.0

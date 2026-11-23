@@ -1,0 +1,13 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/71149a79699f/manabitan-parser-byte-lead-round3
+
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  01:41:33
+   Duration  1.60s (transform 188ms, setup 24ms, import 218ms, tests 1.19s, environment 0ms)
+

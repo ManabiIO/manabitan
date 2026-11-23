@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "frozenBeforeHostedData": true,
+  "observerRule": "stable-zombie-leader-live-sibling-smaps-v1",
+  "receiptSchemaVersion": 3,
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "euid": 1000,
+  "commands": [
+    {
+      "name": "unit-witness",
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "-v",
+        "test_chromium_memory",
+        "test_sibling_recovery"
+      ],
+      "exitCode": 0,
+      "startedAtEpochSeconds": 1795416772.5138266,
+      "finishedAtEpochSeconds": 1795416772.9850318,
+      "stdout": "unit-witness.stdout.log",
+      "stderr": "unit-witness.stderr.log"
+    },
+    {
+      "name": "syntax",
+      "command": [
+        "python3",
+        "-m",
+        "py_compile",
+        "chromium_memory.py",
+        "test_chromium_memory.py",
+        "test_sibling_recovery.py"
+      ],
+      "exitCode": 0,
+      "startedAtEpochSeconds": 1795416772.9850366,
+      "finishedAtEpochSeconds": 1795416773.0286467,
+      "stdout": "syntax.stdout.log",
+      "stderr": "syntax.stderr.log"
+    }
+  ],
+  "passedTestMethods": 22,
+  "unchangedBaseFunctions": [
+    "confirmed_exited_zombie",
+    "process_inventory",
+    "descendants",
+    "browser_identity",
+    "process_role",
+    "discover_tree",
+    "read_smaps",
+    "tree_signature"
+  ],
+  "originalBaseFilesUnchanged": true,
+  "priorCandidateFreezeUnchanged": true,
+  "testedFiles": {
+    "chromium_memory.py": {
+      "bytes": 26268,
+      "sha256": "7ff7c3917b519c6241cb604cf141c1e1264053461f6bac9f61eab3aa78ede919"
+    },
+    "test_chromium_memory.py": {
+      "bytes": 15173,
+      "sha256": "937ba1bc1e84d4060b211b05d0f425801834dea5305cf4c03cb88c0ba189687d"
+    },
+    "test_sibling_recovery.py": {
+      "bytes": 20835,
+      "sha256": "ed7fd99a57e1deac37f93f03a6a8143effe332e28e3dfd143d2bf931bdfe3c11"
+    },
+    "README.md": {
+      "bytes": 7182,
+      "sha256": "ad5d9326380d3c994b1669229a90c08244a4fa592caf868ba24a6d77dc931117"
+    },
+    "primary-sources.json": {
+      "bytes": 2498,
+      "sha256": "3d6f0546e43b4d308884ec168124ad14cbcfc7db6a3ca23726aefa6d8305fa68"
+    },
+    "base-identity.json": {
+      "bytes": 569,
+      "sha256": "5f7a77b87c60d02b0d8b469d5f8dd5248a10c0b4b8b4d55d8fa1573a5973cb46"
+    },
+    "prior-candidate.json": {
+      "bytes": 484,
+      "sha256": "aba203ca88c40a33eb90b17404960f6d0a3d6666e3214639d5d9879a073fa86b"
+    }
+  },
+  "scope": "Small Python/C correctness tests only; no Chromium or dictionary import."
+}

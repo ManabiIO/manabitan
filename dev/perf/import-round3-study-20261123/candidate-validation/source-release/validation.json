@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "base": "6de73ad7b3e0f7520c789f64c234b4ed1d9b5c7d",
+  "commit": "5e195ce08c6f7859f203d250fe05f653a5656788",
+  "tree": "e1bb20bf42317ef82d35e2799c24d9f0686c5993",
+  "node": "v24.22.3",
+  "files": {
+    "ext/js/dictionary/zstd-term-content-compression-worker.js": {
+      "bytes": 4422,
+      "sha256": "d0bd7737edcd54026c18ea91e388ccba0d39ee1102e9dbf2e7dacc4a004f75d4"
+    },
+    "test/zstd-compression-worker-source-release.test.js": {
+      "bytes": 8676,
+      "sha256": "000ded6a6f26440121857b52ca869d4edf156082f69049b90114d6c28426819e"
+    },
+    "test/fixtures/compression-source-release/worker-node.mjs": {
+      "bytes": 2484,
+      "sha256": "27fa67398606d9e7a6962abf7cbca9fb2253cd3a00866624f26614f8c2810887"
+    }
+  },
+  "checks": {
+    "focusedTests": {
+      "files": 4,
+      "tests": 35,
+      "status": "passed",
+      "durationSeconds": 2.55
+    },
+    "scopedLint": "passed",
+    "mainTypes": "passed",
+    "testTypes": "passed",
+    "allTargetBuildDryRun": "passed",
+    "diffCheck": "passed",
+    "fullUnitSuite": "not run locally; normal CI requested"
+  },
+  "earlierCheckFailuresPreserved": [
+    "Initial queued-worker test exceeded Vitest timeout while deep-comparing a1MiB source; final test compares the same complete bytes with Buffer.compare.",
+    "Initial lint found only test formatting issues; fixed without runtime changes.",
+    "Initial build refused the linked ext/lib output directory; replaced only the new worktree's symlink with an owned copy, then the unchanged build passed."
+  ],
+  "logs": {
+    "/workspace/scratch/71149a79699f/compression-source-release-tests.log": {
+      "bytes": 1219,
+      "sha256": "6bcd10bd19aa791fdf30df587b93c11e3cb6b08c66cfef3ecd16aa6e008c6d77"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-tests-final.log": {
+      "bytes": 256,
+      "sha256": "f6b7376f9433cccc3a847ed9382eedd6e2c9103c90375b4e15090c2ad43c19e6"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-tests-frozen.log": {
+      "bytes": 256,
+      "sha256": "ae5405c74c6740d7ecbb362c59c51e0e25f43a506656552aef14f68b47a1170f"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-lint.log": {
+      "bytes": 2685,
+      "sha256": "2f931ad4bfc0510d570789b5cdf19b4652df327573ddf9f8c2fa2fdb6c82db16"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-lint-final.log": {
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-types-main.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-types-test.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-build.log": {
+      "bytes": 1208,
+      "sha256": "ea355252fbe65a066f392e6998f41e1ca45d531e704ad0c993d8035db665b212"
+    },
+    "/workspace/scratch/71149a79699f/compression-source-release-build-final.log": {
+      "bytes": 210,
+      "sha256": "ab3d32991d88e6cc7f0a6fb838ee8d2cd09afcc00571b64d7f053937c7aa5a9a"
+    }
+  },
+  "claims": {
+    "successfulMessageSourceFieldsReleased": true,
+    "compressedOutputAndErrorProtocolTestsPassed": true,
+    "memoryImprovementEstablished": false,
+    "timingImprovementEstablished": false
+  }
+}
