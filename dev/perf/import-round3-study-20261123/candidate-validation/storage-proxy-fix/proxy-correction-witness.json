@@ -1,0 +1,61 @@
+{
+  "description": "Two-row correctness-only witness; actual validation and record/lookup encoders execute, append interception records bytes without opening storage. No timing.",
+  "results": [
+    {
+      "arm": "develop-baseline",
+      "sourceSha256": "564fe2c4449a98f6d761950bc6664842565e3d7d0e0bb4778d9025719b273701",
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      },
+      "appended": []
+    },
+    {
+      "arm": "original-809",
+      "sourceSha256": "355f1b5011e6aa9d785daffe12e1460af291e19de3dfbb5fdb7245199be11ef0",
+      "error": null,
+      "appended": [
+        {
+          "count": 2,
+          "contentOffsetBase": 16,
+          "recordFields": [
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "recordFieldsFormat": 1
+        }
+      ]
+    },
+    {
+      "arm": "corrected-809",
+      "sourceSha256": "5dba10c189b81c312ef453061e461df4f16903b411549fc4018f4d06bb93448d",
+      "error": {
+        "name": "RangeError",
+        "message": "Invalid term content offset: NaN"
+      },
+      "appended": []
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "status": "corrective-source-frozen-local-correctness-passed-fresh-browser-qualification-pending",
+  "localCommit": "2d462b8debc242b9332c3f3ad60316304c2bea8e",
+  "tree": "5cfcb2ab2810c126951f646f08ddced3fef23986",
+  "parentLocalCommit": "61b3db4caa76a8d6af2af147d88d0dc85a6f356a",
+  "parentPublishedCommit": "6a558cb4d48e781418a37cf27637c428fb929712",
+  "branch": "perf/import-storage-proxy-fix-round3-20261123-71149a",
+  "workingTreeClean": true,
+  "files": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "bytes": 597980,
+      "sha256": "b145afe6aedc517b2520568083f53c545a8bd10967d335fe5e155f235b4a5752"
+    },
+    {
+      "path": "ext/js/dictionary/term-record-opfs-store.js",
+      "bytes": 340294,
+      "sha256": "5dba10c189b81c312ef453061e461df4f16903b411549fc4018f4d06bb93448d"
+    },
+    {
+      "path": "test/term-record-reference-origin.test.js",
+      "bytes": 12795,
+      "sha256": "a3231da16fccf906efad77e16f8fa4a10986f88c63070d77711e5b4f0f322f7a"
+    }
+  ],
+  "expectedProductionPackageDifferences": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "design": {
+    "proof": "A module-private WeakMap records only the factory-created chunk and its factory-created ordinary reference object. It records origin, not validated values.",
+    "ordinaryProducer": "The existing DictionaryDatabase producer retains one object spread, ordinary own fields, prepared-index handling and fresh resolved-reference object shape. It now records that object origin via the factory.",
+    "genericBehavior": "Unmarked chunks, Proxy wrappers, replaced reference objects, accessor-backed references and columns, shared columns and subclasses use the original per-row validation path. Prototype/descriptor checks are not used as a proof that an arbitrary caller object is not a Proxy.",
+    "awaitBoundaries": "Each run rechecks the current own reference descriptor, exact original reference-object identity, prototypes and current column descriptors/types/bounds. Offset and length values are validated again after every awaited append; no validity is cached.",
+    "optimization": "The existing consecutive-ID run loop is unchanged for eligible producer objects. Exact encoder outputs match generic output; a120-row consecutive-alias test observes one offset validation versus120 generic validations.",
+    "typedKindSpoofTriage": "No unrelated typed-kind guards were added. Actual-encoder tests show spoofed typed-array prototypes with an invalid first offset/length still throw before append."
+  },
+  "regressionWitness": {
+    "script": {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/proxy-correction-witness.mjs",
+      "bytes": 2472,
+      "sha256": "7e83ecf6836324a386fe3f9ac68fb506af3619802ed6ad8129b4aa1fdb0a1766"
+    },
+    "receipt": {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/proxy-correction-witness.json",
+      "bytes": 1423,
+      "sha256": "e422819661928e610f8d64cadf8d90b05b95be7340b0e76a16933a5afe99eadf"
+    },
+    "log": {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/proxy-correction-witness.log",
+      "bytes": 1009,
+      "sha256": "0d2b15f3336387681f34998f7382185e10d00ad7019c451b6573487a55eb496e"
+    },
+    "originalWitnessUnchanged": {
+      "path": "/workspace/scratch/71149a79699f/round3-809-proxy-witness.mjs",
+      "bytes": 2418,
+      "sha256": "85f9f5ad6436f9d1fc18715ce5451fee482a8996dbcc12aba4680f60eb39c3e2"
+    },
+    "originalReceiptUnchanged": {
+      "path": "/workspace/scratch/71149a79699f/round3-809-proxy-witness.json",
+      "bytes": 1152,
+      "sha256": "9c00a3e324c22b4c06035a1b19b21b8efc5a661d3cec725cc1c089bb5204e621"
+    },
+    "result": "Develop baseline and corrected source throw RangeError Invalid term content offset: NaN with zero append calls. Original#809 accepts and passes one incorrectly encoded chunk to append. Actual validation and record/lookup encoders execute in all three arms."
+  },
+  "checkEnvironment": {
+    "node": "v22.22.0",
+    "nodeOptions": "--max-old-space-size=1536",
+    "vitestMaxWorkers": 1,
+    "heavyChecksSerial": true
+  },
+  "checks": [
+    {
+      "name": "focused unit suites",
+      "exitCode": 0,
+      "files": 5,
+      "passedTests": 373,
+      "newActualEncoderCases": 23,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/focused-complete.log",
+        "bytes": 1305,
+        "sha256": "623e808fca5764ca192e39e553fda93537d1a3f0163ed12fb26394758391b145"
+      }
+    },
+    {
+      "name": "scoped ESLint",
+      "exitCode": 0,
+      "files": 3,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/eslint-complete.log",
+        "bytes": 1042,
+        "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+      }
+    },
+    {
+      "name": "main TypeScript",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/types-main.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test TypeScript",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/types-test-final.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "all-target build dry-run",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/build-dry-run.log",
+        "bytes": 384,
+        "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+      }
+    }
+  ],
+  "earlierCheckReceipts": [
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/focused-initial.log",
+      "bytes": 778,
+      "sha256": "0b16baf9bb122cec53158656dfd2b87c4afe4bde727e002a0eef5264bf75a32a"
+    },
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/focused-final.log",
+      "bytes": 1305,
+      "sha256": "a16addbfc3a1512c0caaf26856519b3a436f1b63d2530b9f0cbadae6d4fa5923"
+    },
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/eslint.log",
+      "bytes": 6107,
+      "sha256": "e1bc38a95ad5fe5a89b85a3384ded187e077077b5e1b6f4e7073a57693db75d3"
+    },
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/eslint-final.log",
+      "bytes": 1350,
+      "sha256": "5bdb3d074af37f881866b48b4f1623c1cfa25dcb43ac32c07edfd2bbdcb12806"
+    },
+    {
+      "path": "/workspace/scratch/71149a79699f/round3-storage-proxy-fix-evidence/types-test.log",
+      "bytes": 364,
+      "sha256": "90d57126739dff3a7c1428c1982a56510f244040b418ca4109a76b9e781bda1d"
+    }
+  ],
+  "earlierCheckNotes": [
+    "Initial lint findings affected only new-test formatting; a subsequent one-line Array.from/spread style finding was corrected. No runtime source edits resulted.",
+    "Initial test typecheck found only the new spy-helper return annotation; changed it to the existing MockInstance convention. Main types passed throughout.",
+    "All373 focused tests were rerun on the final exact source after those test-only corrections."
+  ],
+  "fullRepositoryUnitSuiteRunLocally": false,
+  "localPerformanceBenchmarksRun": false,
+  "browserLaunchesRun": false,
+  "original809SourceOrEvidenceModified": false,
+  "publishedByThisAgent": false
+}

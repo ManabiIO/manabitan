@@ -68,6 +68,29 @@
           "allowReferenceLayoutChange": false
         }
       ]
+    },
+    "storage-proxy-fix": {
+      "arms": {
+        "A": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
+        "B": "de8ef886cc1e178f425176f39dc17ca9af14a99e"
+      },
+      "packageRules": [
+        {
+          "baseline": "A",
+          "candidate": "B",
+          "paths": [
+            "js/dictionary/dictionary-database.js",
+            "js/dictionary/term-record-opfs-store.js"
+          ]
+        }
+      ],
+      "layoutRules": [
+        {
+          "baseline": "A",
+          "candidate": "B",
+          "allowReferenceLayoutChange": false
+        }
+      ]
     }
   },
   "memory": {

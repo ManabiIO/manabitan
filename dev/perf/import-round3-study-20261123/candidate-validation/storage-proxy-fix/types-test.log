@@ -1,0 +1,1 @@
+test/term-record-reference-origin.test.js(53,99): error TS2344: Type '"_appendEncodedChunk"' does not satisfy the constraint '"size" | "_textEncoder" | "_textDecoder" | "_rootDirectoryHandle" | "_recordsDirectoryHandle" | "_shardStateByFileName" | "_activeAppendShardStateByKey" | "_pendingDictionaryDeletionNames" | ... 36 more ... | "_lookupIndexWriteMetrics"'.

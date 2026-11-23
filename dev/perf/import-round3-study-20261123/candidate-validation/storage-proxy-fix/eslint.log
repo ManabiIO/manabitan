@@ -1,0 +1,63 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/71149a79699f/manabitan-storage-proxy-fix-round3/test/term-record-reference-origin.test.js
+   38:60  error  Unexpected newline after '('                                             @stylistic/function-paren-newline
+   40:5   error  Unexpected newline before ')'                                            @stylistic/function-paren-newline
+   68:9   error  Expected newline between arguments/params                                @stylistic/function-paren-newline
+   68:15  error  There should be a line break after this argument                         @stylistic/function-call-argument-newline
+   68:16  error  Expected newline between arguments/params                                @stylistic/function-paren-newline
+   68:18  error  There should be a line break after this argument                         @stylistic/function-call-argument-newline
+   68:19  error  Expected newline between arguments/params                                @stylistic/function-paren-newline
+   68:39  error  There should be a line break after this argument                         @stylistic/function-call-argument-newline
+   68:40  error  Expected newline between arguments/params                                @stylistic/function-paren-newline
+   68:59  error  There should be a line break after this argument                         @stylistic/function-call-argument-newline
+   68:60  error  Expected newline between arguments/params                                @stylistic/function-paren-newline
+   68:65  error  There should be a line break after this argument                         @stylistic/function-call-argument-newline
+  123:72  error  Unexpected newline after '('                                             @stylistic/function-paren-newline
+  125:9   error  Unexpected newline before ')'                                            @stylistic/function-paren-newline
+  166:32  error  Expected newline between test and consequent of ternary expression       @stylistic/multiline-ternary
+  166:53  error  Expected newline between consequent and alternate of ternary expression  @stylistic/multiline-ternary
+  244:20  error  Unexpected whitespace after spread operator                              @stylistic/rest-spread-spacing
+  245:15  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:18  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:21  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:24  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:27  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:30  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:33  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:36  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:39  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:42  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  245:45  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:15  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:18  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:21  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:24  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:27  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:30  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:33  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:36  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:39  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:42  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+  246:45  error  There should be a linebreak after this element                           @stylistic/array-element-newline
+
+✖ 39 problems (39 errors, 0 warnings)
+  37 errors and 0 warnings potentially fixable with the `--fix` option.
+
