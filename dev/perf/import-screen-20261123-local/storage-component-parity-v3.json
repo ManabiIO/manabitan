@@ -1,0 +1,27 @@
+{
+  "node": "v24.22.3",
+  "v8": "13.6.233.17-node.63",
+  "archive": "/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+  "archiveBytes": 291705969,
+  "mediaCount": 146570,
+  "batches": 144,
+  "parity": {
+    "baseline": {
+      "durationMs": 787.158851,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": "cd8e7f869f6e337cc4502962e5558c0702b445e22ebf4a27651e108c6e119740"
+    },
+    "candidate": {
+      "durationMs": 401.89087400000005,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": "cd8e7f869f6e337cc4502962e5558c0702b445e22ebf4a27651e108c6e119740"
+    }
+  },
+  "observations": []
+}

@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "filename-arena",
+  "dictionary": "jitendex",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidate": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+  "studyCommit": "79c8d64063747f36e4b48cbb7b588845c268eac7",
+  "originalArtifact": {
+    "id": 14861563796,
+    "name": "import-screen-filename-arena-jitendex-45262851083-1",
+    "size_in_bytes": 1171919,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14861563796",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14861563796/zip",
+    "expired": false,
+    "created_at": "2026-11-23T20:54:49Z",
+    "expires_at": "2026-12-23T20:54:47Z",
+    "updated_at": "2026-11-23T20:54:49Z",
+    "digest": "sha256:9d7cdc881aafaa4465b723821ba4a8f37a0116d7f470a9ceea8ab3e57f4a3563",
+    "workflow_run": {
+      "id": 45262851083,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-screen-20261123-ad5",
+      "head_sha": "79c8d64063747f36e4b48cbb7b588845c268eac7"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45262851083",
+  "archive": {
+    "path": "filename-arena-jitendex-45262851083.tar.xz",
+    "bytes": 141232,
+    "sha256": "c6330aa9f62035f6a7d424f34f7a2a8111997b2087bc02b2d45df3730f68539c"
+  },
+  "files": [
+    {
+      "path": "filename-arena/jitendex/block-1-A/run-1.json",
+      "bytes": 151000,
+      "sha256": "7334e722b67d8e2b728a43bc9c5dcfc9cc6e1fea813c1c38bc070abcebcf4e72"
+    },
+    {
+      "path": "filename-arena/jitendex/block-1-A/summary.json",
+      "bytes": 59246,
+      "sha256": "16535fe79b7269554500a64b09b5a0f36359ad1a33c8691f981d04592b7b55ba"
+    },
+    {
+      "path": "filename-arena/jitendex/block-1-B/run-1.json",
+      "bytes": 150922,
+      "sha256": "eb37bf2b91e0dc56e0478b47e684965c4362231fff37306fe15a500dcb0adba8"
+    },
+    {
+      "path": "filename-arena/jitendex/block-1-B/summary.json",
+      "bytes": 59329,
+      "sha256": "db35a6faec249f0ae483b3a9bebdc0dfd1f46801a9805aa67a40980f1bf58b23"
+    },
+    {
+      "path": "filename-arena/jitendex/block-1-C/run-1.json",
+      "bytes": 150825,
+      "sha256": "9dd67bcdd57077fc3cfa88306a7a44f7893f7629bd13185893d48484a0f5c380"
+    },
+    {
+      "path": "filename-arena/jitendex/block-1-C/summary.json",
+      "bytes": 59293,
+      "sha256": "214bd36bf0aa9c9031c070053c8baeaac8b93eb7a69610ca2e85264bb6644401"
+    },
+    {
+      "path": "filename-arena/jitendex/block-2-A/run-1.json",
+      "bytes": 151109,
+      "sha256": "915135d4a5d84fc9d6278da028f7e9ade4d817b57543f8e15788485d0ff2fea2"
+    },
+    {
+      "path": "filename-arena/jitendex/block-2-A/summary.json",
+      "bytes": 59342,
+      "sha256": "e5af8e36d871a0b14e8afcb210fb7ff192af37b512adccc1fa6aa043ce11d34d"
+    },
+    {
+      "path": "filename-arena/jitendex/block-2-B/run-1.json",
+      "bytes": 150555,
+      "sha256": "13402d95bf8c38a7c0dc19bc0f0389291c5dae186e378d27188a8c5caafca946"
+    },
+    {
+      "path": "filename-arena/jitendex/block-2-B/summary.json",
+      "bytes": 59245,
+      "sha256": "e8dd3b398156a04dbb49464521b334fbec025e136ff760b312397a3ae9a5be09"
+    },
+    {
+      "path": "filename-arena/jitendex/block-2-C/run-1.json",
+      "bytes": 150549,
+      "sha256": "7a374af37e6a02975e69ee075ca353d11131ad654c629b0ccd2ce59517c28951"
+    },
+    {
+      "path": "filename-arena/jitendex/block-2-C/summary.json",
+      "bytes": 59072,
+      "sha256": "ffa8ccb16a2a0b2b900261dfe53a8b8f883569c5a0f2c4e200f022d5e503fc79"
+    },
+    {
+      "path": "filename-arena/jitendex/block-3-A/run-1.json",
+      "bytes": 150871,
+      "sha256": "818fcb6c2c76d4c95a0aa0452b6a02fd91d346fb22e72b031d7532fbed140133"
+    },
+    {
+      "path": "filename-arena/jitendex/block-3-A/summary.json",
+      "bytes": 59242,
+      "sha256": "7ffbe9fda78114997c0e949fa3e398451394c777b60ea4d17cda0c4d0d3f29e4"
+    },
+    {
+      "path": "filename-arena/jitendex/block-3-B/run-1.json",
+      "bytes": 150523,
+      "sha256": "46bae28f7a595e74fc31aaa521ad42a6e08451402af6f253f91769f3e61178de"
+    },
+    {
+      "path": "filename-arena/jitendex/block-3-B/summary.json",
+      "bytes": 59078,
+      "sha256": "f4bd9da2951cd2758575293cb3931a4902ab71372a59d327fa9caaf17574571f"
+    },
+    {
+      "path": "filename-arena/jitendex/block-3-C/run-1.json",
+      "bytes": 150724,
+      "sha256": "2671eaec352729fd831d2fa0c2bbc0070502f46eac281cba9665f66b29db40a1"
+    },
+    {
+      "path": "filename-arena/jitendex/block-3-C/summary.json",
+      "bytes": 59114,
+      "sha256": "a30530436d2feae8c468481f77a00b9c762b7db152f342b013af84b4ee30108b"
+    },
+    {
+      "path": "filename-arena/jitendex/block-4-A/run-1.json",
+      "bytes": 150659,
+      "sha256": "d5940b1375814fd950a7ccfec04a992b0da3286945d046757f64ac166f161f62"
+    },
+    {
+      "path": "filename-arena/jitendex/block-4-A/summary.json",
+      "bytes": 59209,
+      "sha256": "e90b2b1980c677c50f8ff53cf0c2b03a9f16c27df64fbe3baf1850d32f7e73c4"
+    },
+    {
+      "path": "filename-arena/jitendex/block-4-B/run-1.json",
+      "bytes": 150901,
+      "sha256": "c3e079cbc84c6e5696726d6d450c875a2b478bae10ff5394459f24c8d915a2de"
+    },
+    {
+      "path": "filename-arena/jitendex/block-4-B/summary.json",
+      "bytes": 59268,
+      "sha256": "f88e95603b471ea3c69767ef2ff4f37c72eb7b8b66241a06c8644591edbd1d71"
+    },
+    {
+      "path": "filename-arena/jitendex/block-4-C/run-1.json",
+      "bytes": 151478,
+      "sha256": "92558904403683c18abf52a1620dc6cdd2369995611f94854368c54229867cc8"
+    },
+    {
+      "path": "filename-arena/jitendex/block-4-C/summary.json",
+      "bytes": 59274,
+      "sha256": "3bb92f78bfdebc9648ee70ea436299cd6387c9313f813d343030a89d2324aa10"
+    },
+    {
+      "path": "filename-arena/jitendex/block-5-A/run-1.json",
+      "bytes": 151230,
+      "sha256": "a0c5684b95348c3e505bdcc4ae831a8c004550d86d35d46c9013464c10bd6ec8"
+    },
+    {
+      "path": "filename-arena/jitendex/block-5-A/summary.json",
+      "bytes": 59321,
+      "sha256": "bb8c49268691e1b5b5b37eb7fd11f88ab378ae1d3d672c760cb9c5203b094c7c"
+    },
+    {
+      "path": "filename-arena/jitendex/block-5-B/run-1.json",
+      "bytes": 150749,
+      "sha256": "b1ead25cac33938b8b4b130b39bd40e14bc6ba6ca0df4549739aea6e83630fac"
+    },
+    {
+      "path": "filename-arena/jitendex/block-5-B/summary.json",
+      "bytes": 59169,
+      "sha256": "7e0a7efc0fb225123bdbfc9742e9dc3f8f73c5476dd1501b1d19465cffac0309"
+    },
+    {
+      "path": "filename-arena/jitendex/block-5-C/run-1.json",
+      "bytes": 150661,
+      "sha256": "b7c9b470f5e57a2e952da739c1b5ed2ca0760c1a7a78d36ded39e2e34c081190"
+    },
+    {
+      "path": "filename-arena/jitendex/block-5-C/summary.json",
+      "bytes": 59287,
+      "sha256": "3b77b39ad7670ff72b547a8bba33c174a874d3d21deda62e797676d7eefee89e"
+    },
+    {
+      "path": "filename-arena/jitendex/block-6-A/run-1.json",
+      "bytes": 150365,
+      "sha256": "8c3c53bb1b727de5ea3a593d6c7997ad3aabbb8219f655aa02bbe5a74425569a"
+    },
+    {
+      "path": "filename-arena/jitendex/block-6-A/summary.json",
+      "bytes": 59193,
+      "sha256": "1adcca171029ce7aaaaa021bcc1191f4c411715c1624cc8f6021937900780223"
+    },
+    {
+      "path": "filename-arena/jitendex/block-6-B/run-1.json",
+      "bytes": 150863,
+      "sha256": "933c310cdfd4738f9397e4fc790af8f51aa6f67446b9ffa2e7897929dca2cab4"
+    },
+    {
+      "path": "filename-arena/jitendex/block-6-B/summary.json",
+      "bytes": 59170,
+      "sha256": "210956cd26976df8704e3c5069b3afe5807996ccbde4b88f7520ffd167c9e88f"
+    },
+    {
+      "path": "filename-arena/jitendex/block-6-C/run-1.json",
+      "bytes": 150328,
+      "sha256": "fa0586c752e0d93073dbc5060fa6cf2ebabcfe31b341f08e4b292c899598d563"
+    },
+    {
+      "path": "filename-arena/jitendex/block-6-C/summary.json",
+      "bytes": 59088,
+      "sha256": "60f853872a2b2767b8107bad270848eb54f48e92310553fcb43715a2c9cf748a"
+    },
+    {
+      "path": "filename-arena/jitendex/diagnostic-A/run-1.json",
+      "bytes": 151014,
+      "sha256": "d9ddcb9e89e9e0de80c8ccd8399dba03c9014fa8a5e22d38f6f12c5f832a9d9d"
+    },
+    {
+      "path": "filename-arena/jitendex/diagnostic-A/summary.json",
+      "bytes": 59294,
+      "sha256": "01ab5911fa0fe2da6b113459febaca2e855102de5f6a6d382c0f048fd072a208"
+    },
+    {
+      "path": "filename-arena/jitendex/diagnostic-B/run-1.json",
+      "bytes": 150302,
+      "sha256": "6e0821f636eba1561adb477ff6e97eb6b701197e188c516b03f47442db42c371"
+    },
+    {
+      "path": "filename-arena/jitendex/diagnostic-B/summary.json",
+      "bytes": 59226,
+      "sha256": "6d62c1423fbe6c5e9757e685c9eb4ac0dfd49e2a6acf2378dfb3092f6d4f482f"
+    },
+    {
+      "path": "filename-arena/jitendex/expected-lookup-signature.json",
+      "bytes": 12351,
+      "sha256": "7a3c36aa8fe01644e2617f2bd3cec2dddfd1e9d4593bb3fb6f5b69b92bb4b586"
+    },
+    {
+      "path": "filename-arena/jitendex/protocol.json",
+      "bytes": 558,
+      "sha256": "8a1d1685fb8ae0dfd37daf92cbea670a4a1b11b6fd0fca2afb4cc5ec62aaeb91"
+    },
+    {
+      "path": "filename-arena/jitendex/runner.py",
+      "bytes": 12492,
+      "sha256": "b4b217108f4eca2b136a1f067767ec9e6777a07a0e0bf544bb87f7d2f3bd63fd"
+    },
+    {
+      "path": "filename-arena/jitendex/summary.json",
+      "bytes": 291106,
+      "sha256": "2145fbe9d6fa5a3a5fef4011300a468b21c5b283f8532bc67519dff2843a4632"
+    },
+    {
+      "path": "filename-arena/jitendex/warmup-A/run-1.json",
+      "bytes": 151314,
+      "sha256": "b574ae4f3239a51c92be9e5b0a3826c385b3d3c20717f4ffeac5c259dbe6da41"
+    },
+    {
+      "path": "filename-arena/jitendex/warmup-A/summary.json",
+      "bytes": 59216,
+      "sha256": "55612fd05ad29b972f093fc85f83aef0d6dc9dd8fcd27aa70a001437c56b7404"
+    },
+    {
+      "path": "filename-arena/jitendex/warmup-B/run-1.json",
+      "bytes": 150693,
+      "sha256": "0b6f024afc9cac916d03a10f2499546d8ba11ebb070f032bcb5a6e54910b17d1"
+    },
+    {
+      "path": "filename-arena/jitendex/warmup-B/summary.json",
+      "bytes": 59194,
+      "sha256": "1ef942474e1cdc05aeb1a552807cf5d0445dec0d4781ec2d6d34b7594cf48827"
+    },
+    {
+      "path": "filename-arena/jitendex/warmup-C/run-1.json",
+      "bytes": 151126,
+      "sha256": "56d4adc48567b57b8a276f2db092d35014aa6ceb9036985103631e2fede1289d"
+    },
+    {
+      "path": "filename-arena/jitendex/warmup-C/summary.json",
+      "bytes": 59282,
+      "sha256": "49b92ac3926f55eb038614004fd9eb5dcd6650220aa5dbdf84e7c64e4be477ec"
+    },
+    {
+      "path": "filename-arena/jitendex/workflow.yml",
+      "bytes": 1909,
+      "sha256": "39d67f731c927e5af8bf6a2c499f343a5c81b84ab3f39089f3a3e1fad374bbf3"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

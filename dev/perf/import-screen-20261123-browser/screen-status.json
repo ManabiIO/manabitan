@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-23 21:23:25 UTC",
+  "studies": [
+    {
+      "label": "filename-arena",
+      "run": 45262851083,
+      "study": "79c8d64063747f36e4b48cbb7b588845c268eac7",
+      "candidate": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45262851083",
+      "jobs": [
+        {
+          "id": 138001898274,
+          "name": "Frozen import screen (jitendex)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T20:49:11Z",
+          "completedAt": "2026-11-23T20:54:56Z",
+          "currentSteps": []
+        },
+        {
+          "id": 138001898624,
+          "name": "Frozen import screen (vndb)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T20:48:57Z",
+          "completedAt": "2026-11-23T21:10:14Z",
+          "currentSteps": []
+        },
+        {
+          "id": 138001898697,
+          "name": "Frozen import screen (jmdict)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T20:49:20Z",
+          "completedAt": "2026-11-23T20:53:49Z",
+          "currentSteps": []
+        }
+      ]
+    },
+    {
+      "label": "media-ranges",
+      "run": 45263267064,
+      "study": "3e7343d9baa307552dc8f60fd5731dc2a212ec21",
+      "candidate": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+      "supersededBy": "media-adjacent",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45263267064",
+      "jobs": [
+        {
+          "id": 138003369244,
+          "name": "Frozen import screen (jmdict)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T20:52:41Z",
+          "completedAt": "2026-11-23T20:57:51Z",
+          "currentSteps": []
+        },
+        {
+          "id": 138003369791,
+          "name": "Frozen import screen (jitendex)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T20:54:57Z",
+          "completedAt": "2026-11-23T20:59:50Z",
+          "currentSteps": []
+        },
+        {
+          "id": 138003369857,
+          "name": "Frozen import screen (vndb)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T20:54:03Z",
+          "completedAt": "2026-11-23T21:19:57Z",
+          "currentSteps": []
+        }
+      ]
+    },
+    {
+      "label": "utf8-loop",
+      "run": 45266391385,
+      "study": "d977051ec6f3c0ee0ed2320d92c9683cffda56ff",
+      "candidate": "cb9f241106ab1529fa21c112f1733849c188511c",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45266391385",
+      "jobs": [
+        {
+          "id": 138014304708,
+          "name": "Frozen import screen (jmdict)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T21:12:08Z",
+          "completedAt": "2026-11-23T21:16:08Z",
+          "currentSteps": []
+        },
+        {
+          "id": 138014305315,
+          "name": "Frozen import screen (jitendex)",
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-11-23T21:15:58Z",
+          "completedAt": "2026-11-23T21:20:58Z",
+          "currentSteps": []
+        },
+        {
+          "id": 138014305441,
+          "name": "Frozen import screen (vndb)",
+          "status": "in_progress",
+          "conclusion": null,
+          "startedAt": "2026-11-23T21:20:40Z",
+          "completedAt": null,
+          "currentSteps": [
+            {
+              "name": "Install matching Chromium",
+              "startedAt": "2026-11-23T21:21:09Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "media-adjacent",
+      "run": 45267017516,
+      "study": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+      "candidate": "2c604d0f0a252a7a2e223773292507921b19feaf",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45267017516",
+      "jobs": [
+        {
+          "id": 138016499804,
+          "name": "Frozen import screen (jmdict)",
+          "status": "in_progress",
+          "conclusion": null,
+          "startedAt": "2026-11-23T21:21:27Z",
+          "completedAt": null,
+          "currentSteps": [
+            {
+              "name": "Run fixed three-arm source comparison",
+              "startedAt": "2026-11-23T21:22:06Z"
+            }
+          ]
+        },
+        {
+          "id": 138016500172,
+          "name": "Frozen import screen (jitendex)",
+          "status": "in_progress",
+          "conclusion": null,
+          "startedAt": "2026-11-23T21:22:21Z",
+          "completedAt": null,
+          "currentSteps": [
+            {
+              "name": "Run fixed three-arm source comparison",
+              "startedAt": "2026-11-23T21:23:02Z"
+            }
+          ]
+        },
+        {
+          "id": 138016500273,
+          "name": "Frozen import screen (vndb)",
+          "status": "in_progress",
+          "conclusion": null,
+          "startedAt": "2026-11-23T21:22:36Z",
+          "completedAt": null,
+          "currentSteps": [
+            {
+              "name": "Run fixed three-arm source comparison",
+              "startedAt": "2026-11-23T21:23:17Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

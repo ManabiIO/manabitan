@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "sourceSha": "d06c82c258de76b7ec6229397e4b85611dc592f4",
+  "sourceTree": "655df9e9bd46fdd987a30473f2c3930007ce4e00",
+  "node": "v22.22.0",
+  "startedAt": "2026-11-23T21:05:43.883815+00:00",
+  "checks": [
+    {
+      "name": "types-main",
+      "command": [
+        "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "jsconfig.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 13.173417835001601,
+      "log": "/workspace/scratch/ad5d54ac9137/parser-loop-final-types-main.log"
+    },
+    {
+      "name": "types-test",
+      "command": [
+        "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 31.021530227997573,
+      "log": "/workspace/scratch/ad5d54ac9137/parser-loop-final-types-test.log"
+    },
+    {
+      "name": "lint",
+      "command": [
+        "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/eslint/bin/eslint.js",
+        "test/term-bank-utf8-copy.test.js"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 5.112121890997514,
+      "log": "/workspace/scratch/ad5d54ac9137/parser-loop-final-lint.log"
+    },
+    {
+      "name": "android-isolated",
+      "command": [
+        "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/android/enable-firefox-remote-debugging.test.js",
+        "--maxWorkers=1",
+        "--reporter=dot"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 27.509803879001993,
+      "log": "/workspace/scratch/ad5d54ac9137/parser-loop-final-android-isolated.log"
+    }
+  ],
+  "complete": true,
+  "sourceUnchanged": true
+}

@@ -1,0 +1,43 @@
+import datetime
+import json
+import os
+import pathlib
+import subprocess
+import sys
+import time
+
+root = pathlib.Path('/workspace/scratch/ad5d54ac9137')
+workspace = root / 'parser-loop'
+node_dir = root / 'toolchains/node22/node-v22.22.0-linux-x64/bin'
+node = str(node_dir / 'node')
+env = dict(os.environ)
+env['PATH'] = f"{node_dir}:{env['PATH']}"
+env['MANABITAN_CLANG'] = str(root / 'parser-pinned-clang')
+checks = [
+    ('types-main', [node, 'node_modules/typescript/bin/tsc', '--noEmit', '--project', 'jsconfig.json']),
+    ('types-test', [node, 'node_modules/typescript/bin/tsc', '--noEmit', '--project', 'test/jsconfig.typecheck.json']),
+    ('lint', [node, 'node_modules/eslint/bin/eslint.js', 'test/term-bank-utf8-copy.test.js']),
+    ('android-isolated', [node, 'node_modules/vitest/vitest.mjs', 'run', 'test/android/enable-firefox-remote-debugging.test.js', '--maxWorkers=1', '--reporter=dot']),
+]
+report = {
+    'schema': 1,
+    'sourceSha': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=workspace, text=True).strip(),
+    'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=workspace, text=True).strip(),
+    'node': subprocess.check_output([node, '--version'], text=True).strip(),
+    'startedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    'checks': [],
+}
+report_path = root / 'parser-loop-final-checks.json'
+for name, command in checks:
+    log = root / f'parser-loop-final-{name}.log'
+    started = time.monotonic()
+    with log.open('w') as output:
+        result = subprocess.run(command, cwd=workspace, env=env, stdout=output, stderr=subprocess.STDOUT)
+    item = {'name': name, 'command': command, 'exitCode': result.returncode, 'elapsedSeconds': time.monotonic() - started, 'log': str(log)}
+    report['checks'].append(item)
+    report_path.write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps(item), flush=True)
+report['complete'] = True
+report['sourceUnchanged'] = subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=workspace, text=True).strip() == ''
+report_path.write_text(json.dumps(report, indent=2) + '\n')
+sys.exit(0 if report['sourceUnchanged'] and all(item['exitCode'] == 0 for item in report['checks']) else 1)

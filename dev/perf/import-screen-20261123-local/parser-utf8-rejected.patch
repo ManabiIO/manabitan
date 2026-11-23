@@ -1,0 +1,298 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index 299422d..7fa4e86 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
++    "sourceDigest": "d35e592afffcb2f370df711c157fa2899239195a089a95b48f3c78521bead1fd",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -58,7 +58,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
++            "sha256": "5c963e6b7a5075c7d4a5c916659846e4b372ae80f8b0ca9e23ee46549c64a246"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index 153735f747f2fc2a7ac65ca2cdda27aaee9388c3..f7df37c0c3f1a0d92b10cceaf8ed6f779cba3c1e 100644
+GIT binary patch
+delta 629
+zcmaiwu}d656vk)Xo7ug)b<hw~smI&3(89{%3JY-x6VDU;6SN)?6cj|oy+Sy!NCew6
+zNs~@Nm_NWORmvb1>4ON?7J~YANAMKEYWIE2`+eW{&abg^g=ZvDo5+vKF@V1pegSE-
+za$iHpVds<I*!rp_<v0kVsZJkV2Bcd?!whAlJ{v)bMH;30K)2m)3nT1q+TRx)o$if)
+zkThte%laE2XfPcn@c;J~wfycI`?rw)Ls`vXhDk8XYa&JDfk#Q`CWOe86?1GLcqBC?
+z_{+2u`((n8lwDi5%U{YxO+dI}v1wGXTzEz$A-3oF{F4YStCV6jh-}S}f<UqTnKz9N
+z*wvu?$hl?0=8>bgFn^9AsN$#^0%1>}X=fkgx*cithJv0@ap@mD`7<$g6uo4lg+Szc
+zXwH`e=ACRB3@ugh_eRSgzG@jnbXl#mPD*QpqWRKVD0;}%Rj9rZly6*Jy;ogO%~2AL
+npg3|uoUds_l31DY;k2LVAoxEA>5%ODn_riaJodj&w&xxJ%Mx-Y
+
+delta 944
+zcmY+CyKYlK5Qg`5>~p+X8AODlW5=02k>eCVg(xVHx8PzN;1#GBMY5$JML={Ung}88
+z9pYBd(I6dBqC5sX0^$Wy!p!a(ljg|!XZD|&|MTH5dGuR;1uji1Yc}~vh^IfB9SQgI
+zV<SZ^9-eLX_MfYIYg;gr!2r(qY6RKTWMT{zsB4D7;3|F;R_wZCmdi1$1NX3rpL2{=
+z;xc2v9rv~rV|*oCy@L-*%U8I@2g9UZ@$L_wyTPRDqoL!rhxO1uo7e8{b<~9Ip*~#b
+zr{W8B3rmk|ccr79v^`C~p@+Mc_ogPtJxX6~oM+6g1vhenwJ_@wpO_-f*j=h0`E;Sq
+zl3L?pFPF`G%jOrM88+}zH@<E1a7-U3pu*izebaPs>M#m|TC~P|N)NOWMbkH&0&~Jw
+zT}rL%Q(>42(pMKwRPg>278<WDy+xJ7U}BhlbMavN^cJjQ=vDWUV6bZYFlu%W?qvLZ
+z^ZoI$XkHx(QNNYEsAK#TIkOVsF_0dOWPqn=LrL%uI3A)Ryv)i7ua(p#ymo|_qgxR{
+zDL0!h_~potWU7jq{Qif?x<oM7kb{5>=}BB9^Hm2EvBXIQAJG5ksi+2eQ6+jw4fLW)
+z@RAzf1+{iWPig2RdNN$oMp&psdh|apq7dk{G%#EVXeG*~jgTlIq^Br0wV+p|0@6!)
+s#uo%HIShgYU7L9;HAoOdPh&<nrq#TDQuX+U=G*5VE&i@~_T|Bizcl}zqyPW_
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index d1b26c4..20c99e9 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -2401,23 +2401,48 @@ static int json_string_token_has_escape(
+ 
+ static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t length) {
+     for (uint32_t i = 0u; i < length;) {
+-        const uint8_t first = bytes[i++];
+-        output[i - 1u] = first;
+-        if (first < 0x80u) { continue; }
+-        uint32_t width;
+-        if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
+-        else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
+-        else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
+-        else { return 0; }
+-        if (width - 1u > length - i) { return 0; }
+-        const uint8_t second = bytes[i];
+-        if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
+-            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
+-        for (uint32_t j = 0u; j < width - 1u; ++j) {
+-            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
+-        }
+-        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
+-        i += width - 1u;
++        const uint8_t first = bytes[i];
++        if (first < 0x80u) {
++            output[i++] = first;
++            continue;
++        }
++        // Validate and copy each bounded code point directly. The generic
++        // continuation loops otherwise load these same short keys twice.
++        if (first >= 0xe0u && first <= 0xefu) {
++            if (length - i < 3u) { return 0; }
++            const uint8_t second = bytes[i + 1u];
++            const uint8_t third = bytes[i + 2u];
++            if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u ||
++                (first == 0xe0u && second < 0xa0u) ||
++                (first == 0xedu && second > 0x9fu)) { return 0; }
++            output[i] = first;
++            output[i + 1u] = second;
++            output[i + 2u] = third;
++            i += 3u;
++        } else if (first >= 0xc2u && first <= 0xdfu) {
++            if (length - i < 2u) { return 0; }
++            const uint8_t second = bytes[i + 1u];
++            if ((second & 0xc0u) != 0x80u) { return 0; }
++            output[i] = first;
++            output[i + 1u] = second;
++            i += 2u;
++        } else if (first >= 0xf0u && first <= 0xf4u) {
++            if (length - i < 4u) { return 0; }
++            const uint8_t second = bytes[i + 1u];
++            const uint8_t third = bytes[i + 2u];
++            const uint8_t fourth = bytes[i + 3u];
++            if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u ||
++                (fourth & 0xc0u) != 0x80u ||
++                (first == 0xf0u && second < 0x90u) ||
++                (first == 0xf4u && second > 0x8fu)) { return 0; }
++            output[i] = first;
++            output[i + 1u] = second;
++            output[i + 2u] = third;
++            output[i + 3u] = fourth;
++            i += 4u;
++        } else {
++            return 0;
++        }
+     }
+     return 1;
+ }
+diff --git a/test/term-bank-utf8-copy.test.js b/test/term-bank-utf8-copy.test.js
+new file mode 100644
+index 0000000..84e5479
+--- /dev/null
++++ b/test/term-bank-utf8-copy.test.js
+@@ -0,0 +1,174 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import {readFile} from 'node:fs/promises'
++import {beforeAll, describe, expect, test} from 'vitest'
++import {
++    consumeLastTermBankWasmParseProfile,
++    parseTermBankWithWasmColumnChunks,
++    setTermBankWasmModule,
++} from '../ext/js/dictionary/term-bank-wasm-parser.js'
++import {encodePersistedTermLookupIndexFromPreinternedPlan} from '../ext/js/dictionary/term-lookup-index.js'
++import {getValidatedStringOffsets} from '../ext/js/dictionary/term-record-preinterned-plan.js'
++
++const encoder = new TextEncoder()
++const decoder = new TextDecoder('utf-8', {ignoreBOM: true})
++
++/** @typedef {{expressions: number[][], readings: number[][], equal: number[], scores: number[], sequences: number[], lookup: number[], content: number[][], hashes: number[][]}} Snapshot */
++
++beforeAll(async () => {
++    setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))))
++})
++
++/**
++ * Keep raw UTF-8 inside a complete, bounded JSON key. Repeated rows also cover
++ * native intern hits, which must never promote malformed bytes into an entry.
++ * @param {number[]} raw
++ * @param {string} prefix
++ * @returns {Uint8Array[]}
++ */
++function sourceBanks(raw, prefix) {
++    const key = Uint8Array.from([...encoder.encode(prefix), ...raw])
++    const first = encoder.encode('[["')
++    const last = encoder.encode('","reading","","",7,["definition"],23,""]]')
++    const source = new Uint8Array(first.length + key.length + last.length)
++    source.set(first)
++    source.set(key, first.length)
++    source.set(last, first.length + key.length)
++    return [source, new Uint8Array(source)]
++}
++
++/**
++ * Use the JavaScript decoder/interner as an independent oracle, then compare
++ * complete persisted lookup bytes and content fields before the heap resets.
++ * @param {Uint8Array[]} sources
++ * @param {'fused'|'native'|'javascript'} mode
++ * @returns {Promise<{snapshot: Snapshot, profile: ReturnType<typeof consumeLastTermBankWasmParseProfile>}>}
++ */
++async function project(sources, mode) {
++    /** @type {Snapshot|null} */
++    let snapshot = null
++    await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
++        const plan = chunk.termRecordPreinternedPlan
++        const offsets = getValidatedStringOffsets(plan)
++        const key = (/** @type {number} */ index) => [...plan.stringsBuffer.subarray(offsets[index], offsets[index] + plan.stringLengths[index])]
++        const meta = chunk.contentMetaList
++        const bytes = chunk.contentBytesBuffer
++        if (!(meta instanceof Uint32Array) || !(bytes instanceof Uint8Array)) { throw new Error('Missing native content columns') }
++        snapshot = {
++            expressions: Array.from(plan.expressionIndexes, key),
++            readings: Array.from(plan.readingIndexes, key),
++            equal: [...chunk.readingEqualsExpressionList],
++            scores: [...chunk.scoreList],
++            sequences: [...chunk.sequenceList],
++            lookup: [...encodePersistedTermLookupIndexFromPreinternedPlan(plan, chunk.readingEqualsExpressionList, chunk.sequenceList, chunk.rowCount)],
++            content: Array.from({length: chunk.rowCount}, (_, i) => {
++                const start = (chunk.contentBytesBaseOffset ?? 0) + meta[i * 4]
++                return [...bytes.subarray(start, start + meta[i * 4 + 1])]
++            }),
++            hashes: Array.from({length: chunk.rowCount}, (_, i) => [meta[i * 4 + 2], meta[i * 4 + 3]]),
++        }
++    }, 12000, {
++        experimentalSkipFusedParse: mode !== 'fused',
++        useNativeStringPlan: mode !== 'javascript',
++        emitContentSlab: true,
++        emitTokenBinaryContent: true,
++        emitTermByteLists: false,
++        computeContentHashes: true,
++        singleChunk: true,
++        validateGlossaryTypes: true,
++    })
++    if (snapshot === null) { throw new Error('Expected complete parser columns') }
++    return {snapshot, profile: consumeLastTermBankWasmParseProfile()}
++}
++
++describe('bounded UTF-8 copying into native key arenas', () => {
++    const valid = [
++        [0x20],
++        [0x7f],
++        [0xc2, 0x80],
++        [0xdf, 0xbf],
++        [0xe0, 0xa0, 0x80],
++        [0xe0, 0xbf, 0xbf],
++        [0xe1, 0x80, 0x80],
++        [0xec, 0xbf, 0xbf],
++        [0xed, 0x80, 0x80],
++        [0xed, 0x9f, 0xbf],
++        [0xee, 0x80, 0x80],
++        [0xef, 0xbb, 0xbf],
++        [0xef, 0xbf, 0xbf],
++        [0xf0, 0x90, 0x80, 0x80],
++        [0xf0, 0xbf, 0xbf, 0xbf],
++        [0xf1, 0x80, 0x80, 0x80],
++        [0xf3, 0xbf, 0xbf, 0xbf],
++        [0xf4, 0x80, 0x80, 0x80],
++        [0xf4, 0x8f, 0xbf, 0xbf],
++    ]
++    const invalid = [
++        [0x80],
++        [0xbf],
++        [0xc0, 0xaf],
++        [0xc1, 0xbf],
++        [0xc2],
++        [0xc2, 0x7f],
++        [0xdf, 0xc0],
++        [0xe0],
++        [0xe0, 0xa0],
++        [0xe0, 0x9f, 0xbf],
++        [0xe1, 0x80],
++        [0xe1, 0x7f, 0x80],
++        [0xe1, 0x80, 0x7f],
++        [0xe1, 0xc0, 0x80],
++        [0xe1, 0x80, 0xc0],
++        [0xed, 0xa0, 0x80],
++        [0xed, 0xbf, 0xbf],
++        [0xf0],
++        [0xf0, 0x90],
++        [0xf0, 0x90, 0x80],
++        [0xf0, 0x8f, 0xbf, 0xbf],
++        [0xf1, 0x7f, 0x80, 0x80],
++        [0xf1, 0x80, 0x7f, 0x80],
++        [0xf1, 0x80, 0x80, 0x7f],
++        [0xf1, 0xc0, 0x80, 0x80],
++        [0xf1, 0x80, 0xc0, 0x80],
++        [0xf1, 0x80, 0x80, 0xc0],
++        [0xf4, 0x90, 0x80, 0x80],
++        [0xf5, 0x80, 0x80, 0x80],
++        [0xfe],
++        [0xff],
++    ]
++
++    test.each(['', 'ASCII', '日本語', 'é𠮷'])('preserves every UTF-8 width boundary after prefix %j', async (prefix) => {
++        for (const raw of valid) {
++            const sources = sourceBanks(raw, prefix)
++            const oracle = await project(sources, 'javascript')
++            const expected = [...encoder.encode(prefix), ...raw]
++            expect(oracle.snapshot.expressions).toStrictEqual([expected, expected])
++            for (const mode of /** @type {const} */ (['fused', 'native'])) {
++                const actual = await project(sources, mode)
++                expect(actual.snapshot).toStrictEqual(oracle.snapshot)
++                expect(actual.profile?.fusedParseFallbacks ?? 0).toBe(0)
++                expect(actual.profile?.nativeStringPlanFallbackChunkCount ?? 0).toBe(0)
++                expect(actual.profile?.nativeStringPlanChunkCount).toBe(1)
++            }
++        }
++    })
++
++    test.each(['', 'ASCII', '日本語', 'é𠮷'])('keeps replacement decoding for malformed or truncated UTF-8 after prefix %j', async (prefix) => {
++        for (const raw of invalid) {
++            const sources = sourceBanks(raw, prefix)
++            const oracle = await project(sources, 'javascript')
++            const expected = [...encoder.encode(decoder.decode(Uint8Array.from([...encoder.encode(prefix), ...raw])))]
++            expect(oracle.snapshot.expressions).toStrictEqual([expected, expected])
++            for (const mode of /** @type {const} */ (['fused', 'native'])) {
++                const actual = await project(sources, mode)
++                expect(actual.snapshot).toStrictEqual(oracle.snapshot)
++                expect(actual.profile?.fusedParseFallbacks ?? 0).toBe(mode === 'fused' ? 1 : 0)
++                expect(actual.profile?.nativeStringPlanFallbackChunkCount).toBe(1)
++            }
++        }
++    })
++})

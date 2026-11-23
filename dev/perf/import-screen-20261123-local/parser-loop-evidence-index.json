@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "baselineSha": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidateSha": "d06c82c258de76b7ec6229397e4b85611dc592f4",
+  "candidateTree": "655df9e9bd46fdd987a30473f2c3930007ce4e00",
+  "wasmSha256": "649d96ba9312ff5d162364203fbed2cbe11a30350f2fac56528fb10a3c54f500",
+  "notes": [
+    "The initial full unit run is retained:639 suites and14386 tests passed,2 compiler suites could not find a compiler,1 Android helper timed out,68 tests skipped.",
+    "The corrected pinned compiler was used for affected suites:both compiler suites passed,21 native tests; the same rerun had2 different Android5s timeouts.",
+    "The unchanged-parent Android helper suite passed22 tests. The final isolated candidate Android helper suite passed22 tests at unchanged default5s timeout. Do not claim the baseline reproduced the failures.",
+    "The final main/test TS and scoped ESLint pass. All-target dry build and pinned21.1.8 WASM reproduction passed; generated library binary matches manifest.",
+    "The full3-corpus oracle passed all7613164 lexical rows/937 banks. It is fixed4-bank component correctness coverage with independent source inflate+CRC and JSON comparison, not a production planner/performance measurement.",
+    "The tiny-loop key-only screen remains inconclusive for latency:JMdict median paired wall+1.2506%,Jitendex-7.7232%,ASCII+3.1709% with large tails. Do not claim whole-import speedup or a reliable small latency effect.",
+    "parser-utf8-* files are rejected earlier width-dispatch variant observations and a setup failure; they are included as retained negative evidence and must not be attributed to the final tiny-loop candidate.",
+    "Pinned compiler assembly confirms fused parse_and_encode_term_bank_token_binary_dedup calls standalone copy_valid_utf8. The nonfused build_term_string_plan inlines it. Unchanged fused main body size does not mean the changed helper is off the active path."
+  ],
+  "files": [
+    {
+      "path": "parser-loop-all-parity.mjs",
+      "sizeBytes": 12912,
+      "sha256": "639c0c9720f3d16528589357b1268f71c0f750d1d58e8cd05e0a08cc9d70ad3f"
+    },
+    {
+      "path": "parser-loop-all-parity.json",
+      "sizeBytes": 464675,
+      "sha256": "06eff225986decd64de9eceb0e86ff57c7e51af5550f49c0998b88f74c6ae355"
+    },
+    {
+      "path": "parser-loop-all-parity.log",
+      "sizeBytes": 1183,
+      "sha256": "6506d44d80782e94e30b16c79c6ce24d3baaf4a7d852ed244116294439a91d6a"
+    },
+    {
+      "path": "parser-loop-key-screen.mjs",
+      "sizeBytes": 7823,
+      "sha256": "2c551530b3b87a30ffbf44798f510b44501f80cdda0092d2b05e1afceabc4a15"
+    },
+    {
+      "path": "parser-loop-key-screen.json",
+      "sizeBytes": 17436,
+      "sha256": "0c5de4ed5643150d90bcb0c8fddfed40f4bbf6a618cabee18d519f45463b06bb"
+    },
+    {
+      "path": "parser-loop-key-screen.log",
+      "sizeBytes": 1726,
+      "sha256": "e072f746e5ee30b14fd169a4afdc1bb3b3b8f6456e066da46abbcb9ce0121277"
+    },
+    {
+      "path": "parser-loop-focused.log",
+      "sizeBytes": 1113,
+      "sha256": "4e1500138d455dfe6489436d35ca36ee371a89b94523141354ea1cb6f333b871"
+    },
+    {
+      "path": "parser-loop-build.log",
+      "sizeBytes": 384,
+      "sha256": "7bae6d7881a82eaab8c71c487df4688f58184de655f7df88dc604051c649016d"
+    },
+    {
+      "path": "parser-loop-wasm-check.log",
+      "sizeBytes": 584,
+      "sha256": "6ccde2d58ea9dbd3662f83fc8d2e4936c072cd7941aecdd5ea96b48c3aae586e"
+    },
+    {
+      "path": "parser-loop-unit.log",
+      "sizeBytes": 135710,
+      "sha256": "5144496f5ff953a784a967e056cba608d48ccede75e98900e397fa42591337e9"
+    },
+    {
+      "path": "parser-loop-unit-affected.log",
+      "sizeBytes": 4792,
+      "sha256": "6059089ca20bf5a989d47316f9d74dfbea0ac94c5448bf64e9c12e04e2088e3a"
+    },
+    {
+      "path": "parser-loop-android-parent.log",
+      "sizeBytes": 2466,
+      "sha256": "969b8b6890e24281b8b8be1d1d3d9fead6fa1bde9aae9c44b9db99142c69192c"
+    },
+    {
+      "path": "parser-loop-final-checks.py",
+      "sizeBytes": 2247,
+      "sha256": "a5d2cb86754e4ff534101ee60450c51ae4e4168fe057d335aeb25f07feea5b90"
+    },
+    {
+      "path": "parser-loop-final-checks.json",
+      "sizeBytes": 1997,
+      "sha256": "e16bb8345fe104f908713faf23a5e4edc66cdaca28809ac1aabbb8fd3deb99e4"
+    },
+    {
+      "path": "parser-loop-final-types-main.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parser-loop-final-types-test.log",
+      "sizeBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "parser-loop-final-lint.log",
+      "sizeBytes": 1044,
+      "sha256": "7df636965058ed7adc49e56ce461c77528ca2abd070fc710f8d6bf2cc8c4ebd5"
+    },
+    {
+      "path": "parser-loop-final-android-isolated.log",
+      "sizeBytes": 59075,
+      "sha256": "9d2e7e9da700db42ba7fe8b700ee58e5385f2dbc8db45c3374be5568e8f4ccd6"
+    },
+    {
+      "path": "parser-loop-llvm.s",
+      "sizeBytes": 697041,
+      "sha256": "c876e126a27af7c711b6e5e76034064f404a7dc7dce98a121b1f2840cc857729"
+    },
+    {
+      "path": "parser-utf8-jmdict-screen.json",
+      "sizeBytes": 18382,
+      "sha256": "37306d7b2c602edf8cc3e5781a035c511cd7acefe845cd1832705ec5040769ed"
+    },
+    {
+      "path": "parser-utf8-jitendex-screen.json",
+      "sizeBytes": 18394,
+      "sha256": "59f9c5d32c853c4f115bd8692dbf5a3c1a29075e92576ec7f25d5877780616f1"
+    },
+    {
+      "path": "parser-utf8-key-screen.json",
+      "sizeBytes": 7547,
+      "sha256": "83a3c5b3abdb6618cb39ca682a1ed1cafa62cfb7391ceb5e6cd182529719ca11"
+    },
+    {
+      "path": "parser-utf8-key-screen-setup-failure.json",
+      "sizeBytes": 1302,
+      "sha256": "cbb22525b8bb38f7f32744663f8457cfd8b7c811694a712c4670860908010551"
+    }
+  ]
+}

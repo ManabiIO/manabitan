@@ -1,0 +1,5 @@
+{
+  "excluded": true,
+  "decisionAt": "2026-11-23T20:42:13.161894+00:00",
+  "reason": "Concurrent pipeline-opt main TypeScript checker was still running when root assigned and storage_opt began timing. Contamination learned and entire cohort excluded before inspecting outcomes. All observations retained unmodified. Product source frozen. One replacement complete fixed 6-pair cohort was declared before seeing either outcome."
+}

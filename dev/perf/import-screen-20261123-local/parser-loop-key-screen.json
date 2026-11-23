@@ -1,0 +1,765 @@
+{
+  "scope": "Same-process key interning only: source JSON was projected to real expression/reading fields before setup; parse, inflate, memory allocation and digest verification excluded. No full-import performance claim.",
+  "node": "v22.22.0",
+  "warmupsPerArm": 10,
+  "blocks": 6,
+  "iterationsPerObservation": 3,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sources": [
+    {
+      "root": "/workspace/scratch/ad5d54ac9137/manabitan-live",
+      "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+    },
+    {
+      "root": "/workspace/scratch/ad5d54ac9137/parser-loop",
+      "wasmSha256": "649d96ba9312ff5d162364203fbed2cbe11a30350f2fac56528fb10a3c54f500"
+    }
+  ],
+  "complete": true,
+  "cases": [
+    {
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "sourceBytes": 28152117,
+      "stats": [
+        {
+          "uniqueKeys": 466564,
+          "keyBytes": 7126688,
+          "wasmHeapBytes": 123928576
+        },
+        {
+          "uniqueKeys": 466564,
+          "keyBytes": 7126688,
+          "wasmHeapBytes": 123928576
+        }
+      ],
+      "digest": "b637440defb3dce98e1945225f3b613235789aa0932b74c4f571ef4090579464",
+      "observations": [
+        {
+          "block": 0,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            300.55188500000077,
+            328.99115000000165,
+            268.3341650000002
+          ],
+          "cpuMs": [
+            299.484,
+            328.459,
+            268.402
+          ],
+          "switches": [
+            {
+              "voluntary": 4,
+              "involuntary": 43,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 32,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 1,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            286.84383700000035,
+            285.7463520000001,
+            662.1368409999995
+          ],
+          "cpuMs": [
+            286.873,
+            286.383,
+            662.083
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 2,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            356.0259040000001,
+            342.8289700000005,
+            307.4805489999999
+          ],
+          "cpuMs": [
+            355.996,
+            342.806,
+            307.496
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 3,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            276.0023860000001,
+            301.06441500000074,
+            321.08409700000084
+          ],
+          "cpuMs": [
+            276.065,
+            300.956,
+            321.112
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 4,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            571.5092380000006,
+            355.8635940000004,
+            330.3314250000003
+          ],
+          "cpuMs": [
+            571.513,
+            355.892,
+            330.325
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 3,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 5,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            333.71944500000063,
+            352.0648400000009,
+            359.46891199999845
+          ],
+          "cpuMs": [
+            333.743,
+            352.088,
+            359.481
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            }
+          ]
+        }
+      ],
+      "ratios": [
+        1.1566152835001002,
+        1.6605298219170257,
+        1.0333854884151383,
+        0.9916258004121801,
+        0.789193942123233,
+        0.9844612103270484
+      ],
+      "cpuRatios": [
+        1.1567779448692168,
+        1.6567952706689992,
+        1.0333387591711731,
+        0.992133401560361,
+        0.7892592682943057,
+        0.984447070050669
+      ],
+      "medianPairedChangePercent": 1.2505644413659311,
+      "medianPairedCpuChangePercent": 1.273608036576701
+    },
+    {
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "sourceBytes": 21386607,
+      "stats": [
+        {
+          "uniqueKeys": 573895,
+          "keyBytes": 8304160,
+          "wasmHeapBytes": 93192192
+        },
+        {
+          "uniqueKeys": 573895,
+          "keyBytes": 8304160,
+          "wasmHeapBytes": 93192192
+        }
+      ],
+      "digest": "6632aae992141939f742ec90e7836c6dae1391ba664895ec7ccbb207b4bc7f21",
+      "observations": [
+        {
+          "block": 0,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            245.5399380000017,
+            189.0091930000017,
+            184.01374299999952
+          ],
+          "cpuMs": [
+            245.604,
+            189.015,
+            184.032
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 1,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            185.34717000000092,
+            174.15301499999987,
+            176.87677199999962
+          ],
+          "cpuMs": [
+            185.368,
+            174.047,
+            176.71
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 2,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            175.39678999999887,
+            173.15562900000077,
+            257.30999000000156
+          ],
+          "cpuMs": [
+            175.404,
+            173.174,
+            257.342
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 3,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            236.72899499999767,
+            304.28454000000056,
+            193.1303369999987
+          ],
+          "cpuMs": [
+            236.718,
+            304.246,
+            193.134
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 4,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            232.93642000000182,
+            186.52880100000039,
+            153.44763899999816
+          ],
+          "cpuMs": [
+            233.033,
+            186.551,
+            153.379
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 3,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 5,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            199.7858079999969,
+            158.25177299999996,
+            194.61876799999663
+          ],
+          "cpuMs": [
+            199.82,
+            158.26,
+            194.639
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        }
+      ],
+      "ratios": [
+        0.8800259495390107,
+        1.0399588603160297,
+        0.8003370273051909,
+        0.7063443512443904,
+        0.9655098167494555,
+        1.2461300386188838
+      ],
+      "cpuRatios": [
+        0.8798843672317961,
+        1.0401730567030745,
+        0.8003493966437588,
+        0.7064217771145718,
+        0.9655548999513472,
+        1.2462372046000254
+      ],
+      "medianPairedChangePercent": -7.7232116855766915,
+      "medianPairedCpuChangePercent": -7.728036640842828
+    },
+    {
+      "dictionary": "ascii-control",
+      "rows": 100000,
+      "sourceBytes": 4677781,
+      "stats": [
+        {
+          "uniqueKeys": 200000,
+          "keyBytes": 2277780,
+          "wasmHeapBytes": 21168128
+        },
+        {
+          "uniqueKeys": 200000,
+          "keyBytes": 2277780,
+          "wasmHeapBytes": 21168128
+        }
+      ],
+      "digest": "6e892898c6d953240658cd3bd1a7b7222e65a949ceda2aea902f80882265f502",
+      "observations": [
+        {
+          "block": 0,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            24.169621999997617,
+            28.429114999999,
+            26.68113000000085
+          ],
+          "cpuMs": [
+            24.198,
+            28.445,
+            26.697
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 1,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            27.217407000000094,
+            42.02532599999904,
+            62.675522000001365
+          ],
+          "cpuMs": [
+            27.234,
+            38.12,
+            59.914
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 39,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 73,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 2,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            100.08113500000036,
+            357.6391180000028,
+            88.52875499999936
+          ],
+          "cpuMs": [
+            98.123,
+            340.995,
+            88.024
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 68,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 77,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 3,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            26.48777600000176,
+            29.817038000001048,
+            22.556032999997115
+          ],
+          "cpuMs": [
+            26.504,
+            29.805,
+            22.567
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 4,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            23.32779599999776,
+            23.30722600000081,
+            23.57236599999669
+          ],
+          "cpuMs": [
+            23.265,
+            23.322,
+            23.061
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 6,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 3,
+              "majorPageFault": 0
+            }
+          ]
+        },
+        {
+          "block": 5,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            22.673956999999064,
+            23.454953000000387,
+            23.388065999999526
+          ],
+          "cpuMs": [
+            22.67,
+            23.471,
+            23.388
+          ],
+          "switches": [
+            {
+              "voluntary": 0,
+              "involuntary": 1,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 0,
+              "majorPageFault": 0
+            },
+            {
+              "voluntary": 0,
+              "involuntary": 2,
+              "majorPageFault": 0
+            }
+          ]
+        }
+      ],
+      "ratios": [
+        1.1181394131595088,
+        1.0695090027380574,
+        3.7923686610495695,
+        0.8224124911400849,
+        0.9939081233878709,
+        0.9819252888717754
+      ],
+      "cpuRatios": [
+        1.1177915315846352,
+        1.143074501573977,
+        3.6637173846476174,
+        0.8232008052340211,
+        1.0068643958036523,
+        0.9811682501810747
+      ],
+      "medianPairedChangePercent": 3.17085630629641,
+      "medianPairedCpuChangePercent": 6.232796369414384
+    }
+  ]
+}

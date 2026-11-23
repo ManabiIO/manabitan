@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "filename-arena",
+  "dictionary": "vndb",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidate": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+  "studyCommit": "79c8d64063747f36e4b48cbb7b588845c268eac7",
+  "originalArtifact": {
+    "id": 14863636301,
+    "name": "import-screen-filename-arena-vndb-45262851083-1",
+    "size_in_bytes": 1184109,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14863636301",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14863636301/zip",
+    "expired": false,
+    "created_at": "2026-11-23T21:10:05Z",
+    "expires_at": "2026-12-23T21:10:04Z",
+    "updated_at": "2026-11-23T21:10:05Z",
+    "digest": "sha256:09d9531975ffd6aa181169bd88db8f066b9d7b0d58f24764bbcc9c6abbd971cd",
+    "workflow_run": {
+      "id": 45262851083,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-screen-20261123-ad5",
+      "head_sha": "79c8d64063747f36e4b48cbb7b588845c268eac7"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45262851083",
+  "archive": {
+    "path": "filename-arena-vndb-45262851083.tar.xz",
+    "bytes": 142376,
+    "sha256": "a22f488037e6a3e4cd8f7c9cf4631fe633a5263e1d756d4b76b78476bbe21bdd"
+  },
+  "files": [
+    {
+      "path": "filename-arena/vndb/block-1-A/run-1.json",
+      "bytes": 152866,
+      "sha256": "139e4fb1fdef1a33f0d5232363d3e2c1abebf9f691819fce1c6393f215f6c27d"
+    },
+    {
+      "path": "filename-arena/vndb/block-1-A/summary.json",
+      "bytes": 59834,
+      "sha256": "78e3483ef921ca2c0f76df83fbaf4d168c9b6c05cea9df6874f6875bcca681c6"
+    },
+    {
+      "path": "filename-arena/vndb/block-1-B/run-1.json",
+      "bytes": 152804,
+      "sha256": "1e1d60ecaf44a9053117a8535def15b2223dab20cfeef770d6ed1c8de6f962c5"
+    },
+    {
+      "path": "filename-arena/vndb/block-1-B/summary.json",
+      "bytes": 59819,
+      "sha256": "b7bc4fec61fb7bc04f42cbb86db6ecce036f8375cb24ef41e7a37a03126804d6"
+    },
+    {
+      "path": "filename-arena/vndb/block-1-C/run-1.json",
+      "bytes": 153290,
+      "sha256": "a9f2b5b815952c40d67789cffc03b3ad650bf3f8892741ef6cd34f3b922ccfbc"
+    },
+    {
+      "path": "filename-arena/vndb/block-1-C/summary.json",
+      "bytes": 59794,
+      "sha256": "eb28e84859efc30048b85163d0be9bc5af01764f1e712954a34930f6caa23fb8"
+    },
+    {
+      "path": "filename-arena/vndb/block-2-A/run-1.json",
+      "bytes": 152614,
+      "sha256": "cc2144970430a650bf33aae38e29975e9e8f81b019e28fe7c5dda6cc646faf70"
+    },
+    {
+      "path": "filename-arena/vndb/block-2-A/summary.json",
+      "bytes": 59824,
+      "sha256": "daa0cbcced3ff383579eda02f2caf30535a589c43dd8dec3784bb9c880aacd37"
+    },
+    {
+      "path": "filename-arena/vndb/block-2-B/run-1.json",
+      "bytes": 152826,
+      "sha256": "67b21da8a0a331d95d144687fdc29f46c5f8e3086b158dc9cb6e4670065b2a28"
+    },
+    {
+      "path": "filename-arena/vndb/block-2-B/summary.json",
+      "bytes": 59859,
+      "sha256": "035265de5a786e0f62210af93e2dd8c5be4a1584ba4616ea404ae48ff4edf2b8"
+    },
+    {
+      "path": "filename-arena/vndb/block-2-C/run-1.json",
+      "bytes": 152446,
+      "sha256": "c0321901beb1ccedfcb8eb14aeafb13ef179f2733dfa930e6a3707dd3134df9f"
+    },
+    {
+      "path": "filename-arena/vndb/block-2-C/summary.json",
+      "bytes": 59836,
+      "sha256": "dcfedb57146c5ba11d96b68dd7d52f8ba1d5c1992e08b1d40ebab4eac5186f8e"
+    },
+    {
+      "path": "filename-arena/vndb/block-3-A/run-1.json",
+      "bytes": 152302,
+      "sha256": "ae3ad409d97cdb66b05278b7a4f27713199759a0f07c43466bc65dcbd337d10d"
+    },
+    {
+      "path": "filename-arena/vndb/block-3-A/summary.json",
+      "bytes": 59715,
+      "sha256": "f06804907ebe243b5e2c3e677fdc3bc807cb480517f080bca6fa7208bc342dda"
+    },
+    {
+      "path": "filename-arena/vndb/block-3-B/run-1.json",
+      "bytes": 152583,
+      "sha256": "c23708828e2646ab466cf58fb8a785d93364510686028d8899c5bef07b05fe86"
+    },
+    {
+      "path": "filename-arena/vndb/block-3-B/summary.json",
+      "bytes": 59719,
+      "sha256": "0a68f8015986293e2109b40d8e272f9675b4f50b3e8a2f6e91d17ae1edf5f06c"
+    },
+    {
+      "path": "filename-arena/vndb/block-3-C/run-1.json",
+      "bytes": 152502,
+      "sha256": "adb0b9e5b595360b8e352d064c02ea8c1b9e9e9cb8a8dc0ca3a26ba45cc4289f"
+    },
+    {
+      "path": "filename-arena/vndb/block-3-C/summary.json",
+      "bytes": 59768,
+      "sha256": "274268b8f8545be9db78068476d7d85e2231e6d3e577ffd9d9f56a5debebea99"
+    },
+    {
+      "path": "filename-arena/vndb/block-4-A/run-1.json",
+      "bytes": 152726,
+      "sha256": "f66583f87559d49f7e1d44b8010b1b25e5a341650871753c94915e7984e10e1f"
+    },
+    {
+      "path": "filename-arena/vndb/block-4-A/summary.json",
+      "bytes": 59883,
+      "sha256": "031870e101dfcad03b3f0c64e743a5a400521841a49190782328ed99dde5232f"
+    },
+    {
+      "path": "filename-arena/vndb/block-4-B/run-1.json",
+      "bytes": 153207,
+      "sha256": "90e1ecc6a756b26ce14ed8a918dbbe21ad3a542dcf71d26902153b6da4e8cb53"
+    },
+    {
+      "path": "filename-arena/vndb/block-4-B/summary.json",
+      "bytes": 59833,
+      "sha256": "dd4c4b84ae0af39160781ad203a83e58fa06d019c96a27d2f18e31f9cdc54069"
+    },
+    {
+      "path": "filename-arena/vndb/block-4-C/run-1.json",
+      "bytes": 152868,
+      "sha256": "0291e24674bd7cc3174827a5b1cd1306b1c13de19c9a9a931c34232be50c720b"
+    },
+    {
+      "path": "filename-arena/vndb/block-4-C/summary.json",
+      "bytes": 59871,
+      "sha256": "e6df43b0a6430a51af587750c402349b663db724ebaa9ab7c2b2e7a1388c2c3a"
+    },
+    {
+      "path": "filename-arena/vndb/block-5-A/run-1.json",
+      "bytes": 153139,
+      "sha256": "e7b4da741cb91df8ef6b9a25875aeb372adf865e48de41619e5d5e04a4215a2f"
+    },
+    {
+      "path": "filename-arena/vndb/block-5-A/summary.json",
+      "bytes": 59783,
+      "sha256": "441799f83b93eff9356c071939414f65d0a734afcf2a6bde403e48fa17e13592"
+    },
+    {
+      "path": "filename-arena/vndb/block-5-B/run-1.json",
+      "bytes": 153161,
+      "sha256": "9252e91aa446e515a7cfd0b99414465a9c450c035a80dc41127bab516ac69b25"
+    },
+    {
+      "path": "filename-arena/vndb/block-5-B/summary.json",
+      "bytes": 59757,
+      "sha256": "76fe0ed742d9568dbf73ebf46692adf4dac60842b19f2f5ed34cb2058079562f"
+    },
+    {
+      "path": "filename-arena/vndb/block-5-C/run-1.json",
+      "bytes": 152286,
+      "sha256": "5e6c642daf0065e801e1b29d36a0c52deaf7622d0e73bb3491de6a1a1856bdb9"
+    },
+    {
+      "path": "filename-arena/vndb/block-5-C/summary.json",
+      "bytes": 59634,
+      "sha256": "8e97d5b72edaf9491467899a79e0a7a4cfbc662738b6872a599b882c52bc765e"
+    },
+    {
+      "path": "filename-arena/vndb/block-6-A/run-1.json",
+      "bytes": 152546,
+      "sha256": "e01da9c6d4143f0abbf0c429dd335c79e92363f846e351a6670d87ccd2304a2b"
+    },
+    {
+      "path": "filename-arena/vndb/block-6-A/summary.json",
+      "bytes": 59821,
+      "sha256": "8533d533d83e975258988e74a4b110b7e9db79857c43ac960dd89617316dc0e4"
+    },
+    {
+      "path": "filename-arena/vndb/block-6-B/run-1.json",
+      "bytes": 152401,
+      "sha256": "203f0afe392e5123e573cbc4b0fffa7ab01ded8c539e6e4ca3db5dc5b07462f5"
+    },
+    {
+      "path": "filename-arena/vndb/block-6-B/summary.json",
+      "bytes": 59711,
+      "sha256": "5474f779b426634a01632a064e4bc5975bc4762aa2c041ed00b59aa4f6b049fe"
+    },
+    {
+      "path": "filename-arena/vndb/block-6-C/run-1.json",
+      "bytes": 152671,
+      "sha256": "efaa1cb1d305aa440fc97758a87a59c28f96169688ad1a5bb41ccef4f4e92889"
+    },
+    {
+      "path": "filename-arena/vndb/block-6-C/summary.json",
+      "bytes": 59785,
+      "sha256": "b923ec05589e017d0fae78cd3ef25ca49e3e5988ad83d779e2c70823efd52321"
+    },
+    {
+      "path": "filename-arena/vndb/diagnostic-A/run-1.json",
+      "bytes": 152842,
+      "sha256": "da5a69257c1533964f1b4239036a036b0335dfa269ae8c847c2b49aa1d99d318"
+    },
+    {
+      "path": "filename-arena/vndb/diagnostic-A/summary.json",
+      "bytes": 59668,
+      "sha256": "38191f91e0feac396c353176eb30c1ccd8ee9a212833a7303d2eed73b0c3ddcc"
+    },
+    {
+      "path": "filename-arena/vndb/diagnostic-B/run-1.json",
+      "bytes": 152857,
+      "sha256": "e346d99be1770302236e9819e54194c6f2fffa6ad5d1e9e71d790cea9bff24f5"
+    },
+    {
+      "path": "filename-arena/vndb/diagnostic-B/summary.json",
+      "bytes": 59844,
+      "sha256": "2605bfc8487a9f8542d16e665a0badc7175c3afe9f2044f3be279bc01f57d2b3"
+    },
+    {
+      "path": "filename-arena/vndb/expected-lookup-signature.json",
+      "bytes": 12889,
+      "sha256": "8d17b25323c33afcb7521cb0bedaa112f470c3103f61181f59709c20258c39d7"
+    },
+    {
+      "path": "filename-arena/vndb/protocol.json",
+      "bytes": 554,
+      "sha256": "5f634046c0932dea8125b4e3f3eaeec7984cd3edf7a0f864db8e4b475e5fb8f0"
+    },
+    {
+      "path": "filename-arena/vndb/runner.py",
+      "bytes": 12492,
+      "sha256": "b4b217108f4eca2b136a1f067767ec9e6777a07a0e0bf544bb87f7d2f3bd63fd"
+    },
+    {
+      "path": "filename-arena/vndb/summary.json",
+      "bytes": 290673,
+      "sha256": "dbf5928f106ed737002ac634c3cdc36556dd44ae356cc6f51acc7b2f1dcf5c65"
+    },
+    {
+      "path": "filename-arena/vndb/warmup-A/run-1.json",
+      "bytes": 153279,
+      "sha256": "23fe38633ff0defe82991f92fc381012e62948869934c8330e971a1b3dd36d76"
+    },
+    {
+      "path": "filename-arena/vndb/warmup-A/summary.json",
+      "bytes": 59806,
+      "sha256": "bbc1248074ed3e8b5d219d5bacbed4e8f90b7b4643115a349537ca3f15ac4621"
+    },
+    {
+      "path": "filename-arena/vndb/warmup-B/run-1.json",
+      "bytes": 152802,
+      "sha256": "e2eb66db841a8c88def1e103f0f46f22adacc575c5d8fc982ee1dc849ca7c848"
+    },
+    {
+      "path": "filename-arena/vndb/warmup-B/summary.json",
+      "bytes": 59797,
+      "sha256": "14fadf02ec31a27938cf3d35c708b3c6a1d6fd892c305cf34bd0b66b06cbe959"
+    },
+    {
+      "path": "filename-arena/vndb/warmup-C/run-1.json",
+      "bytes": 152981,
+      "sha256": "658c93368f6cdff0a3eb6113661f75023b0a28379862081a18f31d6e8fc62601"
+    },
+    {
+      "path": "filename-arena/vndb/warmup-C/summary.json",
+      "bytes": 59805,
+      "sha256": "13e2ff07844a6b30e93cc37b9d81209649b56e330d3d531ec228e7c0a5a30d17"
+    },
+    {
+      "path": "filename-arena/vndb/workflow.yml",
+      "bytes": 1909,
+      "sha256": "39d67f731c927e5af8bf6a2c499f343a5c81b84ab3f39089f3a3e1fad374bbf3"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

@@ -1,0 +1,35 @@
+{
+  "baselineCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidateCommit": "86e0184ccfade086b3312c179f49447d4c2ab5b7",
+  "files": {
+    "baselineSource": {
+      "path": "/workspace/scratch/ad5d54ac9137/manabitan-live/ext/js/dictionary/dense-zip-directory.js",
+      "sha256": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506"
+    },
+    "candidateSource": {
+      "path": "/workspace/scratch/ad5d54ac9137/pipeline-opt/ext/js/dictionary/dense-zip-directory.js",
+      "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b"
+    },
+    "candidateTests": {
+      "path": "/workspace/scratch/ad5d54ac9137/pipeline-opt/test/dense-zip-directory.test.js",
+      "sha256": "478c4a963598c14f309aa1895a079003fee7221c446839bb89beff0964f16b0b"
+    },
+    "measurementScript": {
+      "path": "/workspace/scratch/ad5d54ac9137/pipeline-arena-compare.mjs",
+      "sha256": "e85b25d26294dee5901415e3901e7ea00075cf1f67a16422f0153324f59f9611"
+    },
+    "measurementReceipt": {
+      "path": "/workspace/scratch/ad5d54ac9137/pipeline-arena-comparison.json",
+      "sha256": "2a19d63786b66e96ae3bd749f22dfac0510239ce41c366133d88e6dd3cdf722a"
+    }
+  },
+  "validation": {
+    "focusedTests": "110 tests passed across dense-zip-directory, raw-zip-range-reader, dictionary-import-ownership",
+    "mainTypes": "passed after build settled; first parallel check read transient generated-file syntax error",
+    "testTypes": "passed",
+    "scopedEslint": "passed",
+    "allTargetDryBuild": "passed",
+    "fullUnitSuite": "not run in this agent; root to run collective or hosted"
+  },
+  "limitations": "Counts describe retained raw-filename backing allocation after catalog construction, not whole-process or peak memory. Node construction timings include two unexplained baseline tails and support no speed claim. All observations retained."
+}

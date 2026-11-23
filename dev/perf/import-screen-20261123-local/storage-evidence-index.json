@@ -1,0 +1,38 @@
+{
+  "candidateCommit": "80b0587481e43558d1a4e893542f4d1ab8d3d1f1",
+  "baselineCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "baselinePipelineSha256": "10c547e7c49d0931b9c931d9446141cdd4e5c0708654d8e74decb4493684c22d",
+  "candidatePipelineSha256": "eec075de38ab53dcf731203db85cd1755cdb5cfbc60a06e8060a985cc8631342",
+  "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "archiveBytes": 291705969,
+  "readBytesAvoided": 9437040,
+  "percentSourceRangeBytesAvoided": 4.601483072626152,
+  "payloadsVerified": 146570,
+  "payloadAndMetadataSha256": "cd8e7f869f6e337cc4502962e5558c0702b445e22ebf4a27651e108c6e119740",
+  "componentTiming": {
+    "cohort": "storage-component-timing-v2.json",
+    "pairs": 6,
+    "pairedPercentChanges": [
+      -41.02061487575656,
+      -33.31099339865423,
+      -3.176541472669192,
+      -33.38823401636195,
+      -40.15614918416976,
+      -47.63158484568621
+    ],
+    "medianPairedPercentChange": -36.772191600265856,
+    "fasterPairs": 6,
+    "scope": "Node v24.22.3 readBatch only; excludes CRC/inflation, generation media index/persistence and complete import; source range byte counts are logical Blob reads, not measured physical disk I/O."
+  },
+  "qualification": "Correctness and component evidence only; browser full-import gain unproven. V1 rejected; initial V2 cohort excluded for concurrent TypeScript work before outcomes inspected, retained unchanged. Replacement V2 cohort was fixed and used identical frozen source.",
+  "artifactSha256": {
+    "storage-component-replay.mjs": "444453a5a1b628dbb93414e9def3aabeb6e228cec3366a8558712a2addf4d197",
+    "storage-component-timing.json": "2b329c0f915b5584cc7787d4d38e7710bba1e2bdb46607c13ce6f69c5dcb2268",
+    "storage-component-timing-v2-contaminated.json": "1c405cf9ed8bae512474acdd1371caf6670b9f4432771b643c14e0fab0513fe4",
+    "storage-component-timing-v2-contamination.json": "daa0d91a5701214d11bdb274fc79675bb89bd6d994a21ab570d67a79b27753ed",
+    "storage-component-timing-v2.json": "0d014324b6ce1b9155b6f87505d8e5273bfeabff1cbaaf5bf546bfbe2915c598",
+    "storage-component-parity-v2.json": "53d192705d0c08050554445e3238fdde0b14cfefa4c2ae181dd1ba9898324f94",
+    "storage-range-v1-rejected.patch": "37980d991760158d70e632450c0d265b2728887f2c0c8e06552edf1ebdf8ff2c",
+    "storage-range-v2-frozen.patch": "bf8b1bbfed0764bd03fb2f1bc4f0d6c20933225e63ffe951bffa6e9fd8f78deb"
+  }
+}

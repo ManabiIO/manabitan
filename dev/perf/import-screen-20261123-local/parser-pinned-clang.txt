@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+export LD_LIBRARY_PATH=/workspace/scratch/3aacd533c01f/toolchains/llvm21/usr/lib/x86_64-linux-gnu
+exec /workspace/scratch/3aacd533c01f/toolchains/llvm21/usr/bin/clang-21 -fuse-ld=/workspace/scratch/3aacd533c01f/toolchains/llvm21/usr/bin/wasm-ld-21 "$@"

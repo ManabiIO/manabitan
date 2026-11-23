@@ -1,0 +1,70 @@
+import {openAsBlob} from 'node:fs'
+import {createHash} from 'node:crypto'
+import {performance} from 'node:perf_hooks'
+import {readDenseZipDirectory} from './storage-opt/ext/js/dictionary/dense-zip-directory.js'
+import {getImageMediaTypeFromFileName} from './storage-opt/ext/js/media/media-util.js'
+import {RawZipPayloadReader as Baseline, RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} from './manabitan-live/ext/js/dictionary/term-bank-source-pipeline.js'
+import {RawZipPayloadReader as Candidate} from './storage-opt/ext/js/dictionary/term-bank-source-pipeline.js'
+
+const file = '/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip'
+const archive = await openAsBlob(file)
+const entries = await readDenseZipDirectory(archive)
+if (entries === null) throw Error('No dense catalog')
+const media = entries.filter(({filename}) => getImageMediaTypeFromFileName(filename) !== null)
+const batches = []
+for (let start = 0; start < media.length;) {
+  let end = start
+  let packed = 0
+  let unpacked = 0
+  while (end < media.length && end - start < RAW_ZIP_BATCH_MAX_FILES) {
+    const entry = media[end]
+    if (packed + entry.compressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES || unpacked + entry.uncompressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES) break
+    packed += entry.compressedSize
+    unpacked += entry.uncompressedSize
+    ++end
+  }
+  if (start === end) throw Error('Inadmissible entry')
+  batches.push(media.slice(start, end))
+  start = end
+}
+async function replay(Reader, parity) {
+  const reader = new Reader(archive)
+  const hash = parity ? createHash('sha256') : null
+  let payloadBytes = 0
+  let readBytes = 0
+  let readCount = 0
+  let count = 0
+  const start = performance.now()
+  for (const batchFiles of batches) {
+    const batch = await reader.readBatch(batchFiles, undefined, () => false, true)
+    if (batch === null) throw Error('Batch declined')
+    readBytes += batch.rangeReadBytes
+    readCount += batch.rangeReadCount
+    count += batch.sources.length
+    for (const source of batch.sources) {
+      payloadBytes += source.bytes.byteLength
+      if (hash !== null) {
+        hash.update(JSON.stringify([source.filename, source.archiveOffset, source.compressionMethod, source.compressedSize, source.uncompressedSize, source.signature]))
+        hash.update(source.bytes)
+      }
+    }
+  }
+  const durationMs = performance.now() - start
+  return {durationMs, count, payloadBytes, readBytes, readCount, digest: hash?.digest('hex') ?? null}
+}
+const result = {node: process.version, v8: process.versions.v8, archive: file, archiveBytes: archive.size, mediaCount: media.length, batches: batches.length, parity: {}, observations: []}
+const mode = process.argv[2] ?? 'parity'
+if (mode === 'parity') {
+  result.parity.baseline = await replay(Baseline, true)
+  result.parity.candidate = await replay(Candidate, true)
+  if (result.parity.baseline.digest !== result.parity.candidate.digest) throw Error('Payload or metadata mismatch')
+} else {
+  for (const label of ['A', 'B']) await replay(label === 'A' ? Baseline : Candidate, false)
+  for (let pair = 0; pair < 6; ++pair) {
+    for (const label of pair % 2 === 0 ? ['A', 'B'] : ['B', 'A']) {
+      const observation = {pair: pair + 1, arm: label, ...await replay(label === 'A' ? Baseline : Candidate, false)}
+      result.observations.push(observation)
+    }
+  }
+}
+console.log(JSON.stringify(result, null, 2))

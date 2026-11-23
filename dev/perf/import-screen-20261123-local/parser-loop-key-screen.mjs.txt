@@ -1,0 +1,127 @@
+import {readFile, writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import assert from 'node:assert/strict'
+import path from 'node:path'
+import {pathToFileURL} from 'node:url'
+import {inflateRawSync, crc32} from 'node:zlib'
+
+const base = '/workspace/scratch/ad5d54ac9137/manabitan-live'
+const candidate = '/workspace/scratch/ad5d54ac9137/parser-loop'
+const cache = '/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache'
+const output = '/workspace/scratch/ad5d54ac9137/parser-loop-key-screen.json'
+const {ZipReader, Uint8ArrayReader} = await import(pathToFileURL(path.join(base, 'node_modules/@zip.js/zip.js/index.js')))
+const lockBytes = await readFile(path.join(base, 'test/perf/dictionaries.lock.json'))
+const locks = JSON.parse(lockBytes)
+const encoder = new TextEncoder()
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const modules = await Promise.all([base, candidate].map(async (root) => {
+    const bytes = await readFile(path.join(root, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))
+    return {root, sha256: sha256(bytes), module: await WebAssembly.compile(bytes)}
+}))
+const report = {scope: 'Same-process key interning only: source JSON was projected to real expression/reading fields before setup; parse, inflate, memory allocation and digest verification excluded. No full-import performance claim.', node: process.version, warmupsPerArm: 10, blocks: 6, iterationsPerObservation: 3, lockSha256: sha256(lockBytes), sources: modules.map(({root, sha256}) => ({root, wasmSha256: sha256})), complete: false, cases: []}
+
+async function loadKeys(dictionary) {
+    const spec = locks.dictionaries[dictionary]
+    const archive = await readFile(path.join(cache, spec.cacheFile))
+    assert.equal(sha256(archive), spec.sha256)
+    const reader = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)), {useWebWorkers: false})
+    const entries = (await reader.getEntries()).filter((e) => /^term_bank_\d+\.json$/.test(e.filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+    const rows = []
+    for (const entry of entries) {
+        const at = entry.offset
+        const start = at + 30 + archive.readUInt16LE(at + 26) + archive.readUInt16LE(at + 28)
+        const bytes = archive.subarray(start, start + entry.compressedSize)
+        const decoded = entry.compressionMethod === 0 ? bytes : inflateRawSync(bytes)
+        assert.equal(decoded.length, entry.uncompressedSize)
+        assert.equal(crc32(decoded), entry.signature)
+        for (const row of JSON.parse(decoded.toString())) { rows.push([row[0], row[1], '', '', 0, [], 0, '']) }
+    }
+    assert.equal(rows.length, spec.termRows)
+    await reader.close()
+    return rows
+}
+
+async function setup(module, rows, bytes) {
+    const wasm = (await WebAssembly.instantiate(module)).exports
+    wasm.wasm_reset_heap()
+    const input = wasm.wasm_alloc(bytes.length)
+    const metas = wasm.wasm_alloc(rows * 68)
+    const stringsCapacity = bytes.length
+    const strings = wasm.wasm_alloc(stringsCapacity)
+    const lengths = wasm.wasm_alloc(rows * 4)
+    const offsets = wasm.wasm_alloc(rows * 8)
+    const hashes = wasm.wasm_alloc(rows * 8)
+    const expressions = wasm.wasm_alloc(rows * 4)
+    const readings = wasm.wasm_alloc(rows * 4)
+    let slots = 1
+    while (slots < rows * 4) { slots *= 2 }
+    const table = wasm.wasm_alloc(slots * 4)
+    const count = wasm.wasm_alloc(4)
+    new Uint8Array(wasm.memory.buffer, input, bytes.length).set(bytes)
+    assert.equal(wasm.parse_term_bank_with_media_hints(input, bytes.length, metas, rows), rows)
+    const hashSlots = new Uint32Array(wasm.memory.buffer, table, slots)
+    const counts = new Uint32Array(wasm.memory.buffer, count, 1)
+    let used = 0
+    function run() {
+        hashSlots.fill(0)
+        counts[0] = 0
+        used = wasm.build_term_string_plan(input, metas, 0, rows, strings, stringsCapacity, lengths, offsets, hashes, expressions, readings, table, slots, count)
+        assert.ok(used >= 0)
+    }
+    function digest() {
+        const hash = createHash('sha256')
+        for (const [at, size] of [[strings, used], [lengths, counts[0] * 2], [offsets, counts[0] * 4], [hashes, counts[0] * 4], [expressions, rows * 4], [readings, rows * 4]]) {
+            hash.update(new Uint8Array(wasm.memory.buffer, at, size))
+        }
+        return hash.digest('hex')
+    }
+    run()
+    return {run, digest, stats: () => ({uniqueKeys: counts[0], keyBytes: used, wasmHeapBytes: wasm.memory.buffer.byteLength})}
+}
+
+try {
+    for (const dictionary of ['jmdict', 'jitendex', 'ascii-control']) {
+        const rows = dictionary === 'ascii-control' ? Array.from({length: 100000}, (_, i) => [`term-${i}`, `reading-${i}`, '', '', 0, [], 0, '']) : await loadKeys(dictionary)
+        const bytes = encoder.encode(JSON.stringify(rows))
+        const arms = await Promise.all(modules.map(({module}) => setup(module, rows.length, bytes)))
+        assert.equal(arms[0].digest(), arms[1].digest())
+        const result = {dictionary, rows: rows.length, sourceBytes: bytes.length, stats: arms.map((arm) => arm.stats()), digest: arms[0].digest(), observations: [], ratios: [], cpuRatios: []}
+        report.cases.push(result)
+        for (let i = 0; i < report.warmupsPerArm; ++i) { for (const arm of arms) { arm.run() } }
+        for (let block = 0; block < report.blocks; ++block) {
+            const order = block % 2 === 0 ? [0, 1, 0] : [1, 0, 1]
+            const times = []
+            const cpuTimes = []
+            const switches = []
+            for (const arm of order) {
+                const beforeUsage = process.resourceUsage()
+                const beforeCpu = process.cpuUsage()
+                const start = performance.now()
+                for (let iteration = 0; iteration < report.iterationsPerObservation; ++iteration) { arms[arm].run() }
+                times.push(performance.now() - start)
+                const cpu = process.cpuUsage(beforeCpu)
+                const afterUsage = process.resourceUsage()
+                cpuTimes.push((cpu.user + cpu.system) / 1000)
+                switches.push({voluntary: afterUsage.voluntaryContextSwitches - beforeUsage.voluntaryContextSwitches, involuntary: afterUsage.involuntaryContextSwitches - beforeUsage.involuntaryContextSwitches, majorPageFault: afterUsage.majorPageFault - beforeUsage.majorPageFault})
+            }
+            const outside = (times[0] + times[2]) / 2
+            const ratio = block % 2 === 0 ? times[1] / outside : outside / times[1]
+            result.observations.push({block, order: order.map((a) => a === 0 ? 'A' : 'B'), timesMs: times, cpuMs: cpuTimes, switches})
+            result.ratios.push(ratio)
+            const outsideCpu = (cpuTimes[0] + cpuTimes[2]) / 2
+            result.cpuRatios.push(block % 2 === 0 ? cpuTimes[1] / outsideCpu : outsideCpu / cpuTimes[1])
+        }
+        assert.equal(arms[0].digest(), result.digest)
+        assert.equal(arms[1].digest(), result.digest)
+        const sorted = [...result.ratios].sort((a, b) => a - b)
+        result.medianPairedChangePercent = ((sorted[2] + sorted[3]) / 2 - 1) * 100
+        const sortedCpu = [...result.cpuRatios].sort((a, b) => a - b)
+        result.medianPairedCpuChangePercent = ((sortedCpu[2] + sortedCpu[3]) / 2 - 1) * 100
+        console.log(JSON.stringify({dictionary, stats: result.stats, ratios: result.ratios, cpuRatios: result.cpuRatios, medianPairedChangePercent: result.medianPairedChangePercent, medianPairedCpuChangePercent: result.medianPairedCpuChangePercent}))
+        await writeFile(output, JSON.stringify(report, null, 2))
+    }
+    report.complete = true
+} catch (error) {
+    report.error = String(error?.stack ?? error)
+    throw error
+} finally { await writeFile(output, JSON.stringify(report, null, 2)) }

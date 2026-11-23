@@ -1,0 +1,171 @@
+{
+  "node": "v22.22.0",
+  "scope": "Dense ZIP central-directory construction only; not complete import, no peak-memory estimate",
+  "archivePath": "/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+  "archiveBytes": 291705969,
+  "parity": {
+    "entries": 147237,
+    "rawNameBytes": 2400540,
+    "exactMetadataAndNameParity": true,
+    "baselineDigest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+    "candidateDigest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+    "baselineRetainedBackingBytes": 9173442,
+    "candidateRetainedBackingBytes": 2400540
+  },
+  "protocol": "One excluded warmup per arm, six fixed adjacent AB/BA pairs, explicit GC before each call, correctness outside timer",
+  "samples": [
+    {
+      "arm": "a",
+      "stage": "warmup",
+      "pair": -1,
+      "ms": 103.37840100000005,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    },
+    {
+      "arm": "b",
+      "stage": "warmup",
+      "pair": -1,
+      "ms": 102.61305500000003,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "a",
+      "stage": "measured",
+      "pair": 0,
+      "ms": 99.36044200000003,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    },
+    {
+      "arm": "b",
+      "stage": "measured",
+      "pair": 0,
+      "ms": 82.43117100000018,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "b",
+      "stage": "measured",
+      "pair": 1,
+      "ms": 60.346176000000014,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "a",
+      "stage": "measured",
+      "pair": 1,
+      "ms": 82.956232,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    },
+    {
+      "arm": "a",
+      "stage": "measured",
+      "pair": 2,
+      "ms": 88.7254170000001,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    },
+    {
+      "arm": "b",
+      "stage": "measured",
+      "pair": 2,
+      "ms": 99.6204029999999,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "b",
+      "stage": "measured",
+      "pair": 3,
+      "ms": 65.93282399999998,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "a",
+      "stage": "measured",
+      "pair": 3,
+      "ms": 338.1623790000001,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    },
+    {
+      "arm": "a",
+      "stage": "measured",
+      "pair": 4,
+      "ms": 1053.3887200000004,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    },
+    {
+      "arm": "b",
+      "stage": "measured",
+      "pair": 4,
+      "ms": 50.460621000000174,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "b",
+      "stage": "measured",
+      "pair": 5,
+      "ms": 56.67532899999969,
+      "entries": 147237,
+      "retainedBackingBytes": 2400540
+    },
+    {
+      "arm": "a",
+      "stage": "measured",
+      "pair": 5,
+      "ms": 60.63382300000012,
+      "entries": 147237,
+      "retainedBackingBytes": 9173442
+    }
+  ],
+  "pairs": [
+    {
+      "pair": 0,
+      "a": 99.36044200000003,
+      "b": 82.43117100000018,
+      "changePercent": -17.038240429727402
+    },
+    {
+      "pair": 1,
+      "a": 82.956232,
+      "b": 60.346176000000014,
+      "changePercent": -27.25540378931385
+    },
+    {
+      "pair": 2,
+      "a": 88.7254170000001,
+      "b": 99.6204029999999,
+      "changePercent": 12.279441865006714
+    },
+    {
+      "pair": 3,
+      "a": 338.1623790000001,
+      "b": 65.93282399999998,
+      "changePercent": -80.50261410066554
+    },
+    {
+      "pair": 4,
+      "a": 1053.3887200000004,
+      "b": 50.460621000000174,
+      "changePercent": -95.20968660078303
+    },
+    {
+      "pair": 5,
+      "a": 60.63382300000012,
+      "b": 56.67532899999969,
+      "changePercent": -6.528524516754319
+    }
+  ],
+  "pairedMedianChangePercent": -22.146822109520627,
+  "equalWorkChangePercent": -75.89020361996846,
+  "fasterPairs": 5
+}

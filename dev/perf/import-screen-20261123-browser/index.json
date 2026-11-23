@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "label": "filename-arena",
+      "dictionary": "vndb",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+      "studyCommit": "79c8d64063747f36e4b48cbb7b588845c268eac7",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45262851083",
+      "archive": {
+        "path": "filename-arena-vndb-45262851083.tar.xz",
+        "bytes": 142376,
+        "sha256": "a22f488037e6a3e4cd8f7c9cf4631fe633a5263e1d756d4b76b78476bbe21bdd"
+      },
+      "manifest": "filename-arena-vndb-45262851083.manifest.json",
+      "artifactId": 14863636301,
+      "originalArtifactSha256": "sha256:09d9531975ffd6aa181169bd88db8f066b9d7b0d58f24764bbcc9c6abbd971cd"
+    },
+    {
+      "label": "filename-arena",
+      "dictionary": "jmdict",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+      "studyCommit": "79c8d64063747f36e4b48cbb7b588845c268eac7",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45262851083",
+      "archive": {
+        "path": "filename-arena-jmdict-45262851083.tar.xz",
+        "bytes": 135344,
+        "sha256": "c47330119460f6a2e37de8194cfae5e9952db52cecd221057d899ec47b904a89"
+      },
+      "manifest": "filename-arena-jmdict-45262851083.manifest.json",
+      "artifactId": 14862320867,
+      "originalArtifactSha256": "sha256:8ec636e66c513fff3516a1262cbdaa37a361982955e7bfb85f57691583be0cb5"
+    },
+    {
+      "label": "filename-arena",
+      "dictionary": "jitendex",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+      "studyCommit": "79c8d64063747f36e4b48cbb7b588845c268eac7",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45262851083",
+      "archive": {
+        "path": "filename-arena-jitendex-45262851083.tar.xz",
+        "bytes": 141232,
+        "sha256": "c6330aa9f62035f6a7d424f34f7a2a8111997b2087bc02b2d45df3730f68539c"
+      },
+      "manifest": "filename-arena-jitendex-45262851083.manifest.json",
+      "artifactId": 14861563796,
+      "originalArtifactSha256": "sha256:9d7cdc881aafaa4465b723821ba4a8f37a0116d7f470a9ceea8ab3e57f4a3563"
+    },
+    {
+      "label": "media-ranges",
+      "dictionary": "jmdict",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+      "studyCommit": "3e7343d9baa307552dc8f60fd5731dc2a212ec21",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45263267064",
+      "archive": {
+        "path": "media-ranges-jmdict-45263267064.tar.xz",
+        "bytes": 137012,
+        "sha256": "6c9033e35b504ff0054913176a07e960297770e500661b884fc62c2b0cac5bbc"
+      },
+      "manifest": "media-ranges-jmdict-45263267064.manifest.json",
+      "artifactId": 14862646701,
+      "originalArtifactSha256": "sha256:6238b35420c6d2c1cd8d54ce005391df4bc45406692f59758d5e49253987541c",
+      "supersededByStudy": "media-adjacent"
+    },
+    {
+      "label": "media-ranges",
+      "dictionary": "jitendex",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+      "studyCommit": "3e7343d9baa307552dc8f60fd5731dc2a212ec21",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45263267064",
+      "archive": {
+        "path": "media-ranges-jitendex-45263267064.tar.xz",
+        "bytes": 139112,
+        "sha256": "c93d316ec24759be87d614171417145d68f97e86000e29f3b6c53b28697bc850"
+      },
+      "manifest": "media-ranges-jitendex-45263267064.manifest.json",
+      "artifactId": 14861044980,
+      "originalArtifactSha256": "sha256:3015297bf22ce3527d3a43b27cde2cb1019137c5ccc005c6156fa54eb1ff5872",
+      "supersededByStudy": "media-adjacent"
+    },
+    {
+      "label": "utf8-loop",
+      "dictionary": "jmdict",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "cb9f241106ab1529fa21c112f1733849c188511c",
+      "studyCommit": "d977051ec6f3c0ee0ed2320d92c9683cffda56ff",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45266391385",
+      "archive": {
+        "path": "utf8-loop-jmdict-45266391385.tar.xz",
+        "bytes": 135384,
+        "sha256": "5c6c8adce6140a0a765b5d91002c7e2f2c9c249385537b599f64ef686fc988d9"
+      },
+      "manifest": "utf8-loop-jmdict-45266391385.manifest.json",
+      "artifactId": 14862928226,
+      "originalArtifactSha256": "sha256:69fde6ca6e5e7d7cc76aecf3fcef4d5e2e0e26271492eac443a37e25ecbf69c9"
+    },
+    {
+      "label": "media-ranges",
+      "dictionary": "vndb",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+      "studyCommit": "3e7343d9baa307552dc8f60fd5731dc2a212ec21",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45263267064",
+      "archive": {
+        "path": "media-ranges-vndb-45263267064.tar.xz",
+        "bytes": 143840,
+        "sha256": "8a2a2bac8f9a683cd806841e2ceb4e6999d3af5da02105d08e9d63129bb30448"
+      },
+      "manifest": "media-ranges-vndb-45263267064.manifest.json",
+      "artifactId": 14863901575,
+      "originalArtifactSha256": "sha256:eb179c539e79618bac01674c7e2a6bc562678b6b2f78b20b26c7a9e0dbf1ac5a",
+      "supersededByStudy": "media-adjacent"
+    },
+    {
+      "label": "utf8-loop",
+      "dictionary": "jitendex",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "cb9f241106ab1529fa21c112f1733849c188511c",
+      "studyCommit": "d977051ec6f3c0ee0ed2320d92c9683cffda56ff",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45266391385",
+      "archive": {
+        "path": "utf8-loop-jitendex-45266391385.tar.xz",
+        "bytes": 137656,
+        "sha256": "1f3e3397a763f9b41170e50dbcc0f60a4de18e96784b3a4f2d0e486d7be6e76f"
+      },
+      "manifest": "utf8-loop-jitendex-45266391385.manifest.json",
+      "artifactId": 14864551471,
+      "originalArtifactSha256": "sha256:4763ffbe3efd20a56c0afafd3f3fec9de07cbbf1a86f38fae5fe319cf0f704be"
+    }
+  ]
+}

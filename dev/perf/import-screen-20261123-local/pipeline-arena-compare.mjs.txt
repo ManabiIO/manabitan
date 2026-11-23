@@ -1,0 +1,92 @@
+import {openAsBlob} from 'node:fs'
+import {createHash} from 'node:crypto'
+import {writeFile} from 'node:fs/promises'
+import {readDenseZipDirectory as baseline} from './manabitan-live/ext/js/dictionary/dense-zip-directory.js'
+import {readDenseZipDirectory as candidate} from './pipeline-opt/ext/js/dictionary/dense-zip-directory.js'
+
+const archivePath = '/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip'
+const archive = await openAsBlob(archivePath)
+const outputPath = '/workspace/scratch/ad5d54ac9137/pipeline-arena-comparison.json'
+const arms = {a: baseline, b: candidate}
+
+function digest(entries) {
+  const hash = createHash('sha256')
+  for (const entry of entries) {
+    hash.update(JSON.stringify([
+      entry.filename, entry.offset, entry.compressedSize, entry.uncompressedSize,
+      entry.compressionMethod, entry.signature, entry.encrypted, entry.directory,
+    ]))
+    hash.update(entry.rawFilename)
+  }
+  return hash.digest('hex')
+}
+
+function retainedBackingBytes(entries) {
+  return [...new Set(entries.map(entry => entry.rawFilename.buffer))]
+    .reduce((sum, buffer) => sum + buffer.byteLength, 0)
+}
+
+async function oracle() {
+  const a = await baseline(archive)
+  const b = await candidate(archive)
+  if (a === null || b === null || a.length !== b.length) throw new Error('Catalog length mismatch')
+  let rawNameBytes = 0
+  for (let index = 0; index < a.length; index++) {
+    const left = a[index]
+    const right = b[index]
+    for (const key of Object.keys(left)) {
+      if (key === 'rawFilename') continue
+      if (left[key] !== right[key]) throw new Error(`Metadata mismatch at entry ${index}: ${key}`)
+    }
+    if (left.rawFilename.length !== right.rawFilename.length) throw new Error(`Filename length mismatch at ${index}`)
+    for (let i = 0; i < left.rawFilename.length; i++) {
+      if (left.rawFilename[i] !== right.rawFilename[i]) throw new Error(`Filename byte mismatch at ${index}:${i}`)
+    }
+    rawNameBytes += right.rawFilename.byteLength
+  }
+  const aDigest = digest(a)
+  const bDigest = digest(b)
+  if (aDigest !== bDigest) throw new Error('Catalog digest mismatch')
+  return {
+    entries: a.length, rawNameBytes, exactMetadataAndNameParity: true,
+    baselineDigest: aDigest, candidateDigest: bDigest,
+    baselineRetainedBackingBytes: retainedBackingBytes(a),
+    candidateRetainedBackingBytes: retainedBackingBytes(b),
+  }
+}
+
+const parity = await oracle()
+const samples = []
+async function run(arm, stage, pair) {
+  globalThis.gc?.()
+  const start = performance.now()
+  const entries = await arms[arm](archive)
+  const ms = performance.now() - start
+  if (entries === null || entries.length !== parity.entries) throw new Error('Invalid catalog')
+  samples.push({arm, stage, pair, ms, entries: entries.length, retainedBackingBytes: retainedBackingBytes(entries)})
+}
+await run('a', 'warmup', -1)
+await run('b', 'warmup', -1)
+for (let pair = 0; pair < 6; pair++) {
+  for (const arm of pair % 2 === 0 ? ['a', 'b'] : ['b', 'a']) {
+    await run(arm, 'measured', pair)
+  }
+}
+const pairs = Array.from({length: 6}, (_, pair) => {
+  const observations = samples.filter(sample => sample.stage === 'measured' && sample.pair === pair)
+  const a = observations.find(sample => sample.arm === 'a').ms
+  const b = observations.find(sample => sample.arm === 'b').ms
+  return {pair, a, b, changePercent: (b / a - 1) * 100}
+})
+const orderedChanges = pairs.map(pair => pair.changePercent).sort((a, b) => a - b)
+const summary = {
+  node: process.version,
+  scope: 'Dense ZIP central-directory construction only; not complete import, no peak-memory estimate',
+  archivePath, archiveBytes: archive.size, parity,
+  protocol: 'One excluded warmup per arm, six fixed adjacent AB/BA pairs, explicit GC before each call, correctness outside timer',
+  samples, pairs, pairedMedianChangePercent: (orderedChanges[2] + orderedChanges[3]) / 2,
+  equalWorkChangePercent: (pairs.reduce((s, p) => s + p.b, 0) / pairs.reduce((s, p) => s + p.a, 0) - 1) * 100,
+  fasterPairs: pairs.filter(pair => pair.b < pair.a).length,
+}
+await writeFile(outputPath, JSON.stringify(summary, null, 2) + '\n')
+console.log(JSON.stringify(summary, null, 2))

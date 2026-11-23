@@ -1,0 +1,342 @@
+{
+  "scope": "Same-process key interning only: source JSON was projected to real expression/reading fields before setup; parse, inflate, memory allocation and digest verification excluded. No full-import performance claim.",
+  "node": "v22.22.0",
+  "warmupsPerArm": 10,
+  "blocks": 6,
+  "iterationsPerObservation": 3,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sources": [
+    {
+      "root": "/workspace/scratch/ad5d54ac9137/manabitan-live",
+      "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+    },
+    {
+      "root": "/workspace/scratch/ad5d54ac9137/parser-opt",
+      "wasmSha256": "5c963e6b7a5075c7d4a5c916659846e4b372ae80f8b0ca9e23ee46549c64a246"
+    }
+  ],
+  "complete": true,
+  "cases": [
+    {
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "sourceBytes": 28152117,
+      "stats": [
+        {
+          "uniqueKeys": 466564,
+          "keyBytes": 7126688,
+          "wasmHeapBytes": 123928576
+        },
+        {
+          "uniqueKeys": 466564,
+          "keyBytes": 7126688,
+          "wasmHeapBytes": 123928576
+        }
+      ],
+      "digest": "b637440defb3dce98e1945225f3b613235789aa0932b74c4f571ef4090579464",
+      "observations": [
+        {
+          "block": 0,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            251.03282800000034,
+            1011.0612860000001,
+            368.5980550000004
+          ]
+        },
+        {
+          "block": 1,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            334.8048200000003,
+            296.65604299999904,
+            336.63112999999976
+          ]
+        },
+        {
+          "block": 2,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            417.18957500000033,
+            415.4309570000005,
+            570.720636
+          ]
+        },
+        {
+          "block": 3,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            404.8141599999999,
+            319.7485120000001,
+            293.2106440000007
+          ]
+        },
+        {
+          "block": 4,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            301.70488099999966,
+            341.1792609999993,
+            1060.058309
+          ]
+        },
+        {
+          "block": 5,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            595.1298619999998,
+            508.3151909999997,
+            440.07632300000114
+          ]
+        }
+      ],
+      "ratios": [
+        3.2634309029429023,
+        1.1316741489739386,
+        0.8410297866634772,
+        1.091521583062129,
+        0.501084569630641,
+        1.0182719337616664
+      ],
+      "medianPairedChangePercent": 5.489675841189756
+    },
+    {
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "sourceBytes": 21386607,
+      "stats": [
+        {
+          "uniqueKeys": 573895,
+          "keyBytes": 8304160,
+          "wasmHeapBytes": 93192192
+        },
+        {
+          "uniqueKeys": 573895,
+          "keyBytes": 8304160,
+          "wasmHeapBytes": 93192192
+        }
+      ],
+      "digest": "6632aae992141939f742ec90e7836c6dae1391ba664895ec7ccbb207b4bc7f21",
+      "observations": [
+        {
+          "block": 0,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            331.4700699999994,
+            277.64324300000226,
+            364.36494200000016
+          ]
+        },
+        {
+          "block": 1,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            233.35227600000144,
+            471.60692500000005,
+            316.5744519999971
+          ]
+        },
+        {
+          "block": 2,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            374.02764000000025,
+            285.74143099999856,
+            288.52829100000235
+          ]
+        },
+        {
+          "block": 3,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            258.6937419999995,
+            314.6212400000004,
+            444.95868600000176
+          ]
+        },
+        {
+          "block": 4,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            392.3765600000006,
+            392.8297050000001,
+            469.06605000000127
+          ]
+        },
+        {
+          "block": 5,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            291.9768409999997,
+            336.3499660000016,
+            309.0059309999997
+          ]
+        }
+      ],
+      "ratios": [
+        0.798014581652015,
+        0.5830350434315595,
+        0.8625428213093679,
+        1.1182532177420703,
+        0.9120275696601524,
+        0.8933890779700518
+      ],
+      "medianPairedChangePercent": -12.203405036029014
+    },
+    {
+      "dictionary": "ascii-control",
+      "rows": 100000,
+      "sourceBytes": 4677781,
+      "stats": [
+        {
+          "uniqueKeys": 200000,
+          "keyBytes": 2277780,
+          "wasmHeapBytes": 21168128
+        },
+        {
+          "uniqueKeys": 200000,
+          "keyBytes": 2277780,
+          "wasmHeapBytes": 21168128
+        }
+      ],
+      "digest": "6e892898c6d953240658cd3bd1a7b7222e65a949ceda2aea902f80882265f502",
+      "observations": [
+        {
+          "block": 0,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            23.104464000000007,
+            35.52284700000018,
+            37.02920699999959
+          ]
+        },
+        {
+          "block": 1,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            39.91146699999808,
+            35.42927899999995,
+            27.8690459999998
+          ]
+        },
+        {
+          "block": 2,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            23.61795699999857,
+            31.15394599999854,
+            35.69309599999906
+          ]
+        },
+        {
+          "block": 3,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            27.059517999998207,
+            23.254835000003368,
+            25.40364799999952
+          ]
+        },
+        {
+          "block": 4,
+          "order": [
+            "A",
+            "B",
+            "A"
+          ],
+          "timesMs": [
+            23.462438999998994,
+            27.673768000000564,
+            23.513264000001072
+          ]
+        },
+        {
+          "block": 5,
+          "order": [
+            "B",
+            "A",
+            "B"
+          ],
+          "timesMs": [
+            118.79652499999793,
+            188.56509300000107,
+            467.46136099999785
+          ]
+        }
+      ],
+      "ratios": [
+        1.1814627781497133,
+        0.9565607163498582,
+        1.0505274961144186,
+        1.1280055523935157,
+        1.1782162365936504,
+        1.5545238958941157
+      ],
+      "medianPairedChangePercent": 15.311089449358306
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+    "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+    "published": {
+        "arena": {
+            "pullRequest": 852,
+            "commit": "4737f9e05eb8600d926843bfc32675bd214a8bb1",
+            "testedLocalCommit": "86e0184ccfade086b3312c179f49447d4c2ab5b7",
+            "tree": "0468c2768f18558b64c17d5f9e31e91f8a4b90f9"
+        },
+        "media": {
+            "pullRequest": 853,
+            "commit": "2c604d0f0a252a7a2e223773292507921b19feaf",
+            "testedLocalCommit": "54dd1afd14f0b35c0e0b10aaa5bb1739a08166fd",
+            "tree": "6b0b147b232e0baac7f412475b4e5a5084c0354e"
+        },
+        "native": {
+            "pullRequest": 858,
+            "commit": "cb9f241106ab1529fa21c112f1733849c188511c",
+            "testedLocalCommit": "d06c82c258de76b7ec6229397e4b85611dc592f4",
+            "tree": "655df9e9bd46fdd987a30473f2c3930007ce4e00"
+        }
+    },
+    "receipts": [
+        {
+            "originalName": "pipeline-arena-comparison.json",
+            "savedName": "pipeline-arena-comparison.json",
+            "sha256": "2a19d63786b66e96ae3bd749f22dfac0510239ce41c366133d88e6dd3cdf722a"
+        },
+        {
+            "originalName": "pipeline-arena-comparison.sources.json",
+            "savedName": "pipeline-arena-comparison.sources.json",
+            "sha256": "2f26fbac9d6d5c7bc755401c86d0275950b3d69990fe8bdeef5fb798009c2ff8"
+        },
+        {
+            "originalName": "pipeline-arena-compare.mjs",
+            "savedName": "pipeline-arena-compare.mjs.txt",
+            "sha256": "e85b25d26294dee5901415e3901e7ea00075cf1f67a16422f0153324f59f9611"
+        },
+        {
+            "originalName": "storage-evidence-index.json",
+            "savedName": "storage-evidence-index.json",
+            "sha256": "4a749b722ae507bafe9384b44e859d0ad3a69a9c7ca46b754a37378f55962b09"
+        },
+        {
+            "originalName": "storage-component-replay.mjs",
+            "savedName": "storage-component-replay.mjs.txt",
+            "sha256": "444453a5a1b628dbb93414e9def3aabeb6e228cec3366a8558712a2addf4d197"
+        },
+        {
+            "originalName": "storage-component-timing.json",
+            "savedName": "storage-component-timing.json",
+            "sha256": "2b329c0f915b5584cc7787d4d38e7710bba1e2bdb46607c13ce6f69c5dcb2268"
+        },
+        {
+            "originalName": "storage-component-timing-v2-contaminated.json",
+            "savedName": "storage-component-timing-v2-contaminated.json",
+            "sha256": "1c405cf9ed8bae512474acdd1371caf6670b9f4432771b643c14e0fab0513fe4"
+        },
+        {
+            "originalName": "storage-component-timing-v2-contamination.json",
+            "savedName": "storage-component-timing-v2-contamination.json",
+            "sha256": "daa0d91a5701214d11bdb274fc79675bb89bd6d994a21ab570d67a79b27753ed"
+        },
+        {
+            "originalName": "storage-component-timing-v2.json",
+            "savedName": "storage-component-timing-v2.json",
+            "sha256": "0d014324b6ce1b9155b6f87505d8e5273bfeabff1cbaaf5bf546bfbe2915c598"
+        },
+        {
+            "originalName": "storage-component-parity-v2.json",
+            "savedName": "storage-component-parity-v2.json",
+            "sha256": "53d192705d0c08050554445e3238fdde0b14cfefa4c2ae181dd1ba9898324f94"
+        },
+        {
+            "originalName": "storage-range-v1-rejected.patch",
+            "savedName": "storage-range-v1-rejected.patch",
+            "sha256": "37980d991760158d70e632450c0d265b2728887f2c0c8e06552edf1ebdf8ff2c"
+        },
+        {
+            "originalName": "storage-range-v2-frozen.patch",
+            "savedName": "storage-range-v2-frozen.patch",
+            "sha256": "bf8b1bbfed0764bd03fb2f1bc4f0d6c20933225e63ffe951bffa6e9fd8f78deb"
+        }
+    ],
+    "limits": "Original local observations retained byte-for-byte; local path bindings are recorded for provenance. The .mjs.txt files are exact original replay scripts, requiring their recorded local worktree/cache paths. These measure component work, not complete-browser import latency. No local peak-process-memory claim.",
+    "superseded": {
+        "mediaV2": {
+            "pullRequest": 853,
+            "commit": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+            "testedLocalCommit": "80b0587481e43558d1a4e893542f4d1ab8d3d1f1",
+            "tree": "644a8623de05f30ac6145bfb20d05ffb8c77ba71",
+            "reason": "Final exact-adjacency guard avoids repeated reads on per-file extra-field archives. Historical timing evidence is not reused for the new head."
+        }
+    },
+    "additionalIndexes": [
+        "native-index.json",
+        "storage-v3-index.json"
+    ],
+    "browserEvidence": "../import-screen-20261123-browser/index.json",
+    "ciSnapshot": "ci-final-code-heads.json",
+    "resultsReport": "../import-screen-20261123-results.md"
+}

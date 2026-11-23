@@ -1,0 +1,96 @@
+{
+  "localCommit": "54dd1afd14f0b35c0e0b10aaa5bb1739a08166fd",
+  "tree": "6b0b147b232e0baac7f412475b4e5a5084c0354e",
+  "publishedPriorV2Commit": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+  "baselineCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidatePipelineSha256": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+  "gate": {
+    "minimumSelectedEntries": 2,
+    "rule": "Every next selected local offset must equal the previous minimum payload end",
+    "lockedVndbEligibleRanges": 144,
+    "lockedVndbTotalRanges": 144,
+    "eligibleMediaEntries": 146570,
+    "smallestRangeEntries": 138
+  },
+  "work": {
+    "baselineReadBytes": 205086922,
+    "candidateReadBytes": 195649882,
+    "readBytesAvoided": 9437040,
+    "baselineRangeReads": 144,
+    "candidateRangeReads": 144,
+    "mediaEntries": 146570,
+    "compressedPayloadBytes": 188864129,
+    "payloadAndMetadataSha256": "cd8e7f869f6e337cc4502962e5558c0702b445e22ebf4a27651e108c6e119740"
+  },
+  "negativeControl": {
+    "suite": "test/raw-zip-range-reader.test.js",
+    "entries": 1024,
+    "payloadBytesPerEntry": 1024,
+    "localExtraBytesPerEntry": 12,
+    "expectedAndAssertedRangeReadCount": 1,
+    "expectedAndAssertedRangeReadBytes": 1175456,
+    "singletonsAlsoCoveredExtraBytes": [
+      0,
+      12,
+      65535
+    ],
+    "lateGapDeclinesTightRead": true,
+    "lastMemberOnlyExtraRetryRemainsCovered": true
+  },
+  "validation": {
+    "focused": {
+      "files": 4,
+      "testsPassed": 140
+    },
+    "mainTypeScript": "passed",
+    "testTypeScript": "passed",
+    "changedScopeEslint": "passed",
+    "allTargetDryBuild": "passed",
+    "diffCheck": "passed",
+    "independentReview": "root and parser_finish found no blocker",
+    "fullUnit": {
+      "status": "passed",
+      "exitCode": 0,
+      "filesPassed": 641,
+      "testsPassed": 14419,
+      "testsSkipped": 47,
+      "durationSeconds": 237.57,
+      "workers": 2,
+      "nodeVersion": "v24.22.3",
+      "compiler": "clang/LLD 21.1.8 through verified storage-pinned-clang wrapper",
+      "log": "storage-unit-v3.log"
+    },
+    "initialFullUnitSetupAttempt": {
+      "status": "aborted",
+      "exitCode": 130,
+      "reason": "Stale compiler wrapper referenced a deleted toolchain. Stopped before correcting environment; original log retained. The corrected V3 suite used an independently verified current compiler/linker wrapper.",
+      "log": "storage-unit-stale-compiler-aborted.log"
+    }
+  },
+  "performanceScope": "No V3 timing claim. This verifies unchanged bytes and fewer logical Blob source-range bytes on the locked VNDB fixture. Earlier V2 timing is not transferred. Final-member-only extra fields may still require one bounded retry.",
+  "artifacts": {
+    "storage-v3-adjacency-activation.json": "25089eb23737b083defa3ab332389e8e84e94dca1a027349a7f2c8fd82f8d4b9",
+    "storage-component-parity-v3.json": "6fa0b933f01cefaa3acabe1e1764a6d2eab2903279c8fe83e27da5b1c8efa73c",
+    "storage-component-replay.mjs.txt": "444453a5a1b628dbb93414e9def3aabeb6e228cec3366a8558712a2addf4d197",
+    "storage-v3-raw-logs.tar.xz": "98ee1059af6409d8d49d9a93fba6ca4460818f146d0fea65b15acdf078c62c10"
+  },
+  "publishedCommit": "2c604d0f0a252a7a2e223773292507921b19feaf",
+  "pr": "https://github.com/ManabiIO/manabitan/pull/853",
+  "frozenReleaseStudy": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+  "rawLogs": {
+    "archive": "storage-v3-raw-logs.tar.xz",
+    "sha256": "98ee1059af6409d8d49d9a93fba6ca4460818f146d0fea65b15acdf078c62c10",
+    "membersSha256": {
+      "storage-focused-v3.log": "151e76c790dab28fb56ffe9689f84ff188b2ad2ce0bfd6e99bf507a396d2876c",
+      "storage-types-main-v3.log": "304728a9f411c80317241b80cab57c423743cf128f3f58ae31c8bbd8ec4d1b4e",
+      "storage-types-test-v3.log": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a",
+      "storage-lint-v3.log": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+      "storage-build-v3.log": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d",
+      "storage-unit-v3.log": "52831f3cf119fc8a0548f59e089fe8cf82e4a7758ddeeb6af8ce89badb8a510f",
+      "storage-unit-stale-compiler-aborted.log": "1d39496a231788eafafc0b90cf2cdff701cae5c10e05e58b62f596feee6b9f38",
+      "storage-pinned-clang": "45d351e270c563e18534e2f13755e1a04ed8168870bb2b53fd81b53d31e6de58",
+      "storage-clang-probe.c": "3aa379f70a9a0bb5549c34f0153e6731dd76ffe0ac22f7a5acbf5ace208146ef",
+      "storage-clang-probe.wasm": "0db538c794728dbcb325eb73f576c1baa9d5df182516975ea13b48563c66c064"
+    }
+  }
+}

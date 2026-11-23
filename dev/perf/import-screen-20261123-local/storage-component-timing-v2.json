@@ -1,0 +1,131 @@
+{
+  "node": "v24.22.3",
+  "v8": "13.6.233.17-node.63",
+  "archive": "/workspace/scratch/72c24f1e7bc9/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+  "archiveBytes": 291705969,
+  "mediaCount": 146570,
+  "batches": 144,
+  "parity": {},
+  "observations": [
+    {
+      "pair": 1,
+      "arm": "A",
+      "durationMs": 709.1215670000001,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 1,
+      "arm": "B",
+      "durationMs": 418.2355400000001,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 2,
+      "arm": "B",
+      "durationMs": 478.65074899999945,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 2,
+      "arm": "A",
+      "durationMs": 717.7356110000001,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 3,
+      "arm": "A",
+      "durationMs": 666.4634219999998,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 3,
+      "arm": "B",
+      "durationMs": 645.2929349999995,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 4,
+      "arm": "B",
+      "durationMs": 516.81675,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 4,
+      "arm": "A",
+      "durationMs": 775.8640569999998,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 5,
+      "arm": "A",
+      "durationMs": 1370.0198380000002,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 5,
+      "arm": "B",
+      "durationMs": 819.8726279999992,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 6,
+      "arm": "B",
+      "durationMs": 273.8093169999993,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 195649882,
+      "readCount": 144,
+      "digest": null
+    },
+    {
+      "pair": 6,
+      "arm": "A",
+      "durationMs": 522.8520209999988,
+      "count": 146570,
+      "payloadBytes": 188864129,
+      "readBytes": 205086922,
+      "readCount": 144,
+      "digest": null
+    }
+  ]
+}

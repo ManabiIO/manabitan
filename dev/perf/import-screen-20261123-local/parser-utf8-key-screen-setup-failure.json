@@ -1,0 +1,21 @@
+{
+  "scope": "Same-process key interning only: source JSON was projected to real expression/reading fields before setup; parse, inflate, memory allocation and digest verification excluded. No full-import performance claim.",
+  "node": "v22.22.0",
+  "warmupsPerArm": 10,
+  "blocks": 6,
+  "iterationsPerObservation": 3,
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sources": [
+    {
+      "root": "/workspace/scratch/ad5d54ac9137/manabitan-live",
+      "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+    },
+    {
+      "root": "/workspace/scratch/ad5d54ac9137/parser-opt",
+      "wasmSha256": "5c963e6b7a5075c7d4a5c916659846e4b372ae80f8b0ca9e23ee46549c64a246"
+    }
+  ],
+  "complete": false,
+  "cases": [],
+  "error": "Error: Split zip file\n    at ZipReader.getEntriesGenerator (file:///workspace/scratch/ad5d54ac9137/manabitan-live/node_modules/@zip.js/zip.js/lib/core/zip-reader.js:213:10)\n    at async ZipReader.getEntries (file:///workspace/scratch/ad5d54ac9137/manabitan-live/node_modules/@zip.js/zip.js/lib/core/zip-reader.js:325:20)\n    at async loadKeys (file:///workspace/scratch/ad5d54ac9137/parser-utf8-key-screen.mjs:28:22)\n    at async file:///workspace/scratch/ad5d54ac9137/parser-utf8-key-screen.mjs:84:149"
+}

@@ -1,0 +1,1023 @@
+{
+  "baseCommit": "80b0587481e43558d1a4e893542f4d1ab8d3d1f1",
+  "proposedGate": "At least 2 selected entries and every adjacent minimum payload end equals next local offset",
+  "archiveBytes": 291705969,
+  "catalogEntries": 147237,
+  "mediaEntries": 146570,
+  "batches": 144,
+  "eligibleBatches": 144,
+  "eligibleMediaEntries": 146570,
+  "smallestBatch": 138,
+  "predictedReadBytes": 195649882,
+  "baselineReadBytes": 205086922,
+  "batchDecisions": [
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1460869,
+      "tightBytes": 1395334
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1355609,
+      "tightBytes": 1290074
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1420053,
+      "tightBytes": 1354518
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1445217,
+      "tightBytes": 1379682
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1464783,
+      "tightBytes": 1399248
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1463005,
+      "tightBytes": 1397470
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1395629,
+      "tightBytes": 1330094
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1448609,
+      "tightBytes": 1383074
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1427945,
+      "tightBytes": 1362410
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1428087,
+      "tightBytes": 1362552
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1391925,
+      "tightBytes": 1326390
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1399627,
+      "tightBytes": 1334092
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1381499,
+      "tightBytes": 1315964
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1424425,
+      "tightBytes": 1358890
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1330289,
+      "tightBytes": 1264754
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1385301,
+      "tightBytes": 1319766
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1482837,
+      "tightBytes": 1417302
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1399866,
+      "tightBytes": 1334331
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1415645,
+      "tightBytes": 1350110
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1546903,
+      "tightBytes": 1481368
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1399491,
+      "tightBytes": 1333956
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1439527,
+      "tightBytes": 1373992
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1473545,
+      "tightBytes": 1408010
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1470725,
+      "tightBytes": 1405190
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1476839,
+      "tightBytes": 1411304
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1455627,
+      "tightBytes": 1390092
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1456861,
+      "tightBytes": 1391326
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1391503,
+      "tightBytes": 1325968
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1430297,
+      "tightBytes": 1364762
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1544791,
+      "tightBytes": 1479256
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1495431,
+      "tightBytes": 1429896
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1423099,
+      "tightBytes": 1357564
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1432467,
+      "tightBytes": 1366932
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1412295,
+      "tightBytes": 1346760
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1443721,
+      "tightBytes": 1378186
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1464377,
+      "tightBytes": 1398842
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1420715,
+      "tightBytes": 1355180
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1431181,
+      "tightBytes": 1365646
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1472923,
+      "tightBytes": 1407388
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1443547,
+      "tightBytes": 1378012
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1456785,
+      "tightBytes": 1391250
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1507047,
+      "tightBytes": 1441512
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1493855,
+      "tightBytes": 1428320
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1439995,
+      "tightBytes": 1374460
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1483865,
+      "tightBytes": 1418330
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1474045,
+      "tightBytes": 1408510
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1496959,
+      "tightBytes": 1431424
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1461719,
+      "tightBytes": 1396184
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1446915,
+      "tightBytes": 1381380
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1521547,
+      "tightBytes": 1456012
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1454107,
+      "tightBytes": 1388572
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1507057,
+      "tightBytes": 1441522
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1434359,
+      "tightBytes": 1368824
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1462015,
+      "tightBytes": 1396480
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1465419,
+      "tightBytes": 1399884
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1457523,
+      "tightBytes": 1391988
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1494651,
+      "tightBytes": 1429116
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1434367,
+      "tightBytes": 1368832
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1394375,
+      "tightBytes": 1328840
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1396779,
+      "tightBytes": 1331244
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1445323,
+      "tightBytes": 1379788
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1492265,
+      "tightBytes": 1426730
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1439113,
+      "tightBytes": 1373578
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1427311,
+      "tightBytes": 1361776
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1426789,
+      "tightBytes": 1361254
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1439051,
+      "tightBytes": 1373516
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1454475,
+      "tightBytes": 1388940
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1381963,
+      "tightBytes": 1316428
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1398859,
+      "tightBytes": 1333324
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1397449,
+      "tightBytes": 1331914
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1433777,
+      "tightBytes": 1368242
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1434675,
+      "tightBytes": 1369140
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1480647,
+      "tightBytes": 1415112
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1428811,
+      "tightBytes": 1363276
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1409215,
+      "tightBytes": 1343680
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1443183,
+      "tightBytes": 1377648
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1498023,
+      "tightBytes": 1432488
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1445595,
+      "tightBytes": 1380060
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1603475,
+      "tightBytes": 1537940
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1516599,
+      "tightBytes": 1451064
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1427843,
+      "tightBytes": 1362308
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1446505,
+      "tightBytes": 1380970
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1445289,
+      "tightBytes": 1379754
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1391651,
+      "tightBytes": 1326116
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1405993,
+      "tightBytes": 1340458
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1460635,
+      "tightBytes": 1395100
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1548095,
+      "tightBytes": 1482560
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1465355,
+      "tightBytes": 1399820
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1584395,
+      "tightBytes": 1518860
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1457869,
+      "tightBytes": 1392334
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1426046,
+      "tightBytes": 1360511
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1429533,
+      "tightBytes": 1363998
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1435081,
+      "tightBytes": 1369546
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1381001,
+      "tightBytes": 1315466
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1424011,
+      "tightBytes": 1358476
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1475987,
+      "tightBytes": 1410452
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1555435,
+      "tightBytes": 1489900
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1455697,
+      "tightBytes": 1390162
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1433601,
+      "tightBytes": 1368066
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1443963,
+      "tightBytes": 1378428
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1413929,
+      "tightBytes": 1348394
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1423617,
+      "tightBytes": 1358082
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1382059,
+      "tightBytes": 1316524
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1405933,
+      "tightBytes": 1340398
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1414335,
+      "tightBytes": 1348800
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1445381,
+      "tightBytes": 1379846
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1508245,
+      "tightBytes": 1442710
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1441871,
+      "tightBytes": 1376336
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1482881,
+      "tightBytes": 1417346
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1456445,
+      "tightBytes": 1390910
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1496485,
+      "tightBytes": 1430950
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1461507,
+      "tightBytes": 1395972
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1429307,
+      "tightBytes": 1363772
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1547327,
+      "tightBytes": 1481792
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1541651,
+      "tightBytes": 1476116
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1473135,
+      "tightBytes": 1407600
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1429413,
+      "tightBytes": 1363878
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1307085,
+      "tightBytes": 1241550
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1368229,
+      "tightBytes": 1302694
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1362649,
+      "tightBytes": 1297114
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1321811,
+      "tightBytes": 1256276
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1322021,
+      "tightBytes": 1256486
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1324699,
+      "tightBytes": 1259164
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1316477,
+      "tightBytes": 1250942
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1305207,
+      "tightBytes": 1239672
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1375563,
+      "tightBytes": 1310028
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1465541,
+      "tightBytes": 1400006
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1452383,
+      "tightBytes": 1386848
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1350299,
+      "tightBytes": 1284764
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1288897,
+      "tightBytes": 1223362
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1323063,
+      "tightBytes": 1257528
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1515087,
+      "tightBytes": 1449552
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1424005,
+      "tightBytes": 1358470
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1285755,
+      "tightBytes": 1220220
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1317397,
+      "tightBytes": 1251862
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1342387,
+      "tightBytes": 1276852
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1393457,
+      "tightBytes": 1327922
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1297247,
+      "tightBytes": 1231712
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1365663,
+      "tightBytes": 1300128
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1380175,
+      "tightBytes": 1314640
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1380147,
+      "tightBytes": 1314612
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1403027,
+      "tightBytes": 1337492
+    },
+    {
+      "count": 1024,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 1301091,
+      "tightBytes": 1235556
+    },
+    {
+      "count": 138,
+      "contiguous": true,
+      "eligible": true,
+      "sourceBytes": 222987,
+      "tightBytes": 157452
+    }
+  ]
+}

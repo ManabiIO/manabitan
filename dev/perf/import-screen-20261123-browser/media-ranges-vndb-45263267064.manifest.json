@@ -1,0 +1,296 @@
+{
+  "schemaVersion": 1,
+  "label": "media-ranges",
+  "dictionary": "vndb",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidate": "2da6e38c204e1bb22c5835f8f53f867e872b7296",
+  "studyCommit": "3e7343d9baa307552dc8f60fd5731dc2a212ec21",
+  "originalArtifact": {
+    "id": 14863901575,
+    "name": "import-screen-media-ranges-vndb-45263267064-1",
+    "size_in_bytes": 1186310,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14863901575",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14863901575/zip",
+    "expired": false,
+    "created_at": "2026-11-23T21:19:51Z",
+    "expires_at": "2026-12-23T21:19:51Z",
+    "updated_at": "2026-11-23T21:19:51Z",
+    "digest": "sha256:eb179c539e79618bac01674c7e2a6bc562678b6b2f78b20b26c7a9e0dbf1ac5a",
+    "workflow_run": {
+      "id": 45263267064,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-screen-20261123-ad5",
+      "head_sha": "3e7343d9baa307552dc8f60fd5731dc2a212ec21"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45263267064",
+  "archive": {
+    "path": "media-ranges-vndb-45263267064.tar.xz",
+    "bytes": 143840,
+    "sha256": "8a2a2bac8f9a683cd806841e2ceb4e6999d3af5da02105d08e9d63129bb30448"
+  },
+  "files": [
+    {
+      "path": "media-ranges/vndb/block-1-A/run-1.json",
+      "bytes": 153053,
+      "sha256": "e3af1bdb19f85ea1871556a7948d68883ad43b83d61f09cc958b2052dec5fc21"
+    },
+    {
+      "path": "media-ranges/vndb/block-1-A/summary.json",
+      "bytes": 60095,
+      "sha256": "00c8c3798d7677e6af11d12e438267ef8d96b716658301cb659e121d0d1b9256"
+    },
+    {
+      "path": "media-ranges/vndb/block-1-B/run-1.json",
+      "bytes": 153175,
+      "sha256": "7da99484a77af80b2a3e77a3d37662afa5426bce69fe68fa127551663290dd82"
+    },
+    {
+      "path": "media-ranges/vndb/block-1-B/summary.json",
+      "bytes": 60033,
+      "sha256": "181a5ba8bb7d89b01ac2e331266d99218428a52efdd29496eaf588ea870620ca"
+    },
+    {
+      "path": "media-ranges/vndb/block-1-C/run-1.json",
+      "bytes": 153112,
+      "sha256": "05e989b0bbf9fcd0701e5f153075a62880004312e0eed36cc2a1c3920c2bd5b7"
+    },
+    {
+      "path": "media-ranges/vndb/block-1-C/summary.json",
+      "bytes": 59899,
+      "sha256": "ec2145dd9fe959833f9050980b77538d7726adde29a0e13b64f19f562ffbc2c5"
+    },
+    {
+      "path": "media-ranges/vndb/block-2-A/run-1.json",
+      "bytes": 152874,
+      "sha256": "9ab473f14c64bbb0a7cc9e76e3cdaa6eba4b08eb39f11a3d40e6c46d9ea90421"
+    },
+    {
+      "path": "media-ranges/vndb/block-2-A/summary.json",
+      "bytes": 60053,
+      "sha256": "7e42a2b18bcb8dc1b2233fab8ebcaf29a9df264e76a9336788ffbe9214f79813"
+    },
+    {
+      "path": "media-ranges/vndb/block-2-B/run-1.json",
+      "bytes": 153232,
+      "sha256": "337a799161c6d1801edcf435c7891a339fc7af364994ff705e23ef275826cff1"
+    },
+    {
+      "path": "media-ranges/vndb/block-2-B/summary.json",
+      "bytes": 60088,
+      "sha256": "6454e0d69433c8f9c715ad6b5bd7fad436b3dbc27e3142848e76b5ed6388a951"
+    },
+    {
+      "path": "media-ranges/vndb/block-2-C/run-1.json",
+      "bytes": 153059,
+      "sha256": "6d961aad954226a55ce392b2b63813a310ed166daa96bd8526fa1fd54b9b5352"
+    },
+    {
+      "path": "media-ranges/vndb/block-2-C/summary.json",
+      "bytes": 60135,
+      "sha256": "21fd0e5f078441aa2f2f334480fe3bd2aa5425485b7587a1ad9c75b76880dcef"
+    },
+    {
+      "path": "media-ranges/vndb/block-3-A/run-1.json",
+      "bytes": 152837,
+      "sha256": "57d9613278d91666ec107c48b235fa9c50c4d46816ccfafcdde285712f7e141b"
+    },
+    {
+      "path": "media-ranges/vndb/block-3-A/summary.json",
+      "bytes": 59893,
+      "sha256": "c0e0f8285c0cc9c7322bee7e7559782cf91c578d2db6e3522ade437ec7112a5b"
+    },
+    {
+      "path": "media-ranges/vndb/block-3-B/run-1.json",
+      "bytes": 152718,
+      "sha256": "057f4d863e9e3000470def85577e142390de627443271b875a23664361096460"
+    },
+    {
+      "path": "media-ranges/vndb/block-3-B/summary.json",
+      "bytes": 59857,
+      "sha256": "a1fb6ae56cdbc2ba063a714ee76fb7c3b169cd928bf13876626077f23c144c98"
+    },
+    {
+      "path": "media-ranges/vndb/block-3-C/run-1.json",
+      "bytes": 153109,
+      "sha256": "6b46fe526d9d4e6eb70e043206554bd89d441e6d319a8b7ee69cf1c5aa72dd7b"
+    },
+    {
+      "path": "media-ranges/vndb/block-3-C/summary.json",
+      "bytes": 60023,
+      "sha256": "668fa95d8f9944ed078e78e3232914e6568e74357f978cff0cd9e2d0a1a093af"
+    },
+    {
+      "path": "media-ranges/vndb/block-4-A/run-1.json",
+      "bytes": 152941,
+      "sha256": "3be5de5983dd6dc3071588496cfa3096ad4edfb94b65e5d7da3156403315785c"
+    },
+    {
+      "path": "media-ranges/vndb/block-4-A/summary.json",
+      "bytes": 60028,
+      "sha256": "c9a0776431f553c65c7cee5d79307dbe4a63c42bac8dafa700410606fb292dc9"
+    },
+    {
+      "path": "media-ranges/vndb/block-4-B/run-1.json",
+      "bytes": 152740,
+      "sha256": "b01b7a623e25aae7b320b4da1e14eca3a0803df072cf339e2eed619f1c8403ae"
+    },
+    {
+      "path": "media-ranges/vndb/block-4-B/summary.json",
+      "bytes": 59997,
+      "sha256": "5ad286ed0a19cf338fe1cb73686897093cf5eac91464a6397ac3a039f8dc90d1"
+    },
+    {
+      "path": "media-ranges/vndb/block-4-C/run-1.json",
+      "bytes": 152826,
+      "sha256": "295333a373572d3f1014a3f48abc7d7551f1b4809703bdb4732349b6eee23d26"
+    },
+    {
+      "path": "media-ranges/vndb/block-4-C/summary.json",
+      "bytes": 59950,
+      "sha256": "7cb0755406bf0240c5af1e480338a2dec0e11e53f72740c8aa7d175e80a5812d"
+    },
+    {
+      "path": "media-ranges/vndb/block-5-A/run-1.json",
+      "bytes": 153061,
+      "sha256": "5e9ef155c6ea8f7563e8bc548a5fd02f917e6143cfb441515359e4a99a6f51f2"
+    },
+    {
+      "path": "media-ranges/vndb/block-5-A/summary.json",
+      "bytes": 59972,
+      "sha256": "50d9c22b21f3736696f99d54b025b21a68fbdd984c5551bc490eb2c3c0b51dde"
+    },
+    {
+      "path": "media-ranges/vndb/block-5-B/run-1.json",
+      "bytes": 152750,
+      "sha256": "29f01e98e0695d4306a4f78d03e6260c2ffde40e420ab11b771f00143baa1537"
+    },
+    {
+      "path": "media-ranges/vndb/block-5-B/summary.json",
+      "bytes": 59911,
+      "sha256": "c69883385230c039a1ede3dc757e87759b1ed1cd728315c61d7a882e65620e38"
+    },
+    {
+      "path": "media-ranges/vndb/block-5-C/run-1.json",
+      "bytes": 153074,
+      "sha256": "6ea7bd44831f19d5a59be70e39910cfed65918de95747aaf1148f16b2e268b91"
+    },
+    {
+      "path": "media-ranges/vndb/block-5-C/summary.json",
+      "bytes": 60027,
+      "sha256": "8a8772a5666bbb273314ad10cf26d7d1b6e8196b96fdb411540823e7718e9da7"
+    },
+    {
+      "path": "media-ranges/vndb/block-6-A/run-1.json",
+      "bytes": 153102,
+      "sha256": "7e1a76e78f82c8affdd8d9b27f0c9e9b28138dbdb7df761488838be91143fdf5"
+    },
+    {
+      "path": "media-ranges/vndb/block-6-A/summary.json",
+      "bytes": 60119,
+      "sha256": "ddd3edee47f3929e51da3b0ed1a24e6885770fe0a04ada45f3d9acfd47dd1f50"
+    },
+    {
+      "path": "media-ranges/vndb/block-6-B/run-1.json",
+      "bytes": 152845,
+      "sha256": "e4379f6cd37691f56997449cffecf7cb85c4d9ef4e492f8d7b09904ebb85e875"
+    },
+    {
+      "path": "media-ranges/vndb/block-6-B/summary.json",
+      "bytes": 59958,
+      "sha256": "27eda28e3a68126f8a0a3b4132c960d0849b565dc2ccc982bf0ab07eeff27037"
+    },
+    {
+      "path": "media-ranges/vndb/block-6-C/run-1.json",
+      "bytes": 153092,
+      "sha256": "faa2678fa030396e0cec84592fefb5c7edb6e39121a289620df9cbb33f0a542d"
+    },
+    {
+      "path": "media-ranges/vndb/block-6-C/summary.json",
+      "bytes": 60096,
+      "sha256": "de6c2d9050bb8fbe27f1a7f37deee420db616d6553092135231fad5b85bf6684"
+    },
+    {
+      "path": "media-ranges/vndb/diagnostic-A/run-1.json",
+      "bytes": 152816,
+      "sha256": "0762b69ce0a6b9f7f5f0848741224ffb2c53e81a81b3f9e42eac1519c1815cac"
+    },
+    {
+      "path": "media-ranges/vndb/diagnostic-A/summary.json",
+      "bytes": 59897,
+      "sha256": "97cc243ba852577fabea1e46123ceaf3dce746f447aa59f36c70aa5910470e0a"
+    },
+    {
+      "path": "media-ranges/vndb/diagnostic-B/run-1.json",
+      "bytes": 153371,
+      "sha256": "93d560db2ca11060edf185a71ad513eaec2842fd655f6ded90bdf201b0f80ee1"
+    },
+    {
+      "path": "media-ranges/vndb/diagnostic-B/summary.json",
+      "bytes": 60042,
+      "sha256": "ff66409f18102691d89da4a585aa6992fee7ec1181de316c4dad9ae89c31c840"
+    },
+    {
+      "path": "media-ranges/vndb/expected-lookup-signature.json",
+      "bytes": 12889,
+      "sha256": "8d17b25323c33afcb7521cb0bedaa112f470c3103f61181f59709c20258c39d7"
+    },
+    {
+      "path": "media-ranges/vndb/protocol.json",
+      "bytes": 552,
+      "sha256": "78f4cb45cb2c64639444d6b638ed44bbbb36ddb3eb0829fc82b9a5d106f27613"
+    },
+    {
+      "path": "media-ranges/vndb/runner.py",
+      "bytes": 12492,
+      "sha256": "b4b217108f4eca2b136a1f067767ec9e6777a07a0e0bf544bb87f7d2f3bd63fd"
+    },
+    {
+      "path": "media-ranges/vndb/summary.json",
+      "bytes": 290667,
+      "sha256": "a876246c743645df5adb39225000051548f6e9ed428d8807b221bf8ef98778a6"
+    },
+    {
+      "path": "media-ranges/vndb/warmup-A/run-1.json",
+      "bytes": 153070,
+      "sha256": "b0f7286514bc4db4c18821bb965913ef4e5af0077cab242ebf5c51fb32debc60"
+    },
+    {
+      "path": "media-ranges/vndb/warmup-A/summary.json",
+      "bytes": 60047,
+      "sha256": "3e53103f262cc479e9f9cafa723cb4f02bf59c1b7abd672d484e1577254b31d3"
+    },
+    {
+      "path": "media-ranges/vndb/warmup-B/run-1.json",
+      "bytes": 152899,
+      "sha256": "3f5e234d56bb3e520a061a6196bff981d8a9eb5282514721691072f9b695abbf"
+    },
+    {
+      "path": "media-ranges/vndb/warmup-B/summary.json",
+      "bytes": 59994,
+      "sha256": "fa22e4ab81a1c32dce78fac8a96aa4933e948932c3af3850a8fbbb2226e629f0"
+    },
+    {
+      "path": "media-ranges/vndb/warmup-C/run-1.json",
+      "bytes": 152869,
+      "sha256": "a4d31ac28bac564995f15d73b6b2ca5c611295255c8ab974b842671344045607"
+    },
+    {
+      "path": "media-ranges/vndb/warmup-C/summary.json",
+      "bytes": 60034,
+      "sha256": "50a0a233e3b0bbfdc393a66457947b3137c0a9bf2453969e233131cc5ae4f26f"
+    },
+    {
+      "path": "media-ranges/vndb/workflow.yml",
+      "bytes": 1907,
+      "sha256": "21a647dcd599caf5389f132359d844c42191a158667dc3a152d331ffbf9daa0b"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte.",
+  "supersededByStudy": "media-adjacent"
+}
