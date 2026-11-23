@@ -66,7 +66,7 @@ import {createDictionaryImportSessionId, DictionaryImportJournal} from './dictio
 import {computeGenerationMediaCrc, DictionaryGenerationMediaStore, encodeGenerationMediaDescriptor, isGenerationMediaDescriptor} from './dictionary-generation-media-store.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {hashPairToHex, hashTermEntryContentBytes, hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {TermRecordOpfsStore} from './term-record-opfs-store.js';
+import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from './term-record-opfs-store.js';
 import {hasCompletePreparedTermLookupIndexes} from './term-lookup-index-preparation.js';
 import {
     createGlossarySearchQuery,
@@ -9870,23 +9870,20 @@ null :
         contentDedupPlan,
         useResolvedContentReferences,
     ) {
-        /** @type {Partial<ArtifactTermRecordChunk>} */
-        const additions = {};
-        if (preparedLookupIndexes !== null) {
-            additions.preparedLookupIndexes = preparedLookupIndexes;
-        }
         if (
             useResolvedContentReferences &&
             contentDedupPlan !== null &&
             chunk.contentUniqueIndexList instanceof Uint32Array
         ) {
-            additions.resolvedContentReferences = {
-                uniqueIndexList: chunk.contentUniqueIndexList,
-                offsets: contentDedupPlan.resolvedOffsets,
-                lengths: contentDedupPlan.resolvedLengths,
-            };
+            return createArtifactTermRecordChunkWithResolvedContent(
+                chunk,
+                chunk.contentUniqueIndexList,
+                contentDedupPlan.resolvedOffsets,
+                contentDedupPlan.resolvedLengths,
+                preparedLookupIndexes,
+            );
         }
-        return Object.keys(additions).length === 0 ? chunk : {...chunk, ...additions};
+        return preparedLookupIndexes === null ? chunk : {...chunk, preparedLookupIndexes};
     }
 
     /**
