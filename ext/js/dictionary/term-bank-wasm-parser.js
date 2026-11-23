@@ -4015,7 +4015,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
-                    Uint8Array.from(row.glossaryJsonBytes))) :
+                    new Uint8Array(row.glossaryJsonBytes))) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
         return {
