@@ -71,21 +71,26 @@ describe('produced compression blocks', () => {
         const workers = [new ControlledWorker(), new ControlledWorker()]
         const pool = poolFor(workers)
         const source = Uint8Array.of(10, 11, 12, 13, 14, 15)
-        const produce = vi.fn((/** @type {number} */ index) => source.slice(index, index + 1))
+        /** @type {number[]} */
+        const produced = []
+        const produce = (/** @type {number} */ index) => {
+            produced.push(index)
+            return source.slice(index, index + 1)
+        }
         const pending = pool.compressWrappedProduced(source.length, produce, 'jmdict')
         try {
-            expect(produce.mock.calls.map(([index]) => index)).toEqual([0, 1])
+            expect(produced).toEqual([0, 1])
             expect(workers.map(({calls}) => calls.length)).toEqual([1, 1])
             workers[1].reply(0)
             await flush()
-            expect(produce.mock.calls.map(([index]) => index)).toEqual([0, 1, 2])
+            expect(produced).toEqual([0, 1, 2])
             workers[1].reply(1)
             await flush()
             workers[0].reply(0)
             await flush()
             workers[1].reply(2)
             await flush()
-            expect(produce).toHaveBeenCalledTimes(6)
+            expect(produced).toHaveLength(6)
             workers[1].reply(3)
             workers[0].reply(1)
             const result = await pending
@@ -103,10 +108,13 @@ describe('produced compression blocks', () => {
         async (failure) => {
             const workers = [new ControlledWorker(), new ControlledWorker()]
             const pool = poolFor(workers)
-            const produce = vi.fn((/** @type {number} */ index) => {
+            /** @type {number[]} */
+            const produced = []
+            const produce = (/** @type {number} */ index) => {
+                produced.push(index)
                 if (failure === 'producer' && index === 2) { throw new Error('producer failed') }
                 return Uint8Array.of(index)
-            })
+            }
             const pending = pool.compressWrappedProduced(7, produce, null)
             let settled = false
             void pending.finally(() => { settled = true }).catch(() => {})
@@ -120,13 +128,13 @@ describe('produced compression blocks', () => {
                     workers[1].reply(0)
                 }
                 await flush()
-                const produced = produce.mock.calls.length
-                expect(produced).toBe(failure === 'producer' || failure === 'dispatch' ? 3 : 2)
+                const producedCount = produced.length
+                expect(producedCount).toBe(failure === 'producer' || failure === 'dispatch' ? 3 : 2)
                 expect(settled).toBe(false)
                 expect(workers[0].calls).toHaveLength(1)
                 workers[0].reply(0)
                 await expect(pending).rejects.toThrow()
-                expect(produce).toHaveBeenCalledTimes(produced)
+                expect(produced).toHaveLength(producedCount)
                 expect(Reflect.get(pool, '_pending').size).toBe(0)
             } finally { pool.close() }
         },
@@ -148,11 +156,16 @@ describe('produced compression blocks', () => {
     test('pool closure drains a stalled worker without producing additional blocks', async () => {
         const worker = new ControlledWorker()
         const pool = poolFor([worker])
-        const produce = vi.fn((/** @type {number} */ index) => Uint8Array.of(index))
+        /** @type {number[]} */
+        const produced = []
+        const produce = (/** @type {number} */ index) => {
+            produced.push(index)
+            return Uint8Array.of(index)
+        }
         const pending = pool.compressWrappedProduced(5, produce, null)
         pool.close()
         await expect(pending).rejects.toThrow('closed')
-        expect(produce).toHaveBeenCalledOnce()
+        expect(produced).toHaveLength(1)
         expect(worker.terminateCount).toBe(1)
         expect(Reflect.get(pool, '_pending').size).toBe(0)
     })
