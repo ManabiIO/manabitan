@@ -43,6 +43,7 @@ extern unsigned char __heap_base;
 static uint32_t heap_ptr = 0u;
 static uint32_t last_parse_capacity = 0u;
 static uint32_t last_content_capacity = 0u;
+static uint32_t last_content_metadata_mode = 0u;
 
 void* memset(void* dest, int value, unsigned long count) {
     __builtin_memset(dest, value, count);
@@ -604,6 +605,7 @@ static uint32_t read_content_signature(
 __attribute__((visibility("default")))
 void wasm_reset_heap(void) {
     heap_ptr = (uint32_t)(uintptr_t)&__heap_base;
+    last_content_metadata_mode = 0u;
 }
 
 __attribute__((visibility("default")))
@@ -635,6 +637,13 @@ uint32_t wasm_get_last_parse_capacity(void) {
 __attribute__((visibility("default")))
 uint32_t wasm_get_last_content_capacity(void) {
     return last_content_capacity;
+}
+
+/* Zero means row-indexed descriptors; one means exact unique-content IDs.
+ * This describes only the last successful fused parse in this instance. */
+__attribute__((visibility("default")))
+uint32_t wasm_get_last_content_metadata_mode(void) {
+    return last_content_metadata_mode;
 }
 
 static int grow_term_row_buffer(
@@ -3115,8 +3124,10 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t raw_content_hash_table_size,
     uint32_t raw_content_hashes_ptr,
     uint32_t validate_glossary_types,
-    uint32_t glossary_witnesses_ptr
+    uint32_t glossary_witnesses_ptr,
+    uint32_t compact_content_metadata
 ) {
+    last_content_metadata_mode = 0u;
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
         out_ptr == 0u || row_meta_ptr == 0u || hash_table_ptr == 0u ||
@@ -3362,7 +3373,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
         sequences[row_count] = sequence;
 
-        const uint32_t row_offset = row_count * 4u;
+        const uint32_t row_offset = (compact_content_metadata != 0u ? unique_count : row_count) * 4u;
         uint32_t recent_match = 0xffffffffu;
         if ((experiment_mask & EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE) != 0u) {
             const uint32_t raw_hash = raw_term_content_hash(src, parsed_row);
@@ -3425,11 +3436,13 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                     ++recent_content_match_streak >= VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES)) {
                 glossary_reuse_probe_budget = VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET;
             }
-            const uint32_t canonical_offset = recent_match * 4u;
-            row_meta[row_offset] = row_meta[canonical_offset];
-            row_meta[row_offset + 1u] = row_meta[canonical_offset + 1u];
-            row_meta[row_offset + 2u] = row_meta[canonical_offset + 2u];
-            row_meta[row_offset + 3u] = row_meta[canonical_offset + 3u];
+            if (compact_content_metadata == 0u) {
+                const uint32_t canonical_offset = recent_match * 4u;
+                row_meta[row_offset] = row_meta[canonical_offset];
+                row_meta[row_offset + 1u] = row_meta[canonical_offset + 1u];
+                row_meta[row_offset + 2u] = row_meta[canonical_offset + 2u];
+                row_meta[row_offset + 3u] = row_meta[canonical_offset + 3u];
+            }
             unique_indexes[row_count] = unique_indexes[recent_match];
             ++recent_content_hits;
         } else {
@@ -3461,7 +3474,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 if (stored == 0u) { break; }
                 const uint32_t candidate_row = stored - 1u;
                 if (candidate_row >= row_count) { return -3; }
-                const uint32_t candidate_offset = candidate_row * 4u;
+                const uint32_t candidate_offset = (compact_content_metadata != 0u ?
+                    unique_indexes[candidate_row] : candidate_row) * 4u;
                 if (
                     row_meta[candidate_offset + 2u] == hash1 &&
                     row_meta[candidate_offset + 3u] == hash2 &&
@@ -3474,11 +3488,13 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                 slot = (slot + 1u) & table_mask;
             }
             if (matched_row != 0xffffffffu) {
-                const uint32_t canonical_offset = matched_row * 4u;
-                row_meta[row_offset] = row_meta[canonical_offset];
-                row_meta[row_offset + 1u] = length;
-                row_meta[row_offset + 2u] = hash1;
-                row_meta[row_offset + 3u] = hash2;
+                if (compact_content_metadata == 0u) {
+                    const uint32_t canonical_offset = matched_row * 4u;
+                    row_meta[row_offset] = row_meta[canonical_offset];
+                    row_meta[row_offset + 1u] = length;
+                    row_meta[row_offset + 2u] = hash1;
+                    row_meta[row_offset + 3u] = hash2;
+                }
                 unique_indexes[row_count] = unique_indexes[matched_row];
                 cursor = start;
             } else {
@@ -3502,6 +3518,24 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         status = next_term_row(&source, row_end);
     }
     if (status < 0) { return -1; }
+    if (compact_content_metadata != 0u) {
+        if (unique_count * 2u < row_count) {
+            last_content_metadata_mode = 1u;
+        } else {
+            // Preserve the established representation for low-duplication
+            // groups. Every first-use unique ID is at most its row index;
+            // expanding backwards cannot overwrite a still-needed descriptor.
+            for (uint32_t row = row_count; row > 0u;) {
+                --row;
+                const uint32_t source = unique_indexes[row] * 4u;
+                const uint32_t target = row * 4u;
+                row_meta[target] = row_meta[source];
+                row_meta[target + 1u] = row_meta[source + 1u];
+                row_meta[target + 2u] = row_meta[source + 2u];
+                row_meta[target + 3u] = row_meta[source + 3u];
+            }
+        }
+    }
     *(uint32_t*)(uintptr_t)unique_count_ptr = unique_count;
     *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
     *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;

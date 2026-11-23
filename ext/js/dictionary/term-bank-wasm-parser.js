@@ -70,12 +70,12 @@ const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, wasm_get_last_content_metadata_mode?: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -88,6 +88,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * maxPendingChunks?: number,
  * computeContentHashes?: boolean,
  * emitContentSlab?: boolean,
+ * compactContentMetadata?: boolean,
  * emitTokenBinaryContent?: boolean,
  * useNativeStringPlan?: boolean,
  * emitTermByteLists?: boolean,
@@ -96,8 +97,8 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
-/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number, nativeCompactContentMetadataGroups?: number, nativeCompactContentMetadataBytesAvoided?: number, nativeCompactContentMetadataGatherBytesAvoided?: number}} TermBankExperimentProfile */
+/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentMetaByUniqueIndex?: boolean, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
@@ -187,6 +188,7 @@ async function getWasm() {
             wasm_alloc: exports.wasm_alloc,
             wasm_get_last_parse_capacity: exports.wasm_get_last_parse_capacity,
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
+            wasm_get_last_content_metadata_mode: typeof exports.wasm_get_last_content_metadata_mode === 'function' ? exports.wasm_get_last_content_metadata_mode : void 0,
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
             verify_term_bank_source_crcs: typeof exports.verify_term_bank_source_crcs === 'function' ? exports.verify_term_bank_source_crcs : void 0,
             inflate_zip_media_batch: exports.inflate_zip_media_batch,
@@ -785,12 +787,13 @@ function estimateFusedTermBankMetaCapacity(source, defaultCapacity) {
  * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @param {import('dictionary-importer').ImportExperiments} [experiments]
  * @param {boolean} [validateGlossaryTypes]
+ * @param {boolean} [compactContentMetadata]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false, compactContentMetadata = false) {
     try {
-        return await parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse, preloadedSource, experiments, validateGlossaryTypes);
+        return await parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse, preloadedSource, experiments, validateGlossaryTypes, compactContentMetadata);
     } finally {
         // Allocation errors, native traps, and every early return still settle
         // the original source CRC before an importer can select its fallback.
@@ -810,10 +813,11 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
  * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @param {import('dictionary-importer').ImportExperiments} [experiments]
  * @param {boolean} [validateGlossaryTypes]
+ * @param {boolean} [compactContentMetadata]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
+async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false, compactContentMetadata = false) {
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
     // Every multi-bank route must retain source boundaries until the native
     // term-bank cursor has validated each source as a complete JSON array.
@@ -987,6 +991,11 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
         new Uint32Array(wasm.memory.buffer, stringUniqueCountPtr, 1)[0] = 0;
         new Uint32Array(wasm.memory.buffer, stringBytesCountPtr, 1)[0] = 0;
         new Uint32Array(wasm.memory.buffer, recentContentHitsPtr, 1)[0] = 0;
+        // Complete high-repetition worker groups already have a validated
+        // raw-glossary CRC transaction. Only that route opts into native unique
+        // descriptors; older modules and other groups retain row descriptors.
+        const nativeCompactContentMetadata = compactContentMetadata && glossaryWitnessesPtr !== 0 &&
+        typeof wasm.wasm_get_last_content_metadata_mode === 'function';
         tStart = Date.now();
         const encodedContentBytes = wasm.parse_and_encode_term_bank_token_binary_dedup(
             jsonPtr,
@@ -1027,6 +1036,7 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
             rawContentHashesPtr,
             validateGlossaryTypes ? 1 : 0,
             glossaryWitnessesPtr,
+            nativeCompactContentMetadata ? 1 : 0,
         );
         verifyTermBankSourceCrc(
             preloadedSource,
@@ -1092,6 +1102,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
         }
         const rowCount = new Uint32Array(wasm.memory.buffer, rowCountPtr, 1)[0];
         const contentUniqueCount = new Uint32Array(wasm.memory.buffer, contentUniqueCountPtr, 1)[0];
+        const contentMetaByUniqueIndex = nativeCompactContentMetadata && wasm.wasm_get_last_content_metadata_mode?.() === 1;
         const stringUniqueCount = new Uint32Array(wasm.memory.buffer, stringUniqueCountPtr, 1)[0];
         const stringBytesCount = new Uint32Array(wasm.memory.buffer, stringBytesCountPtr, 1)[0];
         const recentContentDedupHitCount = new Uint32Array(wasm.memory.buffer, recentContentHitsPtr, 1)[0];
@@ -1111,6 +1122,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
 ] :
 void 0,
             contentMetasPtr: contentMetaPtr,
+            contentMetaByUniqueIndex,
             contentUniqueIndexesPtr,
             contentUniqueSignatures: new Uint32Array(new Uint32Array(
                 wasm.memory.buffer,
@@ -1120,7 +1132,7 @@ void 0,
             heap,
             source: heap.subarray(jsonPtr, jsonPtr + jsonLength),
             metas: new Uint32Array(wasm.memory.buffer, outPtr, rowCount * META_U32_FIELDS),
-            contentMetas: new Uint32Array(wasm.memory.buffer, contentMetaPtr, rowCount * CONTENT_META_U32_FIELDS),
+            contentMetas: new Uint32Array(wasm.memory.buffer, contentMetaPtr, (contentMetaByUniqueIndex ? contentUniqueCount : rowCount) * CONTENT_META_U32_FIELDS),
             contentOutPtr,
             contentUniqueIndexes: new Uint32Array(wasm.memory.buffer, contentUniqueIndexesPtr, rowCount),
             contentUniqueCount,
@@ -1697,11 +1709,12 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
  * @param {boolean} skipTagRuleDecode
  * @param {boolean} lazyGlossaryDecode
  * @param {boolean} mediaHintFastScan
+ * @param {number} [contentIndex]
  * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
-function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan) {
+function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, skipTagRuleDecode, lazyGlossaryDecode, mediaHintFastScan, contentIndex = i) {
     const o = i * META_U32_FIELDS;
-    const c = i * CONTENT_META_U32_FIELDS;
+    const c = contentIndex * CONTENT_META_U32_FIELDS;
     const expressionStart = metas[o + 0];
     const expressionLength = metas[o + 1];
     const readingStart = metas[o + 2];
@@ -1776,11 +1789,12 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
  * @param {boolean} reuseExpressionForReadingDecode
  * @param {boolean} lazyGlossaryDecode
  * @param {boolean} mediaHintFastScan
+ * @param {number} [contentIndex]
  * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
-function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, lazyGlossaryDecode, mediaHintFastScan) {
+function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, lazyGlossaryDecode, mediaHintFastScan, contentIndex = i) {
     const o = i * META_U32_FIELDS;
-    const c = i * CONTENT_META_U32_FIELDS;
+    const c = contentIndex * CONTENT_META_U32_FIELDS;
     const expressionStart = metas[o + 0];
     const expressionLength = metas[o + 1];
     const readingStart = metas[o + 2];
@@ -2074,6 +2088,7 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         options.preloadedSource ?? null,
         experiments,
         options.validateGlossaryTypes === true && version >= 3,
+        options.compactContentMetadata === true && options.singleChunk === true && emitContentSlab,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     const {contentOutPtr, contentUniqueCount, rowCount, metaCapacity, contentCapacity} = parsed;
@@ -2216,9 +2231,10 @@ null :
     const metas = parsed.wasm === null ?
         parsed.metas :
         new Uint32Array(parsed.wasm.memory.buffer, parsed.metasPtr, rowCount * META_U32_FIELDS);
+    const contentMetaByUniqueIndex = parsed.contentMetaByUniqueIndex === true;
     const contentMetas = parsed.wasm === null ?
         parsed.contentMetas :
-        new Uint32Array(parsed.wasm.memory.buffer, parsed.contentMetasPtr, rowCount * CONTENT_META_U32_FIELDS);
+        new Uint32Array(parsed.wasm.memory.buffer, parsed.contentMetasPtr, (contentMetaByUniqueIndex ? contentUniqueCount : rowCount) * CONTENT_META_U32_FIELDS);
     const contentUniqueIndexes = parsed.contentUniqueIndexesPtr === 0 || parsed.wasm === null ?
         parsed.contentUniqueIndexes :
         new Uint32Array(parsed.wasm.memory.buffer, parsed.contentUniqueIndexesPtr, rowCount);
@@ -2255,6 +2271,8 @@ null :
     let nativeLookupIndexEncodeMs = 0;
     let nativeSegmentedLookupSegments = 0;
     let nativeSegmentedLookupFallbacks = segmentedLookup && nativeCompactionScratch === null ? 1 : 0;
+    let compactContentMetadataGroups = 0;
+    let compactContentMetadataBytesAvoided = 0;
     let chunkDispatchMs = 0;
     /** @type {Promise<void>[]} */
     const pendingDispatches = [];
@@ -2287,7 +2305,7 @@ null :
             const contentHash1List = emitContentSlab ? new Uint32Array(0) : new Uint32Array(count);
             const contentHash2List = emitContentSlab ? new Uint32Array(0) : new Uint32Array(count);
             const contentMetaList = emitContentSlab ?
-                contentMetas.subarray(start * CONTENT_META_U32_FIELDS, end * CONTENT_META_U32_FIELDS) :
+                (contentMetaByUniqueIndex ? contentMetas : contentMetas.subarray(start * CONTENT_META_U32_FIELDS, end * CONTENT_META_U32_FIELDS)) :
                 new Uint32Array(0);
             const tNativeStringPlanStart = Date.now();
             const nativeStringPlan = fusedStringPlan === null ?
@@ -2425,7 +2443,7 @@ null :
                         if (seenMediaContent !== null && uniqueIndex < seenMediaContent.length) { seenMediaContent[uniqueIndex] = 1; }
                         mediaRows.push({
                             index: i,
-                            row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
+                            row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true, contentMetaByUniqueIndex ? uniqueIndex : sourceIndex),
                         });
                     }
                 }
@@ -2479,6 +2497,33 @@ null :
                 termRecordPreinternedPlan,
                 mediaRows,
             };
+            if (contentMetaByUniqueIndex) {
+                chunk.contentMetaByUniqueIndex = true;
+                ++compactContentMetadataGroups;
+                compactContentMetadataBytesAvoided += (rowCount - contentUniqueCount) * CONTENT_META_U32_FIELDS * 4;
+            } else if (
+                options.compactContentMetadata === true && emitContentSlab &&
+                start === 0 && end === rowCount && contentDedupPlan !== null &&
+                contentDedupPlan.uniqueCount * 2 < rowCount
+            ) {
+                // Exact native content IDs include all encoded content fields.
+                // Transfer one descriptor for each unique value; the existing
+                // per-row ID column retains every term's original reference.
+                const uniqueMetas = new Uint32Array(contentDedupPlan.uniqueCount * CONTENT_META_U32_FIELDS);
+                const uniqueRows = contentDedupPlan.uniqueRowIndexes;
+                for (let uniqueIndex = 0; uniqueIndex < uniqueRows.length; ++uniqueIndex) {
+                    const sourceOffset = uniqueRows[uniqueIndex] * CONTENT_META_U32_FIELDS;
+                    const targetOffset = uniqueIndex * CONTENT_META_U32_FIELDS;
+                    uniqueMetas[targetOffset] = contentMetaList[sourceOffset];
+                    uniqueMetas[targetOffset + 1] = contentMetaList[sourceOffset + 1];
+                    uniqueMetas[targetOffset + 2] = contentMetaList[sourceOffset + 2];
+                    uniqueMetas[targetOffset + 3] = contentMetaList[sourceOffset + 3];
+                }
+                chunk.contentMetaList = uniqueMetas;
+                chunk.contentMetaByUniqueIndex = true;
+                ++compactContentMetadataGroups;
+                compactContentMetadataBytesAvoided += contentMetaList.byteLength - uniqueMetas.byteLength;
+            }
             if (
                 nativeLookupIndexScratch !== null &&
                 parsed.wasm !== null &&
@@ -2578,6 +2623,11 @@ null :
         nativeStringPlanChunkCount,
         nativeStringPlanFallbackChunkCount,
         nativeLookupScratchReusedBytes,
+        compactContentMetadataGroups,
+        compactContentMetadataBytesAvoided,
+        nativeCompactContentMetadataGroups: contentMetaByUniqueIndex ? 1 : 0,
+        nativeCompactContentMetadataBytesAvoided: contentMetaByUniqueIndex ? (rowCount - contentUniqueCount) * CONTENT_META_U32_FIELDS * 4 : 0,
+        nativeCompactContentMetadataGatherBytesAvoided: contentMetaByUniqueIndex ? contentUniqueCount * CONTENT_META_U32_FIELDS * 4 : 0,
         nativeLookupScratchReuseGroups,
         nativeLookupScratchReuseMisses,
         nativeSegmentedLookupSegments,
@@ -4117,6 +4167,11 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         orderedSinkWaitMs: sum('orderedSinkWaitMs'),
         borrowedContentResultCount: sum('borrowedContentResultCount'),
         nativeLookupScratchReusedBytes: sum('nativeLookupScratchReusedBytes'),
+        compactContentMetadataGroups: sum('compactContentMetadataGroups'),
+        compactContentMetadataBytesAvoided: sum('compactContentMetadataBytesAvoided'),
+        nativeCompactContentMetadataGroups: sum('nativeCompactContentMetadataGroups'),
+        nativeCompactContentMetadataBytesAvoided: sum('nativeCompactContentMetadataBytesAvoided'),
+        nativeCompactContentMetadataGatherBytesAvoided: sum('nativeCompactContentMetadataGatherBytesAvoided'),
         nativeLookupScratchReuseGroups: sum('nativeLookupScratchReuseGroups'),
         nativeLookupScratchReuseMisses: sum('nativeLookupScratchReuseMisses'),
         nativeSegmentedLookupSegments: sum('nativeSegmentedLookupSegments'),

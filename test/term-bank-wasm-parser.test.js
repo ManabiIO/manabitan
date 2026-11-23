@@ -3075,6 +3075,91 @@ describe('term-bank WASM parser', () => {
         expect(version1Chunks[0].sequenceList).toStrictEqual(new Int32Array([-1, -1, -1]));
     });
 
+    maybeTest.each([false, true])('compacts whole-group content metadata without changing row references (fallback=%s)', async (fallback) => {
+        const rows = Array.from({length: 18}, (_, i) => [
+            `word-${i}`,
+i % 2 === 0 ? '' : `reading-${i}`,
+'',
+'',
+fallback ? i + 0.5 : i,
+            i % 3 === 0 ? [{type: 'image', path: 'image.png', width: 10, height: 20}] : [`meaning-${i % 3}`],
+            i + 100,
+            '',
+        ]);
+        const sources = [textEncoder.encode(JSON.stringify(rows.slice(0, 9))), textEncoder.encode(JSON.stringify(rows.slice(9)))];
+        /**
+         * @param {boolean} compactContentMetadata
+         * @param {boolean} [singleChunk]
+         * @returns {Promise<TermBankColumnChunk[]>}
+         */
+        const parse = async (compactContentMetadata, singleChunk = true) => {
+            /** @type {TermBankColumnChunk[]} */
+            const chunks = [];
+            await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+                chunks.push(copyWasmBackedColumnChunk(chunk));
+            }, 6, {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                mediaHintFastScan: true,
+                singleChunk,
+                compactContentMetadata,
+                prepareLookupIndexes: true,
+            });
+            return chunks;
+        };
+        const [baseline] = await parse(false);
+        const [compact] = await parse(true);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(compact.contentMetaByUniqueIndex).toBe(true);
+        expect(compact.contentMetaList).toHaveLength(3 * 4);
+        expect(compact.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined();
+        expect(compact.contentDedupPlan.pendingSpanLengthsScratch).toBeUndefined();
+        expect(profile?.compactContentMetadataGroups).toBe(1);
+        expect(profile?.compactContentMetadataBytesAvoided).toBe((18 - 3) * 16);
+        expect(profile?.fusedParseFallbacks).toBe(fallback ? 1 : 0);
+        for (const field of ['rowCount', 'scoreList', 'sequenceList', 'readingEqualsExpressionList', 'contentUniqueIndexList', 'contentBytesBuffer', 'mediaRows', 'termRecordPreinternedPlan', 'preparedLookupIndexes']) {
+            expect(Reflect.get(compact, field), field).toStrictEqual(Reflect.get(baseline, field));
+        }
+        const compactMetas = compact.contentMetaList;
+        const baselineMetas = baseline.contentMetaList;
+        const ids = compact.contentUniqueIndexList;
+        if (!(compactMetas instanceof Uint32Array) || !(baselineMetas instanceof Uint32Array) || ids === null) {
+            throw new Error('Missing content metadata');
+        }
+        for (let row = 0; row < rows.length; ++row) {
+            expect(compactMetas.subarray(ids[row] * 4, ids[row] * 4 + 4)).toStrictEqual(baselineMetas.subarray(row * 4, row * 4 + 4));
+        }
+        const expected = new Uint32Array(compactMetas);
+        // Worker transfer and the next parse must not retain the reusable heap.
+        const transferred = structuredClone(compact, {transfer: [(compactMetas.buffer)]});
+        expect(compactMetas.byteLength).toBe(0);
+        expect(transferred.contentMetaByUniqueIndex).toBe(true);
+        const split = await parse(true, false);
+        expect(split).toHaveLength(3);
+        for (const chunk of split) {
+            expect(chunk.contentMetaByUniqueIndex).not.toBe(true);
+            expect(chunk.contentMetaList).toHaveLength(chunk.rowCount * 4);
+        }
+        expect(transferred.contentMetaList).toStrictEqual(expected);
+    });
+
+    maybeTest('keeps dense content metadata row-indexed when compacting would save less than half', async () => {
+        const source = textEncoder.encode(JSON.stringify([
+            ['first', '', '', '', 0, ['one'], 1, ''],
+            ['second', '', '', '', 0, ['two'], 2, ''],
+            ['third', '', '', '', 0, ['one'], 3, ''],
+        ]));
+        await parseTermBankWithWasmColumnChunks([source, source], 3, (chunk) => {
+            expect(chunk.contentMetaByUniqueIndex).toBe(true);
+        }, 10, {emitContentSlab: true, emitTokenBinaryContent: true, compactContentMetadata: true, singleChunk: true});
+        await parseTermBankWithWasmColumnChunks(source, 3, (chunk) => {
+            expect(chunk.contentMetaByUniqueIndex).not.toBe(true);
+            expect(chunk.contentMetaList).toHaveLength(12);
+        }, 10, {emitContentSlab: true, emitTokenBinaryContent: true, compactContentMetadata: true, singleChunk: true});
+        expect(consumeLastTermBankWasmParseProfile()?.compactContentMetadataGroups).toBe(0);
+    });
+
     maybeTest('encodes parser-owned lookup sidecars byte-identically in WASM', async () => {
         const sources = [
             textEncoder.encode(JSON.stringify([
