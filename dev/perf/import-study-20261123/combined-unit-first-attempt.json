@@ -1,0 +1,32 @@
+{
+  "commit": "2b8325ce1e95b1da0f86b9fe87f18f838f55c7e0",
+  "tree": "ddf70903a004965361c9ab58a1f1e434c47edd01",
+  "publishedEquivalentCommit": "958099525e6017c9faa3d912168da51575527b7d",
+  "worktree": "/workspace/scratch/72c24f1e7bc9/round2-combined-large-source",
+  "trackedFilesCleanAfterRun": true,
+  "attempt": 1,
+  "exitCode": 0,
+  "command": "node node_modules/vitest/vitest.mjs run --maxWorkers=2 --testTimeout=30000",
+  "node": "/workspace/scratch/fcfffdc555c8/runtime/node-v22.22.0-linux-x64/bin/node",
+  "compiler": "/workspace/scratch/72c24f1e7bc9/round2-parser/.parser-analysis/pinned-clang",
+  "compilerLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu",
+  "passedFiles": 632,
+  "totalFiles": 632,
+  "passedTests": 14079,
+  "skippedTests": 47,
+  "totalTests": 14126,
+  "durationSeconds": 271.16,
+  "failures": [],
+  "summary": [
+    "Test Files  632 passed (632)",
+    "Tests  14079 passed | 47 skipped (14126)",
+    "Start at  02:11:00",
+    "Duration  271.16s (transform 13.36s, setup 4.07s, import 119.78s, tests 313.67s, environment 362ms)"
+  ],
+  "log": "/workspace/scratch/72c24f1e7bc9/bench-tools/round2-combined-large-unit-full-attempt-1.log",
+  "logBytes": 188291,
+  "logSha256": "6d1548bc04e6847c48020f7184a3c20a4b68e20fc192f0dee3882384aeffb9bd",
+  "exitCodeFile": "/workspace/scratch/72c24f1e7bc9/bench-tools/round2-combined-large-unit-full-attempt-1.exit-code",
+  "codeEdits": false,
+  "reruns": false
+}
