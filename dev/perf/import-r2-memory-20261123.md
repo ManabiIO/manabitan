@@ -15,8 +15,8 @@ derived comparisons and labels every result `authoritativeTiming: false`.
 
 ## Observer provenance and limits
 
-`import-r2-memory-observer-20261123.py` is byte-identical to
-`dev/perf/import-memory-zombies-study-20261123/chromium_memory.py` at commit
+`import-r2-memory-observer-20261123.py` is byte-identical to the
+[reviewed process-tree observer](https://github.com/ManabiIO/manabitan/blob/00da5cb2ec28211dd6d09d938dc6cf1e3a4334c9/dev/perf/import-memory-zombies-study-20261123/chromium_memory.py) at commit
 `00da5cb2ec28211dd6d09d938dc6cf1e3a4334c9`, tree
 `4d03a978213da80b70dd80bf07ad2c479712346b`. Its SHA-256 is
 `ca6c0f7761062761697a810d4bd0007ff0257bbce69099df45657ffdb7ee8f10`.

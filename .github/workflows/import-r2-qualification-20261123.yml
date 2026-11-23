@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [transfer-jmdict, transfer-jitendex, transfer-vndb]
+        case: [record-validation-jmdict, record-validation-jitendex, record-validation-vndb]
         direction: [forward, reverse]
     env:
       STUDY_OUTPUT: ${{ github.workspace }}/builds/perf/import-r2-qualification/${{ matrix.case }}-${{ matrix.direction }}

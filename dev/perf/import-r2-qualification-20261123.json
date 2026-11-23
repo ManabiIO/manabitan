@@ -124,6 +124,27 @@
                 "js/dictionary/term-bank-wasm-parser.js",
                 "js/dictionary/term-record-opfs-store.js"
             ]
+        },
+        "record-validation-jmdict": {
+            "dictionary": "jmdict",
+            "sha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+            "packageDifferences": [
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        },
+        "record-validation-jitendex": {
+            "dictionary": "jitendex",
+            "sha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+            "packageDifferences": [
+                "js/dictionary/term-record-opfs-store.js"
+            ]
+        },
+        "record-validation-vndb": {
+            "dictionary": "vndb",
+            "sha": "cf1e18d59d08da729d4b2fe45c7a07021f42360a",
+            "packageDifferences": [
+                "js/dictionary/term-record-opfs-store.js"
+            ]
         }
     },
     "extraFixture": {
