@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "node": "v24.22.3",
+  "complete": true,
+  "sources": [
+    {
+      "root": "/workspace/scratch/1d04fee2c265/manabitan",
+      "sha": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "hashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "802c71c1dce71d3c68931eb2fd52f651d2ffe03b4b2ac86136cb031aaa7d5257",
+        "ext/js/dictionary/dictionary-importer.js": "fd334be027b74c951ffc61a80bee68f40fe5acc9350ea5e2fab7f343b5b53184",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+      }
+    },
+    {
+      "root": "/workspace/scratch/1d04fee2c265/manabitan-vndb",
+      "sha": "797f1a78fab8efde8ee7aff46369bd2d19a222f9",
+      "hashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "a8b9cfdaac8fb8b099554d736eda0d1d8d82b7067552aaf6a17a988732a39b95",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "3db84671b718d0fab669eccd68805a8808661e3cc82a575b547f0d08e1c43523",
+        "ext/js/dictionary/dictionary-importer.js": "278c8033275a92bea2e5b1729af342fb59fd3c0317bd6231d15f0d8532d49216",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+      }
+    }
+  ],
+  "scope": "Complete pinned ZIPs with independent Node inflate and CRC checks. One native parse per fixed four-bank group, followed by both parent and candidate owned result copying. Every non-media column, content buffer, key plan, and prepared lookup index is compared byte-for-byte. Every changed projected path and diagnostic key is checked against independently decoded source JSON; full fallback rows are compared unchanged. Candidate results cross structuredClone with their owned buffers transferred, and diagnostic snapshots remain stable after native heap reuse. Node V8 serialization sizes are mechanical work counts, not browser bytes or peak-memory measurements. No timing inference.",
+  "dictionaries": [
+    {
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": 53,
+      "groups": 14,
+      "rows": 528299,
+      "sourceBytes": 171617523,
+      "mediaRows": 17,
+      "projectedRows": 0,
+      "fallbackRows": 17,
+      "parentProperties": 272,
+      "candidateProperties": 272,
+      "parentMediaSerializationBytes": 16962,
+      "candidateMediaSerializationBytes": 16962,
+      "sourceImagePathCount": 0,
+      "uniqueReferencedPaths": 0,
+      "mediaDiagnosticDigest": "14e706310f91f717a80d8131eafa87ed7177f2c5d5ee6547f5fc9343112f57c4"
+    },
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "groups": 55,
+      "rows": 436555,
+      "sourceBytes": 538927310,
+      "mediaRows": 339,
+      "projectedRows": 324,
+      "fallbackRows": 15,
+      "parentProperties": 5424,
+      "candidateProperties": 1536,
+      "parentMediaSerializationBytes": 211719,
+      "candidateMediaSerializationBytes": 133836,
+      "sourceImagePathCount": 336,
+      "uniqueReferencedPaths": 236,
+      "mediaDiagnosticDigest": "62e656ad46628c9ec438c9dd71d09d81106d1700d82a1be5973f32d4893ed771"
+    },
+    {
+      "dictionary": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "banks": 665,
+      "groups": 167,
+      "rows": 6648310,
+      "sourceBytes": 4267992967,
+      "mediaRows": 146722,
+      "projectedRows": 146722,
+      "fallbackRows": 0,
+      "parentProperties": 2347552,
+      "candidateProperties": 586888,
+      "parentMediaSerializationBytes": 56685599,
+      "candidateMediaSerializationBytes": 21817716,
+      "sourceImagePathCount": 146722,
+      "uniqueReferencedPaths": 146570,
+      "mediaDiagnosticDigest": "312e9a5869d002e351f63b8bd640853a57bba4d8f22fda74f9affc2d6f7ed9f7"
+    }
+  ]
+}

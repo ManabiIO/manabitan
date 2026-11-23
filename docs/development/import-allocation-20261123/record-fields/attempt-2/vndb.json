@@ -1,0 +1,63 @@
+{
+  "candidateCommit": "49de8db6c3b1c079673f9d50af3e7a978c156a7a",
+  "baselineCommit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+  "candidateSourceSha256": "6b2767b061a4fd36ba0d6460bfce1b9c2ff8a0790974892d44244b184596accb",
+  "baselineSourceSha256": "f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9",
+  "runnerSha256": "83d614bdf49f926c85d123a3d3c17b3a6b17ecccad339fa17617a6579750f38a",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+  "parserSourceSha256": "b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2",
+  "node": "v24.22.3",
+  "scope": "Full-corpus production-parser record columns, factory-created resolved references, and production record-field encoders. Raw offsets are parser content offsets shifted by 2^40; compressed-reference offsets are synthetic consecutive 16-byte references. This is an exact encoder byte/allocation replay, not browser storage, whole-import timing, or persisted-media validation.",
+  "dictionary": "vndb",
+  "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "filesPerGroup": 3,
+  "rows": 6648310,
+  "banks": 665,
+  "groups": 222,
+  "sourceJsonBytes": 4267992967,
+  "modes": {
+    "raw": {
+      "baseline": {
+        "allocatedColumnBytes": 53386160,
+        "allocatedColumnBuffers": 861,
+        "copiedColumnBytes": 53186480,
+        "copiedColumns": 666
+      },
+      "candidate": {
+        "allocatedColumnBytes": 18356300,
+        "allocatedColumnBuffers": 471,
+        "copiedColumnBytes": 18156620,
+        "copiedColumns": 276
+      },
+      "directInt32Rows": 5838310,
+      "float64Rows": 0,
+      "genericIntegerRows": 810000,
+      "compactRows": 6648310,
+      "legacyRows": 0,
+      "encodedBytes": 53192696,
+      "sha256": "9c3bb9b82d3907fbd44ae5644759449a4b47e5a81698379a9c4ba27ac5396215"
+    },
+    "compressed-references": {
+      "baseline": {
+        "allocatedColumnBytes": 53386160,
+        "allocatedColumnBuffers": 861,
+        "copiedColumnBytes": 53186480,
+        "copiedColumns": 666
+      },
+      "candidate": {
+        "allocatedColumnBytes": 18356300,
+        "allocatedColumnBuffers": 471,
+        "copiedColumnBytes": 18156620,
+        "copiedColumns": 276
+      },
+      "directInt32Rows": 5838310,
+      "float64Rows": 0,
+      "genericIntegerRows": 810000,
+      "compactRows": 6648310,
+      "legacyRows": 0,
+      "encodedBytes": 53192696,
+      "sha256": "dda1ee5c932b6d3185b8f912666fb15e48ca80dff0a9e06f048b1267cae7a8bf"
+    }
+  }
+}

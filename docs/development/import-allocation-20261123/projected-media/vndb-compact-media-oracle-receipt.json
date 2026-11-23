@@ -1,0 +1,11 @@
+{
+  "candidateCommit": "797f1a78fab8efde8ee7aff46369bd2d19a222f9",
+  "files": {
+    "vndb-compact-media-oracle.mjs": "c64434d8e8de1613a7a4934cc5e29688eefcc4d8a57f1439ca94ac53a2138057",
+    "vndb-compact-media-oracle.json": "a38bfd788713095addbfe6d89abe451d1052639f8c2a8d313dedc70b2aa13d69",
+    "manabitan-vndb/test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "remoteCommit": "3597a103b0f35d076587e08196caa9f5d12f53ef",
+  "recipeNote": "Four-bank groups; private owned content; native column parsing with image hints, schema validation, content hashing/deduplication, prepared lookup indexes and compact metadata. Native escaped-key experiment enabled for VNDB only. Parent/candidate use one identical native parse for each group; this is transport parity, not exact production planner/default-flag emulation.",
+  "pathOracleNote": "Expected image paths use the unchanged production semantic path collector over separately Node-JSON-decoded source values; this is not a separately implemented path selection algorithm."
+}

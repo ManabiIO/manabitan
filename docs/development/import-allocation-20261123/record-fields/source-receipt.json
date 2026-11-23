@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "dateUtc": "2026-11-23",
+  "repository": "ManabiIO/manabitan",
+  "pullRequest": "https://github.com/ManabiIO/manabitan/pull/849",
+  "baseline": {
+    "commit": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+    "tree": "c540375466fc921ab05a5526a6130bc2d48010d5"
+  },
+  "candidate": {
+    "measuredLocalCommit": "49de8db6c3b1c079673f9d50af3e7a978c156a7a",
+    "publishedCommit": "10a8f09e96ff943ec1351b1391cb56fa7e20feed",
+    "tree": "deae81513cb4fb5508c9d9a388316e049b05429b",
+    "publicationMapping": "The publication check verified that the remote Git tree exactly equals the measured local commit tree."
+  },
+  "sourceSha256": {
+    "baseline/ext/js/dictionary/term-record-opfs-store.js": "f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9",
+    "candidate/ext/js/dictionary/term-record-opfs-store.js": "6b2767b061a4fd36ba0d6460bfce1b9c2ff8a0790974892d44244b184596accb",
+    "candidate/test/term-record-direct-field-columns.test.js": "ae4c6ffd82aba2caf15e3db6d1a641d25dc132deb584ec1b0e197786d8e2bcb1",
+    "shared/ext/js/dictionary/term-bank-wasm-parser.js": "b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2",
+    "shared/ext/lib/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+    "shared/test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "runtime": {
+    "node": "v24.22.3",
+    "scope": "Node component replay; no browser timing or persistence claim"
+  },
+  "attempts": [
+    {
+      "runner": "attempt-1/runner.mjs",
+      "runnerSha256": "8d37230802d87cce55510159429a2bb45a602465c7c7f9f9c35a524933f96730",
+      "log": "attempt-1/console.log",
+      "exitCode": 1,
+      "completedCorpora": [
+        "jmdict",
+        "jitendex"
+      ],
+      "limitation": "The initial harness asserted every parser score column was Int32Array and stopped in VNDB. Successful JMdict/Jitendex summaries are retained; partial VNDB results are excluded."
+    },
+    {
+      "runner": "attempt-2/runner.mjs",
+      "runnerSha256": "83d614bdf49f926c85d123a3d3c17b3a6b17ecccad339fa17617a6579750f38a",
+      "log": "attempt-2/console.log",
+      "exitCode": 0,
+      "completedCorpora": [
+        "vndb"
+      ],
+      "harnessCorrection": "Copy the parser score column using its actual Int32Array or Float64Array type, preserving values; classify direct Int32, Float64 output, and generic integer-valued Float64 separately."
+    }
+  ],
+  "checks": [
+    {
+      "command": "NODE_OPTIONS=--max-old-space-size=1536 npx vitest run test/term-record-direct-field-columns.test.js test/term-record-opfs-store.test.js test/term-record-resolved-import-loaded-state.test.js --maxWorkers=1",
+      "exitCode": 0,
+      "suites": 3,
+      "tests": 210,
+      "log": "checks/focused.log"
+    },
+    {
+      "command": "NODE_OPTIONS=--max-old-space-size=1536 npx eslint ext/js/dictionary/term-record-opfs-store.js test/term-record-direct-field-columns.test.js",
+      "exitCode": 0,
+      "log": "checks/scoped-eslint.log"
+    }
+  ],
+  "totalsPerMode": {
+    "raw": {
+      "rows": 7613164,
+      "banks": 937,
+      "groups": 255,
+      "directInt32Rows": 6803164,
+      "genericIntegerFloat64Rows": 810000,
+      "float64OutputRows": 0,
+      "encodedBytesCompared": 60929536,
+      "baselineAllocatedColumnBytes": 61138784,
+      "candidateAllocatedColumnBytes": 20319800,
+      "allocatedColumnBytesAvoided": 40818984,
+      "baselineCopiedColumnBytes": 60905312,
+      "candidateCopiedColumnBytes": 20086328,
+      "copiedColumnBytesAvoided": 40818984,
+      "baselineAllocatedColumnBuffers": 993,
+      "candidateAllocatedColumnBuffers": 537
+    },
+    "compressed-references": {
+      "rows": 7613164,
+      "banks": 937,
+      "groups": 255,
+      "directInt32Rows": 6803164,
+      "genericIntegerFloat64Rows": 810000,
+      "float64OutputRows": 0,
+      "encodedBytesCompared": 60929536,
+      "baselineAllocatedColumnBytes": 61138784,
+      "candidateAllocatedColumnBytes": 20319800,
+      "allocatedColumnBytesAvoided": 40818984,
+      "baselineCopiedColumnBytes": 60905312,
+      "candidateCopiedColumnBytes": 20086328,
+      "copiedColumnBytesAvoided": 40818984,
+      "baselineAllocatedColumnBuffers": 993,
+      "candidateAllocatedColumnBuffers": 537
+    }
+  }
+}

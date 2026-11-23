@@ -1,0 +1,16 @@
+{
+  "algorithm": "sha256",
+  "files": {
+    "README.md": "ae594c1f7f60f976deb2349ba0777b6ba193722bde1603e815c7c123a723d11b",
+    "attempt-1/console.log": "d57081f7d76a9c29f69c6641ba0db2b11c62f2f3eeda4ac493113cffe4783e6b",
+    "attempt-1/jitendex.json": "dc37d80e33f65a8693b310eb6400d77dfea3d302782ad6906e4f79452d2acae7",
+    "attempt-1/jmdict.json": "ac18ed8afb4ba4bcfb340582f41194578b365c593d532a1b20dba9228bc23cdf",
+    "attempt-1/runner.mjs": "8d37230802d87cce55510159429a2bb45a602465c7c7f9f9c35a524933f96730",
+    "attempt-2/console.log": "2b29df8aa6d80cc1358009978cf12a69e67704960e59c7488fb9002dab20d323",
+    "attempt-2/runner.mjs": "83d614bdf49f926c85d123a3d3c17b3a6b17ecccad339fa17617a6579750f38a",
+    "attempt-2/vndb.json": "92ea5e37ae53b0f52ec0a84f09cea2abb8f57b2a18bdffd720aceab18b32299e",
+    "checks/focused.log": "fc0df6406e9ddb7f1c53db71e68eb4b6ed8be398b8b58a8d35b2babacf61b094",
+    "checks/scoped-eslint.log": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a",
+    "source-receipt.json": "3e587c1aa65ce128464c4b0ed0db113f18c1294948ab7c6de9ccb6c160f7ea1c"
+  }
+}

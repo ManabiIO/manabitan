@@ -1,0 +1,25 @@
+{"candidateCommit":"49de8db6c3b1c079673f9d50af3e7a978c156a7a","baselineCommit":"3d65e403c644b9a5a6be3128d72f9d30050b70e0","candidateSourceSha256":"6b2767b061a4fd36ba0d6460bfce1b9c2ff8a0790974892d44244b184596accb","baselineSourceSha256":"f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9","runnerSha256":"8d37230802d87cce55510159429a2bb45a602465c7c7f9f9c35a524933f96730","lockSha256":"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89","wasmSha256":"25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c","parserSourceSha256":"b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2","node":"v24.22.3","scope":"Full-corpus production-parser record columns, factory-created resolved references, and production record-field encoders. Raw offsets are parser content offsets shifted by 2^40; compressed-reference offsets are synthetic consecutive 16-byte references. This is an exact encoder byte/allocation replay, not browser storage, whole-import timing, or persisted-media validation.","dictionary":"jmdict","archiveSha256":"3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f","filesPerGroup":5,"rows":528299,"banks":53,"groups":11,"sourceJsonBytes":171617523,"modes":{"raw":{"baseline":{"allocatedColumnBytes":4237656,"allocatedColumnBuffers":44,"copiedColumnBytes":4226392,"copiedColumns":33},"candidate":{"allocatedColumnBytes":1067862,"allocatedColumnBuffers":22,"copiedColumnBytes":1056598,"copiedColumns":11},"eligibleRows":528299,"compactRows":528299,"legacyRows":0,"encodedBytes":4239032,"sha256":"d3088d267a492f56f60a44852b5069c7ef6fb4d952a53551dac27b5b85d741d9"},"compressed-references":{"baseline":{"allocatedColumnBytes":4237656,"allocatedColumnBuffers":44,"copiedColumnBytes":4226392,"copiedColumns":33},"candidate":{"allocatedColumnBytes":1067862,"allocatedColumnBuffers":22,"copiedColumnBytes":1056598,"copiedColumns":11},"eligibleRows":528299,"compactRows":528299,"legacyRows":0,"encodedBytes":4239032,"sha256":"62e96b8a3d1fd07e70bc356546a8b96ba1d7a13d147d82c075ba0652e27e423a"}}}
+{"candidateCommit":"49de8db6c3b1c079673f9d50af3e7a978c156a7a","baselineCommit":"3d65e403c644b9a5a6be3128d72f9d30050b70e0","candidateSourceSha256":"6b2767b061a4fd36ba0d6460bfce1b9c2ff8a0790974892d44244b184596accb","baselineSourceSha256":"f1cdc2f7d471d805d8cfe35d0cd8bcdbeb339dc97268f9772f545f9779028cd9","runnerSha256":"8d37230802d87cce55510159429a2bb45a602465c7c7f9f9c35a524933f96730","lockSha256":"60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89","wasmSha256":"25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c","parserSourceSha256":"b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2","node":"v24.22.3","scope":"Full-corpus production-parser record columns, factory-created resolved references, and production record-field encoders. Raw offsets are parser content offsets shifted by 2^40; compressed-reference offsets are synthetic consecutive 16-byte references. This is an exact encoder byte/allocation replay, not browser storage, whole-import timing, or persisted-media validation.","dictionary":"jitendex","archiveSha256":"e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356","filesPerGroup":10,"rows":436555,"banks":219,"groups":22,"sourceJsonBytes":538927310,"modes":{"raw":{"baseline":{"allocatedColumnBytes":3514968,"allocatedColumnBuffers":88,"copiedColumnBytes":3492440,"copiedColumns":66},"candidate":{"allocatedColumnBytes":895638,"allocatedColumnBuffers":44,"copiedColumnBytes":873110,"copiedColumns":22},"eligibleRows":436555,"compactRows":436555,"legacyRows":0,"encodedBytes":3497808,"sha256":"6be5626ac16ad85905603b31a76183b4587590e8096ad9fbd6e1841994e251ac"},"compressed-references":{"baseline":{"allocatedColumnBytes":3514968,"allocatedColumnBuffers":88,"copiedColumnBytes":3492440,"copiedColumns":66},"candidate":{"allocatedColumnBytes":895638,"allocatedColumnBuffers":44,"copiedColumnBytes":873110,"copiedColumns":22},"eligibleRows":436555,"compactRows":436555,"legacyRows":0,"encodedBytes":3497808,"sha256":"ef3ba884cfc70b19451a2ded552d9e34b7201ad90afc73bf49000e2c324f9c73"}}}
+vndb: 750000 rows verified
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(chunk.scoreList instanceof Int32Array)
+
+    at parser.parseTermBankWithWasmColumnChunks.singleChunk (file:///workspace/scratch/1d04fee2c265/jmdict-column-evidence/corpus-replay.mjs:103:24)
+    at invokeColumnChunk (file:///workspace/scratch/1d04fee2c265/manabitan-jmdict/ext/js/dictionary/term-bank-wasm-parser.js:2560:32)
+    at Module.parseTermBankWithWasmColumnChunks (file:///workspace/scratch/1d04fee2c265/manabitan-jmdict/ext/js/dictionary/term-bank-wasm-parser.js:2564:62)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///workspace/scratch/1d04fee2c265/jmdict-column-evidence/corpus-replay.mjs:98:13 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.22.3
