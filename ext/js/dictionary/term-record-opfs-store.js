@@ -326,6 +326,45 @@ function hasResolvedContentReferences(chunk, count) {
 }
 
 /**
+ * Selects columns whose indexed reads cannot change during a synchronous scan.
+ * Accessor-backed or shared columns keep the ordinary per-row validation path.
+ * @param {{fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {number} count
+ * @returns {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}|null}
+ */
+function getSynchronousResolvedContentReferences(chunk, count) {
+    const fixedLengthDescriptor = Object.getOwnPropertyDescriptor(chunk, 'fixedContentLength');
+    if (
+        typeof fixedLengthDescriptor === 'undefined' ?
+            'fixedContentLength' in chunk :
+            !('value' in fixedLengthDescriptor) || typeof fixedLengthDescriptor.value === 'number'
+    ) { return null; }
+    const references = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'resolvedContentReferences')?.value);
+    if (typeof references !== 'object' || references === null) { return null; }
+    const uniqueIndexList = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'uniqueIndexList')?.value);
+    const offsets = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'offsets')?.value);
+    const lengths = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(references, 'lengths')?.value);
+    if (
+        !(uniqueIndexList instanceof Uint32Array) ||
+        !(offsets instanceof Float64Array) ||
+        !(lengths instanceof Uint32Array) ||
+        Object.getPrototypeOf(uniqueIndexList) !== Uint32Array.prototype ||
+        Object.getPrototypeOf(offsets) !== Float64Array.prototype ||
+        Object.getPrototypeOf(lengths) !== Uint32Array.prototype
+    ) { return null; }
+    for (const column of [uniqueIndexList, offsets, lengths]) {
+        if (
+            !ArrayBuffer.isView(column) ||
+            Object.hasOwn(column, 'length') ||
+            Object.hasOwn(column, 'buffer') ||
+            !(column.buffer instanceof ArrayBuffer)
+        ) { return null; }
+    }
+    if (uniqueIndexList.length < count || offsets.length !== lengths.length) { return null; }
+    return {uniqueIndexList, offsets, lengths};
+}
+
+/**
  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number} start
  * @param {number} end
@@ -2292,15 +2331,26 @@ export class TermRecordOpfsStore {
             // across runs. The row loop itself is synchronous.
             const tValidationStart = safePerformance.now();
             const useFixedContentSpan = hasFixedContentSpan(chunk, count);
+            const references = useFixedContentSpan ? null : getSynchronousResolvedContentReferences(chunk, count);
             let runEnd = runStart;
+            const runLimitEnd = Math.min(count, runStart + runRowLimit);
             let minContentOffset = Number.POSITIVE_INFINITY;
             let maxContentOffset = Number.NEGATIVE_INFINITY;
-            while (runEnd < count) {
-                if ((runEnd - runStart) >= runRowLimit) {
-                    break;
+            while (runEnd < runLimitEnd) {
+                let uniqueIndex = -1;
+                let contentOffset;
+                let contentLength;
+                if (references !== null) {
+                    uniqueIndex = references.uniqueIndexList[runEnd];
+                    if (uniqueIndex >= references.offsets.length) {
+                        throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`);
+                    }
+                    contentOffset = references.offsets[uniqueIndex];
+                    contentLength = references.lengths[uniqueIndex];
+                } else {
+                    contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
+                    contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 }
-                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, runEnd, useFixedContentSpan);
-                const contentLength = getArtifactContentLength(chunk, contentLengths, runEnd);
                 validateContentOffset(contentOffset);
                 validateContentLength(contentLength);
                 const nextMinContentOffset = contentOffset >= 0 ? Math.min(minContentOffset, contentOffset) : minContentOffset;
@@ -2315,6 +2365,13 @@ export class TermRecordOpfsStore {
                 minContentOffset = nextMinContentOffset;
                 maxContentOffset = nextMaxContentOffset;
                 ++runEnd;
+                if (references !== null) {
+                    // Consecutive aliases have the same already-validated span
+                    // and cannot change this run's minimum or maximum offset.
+                    while (runEnd < runLimitEnd && references.uniqueIndexList[runEnd] === uniqueIndex) {
+                        ++runEnd;
+                    }
+                }
             }
             const runContentOffsetBase = minContentOffset === Number.POSITIVE_INFINITY ? 0 : minContentOffset;
             const runValidationMs = safePerformance.now() - tValidationStart;
