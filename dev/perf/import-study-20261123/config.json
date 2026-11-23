@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "stage": "discovery",
+  "stage": "confirmation",
   "baseline": "5e1f8c12f7ff798ba407323aff675cb23b22af02",
   "candidate": "0d5a05c40410fd97b0b85a2ad5e432dc5507bb33",
   "expectedPackageDifferences": [
@@ -16,5 +16,5 @@
     "jitendex",
     "vndb"
   ],
-  "confirmationOf": null
+  "confirmationOf": "https://github.com/ManabiIO/manabitan/actions/runs/45122637633"
 }
