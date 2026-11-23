@@ -33,5 +33,23 @@
             "js/dictionary/wasm/term-bank-parser.c",
             "lib/term-bank-parser.wasm"
         ]
+    },
+    "combined": {
+        "baseline": "1e235059a4c05c2509e8757fccba43a2d60222df",
+        "candidate": "62891eb93d64877a404c9fc8025e0e051f6b5cfb",
+        "prs": [
+            809,
+            810,
+            811
+        ],
+        "candidateTree": "0fd0a2a237b66eb95061d3072d07d2c432abe1a5",
+        "status": "combined-interaction-qualification",
+        "expectedPackageDifferences": [
+            "js/dictionary/term-record-opfs-store.js",
+            "js/dictionary/term-bank-wasm-parser-worker.js",
+            "js/dictionary/term-bank-wasm-parser.js",
+            "js/dictionary/dictionary-importer.js",
+            "js/dictionary/source-zip-media-pack.js"
+        ]
     }
 }

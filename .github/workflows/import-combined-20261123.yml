@@ -1,0 +1,46 @@
+name: Combined import qualification 20261123
+
+on:
+  push:
+    branches: [perf/import-combined-study-20261123-71149b]
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        candidate: [combined]
+        dictionary: [jmdict, jitendex, vndb]
+        replication: [1, 2]
+    env:
+      PERF_CANDIDATE: ${{ matrix.candidate }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_REPLICATION: ${{ matrix.replication }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-memory-20261122-${{ matrix.dictionary }}-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Compare complete imports and restart readback
+        run: python3 dev/perf/import-iteration-study-20261123/run.py
+      - name: Preserve every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-combined-20261123-${{ matrix.candidate }}-${{ matrix.dictionary }}-${{ matrix.replication }}
+          path: builds/import-combined-study
+          if-no-files-found: error
+          retention-days: 30

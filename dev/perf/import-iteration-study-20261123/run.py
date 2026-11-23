@@ -63,9 +63,9 @@ def main():
             raise ValueError("Expected immutable source SHA")
         run(["git", "cat-file", "-e", commit + "^{commit}"])
 
-    evidence = ROOT / "builds" / "import-shared-readback-final-study" / candidate_name / dictionary / str(replication)
+    evidence = ROOT / "builds" / "import-combined-study" / candidate_name / dictionary / str(replication)
     evidence.mkdir(parents=True, exist_ok=False)
-    stage = Path(os.environ["RUNNER_TEMP"]) / ("import-shared-readback-final-71149b-" + candidate_name + "-" + dictionary + "-" + str(replication))
+    stage = Path(os.environ["RUNNER_TEMP"]) / ("import-combined-71149b-" + candidate_name + "-" + dictionary + "-" + str(replication))
     stage.mkdir(exist_ok=False)
     schedule = [("warmup", 0, arm) for arm in ("AB" if replication == 1 else "BA")]
     for pair in range(2):
@@ -88,7 +88,7 @@ def main():
         "schedule": schedule,
         "overlaidHarnessFiles": {name: digest(ROOT / name) for name in OVERLAY},
         "boundary": "file-input change to post-UI import completion; restart/readback outside timing",
-        "scope": "Corrective semantic/readback qualification: original physical-layout mismatch retained; Linux Chromium; two predetermined independent eight-pair replications, reversed initial order, four baseline control pairs each; timing excludes separate owned-shared memory diagnostics",
+        "scope": "Combined interaction qualification for frozen PRs 809, 810 and 811 on PR 801; Linux Chromium; two predetermined independent eight-pair replications, reversed initial order, four baseline control pairs each; full semantic and restart checks outside timing; no external memory sampling for the combined candidate",
     }
     save(evidence / "plan.json", identities)
     # Download only this optional dictionary in addition to the standard three
