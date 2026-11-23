@@ -295,6 +295,31 @@ int32_t inflate_and_join_term_banks(
     return (int32_t)cursor;
 }
 
+/* A final stored DEFLATE block has an exact five-byte envelope. The unused
+ * padding bits may have any value, but LEN/NLEN, the complete source length,
+ * and the requested output length must all agree before its body is borrowed.
+ * Other encodings retain the full inflater's size and trailing-byte checks. */
+static const uint8_t* single_stored_deflate_body(
+    const uint8_t* input,
+    uint32_t compressed_length,
+    uint32_t uncompressed_length
+) {
+    if (
+        compressed_length < 5u ||
+        compressed_length - 5u != uncompressed_length ||
+        uncompressed_length > 0xffffu ||
+        (input[0] & 7u) != 1u
+    ) {
+        return 0;
+    }
+    const uint32_t length = (uint32_t)input[1] | ((uint32_t)input[2] << 8u);
+    const uint32_t inverted_length = (uint32_t)input[3] | ((uint32_t)input[4] << 8u);
+    return length == uncompressed_length && inverted_length == (length ^ 0xffffu) ? input + 5u : 0;
+}
+
+/* A null output-offset table requests validation only. Stored payloads are
+ * checked in place; other DEFLATE streams reuse the same bounded scratch span
+ * instead of retaining every decoded image in the batch. */
 __attribute__((visibility("default")))
 int32_t inflate_zip_media_batch(
     uint32_t input_ptr,
@@ -318,6 +343,7 @@ int32_t inflate_zip_media_batch(
     const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
     uint32_t* output_offsets = (uint32_t*)(uintptr_t)output_offsets_ptr;
+    const int retain_decoded_sources = output_offsets_ptr != 0u;
     uint32_t cursor = 0u;
 
     for (uint32_t i = 0u; i < source_count; ++i) {
@@ -327,23 +353,37 @@ int32_t inflate_zip_media_batch(
         if (
             input_offset > input_length ||
             compressed_length > input_length - input_offset ||
-            cursor > output_capacity ||
-            uncompressed_length > output_capacity - cursor
+            uncompressed_length > 0x7fffffffu - cursor ||
+            (retain_decoded_sources && (
+                cursor > output_capacity ||
+                uncompressed_length > output_capacity - cursor
+            ))
         ) {
             return -1;
         }
-        output_offsets[i] = cursor;
-        uint8_t* inflated = output + cursor;
+        if (retain_decoded_sources) { output_offsets[i] = cursor; }
+        uint8_t* inflated = output + (retain_decoded_sources ? cursor : 0u);
+        const uint8_t* verified = input + input_offset;
         if (compression_methods[i] == 0u) {
             if (compressed_length != uncompressed_length) { return -3; }
-            memcpy(inflated, input + input_offset, uncompressed_length);
+            if (retain_decoded_sources) {
+                memcpy(inflated, verified, uncompressed_length);
+                verified = inflated;
+            }
         } else if (compression_methods[i] == 8u) {
-            const int32_t status = term_bank_inflate(input + input_offset, compressed_length, inflated, uncompressed_length);
-            if (status != 0) { return status; }
+            const uint8_t* stored = retain_decoded_sources ? 0 : single_stored_deflate_body(verified, compressed_length, uncompressed_length);
+            if (stored != 0) {
+                verified = stored;
+            } else {
+                if (!retain_decoded_sources && uncompressed_length > output_capacity) { return -1; }
+                const int32_t status = term_bank_inflate(verified, compressed_length, inflated, uncompressed_length);
+                if (status != 0) { return status; }
+                verified = inflated;
+            }
         } else {
             return -1;
         }
-        if (crc32_bytes(inflated, uncompressed_length) != signatures[i]) { return -4; }
+        if (crc32_bytes(verified, uncompressed_length) != signatures[i]) { return -4; }
         cursor += uncompressed_length;
     }
     return (int32_t)cursor;

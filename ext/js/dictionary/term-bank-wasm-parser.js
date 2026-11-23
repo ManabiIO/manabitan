@@ -361,8 +361,8 @@ export async function inflateCompressedZipMediaBatchWasm(sources) {
 }
 
 /**
- * Validates all CRCs and decoded lengths without copying each decoded payload
- * out of the WASM arena.
+ * Validates all CRCs and decoded lengths with one reusable DEFLATE scratch
+ * span. Stored payloads are checked in place without decoded output copies.
  * @param {CompressedTermBankSource[]} sources
  * @returns {Promise<void>}
  */
@@ -384,12 +384,14 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
     }
     let compressedBytes = 0;
     let uncompressedBytes = 0;
+    let maxDeflateBytes = 0;
     for (const [index, source] of sources.entries()) {
         if (!isCompressedTermBankSource(source)) {
             throw new TypeError(`Compressed ZIP media source ${index + 1} metadata is invalid`);
         }
         compressedBytes += source.compressedSize;
         uncompressedBytes += source.uncompressedSize;
+        if (source.compressionMethod === 8) { maxDeflateBytes = Math.max(maxDeflateBytes, source.uncompressedSize); }
     }
     if (
         !Number.isSafeInteger(compressedBytes) || compressedBytes > MAX_WASM_MEDIA_BATCH_BYTES ||
@@ -406,15 +408,15 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media uncompressed length');
     const compressionMethodsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media compression method');
     const signaturesPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media CRC');
-    const outputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media output offset');
-    const outputPtr = allocateWasmBuffer(wasm, uncompressedBytes, 'ZIP media output');
+    const outputOffsetsPtr = retainDecodedSources ? allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media output offset') : 0;
+    const outputCapacity = retainDecodedSources ? uncompressedBytes : maxDeflateBytes;
+    const outputPtr = allocateWasmBuffer(wasm, outputCapacity, 'ZIP media output');
     const input = new Uint8Array(wasm.memory.buffer);
     const inputOffsets = new Uint32Array(wasm.memory.buffer, inputOffsetsPtr, sources.length);
     const compressedLengths = new Uint32Array(wasm.memory.buffer, compressedLengthsPtr, sources.length);
     const uncompressedLengths = new Uint32Array(wasm.memory.buffer, uncompressedLengthsPtr, sources.length);
     const compressionMethods = new Uint32Array(wasm.memory.buffer, compressionMethodsPtr, sources.length);
     const signatures = new Uint32Array(wasm.memory.buffer, signaturesPtr, sources.length);
-    const outputOffsets = new Uint32Array(wasm.memory.buffer, outputOffsetsPtr, sources.length);
     let inputOffset = 0;
     for (let i = 0; i < sources.length; ++i) {
         const source = sources[i];
@@ -437,7 +439,7 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
         signaturesPtr,
         sources.length,
         outputPtr,
-        uncompressedBytes,
+        outputCapacity,
         outputOffsetsPtr,
     );
     const inflateMs = Math.max(0, safePerformance.now() - startedAt);
@@ -458,6 +460,7 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
     if (!retainDecodedSources) {
         return {sources: [], inflateMs, compressedBytes, uncompressedBytes};
     }
+    const outputOffsets = new Uint32Array(wasm.memory.buffer, outputOffsetsPtr, sources.length);
     const output = new Uint8Array(wasm.memory.buffer, outputPtr, outputLength);
     const decoded = sources.map((source, index) => output.slice(outputOffsets[index], outputOffsets[index] + source.uncompressedSize));
     return {sources: decoded, inflateMs, compressedBytes, uncompressedBytes};
