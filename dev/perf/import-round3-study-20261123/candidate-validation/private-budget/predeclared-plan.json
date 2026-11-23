@@ -1,0 +1,18 @@
+{
+  "base": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "originalBytePolicyCommit": "7c6491f875f2e61f11fb087ccd7c66a50b082b8e",
+  "privateBytePolicyCommit": "435e4a5e0ca1c9705ac76e6fd05cfc650982cb0f",
+  "stablePatchId": "6bd327290bfbde4763ea5a1a8b2698464a9113f8",
+  "conflicts": false,
+  "policyUnchanged": true,
+  "budget": "24 MiB existing lazy group target times unchanged worker count",
+  "noPerCorpusTuning": true,
+  "excludedAccounting": [
+    "ZIP prefetch",
+    "retained WASM heaps",
+    "compression buffers",
+    "downstream storage"
+  ],
+  "performanceUnqualified": true,
+  "localBenchmarksOrBrowserLaunches": false
+}

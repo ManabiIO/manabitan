@@ -68,6 +68,29 @@
           "allowReferenceLayoutChange": false
         }
       ]
+    },
+    "private-budget": {
+      "arms": {
+        "A": "1e235059a4c05c2509e8757fccba43a2d60222df",
+        "B": "f6ae9bcdd0bfc43aa0f13ad6b500bc2179541f26"
+      },
+      "packageRules": [
+        {
+          "baseline": "A",
+          "candidate": "B",
+          "paths": [
+            "js/dictionary/dictionary-importer.js",
+            "js/dictionary/term-bank-wasm-parser.js"
+          ]
+        }
+      ],
+      "layoutRules": [
+        {
+          "baseline": "A",
+          "candidate": "B",
+          "allowReferenceLayoutChange": false
+        }
+      ]
     }
   },
   "memory": {
@@ -116,6 +139,29 @@
       {
         "baseline": "B",
         "candidate": "D",
+        "allowReferenceLayoutChange": false
+      }
+    ]
+  },
+  "privateMemory": {
+    "arms": {
+      "A": "1e235059a4c05c2509e8757fccba43a2d60222df",
+      "B": "f6ae9bcdd0bfc43aa0f13ad6b500bc2179541f26"
+    },
+    "packageRules": [
+      {
+        "baseline": "A",
+        "candidate": "B",
+        "paths": [
+          "js/dictionary/dictionary-importer.js",
+          "js/dictionary/term-bank-wasm-parser.js"
+        ]
+      }
+    ],
+    "layoutRules": [
+      {
+        "baseline": "A",
+        "candidate": "B",
         "allowReferenceLayoutChange": false
       }
     ]

@@ -1,0 +1,42 @@
+{
+  "files": {
+    "IMPORT-WINDOW.md": {
+      "bytes": 7928,
+      "sha256": "01c01e3777cfcf84382c7074f3a8747710d43dc97ee82da0ff8fdcdbcc6ed57e"
+    },
+    "import_window.py": {
+      "bytes": 8951,
+      "sha256": "6a93db6d236e09c43eb03c1c9dfe041f979387bf705af8e714e32f068dc5b6e7"
+    },
+    "run_import_memory.py": {
+      "bytes": 5795,
+      "sha256": "4a0336399a6751f96995fdd2551a308bfb9851cf4bb465c5f0a7242d7f084f76"
+    },
+    "test_import_window.py": {
+      "bytes": 20622,
+      "sha256": "21f3e8924f632821f65f25dfc79939372fa43c53d8e4e4c0f7ff5cd401ea0cff"
+    }
+  },
+  "frozenAtUtc": "2026-11-23T07:29:14.294010+00:00",
+  "observerRule": "stable-zombie-leader-live-sibling-smaps-v1",
+  "receipts": {
+    "private-budget-window-tests.stderr.log": "f3ad6d0391af2e9dd7229a8bac9708c99ce60e76237e5058c7b3ba79629253ee",
+    "private-budget-window-tests.stdout.log": "6cd08a09748f8dc15b961153084134d2f039bcd64059fce8feb64840ba8592fe"
+  },
+  "schemaVersion": 1,
+  "scopeRule": "recorded-importer-complete-scans-v1",
+  "sourceDirectory": "/workspace/scratch/71149a79699f/manabitan-private-budget-study-round3/dev/perf/import-round3-study-20261123",
+  "validation": {
+    "allTests": 49,
+    "combinedElapsedSeconds": 0.399,
+    "diffAndTrailingWhitespace": "passed",
+    "independentReview": [
+      "root: no blocking issue",
+      "jmdict_audit: no blocker; no prior scoped maxima derived"
+    ],
+    "localBrowserOrImportRun": false,
+    "markdownFormatting": "passed",
+    "newSyntheticTests": 18,
+    "pythonCompile": "passed"
+  }
+}

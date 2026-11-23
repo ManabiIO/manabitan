@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "status": "frozen-local-correctness-gates-passed-performance-unqualified",
+  "localCommit": "435e4a5e0ca1c9705ac76e6fd05cfc650982cb0f",
+  "tree": "d1016f51d603bef577fcb999345d0080bc84f658",
+  "baseCommit": "1e235059a4c05c2509e8757fccba43a2d60222df",
+  "branch": "perf/parser-byte-private-round3-20261123-71149a",
+  "sourcePolicyCommit": "7c6491f875f2e61f11fb087ccd7c66a50b082b8e",
+  "identicalStablePatchId": "6bd327290bfbde4763ea5a1a8b2698464a9113f8",
+  "cherryPickConflicts": false,
+  "workingTreeClean": true,
+  "files": [
+    {
+      "path": "ext/js/dictionary/dictionary-importer.js",
+      "bytes": 335112,
+      "sha256": "f233770307a406cd373e1a40c75c095d8951beacd03635e6fad5ddf87937c742"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "bytes": 198365,
+      "sha256": "f13dfcdfe5e39d646a94b6e4a72bf6b675be28da7a6d2d3c90b40536304cfaf0"
+    },
+    {
+      "path": "test/term-bank-parser-byte-lead.test.js",
+      "bytes": 14089,
+      "sha256": "c1482497caff5c68dac623881a81a2e3e31fbf48c3064fb3095bae1f20cbd302"
+    }
+  ],
+  "predeclaredPlan": {
+    "path": "/workspace/scratch/71149a79699f/round3-parser-byte-private-evidence/predeclared-plan.json",
+    "bytes": 632,
+    "sha256": "3f68c7246ed0c59945125d6267b050351ad371a74bb9ff17a2f5f1eb5ff1c632"
+  },
+  "checkEnvironment": {
+    "node": "v22.22.0",
+    "nodeOptions": "--max-old-space-size=1536",
+    "heavyChecksSerial": true
+  },
+  "checks": [
+    {
+      "name": "focused parser/ownership interaction suites",
+      "exitCode": 0,
+      "files": 7,
+      "testsPassed": 390,
+      "maxWorkers": 1,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-private-evidence/focused-tests.log",
+        "bytes": 2008,
+        "sha256": "47d08b08fc4d12b636c33fdb78c7e7dd305a783ac811e72e0564ace9aa9325cf"
+      }
+    },
+    {
+      "name": "scoped ESLint",
+      "exitCode": 0,
+      "files": 3,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-private-evidence/eslint.log",
+        "bytes": 1042,
+        "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+      }
+    },
+    {
+      "name": "main TypeScript",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-private-evidence/types-main.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "test TypeScript",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-private-evidence/types-test.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "all-target build dry-run",
+      "exitCode": 0,
+      "receipt": {
+        "path": "/workspace/scratch/71149a79699f/round3-parser-byte-private-evidence/build-dry-run.log",
+        "bytes": 384,
+        "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+      }
+    }
+  ],
+  "fullRepositoryUnitSuiteRunLocally": false,
+  "localTimingExperimentsRun": false,
+  "browserLaunchesRun": false,
+  "policyOrCorpusTuning": false,
+  "review": {
+    "sourcePatch": "Exactly the original byte admission policy and diagnostic propagation. No ownership implementation changes.",
+    "scope": "Existing24MiB lazy group target multiplied by unchanged worker count; ordered admission, active estimate-to-owned replacement, exclusive oversized progress and unchanged borrowed acknowledgment.",
+    "privateBufferOwnership": "#801 worker keeps its original ArrayBuffer ownership/transfer path. Admission uses the backing buffer byteLength independently of ArrayBuffer versus SharedArrayBuffer. Existing worker, parser and borrowed lifetime suites passed on this exact base.",
+    "limits": "ZIP prefetch, retained WASM heaps, compression buffers and downstream storage are excluded; estimates may underestimate already admitted work. This is not a whole-import or RSS ceiling.",
+    "testScope": "The inherited11 byte edge cases are unchanged. The390-test seven-suite gate also covers actual worker ownership, borrowed sink drain, source grouping/timing and ZIP source bounds."
+  }
+}
