@@ -1,10 +1,7 @@
 name: Frozen import critical paths 20261124
 
 on:
-  push:
-    branches: [perf/import-critical-path-20261124-3aac]
-    paths:
-      - '.github/workflows/import-critical-path-20261124-3aac.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -56,7 +53,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$PERF_SOURCE_SHA"
-          test "$(git rev-parse HEAD^{tree})" = "$PERF_SOURCE_TREE"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$PERF_SOURCE_TREE"
           npm run build -- --target chrome
           git diff --exit-code
           git status --porcelain > "$RUNNER_TEMP/import-critical-path/source-status.txt"
