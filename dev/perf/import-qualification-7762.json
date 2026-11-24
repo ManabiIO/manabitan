@@ -1,0 +1,35 @@
+{
+    "schemaVersion": 1,
+    "base": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+    "browserVersion": "153.0.8010.12",
+    "orders": [
+        ["ABC", "BCA", "CAB", "ACB", "CBA", "BAC"],
+        ["BAC", "CBA", "ACB", "CAB", "BCA", "ABC"]
+    ],
+    "warmups": ["ABC", "CBA"],
+    "thresholds": {
+        "targetMinimumReductionPercent": 5,
+        "targetMinimumFasterPairs": 5,
+        "nonTargetMaximumRegressionPercent": 3
+    },
+    "criterion": {
+        "primary": "Browser monotonic file-input change to visible import completion",
+        "target": "At least 5% median paired reduction against both A and identical C on each independent host, and at least five of six faster pairs against each control on each host",
+        "nonTarget": "No more than 3% median paired regression against either control on either independent host; report every result even if this screen fails",
+        "correctness": "Every import passes original production-default validation; all 72 public lookup hashes match across arms, passes and restart; full media payload verification in A/B after timed observations on replica 0",
+        "observations": "All scheduled observations retained; no exclusions, replacements or outcome-dependent reruns; warmups and validation observations excluded from timing by schedule",
+        "memory": "Timing observations have process sampling disabled. Changes affecting retained buffers require a separate prospectively specified process-tree memory qualification"
+    },
+    "candidates": {
+        "bounded-shared-content": {
+            "commit": "4773572362dd9f1327ef651d995e2372942c89f6",
+            "targetDictionaries": ["jitendex"],
+            "packagedDelta": [
+                "js/dictionary/dictionary-importer.js",
+                "js/dictionary/term-bank-wasm-parser-worker.js",
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/zstd-term-content-compression-worker.js"
+            ]
+        }
+    }
+}
