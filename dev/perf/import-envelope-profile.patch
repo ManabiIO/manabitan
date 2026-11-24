@@ -1,0 +1,43 @@
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -5934,6 +5934,7 @@
+         recordFields,
+         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+     ) {
++        const envelopeStartedAt = safePerformance.now()
+         if (!(recordFields instanceof Uint8Array)) {
+             throw new Error('Invalid authoritative term-record fields');
+         }
+@@ -5944,6 +5945,7 @@
+         }
+         validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);
+         const {base, derived} = splitPersistedTermLookupIndex(payload);
++        const validationEndedAt = safePerformance.now()
+         const output = new Uint8Array(
+             LOOKUP_INDEX_CHUNK_HEADER_BYTES +
+             payload.byteLength +
+@@ -5955,12 +5957,23 @@
+         writeSafeU64Le(view, 8, contentOffsetBase);
+         view.setUint32(16, payload.byteLength, true);
+         view.setUint32(20, base.byteLength, true);
++        const hashesStartedAt = safePerformance.now()
+         view.setUint32(24, hashLookupIndexBytes(base), true);
+         view.setUint32(28, hashLookupIndexBytes(derived), true);
+         view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+         view.setUint32(36, recordFieldsFormat, true);
++        const copiesStartedAt = safePerformance.now()
+         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
++        const envelopeEndedAt = safePerformance.now()
++        const diagnostics = this._importIoDiagnostics
++        diagnostics.lookupEnvelopeCalls = (diagnostics.lookupEnvelopeCalls ?? 0) + 1
++        diagnostics.lookupEnvelopeBytes = (diagnostics.lookupEnvelopeBytes ?? 0) + output.byteLength
++        diagnostics.lookupEnvelopeMs = (diagnostics.lookupEnvelopeMs ?? 0) + envelopeEndedAt - envelopeStartedAt
++        diagnostics.lookupEnvelopeValidationMs = (diagnostics.lookupEnvelopeValidationMs ?? 0) + validationEndedAt - envelopeStartedAt
++        diagnostics.lookupEnvelopeAllocationHeaderMs = (diagnostics.lookupEnvelopeAllocationHeaderMs ?? 0) + hashesStartedAt - validationEndedAt
++        diagnostics.lookupEnvelopeHashesMs = (diagnostics.lookupEnvelopeHashesMs ?? 0) + copiesStartedAt - hashesStartedAt
++        diagnostics.lookupEnvelopeCopiesMs = (diagnostics.lookupEnvelopeCopiesMs ?? 0) + envelopeEndedAt - copiesStartedAt
+         return output;
+     }
+ 

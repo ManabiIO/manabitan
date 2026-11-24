@@ -1,0 +1,283 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index a400595..cc601b0 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -1462,7 +1462,7 @@ export class DictionaryDatabase {
+      * @param {((index: number, count: number) => void)?} [onCheckpoint]
+      * @param {{summary: import('dictionary-importer').Summary, primaryKey: number}|null} [publication]
+      * @param {string|null} [expectedSessionId] When supplied, only this owner may publish.
+-     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
++     * @returns {Promise<{commitMs: number, termContentEndImportSessionMs: number, termContentEndImportSessionFlushPendingWritesMs: number, termContentEndImportSessionAwaitQueuedWritesMs: number, termContentEndImportSessionCloseWritableMs: number, termContentDrainCycleCount: number, termContentWriteCallCount: number, termContentSingleChunkWriteCount: number, termContentMergedWriteCount: number, termContentTotalWriteBytes: number, termContentMergedWriteBytes: number, termContentMaxWriteBytes: number, termContentMergedGroupChunkCount: number, termContentMaxMergedGroupChunkCount: number, termContentFlushDueToBytesCount: number, termContentFlushDueToChunkCount: number, termContentFlushFinalGroupCount: number, termContentWriteCoalesceTargetBytes: number, termContentWriteCoalesceMaxChunks: number, termContentWriteFlushThresholdBytes: number, termRecordEndImportSessionMs: number, termRecordEndImportSessionFlushPendingWritesMs: number, termRecordEndImportSessionAwaitQueuedWritesMs: number, termRecordEndImportSessionCloseWritableMs: number, termRecordIoDiagnostics: Record<string, number>|null, termsVirtualTableSyncMs: number, createIndexesMs: number, createIndexesCheckpointCount: number, cacheResetMs: number, runtimePragmasMs: number, totalMs: number}|{published: true, housekeepingErrors: Error[]}|null>}
+      */
+     async finishBulkImport(onCheckpoint = null, publication = null, expectedSessionId = null) {
+         await this._waitForBulkImportSetup();
+@@ -1494,6 +1494,8 @@ export class DictionaryDatabase {
+             let termRecordEndImportSessionFlushPendingWritesMs = 0;
+             let termRecordEndImportSessionAwaitQueuedWritesMs = 0;
+             let termRecordEndImportSessionCloseWritableMs = 0;
++            /** @type {Record<string, number>|null} */
++            let termRecordIoDiagnostics = null;
+             let termRecordDrainCycleCount = 0;
+             let termRecordWriteCallCount = 0;
+             let termRecordSingleChunkWriteCount = 0;
+@@ -1565,6 +1567,7 @@ export class DictionaryDatabase {
+                             termRecordEndImportSessionFlushPendingWritesMs = metrics.flushPendingWritesMs;
+                             termRecordEndImportSessionAwaitQueuedWritesMs = metrics.awaitQueuedWritesMs;
+                             termRecordEndImportSessionCloseWritableMs = metrics.closeWritableMs;
++                            termRecordIoDiagnostics = metrics.ioDiagnostics ?? null;
+                             termRecordDrainCycleCount = metrics.drainCycleCount;
+                             termRecordWriteCallCount = metrics.writeCallCount;
+                             termRecordSingleChunkWriteCount = metrics.singleChunkWriteCount;
+@@ -1739,6 +1742,7 @@ export class DictionaryDatabase {
+                     termRecordEndImportSessionFlushPendingWritesMs,
+                     termRecordEndImportSessionAwaitQueuedWritesMs,
+                     termRecordEndImportSessionCloseWritableMs,
++                    termRecordIoDiagnostics,
+                     termRecordDrainCycleCount,
+                     termRecordWriteCallCount,
+                     termRecordSingleChunkWriteCount,
+diff --git a/ext/js/dictionary/term-record-import-index-writer.js b/ext/js/dictionary/term-record-import-index-writer.js
+index 0aa86b3..e925b3f 100644
+--- a/ext/js/dictionary/term-record-import-index-writer.js
++++ b/ext/js/dictionary/term-record-import-index-writer.js
+@@ -87,6 +87,32 @@ export class SyncImportIndexWriter {
+         this._workStartedAt = 0;
+         /** @type {number} */
+         this._workElapsedMs = 0;
++        /** @type {Record<string, number>} */
++        this._ioDiagnosticMetrics = {};
++    }
++
++    /** @returns {Record<string, number>} */
++    getIoDiagnosticMetrics() {
++        return {...this._ioDiagnosticMetrics};
++    }
++
++    /**
++     * Native calls are measured directly because they can block promise delivery.
++     * @template T
++     * @param {string} name
++     * @param {() => T} operation
++     * @returns {T}
++     */
++    _measureNativeIo(name, operation) {
++        const start = safePerformance.now();
++        try {
++            return operation();
++        } finally {
++            const durationKey = `${name}Ms`;
++            const countKey = `${name}Calls`;
++            this._ioDiagnosticMetrics[durationKey] = (this._ioDiagnosticMetrics[durationKey] ?? 0) + safePerformance.now() - start;
++            this._ioDiagnosticMetrics[countKey] = (this._ioDiagnosticMetrics[countKey] ?? 0) + 1;
++        }
+     }
+ 
+     /** @param {number} offset */
+@@ -196,13 +222,13 @@ export class SyncImportIndexWriter {
+             const errors = this._failure === null ? [] : [this._failure];
+             if (!abort && errors.length === 0) {
+                 try {
+-                    this._access.flush();
++                    this._measureNativeIo('flush', () => this._access.flush());
+                 } catch (error) {
+                     errors.push(toError(error));
+                 }
+             }
+             try {
+-                this._access.close();
++                this._measureNativeIo('close', () => this._access.close());
+             } catch (error) {
+                 errors.push(toError(error));
+             }
+@@ -263,7 +289,7 @@ export class SyncImportIndexWriter {
+         this._validateWriteLength(bytes.byteLength);
+         for (let offset = 0; offset < bytes.byteLength;) {
+             const view = bytes.subarray(offset, Math.min(bytes.byteLength, offset + MAX_WRITE_BYTES));
+-            const written = this._access.write(view, {at: this._position});
++            const written = this._measureNativeIo('write', () => this._access.write(view, {at: this._position}));
+             if (!Number.isSafeInteger(written) || written <= 0 || written > view.byteLength) {
+                 throw new Error('Invalid import index write progress');
+             }
+@@ -273,7 +299,7 @@ export class SyncImportIndexWriter {
+             if (this._periodicFlush && !this._aborted && this._unflushedBytes >= MAX_UNFLUSHED_BYTES) {
+                 // Persist bounded batches while parser workers can still make progress.
+                 // Successful close must also flush the final index header and tail.
+-                this._access.flush();
++                this._measureNativeIo('flush', () => this._access.flush());
+                 this._unflushedBytes = 0;
+             }
+             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index e21648b..a98d7ab 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -787,6 +787,7 @@ class DenseIdRecordStore {
+  * @property {number} lookupIndexAwaitMs
+  * @property {number} lookupIndexMaxQueuedBytes
+  * @property {number} lookupIndexWorkerFileCount
++ * @property {Record<string, number>} [ioDiagnostics]
+  */
+ 
+ /**
+@@ -909,6 +910,27 @@ export class TermRecordOpfsStore {
+         this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
+         /** @type {{writeCallCount: number, writeBytes: number, awaitMs: number, maxQueuedBytes: number, workerFileCount: number}} */
+         this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
++        /** @type {Record<string, number>} */
++        this._importIoDiagnostics = {};
++    }
++
++    /**
++     * Diagnostic-only operation clock. Durations can overlap and are not additive.
++     * @template T
++     * @param {string} name
++     * @param {() => T|Promise<T>} operation
++     * @returns {Promise<T>}
++     */
++    async _measureImportIo(name, operation) {
++        const start = safePerformance.now();
++        try {
++            return await operation();
++        } finally {
++            const durationKey = `${name}Ms`;
++            const countKey = `${name}Calls`;
++            this._importIoDiagnostics[durationKey] = (this._importIoDiagnostics[durationKey] ?? 0) + safePerformance.now() - start;
++            this._importIoDiagnostics[countKey] = (this._importIoDiagnostics[countKey] ?? 0) + 1;
++        }
+     }
+ 
+     /** */
+@@ -1193,6 +1215,7 @@ export class TermRecordOpfsStore {
+             this._writeCoalesceTargetBytes = this._computeWriteCoalesceTargetBytes();
+             this._writeDrainMetrics = this._createEmptyWriteDrainMetrics();
+             this._lookupIndexWriteMetrics = this._createEmptyLookupIndexWriteMetrics();
++            this._importIoDiagnostics = {};
+             for (const state of this._shardStateByFileName.values()) {
+                 state.pendingWriteBytes = 0;
+                 state.pendingWriteChunks = [];
+@@ -1476,6 +1499,7 @@ export class TermRecordOpfsStore {
+             lookupIndexAwaitMs: this._lookupIndexWriteMetrics.awaitMs,
+             lookupIndexMaxQueuedBytes: this._lookupIndexWriteMetrics.maxQueuedBytes,
+             lookupIndexWorkerFileCount: this._lookupIndexWriteMetrics.workerFileCount,
++            ioDiagnostics: {...this._importIoDiagnostics},
+         };
+         if (this._reloadFromShardsAfterImport) {
+             this._indexByDictionary.clear();
+@@ -5979,8 +6003,8 @@ export class TermRecordOpfsStore {
+                 view.setUint32(16, state.lookupIndexChunkCount, true);
+                 view.setUint32(20, state.lookupIndexRecordCount, true);
+                 header.set(state.generationId, 24);
+-                await writable.seek(0);
+-                await writable.write(header);
++                await this._measureImportIo('lookupFinalHeaderSeek', () => writable.seek(0));
++                await this._measureImportIo('lookupFinalHeaderWrite', () => writable.write(header));
+             }
+         } catch (error) {
+             operationError = error instanceof Error ? error : new Error(String(error));
+@@ -5990,10 +6014,16 @@ export class TermRecordOpfsStore {
+         const writable = state.lookupIndexWritable;
+         if (writable !== null) {
+             try {
+-                await writable.close();
++                await this._measureImportIo('lookupClose', () => writable.close());
+             } catch (error) {
+                 closeError = error instanceof Error ? error : new Error(String(error));
+             } finally {
++                if (writable instanceof SyncImportIndexWriter) {
++                    for (const [name, value] of Object.entries(writable.getIoDiagnosticMetrics())) {
++                        const key = `lookupNative${name[0].toUpperCase()}${name.slice(1)}`;
++                        this._importIoDiagnostics[key] = (this._importIoDiagnostics[key] ?? 0) + value;
++                    }
++                }
+                 state.lookupIndexWritable = null;
+             }
+         }
+@@ -6049,18 +6079,26 @@ export class TermRecordOpfsStore {
+                     if (state.lookupIndexFileHandle === null) {
+                         throw new Error('Term-record lookup index directory became unavailable during import');
+                     }
+-                    state.lookupIndexWritable = await this._createLookupIndexWritable(state);
+-                    await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
++                    const writable = await this._measureImportIo('lookupOpen', () => this._createLookupIndexWritable(state));
++                    state.lookupIndexWritable = writable;
++                    let kind = 'lookupAsyncFiles';
++                    if (writable instanceof SyncImportIndexWriter) {
++                        kind = 'lookupLocalSyncFiles';
++                    } else if (writable instanceof WorkerImportIndexWriter) {
++                        kind = 'lookupWorkerFiles';
++                    }
++                    this._importIoDiagnostics[kind] = (this._importIoDiagnostics[kind] ?? 0) + 1;
++                    await this._measureImportIo('lookupInitialHeaderWrite', () => writable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES)));
+                 }
+                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
+                     // _createLookupIndexChunk owns each complete buffer. The
+                     // existing queue budget remains charged until this worker
+                     // acknowledges the write, including any periodic flush.
+-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
++                    await this._measureImportIo('lookupWrite', () => /** @type {WorkerImportIndexWriter} */ (state.lookupIndexWritable).writeOwnedChunks(chunks));
+                 } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
+-                    await state.lookupIndexWritable.writeChunks(chunks);
++                    await this._measureImportIo('lookupWrite', () => /** @type {SyncImportIndexWriter} */ (state.lookupIndexWritable).writeChunks(chunks));
+                 } else {
+-                    await state.lookupIndexWritable.write(new Blob(chunks));
++                    await this._measureImportIo('lookupWrite', () => /** @type {FileSystemWritableFileStream} */ (state.lookupIndexWritable).write(new Blob(chunks)));
+                 }
+                 ++this._lookupIndexWriteMetrics.writeCallCount;
+                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
+@@ -6187,8 +6225,8 @@ export class TermRecordOpfsStore {
+         const errors = [];
+         for (const state of this._shardStateByFileName.values()) {
+             const results = await Promise.allSettled([
+-                this._finalizeShardWritable(state),
+-                this._flushLookupIndexFile(state),
++                this._measureImportIo('descriptorFinalize', () => this._finalizeShardWritable(state)),
++                this._measureImportIo('lookupFinalize', () => this._flushLookupIndexFile(state)),
+             ]);
+             for (const result of results) {
+                 if (result.status === 'fulfilled') { continue; }
+@@ -6241,11 +6279,12 @@ export class TermRecordOpfsStore {
+      * @returns {Promise<void>}
+      */
+     async _closeShardWritable(state) {
+-        if (state.writable === null) {
++        const writable = state.writable;
++        if (writable === null) {
+             return;
+         }
+         try {
+-            await state.writable.close();
++            await this._measureImportIo('descriptorClose', () => writable.close());
+         } catch (error) {
+             if (!this._isClosingWritableStreamError(error)) {
+                 throw error;
+@@ -6676,9 +6715,10 @@ export class TermRecordOpfsStore {
+             return;
+         }
+         if (state.writable === null) {
+-            state.writable = await state.fileHandle.createWritable({keepExistingData: true});
++            const writable = await this._measureImportIo('descriptorOpen', () => state.fileHandle.createWritable({keepExistingData: true}));
++            state.writable = writable;
+             const seekOffset = state.fileLength - state.pendingWriteBytes;
+-            await state.writable.seek(Math.max(0, seekOffset));
++            await this._measureImportIo('descriptorSeek', () => writable.seek(Math.max(0, seekOffset)));
+         }
+         const writeStartOffset = state.fileLength - state.pendingWriteBytes;
+         const chunks = this._coalescePendingChunks(state.pendingWriteChunks);
+@@ -6818,7 +6858,7 @@ export class TermRecordOpfsStore {
+         for (const chunk of chunks) {
+             if (chunk.byteLength <= 0) { continue; }
+             try {
+-                await /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk);
++                await this._measureImportIo('descriptorWrite', () => /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk));
+                 writtenBytes += chunk.byteLength;
+             } catch (error) {
+                 if (!this._isClosingWritableStreamError(error)) {
+@@ -6830,7 +6870,7 @@ export class TermRecordOpfsStore {
+                 if (state.writable === null) {
+                     throw error;
+                 }
+-                await /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk);
++                await this._measureImportIo('descriptorWrite', () => /** @type {FileSystemWritableFileStream} */ (state.writable).write(chunk));
+                 writtenBytes += chunk.byteLength;
+             }
+         }
