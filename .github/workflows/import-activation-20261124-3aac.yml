@@ -101,6 +101,13 @@ jobs:
           cmp "$RUNNER_TEMP/import-activation/instrumentation.patch" "$RUNNER_TEMP/import-activation/actual-source.patch"
           node --version > "$RUNNER_TEMP/import-activation/node-version.txt"
           sha256sum builds/manabitan-chrome.zip > "$RUNNER_TEMP/import-activation/package.sha256"
+      - name: Prepare and verify the complete native setup fixture set
+        shell: bash
+        run: |
+          set -euo pipefail
+          dictionary_ids=(jmdict jmnedict jitendex)
+          if [ "$ACTIVATION_DICTIONARY" = vndb ]; then dictionary_ids+=(vndb); fi
+          node dev/perf/prepare-dictionaries.js "${dictionary_ids[@]}" 2>&1 | tee "$RUNNER_TEMP/import-activation/prepare-dictionaries.log"
       - name: Observe activation in a complete import
         shell: bash
         run: |

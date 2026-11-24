@@ -31,6 +31,7 @@ checks = {
     'completeImportSucceeded': report.get('status') == 'success',
     'oneDiagnosticPhase': len(diagnostics) == 1,
     'diagnosticOnly': len(diagnostics) == 1 and diagnostics[0].get('instrumentationOnly') is True,
+    'productionOffscreenOwner': len(diagnostics) == 1 and diagnostics[0].get('owner') == 'offscreen',
     'eventsObserved': len(events) > 0,
 }
 details = {}
@@ -105,6 +106,7 @@ result = {
     'packageSha256': report.get('packageSha256'),
     'browserVersion': report.get('browserVersion'),
     'reportSha256': hashlib.sha256(report_bytes).hexdigest(),
+    'activationOwner': diagnostics[0].get('owner') if len(diagnostics) == 1 else None,
     'eventCounts': dict(counts),
     'activation': details,
     'checks': checks,

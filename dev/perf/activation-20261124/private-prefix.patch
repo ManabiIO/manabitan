@@ -1,3 +1,19 @@
+diff --git a/ext/js/background/offscreen-dictionary-worker.js b/ext/js/background/offscreen-dictionary-worker.js
+index 2e4cb1c1cfb2aa19628ce6e08076c144c1f19caa..125fc43c6bca2d31fc46f97833aae5a40f3a4b98 100644
+--- a/ext/js/background/offscreen-dictionary-worker.js
++++ b/ext/js/background/offscreen-dictionary-worker.js
+@@ -464,7 +464,11 @@ export class OffscreenDictionaryWorkerHandler {
+             queuedRequestAccounted = false;
+             operation.status.state = 'running';
+             const dictionaryImporter = new DictionaryImporter(this._mediaLoader, onProgress, () => abortController?.signal.aborted === true);
++            Reflect.set(globalThis, '__manabitanActivationEvents', []);
+             const importPayload = await dictionaryImporter.importDictionary(this._dictionaryDatabase, archiveContent, {...details, operationId});
++            const activationEpochMs = Date.now();
++            importPayload.debug?.phaseTimings?.push({phase: 'activation-diagnostic', elapsedMs: 0, startEpochMs: activationEpochMs, endEpochMs: activationEpochMs, details: {instrumentationOnly: true, owner: 'offscreen', events: Reflect.get(globalThis, '__manabitanActivationEvents')}});
++            Reflect.deleteProperty(globalThis, '__manabitanActivationEvents');
+             const {result, errors, debug, outcome} = importPayload;
+             const completion = {
+                 result,
 diff --git a/ext/js/dictionary/dictionary-worker-handler.js b/ext/js/dictionary/dictionary-worker-handler.js
 index b27ffe5daf3d3ea591804c09408ea74563cf8bbf..543b9e6ce4372fd599a5d8be20f0029233e6039e 100644
 --- a/ext/js/dictionary/dictionary-worker-handler.js
