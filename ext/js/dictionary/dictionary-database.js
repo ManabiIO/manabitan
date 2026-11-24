@@ -6747,8 +6747,8 @@ null;
 
     /**
      * Retains bounded owned bytes so the next parser groups can verify exact
-     * duplicates without reading recently written OPFS blocks. Complete compact
-     * parser slabs can be adopted without changing cache coverage or cost.
+     * duplicates without reading recently written OPFS blocks. Immutable parser
+     * slabs can back a retained view when their full allocation fits the budget.
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
      * @param {Record<string, number>|null} [importMetrics]
@@ -6806,9 +6806,15 @@ null;
         const source = spans.buffer;
         const sharedSource = !(source.buffer instanceof ArrayBuffer);
         const padding = sharedSource ? (source.byteOffset + minimumOffset) & 7 : 0;
-        const byteLength = maximumEnd - minimumOffset + padding;
+        const copyByteLength = maximumEnd - minimumOffset + padding;
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
-        if (byteLength > cacheMaxBytes) { return 0; }
+        if (copyByteLength > cacheMaxBytes) { return 0; }
+        const adoptTransferredSource = (
+            source.buffer.byteLength <= cacheMaxBytes && takeOwnedTermContent(source)
+        );
+        // A retained view avoids copying an immutable slab to trim its edges.
+        // Charge the complete backing allocation, including those unused edges.
+        const byteLength = adoptTransferredSource ? source.buffer.byteLength : copyByteLength;
         while (
             this._recentTermContentSourceBatchBytes + byteLength > cacheMaxBytes &&
             this._recentTermContentSourceBatches.size > 0
@@ -6825,13 +6831,11 @@ null;
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
-        const adoptTransferredSource = (
-            minimumOffset === 0 && maximumEnd === source.byteLength &&
-            takeOwnedTermContent(source)
-        );
         // Match the source alignment so the shared bytes need only one copy.
         const owned = adoptTransferredSource ?
-            source :
+            (minimumOffset === 0 && maximumEnd === source.byteLength ?
+                source :
+                source.subarray(minimumOffset, maximumEnd)) :
             (sharedSource ?
                 new Uint8Array(byteLength).subarray(padding) :
                 source.slice(minimumOffset, maximumEnd));

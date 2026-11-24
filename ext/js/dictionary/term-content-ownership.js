@@ -64,8 +64,8 @@ export function registerOwnedTermContent(source) {
 }
 
 /**
- * Consumes a private one-time witness. The cache must first establish that its
- * retained range is the entire backing buffer, preserving cache byte coverage.
+ * Consumes a private one-time witness for a complete immutable backing buffer.
+ * A cache may retain a subrange view only while charging the full allocation.
  * @param {Uint8Array} source
  * @returns {boolean}
  */
