@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
     })
 })
 
-/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number}}} WorkerReply */
+/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number, wholeGlossaryDecodes: number}}} WorkerReply */
 /**
  * One request at a time, as required by the production parser worker's lease.
  * @param {Worker} worker
@@ -602,6 +602,12 @@ describe('actual parser worker flag propagation', () => {
     test('transfers the diagnostic key arena once and preserves its views after another request', async () => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'
+            let wholeGlossaryDecodes = 0
+            const decode = TextDecoder.prototype.decode
+            TextDecoder.prototype.decode = function(bytes, options) {
+                if (bytes instanceof Uint8Array && bytes[0] === 0x5b) { ++wholeGlossaryDecodes }
+                return decode.call(this, bytes, options)
+            }
             globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
                 postMessage: (data, transfer = []) => {
                     if (data.type === 'result' && data.chunk) {
@@ -610,7 +616,7 @@ describe('actual parser worker flag propagation', () => {
                         data.transferObservation = {count: transfer.length, uniqueCount: new Set(transfer).size,
                             keyArenaOccurrences: transfer.filter(buffer => buffer === arena).length,
                             keyBuffers: new Set(keys.map(bytes => bytes.buffer)).size,
-                            keyBuffersOutsideArena: keys.filter(bytes => bytes.buffer !== arena).length}
+                            keyBuffersOutsideArena: keys.filter(bytes => bytes.buffer !== arena).length, wholeGlossaryDecodes}
                     }
                     parentPort.postMessage(data, transfer)
                 }}
@@ -652,6 +658,7 @@ describe('actual parser worker flag propagation', () => {
             expect(transferObservation.keyArenaOccurrences).toBe(1)
             expect(transferObservation.keyBuffers).toBe(1)
             expect(transferObservation.keyBuffersOutsideArena).toBe(0)
+            expect(transferObservation.wholeGlossaryDecodes).toBe(0)
             expect(chunk.mediaRows[0].row.expression).toBe('quoted"\ud800')
             expect(chunk.mediaRows[0].row.expressionBytes).toBeUndefined()
             const keys = chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes])

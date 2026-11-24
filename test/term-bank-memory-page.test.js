@@ -7,6 +7,7 @@ import {execFileSync} from 'node:child_process';
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {afterAll, beforeAll, expect, test} from 'vitest';
 import {moveFixtureToTrash} from './util/move-fixture-to-trash.js';
 import {findCompiler} from './util/wasm-compiler.js';
@@ -41,6 +42,8 @@ uint32_t growth_pages(void) { return mock_growth_pages; }
 `;
     const outputPath = path.join(outputDirectory, 'memory-page-test.wasm');
     execFileSync(compiler.command, [...compiler.args,
+        '-I',
+        fileURLToPath(new URL('../ext/js/dictionary/wasm/', import.meta.url)),
         '--target=wasm32-freestanding',
         '-O3',
         '-matomics',

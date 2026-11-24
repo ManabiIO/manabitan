@@ -1155,6 +1155,8 @@ static int parse_value_span(const uint8_t* src, uint32_t len, uint32_t start, ui
     return parse_scalar_span(src, len, start, out_end);
 }
 
+#include "term-bank-image-paths.h"
+
 static int parse_value_span_with_glossary_hints(
     const uint8_t* src,
     uint32_t len,

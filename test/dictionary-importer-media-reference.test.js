@@ -116,9 +116,9 @@ describe('preformatted image references', () => {
         }, 2048, {singleChunk: true, emitTermByteLists: false, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true})
     })
 
-    test('decodes an owned exact-span snapshot of a shared glossary before parser storage is reused', async () => {
+    test.each([false, true])('decodes owned exact-span snapshots before parser storage is reused, native projection %s', async (nativeProjection) => {
         const glossary = String.raw`[{"type":"structured-content","content":{"tag":"\u0069mg","pa\u0074h":"img/\u732b.webp"}}]`
-        const expected = encoder.encode(glossary)
+        const expected = encoder.encode(nativeProjection ? String.raw`"img/\u732b.webp"` : glossary)
         const source = encoder.encode(`[["image","reading","","",0,${glossary},1,""]]`)
         const decode = vi.spyOn(TextDecoder.prototype, 'decode')
         let projectedRows = 0
@@ -128,12 +128,12 @@ describe('preformatted image references', () => {
             expect(bytes.buffer).toBeInstanceOf(SharedArrayBuffer)
             expect(bytes.byteOffset).toBeGreaterThan(0)
             expect(bytes.byteLength).toBeLessThan(bytes.buffer.byteLength)
-            expect(bytes).toEqual(expected)
+            expect(bytes).toEqual(encoder.encode(glossary))
 
-            const result = parser.copyWasmBackedColumnChunk(chunk, false, true)
+            const result = parser.copyWasmBackedColumnChunk(nativeProjection ? chunk : {...chunk}, false, true)
             expect(result.mediaRows[0].imagePaths).toEqual(['img/猫.webp'])
-            const snapshot = decode.mock.calls.find(([input]) => input instanceof Uint8Array && input.byteLength === expected.byteLength && input[0] === 0x5b)?.[0]
-            if (!(snapshot instanceof Uint8Array)) { throw new Error('Expected glossary decode input') }
+            const snapshot = decode.mock.calls.find(([input]) => input instanceof Uint8Array && input.byteLength === expected.byteLength && input[0] === expected[0])?.[0]
+            if (!(snapshot instanceof Uint8Array)) { throw new Error('Expected owned decode input') }
             expect(snapshot.buffer).toBeInstanceOf(ArrayBuffer)
             expect(snapshot.buffer).not.toBe(bytes.buffer)
             expect(snapshot.byteOffset).toBe(0)

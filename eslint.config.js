@@ -84,6 +84,7 @@ const manabitanHeaderFiles = [
     'ext/js/dictionary/term-lookup-index.js',
     'ext/js/dictionary/term-lookup-index-preparation.js',
     'ext/js/dictionary/term-bank-source-crc.js',
+    'ext/js/dictionary/term-bank-image-paths.js',
     'ext/js/dictionary/term-bank-wasm-parser.js',
     'ext/js/dictionary/term-bank-wasm-parser-worker.js',
     'ext/js/core/diagnostics-reporter.js',

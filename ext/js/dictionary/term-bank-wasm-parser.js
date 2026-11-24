@@ -19,6 +19,7 @@ import {DictionarySourceIntegrityError} from './dictionary-source-integrity-erro
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
 import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
+import {registerNativeImagePathSource, releaseNativeImagePathSource, tryCollectNativeGlossaryImagePaths} from './term-bank-image-paths.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -77,7 +78,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, project_term_glossary_image_paths?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -192,6 +193,7 @@ async function getWasm() {
             wasm_get_last_content_capacity: exports.wasm_get_last_content_capacity,
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
             verify_term_bank_source_crcs: typeof exports.verify_term_bank_source_crcs === 'function' ? exports.verify_term_bank_source_crcs : void 0,
+            project_term_glossary_image_paths: typeof exports.project_term_glossary_image_paths === 'function' ? exports.project_term_glossary_image_paths : void 0,
             inflate_zip_media_batch: exports.inflate_zip_media_batch,
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
@@ -2559,8 +2561,13 @@ null :
             const invokeColumnChunk = async () => {
                 if (dispatchStopped) { return; }
                 const tDispatchStart = Date.now();
-                const result = onChunk(chunk, progress);
-                await result;
+                registerNativeImagePathSource(chunk, parsed.wasm, source);
+                try {
+                    const result = onChunk(chunk, progress);
+                    await result;
+                } finally {
+                    releaseNativeImagePathSource(chunk);
+                }
                 chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
             };
             const promise = pendingDispatches.length === 0 ? invokeColumnChunk() : dispatchTail.then(invokeColumnChunk);
@@ -4047,11 +4054,11 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
-            tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
+            (tryCollectNativeGlossaryImagePaths(chunk, row, decodeJsonStringToken) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
-                    new Uint8Array(row.glossaryJsonBytes))) :
+                    new Uint8Array(row.glossaryJsonBytes)))) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
         return {
