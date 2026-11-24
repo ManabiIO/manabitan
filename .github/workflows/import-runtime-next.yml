@@ -24,19 +24,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - candidate: monotonic-sequence
+          - candidate: media-bookkeeping
             baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            sha: ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf
+            sha: ebb0777114578c5cee879877274e7d872bfea27e
             stage: screen
             dictionary: jmdict
-          - candidate: monotonic-sequence
+          - candidate: media-bookkeeping
             baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            sha: ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf
+            sha: ebb0777114578c5cee879877274e7d872bfea27e
             stage: screen
             dictionary: jitendex
-          - candidate: monotonic-sequence
+          - candidate: media-bookkeeping
             baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            sha: ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf
+            sha: ebb0777114578c5cee879877274e7d872bfea27e
+            stage: screen
+            dictionary: vndb
+          - candidate: canonical-counters
+            baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
+            sha: d147a60fc4845e898d98d8924968d6094b417007
+            stage: screen
+            dictionary: jmdict
+          - candidate: canonical-counters
+            baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
+            sha: d147a60fc4845e898d98d8924968d6094b417007
+            stage: screen
+            dictionary: jitendex
+          - candidate: canonical-counters
+            baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
+            sha: d147a60fc4845e898d98d8924968d6094b417007
             stage: screen
             dictionary: vndb
     env:
