@@ -524,6 +524,39 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
+    test('ignores MDD references in omitted inline CSS declarations', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => { lookupKeys.push(keyText); };
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Inline CSS asset fixture'},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div style="background-image:url(images/kept.png);filter:url(images/unused.png);text-decoration:url(images/missing.png)">Styled</div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/kept.png', value: Uint8Array.of(7, 8, 9)},
+            {keyText: 'images/unused.png', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'inline-css.mdx',
+            {},
+            Uint8Array.of(1),
+            [{name: 'inline-css.mdd', bytes: Uint8Array.of(1)}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const terms = await readJson(zip, 'term_bank_1.json');
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(JSON.stringify(terms)).toContain('mdict-media/images/kept.png');
+        expect(await zip.file('mdict-media/images/kept.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(7, 8, 9));
+        expect(zip.file('mdict-media/images/unused.png')).toBeNull();
+        expect(lookupKeys).toStrictEqual(['images/kept.png']);
+        expect(assetPhase?.details).toMatchObject({missingReferencedAssetCount: 0});
+    });
+
     test('does not navigate, lookup or archive sound resources when dictionary audio is disabled', async () => {
         /** @type {string[]} */
         const lookupKeys = [];
@@ -583,6 +616,53 @@ describe('convertMdxToArchive', () => {
         } finally {
             await testEnv.teardown(global);
         }
+    });
+
+    test('does not include audio-element resources when audio is disabled and preserves fallback and video content', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => {
+            lookupKeys.push(keyText);
+        };
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Disabled audio elements', Description: ''},
+            entries: [{
+                keyText: 'Read',
+                definition: '<div><audio src="audio/read.mp3">audio fallback</audio><audio src="sound://audio/read.wav">sound fallback</audio><video src="video/read.mp4">video fallback</video></div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'audio/read.mp3', value: Uint8Array.of(1, 2, 3)},
+            {keyText: 'audio/read.wav', value: Uint8Array.of(4, 5, 6)},
+            {keyText: 'video/read.mp4', value: Uint8Array.of(7, 8, 9)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'disabled-audio-elements.mdx',
+            {enableAudio: false},
+            new Uint8Array([1]),
+            [{name: 'disabled-audio-elements.mdd', bytes: new Uint8Array([1])}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const termBank = /** @type {Array<[string, string, string, string, number, Array<unknown>, number, string]>} */ (await readJson(zip, 'term_bank_1.json'));
+        const glossary = /** @type {{content: {content: Array<Record<string, unknown>>}}} */ (termBank[0][5][0]);
+        const rootEntry = glossary.content.content[0];
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(rootEntry.content).toStrictEqual([
+            expect.objectContaining({tag: 'a', href: '#', content: ['audio fallback']}),
+            expect.objectContaining({tag: 'a', href: '#', content: ['sound fallback']}),
+            expect.objectContaining({tag: 'a', href: 'media:mdict-media/video/read.mp4', content: ['video fallback']}),
+        ]);
+        expect(zip.file('mdict-media/audio/read.mp3')).toBeNull();
+        expect(zip.file('mdict-media/audio/read.wav')).toBeNull();
+        expect(await zip.file('mdict-media/video/read.mp4')?.async('uint8array')).toStrictEqual(Uint8Array.of(7, 8, 9));
+        expect(lookupKeys).toStrictEqual(['video/read.mp4']);
+        expect(assetPhase?.details).toMatchObject({
+            referencedAssetCount: 1,
+            materializedReferencedAssetCount: 1,
+            missingReferencedAssetCount: 0,
+        });
     });
 
     test('preserves source tag identity without requiring a class or ID', async () => {
