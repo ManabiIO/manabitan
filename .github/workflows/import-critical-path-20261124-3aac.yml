@@ -1,0 +1,98 @@
+name: Frozen import critical paths 20261124
+
+on:
+  push:
+    branches: [perf/import-critical-path-20261124-3aac]
+    paths:
+      - '.github/workflows/import-critical-path-20261124-3aac.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-critical-path-3aac-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  profile:
+    name: Current baseline (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_SOURCE_SHA: 698d685c21618a8e8dbdab7a49a8dcf0d30680eb
+      PERF_SOURCE_TREE: c0d683158cd52869fa4861fd4790054f49bf0721
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Retain the exact acquisition plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/import-critical-path"
+          cp .github/workflows/import-critical-path-20261124-3aac.yml "$RUNNER_TEMP/import-critical-path/workflow.yml"
+          git rev-parse HEAD > "$RUNNER_TEMP/import-critical-path/tooling-sha.txt"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 698d685c21618a8e8dbdab7a49a8dcf0d30680eb
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Build and check the frozen product
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PERF_SOURCE_SHA"
+          test "$(git rev-parse HEAD^{tree})" = "$PERF_SOURCE_TREE"
+          npm run build -- --target chrome
+          git diff --exit-code
+          git status --porcelain > "$RUNNER_TEMP/import-critical-path/source-status.txt"
+          node --version > "$RUNNER_TEMP/import-critical-path/node-version.txt"
+          sha256sum builds/manabitan-chrome.zip > "$RUNNER_TEMP/import-critical-path/package.sha256"
+      - name: Collect an ordinary baseline observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --output "$RUNNER_TEMP/import-critical-path/ordinary" 2>&1 | tee "$RUNNER_TEMP/import-critical-path/ordinary.log"
+      - name: Collect a separate non-authoritative CPU trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --trace --no-build --build-target chrome --media-check sample --output "$RUNNER_TEMP/import-critical-path/trace" 2>&1 | tee "$RUNNER_TEMP/import-critical-path/trace.log"
+      - name: Retain every output and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-critical-path-3aac-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/import-critical-path
+          if-no-files-found: error
+          retention-days: 30
+      - name: Retain the matching browser runtime for local follow-up
+        if: matrix.dictionary == 'jmdict'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/import-browser-runtime"
+          tar -czf "$RUNNER_TEMP/import-browser-runtime/ms-playwright.tar.gz" -C "$HOME/.cache" ms-playwright
+          sha256sum "$RUNNER_TEMP/import-browser-runtime/ms-playwright.tar.gz" > "$RUNNER_TEMP/import-browser-runtime/SHA256SUMS"
+      - name: Publish the matching browser runtime
+        if: matrix.dictionary == 'jmdict'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-browser-runtime-3aac-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/import-browser-runtime
+          if-no-files-found: error
+          retention-days: 7
