@@ -5,14 +5,17 @@ import json
 from pathlib import Path
 import sys
 
-from protocol import DEPENDENCY_PATHS, HARNESS, digest, package_entries, read_summary, require_package_differences, save
+from protocol import (DEPENDENCY_PATHS, HARNESS, digest, package_entries, read_summary,
+                      receipt_comparison_key, require_package_differences, save, storage_allocation_summary)
 from run_memory import memory_overlay, schedule
+from storage_receipts import POLICY_VERSION
 
 
 def verify(root):
     root = Path(root)
     plan = json.loads((root / 'plan.json').read_text())
     assert plan['authoritativeTiming'] is False
+    assert plan['storagePolicyVersion'] == POLICY_VERSION
     assert plan['schedule'] == schedule(plan['replication'])
     assert plan['promotionCriteria'] == {
         'maximumMedianPairedIncreasePercent': 5, 'maximumIndividualPairedIncreasePercent': 10,
@@ -58,9 +61,10 @@ def verify(root):
         memory = json.loads((location / 'memory.json').read_text())
         try:
             receipt = read_summary(location, plan, observation['arm'], identities[observation['arm']])
-            if expected_receipt is not None and receipt != expected_receipt:
+            receipt_key = receipt_comparison_key(receipt)
+            if expected_receipt is not None and receipt_key != expected_receipt:
                 raise ValueError('Correctness receipt differs across observations')
-            expected_receipt = receipt
+            expected_receipt = receipt_key
             if memory['benchmarkExitCode'] != 0:
                 raise ValueError('Native command failed')
         except (AssertionError, KeyError, ValueError, OSError) as error:
@@ -70,6 +74,7 @@ def verify(root):
                                 'authoritativeTiming': False, 'receipt': receipt}
         results.append(recorded)
     assert results == json.loads((root / 'correctness.json').read_text())
+    assert storage_allocation_summary(results, plan['schedule']) == json.loads((root / 'storage-allocation-summary.json').read_text())
     return {'schemaVersion': 1, 'authoritativeTiming': False, 'observations': len(results),
             'allCorrectnessPassed': all(row['status'] == 'passed' for row in results),
             'packageDifferences': differences, 'sourceIdentities': plan['sourceIdentities']}

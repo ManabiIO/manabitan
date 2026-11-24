@@ -41,18 +41,29 @@ test-harness marker overlay. Product packages contain no instrumentation.
 
 Each complete import uses the unchanged native harness's deterministic media
 sample, full row inventory, 72 lookup receipts, and restart checks. Lookups,
-media receipts, logical storage bytes, and browser identity must match across
-all four observations. This is sampled semantic coverage, not exhaustive
+media receipts, the explicit storage identity below, and browser identity must
+match across all four observations. This is sampled semantic coverage, not exhaustive
 lexical readback. The separate whole-import study retains the exhaustive media
 diagnostic; memory acquisition does not replace it or add its time to a cohort.
 
+The prospective `pinned-import-storage-20261124-v1` policy in
+[STORAGE-POLICY.md](STORAGE-POLICY.md) preserves exact known non-SAH paths and
+sizes and exactly eight SAH files with seven empty 4,096-byte files. Jitendex
+keeps exact active SQLite allocation. VNDB alone permits one active SAH file
+at 129–131 aligned 4,096-byte units, based on the two baseline allocations
+captured in failed run `45465463257`. Raw inventories and totals remain in
+each correctness receipt; `storage-allocation-summary.json` retains every
+arm's actual allocation and failed slots. This is not SQLite byte equality.
+The earlier stopped cohorts and prefix memory protocol remain unchanged.
+
 ## Invocation
 
-The initial `.github/workflows/import-memory-20261124-3aac.yml` push trigger is
-limited to `perf/import-memory-20261124-3aac` and this tooling's paths. It freezes
-baseline `bbccabd520972cc351a65d9f545bd5369b6e9747`, prefix candidate
-`ebb1da8d2cc2b28901400968891b632605f1b3f0`, their trees, six package differences,
-and Jitendex only. Its two matrix jobs implement the independent schedules.
+The `.github/workflows/import-memory-20261124-3aac.yml` push trigger is
+limited to `perf/import-media-memory-20261124-3aac` and this tooling's paths. It freezes
+baseline `bbccabd520972cc351a65d9f545bd5369b6e9747`, native media candidate
+`fb71a03f4611bcfa71e135693bebd1fe778153bf`, their trees, four package differences,
+and the VNDB/Jitendex matrix. Its four jobs implement two independent schedules
+for each dictionary; both replications must pass separately for each corpus.
 The optional manual trigger uses the same frozen configuration. The portable
 runner also accepts these explicit CLI arguments:
 

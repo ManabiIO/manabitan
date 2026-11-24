@@ -1,8 +1,8 @@
-name: Import memory qualification 20261124
+name: Native media import memory qualification 20261124
 
 on:
   push:
-    branches: [perf/import-memory-20261124-3aac]
+    branches: [perf/import-media-memory-20261124-3aac]
     paths:
       - '.github/workflows/import-memory-20261124-3aac.yml'
       - 'dev/perf/import-memory-20261124-3aac/**'
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: import-memory-3aac-${{ github.sha }}
+  group: import-media-memory-3aac-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
@@ -23,16 +23,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jitendex]
+        dictionary: [vndb, jitendex]
         replication: [1, 2]
     env:
       MEMORY_BASELINE: bbccabd520972cc351a65d9f545bd5369b6e9747
       MEMORY_BASELINE_TREE: f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07
-      MEMORY_CANDIDATE: ebb1da8d2cc2b28901400968891b632605f1b3f0
-      MEMORY_CANDIDATE_TREE: 243ab638da9cb73e08d84609c41dcdfdf08475cd
+      MEMORY_CANDIDATE: fb71a03f4611bcfa71e135693bebd1fe778153bf
+      MEMORY_CANDIDATE_TREE: 0939bd1eec85dc0b3f15ef002a8f0f5111c80103
       MEMORY_DICTIONARY: ${{ matrix.dictionary }}
       MEMORY_REPLICATION: ${{ matrix.replication }}
-      MEMORY_DIFFERENCES: '["js/dictionary/term-content-block-store.js","js/dictionary/term-content-opfs-store.js","js/dictionary/term-content-ownership.js","js/dictionary/zstd-term-content.js","lib/zstd-wasm.js","lib/zstd-wasm.js.map"]'
+      MEMORY_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -74,7 +74,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-memory-3aac-prefix-${{ matrix.dictionary }}-rep${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: import-memory-3aac-media-${{ matrix.dictionary }}-rep${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/import-memory-3aac
           include-hidden-files: true
           if-no-files-found: error

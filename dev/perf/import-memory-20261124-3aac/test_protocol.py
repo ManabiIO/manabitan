@@ -9,15 +9,17 @@ import unittest
 import zipfile
 
 from protocol import (DEPENDENCY_PATHS, HARNESS, memory_comparison, package_entries,
-                      read_summary, require_dependency_source, require_package_differences)
+                      read_summary, receipt_comparison_key, require_dependency_source,
+                      require_package_differences, storage_allocation_summary)
 from run_memory import schedule
+from test_storage_receipts import inventory
 
 
-def native_receipt():
+def native_receipt(dictionary='jmdict', active_units=43):
     fixture = {'expectedTitle': 'Dictionary', 'revision': 'rev', 'termRows': 12,
                'mediaFiles': 0, 'mediaBytes': 0}
     source = {'commit': 'a' * 40, 'tree': 'b' * 40}
-    plan = {'dictionary': 'jmdict', 'fixture': fixture, 'sourceIdentities': {'A': source},
+    plan = {'dictionary': dictionary, 'fixture': fixture, 'sourceIdentities': {'A': source},
             'harnessSha256': {HARNESS: 'c' * 64, 'package-lock.json': 'd' * 64},
             'memoryOverlaySha256': 'e' * 64}
     identity = {**source, 'packageSha256': 'f' * 64}
@@ -31,8 +33,8 @@ def native_receipt():
                                              for number in range(6) for term in terms]},
                   'media': {'mode': 'sample', 'totalFiles': 0, 'totalBytes': 0,
                             'files': 0, 'bytes': 0, 'sha256': '2' * 64},
-                  'storage': {'bytes': 100, 'files': [{'path': 'content.bin', 'bytes': 100}]}}
-    summary = {'schemaVersion': 3, 'dictionary': 'jmdict', 'fixture': fixture, 'buildTarget': 'chrome',
+                  'storage': inventory(dictionary, active_units)}
+    summary = {'schemaVersion': 3, 'dictionary': dictionary, 'fixture': fixture, 'buildTarget': 'chrome',
                'mediaCheck': 'sample', 'traceEnabled': False, 'importFlags': None, 'authoritativeTiming': True,
                'gitSha': source['commit'], 'browserVersion': '153.0',
                'hostEnvironment': {'nodeVersion': 'v22.22.0'},
@@ -87,8 +89,42 @@ class ProtocolWitness(unittest.TestCase):
             (output / 'summary.json').write_text(json.dumps(summary))
             result = read_summary(output, plan, 'A', identity)
             self.assertFalse(result['authoritativeTiming'])
-            self.assertEqual(result['storageBytes'], 100)
+            self.assertEqual(result['storage']['rawStorageBytes'], summary['runs'][0]['validation']['storage']['bytes'])
             self.assertEqual(len(result['lookup']), 72)
+
+    def test_bounded_storage_does_not_relax_lookup_or_media_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            receipts = []
+            for units in (129, 131):
+                summary, plan, identity = native_receipt('vndb', units)
+                (output / 'summary.json').write_text(json.dumps(summary))
+                receipts.append(read_summary(output, plan, 'A', identity))
+            self.assertEqual(receipt_comparison_key(receipts[0]), receipt_comparison_key(receipts[1]))
+            self.assertEqual(receipts[1]['storage']['rawStorageBytes'] - receipts[0]['storage']['rawStorageBytes'], 8192)
+            for field in ('lookup', 'media'):
+                changed = copy.deepcopy(receipts[1])
+                if field == 'lookup':
+                    changed[field][0][3] = '9' * 64
+                else:
+                    changed[field]['sha256'] = '9' * 64
+                self.assertNotEqual(receipt_comparison_key(receipts[0]), receipt_comparison_key(changed))
+
+    def test_storage_allocation_summary_keeps_each_arm_and_failed_slot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            checks = []
+            for observation, units in zip(schedule(1), (129, 131, 130, 129), strict=True):
+                summary, plan, identity = native_receipt('vndb', units)
+                (output / 'summary.json').write_text(json.dumps(summary))
+                checks.append({'name': observation['name'], 'status': 'passed',
+                               'receipt': read_summary(output, plan, 'A', identity)})
+            result = storage_allocation_summary(checks, schedule(1))
+            self.assertEqual(result['activeSahFileBytesByArm'], {'A': [528384, 528384], 'B': [536576, 532480]})
+            checks[1] = {'name': 'B1', 'status': 'failed'}
+            result = storage_allocation_summary(checks, schedule(1))
+            self.assertEqual(result['activeSahFileBytesByArm']['B'], [None, 532480])
+            self.assertEqual(result['observations'][1]['correctnessStatus'], 'failed')
 
     def test_source_overlay_restart_and_lookup_corruption_fail_closed(self):
         mutations = [

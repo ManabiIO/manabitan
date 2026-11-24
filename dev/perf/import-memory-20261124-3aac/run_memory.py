@@ -14,8 +14,10 @@ import time
 from chromium_memory import run_with_sampling, summarize_import_window
 from protocol import (DEPENDENCY_PATHS, HARNESS, ROOT, WORKFLOW, command, digest,
                       harness_hashes, link_or_copy, memory_comparison,
-                      package_entries, read_summary, require_dependency_source, require_package_differences,
-                      save, source_identity)
+                      package_entries, read_summary, receipt_comparison_key,
+                      require_dependency_source, require_package_differences,
+                      save, source_identity, storage_allocation_summary)
+from storage_receipts import POLICY_VERSION
 
 HERE = Path(__file__).resolve().parent
 
@@ -85,6 +87,7 @@ def run(args, evidence):
         'authoritativeTiming': False,
         'scope': 'External import-window PSS/private diagnostics. Raw native-harness timing labels are non-authoritative under this observer.',
         'expectedPackageDifferences': expected, 'mediaCheck': 'sample',
+        'storagePolicyVersion': POLICY_VERSION,
         'exhaustiveMediaQualification': 'Separate existing whole-import timing study diagnostics; this memory study does not replace them.',
         'dependencyPreparation': 'Real node_modules directories from the normal npm ci setup; exact tooling/arm manifest and setup hashes required before hardlink/copy, internal symlinks preserved.',
         'dependencySourceSha256': {name: digest(ROOT / name) for name in DEPENDENCY_PATHS},
@@ -195,9 +198,10 @@ def run(args, evidence):
         check = {'name': observation['name'], 'status': 'failed', 'authoritativeTiming': False}
         try:
             receipt = read_summary(output, plan, arm, arm_identities[arm])
-            if expected_receipt is not None and receipt != expected_receipt:
+            receipt_key = receipt_comparison_key(receipt)
+            if expected_receipt is not None and receipt_key != expected_receipt:
                 raise ValueError('Lookup/media/storage/browser receipts differ across arms or observations')
-            expected_receipt = receipt
+            expected_receipt = receipt_key
             if memory['benchmarkExitCode'] != 0:
                 raise ValueError('Native benchmark command failed')
             check.update(status='passed', receipt=receipt)
@@ -212,6 +216,7 @@ def run(args, evidence):
             save(output / 'host-after-failure.json', {'error': str(error)})
     comparison = memory_comparison(observations, args.dictionary, args.replication, schedule)
     save(evidence / 'memory-comparison.json', comparison)
+    save(evidence / 'storage-allocation-summary.json', storage_allocation_summary(correctness, plan['schedule']))
     for arm, source in roots.items():
         hashes = harness_hashes(source)
         hashes[HARNESS] = plan['harnessSha256'][HARNESS]

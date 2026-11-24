@@ -9,14 +9,18 @@ import tempfile
 import unittest
 import zipfile
 
-from protocol import DEPENDENCY_PATHS, HARNESS, digest, package_entries, read_summary, save
+from protocol import (DEPENDENCY_PATHS, HARNESS, digest, package_entries, read_summary,
+                      save, storage_allocation_summary)
 from run_memory import memory_overlay, schedule
+from storage_receipts import POLICY_VERSION
 from test_protocol import native_receipt
+from test_storage_receipts import inventory
 from verify_receipts import verify
 
 
-def artifact(root, replication):
-    template, plan, _ = native_receipt()
+def artifact(root, replication, dictionary='jmdict', allocation_units=None):
+    units = 129 if dictionary == 'vndb' else 43
+    template, plan, _ = native_receipt(dictionary, units)
     original = ("import {existsSync, readFileSync} from 'node:fs';\n"
                 '/**\n * Exercise real browser confirmation dialogs\n */\n'
                 '        const initialImportTriggerStart = safePerformance.now();\n'
@@ -32,6 +36,7 @@ def artifact(root, replication):
         hashes[name] = digest(path)
     plan.update(authoritativeTiming=False, replication=replication, schedule=schedule(replication),
                 sourceFiles=hashes, dependencySourceSha256=hashes,
+                storagePolicyVersion=POLICY_VERSION,
                 memoryOverlaySha256=hashlib.sha256(overlay.encode()).hexdigest(),
                 harnessSha256={**hashes, HARNESS: hashlib.sha256(original.encode()).hexdigest()},
                 expectedPackageDifferences=['runtime.js'],
@@ -43,7 +48,7 @@ def artifact(root, replication):
                                 'maximumBracketGapMs': 250, 'betweenScanWaitMs': 25})
     plan['sourceIdentities']['B'] = {'commit': 'c' * 40, 'tree': 'd' * 40}
     save(root / 'plan.json', plan)
-    save(root / 'setup-fixtures.json', {'jmdict': plan['fixture']})
+    save(root / 'setup-fixtures.json', {dictionary: plan['fixture']})
     save(root / 'package-differences.json', ['runtime.js'])
     identities = {}
     for arm in ('A', 'B'):
@@ -67,6 +72,9 @@ def artifact(root, replication):
                              'sha256': {**hashes, HARNESS: plan['memoryOverlaySha256'],
                                         'builds/manabitan-chrome.zip': identity['packageSha256']}}
         summary['runs'][0]['packageSha256'] = identity['packageSha256']
+        summary['runs'][0]['validation']['storage'] = inventory(
+            dictionary, units if allocation_units is None else allocation_units[item['index'] - 1],
+            suffix=item['arm'].lower())
         save(location / 'summary.json', summary)
         save(location / 'acquisition.json', {**item, 'retried': False, 'authoritativeTiming': False,
              'startedEpochSeconds': item['index'] * 2, 'endedEpochSeconds': item['index'] * 2 + 1,
@@ -77,9 +85,23 @@ def artifact(root, replication):
         save(location / 'correctness.json', check)
         correctness.append(check)
     save(root / 'correctness.json', correctness)
+    save(root / 'storage-allocation-summary.json', storage_allocation_summary(correctness, plan['schedule']))
 
 
 class OfflineReceiptsWitness(unittest.TestCase):
+    def test_vndb_allocation_variance_retains_raw_receipts_and_is_audited(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            artifact(root, 1, 'vndb', [129, 131, 130, 129])
+            self.assertTrue(verify(root)['allCorrectnessPassed'])
+            path = root / 'storage-allocation-summary.json'
+            recorded = json.loads(path.read_text())
+            self.assertEqual(recorded['activeSahFileBytesByArm'], {'A': [528384, 528384], 'B': [536576, 532480]})
+            recorded['activeSahFileBytesByArm']['B'][0] = 528384
+            save(path, recorded)
+            with self.assertRaises(AssertionError):
+                verify(root)
+
     def test_independent_schedules_accept_exact_packages_and_semantics(self):
         for replication in (1, 2):
             with self.subTest(replication=replication), tempfile.TemporaryDirectory() as directory:

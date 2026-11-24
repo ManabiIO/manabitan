@@ -12,6 +12,8 @@ import statistics
 import subprocess
 import zipfile
 
+from storage_receipts import POLICY_VERSION, normalize_storage_receipt, storage_comparison_key
+
 ROOT = Path(__file__).resolve().parents[3]
 DIRECTORY = 'dev/perf/import-memory-20261124-3aac'
 WORKFLOW = '.github/workflows/import-memory-20261124-3aac.yml'
@@ -150,14 +152,36 @@ def read_summary(output, plan, arm, identity):
             media.get('files') != min(64, fixture['mediaFiles']) or
             re.fullmatch('[a-f0-9]{64}', media.get('sha256', '')) is None):
         raise ValueError('Sampled source-media validation differs')
-    storage = validation['storage']
-    if (type(storage.get('bytes')) is not int or storage['bytes'] <= 0 or
-            storage['bytes'] != sum(item['bytes'] for item in storage['files'])):
-        raise ValueError('Invalid persisted storage size receipt')
+    storage = normalize_storage_receipt(validation['storage'], plan['dictionary'])
     return {'authoritativeTiming': False, 'browserVersion': browser,
             'lookup': sorted([row['pass'], row['term'], row['results'], row['sha256']] for row in lookups),
             'media': {name: media[name] for name in ('mode', 'totalFiles', 'totalBytes', 'files', 'bytes', 'sha256')},
-            'storageBytes': storage['bytes']}
+            'storage': storage}
+
+
+def receipt_comparison_key(receipt):
+    """Keep semantic equality and compare the explicit prospective storage key."""
+    return {**receipt, 'storage': storage_comparison_key(receipt['storage'])}
+
+
+def storage_allocation_summary(correctness, fixed_schedule):
+    """Retain per-arm raw allocations, including absent/failed observations."""
+    by_name = {row['name']: row for row in correctness}
+    observations = []
+    for observation in fixed_schedule:
+        row = by_name[observation['name']]
+        storage = row.get('receipt', {}).get('storage')
+        if storage is not None:
+            storage_comparison_key(storage)
+        observations.append({**observation, 'correctnessStatus': row['status'],
+                             'rawStorageBytes': None if storage is None else storage['rawStorageBytes'],
+                             'nonSahBytes': None if storage is None else storage['nonSahBytes'],
+                             'activeSahFileBytes': None if storage is None else storage['sahPool']['activeFileBytes']})
+    return {'policyVersion': POLICY_VERSION, 'observations': observations,
+            'activeSahFileBytesByArm': {arm: [row['activeSahFileBytes'] for row in observations if row['arm'] == arm]
+                                      for arm in ('A', 'B')},
+            'rawStorageBytesByArm': {arm: [row['rawStorageBytes'] for row in observations if row['arm'] == arm]
+                                    for arm in ('A', 'B')}}
 
 
 def memory_comparison(observations, dictionary, replication, schedule):
