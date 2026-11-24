@@ -1,0 +1,121 @@
+name: Frozen import activation 20261124
+
+on:
+  push:
+    branches: [codex/import-activation-20261124-3aac]
+    paths:
+      - '.github/workflows/import-activation-20261124-3aac.yml'
+      - 'dev/perf/activation-20261124/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-activation-3aac-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  activation:
+    name: Activation (${{ matrix.label }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: prefix-jmdict
+            mode: prefix
+            dictionary: jmdict
+            source: ebb1da8d2cc2b28901400968891b632605f1b3f0
+            tree: 243ab638da9cb73e08d84609c41dcdfdf08475cd
+            patch: private-prefix.patch
+          - label: prefix-jitendex
+            mode: prefix
+            dictionary: jitendex
+            source: ebb1da8d2cc2b28901400968891b632605f1b3f0
+            tree: 243ab638da9cb73e08d84609c41dcdfdf08475cd
+            patch: private-prefix.patch
+          - label: prefix-vndb
+            mode: prefix
+            dictionary: vndb
+            source: ebb1da8d2cc2b28901400968891b632605f1b3f0
+            tree: 243ab638da9cb73e08d84609c41dcdfdf08475cd
+            patch: private-prefix.patch
+          - label: cache-jmdict
+            mode: cache
+            dictionary: jmdict
+            source: cdb23a11d991a72f860e400d0d81bb0747a5b4f9
+            tree: 1edef4035041ef848175e3278169daf2260ac34a
+            patch: cache-publication.patch
+    env:
+      ACTIVATION_SOURCE_SHA: ${{ matrix.source }}
+      ACTIVATION_SOURCE_TREE: ${{ matrix.tree }}
+      ACTIVATION_DICTIONARY: ${{ matrix.dictionary }}
+      ACTIVATION_MODE: ${{ matrix.mode }}
+      ACTIVATION_PATCH: ${{ matrix.patch }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Retain the exact diagnostic instrumentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/import-activation"
+          cp .github/workflows/import-activation-20261124-3aac.yml "$RUNNER_TEMP/import-activation/workflow.yml"
+          cp "dev/perf/activation-20261124/$ACTIVATION_PATCH" "$RUNNER_TEMP/import-activation/instrumentation.patch"
+          cp dev/perf/activation-20261124/summarize.py "$RUNNER_TEMP/import-activation/summarize.py"
+          git rev-parse HEAD > "$RUNNER_TEMP/import-activation/tooling-sha.txt"
+          sha256sum "$RUNNER_TEMP/import-activation/instrumentation.patch" > "$RUNNER_TEMP/import-activation/instrumentation.sha256"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ matrix.source }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Verify source identity and apply diagnostic-only counters
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$ACTIVATION_SOURCE_SHA"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$ACTIVATION_SOURCE_TREE"
+          git diff --exit-code
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/import-activation/source-identity.txt"
+          test "$(sha256sum test/perf/dictionaries.lock.json | cut -d ' ' -f 1)" = 60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89
+          cp test/perf/dictionaries.lock.json "$RUNNER_TEMP/import-activation/dictionaries.lock.json"
+          git apply --check "$RUNNER_TEMP/import-activation/instrumentation.patch"
+          git apply "$RUNNER_TEMP/import-activation/instrumentation.patch"
+          git diff --full-index --binary > "$RUNNER_TEMP/import-activation/actual-source.patch"
+          cmp "$RUNNER_TEMP/import-activation/instrumentation.patch" "$RUNNER_TEMP/import-activation/actual-source.patch"
+          npm run build -- --target chrome
+          git diff --full-index --binary > "$RUNNER_TEMP/import-activation/actual-source.patch"
+          cmp "$RUNNER_TEMP/import-activation/instrumentation.patch" "$RUNNER_TEMP/import-activation/actual-source.patch"
+          node --version > "$RUNNER_TEMP/import-activation/node-version.txt"
+          sha256sum builds/manabitan-chrome.zip > "$RUNNER_TEMP/import-activation/package.sha256"
+      - name: Observe activation in a complete import
+        shell: bash
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$ACTIVATION_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --output "$RUNNER_TEMP/import-activation/diagnostic" 2>&1 | tee "$RUNNER_TEMP/import-activation/diagnostic.log"
+          python3 "$RUNNER_TEMP/import-activation/summarize.py" \
+            --report "$RUNNER_TEMP/import-activation/diagnostic/run-1.json" \
+            --mode "$ACTIVATION_MODE" --dictionary "$ACTIVATION_DICTIONARY" \
+            --source "$ACTIVATION_SOURCE_SHA" --tree "$ACTIVATION_SOURCE_TREE" \
+            --output "$RUNNER_TEMP/import-activation/activation.json"
+      - name: Retain every output and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-activation-3aac-${{ matrix.label }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/import-activation
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,56 @@
+diff --git a/ext/js/dictionary/dictionary-worker-handler.js b/ext/js/dictionary/dictionary-worker-handler.js
+index b27ffe5daf3d3ea591804c09408ea74563cf8bbf..543b9e6ce4372fd599a5d8be20f0029233e6039e 100644
+--- a/ext/js/dictionary/dictionary-worker-handler.js
++++ b/ext/js/dictionary/dictionary-worker-handler.js
+@@ -273,7 +273,11 @@ export class DictionaryWorkerHandler {
+              * @returns {Promise<{result: import('dictionary-importer').Summary|null, errors: Error[], importerDebug: import('dictionary-importer').ImportDebug|null, outcome: import('dictionary-importer').ImportOutcome}>}
+              */
+             const importOnce = async (activeDictionaryDatabase) => {
++                Reflect.set(globalThis, '__manabitanActivationEvents', []);
+                 const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
++                const activationEpochMs = Date.now();
++                importPayload.debug?.phaseTimings?.push({phase: 'activation-diagnostic', elapsedMs: 0, startEpochMs: activationEpochMs, endEpochMs: activationEpochMs, details: {instrumentationOnly: true, events: Reflect.get(globalThis, '__manabitanActivationEvents')}});
++                Reflect.deleteProperty(globalThis, '__manabitanActivationEvents');
+                 const {result, errors} = importPayload;
+                 const outcome = importPayload.outcome ?? {status: result === null ? 'unknown' : 'published'};
+                 const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
+diff --git a/ext/js/dictionary/term-content-block-store.js b/ext/js/dictionary/term-content-block-store.js
+index fad4ee8067fd303684e499cf94425225281db89c..e5b97baf6ca956505d8d51a5e486658f815fa631 100644
+--- a/ext/js/dictionary/term-content-block-store.js
++++ b/ext/js/dictionary/term-content-block-store.js
+@@ -756,6 +756,7 @@ export class TermContentBlockStore {
+      */
+     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
+         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
++        Reflect.get(globalThis, '__manabitanActivationEvents')?.push({event: 'attempt', compressionDictName, force, sourceKind: sourceBytes.buffer instanceof ArrayBuffer ? 'private' : 'shared', ownsContent: hasOwnedTermContent(sourceBytes), sourceBytes: sourceBytes.byteLength, uncompressedBytes});
+         if (uncompressedBytes === 0 || compressionDictName !== 'jmdict') { return null; }
+         if (typeof SharedArrayBuffer !== 'function' || !(sourceBytes.buffer instanceof SharedArrayBuffer)) {
+             if (!force || !(sourceBytes.buffer instanceof ArrayBuffer) || !hasOwnedTermContent(sourceBytes)) { return null; }
+@@ -808,6 +809,7 @@ export class TermContentBlockStore {
+      * @returns {ReturnType<TermContentBlockStore['_beginAppendSharedSpans']>}
+      */
+     _beginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection, privateSource) {
++        Reflect.get(globalThis, '__manabitanActivationEvents')?.push({event: 'begin', privateSource, initialSelection, uncompressedBytes, uniqueCount: sourceLengths.length});
+         const compressionExperiments = this._compressionExperiments;
+         const planStart = safePerformance.now();
+         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+diff --git a/ext/js/dictionary/term-content-opfs-store.js b/ext/js/dictionary/term-content-opfs-store.js
+index 096e9254abb919cbd3f169297e87eb9a85bd47c2..c7d654c1f43e657fe7da0a760828418f7964e965 100644
+--- a/ext/js/dictionary/term-content-opfs-store.js
++++ b/ext/js/dictionary/term-content-opfs-store.js
+@@ -847,6 +847,7 @@ export class TermContentOpfsStore {
+                     // Check under the append owner after every earlier mutation.
+                     // Keep high offsets on the old suffix layout so placement
+                     // cannot change record offset-span/index partitioning.
++                    Reflect.get(globalThis, '__manabitanActivationEvents')?.push({event: 'private-suffix', startOffset, primaryStartOffset, maximumEndOffset, primaryBytesUpperBound});
+                     const primaryChunks = await primaryPromise;
+                     if (!Array.isArray(primaryChunks) || primaryChunks.some((chunk) => !(chunk instanceof Uint8Array))) {
+                         throw new TypeError('Primary term-content chunks must be Uint8Arrays');
+@@ -856,6 +857,7 @@ export class TermContentOpfsStore {
+                     resolveReserved({derivedOffsets: result.derivedOffsets, derivedLengths: result.derivedLengths});
+                     return result;
+                 }
++                if (prefixLimits !== null) { Reflect.get(globalThis, '__manabitanActivationEvents')?.push({event: 'private-prefix', startOffset, primaryStartOffset, maximumEndOffset, primaryBytesUpperBound}); }
+                 reservationSettled = true;
+                 resolveReserved({
+                     derivedOffsets: [...derivedOffsets],

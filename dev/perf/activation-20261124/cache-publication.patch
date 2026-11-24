@@ -1,0 +1,36 @@
+diff --git a/ext/js/dictionary/dictionary-database.js b/ext/js/dictionary/dictionary-database.js
+index 141119b60c9c47edd936687f4640212e50cd30b6..b4785de50f1684fa9d9aeb5f093a6e136716fa7c 100644
+--- a/ext/js/dictionary/dictionary-database.js
++++ b/ext/js/dictionary/dictionary-database.js
+@@ -6772,6 +6772,7 @@ null;
+             staged.indexes.buffer !== this._termEntryContentMetaRecentSourceBatchIdTable.buffer &&
+             staged.indexes.buffer !== this._termEntryContentMetaRecentSourceOffsetTable.buffer
+         );
++        Reflect.get(globalThis, '__manabitanActivationEvents')?.push({event: 'cache-receiver', publishedContiguous, reusePublishedRange, count: staged.indexes.length, sourceBytes: spans.buffer.byteLength});
+         const averageSampleCount = Math.min(
+             staged.indexes.length,
+             TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
+@@ -9983,6 +9984,7 @@ null :
+             );
+         }
+         const recentSourceCacheStart = importMetrics === null ? 0 : safePerformance.now();
++        Reflect.get(globalThis, '__manabitanActivationEvents')?.push({event: 'cache-publisher', publishedContiguous, count: stagedContentMetadata?.indexes.length ?? 0, sourceBytes: pendingContentSpans?.buffer.byteLength ?? 0});
+         const recentSourceCacheBytes = this._cacheRecentPublishedTermContentSources(
+             stagedContentMetadata,
+             pendingContentSpans,
+diff --git a/ext/js/dictionary/dictionary-worker-handler.js b/ext/js/dictionary/dictionary-worker-handler.js
+index b27ffe5daf3d3ea591804c09408ea74563cf8bbf..543b9e6ce4372fd599a5d8be20f0029233e6039e 100644
+--- a/ext/js/dictionary/dictionary-worker-handler.js
++++ b/ext/js/dictionary/dictionary-worker-handler.js
+@@ -273,7 +273,11 @@ export class DictionaryWorkerHandler {
+              * @returns {Promise<{result: import('dictionary-importer').Summary|null, errors: Error[], importerDebug: import('dictionary-importer').ImportDebug|null, outcome: import('dictionary-importer').ImportOutcome}>}
+              */
+             const importOnce = async (activeDictionaryDatabase) => {
++                Reflect.set(globalThis, '__manabitanActivationEvents', []);
+                 const importPayload = await dictionaryImporter.importDictionary(activeDictionaryDatabase, archiveContent, details);
++                const activationEpochMs = Date.now();
++                importPayload.debug?.phaseTimings?.push({phase: 'activation-diagnostic', elapsedMs: 0, startEpochMs: activationEpochMs, endEpochMs: activationEpochMs, details: {instrumentationOnly: true, events: Reflect.get(globalThis, '__manabitanActivationEvents')}});
++                Reflect.deleteProperty(globalThis, '__manabitanActivationEvents');
+                 const {result, errors} = importPayload;
+                 const outcome = importPayload.outcome ?? {status: result === null ? 'unknown' : 'published'};
+                 const importerDebug = (typeof importPayload === 'object' && importPayload !== null && !Array.isArray(importPayload)) ?
