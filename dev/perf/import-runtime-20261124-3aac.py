@@ -13,9 +13,14 @@ import re
 import shutil
 import statistics
 import subprocess
+import sys
 import tempfile
 import time
 import zipfile
+
+STORAGE_TOOLING_DIRECTORY = "dev/perf/import-storage-20261124-3aac"
+sys.path.insert(0, str(Path(__file__).parent / "import-storage-20261124-3aac"))
+from storage_receipts import POLICY_VERSION, normalize_storage_receipt, storage_comparison_key
 
 
 ORDERS = (
@@ -68,7 +73,8 @@ def source_identity(root, revision):
 
 def harness_hashes(root):
     files = command(["git", "ls-files", "--", *HARNESS_PATHS], root).splitlines()
-    return {name: sha256(root / name) for name in files if name != RUNNER_PATH}
+    return {name: sha256(root / name) for name in files
+            if name != RUNNER_PATH and not name.startswith(STORAGE_TOOLING_DIRECTORY + "/")}
 
 
 def package_entries(path):
@@ -136,15 +142,18 @@ def read_summary(output, dictionary, fixture, source, package_hash, hashes, medi
     return summary, run
 
 
-def receipt_identity(run):
+def receipt_identity(run, dictionary):
     validation = run["validation"]
     lookup = [[row["pass"], row["term"], row["results"], row["sha256"]]
               for row in validation["lookup"]["observations"]]
     media = validation["media"]
+    storage = normalize_storage_receipt(validation["storage"], dictionary)
     return {
         "lookup": sorted(lookup),
         "media": {name: media[name] for name in ("mode", "totalFiles", "totalBytes", "files", "bytes", "sha256")},
         "storageBytes": validation["storage"]["bytes"],
+        "storageInvariant": storage_comparison_key(storage),
+        "storageAllocation": storage,
     }
 
 
@@ -211,6 +220,10 @@ def run_study(args, root, evidence, state):
         "schemaVersion": 1, "stage": args.stage, "dictionary": args.dictionary,
         "sourceIdentities": identities, "toolingCommit": command(["git", "rev-parse", "HEAD"], root),
         "runnerSha256": sha256(Path(__file__)), "nodeVersion": node, "fixture": fixture,
+        "storagePolicyVersion": POLICY_VERSION,
+        "storagePolicySha256": {name: sha256(root / STORAGE_TOOLING_DIRECTORY / name)
+                                for name in ("storage_receipts.py", "test_storage_receipts.py")},
+        "storagePolicy": "All non-SAH paths and sizes exact; eight SAH files with seven empty 4096-byte files. JMdict/Jitendex active SAH allocation exact. VNDB active allocation limited to 129–131 4096-byte units, the already observed baseline range. All raw totals and file sizes retained. Earlier failed cohorts remain failed and are not pooled with this prospective correction.",
         "setupCacheDictionaryIds": cache_ids,
         "dependencyPreparation": "Real node_modules directory per arm; hardlinked files with copy fallback and preserved internal symlinks",
         "unchangedHarnessSha256": tooling_hashes, "harnessOverlay": None,
@@ -300,8 +313,9 @@ def run_study(args, root, evidence, state):
             if browser_version is not None and summary["browserVersion"] != browser_version:
                 raise RuntimeError("Browser version changed during the study")
             browser_version = summary["browserVersion"]
-            receipt = receipt_identity(run)
-            for key in ("lookup", "storageBytes"):
+            receipt = receipt_identity(run, args.dictionary)
+            write_json(output / "storage-receipt.json", receipt["storageAllocation"])
+            for key in ("lookup", "storageInvariant"):
                 if key in expected and receipt[key] != expected[key]:
                     raise RuntimeError(f"Correctness receipt differs across arms/observations: {key}")
                 expected[key] = receipt[key]
@@ -311,6 +325,8 @@ def run_study(args, root, evidence, state):
             expected[media_key] = receipt["media"]
             write_json(output / "phase-counters.json", phase_observations(run))
             entry.update(status="success", totalImportMs=run["totalImportMs"], storageBytes=receipt["storageBytes"],
+                         activeSahFileBytes=receipt["storageAllocation"]["sahPool"]["activeFileBytes"],
+                         nonSahBytes=receipt["storageAllocation"]["nonSahBytes"],
                          summary=f"{name}/summary.json", phaseCounters=f"{name}/phase-counters.json")
         except Exception as error:
             entry.update(status="failed", error=str(error))
@@ -335,6 +351,13 @@ def run_study(args, root, evidence, state):
     for arm in protocol["diagnosticArms"]:
         observe(f"diagnostic-{arm}", arm, "all", "exhaustive-diagnostic")
     write_json(evidence / "correctness.json", {"status": "passed", "identicalReceipts": expected})
+    write_json(evidence / "storage-allocations.json", {
+        "policyVersion": POLICY_VERSION,
+        "observations": [{key: item[key] for key in
+                          ("name", "arm", "cohort", "storageBytes", "activeSahFileBytes", "nonSahBytes")}
+                         for item in observations],
+        "allRawReceiptsRetained": True,
+    })
     for arm in protocol["diagnosticArms"]:
         target = arm_roots[arm]
         if harness_hashes(target) != tooling_hashes or sha256(target / "builds/manabitan-chrome.zip") != packages[arm]["archiveSha256"]:
