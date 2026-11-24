@@ -4,8 +4,8 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
-    "sourceFileCount": 14,
+    "sourceDigest": "8046af756d09bfe418b03de32b4430b63e4700c1905d6661758f06e631c9824a",
+    "sourceFileCount": 15,
     "targets": [
         {
             "name": "term-content-canonical-scan-v1.wasm",
@@ -52,13 +52,14 @@
                 "-Wl,--export=build_term_string_plan",
                 "-Wl,--export=encode_term_lookup_index",
                 "-Wl,--export=compact_term_lookup_keys",
+                "-Wl,--export=project_term_media_paths",
                 "-Wl,--export=encode_term_content",
                 "-Wl,--export=encode_term_content_no_hash",
                 "-Wl,--export=encode_term_content_token_binary",
                 "-Wl,--export=encode_term_content_token_binary_dedup",
                 "-Wl,--strip-all"
             ],
-            "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            "sha256": "a094676b0bf219ec57c18bc1932d484c77ed4b96c29eab9656f1be142d6e77ff"
         }
     ]
 }

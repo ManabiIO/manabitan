@@ -27,6 +27,7 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
+import {lendNativeMediaProjectionScratch, projectNativeMediaPaths} from './term-bank-media-projection.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -77,7 +78,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, project_term_media_paths?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -199,6 +200,7 @@ async function getWasm() {
             build_term_string_plan: exports.build_term_string_plan,
             encode_term_lookup_index: exports.encode_term_lookup_index,
             compact_term_lookup_keys: typeof exports.compact_term_lookup_keys === 'function' ? exports.compact_term_lookup_keys : void 0,
+            project_term_media_paths: typeof exports.project_term_media_paths === 'function' ? exports.project_term_media_paths : void 0,
             encode_term_content: exports.encode_term_content,
             encode_term_content_no_hash: exports.encode_term_content_no_hash,
             encode_term_content_token_binary: exports.encode_term_content_token_binary,
@@ -2559,8 +2561,26 @@ null :
             const invokeColumnChunk = async () => {
                 if (dispatchStopped) { return; }
                 const tDispatchStart = Date.now();
-                const result = onChunk(chunk, progress);
-                await result;
+                /* eslint-disable @stylistic/semi */
+                const releaseProjectionScratch = (
+                    options.projectImagePaths === true && chunkCount === 1 &&
+                    parsed.wasm !== null && nativeLookupIndexScratch !== null && chunk.preparedLookupIndexes instanceof Map
+                ) ?
+                    lendNativeMediaProjectionScratch(chunk, {
+                        wasm: parsed.wasm,
+                        sourceOffset: parsed.jsonPtr,
+                        sourceLength: parsed.jsonLength,
+                        outputPtr: nativeLookupIndexScratch.outputPtr,
+                        outputCapacity: nativeLookupIndexScratch.outputCapacity,
+                    }) :
+                    null
+                try {
+                    const result = onChunk(chunk, progress)
+                    await result
+                } finally {
+                    releaseProjectionScratch?.()
+                }
+                /* eslint-enable @stylistic/semi */
                 chunkDispatchMs += Math.max(0, Date.now() - tDispatchStart);
             };
             const promise = pendingDispatches.length === 0 ? invokeColumnChunk() : dispatchTail.then(invokeColumnChunk);
@@ -4045,13 +4065,14 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         throw new Error('Term record string offsets are unavailable');
     }
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
-    const mediaRows = chunk.mediaRows.map(({index, row}) => {
+    const nativeMediaPaths = projectImagePaths ? projectNativeMediaPaths(chunk) : null;
+    const mediaRows = chunk.mediaRows.map(({index, row}, mediaIndex) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
-            tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
+            (nativeMediaPaths?.[mediaIndex] ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
-                    new Uint8Array(row.glossaryJsonBytes))) :
+                    new Uint8Array(row.glossaryJsonBytes)))) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
         return {
