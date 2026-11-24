@@ -5,6 +5,8 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 import {parentPort, workerData} from 'node:worker_threads'
 
+if (workerData.disableSharedArrayBuffer === true) { Reflect.set(globalThis, 'SharedArrayBuffer', undefined) }
+
 // Adapt only transport; the production worker and compiled parser run intact.
 globalThis.self = globalThis
 globalThis.addEventListener = (type, listener) => {

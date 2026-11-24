@@ -3969,6 +3969,69 @@ void 0,
         expect(records.map(({entryContentLength}) => entryContentLength)).toStrictEqual([7, 7, 9]);
     });
 
+    /* eslint-disable @stylistic/semi */
+    test('splits high resolved offsets even with a prepared whole-chunk lookup index', async () => {
+        const dictionary = 'Reserved shared content offsets'
+        const expressions = ['old', 'reserved', 'repeated', 'far-reserved']
+        const bytes = expressions.map((value) => new TextEncoder().encode(value))
+        const builder = createTermRecordPreinternedPlanBuilder(expressions.length)
+        const indexes = bytes.map((value) => builder.internStringBytes(value))
+        const plan = builder.buildPlan(indexes, indexes)
+        const uniqueOffsets = new Float64Array([16, 0x100000010, Number.MAX_SAFE_INTEGER - 64])
+        const uniqueIndexes = new Uint32Array([0, 1, 0, 2])
+        const expectedOffsets = [...uniqueIndexes].map((index) => uniqueOffsets[index])
+        const files = new Map()
+        const directory = createFakeDirectoryHandle(files)
+        const writer = new TermRecordOpfsStore()
+        Reflect.set(writer, '_recordsDirectoryHandle', directory)
+        const chunk = {
+            dictionary,
+            dictionaryTotalRows: 1_000_000,
+            rowCount: expressions.length,
+            expressionBytesList: bytes,
+            readingBytesList: bytes,
+            readingEqualsExpressionList: new Uint8Array(expressions.length).fill(1),
+            scoreList: new Int32Array([1, 2, 3, 4]),
+            sequenceList: new Int32Array(expressions.length).fill(-1),
+            termRecordPreinternedPlan: plan,
+            resolvedContentReferences: {
+                uniqueIndexList: uniqueIndexes,
+                offsets: uniqueOffsets,
+                lengths: new Uint32Array(uniqueOffsets.length).fill(8),
+            },
+        }
+        const prepared = writer.prepareArtifactChunkLookupIndexes(chunk)
+        expect(prepared?.indexes.size).toBe(1)
+        const encode = vi.spyOn(writer, '_encodeArtifactChunkRecords')
+        await writer.beginImportSession()
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {...chunk, preparedLookupIndexes: prepared?.indexes},
+            new Float64Array(0),
+            new Uint32Array(0),
+            'raw-block-v2:jmdict',
+        )
+        await writer.endImportSession()
+        expect(encode.mock.calls.map(([run]) => run.rowCount)).toStrictEqual([1, 1, 1, 1])
+
+        const reader = new TermRecordOpfsStore()
+        Reflect.set(reader, '_recordsDirectoryHandle', directory)
+        await reader._loadShardFiles(false)
+        await reader.ensureDictionariesLoaded([dictionary])
+        for (let i = 0; i < expressions.length; ++i) {
+            const ids = reader.findTermIds(dictionary, expressions[i], 'expression')
+            expect(ids).toHaveLength(1)
+            const record = (await reader.getByIdsAsync(ids)).get(ids[0])
+            expect(record).toMatchObject({
+                expression: expressions[i],
+                reading: expressions[i],
+                score: i + 1,
+                entryContentOffset: expectedOffsets[i],
+                entryContentLength: 8,
+            })
+        }
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('rejects unresolved content reference indexes', async () => {
         const textEncoder = new TextEncoder();
         const store = new TermRecordOpfsStore();
