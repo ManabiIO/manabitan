@@ -101,6 +101,9 @@ export class TermContentCompressionPool {
         this._workers = workers;
         /** @type {Map<number, {resolve: (value: {bytes: Uint8Array, envelopeMs: number}) => void, reject: (reason?: unknown) => void, resolveSourceConsumed: (() => void)|null, rejectSourceConsumed: ((reason?: unknown) => void)|null, sourceConsumedSettled: boolean, timeoutId: ReturnType<typeof setTimeout>}>} */
         this._pending = new Map();
+        /** @type {Map<ReturnType<typeof setTimeout>, number>} */
+        // eslint-disable-next-line @stylistic/semi
+        this._sharedTimeouts = new Map()
         /** @type {number} */
         this._nextId = 1;
         /** @type {boolean} */
@@ -243,23 +246,38 @@ export class TermContentCompressionPool {
         const lengths = new Uint32Array(metadata, sourceOffsets.byteLength, sourceLengths.length);
         offsets.set(sourceOffsets);
         lengths.set(sourceLengths);
-        const jobs = Array.from(blockLengths, (contentBytes, blockIndex) => {
-            const workerIndex = blockIndex % this._workers.length;
-            const start = blockStartIndexes[blockIndex];
-            const end = blockStartIndexes[blockIndex + 1];
-            return this._dispatchWithSourceConsumed(
-                workerIndex,
-                {
-                    source,
-                    sourceOffsets: offsets.subarray(start, end),
-                    sourceLengths: lengths.subarray(start, end),
-                    contentBytes,
-                    dictName,
-                    wrap: true,
-                    compressionExperiments,
-                },
-            );
-        });
+        /* eslint-disable @stylistic/semi */
+        // The complete span plan is already immutable. Send each worker its
+        // existing round-robin sequence together; logical jobs retain their
+        // individual acknowledgement, failure and output-order semantics.
+        const workerCount = this._workers.length
+        const blocksByWorker = Array.from({length: workerCount}, () => /** @type {Array<{blockIndex: number, sourceOffsets: Uint32Array, sourceLengths: Uint32Array, contentBytes: number}>} */ ([]))
+        for (let blockIndex = 0; blockIndex < blockLengths.length; ++blockIndex) {
+            const start = blockStartIndexes[blockIndex]
+            const end = blockStartIndexes[blockIndex + 1]
+            blocksByWorker[blockIndex % workerCount].push({
+                blockIndex,
+                sourceOffsets: offsets.subarray(start, end),
+                sourceLengths: lengths.subarray(start, end),
+                contentBytes: blockLengths[blockIndex],
+            })
+        }
+        /** @type {Array<{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}>} */
+        const jobs = new Array(blockLengths.length)
+        for (let workerIndex = 0; workerIndex < workerCount; ++workerIndex) {
+            const blocks = blocksByWorker[workerIndex]
+            if (blocks.length === 0) { continue }
+            const common = {source, dictName, wrap: true, compressionExperiments}
+            if (blocks.length === 1) {
+                jobs[blocks[0].blockIndex] = this._dispatchWithSourceConsumed(workerIndex, {...common, ...blocks[0]})
+            } else {
+                const dispatched = this._dispatchSpanBatch(workerIndex, common, blocks)
+                for (let index = 0; index < blocks.length; ++index) {
+                    jobs[blocks[index].blockIndex] = dispatched[index]
+                }
+            }
+        }
+        /* eslint-enable @stylistic/semi */
         // A failed job does not stop other workers from reading the borrowed
         // source. Drain both barriers before rejection can trigger a fallback
         // or allow the caller to release/reuse that source.
@@ -358,6 +376,70 @@ export class TermContentCompressionPool {
         return {sourceConsumed: /** @type {Promise<void>} */ (sourceConsumed), completion};
     }
 
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Transport one already-admitted span batch without changing its logical
+     * jobs. The common deadline bounds the complete worker sequence; no source
+     * or compressed output can outlive this existing compression operation.
+     * @param {number} workerIndex
+     * @param {Record<string, unknown>} common
+     * @param {Array<{sourceOffsets: Uint32Array, sourceLengths: Uint32Array, contentBytes: number}>} blocks
+     * @returns {Array<{sourceConsumed: Promise<void>, completion: Promise<{bytes: Uint8Array, envelopeMs: number}>}>}
+     */
+    _dispatchSpanBatch(workerIndex, common, blocks) {
+        const timeoutId = setTimeout(() => {
+            this._fail(new Error(`Term content compression worker timed out after ${COMPRESSION_JOB_TIMEOUT_MS}ms`))
+        }, COMPRESSION_JOB_TIMEOUT_MS)
+        this._sharedTimeouts.set(timeoutId, blocks.length)
+        /** @type {Array<{id: number, sourceOffsets: Uint32Array, sourceLengths: Uint32Array, contentBytes: number}>} */
+        const messages = []
+        const jobs = blocks.map((block) => {
+            const id = this._nextId++
+            /** @type {() => void} */
+            let resolveSourceConsumed
+            /** @type {(reason?: unknown) => void} */
+            let rejectSourceConsumed
+            /** @type {Promise<void>} */
+            const sourceConsumed = new Promise((resolve, reject) => {
+                resolveSourceConsumed = resolve
+                rejectSourceConsumed = reject
+            })
+            /** @type {Promise<{bytes: Uint8Array, envelopeMs: number}>} */
+            const completion = new Promise((resolve, reject) => {
+                this._pending.set(id, {resolve, reject, resolveSourceConsumed, rejectSourceConsumed, sourceConsumedSettled: false, timeoutId})
+            })
+            messages.push({id, sourceOffsets: block.sourceOffsets, sourceLengths: block.sourceLengths, contentBytes: block.contentBytes})
+            void sourceConsumed.catch(() => {})
+            void completion.catch(() => {})
+            return {sourceConsumed, completion}
+        })
+        try {
+            this._workers[workerIndex].postMessage({...common, spanBatch: messages})
+        } catch (error) {
+            for (const {id} of messages) {
+                const pending = this._pending.get(id)
+                if (typeof pending === 'undefined') { continue }
+                this._pending.delete(id)
+                this._clearJobTimeout(pending.timeoutId)
+                pending.rejectSourceConsumed?.(error)
+                pending.reject(error)
+            }
+        }
+        return jobs
+    }
+
+    /** @param {ReturnType<typeof setTimeout>} timeoutId */
+    _clearJobTimeout(timeoutId) {
+        const remaining = this._sharedTimeouts.get(timeoutId)
+        if (typeof remaining === 'number' && remaining > 1) {
+            this._sharedTimeouts.set(timeoutId, remaining - 1)
+            return
+        }
+        this._sharedTimeouts.delete(timeoutId)
+        clearTimeout(timeoutId)
+    }
+    /* eslint-enable @stylistic/semi */
+
     /**
      * @param {number} workerIndex
      * @param {Record<string, unknown>} message
@@ -404,6 +486,30 @@ export class TermContentCompressionPool {
     /** @param {MessageEvent} event */
     _onMessage(event) {
         const rawData = /** @type {unknown} */ (event.data);
+        const data = /** @type {{type?: unknown, id?: unknown, ids?: unknown, results?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
+        /* eslint-disable @stylistic/semi */
+        if (data?.type === 'sources-consumed' && Array.isArray(data.ids)) {
+            for (const id of data.ids) {
+                const pending = this._pending.get(typeof id === 'number' ? id : -1)
+                if (typeof pending !== 'undefined' && !pending.sourceConsumedSettled) {
+                    pending.sourceConsumedSettled = true
+                    pending.resolveSourceConsumed?.()
+                }
+            }
+            return
+        }
+        if (data?.type === 'compression-results' && Array.isArray(data.results)) {
+            for (const result of data.results) {
+                this._onJobMessage(result)
+            }
+            return
+        }
+        this._onJobMessage(rawData)
+        /* eslint-enable @stylistic/semi */
+    }
+
+    /** @param {unknown} rawData */
+    _onJobMessage(rawData) {
         const data = /** @type {{type?: unknown, id?: unknown, compressed?: unknown, envelopeMs?: unknown, error?: unknown}} */ (rawData);
         const id = typeof data?.id === 'number' ? data.id : -1;
         const pending = this._pending.get(id);
@@ -416,7 +522,8 @@ export class TermContentCompressionPool {
             return;
         }
         this._pending.delete(id);
-        clearTimeout(pending.timeoutId);
+        // eslint-disable-next-line @stylistic/semi
+        this._clearJobTimeout(pending.timeoutId)
         if (typeof data.error === 'string') {
             const error = new Error(data.error);
             if (!pending.sourceConsumedSettled) { pending.rejectSourceConsumed?.(error); }
@@ -446,7 +553,8 @@ export class TermContentCompressionPool {
         for (const worker of this._workers) { worker.terminate(); }
         this._workers = [];
         for (const {reject, rejectSourceConsumed, sourceConsumedSettled, timeoutId} of this._pending.values()) {
-            clearTimeout(timeoutId);
+            // eslint-disable-next-line @stylistic/semi
+            this._clearJobTimeout(timeoutId)
             if (!sourceConsumedSettled) { rejectSourceConsumed?.(error); }
             reject(error);
         }

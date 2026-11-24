@@ -37,9 +37,12 @@ class ControlledWorker {
      * @param {Record<string, unknown>} response
      */
     reply(call, response) {
+        /* eslint-disable @stylistic/semi */
+        const jobs = this.calls.flatMap((message) => (Array.isArray(message.spanBatch) ? message.spanBatch : [message]))
         for (const listener of this.listeners.get('message') ?? []) {
-            listener(/** @type {MessageEvent<unknown>} */ ({data: {id: this.calls[call].id, ...response}}));
+            listener(/** @type {MessageEvent<unknown>} */ ({data: {id: jobs[call].id, ...response}}))
         }
+        /* eslint-enable @stylistic/semi */
     }
 
     terminate() { ++this.terminateCount; }
@@ -114,6 +117,44 @@ describe('shared compression job draining', () => {
             await expect(operation.completion).rejects.toThrow('first job failed');
         } finally { pool.close(); }
     });
+
+    /* eslint-disable @stylistic/semi */
+    test('retains the shared deadline after one logical job completes', async () => {
+        vi.useFakeTimers()
+        const worker = new ControlledWorker()
+        const {pool, operation} = start([worker])
+        try {
+            expect(worker.calls).toHaveLength(1)
+            expect(vi.getTimerCount()).toBe(1)
+            worker.reply(0, {compressed: Uint8Array.of(1).buffer})
+            await Promise.resolve()
+            expect(vi.getTimerCount()).toBe(1)
+            await vi.advanceTimersByTimeAsync(60_000)
+            await expect(operation.sourceConsumed).rejects.toThrow('timed out')
+            await expect(operation.completion).rejects.toThrow('timed out')
+            expect(worker.terminateCount).toBe(1)
+            expect(Reflect.get(pool, '_pending').size).toBe(0)
+            expect(Reflect.get(pool, '_sharedTimeouts').size).toBe(0)
+            expect(vi.getTimerCount()).toBe(0)
+        } finally {
+            pool.close()
+            vi.useRealTimers()
+        }
+    })
+
+    test('a failed batch dispatch releases every logical lease and the shared deadline', async () => {
+        const worker = new ControlledWorker()
+        worker.throwOnDispatch = true
+        const {pool, operation} = start([worker])
+        try {
+            await expect(operation.sourceConsumed).rejects.toThrow('injected dispatch failure')
+            await expect(operation.completion).rejects.toThrow('injected dispatch failure')
+            expect(worker.calls).toHaveLength(1)
+            expect(Reflect.get(pool, '_pending').size).toBe(0)
+            expect(Reflect.get(pool, '_sharedTimeouts').size).toBe(0)
+        } finally { pool.close() }
+    })
+    /* eslint-enable @stylistic/semi */
 
     test('preserves the first rejection observed while draining later failures', async () => {
         const workers = [new ControlledWorker(), new ControlledWorker()];

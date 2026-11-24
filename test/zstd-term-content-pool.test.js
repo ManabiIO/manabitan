@@ -77,6 +77,14 @@ describe('TermContentCompressionPool', () => {
 
     test('dispatches shared-source spans without changing block order', async () => {
         const workers = Array.from({length: 2}, () => new MockCompressionWorker((message) => {
+            /* eslint-disable @stylistic/semi */
+            if (Array.isArray(message.spanBatch)) {
+                return {
+                    type: 'compression-results',
+                    results: message.spanBatch.map((block) => ({id: block.id, compressed: Uint8Array.of(block.contentBytes).buffer})),
+                }
+            }
+            /* eslint-enable @stylistic/semi */
             return {
                 compressed: Uint8Array.of(/** @type {number} */ (message.contentBytes)).buffer,
                 sourceConsumed: true,
@@ -105,13 +113,14 @@ describe('TermContentCompressionPool', () => {
         const result = await operation.completion;
 
         expect(result.chunks.map((bytes) => bytes[0])).toStrictEqual([...blockLengths]);
-        expect(workers.map(({calls}) => calls.length)).toStrictEqual([3, 2]);
-        const metadata = /** @type {Uint32Array} */ (workers[0].calls[0].message.sourceOffsets).buffer;
+        /* eslint-disable @stylistic/semi */
+        expect(workers.map(({calls}) => calls.length)).toStrictEqual([1, 1])
+        const batches = workers.map(({calls}) => /** @type {Array<{sourceOffsets: Uint32Array, sourceLengths: Uint32Array}>} */ (calls[0].message.spanBatch))
+        const metadata = batches[0][0].sourceOffsets.buffer
         expect(metadata).toBeInstanceOf(SharedArrayBuffer);
         for (let block = 0; block < blockLengths.length; ++block) {
-            const {message, transfer} = workers[block % workers.length].calls[Math.floor(block / workers.length)];
-            const offsets = /** @type {Uint32Array} */ (message.sourceOffsets);
-            const lengths = /** @type {Uint32Array} */ (message.sourceLengths);
+            const {message, transfer} = workers[block % workers.length].calls[0]
+            const {sourceOffsets: offsets, sourceLengths: lengths} = batches[block % workers.length][Math.floor(block / workers.length)]
             expect(message.source).toBe(source);
             expect(transfer).toHaveLength(0);
             expect(offsets.buffer).toBe(metadata);
@@ -119,6 +128,7 @@ describe('TermContentCompressionPool', () => {
             expect(offsets).toStrictEqual(originalOffsets.subarray(blockStarts[block], blockStarts[block + 1]));
             expect(lengths).toStrictEqual(originalLengths.subarray(blockStarts[block], blockStarts[block + 1]));
         }
+        /* eslint-enable @stylistic/semi */
 
         pool.close();
     });
