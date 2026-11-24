@@ -1978,7 +1978,7 @@ export class DictionaryImporter {
                                 const file = fileMap.get(requirement.source.path);
                                 if (
                                     deferCachedArchiveImages &&
-                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference' || requirement.type === 'projected-image-reference') &&
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
                                 ) {
@@ -3029,7 +3029,11 @@ export class DictionaryImporter {
                         if (fileMap.has(entry.filename)) {
                             throw new Error(`Duplicate archive filename: '${entry.filename}'`);
                         }
-                        fileMap.set(entry.filename, /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (Object.assign(entry, {getData}))));
+                        /* eslint-disable @stylistic/semi */
+                        const file = /** @type {typeof entry & {getData?: unknown}} */ (entry)
+                        file.getData = getData
+                        fileMap.set(entry.filename, /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (file)))
+                        /* eslint-enable @stylistic/semi */
                     }
                     return {fileMap, zipReader, catalog: 'dense-zip'};
                 }
@@ -3518,6 +3522,7 @@ export class DictionaryImporter {
         };
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * No-metadata targets are already assigned before term serialization. Keep
      * only the path and diagnostic text until the later media drain, so neither
@@ -3525,7 +3530,12 @@ export class DictionaryImporter {
      * @param {import('dictionary-importer').ImportRequirement} requirement
      * @returns {import('dictionary-importer').DeferredMediaImportRequirement}
      */
-    _createDeferredMediaRequirement({type, source: {path}, entry}) {
+    _createDeferredMediaRequirement(requirement) {
+        const {type} = requirement
+        // Projected references contain only a path and the already-owned key
+        // arena. They have no presentation target or parser-backed row to shed.
+        if (type === 'projected-image-reference') { return requirement }
+        const {source: {path}, entry} = requirement
         const {dictionary} = entry;
         if ('diagnosticKeys' in entry) {
             const {diagnosticKeys, diagnosticIndex} = entry;
@@ -3534,6 +3544,7 @@ export class DictionaryImporter {
         const {expression, reading} = entry;
         return {type, source: {path}, dictionary, expression, reading};
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Resolve and store bounded media batches in order. One raw ZIP read
@@ -3582,7 +3593,8 @@ export class DictionaryImporter {
                 /** @type {Map<import('@zip.js/zip.js').Entry, string>} */
                 const pathByFile = new Map();
                 for (const requirement of batchRequirements) {
-                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { continue; }
+                    // eslint-disable-next-line @stylistic/semi
+                    if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference' && requirement.type !== 'projected-image-reference') { continue }
                     const path = requirement.source.path;
                     if (
                         filesByPath.has(path) ||
@@ -3738,6 +3750,11 @@ export class DictionaryImporter {
      */
     async _resolveAsyncRequirement(context, requirement) {
         switch (requirement.type) {
+            /* eslint-disable @stylistic/semi */
+            case 'projected-image-reference':
+                await this._getImageMedia(context, requirement.source.path, requirement)
+                break
+            /* eslint-enable @stylistic/semi */
             case 'image-reference':
                 await this._getImageMedia(context, requirement.source.path, requirement.entry);
                 break;
@@ -3774,6 +3791,7 @@ export class DictionaryImporter {
         }
 
         switch (requirement.type) {
+            case 'projected-image-reference':
             case 'image-reference':
                 return true;
             case 'image':
@@ -5141,8 +5159,18 @@ export class DictionaryImporter {
                         let diagnosticIndex = 0;
                         for (const {index, row, imagePaths} of mediaRows) {
                             if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
-                                const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
-                                for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+                                /* eslint-disable @stylistic/semi */
+                                const mediaDiagnosticIndex = diagnosticIndex++
+                                for (const path of imagePaths) {
+                                    requirementsForChunk.push({
+                                        type: 'projected-image-reference',
+                                        source: {path},
+                                        dictionary: dictionaryTitle,
+                                        diagnosticKeys,
+                                        diagnosticIndex: mediaDiagnosticIndex,
+                                    })
+                                }
+                                /* eslint-enable @stylistic/semi */
                                 continue;
                             }
                             const expression = row.expression.length > 0 ? row.expression : decodeUtf8Bytes(UTF8_FIELD_TEXT_DECODER, row.expressionBytes ?? columnChunk.expressionBytesList[index]);

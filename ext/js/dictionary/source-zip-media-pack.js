@@ -26,6 +26,7 @@ const MAX_PACKED_MEDIA_BYTES = 256 * 1024 * 1024;
 const ZIP_LOCAL_HEADER_BYTES = 30;
 const MAX_RELATIVE_RANGE_OVERHEAD = 1 / 8;
 
+/* eslint-disable @stylistic/semi */
 /**
  * Admit only a dense run of referenced, exact-name ZIP images. The output
  * keeps the request order and points into an immutable span of the original
@@ -45,8 +46,10 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
     let rangeStart = Infinity;
     let rangeEndLowerBound = 0;
     let compressedTotal = 0;
+    let previousOffset = 0
+    let ascendingOffsets = true
     for (const requirement of requirements) {
-        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { return null; }
+        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference' && requirement.type !== 'projected-image-reference') { return null }
         const {path} = requirement.source;
         const entry = fileMap.get(path);
         const mediaType = getImageMediaTypeFromFileName(path);
@@ -80,6 +83,8 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
         }
         const firstPossibleEnd = offset + ZIP_LOCAL_HEADER_BYTES + rawFilename.byteLength + compressedSize;
         if (firstPossibleEnd > archive.size) { return null; }
+        if (offset < previousOffset) { ascendingOffsets = false }
+        previousOffset = offset
         rangeStart = Math.min(rangeStart, offset);
         rangeEndLowerBound = Math.max(rangeEndLowerBound, firstPossibleEnd);
         compressedTotal += compressedSize;
@@ -101,7 +106,9 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
     const maxSpan = Math.min(MAX_PACKED_MEDIA_BYTES, compressedTotal * (1 + MAX_RELATIVE_RANGE_OVERHEAD));
     if (rangeEndLowerBound - rangeStart > maxSpan) { return null; }
 
-    const byOffset = [...records].sort((a, b) => a.offset - b.offset);
+    // Dense directory preparation already visits physical ZIP order. Preserve
+    // request order in the returned records when a different read order is needed.
+    const byOffset = ascendingOffsets ? records : [...records].sort((a, b) => a.offset - b.offset)
     let rangeEnd = rangeStart;
     let readMs = 0;
     let validationMs = 0;
@@ -176,6 +183,7 @@ export async function preparePackedSourceZipMedia(archive, requirements, fileMap
         uncompressedBytes,
     };
 }
+/* eslint-enable @stylistic/semi */
 
 /**
  * @param {{bytes: Uint8Array, compressionMethod: number, uncompressedSize: number}} source

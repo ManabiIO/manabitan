@@ -195,7 +195,8 @@ export type SummaryMetaCount = {
 export type ImportRequirement = (
     ImageImportRequirement |
     StructuredContentImageImportRequirement |
-    ImageReferenceImportRequirement
+    ImageReferenceImportRequirement |
+    ProjectedImageReferenceImportRequirement
 );
 
 export type ImageImportRequirement = {
@@ -218,7 +219,9 @@ export type MediaImportDiagnosticKeys = {
     decodedKeys: Map<number, string> | null;
 };
 
-export type MediaImportEntry = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> | {
+export type MediaImportEntry = Pick<DictionaryDatabase.DatabaseTermEntry, 'dictionary' | 'expression' | 'reading'> | MediaImportDiagnosticEntry;
+
+export type MediaImportDiagnosticEntry = {
     dictionary: string;
     diagnosticKeys: MediaImportDiagnosticKeys;
     diagnosticIndex: number;
@@ -228,6 +231,12 @@ export type ImageReferenceImportRequirement = {
     type: 'image-reference';
     source: {path: string};
     entry: MediaImportEntry;
+};
+
+/** Internal projected paths already own the diagnostic bytes needed by deferred resolution. */
+export type ProjectedImageReferenceImportRequirement = MediaImportDiagnosticEntry & {
+    type: 'projected-image-reference';
+    source: {path: string};
 };
 
 export type DeferredMediaImportRequirement = MediaImportEntry & {

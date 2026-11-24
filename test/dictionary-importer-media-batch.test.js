@@ -13,7 +13,8 @@ import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipelin
 // Native WASM initialization is intentionally isolated from media-prefetch
 // fixtures, which exercise the fallback importer with a minimal database.
 describe('bounded media ZIP batching', () => {
-    test.each(['ranged-blob', 'owned-buffer', 'cached-blob'])('resolves a %s image through a CRC-checked coalesced WASM batch', async (storage) => {
+    /* eslint-disable @stylistic/semi */
+    test.each(['ranged-blob', 'owned-buffer', 'cached-blob'].flatMap((storage) => [false, true].map((projected) => ({storage, projected}))))('resolves a $storage image with projected=$projected through a CRC-checked coalesced WASM batch', async ({storage, projected}) => {
         const filename = new TextEncoder().encode('image0.png');
         const expected = Uint8Array.of(2, 9, 255);
         const compressed = Uint8Array.from(deflateRawSync(expected));
@@ -70,7 +71,15 @@ describe('bounded media ZIP batching', () => {
         const importer = new DictionaryImporter(new DictionaryImporterMediaLoader());
         Reflect.set(importer, '_skipImageMetadata', true);
         /** @type {import('dictionary-importer').DeferredMediaImportRequirement} */
-        const requirement = {type: 'image', source: {path: 'image0.png'}, dictionary: 'Media test', expression: 'term', reading: ''};
+        const requirement = projected ?
+            {
+                type: 'projected-image-reference',
+                source: {path: 'image0.png'},
+                dictionary: 'Media test',
+                diagnosticKeys: {bytes: new TextEncoder().encode('term'), spans: new Uint32Array([0, 4, 4, 0]), decodedKeys: null},
+                diagnosticIndex: 0,
+            } :
+            {type: 'image', source: {path: 'image0.png'}, dictionary: 'Media test', expression: 'term', reading: ''}
         const fileMap = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (new Map([['image0.png', file]])));
         const metrics = {
             mediaZipBatchReadMs: 0,
@@ -102,4 +111,5 @@ describe('bounded media ZIP batching', () => {
             globalThis.fetch = originalFetch;
         }
     });
+    /* eslint-enable @stylistic/semi */
 });
