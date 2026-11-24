@@ -20,19 +20,16 @@ jobs:
         include:
           - dictionary: jmdict
             baseline: bbccabd520972cc351a65d9f545bd5369b6e9747
-            label: native-media-hosted-20261124
+            label: shared-span-batch-hosted-20261124
           - dictionary: jitendex
             baseline: bbccabd520972cc351a65d9f545bd5369b6e9747
-            label: native-media-hosted-20261124
+            label: shared-span-batch-hosted-20261124
           - dictionary: vndb
             baseline: bbccabd520972cc351a65d9f545bd5369b6e9747
-            label: native-media-hosted-20261124
-          - dictionary: vndb
-            baseline: fb71a03f4611bcfa71e135693bebd1fe778153bf
-            label: native-batch-v-single-20261124
+            label: shared-span-batch-hosted-20261124
     env:
       PERF_BASELINE: ${{ matrix.baseline }}
-      PERF_CANDIDATE: 1737c500a0e5cbf0109f1a30b031b1e43cfa0dae
+      PERF_CANDIDATE: 7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8
       PERF_LABEL: ${{ matrix.label }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
