@@ -428,6 +428,91 @@ function getSynchronousRecordFieldReferences(chunk, count) {
     } catch { return null }
     return references
 }
+
+/**
+ * The caller admitted private typed columns for this synchronous invocation.
+ * Check content aliases independently of score runs: alternate spellings can
+ * share a definition while retaining different scores.
+ * @param {ResolvedContentReferences} references
+ * @param {Int32Array} scoreList
+ * @param {number} count
+ * @param {Uint16Array} scoreKeys
+ * @param {number[]} scores
+ * @param {Uint16Array|null} inlineScoreIndexes
+ * @returns {boolean} Whether the compact representation can hold every field.
+ * @throws {RangeError} If a row references an unavailable content span.
+ */
+function planCompactArtifactRecordRuns(references, scoreList, count, scoreKeys, scores, inlineScoreIndexes) {
+    const {uniqueIndexList, lengths} = references
+    let previousUniqueIndex = -1
+    for (let row = 0; row < count; ++row) {
+        const uniqueIndex = uniqueIndexList[row]
+        if (uniqueIndex === previousUniqueIndex) { continue }
+        if (uniqueIndex >= lengths.length) {
+            throw new RangeError(`Invalid resolved term content reference index: ${uniqueIndex}`)
+        }
+        if (lengths[uniqueIndex] >= U16_NULL) { return false }
+        previousUniqueIndex = uniqueIndex
+    }
+    /** @type {Map<number, number>} */
+    const scoreIndexes = new Map()
+    for (let start = 0; start < count;) {
+        const score = scoreList[start]
+        const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS
+        const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length
+        let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1)
+        if (scoreIndex < 0) {
+            scoreIndex = scores.length
+            if (scoreIndex >= U16_NULL) { return false }
+            if (useInlineScore) {
+                inlineScoreIndexes[inlineScore] = scoreIndex + 1
+            } else {
+                scoreIndexes.set(score, scoreIndex)
+            }
+            scores.push(score)
+        }
+        let end = start + 1
+        while (end < count && scoreList[end] === score) { ++end }
+        if (end - start >= 4) {
+            scoreKeys.fill(scoreIndex, start, end)
+        } else {
+            for (let row = start; row < end; ++row) { scoreKeys[row] = scoreIndex }
+        }
+        start = end
+    }
+    return true
+}
+
+/**
+ * Write validated content runs directly into their final output views. The
+ * private columns stay stable between compact planning and this write.
+ * @param {ResolvedContentReferences} references
+ * @param {number} count
+ * @param {number} contentOffsetBase
+ * @param {Uint32Array} outputOffsets
+ * @param {Uint16Array} outputLengths
+ */
+function writeResolvedArtifactContentRuns(references, count, contentOffsetBase, outputOffsets, outputLengths) {
+    const {uniqueIndexList, offsets, lengths} = references
+    for (let start = 0; start < count;) {
+        const uniqueIndex = uniqueIndexList[start]
+        const sourceOffset = offsets[uniqueIndex]
+        const offset = sourceOffset < 0 ? U32_NULL : sourceOffset - contentOffsetBase
+        const length = lengths[uniqueIndex]
+        let end = start + 1
+        while (end < count && uniqueIndexList[end] === uniqueIndex) { ++end }
+        if (end - start >= 4) {
+            outputOffsets.fill(offset, start, end)
+            outputLengths.fill(length, start, end)
+        } else {
+            for (let row = start; row < end; ++row) {
+                outputOffsets[row] = offset
+                outputLengths[row] = length
+            }
+        }
+        start = end
+    }
+}
 /* eslint-enable @stylistic/semi */
 
 /**
@@ -5573,46 +5658,54 @@ export class TermRecordOpfsStore {
         const scoreKeys = new Uint16Array(count);
         /** @type {number[]} */
         const scores = [];
-        /** @type {Map<number, number>} */
-        const scoreIndexes = new Map();
         // Common integer scores use a bounded table. Store the key plus one
         // so zero can mark an unseen score without initializing the table.
         const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
             new Uint16Array(COMPACT_SCORE_TABLE_RADIUS * 2) :
             null;
         let compact = true;
-        for (let i = 0; i < count; ++i) {
-            /* eslint-disable-next-line @stylistic/semi */
-            const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
-            const contentLength = getArtifactContentLength(chunk, contentLengths, i);
-            if (contentLength >= U16_NULL) {
-                compact = false;
-                break;
-            }
+        if (directReferences !== null) {
             /* eslint-disable @stylistic/semi */
-            if (offsets !== null && lengths !== null) {
-                offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase
-                lengths[i] = contentLength < 0 ? U16_NULL : contentLength
-            }
+            compact = planCompactArtifactRecordRuns(
+                directReferences,
+                /** @type {Int32Array} */ (chunk.scoreList),
+                count,
+                scoreKeys,
+                scores,
+                inlineScoreIndexes,
+            )
             /* eslint-enable @stylistic/semi */
-            const score = chunk.scoreList[i] ?? 0;
-            const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
-            const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
-            let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
-            if (scoreIndex < 0) {
-                scoreIndex = scores.length;
-                if (scoreIndex >= U16_NULL) {
+        } else if (offsets !== null && lengths !== null) {
+            /** @type {Map<number, number>} */
+            const scoreIndexes = new Map();
+            for (let i = 0; i < count; ++i) {
+                const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+                const contentLength = getArtifactContentLength(chunk, contentLengths, i);
+                if (contentLength >= U16_NULL) {
                     compact = false;
                     break;
                 }
-                if (useInlineScore) {
-                    inlineScoreIndexes[inlineScore] = scoreIndex + 1;
-                } else {
-                    scoreIndexes.set(score, scoreIndex);
+                offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
+                lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+                const score = chunk.scoreList[i] ?? 0;
+                const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
+                const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
+                let scoreIndex = useInlineScore ? inlineScoreIndexes[inlineScore] - 1 : (scoreIndexes.get(score) ?? -1);
+                if (scoreIndex < 0) {
+                    scoreIndex = scores.length;
+                    if (scoreIndex >= U16_NULL) {
+                        compact = false;
+                        break;
+                    }
+                    if (useInlineScore) {
+                        inlineScoreIndexes[inlineScore] = scoreIndex + 1;
+                    } else {
+                        scoreIndexes.set(score, scoreIndex);
+                    }
+                    scores.push(score);
                 }
-                scores.push(score);
+                scoreKeys[i] = scoreIndex;
             }
-            scoreKeys[i] = scoreIndex;
         }
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
         (scores.length * 4) +
@@ -5651,16 +5744,7 @@ export class TermRecordOpfsStore {
         cursor += count * 4
         const outputLengths = new Uint16Array(output.buffer, cursor, count)
         if (directReferences !== null) {
-            // No await or caller-controlled getter separates these passes.
-            // Write final columns directly instead of allocating and copying
-            // another six bytes per row of offset/length staging.
-            const {uniqueIndexList, offsets: resolvedOffsets, lengths: resolvedLengths} = directReferences
-            for (let i = 0; i < count; ++i) {
-                const unique = uniqueIndexList[i]
-                const offset = resolvedOffsets[unique]
-                outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase
-                outputLengths[i] = resolvedLengths[unique]
-            }
+            writeResolvedArtifactContentRuns(directReferences, count, contentOffsetBase, outputOffsets, outputLengths)
         } else if (offsets !== null && lengths !== null) {
             outputOffsets.set(offsets)
             outputLengths.set(lengths)
