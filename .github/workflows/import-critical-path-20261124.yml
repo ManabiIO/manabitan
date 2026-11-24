@@ -1,10 +1,7 @@
 name: Import critical-path diagnostics (2026-11-24)
 
 on:
-  push:
-    branches: [perf/import-critical-path-20261124-ad5]
-    paths:
-      - .github/workflows/import-critical-path-20261124.yml
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -32,7 +29,8 @@ jobs:
           import {mkdirSync, writeFileSync} from 'node:fs'
           const base = process.env.SOURCE_BASE
           const diff = execFileSync('git', ['diff', '--name-only', base, 'HEAD'], {encoding: 'utf8'}).trim()
-          if (diff !== '.github/workflows/import-critical-path-20261124.yml') throw new Error(`Unexpected product change: ${diff}`)
+          const allowed = (path) => path === '.github/workflows/import-critical-path-20261124.yml' || path === '.github/workflows/import-screen-20261124.yml' || path === 'dev/perf/import-screen-20261124.py' || path.startsWith('dev/perf/import-critical-path-20261124/')
+          if (diff.split('\n').some((path) => !allowed(path))) throw new Error(`Unexpected product change: ${diff}`)
           const commit = execFileSync('git', ['rev-parse', 'HEAD'], {encoding: 'utf8'}).trim()
           mkdirSync('builds/critical-path-profile', {recursive: true})
           writeFileSync('builds/critical-path-profile/source.json', JSON.stringify({base, commit, dictionary: process.env.DICTIONARY, diagnosticOnly: true, note: 'Tracing perturbs execution. Do not compare these elapsed times as performance evidence.'}, null, 2))
@@ -48,7 +46,7 @@ jobs:
           key: import-critical-path-20261124-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
       - name: Profile complete production import
         run: |
-          node -e 'if (process.version !== "v22.22.0") throw new Error(`Unexpected Node: ${process.version}`)'
+          node -e 'if (process.version !== "v22.22.0") throw new Error("Unexpected Node: " + process.version)'
           node dev/perf/import-benchmark.js "$DICTIONARY" --build-target chrome --runs 1 --trace --media-check sample --output builds/critical-path-profile
       - name: Retain reports and failures
         if: always()

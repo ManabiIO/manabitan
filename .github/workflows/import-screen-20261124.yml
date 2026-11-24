@@ -1,0 +1,56 @@
+name: Import source screen (2026-11-24)
+
+on:
+  push:
+    branches: [perf/import-critical-path-20261124-ad5]
+    paths:
+      - .github/workflows/import-screen-20261124.yml
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: Frozen import screen (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: bbccabd520972cc351a65d9f545bd5369b6e9747
+      PERF_CANDIDATE: 3439c2b17cb4d5245a2cee1177dec33fad2a7829
+      PERF_LABEL: sidecar-worker-hosted-20261124
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-critical-path-20261124-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Run fixed three-arm source comparison
+        run: >-
+          python3 dev/perf/import-screen-20261124.py
+          --baseline "$PERF_BASELINE"
+          --candidate "$PERF_CANDIDATE"
+          --dictionary "$PERF_DICTIONARY"
+          --label "$PERF_LABEL"
+
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-screen-${{ env.PERF_LABEL }}-${{ matrix.dictionary }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: builds/import-screen-20261124
+          if-no-files-found: error
+          retention-days: 30
