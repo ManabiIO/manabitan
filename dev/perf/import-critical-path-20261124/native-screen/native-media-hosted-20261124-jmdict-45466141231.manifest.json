@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "native-media-hosted-20261124",
+  "dictionary": "jmdict",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae",
+  "studyCommit": "6a04bbff4c5332d6c86f678455f36545a511abb5",
+  "originalArtifact": {
+    "id": 14955029520,
+    "name": "import-screen-native-media-hosted-20261124-jmdict-45466141231-1",
+    "size_in_bytes": 1162046,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955029520",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955029520/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:08:51Z",
+    "expires_at": "2026-12-24T19:08:49Z",
+    "updated_at": "2026-11-24T19:08:51Z",
+    "digest": "sha256:c419a123a204395e5fac3cd04df43159fe2719c30e78aa9ce205e00b68936f55",
+    "workflow_run": {
+      "id": 45466141231,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "6a04bbff4c5332d6c86f678455f36545a511abb5"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45466141231",
+  "archive": {
+    "path": "native-media-hosted-20261124-jmdict-45466141231.tar.xz",
+    "bytes": 135292,
+    "sha256": "6dc073f61098552b6a03198e4657c6f80ded51a4b0011e57e7bfbf25baa41558"
+  },
+  "files": [
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-1-A/run-1.json",
+      "bytes": 150424,
+      "sha256": "d96c86da74fc3ac63361f35c9e1d0e9bbc450ff8b6c9bc7adfaf939f8b718b03"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-1-A/summary.json",
+      "bytes": 58819,
+      "sha256": "c2ab770c931749b49530867d48b9b77802128d5c5c1b8b15d28c3249f62a6067"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-1-B/run-1.json",
+      "bytes": 150379,
+      "sha256": "82f37a1e25709df9dd9032d4cede7c8bc9104b23386e7bd15690b8aaad6db177"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-1-B/summary.json",
+      "bytes": 58729,
+      "sha256": "04e17b1f0e27731105820b1c14dcaa9b55677a55564d4c59fffee1c188dd8b36"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-1-C/run-1.json",
+      "bytes": 150169,
+      "sha256": "ae3bd761970f3d2a013a410b7bf6edae650bbe14b2e0ee0c64e8650ad12cd94e"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-1-C/summary.json",
+      "bytes": 58711,
+      "sha256": "94799e176638b63be39a67a90b526cc7d0c22c4e6f28f712f492f8e5d588fd59"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-2-A/run-1.json",
+      "bytes": 149581,
+      "sha256": "bb4a5a0786c79ca3b08614644c5bde9adcee2c501690cbe0a9d0ba4395294cbe"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-2-A/summary.json",
+      "bytes": 58613,
+      "sha256": "44241cf514e69394f75a983024e641d3cf993083c990bd78d0dc2c86bfa05d0c"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-2-B/run-1.json",
+      "bytes": 149584,
+      "sha256": "23ce2d9c3c4470206d68d5ecf09dc63e0390ad8cf130036c1f7badec04573370"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-2-B/summary.json",
+      "bytes": 58702,
+      "sha256": "9c2a0f70a729f0d3779c5e996ed8b5144ca7a676a587f42cfc8426b6074bff78"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-2-C/run-1.json",
+      "bytes": 150174,
+      "sha256": "779074c38727f1b7f144ff4866dd7b48b96558a0233248cd66f50994c289281a"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-2-C/summary.json",
+      "bytes": 58800,
+      "sha256": "2fd0836b975011a193a777ac1f75cdf31d6f4fa5b39de75481db554628e5a383"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-3-A/run-1.json",
+      "bytes": 150204,
+      "sha256": "6ca0b14c5ea42c3ab948a60538860d176bb498ec2a3d599d0b598f5f5bd6a318"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-3-A/summary.json",
+      "bytes": 58814,
+      "sha256": "d4800849fbb936907a887647093fef686063da2be7650405dec06b5c8904b7c7"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-3-B/run-1.json",
+      "bytes": 150558,
+      "sha256": "d8d18e9356179e326f976c3f4c5a1b1b5bac49281eda1e1b0acc605a0d5083aa"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-3-B/summary.json",
+      "bytes": 58779,
+      "sha256": "ca241487d143959a320e6223d6b8b8fa78c5f4e4758a1b327c638bc486aeec51"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-3-C/run-1.json",
+      "bytes": 150299,
+      "sha256": "a0a0700a78c967f6a17885fc1f5c0d6bd2699b9fe141287aaf8f0028af695c12"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-3-C/summary.json",
+      "bytes": 58842,
+      "sha256": "397ba0f39e6e4d2171bc68f175607d56e4aeeaee7ffe33cd74a23be99257c4e6"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-4-A/run-1.json",
+      "bytes": 149840,
+      "sha256": "1be8aba8f14553c911ec069b0c361f18bdf932f3e5451ee6f14a8a2a2a4eef24"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-4-A/summary.json",
+      "bytes": 58797,
+      "sha256": "a56f63473ed8d64184dc0be178b2fc5e2477eef3e00856d48cba1d1223019e7f"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-4-B/run-1.json",
+      "bytes": 149973,
+      "sha256": "50f38ed1deb36fa8d8a6e82b044ddb23d31b96c6399064e7d606e100e7db12b7"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-4-B/summary.json",
+      "bytes": 58693,
+      "sha256": "6b73c1ee0441e9bb105149980e205466422b00796d7b237c498d0059fa281c43"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-4-C/run-1.json",
+      "bytes": 150051,
+      "sha256": "4e549d0aefcc0dca8868db5f4c7710f19f3799ee89de7787bb7f79fb4a4a3ee3"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-4-C/summary.json",
+      "bytes": 58707,
+      "sha256": "6e5860956027214aef506c77b652d2faf6d46001c13c4db2c9a859689682a223"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-5-A/run-1.json",
+      "bytes": 149594,
+      "sha256": "637d332f7b098cc773ce36a7456813d8c6a00b1ee7dc2f6050f19c26025f7fe8"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-5-A/summary.json",
+      "bytes": 58807,
+      "sha256": "6418ec35bc83c03516b79ef310bb75ad2a5c5fbddcee009197ffe397307b79bb"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-5-B/run-1.json",
+      "bytes": 149808,
+      "sha256": "25b0771fdf0eeb8b5fd1c86d8819b3da4ad73b286c12a314c596e8c34927574b"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-5-B/summary.json",
+      "bytes": 58725,
+      "sha256": "87e387ef311854211a67af811596a3bfdf0eb542e79208b69f703d4c056beaa8"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-5-C/run-1.json",
+      "bytes": 149963,
+      "sha256": "15d0d6597dbdcfb4e56007cc543845ddd760e686bba66af8a8af58204da319d0"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-5-C/summary.json",
+      "bytes": 58653,
+      "sha256": "f3ca7dfb12053214acb856483e380f47e4782a1baca7d10e9070aafa6e398001"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-6-A/run-1.json",
+      "bytes": 149920,
+      "sha256": "66f9fdeca0c2782b02fc03f855e0f547341bb085ea8b98ac9e8194d886f893a9"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-6-A/summary.json",
+      "bytes": 58724,
+      "sha256": "867506984c8d0407b999e2437e2827f4c4a18c338b869e48531aedb27b7d30fe"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-6-B/run-1.json",
+      "bytes": 149513,
+      "sha256": "bee61891ccb17799bd33254a09850ac2e858e2ebb685f1e47a6681673e40d5aa"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-6-B/summary.json",
+      "bytes": 58595,
+      "sha256": "b7bfa64f2ec5bc00a7def802ea020e7331e6b1a43821b12951284114ae3fe439"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-6-C/run-1.json",
+      "bytes": 150093,
+      "sha256": "d7a290569a318136243c123b2d10dd2753cc49020fb64c233f2d427442798d31"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/block-6-C/summary.json",
+      "bytes": 58736,
+      "sha256": "6576874d373994859509ab92e7979bbc48f27f413e9cdc33250014d1ea6df367"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/diagnostic-A/run-1.json",
+      "bytes": 150669,
+      "sha256": "66adc7abb2ceab6a3a4c24b75cee0effbd217b46a5697923b71438cb942b2bd5"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/diagnostic-A/summary.json",
+      "bytes": 58797,
+      "sha256": "870f7f294ecc6d213f72d2c84ef4c406ec339f3ebd2e9603a32de941ea45eb9b"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/diagnostic-B/run-1.json",
+      "bytes": 150266,
+      "sha256": "ec6b491b3a6a2cd5dde88c48a2375354f45c377878dba4314844ca851f5c70be"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/diagnostic-B/summary.json",
+      "bytes": 58841,
+      "sha256": "640590ccc9d3d4ee28f97005174e4c94817393e20040b396951508b0fcbd4154"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/expected-lookup-signature.json",
+      "bytes": 12620,
+      "sha256": "6fad37c3482c72f875d8e247f0d9929410b42a2d908b7479303afb82775d39db"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/protocol.json",
+      "bytes": 570,
+      "sha256": "ff8e28c9d3625599bb10f4ad427608f16f84f9a81465ceff02290799d0991d1d"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/summary.json",
+      "bytes": 298293,
+      "sha256": "d9c97f5dc46f060ca2c15f43ae4a4f770b2187e9e56110a0fe25d1a5657f6342"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/warmup-A/run-1.json",
+      "bytes": 149685,
+      "sha256": "93f7a783dd935c3e43fc35a2dbb69aa8137e36edba0b2fe644fd1d90a949228a"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/warmup-A/summary.json",
+      "bytes": 58658,
+      "sha256": "e4a682a8bb4ae5ef2e997305f8fac2a330e43956002f9135b6e4cd5c76116416"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/warmup-B/run-1.json",
+      "bytes": 150299,
+      "sha256": "300a4483979bc0056a68f9b7cbc3b865b01272ac8cbb0daf1d526c77378e7539"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/warmup-B/summary.json",
+      "bytes": 58687,
+      "sha256": "a2fa5b357a9b382a1f881f01580ea5e12b303d1edea2c8d78b9c38d3f53160e1"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/warmup-C/run-1.json",
+      "bytes": 150273,
+      "sha256": "8874640bd2ba6a6c5f0add648b6ddcbab3278d5b48c423d90e3771fdbf282373"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/warmup-C/summary.json",
+      "bytes": 58857,
+      "sha256": "f19d8c618ad491fdfd34f337750d276658e717315daed060e614b3a1cc7f5a81"
+    },
+    {
+      "path": "native-media-hosted-20261124/jmdict/workflow.yml",
+      "bytes": 2423,
+      "sha256": "c98f3d397f6ea1dea7e3aecda990068b0e3c78e8a8ee5a76e9f61ccef882a9e9"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

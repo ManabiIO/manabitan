@@ -1,0 +1,134 @@
+[
+  {
+    "label": "native-batch-v-single-20261124",
+    "dictionary": "vndb",
+    "medians": {
+      "A": {
+        "parserResultCopyMs": 1144.1000000000931,
+        "parserParseBankMs": 6428.5,
+        "parserOrderedSinkWaitMs": 5754.500000000044,
+        "parserLookupIndexEncodeMs": 402.6500000000233,
+        "termLookupIndexEncodeMs": 532.8999999999796,
+        "contentAppendMs": 695.2000000001281,
+        "bulkAddTermsMs": 1901.0
+      },
+      "B": {
+        "parserResultCopyMs": 990.8500000001077,
+        "parserParseBankMs": 6509.0,
+        "parserOrderedSinkWaitMs": 6109.949999999895,
+        "parserLookupIndexEncodeMs": 416.49999999998545,
+        "termLookupIndexEncodeMs": 560.2499999998981,
+        "contentAppendMs": 701.849999999773,
+        "bulkAddTermsMs": 1848.5
+      },
+      "C": {
+        "parserResultCopyMs": 1145.1000000000058,
+        "parserParseBankMs": 6316.0,
+        "parserOrderedSinkWaitMs": 5968.199999999793,
+        "parserLookupIndexEncodeMs": 409.29999999993015,
+        "termLookupIndexEncodeMs": 560.8000000001339,
+        "contentAppendMs": 697.9499999999389,
+        "bulkAddTermsMs": 1851.0
+      }
+    }
+  },
+  {
+    "label": "native-media-hosted-20261124",
+    "dictionary": "jitendex",
+    "medians": {
+      "A": {
+        "parserResultCopyMs": 452.1999999997788,
+        "parserParseBankMs": 1782.5,
+        "parserOrderedSinkWaitMs": 4277.250000000058,
+        "parserLookupIndexEncodeMs": 54.849999999889405,
+        "termLookupIndexEncodeMs": 54.849999999889405,
+        "contentAppendMs": 1078.6499999999942,
+        "bulkAddTermsMs": 1227.0
+      },
+      "B": {
+        "parserResultCopyMs": 461.9999999998254,
+        "parserParseBankMs": 1750.0,
+        "parserOrderedSinkWaitMs": 4068.0500000000175,
+        "parserLookupIndexEncodeMs": 60.99999999994179,
+        "termLookupIndexEncodeMs": 60.99999999994179,
+        "contentAppendMs": 1092.8000000000466,
+        "bulkAddTermsMs": 1234.0
+      },
+      "C": {
+        "parserResultCopyMs": 444.29999999998836,
+        "parserParseBankMs": 1779.0,
+        "parserOrderedSinkWaitMs": 4098.20000000007,
+        "parserLookupIndexEncodeMs": 50.350000000034925,
+        "termLookupIndexEncodeMs": 50.350000000034925,
+        "contentAppendMs": 1089.600000000035,
+        "bulkAddTermsMs": 1229.5
+      }
+    }
+  },
+  {
+    "label": "native-media-hosted-20261124",
+    "dictionary": "jmdict",
+    "medians": {
+      "A": {
+        "parserResultCopyMs": 79.79999999990105,
+        "parserParseBankMs": 682.0,
+        "parserOrderedSinkWaitMs": 1050.800000000003,
+        "parserLookupIndexEncodeMs": 33.35000000000582,
+        "termLookupIndexEncodeMs": 33.35000000000582,
+        "contentAppendMs": 382.5999999999767,
+        "bulkAddTermsMs": 393.5
+      },
+      "B": {
+        "parserResultCopyMs": 79.59999999997672,
+        "parserParseBankMs": 684.0,
+        "parserOrderedSinkWaitMs": 1267.6499999999505,
+        "parserLookupIndexEncodeMs": 28.10000000000582,
+        "termLookupIndexEncodeMs": 28.10000000000582,
+        "contentAppendMs": 389.1499999999505,
+        "bulkAddTermsMs": 403.0
+      },
+      "C": {
+        "parserResultCopyMs": 76.19999999999709,
+        "parserParseBankMs": 702.5,
+        "parserOrderedSinkWaitMs": 1103.4500000000553,
+        "parserLookupIndexEncodeMs": 32.850000000034925,
+        "termLookupIndexEncodeMs": 32.850000000034925,
+        "contentAppendMs": 379.5499999999738,
+        "bulkAddTermsMs": 403.5
+      }
+    }
+  },
+  {
+    "label": "native-media-hosted-20261124",
+    "dictionary": "vndb",
+    "medians": {
+      "A": {
+        "parserResultCopyMs": 1846.6999999997934,
+        "parserParseBankMs": 6020.5,
+        "parserOrderedSinkWaitMs": 4960.350000000151,
+        "parserLookupIndexEncodeMs": 371.14999999979045,
+        "termLookupIndexEncodeMs": 508.5999999998021,
+        "contentAppendMs": 678.8500000002969,
+        "bulkAddTermsMs": 1790.0
+      },
+      "B": {
+        "parserResultCopyMs": 919.3000000002794,
+        "parserParseBankMs": 6019.0,
+        "parserOrderedSinkWaitMs": 5643.350000000006,
+        "parserLookupIndexEncodeMs": 384.44999999995343,
+        "termLookupIndexEncodeMs": 516.5000000000291,
+        "contentAppendMs": 682.4499999996915,
+        "bulkAddTermsMs": 1755.5
+      },
+      "C": {
+        "parserResultCopyMs": 1847.3000000002503,
+        "parserParseBankMs": 6019.5,
+        "parserOrderedSinkWaitMs": 4496.399999999936,
+        "parserLookupIndexEncodeMs": 396.95000000039,
+        "termLookupIndexEncodeMs": 504.09999999996217,
+        "contentAppendMs": 683.9500000001281,
+        "bulkAddTermsMs": 1792.0
+      }
+    }
+  }
+]

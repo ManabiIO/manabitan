@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "label": "shared-span-batch-hosted-20261124",
+      "dictionary": "jmdict",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+      "studyCommit": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470393272",
+      "archive": {
+        "path": "shared-span-batch-hosted-20261124-jmdict-45470393272.tar.xz",
+        "bytes": 134128,
+        "sha256": "60405eb54f19083e272d01fe6f1371c42c3c70a01f4c9bd3fd7680c85b1f84b5"
+      },
+      "manifest": "shared-span-batch-hosted-20261124-jmdict-45470393272.manifest.json",
+      "artifactId": 14957782734,
+      "originalArtifactSha256": "sha256:a9051c98a8cdaa8476440ad15a9c6815fbf79d934fca56124a73188b03cffdbe"
+    },
+    {
+      "label": "shared-span-batch-hosted-20261124",
+      "dictionary": "vndb",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+      "studyCommit": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470393272",
+      "archive": {
+        "path": "shared-span-batch-hosted-20261124-vndb-45470393272.tar.xz",
+        "bytes": 142976,
+        "sha256": "5520820c10431bfa70f4dd58a01450b1e18ae2b3b5641a6dcfc95d98ea50919b"
+      },
+      "manifest": "shared-span-batch-hosted-20261124-vndb-45470393272.manifest.json",
+      "artifactId": 14957264400,
+      "originalArtifactSha256": "sha256:fd549adc2799eb7bd944df379c298b531e157a4f9ee2b8a02f58d1bc2da4bc75"
+    },
+    {
+      "label": "shared-span-batch-hosted-20261124",
+      "dictionary": "jitendex",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+      "studyCommit": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470393272",
+      "archive": {
+        "path": "shared-span-batch-hosted-20261124-jitendex-45470393272.tar.xz",
+        "bytes": 139988,
+        "sha256": "d5510af32266836b54edb497d094876a4b2f80ccfdfdadb2adb93dd0d8b90249"
+      },
+      "manifest": "shared-span-batch-hosted-20261124-jitendex-45470393272.manifest.json",
+      "artifactId": 14956274040,
+      "originalArtifactSha256": "sha256:8cc4bc3498d6da53e4959c0581aa6936c65e2e29ef96be48a53bdc87e6190864"
+    }
+  ]
+}

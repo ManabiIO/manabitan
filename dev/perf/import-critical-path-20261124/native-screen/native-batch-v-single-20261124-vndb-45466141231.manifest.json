@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "native-batch-v-single-20261124",
+  "dictionary": "vndb",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+  "candidate": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae",
+  "studyCommit": "6a04bbff4c5332d6c86f678455f36545a511abb5",
+  "originalArtifact": {
+    "id": 14956970971,
+    "name": "import-screen-native-batch-v-single-20261124-vndb-45466141231-1",
+    "size_in_bytes": 1191483,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956970971",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956970971/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:22:50Z",
+    "expires_at": "2026-12-24T19:22:49Z",
+    "updated_at": "2026-11-24T19:22:50Z",
+    "digest": "sha256:13c24dee5b00d688daa4141b3cccdfb1c976051305d005e38988fe2c4a3cfd78",
+    "workflow_run": {
+      "id": 45466141231,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "6a04bbff4c5332d6c86f678455f36545a511abb5"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45466141231",
+  "archive": {
+    "path": "native-batch-v-single-20261124-vndb-45466141231.tar.xz",
+    "bytes": 142096,
+    "sha256": "392a828037bd72bdf9887c5820e01b97f4971ae9ab236d2087c3c70ccf09e824"
+  },
+  "files": [
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-1-A/run-1.json",
+      "bytes": 152639,
+      "sha256": "09bf221cdeb5a6000b8aac609e2610b549332c4530ec6eaa8bba8942815de7e8"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-1-A/summary.json",
+      "bytes": 59906,
+      "sha256": "45fc3f6789fd8200697a4c77cc9f120b2e1539537a73e1e1b5b708ecf7ed6c1f"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-1-B/run-1.json",
+      "bytes": 152929,
+      "sha256": "586d821b6847107f7d855bcdef8759f6494eb25092e592b77947352e567699c8"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-1-B/summary.json",
+      "bytes": 60014,
+      "sha256": "ac1306b6692f62a2edf8cfe23e82caee86e5c33ce6eaf440f3a7221ee6bd4fb0"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-1-C/run-1.json",
+      "bytes": 153478,
+      "sha256": "e68273985acc2e677421b8dc59e632443c59ff42628675ff9cb1724dfb45e9ee"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-1-C/summary.json",
+      "bytes": 60089,
+      "sha256": "fc55fdc3e7b5f6fb3d42f1e53ea0a776215671a337129f77f60e9c39cc0306f4"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-2-A/run-1.json",
+      "bytes": 152774,
+      "sha256": "e4e38a571e5b8adcba28524e39ace2aa580055125e2423ff251cccf609759e34"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-2-A/summary.json",
+      "bytes": 60061,
+      "sha256": "f4d84bb31a9fc9098524add22d93fdfe27042758d6439bd202b4b6dfe6a3a8e9"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-2-B/run-1.json",
+      "bytes": 152717,
+      "sha256": "629c2c8c7d1a521365000e3ad0d45543bc54c301f3b6c6e5c98a1e0238c7da37"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-2-B/summary.json",
+      "bytes": 60031,
+      "sha256": "f33a77c071610a10c2313df67df2f519ae6343bfbfb61eb53f6256ad268a7e5a"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-2-C/run-1.json",
+      "bytes": 153138,
+      "sha256": "9214a624b38e565ca0787f123bb256a198f09faf65fe574bbcb82a39bc1f4a2a"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-2-C/summary.json",
+      "bytes": 60082,
+      "sha256": "c7611cd9bad8dab6aba646fa091c76a99511863dbbcbd892419e2715fcc38be5"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-3-A/run-1.json",
+      "bytes": 153046,
+      "sha256": "a7f29a1574d838bc2f3760299f3ce604fadb9231593e39329cb431deb5e3a889"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-3-A/summary.json",
+      "bytes": 60039,
+      "sha256": "315c22b403617f63c57202167a5dcbc9fbd6f1091fbd1a42ec2398ef0dd6794d"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-3-B/run-1.json",
+      "bytes": 153371,
+      "sha256": "25465b024bbdc0827fa8ef49fdb0034b861c1b4b9b2a90cbc8ea5b0f012a21f8"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-3-B/summary.json",
+      "bytes": 60052,
+      "sha256": "4a6ae621b1bea3370e164f2347ac073f8a534991293666cdbb6f911a5a7cd038"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-3-C/run-1.json",
+      "bytes": 152931,
+      "sha256": "8d5e28b2067ba643aace35a6fb02db94562f79c6a998ad10c8867ca546d06014"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-3-C/summary.json",
+      "bytes": 60118,
+      "sha256": "04ea57a51ab11bba109b5e5dd10286e7a4be93700c59f273aa21de18911e7cc2"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-4-A/run-1.json",
+      "bytes": 152970,
+      "sha256": "4a013971025a14743ea300c3e7e3d12ca00df42cf81a8d9fd1f24fcf24f6c928"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-4-A/summary.json",
+      "bytes": 60024,
+      "sha256": "e15180009edc3b4ba2b1e8f849212c6435df217bd67129fceab3d79dad72522e"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-4-B/run-1.json",
+      "bytes": 152938,
+      "sha256": "7091a9c376ab23f6d7cfe8776fc7104c9a1f4d24d8b649abdc5db7a5050f287b"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-4-B/summary.json",
+      "bytes": 60117,
+      "sha256": "f4497f5a267c5f1b8135a91a61a4690be88ccaec24667e628fd0f166adf238a6"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-4-C/run-1.json",
+      "bytes": 153077,
+      "sha256": "6de9d96a7eea23d1a70bffc8c713adb82a582eabf769d02c549297e0aa2abbc8"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-4-C/summary.json",
+      "bytes": 60070,
+      "sha256": "2c387f646fb73f10cbb99fcc43c1c4a2e9c890226dc08780cfcdf674adfa52d1"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-5-A/run-1.json",
+      "bytes": 152371,
+      "sha256": "211ff6f7afaa8775ee15d5b6640a7fe9755b6c81822262562dd13c2607212358"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-5-A/summary.json",
+      "bytes": 59715,
+      "sha256": "6a192c60a4a38ff0187d1dec85ee34462396cc672a061f202e2ee8abc9ae81ad"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-5-B/run-1.json",
+      "bytes": 153101,
+      "sha256": "f37258f486adc62ab1acdd5518e2f84d54a90b8a4d7cc1d5232fdb8d287da8a6"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-5-B/summary.json",
+      "bytes": 60065,
+      "sha256": "6642c01957c92dd36547c47d0a4b80388171c0985801c99ee83d6edd840c10ad"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-5-C/run-1.json",
+      "bytes": 153099,
+      "sha256": "91b0e207a54bf44e67aca66d1177e775a3f996e334f3e448a7995ddbd1aa4e85"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-5-C/summary.json",
+      "bytes": 60033,
+      "sha256": "8d22a82bc11e49b8ddd110738838f76ca0a8be02fa7bb5fe346b15901d5cf1c9"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-6-A/run-1.json",
+      "bytes": 153177,
+      "sha256": "6be123328297b1985a1d6b6f2abc3651ccaeab8625bd8f25533b2f432694d814"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-6-A/summary.json",
+      "bytes": 60166,
+      "sha256": "7b71888f7a5207f38c9c2798d815668900b09f5a23ddb80b2a2235bf7ecd467f"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-6-B/run-1.json",
+      "bytes": 153045,
+      "sha256": "6b899dc033f20aa66e8f6592da0ccc60aee049a28ca0cefab29f696488f2a5de"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-6-B/summary.json",
+      "bytes": 60117,
+      "sha256": "d777b36c6477fbbb55bda1149bf8551d08bdb1e1e92154e582363f1e9200c301"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-6-C/run-1.json",
+      "bytes": 153411,
+      "sha256": "2bffaa438be4e4fe8d8a8d545046bfa32b3fe40fb4d544023e10231390cfecc6"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/block-6-C/summary.json",
+      "bytes": 60044,
+      "sha256": "addb70797302314721b0ff126d64391b8132dbc16cd9f05dd9501b5a6ddd03fc"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/diagnostic-A/run-1.json",
+      "bytes": 153051,
+      "sha256": "c56358255a1c1773ec2a6736f6d9d380261f5a27d2fe53459a0d2df1c642effb"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/diagnostic-A/summary.json",
+      "bytes": 60022,
+      "sha256": "9588c62b8840366570a356e615723385e981631b6ba41dfc1c6045b5c2fe3506"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/diagnostic-B/run-1.json",
+      "bytes": 153318,
+      "sha256": "fd8b234fa1cf67ea2844dd767012af397375bbdc5cf185c4d2a873aed037a106"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/diagnostic-B/summary.json",
+      "bytes": 60101,
+      "sha256": "a9be36decc08da9f1053df25315c4ec8ec58759317358b1c9ac83a45f71bfd36"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/expected-lookup-signature.json",
+      "bytes": 12889,
+      "sha256": "8d17b25323c33afcb7521cb0bedaa112f470c3103f61181f59709c20258c39d7"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/protocol.json",
+      "bytes": 570,
+      "sha256": "172e9204473e4610f31dd63a7eeea27258ded3b1501efd93840a47825d65246f"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/summary.json",
+      "bytes": 297525,
+      "sha256": "ce77b822d967e2b8ccf99e7bd3dfa4909f0e0d95276e4df8b71ec4509502eb57"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/warmup-A/run-1.json",
+      "bytes": 152841,
+      "sha256": "1ff95c81fceaf2159db861cbfa92ea4c26feb540c4765cea9abc3fe78a4b7ab3"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/warmup-A/summary.json",
+      "bytes": 59911,
+      "sha256": "a938f7e1e5ea2295360f584d4749a3a8385ebd935af90f6fe7cf7ad246262380"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/warmup-B/run-1.json",
+      "bytes": 153459,
+      "sha256": "058f243923213b90bc85b91640d48eae00db309e4adec3104f68ef61e43f36a1"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/warmup-B/summary.json",
+      "bytes": 60038,
+      "sha256": "aad9202f5a9d8cf212f77fceaa16416f475c4022669a33bf9b7d506ed7501abd"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/warmup-C/run-1.json",
+      "bytes": 153029,
+      "sha256": "0cb2273091b823530fea6fa6f9fbf6dd83092c9720189c4f512b432854fa1a3b"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/warmup-C/summary.json",
+      "bytes": 60123,
+      "sha256": "ac903b449b565a843708f549fa7ee43d975f462183866d8ad30c9606e7eaca5d"
+    },
+    {
+      "path": "native-batch-v-single-20261124/vndb/workflow.yml",
+      "bytes": 2423,
+      "sha256": "c98f3d397f6ea1dea7e3aecda990068b0e3c78e8a8ee5a76e9f61ccef882a9e9"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

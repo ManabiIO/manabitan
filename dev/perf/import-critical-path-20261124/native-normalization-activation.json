@@ -1,0 +1,26 @@
+{
+    "scope": "Read-only complete ZIP-bank scan for literal or Unicode-escaped ASCII type:text property pairs; this matches the necessary native text-normalization hint condition on valid JSON",
+    "results": [
+        {
+            "id": "jmdict",
+            "semanticKeyPattern": "\"(?:t|\\\\u0074)(?:y|\\\\u0079)(?:p|\\\\u0070)(?:e|\\\\u0065)\"[ \\t\\r\\n]*:[ \\t\\r\\n]*\"(?:t|\\\\u0074)(?:e|\\\\u0065)(?:x|\\\\u0078)(?:t|\\\\u0074)\"",
+            "typeTextPairs": 0,
+            "banksWithPairs": 0,
+            "banks": [],
+            "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+            "bankCount": 53,
+            "sourceCommit": "bbccabd520972cc351a65d9f545bd5369b6e9747"
+        },
+        {
+            "id": "jitendex",
+            "semanticKeyPattern": "\"(?:t|\\\\u0074)(?:y|\\\\u0079)(?:p|\\\\u0070)(?:e|\\\\u0065)\"[ \\t\\r\\n]*:[ \\t\\r\\n]*\"(?:t|\\\\u0074)(?:e|\\\\u0065)(?:x|\\\\u0078)(?:t|\\\\u0074)\"",
+            "typeTextPairs": 0,
+            "banksWithPairs": 0,
+            "banks": [],
+            "fixtureSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+            "bankCount": 219,
+            "sourceCommit": "bbccabd520972cc351a65d9f545bd5369b6e9747"
+        }
+    ],
+    "decision": "The necessary text-normalization trigger does not occur in either complete locked fixture. The token encoder uses its direct-copy branch; there is no second grammar traversal to fuse away in ordinary fixture rows."
+}

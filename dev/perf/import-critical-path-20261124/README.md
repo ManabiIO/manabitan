@@ -13,10 +13,11 @@ changes from the previous round, integrated through PR #867, along with the
 subsequent import-pipeline optimizations already merged at that point.
 
 Before any new timed import completed, PR #824 merged immutable parser-slab
-retention. New candidates and their browser comparisons therefore use
-`bbccabd520972cc351a65d9f545bd5369b6e9747` as the baseline. The source archives,
-package lock, and seven benchmark/harness files remain fixed within every
-comparison.
+retention. Develop-based comparisons therefore use
+`bbccabd520972cc351a65d9f545bd5369b6e9747` as the baseline. The separate VNDB
+direct comparison uses the frozen PR #875 head documented below. The source
+archives, package lock, and seven benchmark/harness files remain fixed within
+every comparison.
 
 ## Completed earlier VNDB comparisons
 
@@ -39,7 +40,7 @@ All exhaustive checks match the same 146,570 referenced VNDB images and
 188,131,284 image bytes. See [the recovered audit and retained bundles](previous-vndb/README.md).
 The original evidence commit remains unchanged.
 
-## New hypotheses
+## Experiments and decisions
 
 ### Move lookup-sidecar checksums into the existing writer worker
 
@@ -115,9 +116,96 @@ Concurrent PRs #871 and #875 target the same work and are alternatives, not
 independent changes to stack. The new study therefore also compares the batch
 candidate directly against the single-image implementation in #875,
 `fb71a03f4611bcfa71e135693bebd1fe778153bf`, using the same three-arm protocol on
-VNDB. A and C are identical #875 builds in that cohort. A separate PR is
-justified only if batching demonstrates additional value; the source branch
-alone is not a performance recommendation.
+VNDB. A and C are identical #875 builds in that cohort.
+
+All 92 observations pass the independent audit. The completed comparisons are:
+
+| Comparison                    | B/A paired median | B/C paired median | Unchanged C/A control |
+| ----------------------------- | ----------------: | ----------------: | --------------------: |
+| JMdict against develop        |           +0.111% |           -0.517% |               +1.246% |
+| Jitendex against develop      |           +1.137% |           +0.576% |               -0.176% |
+| VNDB against develop          |           -4.144% |           -2.032% |               +0.442% |
+| VNDB against existing PR #875 |           +3.017% |           +3.206% |               -0.725% |
+
+**Withhold a competing batch PR.** Although the batch version improves VNDB
+against develop, the existing single-image implementation wins the direct
+comparison. Batching is faster in only one of six pairs against either #875
+control. Equal-work changes are +2.096% and +2.498%, also favoring #875. Every
+VNDB image and the 609,553,611-byte OPFS total match. These separate hosted
+cohorts must not be combined to calculate another speedup.
+
+The [complete native comparison](native-screen/README.md) retains all four
+cohorts and every observation. Aggregate result-copy intervals improve even in
+the adverse direct comparison, illustrating why those overlapping intervals
+cannot decide a complete-import performance change.
+
+This relative comparison does not qualify PR #875 for release. Its separately
+reported memory qualification is on hold, and its source remains a draft. The
+comparison evidence should be read alongside that PR's current qualification
+status, not as a replacement for its baseline or memory gates.
+
+### Batch shared-span compression messages
+
+The separate IPC candidate groups an existing admitted batch by its existing
+worker assignment. Logical block promises, source-consumption barriers,
+failure draining, output order, compressed bytes and private-source dispatch
+remain unchanged. The exact runtime diff is two JavaScript files.
+
+- Published candidate: `7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8`.
+- Tested local revision: `97a1cb41705c30462c516ffe46b05b0522e5c669`.
+- Exact shared tree: `29ef86aa6a72b3c14c9429a725a811254a2db46e`.
+- Frozen study: `ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d`.
+- [Hosted comparison](https://github.com/ManabiIO/manabitan/actions/runs/45470393272).
+
+The [validation receipt](ipc-validation/receipt.json) records a clean full unit
+invocation: 645/645 suites, 14,506 passing tests and 47 skips. All four TypeScript
+projects, targeted lint and seven dry-build targets also pass. Independent
+reviews cover ownership, timeout accounting, acknowledgements and partial
+failure draining. These correctness checks do not establish a performance gain.
+
+All 69 browser observations pass the independent audit on the original hosted
+attempts. No dictionary establishes a complete-import improvement:
+
+| Dictionary | B/A paired median | B/C paired median | Equal-work B/A | Equal-work B/C |
+| ---------- | ----------------: | ----------------: | -------------: | -------------: |
+| JMdict     |           +1.498% |           +1.219% |        +0.403% |        +0.836% |
+| Jitendex   |           +0.706% |           -0.700% |        +1.425% |        +0.535% |
+| VNDB       |           +0.236% |           +0.404% |        +1.278% |        +1.371% |
+
+**Rejected for a performance PR.** Mixed paired signs, unchanged-control
+variation and positive equal-work changes provide no support for an improvement
+claim. All tails remain, including VNDB's block-4 candidate at +7.041% against A
+and +7.582% against C. The unchanged output checks, exhaustive media readback
+and storage totals pass. The [complete IPC comparison](ipc-screen/README.md)
+contains every observation, independent audit and original completion receipt.
+
+### Compression levels and closed architecture leads
+
+A separate fixed component study uses all 488 production-matching content
+blocks from JMdict and Jitendex. Both titles use the same trained dictionary at
+level -1. The study retains 64 measured observations and 128 excluded warmup
+passes, with duplicate unchanged controls and exact per-block decompression,
+envelope and repeated-output checks.
+
+**Keep level -1.** Level -2 increases content-file size by 1.597% for JMdict and
+1.954% for Jitendex without a dependable component gain. Level -3 saves about
+8 ms of JMdict component work at the observed arm medians, increases its
+content-file size by 3.958%, and increases Jitendex size by 7.486% while its
+timing is inconsistent/adverse. No default change or browser-speed claim follows.
+The [complete component proof](compression-level-study/README.md) contains every
+observation and a byte manifest/regenerator for reproducible derived inputs.
+
+Two additional source checks close other apparent opportunities:
+
+- [Fused glossary scan/encode](native-fusion-architecture-review.md): ordinary
+  encoding copies already-validated raw glossary bytes; there is no second
+  grammar traversal. The text-normalization branch has zero activation in both
+  locked corpora. Copy/hash fusion is already covered by PR #840 and its adverse
+  or inconclusive browser evidence.
+- [Earlier index-worker eligibility](index-worker-eligibility-audit.json): the
+  1 GiB cutoff was added after a broad-worker comparison regressed JMdict by
+  6.31%/7.17% against its controls and failed to establish a Jitendex gain.
+  Current close costs vary substantially by host and do not reverse that result.
 
 ## Browser protocol
 
@@ -136,6 +224,12 @@ The six-block comparisons are exploratory screens on individual runners. They
 do not establish cross-device performance or peak memory use. All tails,
 failures, raw reports, and storage-layout differences are retained. Importer,
 parser-worker, and writer intervals overlap and must not be added together.
+
+The three current studies retain 230 passing browser observations: 180 timed
+imports, 30 excluded warmups and 20 excluded exhaustive-media diagnostics. This
+count includes the native candidate's separate direct comparison with PR #875.
+The recovered earlier VNDB studies and the compression-level component study
+are reported separately and are not pooled into these browser results.
 
 ## Retained environment failures
 

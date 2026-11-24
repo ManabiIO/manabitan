@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "shared-span-batch-hosted-20261124",
+  "dictionary": "jitendex",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+  "studyCommit": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+  "originalArtifact": {
+    "id": 14956274040,
+    "name": "import-screen-shared-span-batch-hosted-20261124-jitendex-45470393272-1",
+    "size_in_bytes": 1178016,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956274040",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956274040/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:32:00Z",
+    "expires_at": "2026-12-24T19:31:59Z",
+    "updated_at": "2026-11-24T19:32:00Z",
+    "digest": "sha256:8cc4bc3498d6da53e4959c0581aa6936c65e2e29ef96be48a53bdc87e6190864",
+    "workflow_run": {
+      "id": 45470393272,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470393272",
+  "archive": {
+    "path": "shared-span-batch-hosted-20261124-jitendex-45470393272.tar.xz",
+    "bytes": 139988,
+    "sha256": "d5510af32266836b54edb497d094876a4b2f80ccfdfdadb2adb93dd0d8b90249"
+  },
+  "files": [
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-1-A/run-1.json",
+      "bytes": 151071,
+      "sha256": "198acbdb08996b875aae880271d2e569508f83f74df8c5094bb73ea79df2e02e"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-1-A/summary.json",
+      "bytes": 59408,
+      "sha256": "df43723252b0a94beea79afbcc349b89bffa20bb99116a084479eef43485149a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-1-B/run-1.json",
+      "bytes": 150693,
+      "sha256": "5cb779807eda4635ccd9ec25ad023b161adad34a0ab3a46b57c0db831475467d"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-1-B/summary.json",
+      "bytes": 59184,
+      "sha256": "a21d94f5f13e54640d65bcb515d1119f9eccdfbb87b6fd430814da5550186353"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-1-C/run-1.json",
+      "bytes": 151194,
+      "sha256": "6044ae1e9cc1e522efd92927f993afb4567033446411f23790a0f91d719af5d3"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-1-C/summary.json",
+      "bytes": 59476,
+      "sha256": "af2f7dbfce78980087947ecde356ef147e44fcfd90165fe83f597ef305652381"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-2-A/run-1.json",
+      "bytes": 150359,
+      "sha256": "69380bba472cee06d6f7ddeccbe067fe41af70785b7fed6feac9ac856cd097d1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-2-A/summary.json",
+      "bytes": 59273,
+      "sha256": "ea4a5acee2f76ce8b2b5f22ccb04cf84e3179c1b87feee222d7a11aab02bbb21"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-2-B/run-1.json",
+      "bytes": 150837,
+      "sha256": "297396e04f6d197dbf34a645b9b1af79007380e506f919572bf7b1f70ac0afee"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-2-B/summary.json",
+      "bytes": 59334,
+      "sha256": "6f4ddd9e6fe0a3c35d46bd56e432c4fe9a866e5f2861ba41f83e99a05fab0fc5"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-2-C/run-1.json",
+      "bytes": 150457,
+      "sha256": "0e53d8d2e009d64118c4224c2dfea990a1a724d1943374a45106f05064eb3145"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-2-C/summary.json",
+      "bytes": 59132,
+      "sha256": "426dd8c48a19328f3298fbf1764ff5238f9ae5e752c37f74915ffa6d8ac52a55"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-3-A/run-1.json",
+      "bytes": 151068,
+      "sha256": "a1fb03223e1b023669b2dd806d02a8b4e2bf26b427b709b56f11b3c59ec152c4"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-3-A/summary.json",
+      "bytes": 59430,
+      "sha256": "37251be90c4233a31cbc9a00ab4b829ecf247954d66cb761bd44fb333df0e0bf"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-3-B/run-1.json",
+      "bytes": 151251,
+      "sha256": "b533e7e0b0a87d5a37bf1aa0cd2aadac542a2dcf981de14df9aa3dd23e910240"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-3-B/summary.json",
+      "bytes": 59449,
+      "sha256": "0943e1c65d77545b1a1a78474ff71dac6173222084187231a734189563252d89"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-3-C/run-1.json",
+      "bytes": 150945,
+      "sha256": "6bf2b6bd28876b4f9c56630268006dfaa6ad2a59c4f499b468db94aa6a0e51c7"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-3-C/summary.json",
+      "bytes": 59330,
+      "sha256": "7fe61d38b40a7cfac64838538fd079a4a21c956de88fbf0472873a9e5e5184af"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-4-A/run-1.json",
+      "bytes": 151039,
+      "sha256": "8f2435e02b4d9d2806ee7ef76a607cc6bd010bfb6884030690e22f716038508d"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-4-A/summary.json",
+      "bytes": 59294,
+      "sha256": "7127bafb869e464c4d18a7e8ff83ea1dc220fad9681432c25058f6bdc98749cc"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-4-B/run-1.json",
+      "bytes": 151222,
+      "sha256": "8eb4f141fb77eeecc1223dd77f6c74c4df0d7aaa950973df7fe3ba942421df19"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-4-B/summary.json",
+      "bytes": 59495,
+      "sha256": "0666dba1602d07c422ac301df4d2ea780430e68f4c2968906459698b69028dbd"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-4-C/run-1.json",
+      "bytes": 150991,
+      "sha256": "a784f34ec7d8f21846e3c3a056db4389ed17d428352b941996745064987d6e44"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-4-C/summary.json",
+      "bytes": 59245,
+      "sha256": "1c100d394bdcf792b7e1139ec21e1d4597314039d6fe54c5a39a914a3b5c6689"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-5-A/run-1.json",
+      "bytes": 150723,
+      "sha256": "8e9be32f7b5946a3311963921f106984720efc249adf559a8977fc32f1c8e153"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-5-A/summary.json",
+      "bytes": 59291,
+      "sha256": "4c8a7f4d5f158cad746edd622013faf6d2924d16e2e982ae4855d4981549e5de"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-5-B/run-1.json",
+      "bytes": 151049,
+      "sha256": "ddcf0e6f8c49bcb8a80f6a1ef2e1c192ee695f1e74d22c6a836c601ce7a9b4d5"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-5-B/summary.json",
+      "bytes": 59331,
+      "sha256": "bc334aabd091f4fa5c3639967a677ac691bb6b4007caef01bbab0b9c255f297b"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-5-C/run-1.json",
+      "bytes": 150880,
+      "sha256": "dd6e3b1d60f465bdbea36ee64028b105d761b60c2761f3bacaf159dbe8eece10"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-5-C/summary.json",
+      "bytes": 59338,
+      "sha256": "2b8da695fc17768e2393df833b491074be60ee370ed5653e50ac0b6af5769e6a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-6-A/run-1.json",
+      "bytes": 150764,
+      "sha256": "88f180791a6db50ec0155c2c67ee08e531784a27894761f4cf191fa69d891df1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-6-A/summary.json",
+      "bytes": 59263,
+      "sha256": "58ce802b4c53f5a3d05512a8129747e9e85834b02dbbb4d216bdbb0414d58dfa"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-6-B/run-1.json",
+      "bytes": 151282,
+      "sha256": "d7cde8bf90c0bfda257f98972d028cb2f70c310d0b7240020a1023a4d314482f"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-6-B/summary.json",
+      "bytes": 59251,
+      "sha256": "32abd6290aeefedad2072a89bf710c9a7b8a8286e22d405560bb6864f817b2f0"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-6-C/run-1.json",
+      "bytes": 150665,
+      "sha256": "5348c21096c73b43a42716ea5ecf91ef2947206d63deb1504b7a974da4ffb80a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/block-6-C/summary.json",
+      "bytes": 59304,
+      "sha256": "fdbd212131f4b7215816e725a23ae769b59cf0d17a4d313b1d67538d576eb260"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/diagnostic-A/run-1.json",
+      "bytes": 150271,
+      "sha256": "cffd73601ccb9902d966f56d2d9b86a569b84f0b291af22d638f156bc437f4d1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/diagnostic-A/summary.json",
+      "bytes": 59194,
+      "sha256": "9b3c8b51c7a534e881c95fcf3f74e81a39689149f4bd84dad830212f70dc2eaa"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/diagnostic-B/run-1.json",
+      "bytes": 150926,
+      "sha256": "de808fc9afe813c3baa21ac477de8274b5bdb660acfb9eff91619b7adf5bc47f"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/diagnostic-B/summary.json",
+      "bytes": 59274,
+      "sha256": "111342bc75c9fa58ad58627c940e3a2eceae6885414318142a8ef428c1e1dd04"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/expected-lookup-signature.json",
+      "bytes": 12351,
+      "sha256": "7a3c36aa8fe01644e2617f2bd3cec2dddfd1e9d4593bb3fb6f5b69b92bb4b586"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/protocol.json",
+      "bytes": 577,
+      "sha256": "c011ea2a18276efc11d9ec90f432e235651ab2a3714ec50f798c0cab10304019"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/summary.json",
+      "bytes": 297558,
+      "sha256": "5faa23a97899a72109634ae74e88357da5008d404c2bb3b59534f0e4b2d057b7"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/warmup-A/run-1.json",
+      "bytes": 150390,
+      "sha256": "f10dbef8ae61156d5baae6b390436a73a6e785fe01d20ee4c61e8d00769fdcf0"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/warmup-A/summary.json",
+      "bytes": 59190,
+      "sha256": "63395e675ab7cefda1b1beec055b924bbf544b3d11de7faa11caab04d0122aee"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/warmup-B/run-1.json",
+      "bytes": 150451,
+      "sha256": "52b05d4174ef972e8984bac5ef089fcabafdbc91118c91ba24985979d14838d2"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/warmup-B/summary.json",
+      "bytes": 59238,
+      "sha256": "88036c0f58f2d51dc38de2cabcf756044c2bfb563654fc8bbda691b3ce9a3a92"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/warmup-C/run-1.json",
+      "bytes": 150368,
+      "sha256": "5cfa9d677f02dd6b51396e10e5f7541189ad4c15e83f1814466caa7c55d6e4a5"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/warmup-C/summary.json",
+      "bytes": 59226,
+      "sha256": "386ab79bc5d0c92629d18669a5a843c875a4f1dcd62815e1adcda47c08e68e6f"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jitendex/workflow.yml",
+      "bytes": 2296,
+      "sha256": "134fcc202a06222c11877a7c77aa787e6dbd73bc266e637e0f1d5cafe57880bf"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

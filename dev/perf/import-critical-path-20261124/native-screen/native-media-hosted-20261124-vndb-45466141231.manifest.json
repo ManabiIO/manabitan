@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "native-media-hosted-20261124",
+  "dictionary": "vndb",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae",
+  "studyCommit": "6a04bbff4c5332d6c86f678455f36545a511abb5",
+  "originalArtifact": {
+    "id": 14957016244,
+    "name": "import-screen-native-media-hosted-20261124-vndb-45466141231-1",
+    "size_in_bytes": 1191142,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957016244",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957016244/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:21:50Z",
+    "expires_at": "2026-12-24T19:21:49Z",
+    "updated_at": "2026-11-24T19:21:50Z",
+    "digest": "sha256:5d4435859a08aa7c3a732118d6182c8f9cf39eeb2757a5d69339eed90103b8c0",
+    "workflow_run": {
+      "id": 45466141231,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "6a04bbff4c5332d6c86f678455f36545a511abb5"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45466141231",
+  "archive": {
+    "path": "native-media-hosted-20261124-vndb-45466141231.tar.xz",
+    "bytes": 141060,
+    "sha256": "d6622023bae4d81b91c399be59d4c71c5bda1c62654e69611a9d800faf4128f7"
+  },
+  "files": [
+    {
+      "path": "native-media-hosted-20261124/vndb/block-1-A/run-1.json",
+      "bytes": 152555,
+      "sha256": "6abe18d77815e00766165b402d52c432f776ddc9f0334d31b7ae53769fcd5eb1"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-1-A/summary.json",
+      "bytes": 60028,
+      "sha256": "d6c6367614f906ace3c7010f2c944b055dc0b06e2402b6d3d91e23f809268adb"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-1-B/run-1.json",
+      "bytes": 153239,
+      "sha256": "4f47cfae4e9080b94796fe877faee5534f5c33b7f68ced3d8e67255c2744f481"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-1-B/summary.json",
+      "bytes": 60158,
+      "sha256": "b26fc66b25e186278bf64d3e41874cdf7eaf271bb4ae89ad941258220e7fee27"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-1-C/run-1.json",
+      "bytes": 152862,
+      "sha256": "230386c391967db77438e7086f1d7a123c7a2cf200ac79c265a2414f4d001811"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-1-C/summary.json",
+      "bytes": 59999,
+      "sha256": "9fce7f2994bfcd2e1fb36e9b7bb5a6822e675193eb7f620d2123660d30f099f0"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-2-A/run-1.json",
+      "bytes": 153215,
+      "sha256": "7c7cbe7b5b0de61445b17c80fdbecc9215fa24cd137d787c01561518728a74c0"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-2-A/summary.json",
+      "bytes": 60180,
+      "sha256": "01a699f9d837a91a4a6f835c9bcf0e61721d36aa35be015b164b009526f469b2"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-2-B/run-1.json",
+      "bytes": 153602,
+      "sha256": "6c88c08f25b122b36c0ccdfb57f37b4eebdc68a52eeb52548dda278bf10ff633"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-2-B/summary.json",
+      "bytes": 60272,
+      "sha256": "777b7628ae329e1e37a39f4281f951443e11ea590111766ef48c7ca22c25f453"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-2-C/run-1.json",
+      "bytes": 152975,
+      "sha256": "cba750259a03ba22b18361d2a71cf60d6cddf15e627b283278e1bbf5d7b71817"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-2-C/summary.json",
+      "bytes": 60094,
+      "sha256": "2bd9e016df9b79e83486452dd838ddd0236a110b848426514279b60039ae75b6"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-3-A/run-1.json",
+      "bytes": 152986,
+      "sha256": "9b750b70b08615435675a49f0f655e426f012cf735fca32f0c4b8294a4b8abfb"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-3-A/summary.json",
+      "bytes": 60086,
+      "sha256": "c4ff40e1c8cbfc6ed2034214f4afe30ee4a611d1496b7054f9a5eb5a26d9c1ba"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-3-B/run-1.json",
+      "bytes": 153306,
+      "sha256": "130277b7992d5e8139a453bd6bce694d9a62d642434d8e7df18c12e084001faf"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-3-B/summary.json",
+      "bytes": 60134,
+      "sha256": "2662bc10bac8ccfa419a68462bd7f23a63ad48a640c5183790ff1b05eeacb62b"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-3-C/run-1.json",
+      "bytes": 153139,
+      "sha256": "3562a39d3861d04f85dcee78923d29d178d973482820e478474cb1f0afb89f1f"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-3-C/summary.json",
+      "bytes": 60179,
+      "sha256": "b03d3646bb19ead137605268d0ed7c52875eb66a0d7f6220fc4692d2a4fb4d71"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-4-A/run-1.json",
+      "bytes": 153036,
+      "sha256": "4b903ae3e2880c8ef34ae0c37f0a1b49da82eb0596e5fec6ac955483d06762e4"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-4-A/summary.json",
+      "bytes": 60134,
+      "sha256": "7e8881a18090147403def1ce3cb0d165374306ad99ab9b025fe474b45b745985"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-4-B/run-1.json",
+      "bytes": 152820,
+      "sha256": "fab700c08dd5a270ddca8771a35fdbbc3bf0e9377915d33414f3152e5acd0622"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-4-B/summary.json",
+      "bytes": 60065,
+      "sha256": "fab0b36a425ab6a6bcc68df37c0614d68601062a2b3abe158315b5e560e9d8f1"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-4-C/run-1.json",
+      "bytes": 153203,
+      "sha256": "430112beb9f868741ec9ce8164a2ac0c6de3036e245477efb7fccbd878fb4832"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-4-C/summary.json",
+      "bytes": 60142,
+      "sha256": "bed0f179ef345c74000230d9b55040e3de47d84511129a060acb2d1290790340"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-5-A/run-1.json",
+      "bytes": 153105,
+      "sha256": "808cf6c441a7f8c63547531b823587ad2a4796f7225c6c3ac73bf9489c28b8c0"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-5-A/summary.json",
+      "bytes": 60194,
+      "sha256": "17d010e102a7b348607067ccc904263b1626e618ea3b94b38d029d478e6c267e"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-5-B/run-1.json",
+      "bytes": 152627,
+      "sha256": "3f9750ca0314c26bcf72eb2ef64e27caba220183ccc57c7b355c78da0cc7cfdc"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-5-B/summary.json",
+      "bytes": 60030,
+      "sha256": "806ac0f4b5713670c34ea7475046eb0f9ee5b822b726987d231bfcd287cd9983"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-5-C/run-1.json",
+      "bytes": 153024,
+      "sha256": "0ecaa9fdb499484ab2293073f5ae7e7f153ec0f82f0d663de2a7a837b4fe7b15"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-5-C/summary.json",
+      "bytes": 60016,
+      "sha256": "3b395cc032dd49201c1535cf23fce3f22b3e73eca0ae99f5b6e6848f030afa43"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-6-A/run-1.json",
+      "bytes": 153135,
+      "sha256": "80d467df15db8f69df7eebef54e9664c47455c7e0b64e571b88cc7242ad5ea35"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-6-A/summary.json",
+      "bytes": 60130,
+      "sha256": "06c5e1be997ee5498940de51a38378ed4cba87ea22867d7166f0118ffc14553a"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-6-B/run-1.json",
+      "bytes": 153272,
+      "sha256": "771df1c741d2ed4ff959ab47afda535c9b6fed06a9cdde3699ff98bc29b9ee48"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-6-B/summary.json",
+      "bytes": 60118,
+      "sha256": "26f3f0601d78b93fd31e8f07081a9f43e6065a66d42fbd82b25820577208fd95"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-6-C/run-1.json",
+      "bytes": 152998,
+      "sha256": "5ffc9b6129d7478aa7787458ae1face5222c12984e2870c312d5b0adc91c0097"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/block-6-C/summary.json",
+      "bytes": 60130,
+      "sha256": "c627ca9700f0b5318e49f001ef23be431f83cd977142f5b634a27ee2aa881c30"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/diagnostic-A/run-1.json",
+      "bytes": 153409,
+      "sha256": "657884e58761d96cba971c3240a816a058657b97260916fed813601ebc544bb5"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/diagnostic-A/summary.json",
+      "bytes": 60084,
+      "sha256": "d0716622ad50afbc2430248eb2d3613d5a6e323c6d00b5849862a68a7705e876"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/diagnostic-B/run-1.json",
+      "bytes": 152565,
+      "sha256": "9a7ddcd36271f356af45855c93708e49c3464f3fb7a012d7acb73683fda90af7"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/diagnostic-B/summary.json",
+      "bytes": 60040,
+      "sha256": "4583e02b529d33c6690b73cdc95c28c41ebf25a1846c2d31e8f986c8b08bacf1"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/expected-lookup-signature.json",
+      "bytes": 12889,
+      "sha256": "8d17b25323c33afcb7521cb0bedaa112f470c3103f61181f59709c20258c39d7"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/protocol.json",
+      "bytes": 568,
+      "sha256": "33abc267eaffca567c4e2173610bfecaf8e8c4a71d6ac11c340bcbfcd8689499"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/summary.json",
+      "bytes": 297524,
+      "sha256": "4aecab108fd869b7ddff7352a64e5b6cfec5dc58e78f6ac463f825f43d251d80"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/warmup-A/run-1.json",
+      "bytes": 153000,
+      "sha256": "8c0690c60a41e623dd76286fefb7510c65a3b90e26e126bf5c843842c7539ef7"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/warmup-A/summary.json",
+      "bytes": 59987,
+      "sha256": "57a2d7123d6b45d6e496f8a09cd98f176548f701a55c8a2617d337e63e7d988e"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/warmup-B/run-1.json",
+      "bytes": 153160,
+      "sha256": "6ddc0047edf7766a81e3dde573aa780fcc06cb9e832c4660e912de7c4a0004cd"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/warmup-B/summary.json",
+      "bytes": 60102,
+      "sha256": "45bc8d4c5d8a79ed714cb4dcbd517226bd89a152cf518c1f409274406d5692c1"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/warmup-C/run-1.json",
+      "bytes": 153133,
+      "sha256": "8c4355a820d8685ad30c8b19ec0c3fa385f7867fe38a9a5fbe2f0858fc8fdc8f"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/warmup-C/summary.json",
+      "bytes": 60165,
+      "sha256": "287849efd82074693bebac01a2ed9003c967840d5ed9e2eb7030278645f6bc84"
+    },
+    {
+      "path": "native-media-hosted-20261124/vndb/workflow.yml",
+      "bytes": 2423,
+      "sha256": "c98f3d397f6ea1dea7e3aecda990068b0e3c78e8a8ee5a76e9f61ccef882a9e9"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

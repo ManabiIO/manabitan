@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "shared-span-batch-hosted-20261124",
+  "dictionary": "jmdict",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+  "studyCommit": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+  "originalArtifact": {
+    "id": 14957782734,
+    "name": "import-screen-shared-span-batch-hosted-20261124-jmdict-45470393272-1",
+    "size_in_bytes": 1165695,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957782734",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957782734/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:31:09Z",
+    "expires_at": "2026-12-24T19:31:08Z",
+    "updated_at": "2026-11-24T19:31:09Z",
+    "digest": "sha256:a9051c98a8cdaa8476440ad15a9c6815fbf79d934fca56124a73188b03cffdbe",
+    "workflow_run": {
+      "id": 45470393272,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470393272",
+  "archive": {
+    "path": "shared-span-batch-hosted-20261124-jmdict-45470393272.tar.xz",
+    "bytes": 134128,
+    "sha256": "60405eb54f19083e272d01fe6f1371c42c3c70a01f4c9bd3fd7680c85b1f84b5"
+  },
+  "files": [
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-1-A/run-1.json",
+      "bytes": 150359,
+      "sha256": "7e52b78ad61530011e70bc5ee86fde0012eff2b3481bce0f2b34858fdfa64aec"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-1-A/summary.json",
+      "bytes": 59083,
+      "sha256": "35a21141749b9eb29be73df0faa2432f64587c8b927c09105062686b9e09e442"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-1-B/run-1.json",
+      "bytes": 149737,
+      "sha256": "10fbe9db43ac050e1860f465b85db23b31a5b861c786f3cfa433fb31eeff66d1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-1-B/summary.json",
+      "bytes": 58858,
+      "sha256": "e0d209f031399a56cece89964025138e51537a15df498f6102c274905b99fe33"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-1-C/run-1.json",
+      "bytes": 150398,
+      "sha256": "ceb0d3d19fb38e72d504ac09f1c9bdfb04a054f9522c546e8874f81e7d4b27f7"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-1-C/summary.json",
+      "bytes": 59038,
+      "sha256": "74f7b19ab30d98fd106551c1f08865e00548db3e3720696c6f2d1542c53c2e15"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-2-A/run-1.json",
+      "bytes": 150572,
+      "sha256": "dbb5e3b00ded6f27dc50a91137ca22220b9c348ebbb575d9c0be1d664c1289b3"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-2-A/summary.json",
+      "bytes": 58960,
+      "sha256": "5a053b665f125904447461d6ba58335d3e4cd7923b94746055a9b89dbe074844"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-2-B/run-1.json",
+      "bytes": 150894,
+      "sha256": "9ebc2b3e7fb5887978ffc2ddad805b475b0c339f9a72e33cd97cfeb5080ab1a8"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-2-B/summary.json",
+      "bytes": 59097,
+      "sha256": "4e8c34c45de3fd5b8acdb17ba2640e2caef495609ab2505bd6203f8782c30604"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-2-C/run-1.json",
+      "bytes": 150860,
+      "sha256": "ea84a567e65cb7867583275705d745e9a6056de1297a3ff4b471b6d510d23efa"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-2-C/summary.json",
+      "bytes": 59052,
+      "sha256": "481a8dd3367bca7e1878567fdb832f3a0e1494a47aeaac8830d8b88527b157ea"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-3-A/run-1.json",
+      "bytes": 150289,
+      "sha256": "8525d306fee6f0eec7a3dda9be1d0137e8cbb63b80736ce77e92a555f079d12a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-3-A/summary.json",
+      "bytes": 58982,
+      "sha256": "8761dc9e5e52afe5a8ac554f61c61ae13fe32d9f13ea8708ab7729db538614ab"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-3-B/run-1.json",
+      "bytes": 150583,
+      "sha256": "8b028099f92ae021ed112858acfc9ffe3c85c131eb2905d52ac7b4b75bdcb3e5"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-3-B/summary.json",
+      "bytes": 59030,
+      "sha256": "c73f861736085b6d7f39d405447839135b44aa15c8223dec82d3652fac948ffd"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-3-C/run-1.json",
+      "bytes": 150897,
+      "sha256": "1b318937c35b0c935892ed9ac0bc7c58084a1b6f3014a84b8cc12b71955c67db"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-3-C/summary.json",
+      "bytes": 58974,
+      "sha256": "61a60fb13711e2828fb2961b6eb5d916b0d7a3a42a681db6d814acea8cd50b4b"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-4-A/run-1.json",
+      "bytes": 150761,
+      "sha256": "e20a56890b7c30ed97cc79d4883bdc7b8da427a7cca34fead839412cd0aed73e"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-4-A/summary.json",
+      "bytes": 58992,
+      "sha256": "bb9951004f74f533b2ef36253400f8472a14d1fe3f7f63e1e70d1999f048e808"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-4-B/run-1.json",
+      "bytes": 150954,
+      "sha256": "6d69edefae0b4aadfa390c0d3cbdd6417d9ab999495ee9dd8b5bbad7b6041709"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-4-B/summary.json",
+      "bytes": 58971,
+      "sha256": "f6dbf71418f019ad19fffcc456c42600e8705c329fb863b6f8bd4ea27c39a82d"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-4-C/run-1.json",
+      "bytes": 150504,
+      "sha256": "658f424a8bcd744c7bf96adc5fbece68b298be49101a797223d5514be8768f02"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-4-C/summary.json",
+      "bytes": 59035,
+      "sha256": "bd0cd9742d2aeb01f0ad72374e4ef35699b1f8d6478df48358ec7e4a9dcf553d"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-5-A/run-1.json",
+      "bytes": 150528,
+      "sha256": "224835cc38153f857004abd078905b7c2de441d7dd9d264387c8d48b9f984eed"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-5-A/summary.json",
+      "bytes": 58844,
+      "sha256": "7499d15b7961f52de0741df261e49996fba8242b0484164eb846f8a5fd29b315"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-5-B/run-1.json",
+      "bytes": 150149,
+      "sha256": "93843c01034705fd4bbe765c2351af13205e66d4b777a010f5ab0cd5f0489961"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-5-B/summary.json",
+      "bytes": 59016,
+      "sha256": "94b039cc239d81be9b87076b63d75a948c997abff2298e424344d9db9dd363cd"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-5-C/run-1.json",
+      "bytes": 150212,
+      "sha256": "d277e5203a04551a86ddca14dbdd339e367d3e7cc78013693710d4fb9705b966"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-5-C/summary.json",
+      "bytes": 58789,
+      "sha256": "acba6ba2959e0ec5baa29e374d20ef68dde147618d5771ddeeb715a1d9b18c51"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-6-A/run-1.json",
+      "bytes": 150479,
+      "sha256": "573b797411e7a4c80866855edb8a4fecbb6c2ffbeef639042195a40f96f67d87"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-6-A/summary.json",
+      "bytes": 58915,
+      "sha256": "b667cd0a81b7d1567e7e4b0f3029a350c79957897c2d614876772405b63701a8"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-6-B/run-1.json",
+      "bytes": 150694,
+      "sha256": "2ab0c91e5afe2aad57158558df07a0f7f9ca72d9b48e5e2af54c31f8b50e98b1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-6-B/summary.json",
+      "bytes": 59062,
+      "sha256": "64c3d12d66e664650122305811fa2444ef27c2bda52184655278c8a9883a3d01"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-6-C/run-1.json",
+      "bytes": 150730,
+      "sha256": "f5e94f43c1dc69b1d0a1606547e73ee61b1134c4f96895836ce990d61fe90d32"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/block-6-C/summary.json",
+      "bytes": 59092,
+      "sha256": "8d23b19f7ff27cab4746296aa66e6af3427b1b1c5a77c4a9e3dc9aee97d75bcf"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/diagnostic-A/run-1.json",
+      "bytes": 150801,
+      "sha256": "4e04d18c88f7374eb418f1e2a759ed46624c00409aa569f538861d3bfb718f9a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/diagnostic-A/summary.json",
+      "bytes": 59081,
+      "sha256": "5b67def0df2e3f341b614b8b1f0a9940eb27275a678a32bbd5242e8509c58bda"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/diagnostic-B/run-1.json",
+      "bytes": 150537,
+      "sha256": "cdb71db216775a0188a2a5c6c22bb66df397cacc093969df6425963f3c2ae348"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/diagnostic-B/summary.json",
+      "bytes": 59129,
+      "sha256": "abb74c687aa257d3c6d2c8295dff296e0636115a24a39d875938a420124196f9"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/expected-lookup-signature.json",
+      "bytes": 12620,
+      "sha256": "6fad37c3482c72f875d8e247f0d9929410b42a2d908b7479303afb82775d39db"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/protocol.json",
+      "bytes": 575,
+      "sha256": "9f4a33bc46281560a16393bb967bf54bc58a393672917eb2b6dc9a02ae9cac1c"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/summary.json",
+      "bytes": 297030,
+      "sha256": "35481861288f4de52a352f05d0c2bd2b6fddde84b3687f835077cad84678a418"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/warmup-A/run-1.json",
+      "bytes": 150317,
+      "sha256": "7a25ca8765153b3f71612a65ca317085a256fba39cf3423e9b6d733bee0fc345"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/warmup-A/summary.json",
+      "bytes": 59010,
+      "sha256": "b0b25f6127cf0f45a3c53d979619d6ab4257bdd1687e40745ddffce833515f86"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/warmup-B/run-1.json",
+      "bytes": 150764,
+      "sha256": "f8d29c4a76de38f6bce51889d971e19f3b5cc2e3f4dffafea527a5088db0b099"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/warmup-B/summary.json",
+      "bytes": 59038,
+      "sha256": "6a40577b6e56197ef01a86dc26f22057216396a74015bf2625541b27c7b5c8b8"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/warmup-C/run-1.json",
+      "bytes": 150785,
+      "sha256": "e286dac8b05d8fa283f0c1fa775caa9650266c054165075ebb61d34e0bc6bed5"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/warmup-C/summary.json",
+      "bytes": 58973,
+      "sha256": "b52f2f4eccc6d827c19cce229dc0d64cbecf51678110b55ca222bdf753b92b77"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/jmdict/workflow.yml",
+      "bytes": 2296,
+      "sha256": "134fcc202a06222c11877a7c77aa787e6dbd73bc266e637e0f1d5cafe57880bf"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

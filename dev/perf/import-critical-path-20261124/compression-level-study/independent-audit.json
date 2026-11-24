@@ -1,0 +1,245 @@
+{
+  "status": "passed",
+  "planSha256": "8ea0e039aa7e09328d1b1dd39ec73659ef8e36f76d9f7754cd8d60387881acf5",
+  "observations": 64,
+  "warmupPasses": 128,
+  "scope": "Independent source/receipt/byte-hash/arithmetic audit; no timing rerun",
+  "corpora": {
+    "jmdict": {
+      "sourceBlocks": 103,
+      "rawBytes": 100300626,
+      "verifiedFullPasses": 96,
+      "productionInventoryMatch": true,
+      "baselineFramesEqual": true,
+      "comparisons": {
+        "B/A": {
+          "pairedMedianPercent": -1.7052504734379303,
+          "equalWorkPercent": -0.471797595797141,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedPercent": [
+            -0.7215250040483623,
+            10.492406476315264,
+            -0.6455064280539435,
+            27.675339487117935,
+            -9.905626954441493,
+            -19.413582630187864,
+            -2.6889759428274984,
+            -4.846875716702015
+          ]
+        },
+        "B/D": {
+          "pairedMedianPercent": -0.6181617239116088,
+          "equalWorkPercent": 0.8601215151657904,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedPercent": [
+            -0.956188224173371,
+            10.229767313667516,
+            -0.28013522364984667,
+            42.30616861397309,
+            4.187776844086311,
+            -2.792310560282185,
+            -28.719365489172677,
+            -5.254531769451198
+          ]
+        },
+        "C/A": {
+          "pairedMedianPercent": -5.46247797576001,
+          "equalWorkPercent": -5.618425013925021,
+          "fasterPairs": 6,
+          "pairs": 8,
+          "pairedPercent": [
+            -8.398714843946841,
+            -5.415004202727669,
+            -5.509951748792352,
+            -11.63558892327121,
+            2.272595248237619,
+            -20.824197658003474,
+            10.026135060728535,
+            -2.883124741048737
+          ]
+        },
+        "C/D": {
+          "pairedMedianPercent": -4.828169949970423,
+          "equalWorkPercent": -4.355379762326816,
+          "fasterPairs": 7,
+          "pairs": 8,
+          "pairedPercent": [
+            -8.615231591843953,
+            -5.639831635557291,
+            -5.16246929991101,
+            -1.5095567188355918,
+            18.271030373902384,
+            -4.493870600029837,
+            -19.405506252868875,
+            -3.2991939171435503
+          ]
+        },
+        "D/A": {
+          "pairedMedianPercent": -0.0647344543400652,
+          "equalWorkPercent": -1.320560684395622,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedPercent": [
+            0.2369287044970969,
+            0.2382651882956388,
+            -0.3663976131772273,
+            -10.28123325176682,
+            -13.526926310768806,
+            -17.09872147533469,
+            36.518178780228496,
+            0.430264434133365
+          ]
+        }
+      },
+      "storage": {
+        "-1": {
+          "compressedBytes": 12326040,
+          "compressedDeltaBytes": 0,
+          "compressedDeltaPercent": 0.0,
+          "contentFileBytes": 19566680,
+          "contentFileDeltaBytes": 0,
+          "contentFileDeltaPercent": 0.0
+        },
+        "-2": {
+          "compressedBytes": 12638444,
+          "compressedDeltaBytes": 312404,
+          "compressedDeltaPercent": 2.534504187881925,
+          "contentFileBytes": 19879084,
+          "contentFileDeltaBytes": 312404,
+          "contentFileDeltaPercent": 1.5966121999235527
+        },
+        "-3": {
+          "compressedBytes": 13100410,
+          "compressedDeltaBytes": 774370,
+          "compressedDeltaPercent": 6.282390775950741,
+          "contentFileBytes": 20341050,
+          "contentFileDeltaBytes": 774370,
+          "contentFileDeltaPercent": 3.9575952588788654
+        }
+      }
+    },
+    "jitendex": {
+      "sourceBlocks": 385,
+      "rawBytes": 389687485,
+      "verifiedFullPasses": 96,
+      "productionInventoryMatch": true,
+      "baselineFramesEqual": true,
+      "comparisons": {
+        "B/A": {
+          "pairedMedianPercent": 3.5175390471822388,
+          "equalWorkPercent": 1.765226119564356,
+          "fasterPairs": 3,
+          "pairs": 8,
+          "pairedPercent": [
+            1.6514032734586959,
+            44.28199952399239,
+            8.385699853116947,
+            5.383674820905782,
+            -5.02991881589856,
+            -8.941380613907079,
+            12.19366202509713,
+            -29.86485617878676
+          ]
+        },
+        "B/D": {
+          "pairedMedianPercent": -6.273965717789943,
+          "equalWorkPercent": 3.2386004125343204,
+          "fasterPairs": 5,
+          "pairs": 8,
+          "pairedPercent": [
+            -6.843832250802507,
+            48.28173503292863,
+            7.145247742866534,
+            -10.26466152211759,
+            -8.514403787926394,
+            -5.7040991847773785,
+            25.21182242392781,
+            -15.357467255752944
+          ]
+        },
+        "C/A": {
+          "pairedMedianPercent": 10.14037225961738,
+          "equalWorkPercent": 18.55219860873094,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedPercent": [
+            -5.61106978337127,
+            37.43270884613787,
+            -8.094295070514402,
+            25.89181430260603,
+            119.5997693714411,
+            56.04788187656873,
+            -18.28027881857428,
+            -30.591792005679096
+          ]
+        },
+        "C/D": {
+          "pairedMedianPercent": -0.7999291907540731,
+          "equalWorkPercent": 20.268617551287505,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedPercent": [
+            -13.499364162507321,
+            41.24257069636672,
+            -9.146137018099099,
+            7.198240972690084,
+            111.54257823613793,
+            61.59563686626488,
+            -8.79809935419823,
+            -16.23476907875271
+          ]
+        },
+        "D/A": {
+          "pairedMedianPercent": -0.7698298652059954,
+          "equalWorkPercent": -1.4271544626549115,
+          "fasterPairs": 4,
+          "pairs": 8,
+          "pairedPercent": [
+            9.119348433409957,
+            -2.697389201743583,
+            1.1577294713315922,
+            17.43832096524638,
+            3.8087798695112918,
+            -3.4331093940905277,
+            -10.396909929763098,
+            -17.139596905575637
+          ]
+        }
+      },
+      "storage": {
+        "-1": {
+          "compressedBytes": 31121935,
+          "compressedDeltaBytes": 0,
+          "compressedDeltaPercent": 0.0,
+          "contentFileBytes": 38386795,
+          "contentFileDeltaBytes": 0,
+          "contentFileDeltaPercent": 0.0
+        },
+        "-2": {
+          "compressedBytes": 31871953,
+          "compressedDeltaBytes": 750018,
+          "compressedDeltaPercent": 2.4099337011018074,
+          "contentFileBytes": 39136813,
+          "contentFileDeltaBytes": 750018,
+          "contentFileDeltaPercent": 1.9538437632003358
+        },
+        "-3": {
+          "compressedBytes": 33995568,
+          "compressedDeltaBytes": 2873633,
+          "compressedDeltaPercent": 9.233465078569193,
+          "contentFileBytes": 41260428,
+          "contentFileDeltaBytes": 2873633,
+          "contentFileDeltaPercent": 7.485993555856907
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Node compression component only; source gather, IPC, dedup and storage are outside timing.",
+    "Explicit forced GC is outside timing; automatic GC during wrapper calls is not proven absent.",
+    "Baseline byte equality is against captured production-function frames; browser OPFS inventories agree, but complete browser frame bytes were not captured.",
+    "No whole-import improvement follows from a component speed estimate."
+  ]
+}

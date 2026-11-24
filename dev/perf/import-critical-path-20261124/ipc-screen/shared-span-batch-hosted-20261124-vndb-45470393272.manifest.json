@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "shared-span-batch-hosted-20261124",
+  "dictionary": "vndb",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+  "studyCommit": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+  "originalArtifact": {
+    "id": 14957264400,
+    "name": "import-screen-shared-span-batch-hosted-20261124-vndb-45470393272-1",
+    "size_in_bytes": 1192541,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957264400",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957264400/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:51:23Z",
+    "expires_at": "2026-12-24T19:51:22Z",
+    "updated_at": "2026-11-24T19:51:23Z",
+    "digest": "sha256:fd549adc2799eb7bd944df379c298b531e157a4f9ee2b8a02f58d1bc2da4bc75",
+    "workflow_run": {
+      "id": 45470393272,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470393272",
+  "archive": {
+    "path": "shared-span-batch-hosted-20261124-vndb-45470393272.tar.xz",
+    "bytes": 142976,
+    "sha256": "5520820c10431bfa70f4dd58a01450b1e18ae2b3b5641a6dcfc95d98ea50919b"
+  },
+  "files": [
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-1-A/run-1.json",
+      "bytes": 152883,
+      "sha256": "00813cad7d5faecc464c1a50c0a4023a0a9ea00a021dcd4ff794c8b896ae5cba"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-1-A/summary.json",
+      "bytes": 60024,
+      "sha256": "20b816c80bdfaca70ee8a333704fb96e91612636d8d31a2eaf65a01b795ee396"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-1-B/run-1.json",
+      "bytes": 152846,
+      "sha256": "9afe0865f59324197ff76fe1cd54f709f48309b63d7d9efeee1e0c9a485b56c7"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-1-B/summary.json",
+      "bytes": 60048,
+      "sha256": "423822a2d65d7c74bcc64b27d44a6079e3cea59329c7f0c02b3ce0497d8f7628"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-1-C/run-1.json",
+      "bytes": 153454,
+      "sha256": "25827bafa2f2fbb4437986b22f0e8221d26d9c11bd5b367b891feb03f8d4996a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-1-C/summary.json",
+      "bytes": 60158,
+      "sha256": "25c5468dbb22b9e8e9437e062a0b9ef198c56e578017957479c9cf5ec9ab3774"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-2-A/run-1.json",
+      "bytes": 153140,
+      "sha256": "9bcc59a6e610ef7c7536e3b04328eeb7ca1a0182c1942a2a4ff830d83db91a32"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-2-A/summary.json",
+      "bytes": 60073,
+      "sha256": "2e27f90f2c9718ccd37ebf359a9f2363d10b557b9fc33bfa96861aba0ad168a4"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-2-B/run-1.json",
+      "bytes": 152896,
+      "sha256": "6660ccac647d8b45e7f8c444a8e659b141a8613763820b0a28cfc28f84607443"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-2-B/summary.json",
+      "bytes": 60049,
+      "sha256": "27dc445b932529b09f6e0f1e12a7a8de08ef726507b90f0c08fdfc35dedb751f"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-2-C/run-1.json",
+      "bytes": 153036,
+      "sha256": "90d74190c0a75655fbf194de08909b51a0f4b613e50002bca43b89dd3cf5c840"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-2-C/summary.json",
+      "bytes": 60154,
+      "sha256": "c3c56f62ce997898676c46da5d64dc0aff743bf7fbe562e23ab2c3655fa9ab43"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-3-A/run-1.json",
+      "bytes": 152470,
+      "sha256": "b403ebd3b8f230b3b0130e3974a8e46615b30fe6260579708aa6955a7c501ac4"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-3-A/summary.json",
+      "bytes": 59928,
+      "sha256": "2cf6c283d6a2cfa67d049691780c24a063355b25617ff5a109c224692b164a2c"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-3-B/run-1.json",
+      "bytes": 153122,
+      "sha256": "01845fcf3853d451f9bde7196f587d579dafc9543bc6135e3ad3f4448682f34f"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-3-B/summary.json",
+      "bytes": 60127,
+      "sha256": "945405734537107e7eee8638d813479de43871bc1712de4f14aee6eae78b824b"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-3-C/run-1.json",
+      "bytes": 152924,
+      "sha256": "c16c2db0835f925464be09dca919e07d8e4828c3a1f9a763b452c785ab377a1e"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-3-C/summary.json",
+      "bytes": 59973,
+      "sha256": "0bb51d8ed0d716f0c6c1acce3f3ce08b69c57609ecfe17564baab75ba00af90a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-4-A/run-1.json",
+      "bytes": 153095,
+      "sha256": "fbea514acee5e95ef0d0ede7afd4f80aec8f9a56a55c4f42ee9d5aa715e9a881"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-4-A/summary.json",
+      "bytes": 60104,
+      "sha256": "4690d6da039ca518ed568cc50eb68667af1a306d232f0139d6d7b3a27bb1a400"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-4-B/run-1.json",
+      "bytes": 153007,
+      "sha256": "426450efe887b5c32f3f94c398c6334f00b9346ba3c1043ed475a9c34e3c98e3"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-4-B/summary.json",
+      "bytes": 60159,
+      "sha256": "e986b8719662148497dcdb5c3033fb61354e76edfb29915e6e65c06d78404410"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-4-C/run-1.json",
+      "bytes": 153531,
+      "sha256": "0bdd0a0ae1a61a673230fa84da4f96557b7ec61290d5630b795abcee13bc4af5"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-4-C/summary.json",
+      "bytes": 60120,
+      "sha256": "7813953a58e8ac186988753d9e7592df83557d14ec7d98bb2d6aa35fff143740"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-5-A/run-1.json",
+      "bytes": 152735,
+      "sha256": "c043b2d2278f7e92b007f9c521aac4cd6dbce44e23528540819184220f83ade8"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-5-A/summary.json",
+      "bytes": 60042,
+      "sha256": "db823198461892568f5c9ce30b8659f7c9f34831029c8a470cbb3eb6d8978b07"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-5-B/run-1.json",
+      "bytes": 153033,
+      "sha256": "c1f7122bcb3e7f21bdad05dd654bf25ebd07c8c269b2a80ba0b2a001bce6974a"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-5-B/summary.json",
+      "bytes": 60108,
+      "sha256": "9c1b3af313df69bde239b04b62acec10ff4036f04de7f78a9321bbf3da3cc769"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-5-C/run-1.json",
+      "bytes": 152804,
+      "sha256": "6ccb75552df84f79c5a598bc2e48bb5b3792294592aa500a40dd71a2a940966f"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-5-C/summary.json",
+      "bytes": 59958,
+      "sha256": "72f78a823b04f8e27a08f1749b4fbb416f3664e097ca3c2de6144835f4fb35cf"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-6-A/run-1.json",
+      "bytes": 152902,
+      "sha256": "55738969bb47b7a5642e4ba429a5426f93bb31818f71ab9edc19915597c8dfe1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-6-A/summary.json",
+      "bytes": 60083,
+      "sha256": "cef443962f0a79ff2c52cdf55a9e26a62ea7d9463709da293b311eba3ea1b257"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-6-B/run-1.json",
+      "bytes": 153095,
+      "sha256": "d3a6e8570e30c9bd91997129eeb50513f4acbc157ef545ed8936fe10eb72847e"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-6-B/summary.json",
+      "bytes": 60144,
+      "sha256": "fd34959d8105f3a5d565d42e379c0ae02c58210916ac7ccc82a08282cbb9f959"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-6-C/run-1.json",
+      "bytes": 152703,
+      "sha256": "03bde7464f5573220a1f9514d26a98da009849bb9b21ae3a32388e192e615da9"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/block-6-C/summary.json",
+      "bytes": 59935,
+      "sha256": "59f1f373889420c2e58a559b2eb4eda6fe506fd07ab2917987403eee57ffe371"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/diagnostic-A/run-1.json",
+      "bytes": 153195,
+      "sha256": "77e1ace730b3076c29879a15d02177d5128e2422caaf2cbf7b2a7796160990fe"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/diagnostic-A/summary.json",
+      "bytes": 60202,
+      "sha256": "2236bb03a7e56618ddd8abc57f63a0c94d8b4134e7e3805b09e7c26fb703ce73"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/diagnostic-B/run-1.json",
+      "bytes": 153160,
+      "sha256": "da43998eab13bdf5d717f49249a9a0e7307380d0a82ea448647678d5561d30b1"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/diagnostic-B/summary.json",
+      "bytes": 60138,
+      "sha256": "e5291a1eb233b0a3bb6b23c63efe4ece02a564496c4a996622b1dc6d73659969"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/expected-lookup-signature.json",
+      "bytes": 12889,
+      "sha256": "8d17b25323c33afcb7521cb0bedaa112f470c3103f61181f59709c20258c39d7"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/protocol.json",
+      "bytes": 573,
+      "sha256": "73623f37fbb963de9e2ddf0b63801dd5233385db0e7de8166f07b545ee162cd0"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/summary.json",
+      "bytes": 296471,
+      "sha256": "d7cf86a18ed6f5835089aaf13b19332a23cdcbae844ad9fd64fc0d4711e8e64b"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/warmup-A/run-1.json",
+      "bytes": 152827,
+      "sha256": "4fde99d206e9b1b0a4acbc23bd1a52133dacc690fe8c8cde916861a6c7d8be85"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/warmup-A/summary.json",
+      "bytes": 60055,
+      "sha256": "045039ee992d99b4e7af445bb9d01c0754e87960a00c8f3664e94498b13ab509"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/warmup-B/run-1.json",
+      "bytes": 153363,
+      "sha256": "d65f1e17480a79576481701017b150dd2bb4273f5cfcd4e8f90ad47d5bb2a877"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/warmup-B/summary.json",
+      "bytes": 60286,
+      "sha256": "42d31801a7eb2ddd4a48a38638a8e9ba786d2c25fa51b40532f4a64bc3143ad3"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/warmup-C/run-1.json",
+      "bytes": 153052,
+      "sha256": "d4755d2a754000e88bed8d351f970a781d2046539eb4bd327a90a39cce9ebde6"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/warmup-C/summary.json",
+      "bytes": 60072,
+      "sha256": "b3bf038e2c98ae13a10f1bb381e6017c6cba83d7d9941bdd2a900077ab4acbf8"
+    },
+    {
+      "path": "shared-span-batch-hosted-20261124/vndb/workflow.yml",
+      "bytes": 2296,
+      "sha256": "134fcc202a06222c11877a7c77aa787e6dbd73bc266e637e0f1d5cafe57880bf"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

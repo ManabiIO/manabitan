@@ -1,0 +1,125 @@
+{
+  "candidate": {
+    "commit": "97a1cb41705c30462c516ffe46b05b0522e5c669",
+    "tree": "29ef86aa6a72b3c14c9429a725a811254a2db46e",
+    "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "branch": "perf/shared-span-compression-batch-20261124",
+    "worktree": "/workspace/scratch/ad5d54ac9137/compression-ipc-batch"
+  },
+  "toolchain": {
+    "node": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node",
+    "nodeVersion": "v22.22.0",
+    "npmVersion": "10.9.4",
+    "vitestVersion": "4.1.12",
+    "clang": {
+      "path": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang",
+      "version": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)",
+      "requiredLinkerPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin",
+      "requiredLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu"
+    }
+  },
+  "focused": {
+    "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH npx vitest run test/zstd-term-content-shared-batch.test.js test/zstd-term-content-pool.test.js test/zstd-term-content-pool-drain.test.js test/zstd-term-content-packed-dispatch.test.js test/zstd-term-content-block-plan.test.js test/zstd-term-content-initialization.test.js test/zstd-term-content-single-block-rejection.test.js test/zstd-shared-gather.test.js test/zstd-prepared-lifetime.test.js test/zstd-compression-ownership.test.js --maxWorkers=1",
+    "exitCode": 0,
+    "filesPassed": 10,
+    "testsPassed": 98,
+    "startedUtc": "2026-11-24T14:21:40Z",
+    "durationSeconds": 17.83,
+    "outputProvenance": "Tool output recorded in the agent transcript; no complete file log was captured for this focused run. Final full-unit gate will retain its complete log.",
+    "coverage": [
+      "Real production worker module and actual worker_threads messages",
+      "Exact codec frames/envelopes for trained and empty dictionary paths",
+      "Caller metadata mutation after synchronous snapshot",
+      "Source mutation after every worker final gather and before final compression",
+      "Output ownership across subsequent WASM heap reuse",
+      "Real native gather failure followed by later valid jobs",
+      "Codec initialization failure for every batched logical job",
+      "Cancellation before a worker reads its batch",
+      "Shared timeout survives partial completion and drains all jobs",
+      "Batch postMessage exception clears every logical lease",
+      "Existing private packing dispatch and fallback suites"
+    ]
+  },
+  "typescript": {
+    "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH npm run test:ts",
+    "exitCode": 0,
+    "projects": [
+      "main",
+      "dev",
+      "test",
+      "bench"
+    ],
+    "log": "typescript.log",
+    "logSha256": "b5ada234991d712e07f84ed3a88cb851dc15651d5ab7bc71c9d6a3b3da6d0f36",
+    "logBytes": 2020
+  },
+  "dryBuild": {
+    "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH npm run test:build",
+    "exitCode": 0,
+    "targets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ],
+    "log": "dry-build.log",
+    "logSha256": "e8d9c85f5cca882d1e19bb01145efd7e3057980c2489aa3eaff0cab85dc7d95d",
+    "logBytes": 629
+  },
+  "targetedEslint": {
+    "exitCode": 0,
+    "note": "Targeted ESLint also passed on the exact frozen source after the complete unit gate.",
+    "log": "eslint.log",
+    "logSha256": "1f2ba4dd6d53b46810781aa826f59d074f4822f258661dd0bb2dac207d240937",
+    "logBytes": 1218
+  },
+  "independentReview": {
+    "agent": "/root/evidence_and_prs",
+    "result": "No blocker in acknowledgement ordering, source ownership, per-job failure/draining, timeout references, private factory path or existing batch memory bound.",
+    "rootReview": "Root independently reviewed the exact published runtime patch: no blocker in shared timeout accounting, per-block failures, duplicate acknowledgement handling, round-robin result order, or unchanged private path."
+  },
+  "fullUnit": {
+    "status": "passed",
+    "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin:$PATH LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang npm run test:unit -- --maxWorkers=1",
+    "log": "unit.log",
+    "exitCode": 0,
+    "filesPassed": 645,
+    "filesTotal": 645,
+    "testsPassed": 14506,
+    "testsSkipped": 47,
+    "testsTotal": 14553,
+    "startedUtc": "2026-11-24T14:31:21Z",
+    "durationSeconds": 501.65,
+    "cleanFullSuitePassInOneInvocation": true,
+    "logSha256": "0c646874f856b5299b17e4d3dad7db2df721f5cc19a87f43352818209758550e",
+    "logBytes": 193194
+  },
+  "performance": {
+    "status": "hosted screen running",
+    "workflowRun": "45470393272",
+    "note": "Parent owns hosted total-import analysis. No performance improvement has been established yet."
+  },
+  "scope": {
+    "sharedSpanTransportOnly": true,
+    "workerCountChanged": false,
+    "roundRobinAssignmentChanged": false,
+    "codecOrBlockBytesChanged": false,
+    "privateFactoryDispatchChanged": false,
+    "timeouts": "One existing 60-second deadline per worker batch; completion of one logical job does not clear other jobs' deadline.",
+    "retention": "Previously admitted batch only; each successful frame is copied/owned before the next compression, then transferred once. The existing complete-operation barrier retains the same total result payload."
+  },
+  "publishedCandidate": {
+    "commit": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+    "tree": "29ef86aa6a72b3c14c9429a725a811254a2db46e",
+    "identityVerification": "Root independently verified exact published runtime patch and equality with local candidate tree."
+  },
+  "sourceAfterGates": {
+    "unchanged": true,
+    "uncommittedItems": [
+      "node_modules dependency symlink only"
+    ]
+  }
+}

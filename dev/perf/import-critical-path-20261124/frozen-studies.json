@@ -44,5 +44,17 @@
       "js/dictionary/wasm/term-bank-parser.c",
       "lib/term-bank-parser.wasm"
     ]
+  },
+  "shared-span-batch-hosted-20261124": {
+    "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "candidate": "7d4e4979f9ad0f3ed1d0e61840e6e06212ad63d8",
+    "study": "ce10e1782c6aa119d6bb19e5cf109d1fdfe8169d",
+    "runner": "dev/perf/import-screen-20261124.py",
+    "browser": "153.0.8010.12",
+    "changed": [
+      "js/dictionary/zstd-term-content-compression-worker.js",
+      "js/dictionary/zstd-term-content.js"
+    ],
+    "run": 45470393272
   }
 }

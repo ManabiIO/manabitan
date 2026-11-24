@@ -42,6 +42,10 @@ def build(root, metadata, output):
             "protocol.json", "expected-lookup-signature.json", "runner.py", "workflow.yml"
         ) if (path := directory / name).exists())
         paths.update(directory.glob("*/*.json"))
+        if state["status"] != "complete":
+            # Failure diagnosis may exist only in console/build logs. Keep the
+            # entire failed cohort rather than applying successful-run pruning.
+            paths.update(path for path in directory.rglob("*") if path.is_file())
         files = []
         stream = io.BytesIO()
         with zipfile.ZipFile(archive) as original, tarfile.open(
@@ -84,7 +88,11 @@ def build(root, metadata, output):
             "workflowUrl": f'https://github.com/ManabiIO/manabitan/actions/runs/{artifact["workflow_run"]["id"]}',
             "archive": {"path": bundle_name, "bytes": len(packed_bytes), "sha256": sha256(packed_bytes)},
             "files": files,
-            "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+            "exclusions": (
+                "None: every file from the failed cohort is retained byte-for-byte."
+                if state["status"] != "complete" else
+                "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+            ),
         }
         if state["label"] == "media-ranges":
             receipt["supersededByStudy"] = "media-adjacent"

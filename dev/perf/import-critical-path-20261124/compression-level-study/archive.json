@@ -1,0 +1,12 @@
+{
+    "archive": "complete-component-proof.tar.xz",
+    "bytes": 434124,
+    "sha256": "f63c40fad62ee887d05463f0264f5518d3d97c26e1850eff05a626b82093dd21",
+    "originalGzip": {
+        "bytes": 2471914,
+        "sha256": "a00ff326bafb6ec0689c306f9e440e3f4158e1478e4573cb00ffd3e775af2300"
+    },
+    "decompressedTarSha256": "9e233d0fc46583548e46670c036f680379b6f920e97913db128c33282919b587",
+    "identicalTarPayload": true,
+    "note": "Only lossless archive transport compression changed. The entire tar payload, every member and all observations are byte-identical."
+}

@@ -1,0 +1,11 @@
+{
+    "archive": "compression-level-component-proof-20261124.tar.gz",
+    "sha256": "a00ff326bafb6ec0689c306f9e440e3f4158e1478e4573cb00ffd3e775af2300",
+    "bytes": 2471914,
+    "members": 218,
+    "uncompressedBytes": 8515631,
+    "excludedCorpusFiles": 2548,
+    "excludedCorpusBytes": 727896627,
+    "actualArchiveMemberSetAndBytesVerified": true,
+    "determinism": "Sorted USTAR members; zero timestamps/uid/gid; fixed mode; empty owner/group names; gzip filename empty and mtime zero"
+}

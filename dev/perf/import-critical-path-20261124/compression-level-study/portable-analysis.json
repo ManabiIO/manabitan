@@ -1,0 +1,7 @@
+{
+    "archiveSha256": "a00ff326bafb6ec0689c306f9e440e3f4158e1478e4573cb00ffd3e775af2300",
+    "analysisSucceededWithoutExcludedCorpusBytes": true,
+    "recomputedAnalysisSha256": "032e49d83abf1c9ed78c7c15417828ec8bd806640ac2834df3139518aa30acd4",
+    "stdout": "{\"destination\": \"/workspace/scratch/ad5d54ac9137/evidence-20261124/compression-proof-portability-check/portable-analysis.json\", \"sha256\": \"032e49d83abf1c9ed78c7c15417828ec8bd806640ac2834df3139518aa30acd4\"}\n",
+    "exitCode": 0
+}
