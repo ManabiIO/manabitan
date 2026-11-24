@@ -53,6 +53,7 @@ describe('media headwords with omitted native byte columns', () => {
         }, bytes)
         expect(chunks).toBe(1)
         expect(observed).toHaveLength(1)
+        if (!('entry' in observed[0])) { throw new Error('Expected a nonprojected image reference') }
         expect(observed[0].entry).toMatchObject({expression, reading: reading || expression, dictionary: 'media-fixture'})
     })
 

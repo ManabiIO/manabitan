@@ -460,7 +460,8 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual(entries.map(({payload}) => payload));
     });
 
-    test.skipIf(!existsSync(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))('projects checked stored and compressed payloads into one source span', async () => {
+    /* eslint-disable @stylistic/semi */
+    test.skipIf(!existsSync(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))).each(['ascending', 'descending', 'inverted batch boundary'])('projects checked stored and compressed payloads in %s request order into one source span', async (order) => {
         const nativeFetch = globalThis.fetch;
         vi.stubGlobal('fetch', async (/** @type {RequestInfo|URL} */ resource) => {
             const url = resource instanceof URL ? resource : new URL(String(resource));
@@ -506,26 +507,48 @@ describe('bounded large ZIP entry reads', () => {
                     encrypted: false,
                 };
                 entryMap.set(filename, metadata);
-                requests.push(i % 2 === 0 ?
+                requests.push(i % 3 === 0 ?
                     {type: 'image', source: {type: 'image', path: filename}, target: {type: 'image', path: ''}, entry: row} :
-                    {type: 'image-reference', source: {path: filename}, entry: row});
+                    (i % 3 === 1 ?
+                        {type: 'image-reference', source: {path: filename}, entry: row} :
+                        {type: 'projected-image-reference', source: {path: filename}, dictionary: row.dictionary, diagnosticKeys: {bytes: new Uint8Array(0), spans: new Uint32Array(4), decodedKeys: null}, diagnosticIndex: 0}))
                 offset += header.length + data.length;
             }
             const archive = new TrackedBlob([...parts, padding]);
             const files = /** @type {import('dictionary-importer').ArchiveFileMap} */ (/** @type {unknown} */ (entryMap));
             const reader = new RawZipPayloadReader(archive);
-            const prepared = await preparePackedSourceZipMedia(archive, requests.reverse(), files, reader, () => {});
+            if (order === 'descending') { requests.reverse() }
+            if (order === 'inverted batch boundary') { [requests[1023], requests[1024]] = [requests[1024], requests[1023]] }
+            const prepared = await preparePackedSourceZipMedia(archive, requests, files, reader, () => {})
             expect(prepared?.records).toHaveLength(8192);
             expect(prepared?.blob.size).toBe(offset);
             if (prepared === null) { throw new Error('Expected the dense source span'); }
-            const head = prepared.records[0];
-            const tail = prepared.records.at(-1);
-            if (typeof tail === 'undefined') { throw new Error('Missing the first physical image'); }
+            expect(prepared.records.map(({path}) => path)).toEqual(requests.map(({source}) => source.path))
+            const head = prepared.records.find(({path}) => path === 'image8191.webp')
+            const tail = prepared.records.find(({path}) => path === 'image0.webp')
+            if (typeof head === 'undefined' || typeof tail === 'undefined') { throw new Error('Missing physical boundary images') }
             expect(head).toMatchObject({path: 'image8191.webp', compressionMethod: 0, packedLength: image.length});
             expect(tail).toMatchObject({path: 'image0.webp', compressionMethod: 8, packedLength: deflated.length});
             expect(new Uint8Array(await prepared.blob.slice(head.packedOffset, head.packedOffset + head.packedLength).arrayBuffer())).toEqual(image);
             const deflatedBody = new Uint8Array(await prepared.blob.slice(tail.packedOffset, tail.packedOffset + tail.packedLength).arrayBuffer());
             expect(new Uint8Array(inflateRawSync(deflatedBody))).toEqual(image);
+
+            const batchRead = vi.spyOn(reader, 'readBatch')
+            const duplicate = [...requests]
+            duplicate[duplicate.length - 1] = duplicate[0]
+            expect(await preparePackedSourceZipMedia(archive, duplicate, files, reader, () => {})).toBeNull()
+            expect(batchRead).not.toHaveBeenCalled()
+            const cancelled = new Error('cancelled before the first media batch')
+            await expect(preparePackedSourceZipMedia(archive, requests, files, reader, () => { throw cancelled; })).rejects.toBe(cancelled)
+            expect(batchRead).not.toHaveBeenCalled()
+            batchRead.mockRestore()
+
+            const alias = entryMap.get('image1.webp')
+            if (typeof alias === 'undefined') { throw new Error('Missing duplicate-offset metadata') }
+            const originalOffset = alias.offset
+            alias.offset = 0
+            await expect(preparePackedSourceZipMedia(archive, requests, files, reader, () => {})).rejects.toThrow('local filename disagrees')
+            alias.offset = originalOffset
 
             const corrupt = entryMap.get('image0.webp');
             if (typeof corrupt === 'undefined') { throw new Error('Missing test fixture metadata'); }
@@ -537,6 +560,7 @@ describe('bounded large ZIP entry reads', () => {
         }
     });
 
+    /* eslint-enable @stylistic/semi */
     test('validates each batched filename against its ZIP central metadata', async () => {
         const first = entry(8);
         const second = entry(8);

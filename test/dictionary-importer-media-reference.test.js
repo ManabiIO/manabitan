@@ -169,9 +169,9 @@ describe('preformatted image references', () => {
         })
         expect(requirements).toHaveLength(2)
         for (const requirement of requirements) {
-            expect(requirement.type).toBe('image-reference')
+            expect(requirement.type).toBe('projected-image-reference')
             expect(requirement).not.toHaveProperty('target')
-            expect(Object.keys(requirement.entry).sort()).toEqual(['diagnosticIndex', 'diagnosticKeys', 'dictionary'])
+            expect(requirement).not.toHaveProperty('entry')
         }
         const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
         if (!('diagnosticKeys' in compact[0]) || !('diagnosticKeys' in compact[1])) { throw new Error('Expected encoded diagnostics') }
@@ -208,6 +208,8 @@ describe('preformatted image references', () => {
         const compact = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
         const expectedReading = reading || expression
         const readingSource = expectedReading.length > 0 ? ` (${expectedReading})` : ''
+        await expect(importer._resolveAsyncRequirements(requirements, new Map()))
+            .rejects.toThrow(`Could not find image at path "missing.png" for ${expression}${readingSource} in Media references`)
         await expect(importer._importDeferredMediaRequirements(compact, [], new Map(), async () => {}))
             .rejects.toThrow(`Could not find image at path "missing.png" for ${expression}${readingSource} in Media references`)
     })
@@ -232,7 +234,7 @@ describe('preformatted image references', () => {
             }
         })
         expect(requirements).toHaveLength(1)
-        const {entry} = requirements[0]
+        const entry = requirements[0]
         if (!('diagnosticKeys' in entry)) { throw new Error('Expected encoded diagnostics') }
         const {bytes, spans} = entry.diagnosticKeys
         expect(sourceKeys).not.toContain(bytes)
@@ -252,9 +254,117 @@ describe('preformatted image references', () => {
             ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'missing.png'}], 0, ''],
         ], (chunk) => { chunk.mediaRows[0].imagePaths = [] })
         expect(requirements).toHaveLength(1)
-        expect(requirements[0].entry).toMatchObject({diagnosticIndex: 1})
+        expect(requirements[0]).toMatchObject({diagnosticIndex: 1})
         const compact = importer._createDeferredMediaRequirement(requirements[0])
         await expect(importer._importDeferredMediaRequirements([compact], [], new Map(), async () => {}))
             .rejects.toThrow('Could not find image at path "missing.png" for 画像 (がぞう) in Media references')
+    })
+
+    test('resolves mixed projected and ordinary requirements through the prefetch path', async () => {
+        const {importer, requirements} = await collectReferences([
+            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'projected.png'}], 0, ''],
+        ])
+        const entry = {dictionary: 'Media references', expression: 'ordinary', reading: '', definitionTags: '', rules: '', score: 0, glossary: []}
+        /** @type {import('dictionary-importer').ImageImportRequirement} */
+        const ordinary = {type: 'image', source: {type: 'image', path: 'ordinary.png', width: 31}, target: {type: 'image', path: ''}, entry}
+        const first = Uint8Array.of(1, 2, 3)
+        const second = Uint8Array.of(4, 5, 6)
+        /** @type {import('dictionary-importer').ArchiveFileMap} */
+        const files = new Map([
+            ['projected.png', {filename: 'projected.png', bytes: first}],
+            ['ordinary.png', {filename: 'ordinary.png', bytes: second}],
+        ])
+        const {media} = await importer._resolveAsyncRequirements([...requirements, ordinary], files)
+        expect(media).toEqual([
+            {dictionary: 'Media references', path: 'projected.png', mediaType: 'image/png', width: 0, height: 0, content: first.buffer},
+            {dictionary: 'Media references', path: 'ordinary.png', mediaType: 'image/png', width: 0, height: 0, content: second.buffer},
+        ])
+        expect(ordinary.target).toMatchObject({path: 'ordinary.png', width: 0, height: 0, preferredWidth: 31})
+        expect(importer._tryResolveRequirementFromCachedImageMetadata(requirements[0])).toBe(true)
+    })
+
+    test('preserves ordinary deferred snapshots and property-read order', () => {
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+        /** @type {string[]} */
+        const reads = []
+        const values = {path: 'original.png', dictionary: 'Original dictionary', expression: 'original', reading: 'reading'}
+        const source = {
+            get path() { reads.push('path'); return values.path },
+        }
+        const entry = {
+            get dictionary() { reads.push('dictionary'); return values.dictionary },
+            get expression() { reads.push('expression'); return values.expression },
+            get reading() { reads.push('reading'); return values.reading },
+            get glossary() { throw new Error('Glossary must not be retained') },
+        }
+        /** @type {import('dictionary-importer').ImageReferenceImportRequirement} */
+        const requirement = {
+            get type() { reads.push('type'); return /** @type {const} */ ('image-reference') },
+            get source() { reads.push('source'); return source },
+            get entry() { reads.push('entry'); return entry },
+        }
+        const deferred = importer._createDeferredMediaRequirement(requirement)
+        expect(reads).toEqual(['type', 'source', 'path', 'entry', 'dictionary', 'expression', 'reading'])
+        values.path = 'replacement.png'
+        values.dictionary = 'Replacement dictionary'
+        values.expression = 'replacement'
+        values.reading = 'replacement'
+        expect(deferred).not.toBe(requirement)
+        expect(deferred.source).not.toBe(source)
+        expect(deferred).toEqual({type: 'image-reference', source: {path: 'original.png'}, dictionary: 'Original dictionary', expression: 'original', reading: 'reading'})
+    })
+
+    test('joins an active projected image read before rejecting cancellation without writing media', async () => {
+        const {requirements} = await collectReferences([
+            ['画像', 'がぞう', '', '', 0, [{type: 'image', path: 'projected.png'}], 0, ''],
+        ])
+        let cancelled = false
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => cancelled)
+        Reflect.set(importer, '_skipImageMetadata', true)
+        let releaseRead = () => {}
+        let startedRead = () => {}
+        const released = new Promise((resolve) => { releaseRead = () => resolve(void 0) })
+        const started = new Promise((resolve) => { startedRead = () => resolve(void 0) })
+        const file = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({
+            filename: 'projected.png',
+            async getData() {
+                startedRead()
+                await released
+                return Uint8Array.of(1, 2, 3)
+            },
+        }))
+        const writeMedia = vi.fn(async () => {})
+        const deferred = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
+        const operation = importer._importDeferredMediaRequirements(deferred, [], new Map([['projected.png', file]]), writeMedia)
+        let settled = false
+        void operation.then(
+            () => { settled = true },
+            () => { settled = true },
+        )
+        try {
+            await started
+            cancelled = true
+            await Promise.resolve()
+            expect(settled).toBe(false)
+            expect(writeMedia).not.toHaveBeenCalled()
+        } finally {
+            releaseRead()
+        }
+        await expect(operation).rejects.toThrow('Dictionary import was cancelled')
+        expect(writeMedia).not.toHaveBeenCalled()
+    })
+
+    test('keeps each projected path and its first diagnostic row through deferred deduplication', async () => {
+        const {importer, requirements} = await collectReferences([
+            ['first', 'reading', '', '', 0, [{type: 'image', path: 'first.png'}, {type: 'image', path: 'shared.png'}], 0, ''],
+            ['second', '', '', '', 0, [{type: 'image', path: 'shared.png'}], 0, ''],
+        ])
+        const deferred = requirements.map((requirement) => importer._createDeferredMediaRequirement(requirement))
+        expect(deferred.map(({source}) => source.path)).toEqual(['first.png', 'shared.png', 'shared.png'])
+        expect(deferred.map((requirement) => ('diagnosticIndex' in requirement ? requirement.diagnosticIndex : null))).toEqual([0, 0, 1])
+        /** @type {import('dictionary-importer').ArchiveFileMap} */
+        const files = new Map([['first.png', {filename: 'first.png', bytes: Uint8Array.of(1)}]])
+        await expect(importer._importDeferredMediaRequirements(deferred, [], files, async () => {}))
+            .rejects.toThrow('Could not find image at path "shared.png" for first (reading) in Media references')
     })
 })
