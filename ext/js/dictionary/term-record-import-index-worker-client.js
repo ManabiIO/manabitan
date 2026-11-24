@@ -324,6 +324,40 @@ export class WorkerImportIndexWriter {
         await this._enqueue('writeChunks', {chunks: owned}, [...buffers]);
     }
 
+    /**
+     * Move private envelope parts without flattening them on the storage owner.
+     * The worker hashes and writes the same snapshot in its existing queue.
+     * @param {import('./term-record-import-index-chunk.js').ImportIndexChunk[]} chunks
+     */
+    async writeOwnedIndexChunks(chunks) {
+        if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
+        if (chunks.every((chunk) => chunk instanceof Uint8Array)) {
+            await this.writeOwnedChunks(/** @type {Uint8Array[]} */ (chunks));
+            return;
+        }
+        const owned = [...chunks];
+        /** @type {Set<ArrayBuffer>} */
+        const buffers = new Set();
+        let length = 0;
+        for (const chunk of owned) {
+            const parts = chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields];
+            let chunkLength = 0;
+            for (const part of parts) {
+                if (
+                    !(part instanceof Uint8Array) || !(part.buffer instanceof ArrayBuffer) ||
+                    part.byteOffset !== 0 || part.byteLength !== part.buffer.byteLength ||
+                    buffers.has(part.buffer)
+                ) { throw new TypeError('Import index transfer requires independently owned complete buffers'); }
+                buffers.add(part.buffer);
+                chunkLength += part.byteLength;
+            }
+            if (chunkLength !== chunk.byteLength) { throw new TypeError('Invalid import index chunk length'); }
+            length += chunkLength;
+            if (!Number.isSafeInteger(length)) { throw new RangeError('Import index chunk length overflow'); }
+        }
+        await this._enqueue('writeIndexChunks', {chunks: owned}, [...buffers]);
+    }
+
     /** @returns {Promise<void>} */
     async close() {
         await this._finish(false);
