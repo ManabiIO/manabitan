@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
-import {hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
+import {encodePersistedTermLookupIndex, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
@@ -398,6 +398,104 @@ describe('TermRecordOpfsStore', () => {
         expect(compact.byteLength).toBe(16 + (values.length * 4) + (scores.length * 8));
         expect(compact).toEqual(expected);
     });
+
+    /* eslint-disable @stylistic/semi */
+    test.each([65534, 65535, 65536])('round-trips %i distinct scores through the persisted field reader', async (distinctScoreCount) => {
+        // Keep enough repeated rows for compact fields to win the size check,
+        // including at the reader-reserved count of 65535 scores.
+        const rowCount = distinctScoreCount + 16
+        const dictionary = `Score-table boundary ${distinctScoreCount}`
+        const expressionBytes = new TextEncoder().encode('boundary')
+        const scores = Int32Array.from({length: rowCount}, (_, i) => (i % distinctScoreCount) - 32768)
+        const offsets = Float64Array.from({length: rowCount}, (_, i) => 2 ** 40 + i * 8)
+        const lengths = new Uint32Array(rowCount).fill(7)
+        const chunk = {
+            dictionary,
+            rowCount,
+            expressionBytesList: new Array(rowCount).fill(expressionBytes),
+            readingBytesList: new Array(rowCount).fill(expressionBytes),
+            readingEqualsExpressionList: new Uint8Array(rowCount).fill(1),
+            scoreList: scores,
+            sequenceList: Int32Array.from({length: rowCount}, (_, i) => i),
+            termRecordPreinternedPlan: {
+                stringLengths: Uint16Array.of(expressionBytes.byteLength),
+                stringOffsets: Uint32Array.of(0),
+                stringsBuffer: expressionBytes,
+                expressionIndexes: new Uint32Array(rowCount),
+                readingIndexes: new Uint32Array(rowCount),
+            },
+        }
+        const fileBytesByName = new Map()
+        const recordsDirectoryHandle = createFakeDirectoryHandle(fileBytesByName)
+        const writer = new TermRecordOpfsStore()
+        Reflect.set(writer, '_recordsDirectoryHandle', recordsDirectoryHandle)
+        const fields = writer._encodeArtifactRecordFields(chunk, offsets, lengths, offsets[0])
+        const format = fields.byteLength === rowCount * 12 ? 1 : 2
+        const compact = distinctScoreCount < 65535
+        // Use the real field header/key parser. This small lookup payload only
+        // reaches field validation; the oversized container is never persisted.
+        const payload = encodePersistedTermLookupIndex([{expressionBytes, readingBytes: null, sequence: null}])
+        writer._createLookupIndexChunk(1, rowCount, offsets[0], payload, fields, format)
+        assert.equal(format, compact ? 2 : 1)
+        const expected = new Uint8Array(compact ? 16 + distinctScoreCount * 4 + rowCount * 8 : rowCount * 12)
+        if (compact) {
+            new Uint32Array(expected.buffer, 0, 4).set([0x3246524d, rowCount, distinctScoreCount, 2])
+            new Int32Array(expected.buffer, 16, distinctScoreCount).set(scores.subarray(0, distinctScoreCount))
+            let cursor = 16 + distinctScoreCount * 4
+            new Uint32Array(expected.buffer, cursor, rowCount).set(Uint32Array.from(offsets, (offset) => offset - offsets[0]))
+            cursor += rowCount * 4
+            new Uint16Array(expected.buffer, cursor, rowCount).fill(7)
+            cursor += rowCount * 2
+            new Uint16Array(expected.buffer, cursor, rowCount).set(Uint16Array.from(scores, (_, i) => i % distinctScoreCount))
+        } else {
+            const view = new DataView(expected.buffer)
+            for (let i = 0; i < rowCount; ++i) {
+                view.setUint32(i * 12, offsets[i] - offsets[0], true)
+                view.setUint32(i * 12 + 4, lengths[i], true)
+                view.setInt32(i * 12 + 8, scores[i], true)
+            }
+        }
+        assert.deepEqual(fields, expected)
+
+        // The public path splits these inputs into supported lookup chunks.
+        // Reopen that actual persisted representation and read every row.
+        const prepared = writer.prepareArtifactChunkLookupIndexes(chunk)
+        assert(prepared)
+        assert.equal(prepared.indexes.size, 3)
+        await writer.beginImportSession()
+        await writer.appendBatchFromArtifactChunkResolvedContent(
+            {...chunk, preparedLookupIndexes: prepared.indexes},
+            offsets,
+            lengths,
+            'raw',
+        )
+        await writer.endImportSession()
+
+        const indexBytes = [...fileBytesByName.entries()].find(([name]) => name.endsWith('.mbti'))?.[1]
+        assert(indexBytes instanceof Uint8Array)
+        const indexView = new DataView(indexBytes.buffer, indexBytes.byteOffset, indexBytes.byteLength)
+        assert.equal(indexView.getUint32(16, true), 3)
+        assert.equal(indexView.getUint32(20, true), rowCount)
+
+        const reader = new TermRecordOpfsStore()
+        Reflect.set(reader, '_recordsDirectoryHandle', recordsDirectoryHandle)
+        await reader._loadShardFiles(false)
+        await reader.ensureDictionariesLoaded([dictionary])
+        const ids = Array.from({length: rowCount}, (_, i) => i + 1)
+        const records = await reader.getByIdsAsync(ids)
+        assert.equal(records.size, rowCount)
+        for (let i = 0; i < rowCount; ++i) {
+            const record = records.get(i + 1)
+            assert(record, `Missing record ${i + 1}`)
+            assert.equal(record.expression, 'boundary')
+            assert.equal(record.reading, 'boundary')
+            assert.equal(record.entryContentOffset, offsets[i])
+            assert.equal(record.entryContentLength, lengths[i])
+            assert.equal(record.sequence, i)
+            assert.equal(record.score, scores[i])
+        }
+    })
+    /* eslint-enable @stylistic/semi */
 
     test('round-trips non-int32 scores through ordinary record persistence', async () => {
         const dictionaryName = 'Float scores ordinary';

@@ -5585,6 +5585,8 @@ export class TermRecordOpfsStore {
         if (
             !compact ||
             scores.length === 0 ||
+            // The reader reserves this score count even though the last key fits u16.
+            scores.length >= U16_NULL ||
             compactByteLength >= count * LOOKUP_INDEX_RECORD_FIELDS_BYTES
         ) {
             const legacy = new Uint8Array(count * LOOKUP_INDEX_RECORD_FIELDS_BYTES);
