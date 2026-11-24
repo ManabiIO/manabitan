@@ -1,0 +1,296 @@
+{
+  "status": "complete",
+  "dictionary": "vndb",
+  "scope": "Three separate six-pair exploratory A/B/C complete-import screens. Each retains 18 timings and two separate exhaustive-media diagnostic imports. Statistics are not pooled across candidates or baseline stages.",
+  "disposition": "No VNDB candidate screen establishes a complete-import gain or justifies independent qualification.",
+  "candidates": {
+    "monotonic-sequence": {
+      "audit": "audits/monotonic-sequence-screen-vndb.json",
+      "artifactSha256": "015959a39605095eca444f8cc773f273d67ec890923b841f0cd043df560a845d",
+      "allTimingsMs": {
+        "A": [
+          8341.100000000006,
+          7028.5,
+          7007.5,
+          6767.700000000012,
+          6730.700000000012,
+          6748.20000000007
+        ],
+        "B": [
+          7236.099999999991,
+          6773.799999999988,
+          6688.0,
+          7239.200000000012,
+          6592.599999999977,
+          6572.900000000023
+        ],
+        "C": [
+          6780.5,
+          6691.299999999988,
+          6700.600000000035,
+          7218.900000000023,
+          6758.299999999988,
+          6431.79999999993
+        ]
+      },
+      "comparisons": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -13.24765318722967,
+            -3.623817315216782,
+            -4.559400642169109,
+            6.966916382227328,
+            -2.0517925327237063,
+            -2.597729764975032
+          ],
+          "pairedMedianPercent": -3.1107735400959067,
+          "pairedMedianBootstrap95Percent": [
+            -8.90352691469939,
+            2.4575619247518112
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -3.5686718891135727,
+          "baselineMedianMs": 6887.600000000006,
+          "candidateMedianMs": 6730.899999999994
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 2,
+          "pairedChangesPercent": [
+            6.719268490524177,
+            1.2329442709189564,
+            -0.1880428618337926,
+            0.2812062779646185,
+            -2.4518000088781466,
+            2.193787120247759
+          ],
+          "pairedMedianPercent": 0.7570752744417875,
+          "pairedMedianBootstrap95Percent": [
+            -1.3199214353559696,
+            4.456527805385968
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": 1.284332231022156,
+          "baselineMedianMs": 6729.450000000012,
+          "candidateMedianMs": 6730.899999999994
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -18.709762501348802,
+            -4.797609731806385,
+            -4.379593292899964,
+            6.666962188040415,
+            0.4100613606307979,
+            -4.688657716133726
+          ],
+          "pairedMedianPercent": -4.534125504516845,
+          "pairedMedianBootstrap95Percent": [
+            -11.753686116577594,
+            3.5385117743356065
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -4.791465780774851,
+          "baselineMedianMs": 6887.600000000006,
+          "candidateMedianMs": 6729.450000000012
+        }
+      },
+      "interpretation": "B wins 5/6 against A but only 2/6 against C. The A first-block tail of 8341.1 ms is retained; B/A median -3.111% is accompanied by identical-code C/A median -4.534%, while B/C median is +0.757%. Both candidate intervals include zero."
+    },
+    "media-bookkeeping": {
+      "audit": "audits/media-bookkeeping-screen-vndb.json",
+      "artifactSha256": "44700b122b13e4dbc07da4b44762fa4a8bf0b9f8c89f46962390cc3e8c1668f3",
+      "allTimingsMs": {
+        "A": [
+          7057.899999999994,
+          6818.8000000000175,
+          6701.700000000012,
+          6926.799999999988,
+          6638.799999999988,
+          6630.70000000007
+        ],
+        "B": [
+          7511.1999999999825,
+          6662.899999999994,
+          7036.399999999965,
+          6643.700000000012,
+          6741.900000000023,
+          6591.100000000093
+        ],
+        "C": [
+          6676,
+          6528.5,
+          7134.799999999988,
+          6516.700000000012,
+          6736.599999999977,
+          6656.400000000023
+        ]
+      },
+      "comparisons": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            6.42259028889598,
+            -2.2863260397727347,
+            4.9942551889812,
+            -4.087024311370002,
+            1.5529915044892872,
+            -0.5972220127584804
+          ],
+          "pairedMedianPercent": 0.4778847458654034,
+          "pairedMedianBootstrap95Percent": [
+            -3.1866751755713683,
+            5.70842273893859
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": 1.011656738124378,
+          "baselineMedianMs": 6760.250000000015,
+          "candidateMedianMs": 6702.400000000009
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 2,
+          "pairedChangesPercent": [
+            12.510485320550968,
+            2.058665849735686,
+            -1.3791556876159627,
+            1.9488391363726931,
+            0.07867470237281626,
+            -0.9810107565640602
+          ],
+          "pairedMedianPercent": 1.0137569193727547,
+          "pairedMedianBootstrap95Percent": [
+            -1.1800832220900115,
+            7.284575585143327
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": 2.330989589803645,
+          "baselineMedianMs": 6666.200000000012,
+          "candidateMedianMs": 6702.400000000009
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            -5.410957933662908,
+            -4.2573473338419765,
+            6.462539355685504,
+            -5.920482762602896,
+            1.473157799602176,
+            0.3875910537342042
+          ],
+          "pairedMedianPercent": -1.9348781400538861,
+          "pairedMedianBootstrap95Percent": [
+            -5.665720348132902,
+            3.96784857764384
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -1.2892798720777088,
+          "baselineMedianMs": 6760.250000000015,
+          "candidateMedianMs": 6666.200000000012
+        }
+      },
+      "interpretation": "B wins 3/6 against A and 2/6 against C. B/A and B/C medians are +0.478% and +1.014%, respectively, with both intervals spanning zero. The B first-block tail of 7511.2 ms and the C third-block timing of 7134.8 ms remain included; there is no established gain."
+    },
+    "canonical-counters": {
+      "audit": "audits/canonical-counters-screen-vndb.json",
+      "artifactSha256": "b4a072110820024a1e611e5c1ae8aab0fad1b4fec5cbeaf0ca5abd006ec9f0d8",
+      "allTimingsMs": {
+        "A": [
+          6960.799999999988,
+          5501.700000000012,
+          5486.799999999988,
+          5446.699999999953,
+          5341.899999999965,
+          5442.599999999977
+        ],
+        "B": [
+          5297.199999999997,
+          5564.100000000006,
+          5553.799999999988,
+          5325.700000000012,
+          5310.700000000012,
+          5436.099999999977
+        ],
+        "C": [
+          5647.399999999994,
+          5494.3000000000175,
+          5448.899999999965,
+          5372.200000000012,
+          5222.299999999988,
+          5420.799999999988
+        ]
+      },
+      "comparisons": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -23.89955177565789,
+            1.134194885217199,
+            1.2211124881533975,
+            -2.2215286320146688,
+            -0.5840618506515183,
+            -0.11942821445632967
+          ],
+          "pairedMedianPercent": -0.351745032553924,
+          "pairedMedianBootstrap95Percent": [
+            -13.060540203836279,
+            1.1776536866852982
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -4.952823978583987,
+          "baselineMedianMs": 5466.749999999971,
+          "candidateMedianMs": 5380.899999999994
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 2,
+          "pairedChangesPercent": [
+            -6.201083684527353,
+            1.27040751324079,
+            1.9251592064457812,
+            -0.8655671791817143,
+            1.6927407464148558,
+            0.2822461629277573
+          ],
+          "pairedMedianPercent": 0.7763268380842736,
+          "pairedMedianBootstrap95Percent": [
+            -3.5333254318545335,
+            1.8089499764303185
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -0.36281777224359546,
+          "baselineMedianMs": 5434.849999999977,
+          "candidateMedianMs": 5380.899999999994
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 6,
+          "pairedChangesPercent": [
+            -18.868520859671246,
+            -0.1345038806186083,
+            -0.6907487059856998,
+            -1.3678006866532422,
+            -2.2389037608337437,
+            -0.40054385771485235
+          ],
+          "pairedMedianPercent": -1.029274696319471,
+          "pairedMedianBootstrap95Percent": [
+            -10.553712310252495,
+            -0.2675238691667303
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -4.606720205965164,
+          "baselineMedianMs": 5466.749999999971,
+          "candidateMedianMs": 5434.849999999977
+        }
+      },
+      "interpretation": "B wins 4/6 against A but only 2/6 against C. The A first-block tail of 6960.8 ms remains included. B/A equal-work change (-4.953%) closely tracks identical-code C/A (-4.607%); B/C paired median is +0.776%. Control C is faster than A in all six pairs, with its descriptive interval wholly below zero, demonstrating substantial same-code drift. Neither candidate interval establishes a gain."
+    }
+  }
+}

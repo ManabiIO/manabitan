@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/0a1757ac2970/round2-evidence/audit-import-study.py", line 538, in <module>
+    main()
+  File "/workspace/scratch/0a1757ac2970/round2-evidence/audit-import-study.py", line 529, in main
+    result = audit(args.root, args.evidence_root, args.repo)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/0a1757ac2970/round2-evidence/audit-import-study.py", line 482, in audit
+    check(read(contained(root, observation["phaseCounters"])) == phases, f"Copied phase counters differ from raw report: {name}")
+  File "/workspace/scratch/0a1757ac2970/round2-evidence/audit-import-study.py", line 81, in check
+    raise AssertionError(message)
+AssertionError: Copied phase counters differ from raw report: baseline-01-A

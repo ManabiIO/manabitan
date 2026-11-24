@@ -1,0 +1,7 @@
+{
+  "status": "passed with explicit provenance and scope limits",
+  "output": "/workspace/scratch/0a1757ac2970/round2-evidence/audits/media-components-independent.json",
+  "projectionRows": 6648310,
+  "media": 146570,
+  "sha256": "99614cdf8cd6fec23a386e77d36c34e1390069f0b081eb67340d1e6696f41050"
+}

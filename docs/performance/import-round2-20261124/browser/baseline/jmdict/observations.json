@@ -1,0 +1,74 @@
+[
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "baseline-diagnostic",
+    "commandElapsedSeconds": 11.079824572000007,
+    "mediaCheck": "sample",
+    "name": "baseline-01-A",
+    "phaseCounters": "baseline-01-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "baseline-01-A/summary.json",
+    "totalImportMs": 872
+  },
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "baseline-diagnostic",
+    "commandElapsedSeconds": 7.825312192000013,
+    "mediaCheck": "sample",
+    "name": "baseline-02-A",
+    "phaseCounters": "baseline-02-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "baseline-02-A/summary.json",
+    "totalImportMs": 800.5
+  },
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "baseline-diagnostic",
+    "commandElapsedSeconds": 7.155695119000029,
+    "mediaCheck": "sample",
+    "name": "baseline-03-A",
+    "phaseCounters": "baseline-03-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "baseline-03-A/summary.json",
+    "totalImportMs": 701.3999999999651
+  },
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "exhaustive-diagnostic",
+    "commandElapsedSeconds": 7.192576975000009,
+    "mediaCheck": "all",
+    "name": "diagnostic-A",
+    "phaseCounters": "diagnostic-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "status": "success",
+    "storageBytes": 43520477,
+    "summary": "diagnostic-A/summary.json",
+    "totalImportMs": 719.4000000000233
+  }
+]

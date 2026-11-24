@@ -1,0 +1,240 @@
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/jmdict-sequence
+
+ ❯ test/term-lookup-monotonic-sequences.test.js (21 tests | 8 failed) 871ms
+     × preserves zero sequences without touching dirty hash scratch 12ms
+     × preserves maximum int32 sequences without touching dirty hash scratch 2ms
+     × preserves absent sequences without touching dirty hash scratch 1ms
+     × preserves increasing sequences without touching dirty hash scratch 1ms
+     × preserves repeated sequences without touching dirty hash scratch 1ms
+     × preserves missing between repeats sequences without touching dirty hash scratch 1ms
+     × retains the maximum supported row and sequence-key cardinality 530ms
+     × reinitializes only when needed across repeated calls using the same scratch 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > preserves zero sequences without touching dirty hash scratch
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > preserves maximum int32 sequences without touching dirty hash scratch
+AssertionError: expected Uint16Array[ 1 ] to deeply equal Uint16Array[ 51966 ]
+
+- Expected
++ Received
+
+  Uint16Array [
+-   51966,
++   1,
+  ]
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:122:31
+    120|         const dirtySlots = new Uint16Array(input.slots())
+    121|         check(input)
+    122|         expect(input.slots()).toEqual(dirtySlots)
+       |                               ^
+    123|     })
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > preserves absent sequences without touching dirty hash scratch
+AssertionError: expected Uint16Array[ 0, 0, 0, 0 ] to deeply equal Uint16Array[ 51966, 51966, 51966, …(-51961) ]
+
+- Expected
++ Received
+
+  Uint16Array [
+-   51966,
+-   51966,
+-   51966,
+-   51966,
++   0,
++   0,
++   0,
++   0,
+  ]
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:122:31
+    120|         const dirtySlots = new Uint16Array(input.slots())
+    121|         check(input)
+    122|         expect(input.slots()).toEqual(dirtySlots)
+       |                               ^
+    123|     })
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > preserves increasing sequences without touching dirty hash scratch
+AssertionError: expected Uint16Array[ 0, 5, 0, 0, 2, 1, 3, …(5) ] to deeply equal Uint16Array[ 51966, 51966, 51966, …(-51957) ]
+
+- Expected
++ Received
+
+  Uint16Array [
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
++   0,
++   5,
++   0,
++   0,
++   2,
++   1,
++   3,
++   4,
+  ]
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:122:31
+    120|         const dirtySlots = new Uint16Array(input.slots())
+    121|         check(input)
+    122|         expect(input.slots()).toEqual(dirtySlots)
+       |                               ^
+    123|     })
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > preserves repeated sequences without touching dirty hash scratch
+AssertionError: expected Uint16Array[ 0, 3, 0, 0, 2, 1, 0, …(9) ] to deeply equal Uint16Array[ 51966, 51966, 51966, …(-51957) ]
+
+- Expected
++ Received
+
+  Uint16Array [
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
++   0,
++   3,
++   0,
++   0,
++   2,
++   1,
++   0,
++   0,
+  ]
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:122:31
+    120|         const dirtySlots = new Uint16Array(input.slots())
+    121|         check(input)
+    122|         expect(input.slots()).toEqual(dirtySlots)
+       |                               ^
+    123|     })
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > preserves missing between repeats sequences without touching dirty hash scratch
+AssertionError: expected Uint16Array[ 0, 3, 0, 0, 0, 1, 0, …(17) ] to deeply equal Uint16Array[ 51966, 51966, 51966, …(-51949) ]
+
+- Expected
++ Received
+
+  Uint16Array [
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
+-   51966,
++   0,
++   3,
++   0,
++   0,
++   0,
++   1,
++   0,
++   0,
++   0,
++   0,
++   0,
++   0,
++   0,
++   0,
++   0,
++   2,
+  ]
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:122:31
+    120|         const dirtySlots = new Uint16Array(input.slots())
+    121|         check(input)
+    122|         expect(input.slots()).toEqual(dirtySlots)
+       |                               ^
+    123|     })
+    124|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > retains the maximum supported row and sequence-key cardinality
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:162:64
+    160|         const input = fixture(Int32Array.from({length: 0xfffe}, (_, i)…
+    161|         check(input)
+    162|         expect(input.slots().every((slot) => slot === 0xcafe)).toBe(tr…
+       |                                                                ^
+    163|         input.args[10] = 0xffff
+    164|         expect(input.encode().status).toBe(-1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  test/term-lookup-monotonic-sequences.test.js > native lookup sequence interning > reinitializes only when needed across repeated calls using the same scratch
+AssertionError: expected Uint16Array[ 2, 0, 0, 0, 0, 3, 0, …(8) ] to deeply equal Uint16Array[ 0, 0, 3, 0, 0, 1, 2, …(5) ]
+
+- Expected
++ Received
+
+  Uint16Array [
++   2,
+    0,
+    0,
+-   3,
++   0,
+    0,
++   3,
+    0,
+    1,
+-   2,
+-   4,
+  ]
+
+ ❯ test/term-lookup-monotonic-sequences.test.js:177:31
+    175|         new Int32Array(wasm.memory.buffer, input.args[9], input.values…
+    176|         check(input)
+    177|         expect(input.slots()).toEqual(populatedSlots)
+       |                               ^
+    178|         input.values.set([8, 5, -1, 2, 5, 8])
+    179|         new Int32Array(wasm.memory.buffer, input.args[9], input.values…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  8 failed | 98 passed (106)
+   Start at  02:55:57
+   Duration  7.98s (transform 279ms, setup 45ms, import 481ms, tests 8.55s, environment 0ms)
+

@@ -1,0 +1,7 @@
+ dev/data/dictionary-wasm/manifest.json             |   4 +-
+ .../term-content-canonical-scan-v1.wasm            | Bin 1624 -> 1760 bytes
+ .../wasm/term-content-canonical-scan-v1.c          |  49 +++--
+ .../term-content-canonical-counters-baseline.wasm  | Bin 0 -> 1624 bytes
+ test/term-content-canonical-counters.test.js       | 231 +++++++++++++++++++++
+ test/term-content-canonical-scan.test.js           |  16 +-
+ 6 files changed, 277 insertions(+), 23 deletions(-)

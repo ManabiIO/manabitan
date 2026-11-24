@@ -1,0 +1,159 @@
+{
+  "sequence": {
+    "localCommit": "cc4a0a73fef29c418b1f8d894648c1e9f2c2a230",
+    "remoteCommit": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+    "parent": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "tree": "3dd10f7c9b24e9ba3429a4d65540210a86d17fa3",
+    "branch": "perf/monotonic-sequence-index-20261124-0a175",
+    "files": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "blob": "2566b8ef22a0fb1f0da45bf55653c06a80f82fba",
+        "bytes": 2521,
+        "binary": false,
+        "characters": 2521
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "blob": "f5ff40c4353962128b8245ddfdb8db0c00b433f9",
+        "bytes": 63004,
+        "binary": true,
+        "characters": 84008
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "blob": "dcd89b567c021558bacfe90106c50b92ccca3adf",
+        "bytes": 150623,
+        "binary": false,
+        "characters": 150623
+      },
+      {
+        "path": "test/term-lookup-monotonic-sequences.test.js",
+        "blob": "3e6df01f0b777d66a90b44a81e5006736fbdf6a2",
+        "bytes": 9581,
+        "binary": false,
+        "characters": 9581
+      }
+    ]
+  },
+  "media": {
+    "localCommit": "fab9802f03b82a6cce221576e4703c624d76aa1d",
+    "remoteCommit": "ebb0777114578c5cee879877274e7d872bfea27e",
+    "parent": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "tree": "923cd36b875afbbee6e6674fd1b4450bed6ce362",
+    "branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+    "files": [
+      {
+        "path": "ext/js/dictionary/dictionary-importer.js",
+        "blob": "5d08b0edb79b78539a2afd35920bbc240c78222b",
+        "bytes": 343902,
+        "binary": false,
+        "characters": 343900
+      },
+      {
+        "path": "ext/js/dictionary/source-zip-media-pack.js",
+        "blob": "204a344f18e46f32f144fb43d731e9f9fbca1967",
+        "bytes": 9207,
+        "binary": false,
+        "characters": 9207
+      },
+      {
+        "path": "test/dictionary-importer-media-batch.test.js",
+        "blob": "0d54797ff9a86f03422a72936a229bb7c6dc2bb7",
+        "bytes": 5641,
+        "binary": false,
+        "characters": 5641
+      },
+      {
+        "path": "test/dictionary-importer-media-keys.test.js",
+        "blob": "1841dbb2250db1a00518be1bdaf2b9de065b5b76",
+        "bytes": 5138,
+        "binary": false,
+        "characters": 5111
+      },
+      {
+        "path": "test/dictionary-importer-media-reference.test.js",
+        "blob": "39802601e3c0edadcd6b81f4ce30490c71471c06",
+        "bytes": 20894,
+        "binary": false,
+        "characters": 20687
+      },
+      {
+        "path": "test/raw-zip-range-reader.test.js",
+        "blob": "10bb0bf9b640e45de30e615c3d57d5a813e3ab02",
+        "bytes": 41531,
+        "binary": false,
+        "characters": 41525
+      },
+      {
+        "path": "types/ext/dictionary-importer.d.ts",
+        "blob": "ee83a68b4eaef8b62b913ce062881e13b503b2e8",
+        "bytes": 9688,
+        "binary": false,
+        "characters": 9688
+      }
+    ]
+  },
+  "canonical": {
+    "localCommit": "0eb65e80712eb31037792cc831f10b24b827ac7c",
+    "remoteCommit": "d147a60fc4845e898d98d8924968d6094b417007",
+    "parent": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "tree": "e3b9546229ac4118cc3e539678522446d74cff1d",
+    "branch": "perf/canonical-local-counters-20261124-0a175",
+    "files": [
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "blob": "893f2c2bbcf758a7d0581273a084d2e411abb235",
+        "bytes": 2521,
+        "binary": false,
+        "characters": 2521
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+        "blob": "dc32be8930afa46912d3eeb7c8c00729e7b56850",
+        "bytes": 1760,
+        "binary": true,
+        "characters": 2348
+      },
+      {
+        "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "blob": "9862ef2bd9c3bdea6f40c080efea9d6db011cbac",
+        "bytes": 7757,
+        "binary": false,
+        "characters": 7757
+      },
+      {
+        "path": "test/data/dictionary-wasm/term-content-canonical-counters-baseline.wasm",
+        "blob": "e81f92e8aca60a10dbb753777eef1df6a9862f02",
+        "bytes": 1624,
+        "binary": true,
+        "characters": 2168
+      },
+      {
+        "path": "test/term-content-canonical-counters.test.js",
+        "blob": "e9262ad019611f8e176cb14160b1588735b59453",
+        "bytes": 9761,
+        "binary": false,
+        "characters": 9761
+      },
+      {
+        "path": "test/term-content-canonical-scan.test.js",
+        "blob": "ff6aec6a8de270a24945d3aef6b97bdd93539400",
+        "bytes": 61533,
+        "binary": false,
+        "characters": 61529
+      }
+    ]
+  },
+  "study": {
+    "head": "478556323c394977992bfb767ad311d42990ee2a",
+    "tree": "0b6a73381e05df5e7b3c2b58ce880735fe3ad936",
+    "branch": "perf/import-round2-20261124-0a175-study",
+    "baselineRun": 45351292649
+  },
+  "pullRequests": {
+    "sequence": 862,
+    "media": 863,
+    "canonical": 864
+  }
+}

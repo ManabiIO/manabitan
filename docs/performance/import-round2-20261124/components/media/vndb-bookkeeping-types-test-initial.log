@@ -1,0 +1,3 @@
+test/dictionary-importer-media-reference.test.js(288,15): error TS7034: Variable 'reads' implicitly has type 'any[]' in some locations where its type cannot be determined.
+test/dictionary-importer-media-reference.test.js(299,17): error TS2322: Type 'string' is not assignable to type '"image-reference"'.
+test/dictionary-importer-media-reference.test.js(304,16): error TS7005: Variable 'reads' implicitly has an 'any[]' type.

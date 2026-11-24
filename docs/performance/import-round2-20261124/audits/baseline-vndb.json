@@ -1,0 +1,135 @@
+{
+  "auditVersion": 2,
+  "auditSha256": "7b119cbe86da3a2a8be6889b5b2a62af12fb69958d1275158d6fc97113561853",
+  "status": "passed",
+  "stage": "baseline",
+  "dictionary": "vndb",
+  "candidate": null,
+  "workflowRun": "45351292649",
+  "toolingCommit": "2f0b03ad34169afa0dfc0f784928083b58088841",
+  "artifactIntegrity": {
+    "id": 14900282757,
+    "name": "import-crossover-baseline-round2-baseline-vndb-45351292649-1",
+    "sha256": "89ea4bd1bd5d43b5cacac2724ac1c2c6cab2c41bb3188bce42b1fb895bb29676",
+    "bytes": 233663,
+    "verifiedMembers": 45
+  },
+  "publicationIdentitiesSha256": "170ff28531bea5473f6aa2f66f0deab2920e019f79b2ebcb67ec8244fd72adf2",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sourceIdentities": {
+    "A": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "C": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    }
+  },
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "verifiedFrozenHarnessFiles": 66,
+  "verifiedEmittedHarnessFilesPerObservation": 9,
+  "browserVersion": "153.0.8010.12",
+  "attemptedObservations": 4,
+  "timedObservations": 0,
+  "lookupReceipts": 288,
+  "exhaustiveDiagnostics": 1,
+  "changedPackageMembers": [],
+  "allTimingsMs": {
+    "A": [],
+    "B": [],
+    "C": []
+  },
+  "comparisons": {},
+  "observations": [
+    {
+      "name": "baseline-01-A",
+      "arm": "A",
+      "cohort": "baseline-diagnostic",
+      "block": null,
+      "position": null,
+      "totalImportMs": 4843.5,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 2717.9000000000233,
+        "completedAtMs": 7561.400000000023,
+        "nextFrameAtMs": 7562.900000000023,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "793834812a770d309c1078e6447250c6206e95446d831b9be7b795bf931af9ff",
+      "rawReportSha256": "9ac3eec13b56785b59de957ed1e6d178814b83299f27bf43d8b25b8c2b61990a",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "baseline-02-A",
+      "arm": "A",
+      "cohort": "baseline-diagnostic",
+      "block": null,
+      "position": null,
+      "totalImportMs": 4842.599999999977,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3462.3000000000466,
+        "completedAtMs": 8304.900000000023,
+        "nextFrameAtMs": 8306.100000000035,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "648d205fa1ac02c29d1f3f29b40cb343f1204aafb8de3f64ece8f908865f7870",
+      "rawReportSha256": "6bad5cb126eee18b004a678548607a4cdfd4040ed73e87a08abf206b9463d375",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "baseline-03-A",
+      "arm": "A",
+      "cohort": "baseline-diagnostic",
+      "block": null,
+      "position": null,
+      "totalImportMs": 4789.900000000023,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 2479,
+        "completedAtMs": 7268.900000000023,
+        "nextFrameAtMs": 7270.100000000035,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "5ae721cd631e2495a704c47bccefab2770bb41829ed9ff5f29b3236b94f323ac",
+      "rawReportSha256": "8a79d768a1550b82433f1fe3150a48453f1cfedf7fbc38c6f0203a153eebb8dd",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "diagnostic-A",
+      "arm": "A",
+      "cohort": "exhaustive-diagnostic",
+      "block": null,
+      "position": null,
+      "totalImportMs": 4657.599999999977,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 2535.4000000000233,
+        "completedAtMs": 7193,
+        "nextFrameAtMs": 7194.200000000012,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "08be538da592f9741d620b485bd1309925d6c497f1324bb697e70255f8259cdc",
+      "rawReportSha256": "fadcc7b0e3014a8f6f877a60290878b8835631fd9dd7e5f4f2185ce991b999ab",
+      "mediaMode": "all",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    }
+  ],
+  "limits": "All retained timings and tails included. Frozen sources, retained package manifests and changed runtime hashes, full inventory, restart and source-media receipts are verified. Release product ZIPs are not retained: this audit matches reported archive digests and manifest entries, without independently rebuilding or reading every release ZIP entry. Terms remain 12 sampled probes over six lookup passes. No all-term semantics or process peak-memory proof. Native/component timings and overlapping phase counters do not establish complete-import gains. Screens are exploratory and not pooled with baseline/qualification cohorts."
+}

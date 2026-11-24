@@ -1,0 +1,11 @@
+{
+  "attemptedObservations": 20,
+  "browserVersion": "153.0.8010.12",
+  "buildComplete": true,
+  "dictionary": "jmdict",
+  "exhaustiveDiagnostics": 2,
+  "performanceClaim": "none; inspect paired evidence and control drift",
+  "stage": "screen",
+  "status": "success",
+  "timedObservations": 18
+}

@@ -1,0 +1,4 @@
+
+> yomitan@0.0.0 build:libs
+> node ./dev/bin/build-libs.js
+

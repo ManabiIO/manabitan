@@ -1,0 +1,579 @@
+{
+  "auditVersion": 2,
+  "auditSha256": "7b119cbe86da3a2a8be6889b5b2a62af12fb69958d1275158d6fc97113561853",
+  "status": "passed",
+  "stage": "screen",
+  "dictionary": "vndb",
+  "candidate": "sequence",
+  "workflowRun": "45352695368",
+  "toolingCommit": "4072cbbea0cfc455aaf7416a0f72af73995c4114",
+  "artifactIntegrity": {
+    "id": 14902800714,
+    "name": "import-crossover-monotonic-sequence-screen-vndb-45352695368-1",
+    "sha256": "015959a39605095eca444f8cc773f273d67ec890923b841f0cd043df560a845d",
+    "bytes": 914448,
+    "verifiedMembers": 164
+  },
+  "publicationIdentitiesSha256": "170ff28531bea5473f6aa2f66f0deab2920e019f79b2ebcb67ec8244fd72adf2",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sourceIdentities": {
+    "A": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "C": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "B": {
+      "commit": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+      "tree": "3dd10f7c9b24e9ba3429a4d65540210a86d17fa3"
+    }
+  },
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "verifiedFrozenHarnessFiles": 66,
+  "verifiedEmittedHarnessFilesPerObservation": 9,
+  "browserVersion": "153.0.8010.12",
+  "attemptedObservations": 20,
+  "timedObservations": 18,
+  "lookupReceipts": 1440,
+  "exhaustiveDiagnostics": 2,
+  "changedPackageMembers": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "allTimingsMs": {
+    "A": [
+      8341.100000000006,
+      7028.5,
+      7007.5,
+      6767.700000000012,
+      6730.700000000012,
+      6748.20000000007
+    ],
+    "B": [
+      7236.099999999991,
+      6773.799999999988,
+      6688.0,
+      7239.200000000012,
+      6592.599999999977,
+      6572.900000000023
+    ],
+    "C": [
+      6780.5,
+      6691.299999999988,
+      6700.600000000035,
+      7218.900000000023,
+      6758.299999999988,
+      6431.79999999993
+    ]
+  },
+  "comparisons": {
+    "candidate": {
+      "pairs": 6,
+      "fasterPairs": 5,
+      "pairedChangesPercent": [
+        -13.24765318722967,
+        -3.623817315216782,
+        -4.559400642169109,
+        6.966916382227328,
+        -2.0517925327237063,
+        -2.597729764975032
+      ],
+      "pairedMedianPercent": -3.1107735400959067,
+      "pairedMedianBootstrap95Percent": [
+        -8.90352691469939,
+        2.4575619247518112
+      ],
+      "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+      "equalWorkPercent": -3.5686718891135727,
+      "baselineMedianMs": 6887.600000000006,
+      "candidateMedianMs": 6730.899999999994
+    },
+    "candidateVsSecondBaseline": {
+      "pairs": 6,
+      "fasterPairs": 2,
+      "pairedChangesPercent": [
+        6.719268490524177,
+        1.2329442709189564,
+        -0.1880428618337926,
+        0.2812062779646185,
+        -2.4518000088781466,
+        2.193787120247759
+      ],
+      "pairedMedianPercent": 0.7570752744417875,
+      "pairedMedianBootstrap95Percent": [
+        -1.3199214353559696,
+        4.456527805385968
+      ],
+      "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+      "equalWorkPercent": 1.284332231022156,
+      "baselineMedianMs": 6729.450000000012,
+      "candidateMedianMs": 6730.899999999994
+    },
+    "identicalProductControl": {
+      "pairs": 6,
+      "fasterPairs": 4,
+      "pairedChangesPercent": [
+        -18.709762501348802,
+        -4.797609731806385,
+        -4.379593292899964,
+        6.666962188040415,
+        0.4100613606307979,
+        -4.688657716133726
+      ],
+      "pairedMedianPercent": -4.534125504516845,
+      "pairedMedianBootstrap95Percent": [
+        -11.753686116577594,
+        3.5385117743356065
+      ],
+      "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+      "equalWorkPercent": -4.791465780774851,
+      "baselineMedianMs": 6887.600000000006,
+      "candidateMedianMs": 6729.450000000012
+    }
+  },
+  "observations": [
+    {
+      "name": "block-01-1-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 1,
+      "position": 1,
+      "totalImportMs": 8341.100000000006,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3943.0999999999913,
+        "completedAtMs": 12284.199999999997,
+        "nextFrameAtMs": 12286,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "baa957e439468db8541aba394f32f1cae6bebce109d76eb94fd53691037b4729",
+      "rawReportSha256": "28eb121d7474e90043ab00be41744ea80501a0f5d50c0552fab8a00051fc0aa6",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-01-2-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 1,
+      "position": 2,
+      "totalImportMs": 7236.099999999991,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3962.5,
+        "completedAtMs": 11198.599999999991,
+        "nextFrameAtMs": 11201.099999999991,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "56e4bfb9101fe87545471062f81eb793bdd0f762e1e8f7c7bb51bcede631e968",
+      "rawReportSha256": "334ca161d83651fdeece2f9af9334a5195053513b74bf80844d84411dd6400eb",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-01-3-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 1,
+      "position": 3,
+      "totalImportMs": 6780.5,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3718.0999999999767,
+        "completedAtMs": 10498.599999999977,
+        "nextFrameAtMs": 10500.899999999994,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "1020776f9a4f9655f14f7d81b07c1367897e5317e3cbc4a9fb2e04ad44db018f",
+      "rawReportSha256": "046f86875badf5a97f80288d90f6cc166bc45e9e34331de0d8b127f2a1611dcc",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-02-1-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 2,
+      "position": 1,
+      "totalImportMs": 6691.299999999988,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3951.2000000000116,
+        "completedAtMs": 10642.5,
+        "nextFrameAtMs": 10644.800000000017,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "492c20227b5fa7f2c6703c7e3443225500f316f3e97846149b9bf46553a019d0",
+      "rawReportSha256": "5aad2dc0a0445a701cc895de497b03ea176e3e2d04a897a9d58e1a894bb340a6",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-02-2-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 2,
+      "position": 2,
+      "totalImportMs": 6773.799999999988,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3747.7000000000116,
+        "completedAtMs": 10521.5,
+        "nextFrameAtMs": 10523.5,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "0a2d5ee1ce014f856c42f9750df2339d5e2afdfc4a69ad77f424fee4780a843d",
+      "rawReportSha256": "50c43ac07306fd2e4e3d3804b97ccbd605248459e1a068a0f3d00966f7b4183f",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-02-3-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 2,
+      "position": 3,
+      "totalImportMs": 7028.5,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3786.7000000000116,
+        "completedAtMs": 10815.200000000012,
+        "nextFrameAtMs": 10817.399999999994,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "ead1afd5ed9075b97218520c00e1a26cca5e0a355d95cdf7e185818f375c10c6",
+      "rawReportSha256": "31f18ec00c1ced4f475908538bd9ef8d5b367ea38d00c6969eff31664a99ae6a",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-03-1-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 3,
+      "position": 1,
+      "totalImportMs": 6688.0,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3578.7000000000116,
+        "completedAtMs": 10266.700000000012,
+        "nextFrameAtMs": 10267.099999999977,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "533f0e32e86b78d75ad0b4c004cc2fb599b35a2297ac548933d1ce75c062ab50",
+      "rawReportSha256": "7a4662ac8607aaa55987a0126c08055c3745e59d1f0eb0f6b0df535cc18e481e",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-03-2-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 3,
+      "position": 2,
+      "totalImportMs": 7007.5,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3673.2000000000116,
+        "completedAtMs": 10680.700000000012,
+        "nextFrameAtMs": 10682.299999999988,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "e06dacabfc626b9ab205d60a1020c13b1a4c765670a8b63cf3f602a931f8b9cd",
+      "rawReportSha256": "fcbf1d0ee9a28ca0c34bd45f6ad58436434ab64af7a6c14c26828c0cba1254cd",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-03-3-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 3,
+      "position": 3,
+      "totalImportMs": 6700.600000000035,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3574.899999999965,
+        "completedAtMs": 10275.5,
+        "nextFrameAtMs": 10276.399999999965,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "485bebe025df1c15868b239eb0984248239d9037d566bb8ba054526000b8a08b",
+      "rawReportSha256": "9434bab50c136fa8ea591ad6565c6996edaa9e42120bddb7feda6c16f2820fee",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-04-1-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 4,
+      "position": 1,
+      "totalImportMs": 7218.900000000023,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3680.9000000000233,
+        "completedAtMs": 10899.800000000047,
+        "nextFrameAtMs": 10900.300000000047,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "103ba138e282599650d579f34603cea9a7100b78c96f9fd035b4f6855db7fc41",
+      "rawReportSha256": "94df68fe1145864615fbc125c286cc81f22db6de22b472114e7b2d9d1fff7c5a",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-04-2-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 4,
+      "position": 2,
+      "totalImportMs": 6767.700000000012,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3635.2999999999884,
+        "completedAtMs": 10403,
+        "nextFrameAtMs": 10406.299999999988,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "41e882313993bc28bcfc95290d514404e5eb888c31d2a88cefa3e4249a96b3cf",
+      "rawReportSha256": "090da8d4f831db0296eb3b766842740c59dac2c0c1e8aa469ba182dc03beff57",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-04-3-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 4,
+      "position": 3,
+      "totalImportMs": 7239.200000000012,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3655.2999999999884,
+        "completedAtMs": 10894.5,
+        "nextFrameAtMs": 10896.099999999977,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "e47305b130223b0784dbbe37f209500889325ce82cb564f7bc0891b5893c3cae",
+      "rawReportSha256": "15158d82cce0b005a2e3f76f4626819d2f22447bf1d268d9ee3a99702dd184c2",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-05-1-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 5,
+      "position": 1,
+      "totalImportMs": 6592.599999999977,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3591.2000000000116,
+        "completedAtMs": 10183.799999999988,
+        "nextFrameAtMs": 10187.900000000023,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "73f332cb0177c4064f4d17261273fb0fdfb7505b13f5b464e0f9553076f8db0d",
+      "rawReportSha256": "5b504fc02a51c0f7505b1ff661b7951320cdecec88918884dfdf4a88bfdf928d",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-05-2-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 5,
+      "position": 2,
+      "totalImportMs": 6758.299999999988,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3655.600000000035,
+        "completedAtMs": 10413.900000000023,
+        "nextFrameAtMs": 10416.900000000023,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "2823cedaecd472f43285852cd5d7fb8c6c4a07a41266c6f72c345323073b0b6b",
+      "rawReportSha256": "92fe17eb2b04b25dfce0a50829c69b3e794932c8f5459a19e0ebddee6b3b1bd1",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-05-3-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 5,
+      "position": 3,
+      "totalImportMs": 6730.700000000012,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3601.7999999999884,
+        "completedAtMs": 10332.5,
+        "nextFrameAtMs": 10333.699999999953,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "4cf2efd33c5a6bc39319ca1df5c6422b6cc91149caf91c041a90a3d6db5c8a4c",
+      "rawReportSha256": "6763a4b77ae7dd43e1bbcbb0644ea5abbb60938c36e1373179f711f468c4538e",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-06-1-A",
+      "arm": "A",
+      "cohort": "timed",
+      "block": 6,
+      "position": 1,
+      "totalImportMs": 6748.20000000007,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3675.29999999993,
+        "completedAtMs": 10423.5,
+        "nextFrameAtMs": 10425.699999999953,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "28fd862b4d359e2f5900e4dac5f79df98c7a4ea0215f08d9e967ea673b8ef729",
+      "rawReportSha256": "890d4884354dac8f736bf6df2b1f624a8d49e11b4003980278b7289a526695c6",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-06-2-C",
+      "arm": "C",
+      "cohort": "timed",
+      "block": 6,
+      "position": 2,
+      "totalImportMs": 6431.79999999993,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3450.0999999999767,
+        "completedAtMs": 9881.899999999907,
+        "nextFrameAtMs": 9883.5,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "fce837f5487548ef2d3517a6247b868cdf4469b6cb3d54ae9926baea76050fd6",
+      "rawReportSha256": "5bd7e44c183722f575f698e7a521b6332a51ace097e9df2726323c9a370ccb44",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "block-06-3-B",
+      "arm": "B",
+      "cohort": "timed",
+      "block": 6,
+      "position": 3,
+      "totalImportMs": 6572.900000000023,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3615,
+        "completedAtMs": 10187.900000000023,
+        "nextFrameAtMs": 10189.5,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "73c13a24e5587174a21e03eb84127d06a551205ea624673492033a0813ac1421",
+      "rawReportSha256": "b71ac7df8c7f9c1a2400af6004992572fe8abb9cbfa454c878d9021b3c52af43",
+      "mediaMode": "sample",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "diagnostic-A",
+      "arm": "A",
+      "cohort": "exhaustive-diagnostic",
+      "block": null,
+      "position": null,
+      "totalImportMs": 6600.199999999953,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 3516.4000000000233,
+        "completedAtMs": 10116.599999999977,
+        "nextFrameAtMs": 10121.800000000047,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "f9e65c3330ee265bc89ab70d73ae3c3406c6670e076925a1eac8e61b369c06ac",
+      "rawReportSha256": "0629b5c1e5c38f81e4bd0d0ccf516d6206e34459d089720636d0e57aa85c38ec",
+      "mediaMode": "all",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    },
+    {
+      "name": "diagnostic-B",
+      "arm": "B",
+      "cohort": "exhaustive-diagnostic",
+      "block": null,
+      "position": null,
+      "totalImportMs": 6641.400000000023,
+      "rawBrowserClock": {
+        "sequenceBefore": 0,
+        "sequence": 1,
+        "startedAtMs": 4018.5999999999767,
+        "completedAtMs": 10660,
+        "nextFrameAtMs": 10661.300000000047,
+        "trigger": "file-input-change",
+        "errorCount": 0
+      },
+      "summarySha256": "d282b2adca9505d0c9273430a4e826d9b7a2eb4f8d75e14ef5a7799ac94dc9b4",
+      "rawReportSha256": "bf7d53b63a79cf4ed160d33ebc883b0b75865e014b4c859e4e2ef568d313b49f",
+      "mediaMode": "all",
+      "lookupReceipts": 72,
+      "sourceBankCount": 665
+    }
+  ],
+  "limits": "All retained timings and tails included. Frozen sources, retained package manifests and changed runtime hashes, full inventory, restart and source-media receipts are verified. Release product ZIPs are not retained: this audit matches reported archive digests and manifest entries, without independently rebuilding or reading every release ZIP entry. Terms remain 12 sampled probes over six lookup passes. No all-term semantics or process peak-memory proof. Native/component timings and overlapping phase counters do not establish complete-import gains. Screens are exploratory and not pooled with baseline/qualification cohorts."
+}

@@ -1,0 +1,1613 @@
+{
+  "auditedAtUtc": "2026-11-24T08:16:17.344156+00:00",
+  "scope": "Independent GitHub frozen-head CI audit. API run/job/check receipts and build/restart logs are retained. Success is reported only for executed jobs and steps; job-gated and artifact-only skipped steps remain explicit. Browser benchmark qualification is separate. Browser/restart artifact payloads were not downloaded for this CI audit; their enforced workflow gates and execution receipts are audited here.",
+  "frozenBase": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+  "expectedSkippedJobs": {
+    "Full Extension E2E (Edge)": "github.event_name == 'workflow_dispatch'",
+    "Firefox Android Installation Smoke (blocking)": "github.event_name == 'workflow_dispatch'",
+    "Firefox Android Gecko RDP Capability Probe (manual)": "github.event_name == 'workflow_dispatch'",
+    "Published release upgrade and reimport": "github.event_name == 'workflow_dispatch' && inputs.release_version != ''"
+  },
+  "expectedSkippedSteps": {
+    "Retain versioned release packages": "inputs.release_version != ''",
+    "Retain tested Firefox release package": "inputs.release_version != ''",
+    "Retain tested Chromium release package": "inputs.release_version != ''",
+    "Upload Firefox extension E2E report": "failure() || github.event_name == 'workflow_dispatch'",
+    "Upload Chromium extension E2E report": "failure() || github.event_name == 'workflow_dispatch'"
+  },
+  "pullRequests": [
+    {
+      "number": 862,
+      "url": "https://github.com/ManabiIO/manabitan/pull/862",
+      "head": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+      "base": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "mergeRef": "b9ca8b48317f2232346027c52c13529595436065",
+      "stateAtReceipt": "open",
+      "draftAtReceipt": true,
+      "mainRun": {
+        "id": 45352630251,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251",
+        "updatedAt": "2026-11-24T08:10:11Z"
+      },
+      "successfulMainJobs": 15,
+      "skippedMainJobs": [
+        "Firefox Android Gecko RDP Capability Probe (manual)",
+        "Firefox Android Installation Smoke (blocking)",
+        "Full Extension E2E (Edge)",
+        "Published release upgrade and reimport"
+      ],
+      "mainJobs": [
+        {
+          "id": 138302579437,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:03:17Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579437"
+        },
+        {
+          "id": 138302579770,
+          "name": "TypeScript (dev)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:28Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579770"
+        },
+        {
+          "id": 138302579819,
+          "name": "CSS",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:27Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579819"
+        },
+        {
+          "id": 138302579834,
+          "name": "JSON",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:51Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579834"
+        },
+        {
+          "id": 138302579885,
+          "name": "TypeScript (main)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:29Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579885"
+        },
+        {
+          "id": 138302579891,
+          "name": "Full Extension E2E (Firefox)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:04:07Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579891"
+        },
+        {
+          "id": 138302579920,
+          "name": "Full Extension E2E (Chromium)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:05Z",
+          "completed_at": "2026-11-24T08:10:11Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579920"
+        },
+        {
+          "id": 138302579940,
+          "name": "Unit Tests",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:06:00Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579940"
+        },
+        {
+          "id": 138302579965,
+          "name": "Test Build",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:45Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579965"
+        },
+        {
+          "id": 138302580010,
+          "name": "JavaScript",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:05:21Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580010"
+        },
+        {
+          "id": 138302580081,
+          "name": "Unit Tests (options)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:26Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580081"
+        },
+        {
+          "id": 138302580137,
+          "name": "TypeScript (bench)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:38Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580137"
+        },
+        {
+          "id": 138302580138,
+          "name": "HTML",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:13Z",
+          "completed_at": "2026-11-24T08:02:33Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580138"
+        },
+        {
+          "id": 138302580166,
+          "name": "TypeScript (test)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:15Z",
+          "completed_at": "2026-11-24T08:03:07Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580166"
+        },
+        {
+          "id": 138302580174,
+          "name": "Markdown",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:02:24Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580174"
+        },
+        {
+          "id": 138302581327,
+          "name": "Full Extension E2E (Edge)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:02:02Z",
+          "completed_at": "2026-11-24T08:02:02Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302581327"
+        },
+        {
+          "id": 138302582091,
+          "name": "Published release upgrade and reimport",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:02:03Z",
+          "completed_at": "2026-11-24T08:02:02Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302582091"
+        },
+        {
+          "id": 138302637795,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:02:10Z",
+          "completed_at": "2026-11-24T08:02:02Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302637795"
+        },
+        {
+          "id": 138302651817,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:02:12Z",
+          "completed_at": "2026-11-24T08:02:02Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302651817"
+        }
+      ],
+      "skippedMainSteps": [
+        {
+          "job": "Full Extension E2E (Firefox)",
+          "step": "Retain tested Firefox release package",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Firefox)",
+          "step": "Upload Firefox extension E2E report",
+          "condition": "failure() || github.event_name == 'workflow_dispatch'"
+        },
+        {
+          "job": "Full Extension E2E (Chromium)",
+          "step": "Retain tested Chromium release package",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Chromium)",
+          "step": "Upload Chromium extension E2E report",
+          "condition": "failure() || github.event_name == 'workflow_dispatch'"
+        },
+        {
+          "job": "Test Build",
+          "step": "Retain versioned release packages",
+          "condition": "inputs.release_version != ''"
+        }
+      ],
+      "workflowSourceSha256": "25708c0d8428c2d920a594d83f60cee4b58cf9689fa43fae2cccd43d7e23d0e7",
+      "nativeReproduction": {
+        "step": {
+          "name": "Verify pinned dictionary WASM rebuild",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:24Z",
+          "completed_at": "2026-11-24T08:02:30Z"
+        },
+        "receipt": {
+          "mode": "check",
+          "toolchain": {
+            "compilerVersion": "21.1.8",
+            "linkerVersion": "21.1.8"
+          },
+          "targets": [
+            {
+              "name": "term-content-canonical-scan-v1.wasm",
+              "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+            },
+            {
+              "name": "term-bank-parser.wasm",
+              "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+            }
+          ]
+        }
+      },
+      "browserGates": [
+        {
+          "job": {
+            "id": 138302579920,
+            "name": "Full Extension E2E (Chromium)",
+            "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:10:11Z",
+            "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579920"
+          },
+          "run": {
+            "name": "Run Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:07:58Z",
+            "completed_at": "2026-11-24T08:10:05Z"
+          },
+          "enforce": {
+            "name": "Enforce Chromium extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:10:05Z",
+            "completed_at": "2026-11-24T08:10:05Z"
+          },
+          "jsonUpload": {
+            "name": "Upload Chromium extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:10:05Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          }
+        },
+        {
+          "job": {
+            "id": 138302579891,
+            "name": "Full Extension E2E (Firefox)",
+            "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:02:04Z",
+            "completed_at": "2026-11-24T08:04:07Z",
+            "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579891"
+          },
+          "run": {
+            "name": "Run Firefox extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:02:31Z",
+            "completed_at": "2026-11-24T08:04:01Z"
+          },
+          "enforce": {
+            "name": "Enforce Firefox extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:04:01Z",
+            "completed_at": "2026-11-24T08:04:01Z"
+          },
+          "jsonUpload": {
+            "name": "Upload Firefox extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:04:01Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          }
+        }
+      ],
+      "restartGates": {
+        "runId": 45352630091,
+        "job": {
+          "id": 138302578916,
+          "name": "Restart and interruption recovery (Chromium)",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:04Z",
+          "completed_at": "2026-11-24T08:03:02Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630091/job/138302578916"
+        },
+        "processTreeTest": {
+          "name": "Test owned process-tree selection",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:39Z",
+          "completed_at": "2026-11-24T08:02:40Z"
+        },
+        "campaign": {
+          "name": "Run witnessed interruption recovery campaign",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:40Z",
+          "completed_at": "2026-11-24T08:02:56Z"
+        },
+        "enforce": {
+          "name": "Enforce recovery report",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:56Z",
+          "completed_at": "2026-11-24T08:02:56Z"
+        },
+        "evidenceUpload": {
+          "name": "Upload restart interruption evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:02:56Z",
+          "completed_at": "2026-11-24T08:03:00Z"
+        }
+      },
+      "dependencyReviewCoverage": {
+        "workflowConclusion": "success",
+        "dependencyGraphAvailable": false,
+        "dependencyVulnerabilityScanExecuted": false,
+        "reason": "Availability probe selected the explicit dependency-review-unavailable branch; actual scan and checkout steps were skipped."
+      },
+      "ancillary": [
+        {
+          "id": 45352630221,
+          "name": "Auto-Approve Safe PRs",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630221",
+          "jobs": [
+            {
+              "id": 138302579521,
+              "name": "auto-approve",
+              "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:02:05Z",
+              "completed_at": "2026-11-24T08:02:14Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630221/job/138302579521"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352630142,
+          "name": "Lint GitHub Actions workflows",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630142",
+          "jobs": [
+            {
+              "id": 138302578568,
+              "name": "actionlint",
+              "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:02:04Z",
+              "completed_at": "2026-11-24T08:02:11Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630142/job/138302578568"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352630347,
+          "name": "Dependency Review",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630347",
+          "jobs": [
+            {
+              "id": 138302579698,
+              "name": "dependency-review",
+              "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:02:04Z",
+              "completed_at": "2026-11-24T08:02:14Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630347/job/138302579698"
+            }
+          ],
+          "skippedSteps": [
+            {
+              "job": "dependency-review",
+              "step": "Harden Runner"
+            },
+            {
+              "job": "dependency-review",
+              "step": "Checkout Repository"
+            },
+            {
+              "job": "dependency-review",
+              "step": "Dependency Review"
+            }
+          ]
+        },
+        {
+          "id": 45352630091,
+          "name": "Chromium Restart Interruption",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630091",
+          "jobs": [
+            {
+              "id": 138302578916,
+              "name": "Restart and interruption recovery (Chromium)",
+              "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:02:04Z",
+              "completed_at": "2026-11-24T08:03:02Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630091/job/138302578916"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352630349,
+          "name": "ManabiTan static web acceptance",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630349",
+          "jobs": [
+            {
+              "id": 138302580455,
+              "name": "chromium",
+              "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:02:04Z",
+              "completed_at": "2026-11-24T08:04:32Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630349/job/138302580455"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352630051,
+          "name": "CodeQL",
+          "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630051",
+          "jobs": [
+            {
+              "id": 138302578109,
+              "name": "Analyze (javascript)",
+              "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:02:04Z",
+              "completed_at": "2026-11-24T08:04:09Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630051/job/138302578109"
+            }
+          ],
+          "skippedSteps": []
+        }
+      ],
+      "headChecks": {
+        "success": 24,
+        "skipped": 4,
+        "null": 0
+      }
+    },
+    {
+      "number": 863,
+      "url": "https://github.com/ManabiIO/manabitan/pull/863",
+      "head": "ebb0777114578c5cee879877274e7d872bfea27e",
+      "base": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "mergeRef": "7bf40a8d96184b9cfebd3ef51cc84422cb82fd9e",
+      "stateAtReceipt": "open",
+      "draftAtReceipt": true,
+      "mainRun": {
+        "id": 45352943424,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424",
+        "updatedAt": "2026-11-24T08:07:53Z"
+      },
+      "successfulMainJobs": 15,
+      "skippedMainJobs": [
+        "Firefox Android Gecko RDP Capability Probe (manual)",
+        "Firefox Android Installation Smoke (blocking)",
+        "Full Extension E2E (Edge)",
+        "Published release upgrade and reimport"
+      ],
+      "mainJobs": [
+        {
+          "id": 138303637624,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:22Z",
+          "completed_at": "2026-11-24T08:05:19Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303637624"
+        },
+        {
+          "id": 138303638064,
+          "name": "Markdown",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:22Z",
+          "completed_at": "2026-11-24T08:04:44Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638064"
+        },
+        {
+          "id": 138303638140,
+          "name": "Test Build",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:21Z",
+          "completed_at": "2026-11-24T08:05:04Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638140"
+        },
+        {
+          "id": 138303638158,
+          "name": "Full Extension E2E (Firefox)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:22Z",
+          "completed_at": "2026-11-24T08:06:21Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638158"
+        },
+        {
+          "id": 138303638262,
+          "name": "CSS",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:22Z",
+          "completed_at": "2026-11-24T08:04:41Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638262"
+        },
+        {
+          "id": 138303638422,
+          "name": "Full Extension E2E (Chromium)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:22Z",
+          "completed_at": "2026-11-24T08:07:26Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638422"
+        },
+        {
+          "id": 138303638425,
+          "name": "TypeScript (dev)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:22Z",
+          "completed_at": "2026-11-24T08:04:50Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638425"
+        },
+        {
+          "id": 138303638485,
+          "name": "TypeScript (test)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:33Z",
+          "completed_at": "2026-11-24T08:05:19Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638485"
+        },
+        {
+          "id": 138303638486,
+          "name": "JavaScript",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:27Z",
+          "completed_at": "2026-11-24T08:07:48Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638486"
+        },
+        {
+          "id": 138303638542,
+          "name": "TypeScript (bench)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:29Z",
+          "completed_at": "2026-11-24T08:04:56Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638542"
+        },
+        {
+          "id": 138303638556,
+          "name": "HTML",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:35Z",
+          "completed_at": "2026-11-24T08:04:58Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638556"
+        },
+        {
+          "id": 138303638561,
+          "name": "Unit Tests (options)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:57Z",
+          "completed_at": "2026-11-24T08:05:21Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638561"
+        },
+        {
+          "id": 138303638637,
+          "name": "JSON",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:45Z",
+          "completed_at": "2026-11-24T08:05:39Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638637"
+        },
+        {
+          "id": 138303638687,
+          "name": "TypeScript (main)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:43Z",
+          "completed_at": "2026-11-24T08:05:14Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638687"
+        },
+        {
+          "id": 138303638740,
+          "name": "Unit Tests",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:51Z",
+          "completed_at": "2026-11-24T08:07:52Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638740"
+        },
+        {
+          "id": 138303639507,
+          "name": "Full Extension E2E (Edge)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:04:20Z",
+          "completed_at": "2026-11-24T08:04:20Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303639507"
+        },
+        {
+          "id": 138303640200,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:04:20Z",
+          "completed_at": "2026-11-24T08:04:20Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303640200"
+        },
+        {
+          "id": 138303640531,
+          "name": "Published release upgrade and reimport",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:04:20Z",
+          "completed_at": "2026-11-24T08:04:20Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303640531"
+        },
+        {
+          "id": 138303640559,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:04:20Z",
+          "completed_at": "2026-11-24T08:04:20Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303640559"
+        }
+      ],
+      "skippedMainSteps": [
+        {
+          "job": "Test Build",
+          "step": "Retain versioned release packages",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Firefox)",
+          "step": "Retain tested Firefox release package",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Firefox)",
+          "step": "Upload Firefox extension E2E report",
+          "condition": "failure() || github.event_name == 'workflow_dispatch'"
+        },
+        {
+          "job": "Full Extension E2E (Chromium)",
+          "step": "Retain tested Chromium release package",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Chromium)",
+          "step": "Upload Chromium extension E2E report",
+          "condition": "failure() || github.event_name == 'workflow_dispatch'"
+        }
+      ],
+      "workflowSourceSha256": "25708c0d8428c2d920a594d83f60cee4b58cf9689fa43fae2cccd43d7e23d0e7",
+      "nativeReproduction": {
+        "step": {
+          "name": "Verify pinned dictionary WASM rebuild",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:43Z",
+          "completed_at": "2026-11-24T08:04:47Z"
+        },
+        "receipt": {
+          "mode": "check",
+          "toolchain": {
+            "compilerVersion": "21.1.8",
+            "linkerVersion": "21.1.8"
+          },
+          "targets": [
+            {
+              "name": "term-content-canonical-scan-v1.wasm",
+              "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+            },
+            {
+              "name": "term-bank-parser.wasm",
+              "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+          ]
+        }
+      },
+      "browserGates": [
+        {
+          "job": {
+            "id": 138303638422,
+            "name": "Full Extension E2E (Chromium)",
+            "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:07:26Z",
+            "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638422"
+          },
+          "run": {
+            "name": "Run Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:07:21Z"
+          },
+          "enforce": {
+            "name": "Enforce Chromium extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:07:21Z",
+            "completed_at": "2026-11-24T08:07:21Z"
+          },
+          "jsonUpload": {
+            "name": "Upload Chromium extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:07:21Z",
+            "completed_at": "2026-11-24T08:07:22Z"
+          }
+        },
+        {
+          "job": {
+            "id": 138303638158,
+            "name": "Full Extension E2E (Firefox)",
+            "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:06:21Z",
+            "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638158"
+          },
+          "run": {
+            "name": "Run Firefox extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:04:47Z",
+            "completed_at": "2026-11-24T08:06:18Z"
+          },
+          "enforce": {
+            "name": "Enforce Firefox extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:06:18Z",
+            "completed_at": "2026-11-24T08:06:18Z"
+          },
+          "jsonUpload": {
+            "name": "Upload Firefox extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:06:18Z",
+            "completed_at": "2026-11-24T08:06:19Z"
+          }
+        }
+      ],
+      "restartGates": {
+        "runId": 45352943634,
+        "job": {
+          "id": 138303638718,
+          "name": "Restart and interruption recovery (Chromium)",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:04:27Z",
+          "completed_at": "2026-11-24T08:05:24Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943634/job/138303638718"
+        },
+        "processTreeTest": {
+          "name": "Test owned process-tree selection",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:02Z",
+          "completed_at": "2026-11-24T08:05:02Z"
+        },
+        "campaign": {
+          "name": "Run witnessed interruption recovery campaign",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:02Z",
+          "completed_at": "2026-11-24T08:05:17Z"
+        },
+        "enforce": {
+          "name": "Enforce recovery report",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:17Z",
+          "completed_at": "2026-11-24T08:05:18Z"
+        },
+        "evidenceUpload": {
+          "name": "Upload restart interruption evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:18Z",
+          "completed_at": "2026-11-24T08:05:22Z"
+        }
+      },
+      "dependencyReviewCoverage": {
+        "workflowConclusion": "success",
+        "dependencyGraphAvailable": false,
+        "dependencyVulnerabilityScanExecuted": false,
+        "reason": "Availability probe selected the explicit dependency-review-unavailable branch; actual scan and checkout steps were skipped."
+      },
+      "ancillary": [
+        {
+          "id": 45352943679,
+          "name": "ManabiTan static web acceptance",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943679",
+          "jobs": [
+            {
+              "id": 138303638497,
+              "name": "chromium",
+              "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:04:27Z",
+              "completed_at": "2026-11-24T08:14:34Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943679/job/138303638497"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352943634,
+          "name": "Chromium Restart Interruption",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943634",
+          "jobs": [
+            {
+              "id": 138303638718,
+              "name": "Restart and interruption recovery (Chromium)",
+              "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:04:27Z",
+              "completed_at": "2026-11-24T08:05:24Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943634/job/138303638718"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352943330,
+          "name": "Auto-Approve Safe PRs",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943330",
+          "jobs": [
+            {
+              "id": 138303637372,
+              "name": "auto-approve",
+              "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:04:21Z",
+              "completed_at": "2026-11-24T08:04:25Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943330/job/138303637372"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352943282,
+          "name": "Lint GitHub Actions workflows",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943282",
+          "jobs": [
+            {
+              "id": 138303637586,
+              "name": "actionlint",
+              "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:04:21Z",
+              "completed_at": "2026-11-24T08:04:28Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943282/job/138303637586"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45352943290,
+          "name": "Dependency Review",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943290",
+          "jobs": [
+            {
+              "id": 138303637005,
+              "name": "dependency-review",
+              "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:04:21Z",
+              "completed_at": "2026-11-24T08:04:31Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943290/job/138303637005"
+            }
+          ],
+          "skippedSteps": [
+            {
+              "job": "dependency-review",
+              "step": "Harden Runner"
+            },
+            {
+              "job": "dependency-review",
+              "step": "Checkout Repository"
+            },
+            {
+              "job": "dependency-review",
+              "step": "Dependency Review"
+            }
+          ]
+        },
+        {
+          "id": 45352943296,
+          "name": "CodeQL",
+          "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943296",
+          "jobs": [
+            {
+              "id": 138303637105,
+              "name": "Analyze (javascript)",
+              "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:04:21Z",
+              "completed_at": "2026-11-24T08:06:57Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943296/job/138303637105"
+            }
+          ],
+          "skippedSteps": []
+        }
+      ],
+      "headChecks": {
+        "success": 24,
+        "skipped": 4,
+        "null": 0
+      }
+    },
+    {
+      "number": 864,
+      "url": "https://github.com/ManabiIO/manabitan/pull/864",
+      "head": "d147a60fc4845e898d98d8924968d6094b417007",
+      "base": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "mergeRef": "261ceec1c7802fe9f03374d6a8e746f041bc0b07",
+      "stateAtReceipt": "open",
+      "draftAtReceipt": true,
+      "mainRun": {
+        "id": 45353056708,
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708",
+        "updatedAt": "2026-11-24T08:10:07Z"
+      },
+      "successfulMainJobs": 15,
+      "skippedMainJobs": [
+        "Firefox Android Gecko RDP Capability Probe (manual)",
+        "Firefox Android Installation Smoke (blocking)",
+        "Full Extension E2E (Edge)",
+        "Published release upgrade and reimport"
+      ],
+      "mainJobs": [
+        {
+          "id": 138304008991,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:23Z",
+          "completed_at": "2026-11-24T08:06:25Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304008991"
+        },
+        {
+          "id": 138304009326,
+          "name": "Full Extension E2E (Chromium)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:26Z",
+          "completed_at": "2026-11-24T08:08:30Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009326"
+        },
+        {
+          "id": 138304009336,
+          "name": "Test Build",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:30Z",
+          "completed_at": "2026-11-24T08:06:12Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009336"
+        },
+        {
+          "id": 138304009368,
+          "name": "JSON",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:49Z",
+          "completed_at": "2026-11-24T08:06:42Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009368"
+        },
+        {
+          "id": 138304009532,
+          "name": "Full Extension E2E (Firefox)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:30Z",
+          "completed_at": "2026-11-24T08:07:21Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009532"
+        },
+        {
+          "id": 138304009554,
+          "name": "HTML",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:40Z",
+          "completed_at": "2026-11-24T08:06:00Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009554"
+        },
+        {
+          "id": 138304009619,
+          "name": "TypeScript (dev)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:02Z",
+          "completed_at": "2026-11-24T08:06:27Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009619"
+        },
+        {
+          "id": 138304009687,
+          "name": "Unit Tests (options)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:30Z",
+          "completed_at": "2026-11-24T08:05:48Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009687"
+        },
+        {
+          "id": 138304009722,
+          "name": "Markdown",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:26Z",
+          "completed_at": "2026-11-24T08:06:46Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009722"
+        },
+        {
+          "id": 138304009725,
+          "name": "Unit Tests",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:01Z",
+          "completed_at": "2026-11-24T08:09:08Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009725"
+        },
+        {
+          "id": 138304009746,
+          "name": "TypeScript (bench)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:16Z",
+          "completed_at": "2026-11-24T08:06:49Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009746"
+        },
+        {
+          "id": 138304009785,
+          "name": "JavaScript",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:37Z",
+          "completed_at": "2026-11-24T08:10:06Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009785"
+        },
+        {
+          "id": 138304009801,
+          "name": "CSS",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:14Z",
+          "completed_at": "2026-11-24T08:06:36Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009801"
+        },
+        {
+          "id": 138304009858,
+          "name": "TypeScript (main)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:29Z",
+          "completed_at": "2026-11-24T08:07:01Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009858"
+        },
+        {
+          "id": 138304009871,
+          "name": "TypeScript (test)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:22Z",
+          "completed_at": "2026-11-24T08:07:07Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009871"
+        },
+        {
+          "id": 138304010763,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:05:09Z",
+          "completed_at": "2026-11-24T08:05:09Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304010763"
+        },
+        {
+          "id": 138304011169,
+          "name": "Full Extension E2E (Edge)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:05:09Z",
+          "completed_at": "2026-11-24T08:05:09Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304011169"
+        },
+        {
+          "id": 138304011738,
+          "name": "Published release upgrade and reimport",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:05:09Z",
+          "completed_at": "2026-11-24T08:05:09Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304011738"
+        },
+        {
+          "id": 138304011751,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "skipped",
+          "started_at": "2026-11-24T08:05:09Z",
+          "completed_at": "2026-11-24T08:05:09Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304011751"
+        }
+      ],
+      "skippedMainSteps": [
+        {
+          "job": "Full Extension E2E (Chromium)",
+          "step": "Retain tested Chromium release package",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Chromium)",
+          "step": "Upload Chromium extension E2E report",
+          "condition": "failure() || github.event_name == 'workflow_dispatch'"
+        },
+        {
+          "job": "Test Build",
+          "step": "Retain versioned release packages",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Firefox)",
+          "step": "Retain tested Firefox release package",
+          "condition": "inputs.release_version != ''"
+        },
+        {
+          "job": "Full Extension E2E (Firefox)",
+          "step": "Upload Firefox extension E2E report",
+          "condition": "failure() || github.event_name == 'workflow_dispatch'"
+        }
+      ],
+      "workflowSourceSha256": "25708c0d8428c2d920a594d83f60cee4b58cf9689fa43fae2cccd43d7e23d0e7",
+      "nativeReproduction": {
+        "step": {
+          "name": "Verify pinned dictionary WASM rebuild",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:52Z",
+          "completed_at": "2026-11-24T08:05:55Z"
+        },
+        "receipt": {
+          "mode": "check",
+          "toolchain": {
+            "compilerVersion": "21.1.8",
+            "linkerVersion": "21.1.8"
+          },
+          "targets": [
+            {
+              "name": "term-content-canonical-scan-v1.wasm",
+              "sha256": "04fdb51271a20d9152b8655f33b3e6fa36a4048380ba69010a5288761143c9f0"
+            },
+            {
+              "name": "term-bank-parser.wasm",
+              "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+          ]
+        }
+      },
+      "browserGates": [
+        {
+          "job": {
+            "id": 138304009326,
+            "name": "Full Extension E2E (Chromium)",
+            "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:05:26Z",
+            "completed_at": "2026-11-24T08:08:30Z",
+            "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009326"
+          },
+          "run": {
+            "name": "Run Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:06:05Z",
+            "completed_at": "2026-11-24T08:08:25Z"
+          },
+          "enforce": {
+            "name": "Enforce Chromium extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:08:25Z",
+            "completed_at": "2026-11-24T08:08:25Z"
+          },
+          "jsonUpload": {
+            "name": "Upload Chromium extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:08:25Z",
+            "completed_at": "2026-11-24T08:08:26Z"
+          }
+        },
+        {
+          "job": {
+            "id": 138304009532,
+            "name": "Full Extension E2E (Firefox)",
+            "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:05:30Z",
+            "completed_at": "2026-11-24T08:07:21Z",
+            "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056708/job/138304009532"
+          },
+          "run": {
+            "name": "Run Firefox extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:05:56Z",
+            "completed_at": "2026-11-24T08:07:16Z"
+          },
+          "enforce": {
+            "name": "Enforce Firefox extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:07:16Z",
+            "completed_at": "2026-11-24T08:07:17Z"
+          },
+          "jsonUpload": {
+            "name": "Upload Firefox extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "started_at": "2026-11-24T08:07:17Z",
+            "completed_at": "2026-11-24T08:07:18Z"
+          }
+        }
+      ],
+      "restartGates": {
+        "runId": 45353056824,
+        "job": {
+          "id": 138304008652,
+          "name": "Restart and interruption recovery (Chromium)",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:16Z",
+          "completed_at": "2026-11-24T08:06:14Z",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056824/job/138304008652"
+        },
+        "processTreeTest": {
+          "name": "Test owned process-tree selection",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:52Z",
+          "completed_at": "2026-11-24T08:05:53Z"
+        },
+        "campaign": {
+          "name": "Run witnessed interruption recovery campaign",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:05:53Z",
+          "completed_at": "2026-11-24T08:06:07Z"
+        },
+        "enforce": {
+          "name": "Enforce recovery report",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:07Z",
+          "completed_at": "2026-11-24T08:06:07Z"
+        },
+        "evidenceUpload": {
+          "name": "Upload restart interruption evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "started_at": "2026-11-24T08:06:07Z",
+          "completed_at": "2026-11-24T08:06:12Z"
+        }
+      },
+      "dependencyReviewCoverage": {
+        "workflowConclusion": "success",
+        "dependencyGraphAvailable": false,
+        "dependencyVulnerabilityScanExecuted": false,
+        "reason": "Availability probe selected the explicit dependency-review-unavailable branch; actual scan and checkout steps were skipped."
+      },
+      "ancillary": [
+        {
+          "id": 45353056849,
+          "name": "Lint GitHub Actions workflows",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056849",
+          "jobs": [
+            {
+              "id": 138304008500,
+              "name": "actionlint",
+              "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:05:21Z",
+              "completed_at": "2026-11-24T08:05:28Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056849/job/138304008500"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45353056867,
+          "name": "Auto-Approve Safe PRs",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056867",
+          "jobs": [
+            {
+              "id": 138304008436,
+              "name": "auto-approve",
+              "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:05:22Z",
+              "completed_at": "2026-11-24T08:05:28Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056867/job/138304008436"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45353056776,
+          "name": "Dependency Review",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056776",
+          "jobs": [
+            {
+              "id": 138304008218,
+              "name": "dependency-review",
+              "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:05:17Z",
+              "completed_at": "2026-11-24T08:05:28Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056776/job/138304008218"
+            }
+          ],
+          "skippedSteps": [
+            {
+              "job": "dependency-review",
+              "step": "Harden Runner"
+            },
+            {
+              "job": "dependency-review",
+              "step": "Checkout Repository"
+            },
+            {
+              "job": "dependency-review",
+              "step": "Dependency Review"
+            }
+          ]
+        },
+        {
+          "id": 45353056824,
+          "name": "Chromium Restart Interruption",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056824",
+          "jobs": [
+            {
+              "id": 138304008652,
+              "name": "Restart and interruption recovery (Chromium)",
+              "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:05:16Z",
+              "completed_at": "2026-11-24T08:06:14Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056824/job/138304008652"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45353056759,
+          "name": "CodeQL",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056759",
+          "jobs": [
+            {
+              "id": 138304008360,
+              "name": "Analyze (javascript)",
+              "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:05:21Z",
+              "completed_at": "2026-11-24T08:07:29Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056759/job/138304008360"
+            }
+          ],
+          "skippedSteps": []
+        },
+        {
+          "id": 45353057035,
+          "name": "ManabiTan static web acceptance",
+          "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+          "status": "completed",
+          "conclusion": "success",
+          "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353057035",
+          "jobs": [
+            {
+              "id": 138304009748,
+              "name": "chromium",
+              "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+              "status": "completed",
+              "conclusion": "success",
+              "started_at": "2026-11-24T08:05:18Z",
+              "completed_at": "2026-11-24T08:07:49Z",
+              "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353057035/job/138304009748"
+            }
+          ],
+          "skippedSteps": []
+        }
+      ],
+      "headChecks": {
+        "success": 24,
+        "skipped": 4,
+        "null": 0
+      }
+    }
+  ],
+  "failures": [],
+  "pending": [],
+  "status": "passed"
+}

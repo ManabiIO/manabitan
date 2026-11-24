@@ -1,0 +1,5 @@
+ dev/data/dictionary-wasm/manifest.json         |   4 +-
+ dev/data/dictionary-wasm/term-bank-parser.wasm | Bin 62783 -> 63004 bytes
+ ext/js/dictionary/wasm/term-bank-parser.c      |  45 +++--
+ test/term-lookup-monotonic-sequences.test.js   | 220 +++++++++++++++++++++++++
+ 4 files changed, 254 insertions(+), 15 deletions(-)

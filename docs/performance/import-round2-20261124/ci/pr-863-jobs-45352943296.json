@@ -1,0 +1,114 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ebb0777114578c5cee879877274e7d872bfea27e",
+  "kind": "jobs-45352943296",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943296/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 138303637105,
+        "run_id": 45352943296,
+        "workflow_name": "CodeQL",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943296",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oGcQ",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303637105",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943296/job/138303637105",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:21Z",
+        "completed_at": "2026-11-24T08:06:57Z",
+        "name": "Analyze (javascript)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Checkout repository",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:25Z"
+          },
+          {
+            "name": "Initialize CodeQL",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:25Z",
+            "completed_at": "2026-11-24T08:04:42Z"
+          },
+          {
+            "name": "Autobuild",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:42Z",
+            "completed_at": "2026-11-24T08:04:46Z"
+          },
+          {
+            "name": "Perform CodeQL Analysis",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:46Z",
+            "completed_at": "2026-11-24T08:06:53Z"
+          },
+          {
+            "name": "Post Perform CodeQL Analysis",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:06:53Z",
+            "completed_at": "2026-11-24T08:06:54Z"
+          },
+          {
+            "name": "Post Initialize CodeQL",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:06:54Z",
+            "completed_at": "2026-11-24T08:06:55Z"
+          },
+          {
+            "name": "Post Checkout repository",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-24T08:06:55Z",
+            "completed_at": "2026-11-24T08:06:56Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-24T08:06:56Z",
+            "completed_at": "2026-11-24T08:06:56Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303637105",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085960,
+        "runner_name": "GitHub Actions 1000085960",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

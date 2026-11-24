@@ -1,0 +1,14 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+  "kind": "legacy-statuses",
+  "source": {
+    "tool": "github.get_commit_combined_status",
+    "repo": "ManabiIO/manabitan",
+    "commit_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+    "normalized": true
+  },
+  "data": {
+    "statuses": []
+  }
+}

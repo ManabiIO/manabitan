@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "input": "canonical-local-counters-bench-jitendex.json",
+  "inputSha256": "9d4eebf0544a84b59f9e5cddacae5f2bd028ffd1a4576ac9f55065a6f8cc9efc",
+  "analyzerSha256": "781dfb8d9386b72163d816982a11e0745bb8964c6acffdc4cfbe0e426c5bddde",
+  "candidateLocalCommit": "0eb65e80712eb31037792cc831f10b24b827ac7c",
+  "candidateTree": "e3b9546229ac4118cc3e539678522446d74cff1d",
+  "runtimeFrozenAt": "5d35b544a7bb2c74384df470e2f43faad52dde6e",
+  "wasmBytes": {
+    "baseline": 1624,
+    "candidate": 1760,
+    "increase": 136
+  },
+  "scope": "Each native call is captured from the production owner using four-bank component partitions. All three independent memories are restored from the complete identical snapshot before each replay. Header, config and every byte from layout.META through the end of memory compare exactly, including journal tails. The compiler private stack is excluded. This does not perform browser, compression, or storage work.",
+  "statistics": "The twelve retained round totals sum that replay position over all captured calls. Two warmup rounds per call were excluded by the fixed protocol; no measured observations were removed. The bootstrap intervals describe this local component replay and are not independent whole-import confidence intervals.",
+  "limitations": "The local host was shared with concurrent validation. Process CPU clocks can also include background work. Equal-work C is a second independent instance of the exact A module. No whole-import, browser, cross-device, or memory benefit is established.",
+  "dictionaries": [
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "rows": 436555,
+      "uniqueRows": 363281,
+      "pendingRows": 363243,
+      "exactRows": 38,
+      "fallbackGroups": [],
+      "nativeCalls": 55,
+      "sourceDerivedHeaderCounterStores": {
+        "baseline": 1089805,
+        "candidate": 275,
+        "removed": 1089530,
+        "scope": "Derived from successful oracle call headers and the frozen C statements for h[1] through h[5]. Includes final boundary publication; excludes the identical seven initial header stores per call and unchanged h[0] journal progress. This is not a hardware instruction or latency measurement."
+      },
+      "metrics": {
+        "timings": {
+          "units": "milliseconds",
+          "aggregateRounds": [
+            {
+              "A": 45.228917999994565,
+              "B": 45.22723100000542,
+              "C": 43.76345000000663
+            },
+            {
+              "A": 47.77467800001102,
+              "B": 45.737113999995586,
+              "C": 44.901328999997986
+            },
+            {
+              "A": 48.01292099999796,
+              "B": 45.379233000013755,
+              "C": 46.0266210000151
+            },
+            {
+              "A": 48.90008400000329,
+              "B": 48.31020799999624,
+              "C": 45.0779610000003
+            },
+            {
+              "A": 46.85727300001486,
+              "B": 44.48142400000768,
+              "C": 51.792868999992834
+            },
+            {
+              "A": 49.6674469999914,
+              "B": 48.30418399999576,
+              "C": 51.579731999999694
+            },
+            {
+              "A": 49.98235400000715,
+              "B": 45.53415099999859,
+              "C": 45.75482900000384
+            },
+            {
+              "A": 51.5453189999987,
+              "B": 47.91693199999986,
+              "C": 47.86814899999854
+            },
+            {
+              "A": 49.53703099999677,
+              "B": 46.76228800000308,
+              "C": 46.61698400000046
+            },
+            {
+              "A": 49.76977999999576,
+              "B": 45.71837599999151,
+              "C": 46.35423700000274
+            },
+            {
+              "A": 80.91577499999721,
+              "B": 46.221944999998186,
+              "C": 47.419569999993314
+            },
+            {
+              "A": 97.65863600000694,
+              "B": 47.283312999995246,
+              "C": 44.618328000017755
+            }
+          ],
+          "roleMedians": {
+            "A": 49.602238999994086,
+            "B": 45.979529499996886,
+            "C": 46.19042900000892
+          },
+          "comparisons": {
+            "B/A": {
+              "medianPercent": -5.543362221886677,
+              "descriptiveBootstrap95Percent": [
+                -8.51991798772086,
+                -3.504863625378701
+              ],
+              "fasterRounds": 12,
+              "rounds": 12,
+              "minPercent": -51.58307044141812,
+              "maxPercent": -0.003729914540839818,
+              "pairedPercent": [
+                -0.003729914540839818,
+                -4.264945542940057,
+                -5.4853734060135935,
+                -1.2062883164106863,
+                -5.070395368519264,
+                -2.7447817078173453,
+                -8.899546828082416,
+                -7.039217275964338,
+                -5.601351037759761,
+                -8.140289147359303,
+                -42.87647248018105,
+                -51.58307044141812
+              ]
+            },
+            "B/C": {
+              "medianPercent": -0.19019709324261114,
+              "descriptiveBootstrap95Percent": [
+                -1.9660717517832216,
+                2.6030691497014757
+              ],
+              "fasterRounds": 6,
+              "rounds": 12,
+              "minPercent": -14.116702050211138,
+              "maxPercent": 7.170348720954611,
+              "pairedPercent": [
+                3.344756869027843,
+                1.8613814303751086,
+                -1.4065512217399823,
+                7.170348720954611,
+                -14.116702050211138,
+                -6.350455640219222,
+                -0.48230537590957523,
+                0.10191118942435295,
+                0.31169755641553554,
+                -1.3717429973255646,
+                -2.525592281826461,
+                5.972848198113634
+              ]
+            },
+            "C/A": {
+              "medianPercent": -6.438530515475794,
+              "descriptiveBootstrap95Percent": [
+                -8.13711201856599,
+                -3.6885621267455093
+              ],
+              "fasterRounds": 10,
+              "rounds": 12,
+              "minPercent": -54.31194840770193,
+              "maxPercent": 10.533254890817933,
+              "pairedPercent": [
+                -3.2401128852742267,
+                -6.014376486247319,
+                -4.1370113682167915,
+                -7.816189027410935,
+                10.533254890817933,
+                3.85017776333183,
+                -8.458035009721044,
+                -7.133858265578397,
+                -5.894675036129049,
+                -6.862684544704267,
+                -41.39638407962484,
+                -54.31194840770193
+              ]
+            }
+          }
+        },
+        "cpuMicros": {
+          "units": "microseconds",
+          "aggregateRounds": [
+            {
+              "A": 46676,
+              "B": 45894,
+              "C": 44389
+            },
+            {
+              "A": 48595,
+              "B": 47359,
+              "C": 45279
+            },
+            {
+              "A": 48856,
+              "B": 46121,
+              "C": 47578
+            },
+            {
+              "A": 49585,
+              "B": 49242,
+              "C": 46657
+            },
+            {
+              "A": 48441,
+              "B": 45254,
+              "C": 52650
+            },
+            {
+              "A": 50569,
+              "B": 50088,
+              "C": 52943
+            },
+            {
+              "A": 51444,
+              "B": 46426,
+              "C": 46537
+            },
+            {
+              "A": 51810,
+              "B": 49578,
+              "C": 48081
+            },
+            {
+              "A": 50459,
+              "B": 47576,
+              "C": 48206
+            },
+            {
+              "A": 50655,
+              "B": 46574,
+              "C": 47995
+            },
+            {
+              "A": 83063,
+              "B": 46944,
+              "C": 48285
+            },
+            {
+              "A": 98736,
+              "B": 49038,
+              "C": 45407
+            }
+          ],
+          "roleMedians": {
+            "A": 50514.0,
+            "B": 47151.5,
+            "C": 47786.5
+          },
+          "comparisons": {
+            "B/A": {
+              "medianPercent": -5.65581689012501,
+              "descriptiveBootstrap95Percent": [
+                -8.905378151303072,
+                -2.1094253802216745
+              ],
+              "fasterRounds": 12,
+              "rounds": 12,
+              "minPercent": -50.33422459893049,
+              "maxPercent": -0.6917414540687727,
+              "pairedPercent": [
+                -1.6753792098723075,
+                -2.5434715505710415,
+                -5.598084165711481,
+                -0.6917414540687727,
+                -6.579137507483335,
+                -0.9511756214281464,
+                -9.754295933442192,
+                -4.308048639258832,
+                -5.713549614538538,
+                -8.056460369163954,
+                -43.48386164718347,
+                -50.33422459893049
+              ]
+            },
+            "B/C": {
+              "medianPercent": -0.7727055728755039,
+              "descriptiveBootstrap95Percent": [
+                -3.0115324061909368,
+                3.992110325589826
+              ],
+              "fasterRounds": 7,
+              "rounds": 12,
+              "minPercent": -14.047483380816717,
+              "maxPercent": 7.996564406369067,
+              "pairedPercent": [
+                3.3904796233301004,
+                4.593741027849552,
+                -3.06233973685317,
+                5.540433375484932,
+                -14.047483380816717,
+                -5.39259203294109,
+                -0.23851988740142271,
+                3.1134959755412694,
+                -1.306891258349585,
+                -2.960725075528703,
+                -2.777260018639327,
+                7.996564406369067
+              ]
+            },
+            "C/A": {
+              "medianPercent": -5.578110378126405,
+              "descriptiveBootstrap95Percent": [
+                -8.367989779994524,
+                -3.540430930191507
+              ],
+              "fasterRounds": 10,
+              "rounds": 12,
+              "minPercent": -54.01170798898072,
+              "maxPercent": 8.688920542515643,
+              "pairedPercent": [
+                -4.8997343388465175,
+                -6.823747299104843,
+                -2.6158506631734024,
+                -5.905011596248865,
+                8.688920542515643,
+                4.694575728212946,
+                -9.538527330689684,
+                -7.197452229299362,
+                -4.465011197209612,
+                -5.2512091600039446,
+                -41.86942441279511,
+                -54.01170798898072
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "conclusion": "No native performance gain is established by this shared-host screen: B is nearly equal to unchanged control C, while A and C themselves drift materially. The complete native-state parity checks passed. Keep browser qualification separate."
+}

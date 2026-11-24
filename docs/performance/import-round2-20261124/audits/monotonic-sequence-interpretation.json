@@ -1,0 +1,905 @@
+{
+  "status": "complete",
+  "candidate": "PR #862 monotonic sequence indexing",
+  "workflowRun": "45352695368",
+  "baseline": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+  "candidateCommit": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+  "interpretation": "None of the three six-pair complete-import screens establishes an improvement; no independent qualification is justified by these screens. All attempted imports and tails remain included.",
+  "phaseScope": "Selected counters are descriptive totals emitted by the parallel parser/importer. They overlap and are not a partition of end-to-end wall time. parserLookupIndexPrepareMs, parserLookupIndexEncodeMs and termLookupIndexEncodeMs are equal aliases in these packets.",
+  "componentRisk": {
+    "source": "../sequence-evidence/lookup-component.json",
+    "scope": "Prior shared-host, resident native encoder component experiment; not a browser or complete-import measurement.",
+    "lateDecreasePairedMedianPercent": {
+      "B/A": 6.0342,
+      "B/C": 6.8898,
+      "C/A": 0.01558
+    },
+    "interpretation": "A first decrease late in a mostly ordered batch pays deferred table initialization/backfill. The diagnostic overhead remains a separate workload tradeoff and is not converted into an import-regression estimate."
+  },
+  "dictionaries": {
+    "jmdict": {
+      "audit": "audits/monotonic-sequence-screen-jmdict.json",
+      "artifactSha256": "03cfa7b2dbc4203fa14239487b4363097b75a7a9eb8f5702efad11f45aca2e0b",
+      "retainedImports": 20,
+      "timedImports": 18,
+      "allTimingsMs": {
+        "A": [
+          1156.2000000000116,
+          933.3999999999942,
+          911.0,
+          969.6000000000058,
+          937.4000000000233,
+          955.5999999999767
+        ],
+        "B": [
+          947.0999999999767,
+          944.3999999999942,
+          938.6000000000058,
+          938.1999999999825,
+          955.3000000000175,
+          904.2999999999884
+        ],
+        "C": [
+          939.3999999999942,
+          962.7999999999884,
+          960.5999999999767,
+          948.8999999999942,
+          942.4000000000233,
+          950.5
+        ]
+      },
+      "comparisons": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            -18.085106382981564,
+            1.1784872509106536,
+            3.0296377607031744,
+            -3.2384488448868654,
+            1.909537017281182,
+            -5.368354960233324
+          ],
+          "pairedMedianPercent": -1.0299807969881059,
+          "pairedMedianBootstrap95Percent": [
+            -11.726730671607445,
+            2.4695873889921782
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -4.013166871333851,
+          "baselineMedianMs": 946.5,
+          "candidateMedianMs": 941.5
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            0.8196721311456878,
+            -1.9110926464472766,
+            -2.2902352696201778,
+            -1.1276214564244658,
+            1.368845500848237,
+            -4.860599684377864
+          ],
+          "pairedMedianPercent": -1.5193570514358712,
+          "pairedMedianBootstrap95Percent": [
+            -3.575417476999021,
+            1.0942588159969624
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -1.3445289766155777,
+          "baselineMedianMs": 949.6999999999971,
+          "candidateMedianMs": 941.5
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            -18.751081127833878,
+            3.149775016069678,
+            5.444566410535323,
+            -2.134900990100197,
+            0.5333902282909975,
+            -0.5336961071553792
+          ],
+          "pairedMedianPercent": -0.00015293943219085726,
+          "pairedMedianBootstrap95Percent": [
+            -10.442991058967037,
+            4.297170713302501
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -2.705007504435031,
+          "baselineMedianMs": 946.5,
+          "candidateMedianMs": 949.6999999999971
+        }
+      },
+      "stableProductionCounts": {
+        "rows": [
+          528299
+        ],
+        "chunkCount": [
+          12
+        ],
+        "parserBankSpanCount": [
+          53
+        ],
+        "parserFusedAttempts": [
+          12
+        ],
+        "parserFusedFallbacks": [
+          0
+        ],
+        "parserNativeLookupScratchReuseGroups": [
+          12
+        ],
+        "parserNativeLookupScratchReuseMisses": [
+          0
+        ],
+        "parserParallelWorkerCount": [
+          3
+        ],
+        "parserParallelGroupCount": [
+          12
+        ]
+      },
+      "descriptivePhaseCountersMs": {
+        "parserLookupIndexEncodeMs": {
+          "A": {
+            "values": [
+              49.90000000002328,
+              49.89999999990687,
+              39,
+              36.49999999991269,
+              51.199999999953434,
+              37.39999999990687
+            ],
+            "median": 44.449999999953434,
+            "min": 36.49999999991269,
+            "max": 51.199999999953434
+          },
+          "B": {
+            "values": [
+              35.49999999994179,
+              47.59999999991851,
+              41.899999999965075,
+              37.09999999997672,
+              35.90000000008149,
+              40.90000000008149
+            ],
+            "median": 39.000000000029104,
+            "min": 35.49999999994179,
+            "max": 47.59999999991851
+          },
+          "C": {
+            "values": [
+              39.500000000029104,
+              40.39999999999418,
+              54.10000000000582,
+              44.29999999998836,
+              53.59999999997672,
+              45.20000000001164
+            ],
+            "median": 44.75,
+            "min": 39.500000000029104,
+            "max": 54.10000000000582
+          }
+        },
+        "parserParallelWorkerWallMs": {
+          "A": {
+            "values": [
+              991.8999999999942,
+              733.8999999999942,
+              711.2999999999884,
+              733.3000000000175,
+              774.4000000000233,
+              775.6999999999534
+            ],
+            "median": 754.1500000000087,
+            "min": 711.2999999999884,
+            "max": 991.8999999999942
+          },
+          "B": {
+            "values": [
+              731.5,
+              790.8000000000175,
+              783.1000000000058,
+              787.6000000000058,
+              777.8000000000175,
+              738.9000000000233
+            ],
+            "median": 780.4500000000116,
+            "min": 731.5,
+            "max": 790.8000000000175
+          },
+          "C": {
+            "values": [
+              727.6000000000058,
+              717.5,
+              731.3999999999942,
+              706.7999999999884,
+              745.0999999999767,
+              772.2999999999884
+            ],
+            "median": 729.5,
+            "min": 706.7999999999884,
+            "max": 772.2999999999884
+          }
+        },
+        "dedupCanonicalScanMs": {
+          "A": {
+            "values": [
+              109.4999999999709,
+              99.70000000001164,
+              86.60000000003492,
+              113.60000000000582,
+              107.10000000003492,
+              88.5
+            ],
+            "median": 103.40000000002328,
+            "min": 86.60000000003492,
+            "max": 113.60000000000582
+          },
+          "B": {
+            "values": [
+              96.30000000004657,
+              90.0000000000291,
+              83.60000000006403,
+              100.70000000004075,
+              98.29999999993015,
+              99.19999999989523
+            ],
+            "median": 97.29999999998836,
+            "min": 83.60000000006403,
+            "max": 100.70000000004075
+          },
+          "C": {
+            "values": [
+              83.60000000006403,
+              89.10000000003492,
+              94.09999999997672,
+              89.29999999993015,
+              80.29999999981374,
+              98.59999999997672
+            ],
+            "median": 89.19999999998254,
+            "min": 80.29999999981374,
+            "max": 98.59999999997672
+          }
+        },
+        "contentCompressMs": {
+          "A": {
+            "values": [
+              411.6000000000058,
+              336.4000000000233,
+              352.0999999999767,
+              369.3999999999651,
+              339.0999999999767,
+              347.4000000000233
+            ],
+            "median": 349.75,
+            "min": 336.4000000000233,
+            "max": 411.6000000000058
+          },
+          "B": {
+            "values": [
+              374.69999999998254,
+              358.9999999999709,
+              339.0999999999767,
+              343.6000000000349,
+              393.29999999995925,
+              297.60000000020955
+            ],
+            "median": 351.3000000000029,
+            "min": 297.60000000020955,
+            "max": 393.29999999995925
+          },
+          "C": {
+            "values": [
+              361.79999999995925,
+              359.5999999999767,
+              345.0000000000291,
+              383.1000000000058,
+              370.20000000001164,
+              349.3000000001048
+            ],
+            "median": 360.699999999968,
+            "min": 345.0000000000291,
+            "max": 383.1000000000058
+          }
+        }
+      },
+      "interpretation": "Candidate wins 3/6 B/A pairs and 4/6 B/C pairs; both candidate intervals include zero. The first A observation is 1156.2 ms versus first B 947.1 and C 939.4; it is retained. Equal-work B/A (-4.013%) looks larger than paired-median B/A (-1.030%), while identical-code equal-work C/A is -2.705%. Lower descriptive native lookup-index counters do not establish an end-to-end gain."
+    },
+    "jitendex": {
+      "audit": "audits/monotonic-sequence-screen-jitendex.json",
+      "artifactSha256": "a5029ab1b13d1df213ef4d5336e140ca799232d0042fccec33ca8163c012f2fd",
+      "retainedImports": 20,
+      "timedImports": 18,
+      "allTimingsMs": {
+        "A": [
+          2280.4000000000233,
+          1884.0999999999767,
+          1855.6999999999534,
+          1890.3000000000466,
+          1895.8000000000466,
+          1802.0
+        ],
+        "B": [
+          2375.6999999999534,
+          1789.7999999999302,
+          1821.2000000000698,
+          1915.2999999998137,
+          1893.8000000000466,
+          2019.6999999999534
+        ],
+        "C": [
+          1823.9000000000233,
+          1847.8000000000466,
+          1788.6999999999534,
+          1830,
+          1827.8000000000466,
+          1861.1000000000931
+        ]
+      },
+      "comparisons": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            4.179091387472766,
+            -5.005042195215104,
+            -1.8591367139022763,
+            1.3225413955333387,
+            -0.10549636037556764,
+            12.081021087677769
+          ],
+          "pairedMedianPercent": 0.6085225175788855,
+          "pairedMedianBootstrap95Percent": [
+            -3.43208945455869,
+            8.130056237575268
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": 1.7849297485395876,
+          "baselineMedianMs": 1887.2000000000116,
+          "candidateMedianMs": 1904.5499999999302
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 1,
+          "pairedChangesPercent": [
+            30.25385163659866,
+            -3.13886784284636,
+            1.8169620394765662,
+            4.661202185782165,
+            3.6108983477403545,
+            8.52184192143637
+          ],
+          "pairedMedianPercent": 4.136050266761259,
+          "pairedMedianBootstrap95Percent": [
+            -0.660952901684897,
+            19.387846779017515
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": 7.616150392097776,
+          "baselineMedianMs": 1828.9000000000233,
+          "candidateMedianMs": 1904.5499999999302
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -20.01841782143463,
+            -1.9266493285882147,
+            -3.6104973864310885,
+            -3.1899698460585713,
+            -3.586876252769189,
+            3.279689234189398
+          ],
+          "pairedMedianPercent": -3.38842304941388,
+          "pairedMedianBootstrap95Percent": [
+            -11.81445760393286,
+            0.6765199528005916
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -5.418536736644308,
+          "baselineMedianMs": 1887.2000000000116,
+          "candidateMedianMs": 1828.9000000000233
+        }
+      },
+      "stableProductionCounts": {
+        "rows": [
+          436555
+        ],
+        "chunkCount": [
+          22
+        ],
+        "parserBankSpanCount": [
+          219
+        ],
+        "parserFusedAttempts": [
+          22
+        ],
+        "parserFusedFallbacks": [
+          0
+        ],
+        "parserNativeLookupScratchReuseGroups": [
+          22
+        ],
+        "parserNativeLookupScratchReuseMisses": [
+          0
+        ],
+        "parserParallelWorkerCount": [
+          3
+        ],
+        "parserParallelGroupCount": [
+          22
+        ]
+      },
+      "descriptivePhaseCountersMs": {
+        "parserLookupIndexEncodeMs": {
+          "A": {
+            "values": [
+              52.999999999883585,
+              53.40000000002328,
+              54.000000000349246,
+              55.200000000651926,
+              48.39999999944121,
+              44.9000000001397
+            ],
+            "median": 53.199999999953434,
+            "min": 44.9000000001397,
+            "max": 55.200000000651926
+          },
+          "B": {
+            "values": [
+              52.29999999993015,
+              46.700000000186265,
+              56.6999999997206,
+              64.60000000009313,
+              50.50000000046566,
+              63.00000000023283
+            ],
+            "median": 54.49999999982538,
+            "min": 46.700000000186265,
+            "max": 64.60000000009313
+          },
+          "C": {
+            "values": [
+              58.799999999580905,
+              52.69999999983702,
+              55.70000000030268,
+              47.30000000074506,
+              59.90000000107102,
+              48.90000000037253
+            ],
+            "median": 54.20000000006985,
+            "min": 47.30000000074506,
+            "max": 59.90000000107102
+          }
+        },
+        "parserParallelWorkerWallMs": {
+          "A": {
+            "values": [
+              1853.2000000000698,
+              1514.1999999999534,
+              1482.4000000000233,
+              1524.8999999999069,
+              1533,
+              1444.8000000000466
+            ],
+            "median": 1519.5499999999302,
+            "min": 1444.8000000000466,
+            "max": 1853.2000000000698
+          },
+          "B": {
+            "values": [
+              1752.3000000000466,
+              1428.2999999999302,
+              1453.3000000000466,
+              1500.8999999999069,
+              1531.1999999999534,
+              1591.6000000000931
+            ],
+            "median": 1516.0499999999302,
+            "min": 1428.2999999999302,
+            "max": 1752.3000000000466
+          },
+          "C": {
+            "values": [
+              1449.7999999999302,
+              1470.0999999999767,
+              1429.5999999999767,
+              1428.8999999999069,
+              1453.7000000001863,
+              1490.8000000000466
+            ],
+            "median": 1451.7500000000582,
+            "min": 1428.8999999999069,
+            "max": 1490.8000000000466
+          }
+        },
+        "dedupCanonicalScanMs": {
+          "A": {
+            "values": [
+              88.50000000011642,
+              82.30000000004657,
+              83.09999999974389,
+              102.60000000079162,
+              91.89999999990687,
+              73.00000000093132
+            ],
+            "median": 85.79999999993015,
+            "min": 73.00000000093132,
+            "max": 102.60000000079162
+          },
+          "B": {
+            "values": [
+              86.09999999962747,
+              98.59999999974389,
+              94.09999999951106,
+              98.20000000018626,
+              83.1999999997206,
+              96.90000000037253
+            ],
+            "median": 95.49999999994179,
+            "min": 83.1999999997206,
+            "max": 98.59999999974389
+          },
+          "C": {
+            "values": [
+              64.59999999997672,
+              73.60000000020955,
+              78.60000000020955,
+              87.00000000116415,
+              81.29999999981374,
+              95.2000000004191
+            ],
+            "median": 79.95000000001164,
+            "min": 64.59999999997672,
+            "max": 95.2000000004191
+          }
+        },
+        "contentCompressMs": {
+          "A": {
+            "values": [
+              681.5999999996275,
+              589.7999999996973,
+              554.3999999995576,
+              605.1999999999534,
+              618.399999999674,
+              585.2000000006519
+            ],
+            "median": 597.4999999998254,
+            "min": 554.3999999995576,
+            "max": 681.5999999996275
+          },
+          "B": {
+            "values": [
+              725.300000000163,
+              574.4999999994179,
+              579.099999999511,
+              637.4000000001397,
+              518.3000000002794,
+              671.2000000004191
+            ],
+            "median": 608.2499999998254,
+            "min": 518.3000000002794,
+            "max": 725.300000000163
+          },
+          "C": {
+            "values": [
+              609.899999999674,
+              569.5000000002328,
+              590.399999999674,
+              557,
+              558.8000000002794,
+              569.9999999997672
+            ],
+            "median": 569.75,
+            "min": 557,
+            "max": 609.899999999674
+          }
+        }
+      },
+      "interpretation": "Candidate wins 3/6 B/A pairs and only 1/6 B/C pairs; it is slower than C in 5/6 pairs. Both candidate intervals include zero and the identical-code C/A median is -3.388%. First A/B observations (2280.4/2375.7 ms) and the final B observation (2019.7 ms) are retained. Descriptive lookup-index counters do not show an improvement."
+    },
+    "vndb": {
+      "audit": "audits/monotonic-sequence-screen-vndb.json",
+      "artifactSha256": "015959a39605095eca444f8cc773f273d67ec890923b841f0cd043df560a845d",
+      "allTimingsMs": {
+        "A": [
+          8341.100000000006,
+          7028.5,
+          7007.5,
+          6767.700000000012,
+          6730.700000000012,
+          6748.20000000007
+        ],
+        "B": [
+          7236.099999999991,
+          6773.799999999988,
+          6688.0,
+          7239.200000000012,
+          6592.599999999977,
+          6572.900000000023
+        ],
+        "C": [
+          6780.5,
+          6691.299999999988,
+          6700.600000000035,
+          7218.900000000023,
+          6758.299999999988,
+          6431.79999999993
+        ]
+      },
+      "comparisons": {
+        "candidate": {
+          "pairs": 6,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -13.24765318722967,
+            -3.623817315216782,
+            -4.559400642169109,
+            6.966916382227328,
+            -2.0517925327237063,
+            -2.597729764975032
+          ],
+          "pairedMedianPercent": -3.1107735400959067,
+          "pairedMedianBootstrap95Percent": [
+            -8.90352691469939,
+            2.4575619247518112
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -3.5686718891135727,
+          "baselineMedianMs": 6887.600000000006,
+          "candidateMedianMs": 6730.899999999994
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 6,
+          "fasterPairs": 2,
+          "pairedChangesPercent": [
+            6.719268490524177,
+            1.2329442709189564,
+            -0.1880428618337926,
+            0.2812062779646185,
+            -2.4518000088781466,
+            2.193787120247759
+          ],
+          "pairedMedianPercent": 0.7570752744417875,
+          "pairedMedianBootstrap95Percent": [
+            -1.3199214353559696,
+            4.456527805385968
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": 1.284332231022156,
+          "baselineMedianMs": 6729.450000000012,
+          "candidateMedianMs": 6730.899999999994
+        },
+        "identicalProductControl": {
+          "pairs": 6,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -18.709762501348802,
+            -4.797609731806385,
+            -4.379593292899964,
+            6.666962188040415,
+            0.4100613606307979,
+            -4.688657716133726
+          ],
+          "pairedMedianPercent": -4.534125504516845,
+          "pairedMedianBootstrap95Percent": [
+            -11.753686116577594,
+            3.5385117743356065
+          ],
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+          "equalWorkPercent": -4.791465780774851,
+          "baselineMedianMs": 6887.600000000006,
+          "candidateMedianMs": 6729.450000000012
+        }
+      },
+      "interpretation": "B wins 5/6 against A but only 2/6 against C. The A first-block tail of 8341.1 ms is retained; B/A median -3.111% is accompanied by identical-code C/A median -4.534%, while B/C median is +0.757%. Both candidate intervals include zero.",
+      "retainedImports": 20,
+      "timedImports": 18,
+      "stableProductionCounts": {
+        "rows": [
+          6648310
+        ],
+        "chunkCount": [
+          170
+        ],
+        "parserBankSpanCount": [
+          665
+        ],
+        "parserFusedAttempts": [
+          170
+        ],
+        "parserFusedFallbacks": [
+          0
+        ],
+        "parserNativeLookupScratchReuseGroups": [
+          170
+        ],
+        "parserNativeLookupScratchReuseMisses": [
+          0
+        ],
+        "parserParallelWorkerCount": [
+          3
+        ],
+        "parserParallelGroupCount": [
+          170
+        ]
+      },
+      "descriptivePhaseCountersMs": {
+        "parserLookupIndexEncodeMs": {
+          "A": {
+            "values": [
+              732.6999999999971,
+              703.5000000000291,
+              674.5999999999185,
+              698.0000000001746,
+              667.2999999993481,
+              679.8000000010943
+            ],
+            "median": 688.9000000006345,
+            "min": 667.2999999993481,
+            "max": 732.6999999999971
+          },
+          "B": {
+            "values": [
+              590.1000000000204,
+              621.099999999773,
+              642.399999999383,
+              688.6999999996042,
+              630.7999999999884,
+              601.8999999999069
+            ],
+            "median": 625.9499999998807,
+            "min": 590.1000000000204,
+            "max": 688.6999999996042
+          },
+          "C": {
+            "values": [
+              655.8000000000466,
+              652.3999999997905,
+              631.4999999995925,
+              738.9000000001397,
+              701.3000000002794,
+              601.1000000005588
+            ],
+            "median": 654.0999999999185,
+            "min": 601.1000000005588,
+            "max": 738.9000000001397
+          }
+        },
+        "parserParallelWorkerWallMs": {
+          "A": {
+            "values": [
+              7878.400000000009,
+              6584.599999999977,
+              6581.599999999977,
+              6339.899999999965,
+              6298.300000000047,
+              6324.800000000047
+            ],
+            "median": 6460.749999999971,
+            "min": 6298.300000000047,
+            "max": 7878.400000000009
+          },
+          "B": {
+            "values": [
+              6808.5,
+              6351.400000000023,
+              6260.900000000023,
+              6785.200000000012,
+              6175.899999999965,
+              6146.20000000007
+            ],
+            "median": 6306.150000000023,
+            "min": 6146.20000000007,
+            "max": 6808.5
+          },
+          "C": {
+            "values": [
+              6335.5,
+              6268.100000000006,
+              6281.300000000047,
+              6781.299999999988,
+              6329.200000000012,
+              6036.599999999977
+            ],
+            "median": 6305.250000000029,
+            "min": 6036.599999999977,
+            "max": 6781.299999999988
+          }
+        },
+        "dedupCanonicalScanMs": {
+          "A": {
+            "values": [
+              179.50000000004366,
+              158.90000000002328,
+              139.1999999996624,
+              160.90000000043074,
+              148.39999999990687,
+              173.49999999883585
+            ],
+            "median": 159.900000000227,
+            "min": 139.1999999996624,
+            "max": 179.50000000004366
+          },
+          "B": {
+            "values": [
+              119.90000000009604,
+              161.1999999997788,
+              144.70000000100117,
+              146.9000000002561,
+              118.49999999988358,
+              166.60000000102445
+            ],
+            "median": 145.80000000062864,
+            "min": 118.49999999988358,
+            "max": 166.60000000102445
+          },
+          "C": {
+            "values": [
+              156.4999999999709,
+              175.00000000011642,
+              133.69999999989523,
+              153.60000000032596,
+              131.60000000026776,
+              130.6999999996042
+            ],
+            "median": 143.6500000001106,
+            "min": 130.6999999996042,
+            "max": 175.00000000011642
+          }
+        },
+        "contentCompressMs": {
+          "A": {
+            "values": [
+              260.60000000009313,
+              260.10000000023865,
+              238.10000000032596,
+              228.10000000009313,
+              261.3000000002212,
+              239.3999999993248
+            ],
+            "median": 249.74999999978172,
+            "min": 228.10000000009313,
+            "max": 261.3000000002212
+          },
+          "B": {
+            "values": [
+              272.2000000000553,
+              263.4999999999709,
+              251.39999999979045,
+              276.0000000001164,
+              230.69999999942956,
+              284.5999999997439
+            ],
+            "median": 267.8500000000131,
+            "min": 230.69999999942956,
+            "max": 284.5999999997439
+          },
+          "C": {
+            "values": [
+              261.5000000000873,
+              238.60000000006403,
+              284.20000000012806,
+              283.0000000001164,
+              288.1999999996042,
+              236.69999999995343
+            ],
+            "median": 272.25000000010186,
+            "min": 236.69999999995343,
+            "max": 288.1999999996042
+          }
+        }
+      },
+      "fullMediaDiagnostics": {
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      }
+    }
+  }
+}

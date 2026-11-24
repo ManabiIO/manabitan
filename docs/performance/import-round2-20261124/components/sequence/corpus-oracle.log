@@ -1,0 +1,28 @@
+jmdict: verified 40000 rows / 4 banks
+jmdict: verified 440000 rows / 44 banks
+jmdict: PASS 528299 rows; {"successfulNativeCalls":14,"nativeRows":528299,"orderedCalls":13,"fallbackTableCalls":1,"internerHashesAvoided":200916,"hashScratchClearBytesAvoided":1605632}
+jitendex: verified 8000 rows / 4 banks
+jitendex: verified 88000 rows / 44 banks
+jitendex: verified 168000 rows / 84 banks
+jitendex: verified 248000 rows / 124 banks
+jitendex: verified 328000 rows / 164 banks
+jitendex: verified 408000 rows / 204 banks
+jitendex: PASS 436555 rows; {"successfulNativeCalls":55,"nativeRows":436555,"orderedCalls":55,"fallbackTableCalls":0,"internerHashesAvoided":211563,"hashScratchClearBytesAvoided":901120}
+vndb: verified 40000 rows / 4 banks
+vndb: verified 440000 rows / 44 banks
+vndb: verified 840000 rows / 84 banks
+vndb: verified 1240000 rows / 124 banks
+vndb: verified 1640000 rows / 164 banks
+vndb: verified 2040000 rows / 204 banks
+vndb: verified 2440000 rows / 244 banks
+vndb: verified 2840000 rows / 284 banks
+vndb: verified 3240000 rows / 324 banks
+vndb: verified 3640000 rows / 364 banks
+vndb: verified 4040000 rows / 404 banks
+vndb: verified 4440000 rows / 444 banks
+vndb: verified 4840000 rows / 484 banks
+vndb: verified 5240000 rows / 524 banks
+vndb: verified 5640000 rows / 564 banks
+vndb: verified 6040000 rows / 604 banks
+vndb: verified 6440000 rows / 644 banks
+vndb: PASS 6648310 rows; {"successfulNativeCalls":167,"nativeRows":6648310,"orderedCalls":167,"fallbackTableCalls":0,"internerHashesAvoided":167,"hashScratchClearBytesAvoided":21790720}

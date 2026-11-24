@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/vndb-media-bookkeeping
+
+
+ Test Files  6 passed (6)
+      Tests  140 passed (140)
+   Start at  03:01:16
+   Duration  2.36s (transform 2.76s, setup 285ms, import 4.69s, tests 2.16s, environment 1ms)
+

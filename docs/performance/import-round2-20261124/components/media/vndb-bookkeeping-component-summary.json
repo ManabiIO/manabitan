@@ -1,0 +1,107 @@
+{
+  "scope": "Component correctness and deterministic work-removal evidence; complete-import speed and peak-memory qualification belong to the separate hosted browser study.",
+  "candidate": {
+    "localHead": "fab9802f03b82a6cce221576e4703c624d76aa1d",
+    "remoteHead": "ebb0777114578c5cee879877274e7d872bfea27e",
+    "tree": "923cd36b875afbbee6e6674fd1b4450bed6ce362",
+    "pullRequest": "https://github.com/ManabiIO/manabitan/pull/863"
+  },
+  "baseline": {
+    "head": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+  },
+  "source": {
+    "path": "/workspace/scratch/0a1757ac2970/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+    "bytes": 291705969,
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "fullArchivePack": {
+    "script": "vndb-bookkeeping-pack-parity.mjs",
+    "receipt": "vndb-bookkeeping-pack-parity.json",
+    "log": "vndb-bookkeeping-pack-parity.log",
+    "catalogEntries": 147237,
+    "mediaEntries": 146570,
+    "nativeCrcCheckedDecodedMediaBytes": 188131284,
+    "equalOutputs": [
+      "complete catalog metadata/name order",
+      "all packed record metadata and request order",
+      "full packed Blob SHA256",
+      "generation descriptor and exact index bytes",
+      "range-read counts/bytes and compressed/uncompressed totals"
+    ],
+    "temporaryGetDataObjectsAndAssignCallsRemoved": 147237,
+    "copiedMediaSortReferenceCountRemoved": 146570,
+    "sortComparisonsRemoved": 146569,
+    "scopeNote": "Actual full-archive dense catalog and source pack components were executed for both frozen trees. No full browser import was run by these scripts."
+  },
+  "perBankProjectionReplay": {
+    "script": "vndb-bookkeeping-projection-parity.mjs",
+    "receipt": "vndb-bookkeeping-projection-parity.json",
+    "log": "vndb-bookkeeping-projection-parity.log",
+    "sourceBanks": 665,
+    "sourceRows": 6648310,
+    "projectedRowsAndRequirements": 147186,
+    "uniquePaths": 146570,
+    "equalOutputs": [
+      "selected typed term columns and encoded content bytes",
+      "prepared lookup bytes",
+      "projected requirement order",
+      "owned diagnostic arena bytes/spans/order",
+      "first missing-media diagnostics after all later native arena reuse"
+    ],
+    "projectedDiagnosticEntryObjectsRemoved": 147186,
+    "additionalRequirementAndSourceClonesRemovedInAllUniqueDeferredScenario": 293140,
+    "scopeNote": "Each source bank is parsed separately with the importer default chunk size; the actual native parser plus owned-result projection feeds the real importer through a transport-only wrapper. Browser parallel grouping/cross-bank dedup can change projected row count. The all-unique-deferred scenario deliberately exercises deferred snapshots; actual browser prefetch/defer choice can change that clone count. These are source-level object-literal counts, not observed allocation bytes or peak-memory measurements."
+  },
+  "localValidation": {
+    "scoped": {
+      "status": "passed",
+      "suites": 6,
+      "tests": 140
+    },
+    "fullUnit": {
+      "status": "passed",
+      "suites": 641,
+      "passed": 14414,
+      "skipped": 47,
+      "durationSeconds": 474.72,
+      "workers": 1,
+      "unchangedTimeouts": true,
+      "nativeCompiler": "LLVM21.1.8"
+    },
+    "selectedEslint": "passed",
+    "mainTypecheck": "passed",
+    "testTypecheck": "passed",
+    "dryBuildAllTargets": "passed",
+    "diffCheck": "passed",
+    "logs": {
+      "focused": {
+        "path": "vndb-bookkeeping-focused.log",
+        "sha256": "853b663066d83de25a0a27a2d664ced5682a9dd38991882e290370d04d18f6c7"
+      },
+      "lint": {
+        "path": "vndb-bookkeeping-lint.log",
+        "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+      },
+      "types-main": {
+        "path": "vndb-bookkeeping-types-main.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "types-test": {
+        "path": "vndb-bookkeeping-types-test.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "build": {
+        "path": "vndb-bookkeeping-build.log",
+        "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+      },
+      "unit-full": {
+        "path": "vndb-bookkeeping-unit-full.log",
+        "sha256": "a68bc22db66f3e11f338e1b88d6fe5ace1957b1c64a24cd675ee39b0887c2fc8"
+      }
+    },
+    "initialDiagnostics": "Initial lint and test type errors during test development were corrected; retained initial log files are not final gate results. No product runtime edits followed the frozen local commit."
+  },
+  "memoryClaim": null,
+  "completeImportPerformanceClaim": null
+}

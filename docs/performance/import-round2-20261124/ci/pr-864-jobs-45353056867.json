@@ -1,0 +1,74 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "d147a60fc4845e898d98d8924968d6094b417007",
+  "kind": "jobs-45353056867",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45353056867/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 138304008436,
+        "run_id": 45353056867,
+        "workflow_name": "Auto-Approve Safe PRs",
+        "head_branch": "perf/canonical-local-counters-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45353056867",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4-w9A",
+        "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138304008436",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056867/job/138304008436",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:05:09Z",
+        "started_at": "2026-11-24T08:05:22Z",
+        "completed_at": "2026-11-24T08:05:28Z",
+        "name": "auto-approve",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:05:23Z",
+            "completed_at": "2026-11-24T08:05:24Z"
+          },
+          {
+            "name": "Save the PR number in an artifact",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:05:24Z",
+            "completed_at": "2026-11-24T08:05:24Z"
+          },
+          {
+            "name": "Upload the PR number",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:05:24Z",
+            "completed_at": "2026-11-24T08:05:27Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:05:27Z",
+            "completed_at": "2026-11-24T08:05:27Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138304008436",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085988,
+        "runner_name": "GitHub Actions 1000085988",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

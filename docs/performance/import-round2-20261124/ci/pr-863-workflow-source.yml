@@ -1,0 +1,886 @@
+name: CI
+
+concurrency:
+  group: manabitan-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Optional four-part version: qualify and retain unsigned release packages"
+        required: false
+        type: string
+        default: ""
+
+env:
+  MANABITAN_RELEASE_VERSION: ${{ inputs.release_version || '' }}
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: JavaScript
+            test: test:js
+          - name: TypeScript (main)
+            test: test:ts:main
+          - name: TypeScript (dev)
+            test: test:ts:dev
+          - name: TypeScript (test)
+            test: test:ts:test
+          - name: TypeScript (bench)
+            test: test:ts:bench
+          - name: CSS
+            test: test:css
+          - name: HTML
+            test: test:html
+          - name: Markdown
+            test: test:md
+          - name: JSON
+            test: test:json
+          - name: Unit Tests
+            test: test:unit
+          - name: Unit Tests (options)
+            test: test:unit:options
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Run ${{ matrix.name }} tests
+        run: npm run ${{ matrix.test }}
+
+  test-build:
+    name: Test Build
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Install pinned dictionary WASM toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+
+      - name: Verify pinned dictionary WASM rebuild
+        run: npm run build:dictionary-wasm -- --check
+
+      - name: Build
+        run: |
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --all --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-chrome.zip builds/manabitan-firefox.zip builds/manabitan-edge.zip > builds/release-packages.json
+          else
+            npm run build
+          fi
+
+      - name: Retain versioned release packages
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unsigned-release-candidate
+          path: |
+            builds/manabitan-chrome.zip
+            builds/manabitan-firefox.zip
+            builds/manabitan-edge.zip
+            builds/release-packages.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Validate manifest.json of the extension
+        uses: cardinalby/schema-validator-action@2166123eb256fa40baef7e22ab1379708425efc7 # v3.1.1
+        with:
+          file: ext/manifest.json
+          schema: ./dev/data/chrome-manifest-schema.json
+          fixSchemas: true
+
+  test-firefox-extension-e2e:
+    name: Full Extension E2E (Firefox)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Build Firefox test package
+        run: |
+          package_target=firefox-dev
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            package_target=firefox
+            npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
+          else
+            npm run build -- --target "$package_target"
+          fi
+          echo "MANABITAN_FIREFOX_XPI=$GITHUB_WORKSPACE/builds/manabitan-$package_target.zip" >> "$GITHUB_ENV"
+
+      - name: Retain tested Firefox release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-firefox
+          path: |
+            builds/manabitan-firefox.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Install Firefox Developer Edition
+        run: |
+          curl -fsSL "https://download.mozilla.org/?product=firefox-devedition-latest-ssl&os=linux64&lang=en-US" -o /tmp/firefox-devedition.tar.bz2
+          mkdir -p "$HOME/firefox-devedition"
+          tar -xf /tmp/firefox-devedition.tar.bz2 -C "$HOME/firefox-devedition"
+          echo "MANABITAN_FIREFOX_BINARY=$HOME/firefox-devedition/firefox/firefox" >> "$GITHUB_ENV"
+
+      - name: Restore Firefox E2E dictionary cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: firefox-e2e-dictionaries-${{ runner.os }}-v1
+
+      - name: Run Firefox extension E2E
+        env:
+          MANABITAN_FIREFOX_HEADLESS: '0'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        run: xvfb-run -a npm run test:e2e:firefox-extension
+
+      - name: Enforce Firefox extension E2E success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/firefox-e2e-import-report.json';
+          if (!fs.existsSync(path)) {
+            console.error('Firefox extension E2E report JSON not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const skipReason = String(report.skipReason || '');
+          const isKnownUnsupportedSkip = (
+            report.status === 'success-with-skips' &&
+            (
+              skipReason.includes('does not expose OPFS VFS') ||
+              skipReason.includes('does not support MV3 background service workers')
+            )
+          );
+          if (report.status === 'success') {
+            process.exit(0);
+          }
+          if (isKnownUnsupportedSkip) {
+            console.log(`Firefox extension E2E skipped in unsupported runtime: ${skipReason}`);
+            process.exit(0);
+          }
+          console.error(`Firefox extension E2E status is not success: ${String(report.status)} skipReason=${skipReason}`);
+          process.exit(1);
+          NODE
+
+      # Keep the machine-readable verdict without the duplicated HTML payload.
+      - name: Upload Firefox extension E2E JSON
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firefox-extension-e2e-report
+          path: builds/firefox-e2e-import-report.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload Firefox extension E2E report
+        if: failure() || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firefox-extension-e2e-report
+          path: |
+            builds/firefox-e2e-import-report.html
+            builds/firefox-e2e-import-report.json
+            builds/extension-e2e-report.html
+          if-no-files-found: ignore
+
+  test-chromium-extension-e2e:
+    name: Full Extension E2E (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Build Chromium test package
+        run: |
+          package_target=chrome-dev
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            package_target=chrome
+            npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
+          else
+            npm run build -- --target "$package_target"
+          fi
+          echo "MANABITAN_CHROMIUM_BUILD_TARGET=$package_target" >> "$GITHUB_ENV"
+          echo "MANABITAN_E2E_SKIP_BUILD=1" >> "$GITHUB_ENV"
+
+      - name: Retain tested Chromium release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-chromium
+          path: |
+            builds/manabitan-chrome.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore Chromium E2E dictionary cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: chromium-e2e-dictionaries-${{ runner.os }}-v1
+
+      - name: Run Chromium extension E2E
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        run: xvfb-run -a npm run test:e2e:chromium-extension
+
+      - name: Enforce Chromium extension E2E success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/chromium-e2e-import-report.json';
+          if (!fs.existsSync(path)) {
+            console.error('Chromium extension E2E report JSON not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
+          // SyncAccessHandle is a dedicated-worker API, not a window API.
+          // Validate the actual dictionary worker's storage diagnostics.
+          const worker = runtime?.openStorageDiagnostics?.runtimeContext;
+          const opfsReady = runtime !== null && (
+            runtime.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            runtime.hasOpfsSahpoolVfs === true &&
+            runtime.opfsSahpoolInstallResult === 'installed' &&
+            runtime.openStorageMode === 'opfs-sahpool'
+          );
+          if (report.status !== 'success') {
+            console.error(`Chromium extension E2E status is not success: ${String(report.status)}`);
+            process.exit(1);
+          }
+          if (report.skippedVerification === true) {
+            console.error(`Chromium extension E2E skipped verification: ${String(report.skipReason || 'no reason')}`);
+            process.exit(1);
+          }
+          if (!opfsReady) {
+            console.error(`Chromium extension OPFS readiness check failed. runtimeDiagnostics=${JSON.stringify(runtime)}`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Summarize Chromium extension E2E
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/chromium-e2e-import-report.json';
+          if (!fs.existsSync(path)) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Chromium Extension E2E\nReport JSON not found.\n');
+            process.exit(0);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const phases = Array.isArray(report.phases) ? report.phases : [];
+          const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
+          const startupDiagnostics = runtime && typeof runtime.startupDiagnosticsSnapshot === 'object' && runtime.startupDiagnosticsSnapshot !== null ?
+            runtime.startupDiagnosticsSnapshot :
+            null;
+          const startupIncompleteCleanup = startupDiagnostics && typeof startupDiagnostics.dictionaryStartupCleanupSummary === 'object' && startupDiagnostics.dictionaryStartupCleanupSummary !== null ?
+            startupDiagnostics.dictionaryStartupCleanupSummary :
+            null;
+          const startupIntegrityCleanup = startupDiagnostics && typeof startupDiagnostics.dictionaryTermRecordIntegritySummary === 'object' && startupDiagnostics.dictionaryTermRecordIntegritySummary !== null ?
+            startupDiagnostics.dictionaryTermRecordIntegritySummary :
+            null;
+          const formatCleanupCounts = (summary) => {
+            if (!(summary && typeof summary === 'object')) {
+              return 'unknown';
+            }
+            const removedCount = typeof summary.removedCount === 'number' ? summary.removedCount : 'n/a';
+            const failedCount = typeof summary.failedCount === 'number' ? summary.failedCount : 'n/a';
+            return `removed=${String(removedCount)}, failed=${String(failedCount)}`;
+          };
+          const worker = runtime?.openStorageDiagnostics?.runtimeContext;
+          const opfsReady = runtime ? (
+            runtime.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            runtime.hasOpfsSahpoolVfs === true &&
+            runtime.opfsSahpoolInstallResult === 'installed' &&
+            runtime.openStorageMode === 'opfs-sahpool'
+          ) : null;
+          const top = [...phases].sort((a, b) => Number(b.durationMs || 0) - Number(a.durationMs || 0)).slice(0, 5);
+          const lines = [
+            '## Chromium Extension E2E',
+            `- Status: \`${String(report.status || 'unknown')}\``,
+            `- Skipped verification: \`${String(report.skippedVerification === true)}\``,
+            `- Skip reason: ${report.skipReason ? `\`${String(report.skipReason)}\`` : 'none'}`,
+            `- Launch mode: \`${String(report.launchMode || 'unknown')}\``,
+            `- Failure: ${report.failureReason ? `\`${String(report.failureReason)}\`` : 'none'}`,
+            `- OPFS ready: ${opfsReady === null ? 'unknown' : `\`${String(opfsReady)}\``}`,
+            `- Runtime diagnostics: \`${JSON.stringify(report.runtimeDiagnostics ?? null)}\``,
+            `- Startup cleanup (incomplete imports): ${formatCleanupCounts(startupIncompleteCleanup)}`,
+            `- Startup cleanup (term-record integrity): ${formatCleanupCounts(startupIntegrityCleanup)}`,
+            `- Phase count: ${String(phases.length)}`,
+            '- Slowest phases:',
+            ...top.map((phase) => `  - ${String(phase.name)} (${Number(phase.durationMs || 0).toFixed(1)} ms)`),
+            '',
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
+
+      # Keep the machine-readable verdict without the duplicated HTML payload.
+      - name: Upload Chromium extension E2E JSON
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: chromium-extension-e2e-report
+          path: builds/chromium-e2e-import-report.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload Chromium extension E2E report
+        if: failure() || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: chromium-extension-e2e-report
+          path: |
+            builds/chromium-e2e-import-report.html
+            builds/chromium-e2e-import-report.json
+            builds/extension-e2e-report.html
+          if-no-files-found: ignore
+
+  test-chromium-anki-dedupe-e2e:
+    name: Anki Deduplication Matrix (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Chromium Anki deduplication matrix
+        env:
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+        run: xvfb-run -a npm run test:e2e:chromium-anki-dedupe
+
+      - name: Enforce Chromium Anki matrix success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const reportPath = 'builds/chromium-e2e-anki-dedupe-report.json';
+          if (!fs.existsSync(reportPath)) {
+            console.error('Chromium Anki deduplication report JSON not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+          const failures = report.scenarios.filter((scenario) => scenario.pass !== true);
+          const sourceIdentity = report.sourceIdentity && typeof report.sourceIdentity === 'object' ? report.sourceIdentity : null;
+          const packageIdentity = report.packageIdentity && typeof report.packageIdentity === 'object' ? report.packageIdentity : null;
+          const browserIdentity = report.browserIdentity && typeof report.browserIdentity === 'object' ? report.browserIdentity : null;
+          const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
+          const storage = runtime?.openStorageDiagnostics;
+          const worker = storage?.runtimeContext;
+          const opfsReady = runtime !== null && (
+            runtime.usesFallbackStorage === false &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            storage?.hasOpfsSahpoolVfs === true &&
+            storage?.opfsSahpoolInstallResult === 'installed' &&
+            storage?.mode === 'opfs-sahpool'
+          );
+          const identityReady = (
+            typeof sourceIdentity?.commit === 'string' && sourceIdentity.commit.length > 0 &&
+            typeof packageIdentity?.sha256 === 'string' && /^[0-9a-f]{64}$/.test(packageIdentity.sha256) &&
+            typeof browserIdentity?.version === 'string' && browserIdentity.version.length > 0 &&
+            typeof browserIdentity?.commandLine === 'string' && browserIdentity.commandLine.length > 0
+          );
+          if (report.status !== 'success' || report.scenarios.length !== 10 || failures.length !== 0 || !opfsReady || !identityReady) {
+            console.error(`Chromium Anki matrix failed: status=${report.status} scenarios=${report.scenarios.length} failures=${failures.length} opfsReady=${opfsReady} identityReady=${identityReady} reason=${report.failureReason || 'none'}`);
+            process.exit(1);
+          }
+          console.log(`Chromium Anki matrix passed all ${report.scenarios.length} scenarios.`);
+          NODE
+
+      - name: Upload Chromium Anki deduplication report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: chromium-anki-deduplication-e2e-report
+          path: |
+            builds/chromium-e2e-anki-dedupe-report.html
+            builds/chromium-e2e-anki-dedupe-report.json
+            builds/extension-e2e-anki-dedupe-report.html
+          if-no-files-found: ignore
+
+  test-edge-extension-e2e:
+    name: Full Extension E2E (Edge)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+
+      - name: Build Edge test package
+        run: |
+          package_target=edge
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --target "$package_target" --version "$MANABITAN_RELEASE_VERSION"
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" "builds/manabitan-$package_target.zip" > builds/release-package.json
+          else
+            npm run build -- --target "$package_target"
+          fi
+          echo "MANABITAN_CHROMIUM_BUILD_TARGET=$package_target" >> "$GITHUB_ENV"
+          echo "MANABITAN_E2E_SKIP_BUILD=1" >> "$GITHUB_ENV"
+
+      - name: Retain tested Edge release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-edge
+          path: |
+            builds/manabitan-edge.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Install Playwright Edge
+        run: npx playwright install --with-deps msedge
+
+      - name: Restore Edge E2E dictionary cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: edge-e2e-dictionaries-${{ runner.os }}-v1
+
+      - name: Run Edge extension E2E
+        env:
+          MANABITAN_CHROMIUM_BROWSER: edge
+          MANABITAN_CHROMIUM_HEADLESS: '1'
+          MANABITAN_CHROMIUM_E2E_REPORT: ./builds/edge-e2e-import-report.html
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        run: xvfb-run -a npm run test:e2e:edge-extension
+
+      - name: Enforce Edge extension E2E success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/edge-e2e-import-report.json';
+          if (!fs.existsSync(path)) {
+            console.error('Edge extension E2E report JSON not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
+          // SyncAccessHandle is a dedicated-worker API, not a window API.
+          // Validate the actual dictionary worker's storage diagnostics.
+          const worker = runtime?.openStorageDiagnostics?.runtimeContext;
+          const opfsReady = runtime !== null && (
+            runtime.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            runtime.hasOpfsSahpoolVfs === true &&
+            runtime.opfsSahpoolInstallResult === 'installed' &&
+            runtime.openStorageMode === 'opfs-sahpool'
+          );
+          if (report.status !== 'success') {
+            console.error(`Edge extension E2E status is not success: ${String(report.status)}`);
+            process.exit(1);
+          }
+          if (report.skippedVerification === true) {
+            console.error(`Edge extension E2E skipped verification: ${String(report.skipReason || 'no reason')}`);
+            process.exit(1);
+          }
+          if (!opfsReady) {
+            console.error(`Edge extension OPFS readiness check failed. runtimeDiagnostics=${JSON.stringify(runtime)}`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Summarize Edge extension E2E
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/edge-e2e-import-report.json';
+          if (!fs.existsSync(path)) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Edge Extension E2E\nReport JSON not found.\n');
+            process.exit(0);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const phases = Array.isArray(report.phases) ? report.phases : [];
+          const runtime = report.runtimeDiagnostics && typeof report.runtimeDiagnostics === 'object' ? report.runtimeDiagnostics : null;
+          const startupDiagnostics = runtime && typeof runtime.startupDiagnosticsSnapshot === 'object' && runtime.startupDiagnosticsSnapshot !== null ?
+            runtime.startupDiagnosticsSnapshot :
+            null;
+          const startupIncompleteCleanup = startupDiagnostics && typeof startupDiagnostics.dictionaryStartupCleanupSummary === 'object' && startupDiagnostics.dictionaryStartupCleanupSummary !== null ?
+            startupDiagnostics.dictionaryStartupCleanupSummary :
+            null;
+          const startupIntegrityCleanup = startupDiagnostics && typeof startupDiagnostics.dictionaryTermRecordIntegritySummary === 'object' && startupDiagnostics.dictionaryTermRecordIntegritySummary !== null ?
+            startupDiagnostics.dictionaryTermRecordIntegritySummary :
+            null;
+          const formatCleanupCounts = (summary) => {
+            if (!(summary && typeof summary === 'object')) {
+              return 'unknown';
+            }
+            const removedCount = typeof summary.removedCount === 'number' ? summary.removedCount : 'n/a';
+            const failedCount = typeof summary.failedCount === 'number' ? summary.failedCount : 'n/a';
+            return `removed=${String(removedCount)}, failed=${String(failedCount)}`;
+          };
+          const worker = runtime?.openStorageDiagnostics?.runtimeContext;
+          const opfsReady = runtime ? (
+            runtime.hasStorageGetDirectory === true &&
+            worker?.isDedicatedWorkerGlobalScope === true &&
+            worker?.hasStorageGetDirectory === true &&
+            worker?.hasCreateSyncAccessHandle === true &&
+            runtime.hasOpfsSahpoolVfs === true &&
+            runtime.opfsSahpoolInstallResult === 'installed' &&
+            runtime.openStorageMode === 'opfs-sahpool'
+          ) : null;
+          const top = [...phases].sort((a, b) => Number(b.durationMs || 0) - Number(a.durationMs || 0)).slice(0, 5);
+          const lines = [
+            '## Edge Extension E2E',
+            `- Status: \`${String(report.status || 'unknown')}\``,
+            `- Skipped verification: \`${String(report.skippedVerification === true)}\``,
+            `- Skip reason: ${report.skipReason ? `\`${String(report.skipReason)}\`` : 'none'}`,
+            `- Launch mode: \`${String(report.launchMode || 'unknown')}\``,
+            `- Failure: ${report.failureReason ? `\`${String(report.failureReason)}\`` : 'none'}`,
+            `- OPFS ready: ${opfsReady === null ? 'unknown' : `\`${String(opfsReady)}\``}`,
+            `- Runtime diagnostics: \`${JSON.stringify(report.runtimeDiagnostics ?? null)}\``,
+            `- Startup cleanup (incomplete imports): ${formatCleanupCounts(startupIncompleteCleanup)}`,
+            `- Startup cleanup (term-record integrity): ${formatCleanupCounts(startupIntegrityCleanup)}`,
+            `- Phase count: ${String(phases.length)}`,
+            '- Slowest phases:',
+            ...top.map((phase) => `  - ${String(phase.name)} (${Number(phase.durationMs || 0).toFixed(1)} ms)`),
+            '',
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
+
+      # Keep the machine-readable verdict without the duplicated HTML payload.
+      - name: Upload Edge extension E2E JSON
+        if: success() && github.event_name != 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: edge-extension-e2e-report
+          path: builds/edge-e2e-import-report.json
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload Edge extension E2E report
+        if: failure() || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: edge-extension-e2e-report
+          path: |
+            builds/edge-e2e-import-report.html
+            builds/edge-e2e-import-report.json
+            builds/extension-e2e-report.html
+          if-no-files-found: ignore
+
+  test-firefox-android-extension-e2e:
+    name: Firefox Android Installation Smoke (blocking)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+
+      - name: Build Firefox Android package
+        run: |
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --target firefox-android --version "$MANABITAN_RELEASE_VERSION"
+            (cd builds/manabitan-firefox-android && zip -qr ../manabitan-firefox-android.zip .)
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-firefox-android.zip > builds/release-package.json
+          else
+            npm run build -- --target firefox-android
+          fi
+
+      - name: Retain tested Firefox Android release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-firefox-android-smoke
+          path: |
+            builds/manabitan-firefox-android.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Enable Android emulator KVM
+        run: |
+          if [ ! -e /dev/kvm ]; then
+            echo 'KVM device /dev/kvm is unavailable on this runner.' >&2
+            exit 1
+          fi
+          sudo chmod 0666 /dev/kvm
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo 'The runner cannot read and write /dev/kvm.' >&2
+            exit 1
+          fi
+
+      - name: Run Firefox Android extension E2E
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        env:
+          MANABITAN_ANDROID_AUTO_INSTALL_FIREFOX: '1'
+          MANABITAN_ANDROID_FIREFOX_PACKAGE: org.mozilla.firefox
+          MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING: '1'
+          MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: '45000'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-linux-hw-accel: false
+          disable-animations: true
+          script: |
+            adb wait-for-device
+            adb devices
+            npm run test:e2e:firefox-android-extension
+
+      - name: Enforce Firefox Android extension E2E success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/firefox-android-e2e-report.json';
+          if (!fs.existsSync(path)) {
+            console.error('Firefox Android extension E2E report JSON not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          if (report.status !== 'success') {
+            console.error(`Firefox Android extension E2E status is not success: ${String(report.status)} failure=${String(report.failureReason || '')}`);
+            process.exit(1);
+          }
+          if (report.verificationScope !== 'temporary-installation-smoke') {
+            console.error(`Unexpected Firefox Android verification scope: ${String(report.verificationScope || '')}`);
+            process.exit(1);
+          }
+          const requiredUnverified = ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'];
+          if (!requiredUnverified.every((capability) => Array.isArray(report.unverifiedCapabilities) && report.unverifiedCapabilities.includes(capability))) {
+            console.error(`Firefox Android report must retain unverified capabilities: ${requiredUnverified.join(', ')}`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Summarize Firefox Android extension E2E
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/firefox-android-e2e-report.json';
+          if (!fs.existsSync(path)) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Firefox Android Installation Smoke\nReport JSON not found.\n');
+            process.exit(0);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const phases = Array.isArray(report.phases) ? report.phases : [];
+          const top = [...phases].sort((a, b) => Number(b.durationMs || 0) - Number(a.durationMs || 0)).slice(0, 5);
+          const lines = [
+            '## Firefox Android Installation Smoke',
+            `- Status: \`${String(report.status || 'unknown')}\``,
+            `- Verification scope: \`${String(report.verificationScope || 'unknown')}\``,
+            `- Unverified capabilities: ${(Array.isArray(report.unverifiedCapabilities) ? report.unverifiedCapabilities : []).map((value) => `\`${String(value)}\``).join(', ') || 'not reported'}`,
+            `- Failure: ${report.failureReason ? `\`${String(report.failureReason)}\`` : 'none'}`,
+            `- ADB device: \`${String(report.adbDevice || 'unknown')}\``,
+            `- Firefox package: \`${String(report.firefoxPackage || 'unknown')}\``,
+            `- Source dir: \`${String(report.sourceDir || 'unknown')}\``,
+            `- Firefox APK URL: ${report.firefoxApkUrl ? `\`${String(report.firefoxApkUrl)}\`` : 'not-used'}`,
+            `- Phase count: ${String(phases.length)}`,
+            '- Slowest phases:',
+            ...top.map((phase) => `  - ${String(phase.name)} (${Number(phase.durationMs || 0).toFixed(1)} ms)`),
+            '',
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
+
+      - name: Upload Firefox Android extension E2E report
+        if: failure() || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firefox-android-extension-e2e-report
+          path: |
+            builds/firefox-android-e2e-report.html
+            builds/firefox-android-e2e-report.json
+          if-no-files-found: ignore
+
+  test-firefox-android-capability-probe:
+    name: Firefox Android Gecko RDP Capability Probe (manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22'
+
+      - name: Build Firefox Android package
+        run: |
+          if [ -n "$MANABITAN_RELEASE_VERSION" ]; then
+            npm run build -- --target firefox-android --version "$MANABITAN_RELEASE_VERSION"
+            (cd builds/manabitan-firefox-android && zip -qr ../manabitan-firefox-android.zip .)
+            node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-firefox-android.zip > builds/release-package.json
+          else
+            npm run build -- --target firefox-android
+          fi
+
+      - name: Retain tested Firefox Android release package
+        if: inputs.release_version != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tested-release-firefox-android-runtime
+          path: |
+            builds/manabitan-firefox-android.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Enable Android emulator KVM
+        run: |
+          if [ ! -e /dev/kvm ]; then
+            echo 'KVM device /dev/kvm is unavailable on this runner.' >&2
+            exit 1
+          fi
+          sudo chmod 0666 /dev/kvm
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo 'The runner cannot read and write /dev/kvm.' >&2
+            exit 1
+          fi
+
+      - name: Run installation smoke then actual Gecko RDP probe
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        env:
+          MANABITAN_ANDROID_AUTO_INSTALL_FIREFOX: '1'
+          MANABITAN_ANDROID_FIREFOX_PACKAGE: org.mozilla.firefox
+          MANABITAN_ANDROID_ENABLE_FIREFOX_REMOTE_DEBUGGING: '1'
+          MANABITAN_ANDROID_WEB_EXT_TIMEOUT_MS: '45000'
+          MANABITAN_E2E_STRICT_RUNTIME: '1'
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-linux-hw-accel: false
+          disable-animations: true
+          script: |
+            adb wait-for-device
+            adb devices
+            npm run test:e2e:firefox-android-extension
+            npm run test:e2e:firefox-android-capability
+
+      - name: Enforce Gecko RDP capability probe success
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const path = 'builds/firefox-android-capability-report.json';
+          if (!fs.existsSync(path)) {
+            console.error('Firefox Android capability report not found.');
+            process.exit(1);
+          }
+          const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const allowedScopes = ['actual-gecko-rdp-extension-context+android-runtime-qualification'];
+          if (report.status !== 'success' || !allowedScopes.includes(report.verificationScope)) {
+            console.error(`Gecko RDP probe did not pass: status=${String(report.status)} scope=${String(report.verificationScope)} failure=${String(report.failureReason || '')}`);
+            process.exit(1);
+          }
+          if (!report.sourceCommit || !report.buildIdentity?.packageTreeSha256 || !report.buildIdentity?.manifestSha256 || !report.androidVersion || !report.firefoxVersion || !report.rdpTargetIdentity?.targetActor) {
+            console.error('Capability report is missing source, package, browser, Android, or target identity evidence.');
+            process.exit(1);
+          }
+          const runtime = report.runtimeQualification;
+          const requiredVerified = ['dictionary-import', 'dictionary-lookup', 'anki-mining', 'dictionary-update'];
+          if (runtime?.status !== 'success' || !requiredVerified.every((capability) => runtime.verifiedCapabilities?.includes(capability)) || runtime.unverifiedCapabilities?.length !== 0) {
+            console.error(`Android runtime qualification did not preserve truthful capability scope: ${JSON.stringify(runtime)}`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Upload Gecko RDP capability report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: firefox-android-gecko-rdp-capability-report
+          path: |
+            builds/firefox-android-capability-report.json
+            builds/firefox-android-capability-diagnostics/
+            builds/firefox-android-native-readiness/
+          if-no-files-found: ignore
+
+  test-schema-upgrade:
+    name: Published release upgrade and reimport
+    if: github.event_name == 'workflow_dispatch' && inputs.release_version != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: ./.github/actions/setup
+      - name: Build versioned candidate
+        run: |
+          npm run build -- --target chrome --version "$MANABITAN_RELEASE_VERSION"
+          node dev/bin/audit-release-packages.js "$MANABITAN_RELEASE_VERSION" builds/manabitan-chrome.zip > builds/release-package.json
+      - name: Download actual published upgrade fixture
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir builds/released-upgrade-fixture
+          gh release download 26.3.31.46 --repo "$GITHUB_REPOSITORY" --pattern manabitan-chrome.zip --dir builds/released-upgrade-fixture
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/26.3.31.46" --jq '{tag_name,target_commitish,assets:[.assets[]|select(.name=="manabitan-chrome.zip")|{id,name,digest,size}]}' > builds/released-upgrade-fixture/identity.json
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Upgrade real storage and restore the dictionary through settings
+        env:
+          MANABITAN_UPGRADE_OLD_ZIP: ${{ github.workspace }}/builds/released-upgrade-fixture/manabitan-chrome.zip
+          MANABITAN_UPGRADE_NEW_ZIP: ${{ github.workspace }}/builds/manabitan-chrome.zip
+          MANABITAN_UPGRADE_EVIDENCE_DIR: ${{ github.workspace }}/builds/schema-upgrade-evidence
+        run: |
+          mkdir builds/schema-upgrade-evidence
+          xvfb-run -a node test/chromium/schema-upgrade.e2e.js
+      - name: Retain upgrade verdict and exact candidate package
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: published-release-upgrade
+          path: |
+            builds/schema-upgrade-evidence/upgrade-report.json
+            builds/schema-upgrade-evidence/fixture.zip
+            builds/released-upgrade-fixture/identity.json
+            builds/manabitan-chrome.zip
+            builds/release-package.json
+          retention-days: 14
+          if-no-files-found: error

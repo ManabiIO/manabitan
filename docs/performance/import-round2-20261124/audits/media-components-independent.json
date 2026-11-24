@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "status": "passed with explicit provenance and scope limits",
+  "method": "Read-only code inspection, current frozen-tree and module hashing, log/receipt arithmetic, independent ZIP-directory/metadata/index and raw packed-range digest reconstruction. No dictionary imports, term-bank inflation, product module execution, native CRC rerun, or performance measurement.",
+  "publishedIdentity": {
+    "pr": 863,
+    "url": "https://github.com/ManabiIO/manabitan/pull/863",
+    "head": "ebb0777114578c5cee879877274e7d872bfea27e",
+    "tree": "923cd36b875afbbee6e6674fd1b4450bed6ce362",
+    "parents": [
+      "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26"
+    ],
+    "base": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "draft": true,
+    "observedAt": "2026-11-24 08:15:53 UTC"
+  },
+  "inputs": [
+    {
+      "path": "vndb-bookkeeping-pack-parity.mjs",
+      "bytes": 7690,
+      "sha256": "0abf26beb39de3b20c816277db72c6d52b57080fa0a3df87cd64519b5ebfe23f"
+    },
+    {
+      "path": "vndb-bookkeeping-pack-parity.json",
+      "bytes": 3352,
+      "sha256": "4b448a43c1c16ff6b49c0dc7c54163de4dbc705bca5a4fdb9f1861aeb3d4e2c9"
+    },
+    {
+      "path": "vndb-bookkeeping-pack-parity.log",
+      "bytes": 2052,
+      "sha256": "6bce2dc5667f89dff70ed40ba0e46c072393109476d018c6779abb23a244de63"
+    },
+    {
+      "path": "vndb-bookkeeping-projection-parity.mjs",
+      "bytes": 11742,
+      "sha256": "512b2c3617f7d7894a46198e4a8578557365d48dd29cf444c669edac979b0900"
+    },
+    {
+      "path": "vndb-bookkeeping-projection-parity.json",
+      "bytes": 899883,
+      "sha256": "29aba9efa524aec06a38b86c3ab80b1fb55f58b34501c01456e3eb910071a84b"
+    },
+    {
+      "path": "vndb-bookkeeping-projection-parity.log",
+      "bytes": 2098,
+      "sha256": "706481a8f06ab3396db7983575239a11ef91b44808c0dfe469696d5ac8b522ab"
+    }
+  ],
+  "sourceIdentities": [
+    {
+      "label": "baseline",
+      "checkout": "/workspace/scratch/0a1757ac2970/manabitan",
+      "head": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880",
+      "originalImporterSha256": "fd334be027b74c951ffc61a80bee68f40fe5acc9350ea5e2fab7f343b5b53184",
+      "transportWrapperSha256": "20c1c9c8c5cce2499123762cfe7e0c181b0009f2db15e2962416e44e73153e98",
+      "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+      "postRunTrackedTreeClean": true,
+      "currentRuntimeHashesMatchCommit": {
+        "ext/js/dictionary/dictionary-importer.js": "fd334be027b74c951ffc61a80bee68f40fe5acc9350ea5e2fab7f343b5b53184",
+        "ext/js/dictionary/source-zip-media-pack.js": "8e9f213cb2c9d616b1f276cacc7fe097a1134b5d7623c32f588f571d125adbef",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "bcf95af0cd0fbc9eb8bb933d812e8de4a3c5d4538a8e28be267d5991e44224ed",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "10c547e7c49d0931b9c931d9446141cdd4e5c0708654d8e74decb4493684c22d",
+        "ext/js/dictionary/dense-zip-directory.js": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583"
+      },
+      "currentZipBundleSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d"
+    },
+    {
+      "label": "candidate",
+      "checkout": "/workspace/scratch/0a1757ac2970/vndb-media-bookkeeping",
+      "head": "fab9802f03b82a6cce221576e4703c624d76aa1d",
+      "tree": "923cd36b875afbbee6e6674fd1b4450bed6ce362",
+      "originalImporterSha256": "ea7aaed31ddff3dd002c3be0e675bf7651d7e964fb3d66415c83300b577e91ee",
+      "transportWrapperSha256": "62aa6295cad73c54c8f5e3db78dba3b4345bdd6bb73941b83c426ada0746f464",
+      "wasmSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+      "postRunTrackedTreeClean": true,
+      "currentRuntimeHashesMatchCommit": {
+        "ext/js/dictionary/dictionary-importer.js": "ea7aaed31ddff3dd002c3be0e675bf7651d7e964fb3d66415c83300b577e91ee",
+        "ext/js/dictionary/source-zip-media-pack.js": "a1a01c4f3172809757cde7b85daa76d0cf3a0148153e3c0de57974e1a9887eb3",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "bcf95af0cd0fbc9eb8bb933d812e8de4a3c5d4538a8e28be267d5991e44224ed",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "10c547e7c49d0931b9c931d9446141cdd4e5c0708654d8e74decb4493684c22d",
+        "ext/js/dictionary/dense-zip-directory.js": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583"
+      },
+      "currentZipBundleSha256": "d41cfb9b932267ebb9d018b5f77f3b973e9f48173d0f1136a2581a83735f344d"
+    }
+  ],
+  "archive": {
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "bytes": 291705969,
+    "catalogEntries": 147237,
+    "termBanks": 665,
+    "mediaEntries": 146570
+  },
+  "independentPackedReconstruction": {
+    "catalogSha256": "60672967cb72897911db45659ce476e13513d11e2921fe349ae42cdd0eee3f36",
+    "mediaRecordSha256": "8e1c76f5fe024b33688234994de8efe8462d2847d07fc7341aa17dac407accf4",
+    "packedBlobSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+    "packedBlobBytes": 195649882,
+    "sourceRangeStart": 86882547,
+    "sourceRangeEnd": 282532429,
+    "planIndexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+    "planIndexBytes": 3912816,
+    "singleStoredDeflateBodies": 146569,
+    "descriptor": {
+      "version": 2,
+      "prefix": "img/cc",
+      "suffix": ".webp",
+      "firstId": 1,
+      "slotCount": 163034,
+      "count": 146570,
+      "dataBytes": 195649882
+    }
+  },
+  "projection": {
+    "banks": 665,
+    "totalsRecomputedFromEveryBank": {
+      "baseline": {
+        "rows": 6648310,
+        "projectedRows": 147186,
+        "requirements": 147186,
+        "uniqueDeferred": 146570
+      },
+      "candidate": {
+        "rows": 6648310,
+        "projectedRows": 147186,
+        "requirements": 147186,
+        "uniqueDeferred": 146570
+      }
+    },
+    "aggregateReceiptDigests": {
+      "sourceSha256": "d72df518d180f8db279783bf61f5ce66acf0069d958668b538cf57ae19086255",
+      "columnsHash": "e62acc6b821bbef7badf4d29ef25f5d39400f1042ebcba79a40d45f2e6964524",
+      "requirementHash": "d700cac0b337a3dab7cf9de2b36fea46bc6823043704ec7071f7ceea1d758a6c",
+      "diagnosticHash": "e093800d949d032a52389f30eebd0bcc2433249caa8672bc6513fc1da124130e",
+      "deferredHash": "14636ed05c8526657b8b557a7adb5a5d876cd2ca73bfe60e4323d741f2179ace"
+    },
+    "aggregateDigestEncoding": "For each bank in numeric order: filename + NUL + recorded per-bank digest + newline; this audits receipt consistency, not independent source-bank decompression.",
+    "earlyDiagnosticSamples": 3
+  },
+  "enforcedCodeChecks": [
+    "Packer selects every image entry accepted by the exact dense catalog; the retained count matches all 146570 locked media files.",
+    "Every packed batch awaits the unmodified production native CRC/decoded-length validator before acceptance. The wrapper invokes inflate_zip_media_batch with every signature, rejects negative status and requires total decoded bytes to match.",
+    "Packer receipt compares all metadata, descriptor, Blob digest and index digest; it also directly compares the complete baseline/candidate index arrays.",
+    "Projection calls the real parser and importer for every bank; its wrapper changes only transport ownership and projects image paths to reproduce worker delivery.",
+    "Projection hashes all selected typed columns, content slab/list bytes, preinterned plan arrays, and prepared lookup index bytes; the contentBytesBuffer field is a Uint8Array and is hashed as bytes.",
+    "Per-bank requirement, diagnostic and deferred hashes are compared in order. Requirement shape/type is deliberately normalized across old nested and new flat representations.",
+    "Owned exact-length diagnostic byte buffers are asserted. The first three retained diagnostics are exercised again after every later native bank call and their error messages compare exactly."
+  ],
+  "workCounts": {
+    "denseGetDataTemporaryObjectLiteralsRemoved": 147237,
+    "copiedPhysicalOrderSortsRemoved": 1,
+    "sortComparatorCallsRemoved": 146569,
+    "projectedEntryWrappers": 147186,
+    "additionalRequirementAndSourceClonesInAllUniqueDeferredReplay": 293140,
+    "caveat": "Structural source-level object-literal executions removed for this replay. Browser prefetch/defer selection can change the second count; no allocated-byte or peak-memory conclusion."
+  },
+  "limits": [
+    "Both scripts record Git heads; projection additionally records importer/wrapper/WASM hashes. Neither script enforces clean tracked state or rechecks all source/module hashes after execution. Pack records no loaded module hashes. This audit verifies current committed files and recorded projection hashes against exact PR863; it cannot retroactively prove source immutability throughout the original executions.",
+    "Projection copies lock metadata but does not itself hash the whole archive. The separate pack run hashes that same file and this independent audit rehashed it against the exact VNDB lock; original mid-run archive immutability is not separately attested.",
+    "Native media CRC and decoded-length validation is exhaustive in the inspected product path. The component does not decode image pixels/dimensions or independently compare every decoded media payload to another implementation.",
+    "All 665 bank receipts agree for the selected columns/content/projections. The audit does not repeat bank decompression or independently derive every glossary/term semantic value; it checks ordered receipt digests and the script enforcement.",
+    "Only three early diagnostic errors are exercised after arena reuse. Every diagnostic arena is hashed at its callback, but this is not an exhaustive delayed-error test.",
+    "The 147186 entry-wrapper and 293140 extra-clone reductions belong to a one-bank-at-a-time, all-unique-deferred component replay. Browser grouping and prefetch/defer selection can change these counts. Object-literal executions are not allocated bytes, peak memory, or import latency."
+  ],
+  "conclusion": "The advertised parity and structural-work claims are supported within their stated component scope. Independent archive-derived catalog, record, packed-Blob and index digests match both arms. No observed source identity mismatch or parity failure; retain the provenance limits and do not present component counts as browser performance or memory gains."
+}

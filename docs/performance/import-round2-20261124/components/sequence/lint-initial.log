@@ -1,0 +1,34 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/0a1757ac2970/jmdict-sequence/test/term-lookup-monotonic-sequences.test.js
+   64:33  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   65:33  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   65:58  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   65:82  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   66:37  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   66:63  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   66:76  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   66:92  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   67:16  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   70:54  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   73:15  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   73:21  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+   73:29  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  154:64  error  Arrow function used ambiguously with a conditional expression                @stylistic/no-confusing-arrow
+
+✖ 14 problems (14 errors, 0 warnings)
+  14 errors and 0 warnings potentially fixable with the `--fix` option.
+

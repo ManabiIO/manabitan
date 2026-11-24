@@ -1,0 +1,632 @@
+﻿2026-11-24T08:05:16.9461674Z Current runner version: '2.338.2'
+2026-11-24T08:05:16.9485801Z ##[group]Runner Image Provisioner
+2026-11-24T08:05:16.9486744Z Hosted Compute Agent
+2026-11-24T08:05:16.9487374Z Version: 20261111.635
+2026-11-24T08:05:16.9488041Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-24T08:05:16.9488906Z Build Date: 2026-11-11T01:49:01Z
+2026-11-24T08:05:16.9489600Z Worker ID: {8585551c-8659-42d9-8af0-3c5ccf154bc9}
+2026-11-24T08:05:16.9490369Z Region: centralus
+2026-11-24T08:05:16.9490930Z Cloud: Azure
+2026-11-24T08:05:16.9491499Z ##[endgroup]
+2026-11-24T08:05:16.9493116Z ##[group]Operating System
+2026-11-24T08:05:16.9493772Z Ubuntu
+2026-11-24T08:05:16.9494280Z 26.04.1
+2026-11-24T08:05:16.9494948Z LTS
+2026-11-24T08:05:16.9495854Z ##[endgroup]
+2026-11-24T08:05:16.9496508Z ##[group]Runner Image
+2026-11-24T08:05:16.9497146Z Image: ubuntu-26.04
+2026-11-24T08:05:16.9497730Z Version: 20261116.202.1
+2026-11-24T08:05:16.9499127Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261116.202/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-24T08:05:16.9500841Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261116.202
+2026-11-24T08:05:16.9501904Z ##[endgroup]
+2026-11-24T08:05:16.9503003Z ##[group]GITHUB_TOKEN Permissions
+2026-11-24T08:05:16.9504932Z Contents: read
+2026-11-24T08:05:16.9506070Z Metadata: read
+2026-11-24T08:05:16.9506790Z ##[endgroup]
+2026-11-24T08:05:16.9509125Z Secret source: Actions
+2026-11-24T08:05:16.9510233Z Cache mode: write
+2026-11-24T08:05:16.9511204Z Prepare workflow directory
+2026-11-24T08:05:16.9841198Z Prepare all required actions
+2026-11-24T08:05:16.9891469Z Getting action download info
+2026-11-24T08:05:17.1982572Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-24T08:05:17.3041423Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-24T08:05:17.4894544Z Complete job name: Restart and interruption recovery (Chromium)
+2026-11-24T08:05:17.5950010Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-24T08:05:17.5951131Z with:
+2026-11-24T08:05:17.5951591Z   repository: ManabiIO/manabitan
+2026-11-24T08:05:17.5955844Z   token: ***
+2026-11-24T08:05:17.5956307Z   ssh-strict: true
+2026-11-24T08:05:17.5956764Z   ssh-user: git
+2026-11-24T08:05:17.5957230Z   persist-credentials: true
+2026-11-24T08:05:17.5957733Z   clean: true
+2026-11-24T08:05:17.5958181Z   sparse-checkout-cone-mode: true
+2026-11-24T08:05:17.5958708Z   fetch-depth: 1
+2026-11-24T08:05:17.5959197Z   fetch-tags: false
+2026-11-24T08:05:17.5959659Z   show-progress: true
+2026-11-24T08:05:17.5960116Z   lfs: false
+2026-11-24T08:05:17.5960543Z   submodules: false
+2026-11-24T08:05:17.5961007Z   set-safe-directory: true
+2026-11-24T08:05:17.5961536Z   allow-unsafe-pr-checkout: false
+2026-11-24T08:05:17.5962348Z ##[endgroup]
+2026-11-24T08:05:17.8620172Z Syncing repository: ManabiIO/manabitan
+2026-11-24T08:05:17.8623424Z ##[group]Getting Git version info
+2026-11-24T08:05:17.8624793Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-24T08:05:17.8626376Z [command]/usr/bin/git version
+2026-11-24T08:05:17.8641006Z git version 2.56.1
+2026-11-24T08:05:17.8665273Z ##[endgroup]
+2026-11-24T08:05:17.8687191Z Temporarily overriding HOME='/home/runner/work/_temp/fec640d4-57b2-4c96-929c-359e420230e2' before making global git config changes
+2026-11-24T08:05:17.8689866Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T08:05:17.8691983Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-24T08:05:17.8754184Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-24T08:05:17.8757753Z ##[group]Determining repository object format
+2026-11-24T08:05:17.8759957Z ##[endgroup]
+2026-11-24T08:05:17.8761221Z ##[group]Initializing the repository
+2026-11-24T08:05:17.8766546Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-24T08:05:17.8875253Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-24T08:05:17.8877604Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-24T08:05:17.8879427Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-24T08:05:17.8881024Z hint: call:
+2026-11-24T08:05:17.8881998Z hint:
+2026-11-24T08:05:17.8883110Z hint: 	git config --global init.defaultBranch <name>
+2026-11-24T08:05:17.8884464Z hint:
+2026-11-24T08:05:17.8885912Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-24T08:05:17.8887878Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-24T08:05:17.8889566Z hint:
+2026-11-24T08:05:17.8890542Z hint: 	git branch -m <name>
+2026-11-24T08:05:17.8891621Z hint:
+2026-11-24T08:05:17.8892841Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-24T08:05:17.8894740Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-24T08:05:17.8898193Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-24T08:05:17.8951576Z ##[endgroup]
+2026-11-24T08:05:17.8953328Z ##[group]Disabling automatic garbage collection
+2026-11-24T08:05:17.8954977Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-24T08:05:17.8991627Z ##[endgroup]
+2026-11-24T08:05:17.8993429Z ##[group]Setting up auth
+2026-11-24T08:05:17.8994660Z Removing SSH command configuration
+2026-11-24T08:05:17.9000038Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T08:05:17.9037900Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T08:05:17.9565916Z Removing HTTP extra header
+2026-11-24T08:05:17.9574740Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T08:05:17.9629311Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T08:05:17.9911336Z Removing includeIf entries pointing to credentials config files
+2026-11-24T08:05:17.9916774Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T08:05:17.9957220Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T08:05:18.0253648Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-24T08:05:18.0297433Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:05:18.0353789Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:05:18.0390406Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:05:18.0429125Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:05:18.0456833Z ##[endgroup]
+2026-11-24T08:05:18.0457745Z ##[group]Fetching the repository
+2026-11-24T08:05:18.0465236Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +261ceec1c7802fe9f03374d6a8e746f041bc0b07:refs/remotes/pull/864/merge
+2026-11-24T08:05:19.3831726Z From https://github.com/ManabiIO/manabitan
+2026-11-24T08:05:19.3836928Z  * [new ref]         261ceec1c7802fe9f03374d6a8e746f041bc0b07 -> pull/864/merge
+2026-11-24T08:05:19.3840389Z ##[endgroup]
+2026-11-24T08:05:19.3841811Z ##[group]Determining the checkout info
+2026-11-24T08:05:19.3843930Z ##[endgroup]
+2026-11-24T08:05:19.3844927Z [command]/usr/bin/git sparse-checkout disable
+2026-11-24T08:05:19.3904721Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-24T08:05:19.3936681Z ##[group]Checking out the ref
+2026-11-24T08:05:19.3939448Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/864/merge
+2026-11-24T08:05:19.6828000Z Note: switching to 'refs/remotes/pull/864/merge'.
+2026-11-24T08:05:19.6828644Z 
+2026-11-24T08:05:19.6829085Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-24T08:05:19.6830032Z changes and commit them, and you can discard any commits you make in this
+2026-11-24T08:05:19.6830932Z state without impacting any branches by switching back to a branch.
+2026-11-24T08:05:19.6831545Z 
+2026-11-24T08:05:19.6831959Z If you want to create a new branch to retain commits you create, you may
+2026-11-24T08:05:19.6832796Z do so (now or later) by using -c with the switch command. Example:
+2026-11-24T08:05:19.6833262Z 
+2026-11-24T08:05:19.6833499Z   git switch -c <new-branch-name>
+2026-11-24T08:05:19.6833816Z 
+2026-11-24T08:05:19.6834049Z Or undo this operation with:
+2026-11-24T08:05:19.6834367Z 
+2026-11-24T08:05:19.6834562Z   git switch -
+2026-11-24T08:05:19.6834838Z 
+2026-11-24T08:05:19.6835289Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-24T08:05:19.6836108Z 
+2026-11-24T08:05:19.6836746Z HEAD is now at 261ceec Merge d147a60fc4845e898d98d8924968d6094b417007 into d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
+2026-11-24T08:05:19.6848108Z ##[endgroup]
+2026-11-24T08:05:19.6907905Z [command]/usr/bin/git log -1 --format=%H
+2026-11-24T08:05:19.6935734Z 261ceec1c7802fe9f03374d6a8e746f041bc0b07
+2026-11-24T08:05:19.7332887Z Prepare all required actions
+2026-11-24T08:05:19.7333480Z Getting action download info
+2026-11-24T08:05:19.8192029Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-24T08:05:19.9016127Z ##[group]Run ./.github/actions/setup
+2026-11-24T08:05:19.9016426Z with:
+2026-11-24T08:05:19.9016627Z   node-version: 22.22.0
+2026-11-24T08:05:19.9016850Z ##[endgroup]
+2026-11-24T08:05:19.9072362Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-24T08:05:19.9182375Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-24T08:05:19.9182788Z with:
+2026-11-24T08:05:19.9182991Z   node-version: 22.22.0
+2026-11-24T08:05:19.9183214Z   cache: npm
+2026-11-24T08:05:19.9183405Z   always-auth: false
+2026-11-24T08:05:19.9183614Z   check-latest: false
+2026-11-24T08:05:19.9186311Z   token: ***
+2026-11-24T08:05:19.9186525Z ##[endgroup]
+2026-11-24T08:05:20.0649402Z Attempting to download 22.22.0...
+2026-11-24T08:05:20.0804905Z (node:2420) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T08:05:20.0806286Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T08:05:20.8763828Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-24T08:05:21.4340365Z Extracting ...
+2026-11-24T08:05:21.4477435Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/967c2d16-18e1-4ac4-a2ae-f38ca7222c7d -f /home/runner/work/_temp/3a5b649b-3aa9-4255-9b6b-34e105ebf506
+2026-11-24T08:05:22.1975842Z Adding to the cache ...
+2026-11-24T08:05:24.0075651Z ##[group]Environment details
+2026-11-24T08:05:24.2425020Z node: v22.22.0
+2026-11-24T08:05:24.2425714Z npm: 10.9.4
+2026-11-24T08:05:24.2426070Z yarn: 1.22.22
+2026-11-24T08:05:24.2426798Z ##[endgroup]
+2026-11-24T08:05:24.2444985Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-24T08:05:24.3365661Z /home/runner/.npm
+2026-11-24T08:05:24.4875150Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-24T08:05:24.4992091Z (node:2420) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-24T08:05:25.3197132Z Received 63143556 of 63143556 (100.0%), 88.2 MBs/sec
+2026-11-24T08:05:25.3198066Z Cache Size: ~60 MB (63143556 B)
+2026-11-24T08:05:25.3260254Z [command]/usr/bin/tar -xf /home/runner/work/_temp/6a916c38-2243-4850-b194-3e5166ad0525/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-24T08:05:25.6111851Z Cache restored successfully
+2026-11-24T08:05:25.6147610Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-24T08:05:25.6358870Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=5728]
+2026-11-24T08:05:25.6362213Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-24T08:05:25.6368979Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-24T08:05:25.6371049Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-24T08:05:25.6409193Z ##[group]Run npm ci
+2026-11-24T08:05:25.6409501Z [36;1mnpm ci[0m
+2026-11-24T08:05:25.6449766Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T08:05:25.6450146Z ##[endgroup]
+2026-11-24T08:05:26.2890964Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-24T08:05:31.3443174Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-24T08:05:32.4602561Z 
+2026-11-24T08:05:32.4603351Z > yomitan@0.0.0 prepare
+2026-11-24T08:05:32.4604259Z > husky
+2026-11-24T08:05:32.4604670Z 
+2026-11-24T08:05:32.5226462Z 
+2026-11-24T08:05:32.5227583Z added 670 packages, and audited 671 packages in 7s
+2026-11-24T08:05:32.5228343Z 
+2026-11-24T08:05:32.5231667Z 232 packages are looking for funding
+2026-11-24T08:05:32.5232479Z   run `npm fund` for details
+2026-11-24T08:05:32.5246569Z 
+2026-11-24T08:05:32.5247315Z found 0 vulnerabilities
+2026-11-24T08:05:32.5988907Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=6961]
+2026-11-24T08:05:32.5991807Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-24T08:05:32.6012722Z ##[group]Run npm run build:libs
+2026-11-24T08:05:32.6013019Z [36;1mnpm run build:libs[0m
+2026-11-24T08:05:32.6013281Z [36;1mnpm run license-report:html[0m
+2026-11-24T08:05:32.6047513Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-24T08:05:32.6047912Z ##[endgroup]
+2026-11-24T08:05:32.6972392Z 
+2026-11-24T08:05:32.6973000Z > yomitan@0.0.0 build:libs
+2026-11-24T08:05:32.6973485Z > node ./dev/bin/build-libs.js
+2026-11-24T08:05:32.6973717Z 
+2026-11-24T08:05:33.2618175Z 
+2026-11-24T08:05:33.2618835Z > yomitan@0.0.0 license-report:html
+2026-11-24T08:05:33.2620101Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-24T08:05:33.2620918Z 
+2026-11-24T08:05:33.6018251Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=1002]
+2026-11-24T08:05:33.6080874Z ##[group]Run npm run build -- --target chrome-playwright
+2026-11-24T08:05:33.6081315Z [36;1mnpm run build -- --target chrome-playwright[0m
+2026-11-24T08:05:33.6114148Z shell: /usr/bin/bash -e {0}
+2026-11-24T08:05:33.6114411Z ##[endgroup]
+2026-11-24T08:05:33.7057884Z 
+2026-11-24T08:05:33.7058319Z > yomitan@0.0.0 build
+2026-11-24T08:05:33.7058879Z > node ./dev/bin/build.js --target chrome-playwright
+2026-11-24T08:05:33.7059530Z 
+2026-11-24T08:05:34.1802517Z Version: 0.0.0.0...
+2026-11-24T08:05:34.1803129Z Building chrome-playwright...
+2026-11-24T08:05:36.6217670Z 
+2026-11-24T08:05:36.6218561Z Restoring manifest...
+2026-11-24T08:05:36.6424830Z ##[group]Run npx playwright install --with-deps chromium
+2026-11-24T08:05:36.6425274Z [36;1mnpx playwright install --with-deps chromium[0m
+2026-11-24T08:05:36.6457391Z shell: /usr/bin/bash -e {0}
+2026-11-24T08:05:36.6457652Z ##[endgroup]
+2026-11-24T08:05:37.3789946Z Installing dependencies...
+2026-11-24T08:05:37.3852266Z Switching to root user to install dependencies...
+2026-11-24T08:05:37.4746621Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-24T08:05:37.5120891Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-24T08:05:37.5127346Z Get:6 https://packages.microsoft.com/ubuntu/26.04/prod resolute InRelease [3964 B]
+2026-11-24T08:05:37.5173752Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-24T08:05:37.5175249Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-24T08:05:37.5248278Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-24T08:05:37.5397660Z Get:7 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main amd64 Packages [186 kB]
+2026-11-24T08:05:37.5590161Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [914 kB]
+2026-11-24T08:05:37.5607672Z Get:14 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main arm64 Packages [173 kB]
+2026-11-24T08:05:37.5767118Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [201 kB]
+2026-11-24T08:05:37.5774208Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [394 kB]
+2026-11-24T08:05:37.5901512Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [124 kB]
+2026-11-24T08:05:37.5915208Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [640 kB]
+2026-11-24T08:05:37.5982158Z Get:13 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [132 kB]
+2026-11-24T08:05:37.5997804Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [753 kB]
+2026-11-24T08:05:37.6040741Z Get:16 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [162 kB]
+2026-11-24T08:05:37.6058058Z Get:17 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [224 kB]
+2026-11-24T08:05:37.6088078Z Get:18 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [73.2 kB]
+2026-11-24T08:05:37.6587886Z Get:19 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted amd64v3 Packages [618 kB]
+2026-11-24T08:05:37.6598931Z Get:20 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted Translation-en [128 kB]
+2026-11-24T08:05:39.6791823Z Fetched 5139 kB in 0s (11.8 MB/s)
+2026-11-24T08:05:40.3484561Z Reading package lists...
+2026-11-24T08:05:40.3755796Z Reading package lists...
+2026-11-24T08:05:40.5309300Z Building dependency tree...
+2026-11-24T08:05:40.5316279Z Reading state information...
+2026-11-24T08:05:40.5631428Z libasound2t64 is already the newest version (1.2.15.3-1ubuntu1.1).
+2026-11-24T08:05:40.5632448Z libasound2t64 set to manually installed.
+2026-11-24T08:05:40.5633463Z libatk-bridge2.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-24T08:05:40.5634477Z libatk-bridge2.0-0t64 set to manually installed.
+2026-11-24T08:05:40.5635700Z libatk1.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-24T08:05:40.5636287Z libatk1.0-0t64 set to manually installed.
+2026-11-24T08:05:40.5636891Z libatspi2.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-24T08:05:40.5637459Z libatspi2.0-0t64 set to manually installed.
+2026-11-24T08:05:40.5637960Z libcairo2 is already the newest version (1.18.4-3).
+2026-11-24T08:05:40.5638977Z libcairo2 set to manually installed.
+2026-11-24T08:05:40.5639558Z libcups2t64 is already the newest version (2.4.16-1ubuntu1.3).
+2026-11-24T08:05:40.5640088Z libcups2t64 set to manually installed.
+2026-11-24T08:05:40.5640857Z libdbus-1-3 is already the newest version (1.16.2-2ubuntu4).
+2026-11-24T08:05:40.5641368Z libdbus-1-3 set to manually installed.
+2026-11-24T08:05:40.5641838Z libdrm2 is already the newest version (2.4.131-1).
+2026-11-24T08:05:40.5642308Z libdrm2 set to manually installed.
+2026-11-24T08:05:40.5642990Z libgbm1 is already the newest version (26.0.8-1ubuntu0.3).
+2026-11-24T08:05:40.5643485Z libgbm1 set to manually installed.
+2026-11-24T08:05:40.5644025Z libglib2.0-0t64 is already the newest version (2.88.0-1ubuntu0.1).
+2026-11-24T08:05:40.5644577Z libglib2.0-0t64 set to manually installed.
+2026-11-24T08:05:40.5645130Z libnspr4 is already the newest version (2:4.38.2-1ubuntu1).
+2026-11-24T08:05:40.5645754Z libnspr4 set to manually installed.
+2026-11-24T08:05:40.5646262Z libnss3 is already the newest version (2:3.120-1ubuntu2.2).
+2026-11-24T08:05:40.5646762Z libnss3 set to manually installed.
+2026-11-24T08:05:40.5647253Z libpango-1.0-0 is already the newest version (1.57.0-1).
+2026-11-24T08:05:40.5647773Z libpango-1.0-0 set to manually installed.
+2026-11-24T08:05:40.5648312Z libx11-6 is already the newest version (2:1.8.13-1ubuntu0.1).
+2026-11-24T08:05:40.5648808Z libx11-6 set to manually installed.
+2026-11-24T08:05:40.5649301Z libxcb1 is already the newest version (1.17.0-2ubuntu1).
+2026-11-24T08:05:40.5649769Z libxcb1 set to manually installed.
+2026-11-24T08:05:40.5650176Z libxcomposite1 is already the newest version (1:0.4.6-1build1).
+2026-11-24T08:05:40.5650585Z libxcomposite1 set to manually installed.
+2026-11-24T08:05:40.5650972Z libxdamage1 is already the newest version (1:1.1.7-1).
+2026-11-24T08:05:40.5651340Z libxdamage1 set to manually installed.
+2026-11-24T08:05:40.5651734Z libxext6 is already the newest version (2:1.3.4-1build3).
+2026-11-24T08:05:40.5652097Z libxext6 set to manually installed.
+2026-11-24T08:05:40.5652478Z libxfixes3 is already the newest version (1:6.0.0-2build2).
+2026-11-24T08:05:40.5652869Z libxfixes3 set to manually installed.
+2026-11-24T08:05:40.5653276Z libxkbcommon0 is already the newest version (1.13.1-1).
+2026-11-24T08:05:40.5653665Z libxkbcommon0 set to manually installed.
+2026-11-24T08:05:40.5654069Z libxrandr2 is already the newest version (2:1.5.4-1build1).
+2026-11-24T08:05:40.5654453Z libxrandr2 set to manually installed.
+2026-11-24T08:05:40.5654834Z xvfb is already the newest version (2:21.1.22-1ubuntu1.3).
+2026-11-24T08:05:40.5655419Z fonts-noto-color-emoji is already the newest version (2.051-1build1).
+2026-11-24T08:05:40.5655946Z libfontconfig1 is already the newest version (2.17.1-3ubuntu1).
+2026-11-24T08:05:40.5656373Z libfontconfig1 set to manually installed.
+2026-11-24T08:05:40.5656814Z libfreetype6 is already the newest version (2.14.2+dfsg-1ubuntu0.2).
+2026-11-24T08:05:40.5657238Z libfreetype6 set to manually installed.
+2026-11-24T08:05:40.5657678Z fonts-liberation is already the newest version (1:2.1.5-3build1).
+2026-11-24T08:05:40.5658103Z fonts-liberation set to manually installed.
+2026-11-24T08:05:40.6254049Z Solving dependencies...
+2026-11-24T08:05:40.7078992Z The following additional packages will be installed:
+2026-11-24T08:05:40.7079955Z   xfonts-encodings xfonts-utils
+2026-11-24T08:05:40.7084030Z Recommended packages:
+2026-11-24T08:05:40.7084537Z   fonts-ipafont-mincho fonts-tlwg-loma
+2026-11-24T08:05:40.7303114Z The following NEW packages will be installed:
+2026-11-24T08:05:40.7303908Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-11-24T08:05:40.7310392Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-11-24T08:05:40.7310863Z   xfonts-utils
+2026-11-24T08:05:40.7516906Z 0 upgraded, 9 newly installed, 0 to remove and 57 not upgraded.
+2026-11-24T08:05:40.7517627Z Need to get 21.9 MB of archives.
+2026-11-24T08:05:40.7518367Z After this operation, 80.2 MB of additional disk space will be used.
+2026-11-24T08:05:40.7519553Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-24T08:05:40.8154489Z Get:2 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-ipafont-gothic all 00303-23ubuntu1 [3703 kB]
+2026-11-24T08:05:40.9119320Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 fonts-freefont-ttf all 20211204+svn4273-4build1 [5656 kB]
+2026-11-24T08:05:41.0404537Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-tlwg-loma-otf all 1:0.7.3-1build1 [106 kB]
+2026-11-24T08:05:41.0905616Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-unifont all 1:16.0.04-1build1 [3169 kB]
+2026-11-24T08:05:41.1802820Z Get:6 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-wqy-zenhei all 0.9.45-8build1 [7863 kB]
+2026-11-24T08:05:41.3418287Z Get:7 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 xfonts-encodings all 1:1.0.5-0ubuntu3 [576 kB]
+2026-11-24T08:05:41.3941722Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 xfonts-utils amd64 1:7.7+7build1 [97.3 kB]
+2026-11-24T08:05:41.4402467Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 xfonts-cyrillic all 1:1.0.5+nmu1build1 [384 kB]
+2026-11-24T08:05:41.4892109Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 xfonts-scalable all 1:1.0.3-1.3build1 [304 kB]
+2026-11-24T08:05:41.8302780Z Fetched 21.9 MB in 1s (29.0 MB/s)
+2026-11-24T08:05:41.8580498Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-11-24T08:05:41.8857237Z (Reading database ... 
+2026-11-24T08:05:41.8858006Z (Reading database ... 5%
+2026-11-24T08:05:41.8858618Z (Reading database ... 10%
+2026-11-24T08:05:41.8859194Z (Reading database ... 15%
+2026-11-24T08:05:41.8859603Z (Reading database ... 20%
+2026-11-24T08:05:41.8859883Z (Reading database ... 25%
+2026-11-24T08:05:41.8860143Z (Reading database ... 30%
+2026-11-24T08:05:41.8860390Z (Reading database ... 35%
+2026-11-24T08:05:41.8860664Z (Reading database ... 40%
+2026-11-24T08:05:41.8860908Z (Reading database ... 45%
+2026-11-24T08:05:41.8861147Z (Reading database ... 50%
+2026-11-24T08:05:41.9154649Z (Reading database ... 55%
+2026-11-24T08:05:41.9520608Z (Reading database ... 60%
+2026-11-24T08:05:41.9974133Z (Reading database ... 65%
+2026-11-24T08:05:42.0304671Z (Reading database ... 70%
+2026-11-24T08:05:42.0801304Z (Reading database ... 75%
+2026-11-24T08:05:42.2053955Z (Reading database ... 80%
+2026-11-24T08:05:42.3922181Z (Reading database ... 85%
+2026-11-24T08:05:42.5958430Z (Reading database ... 90%
+2026-11-24T08:05:42.7510290Z (Reading database ... 95%
+2026-11-24T08:05:42.7510959Z (Reading database ... 100%
+2026-11-24T08:05:42.7511950Z (Reading database ... 214296 files and directories currently installed.)
+2026-11-24T08:05:42.7552436Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-23ubuntu1_all.deb ...
+2026-11-24T08:05:42.7646262Z Unpacking fonts-ipafont-gothic (00303-23ubuntu1) ...
+2026-11-24T08:05:42.8354952Z Selecting previously unselected package fonts-freefont-ttf.
+2026-11-24T08:05:42.8491127Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-4build1_all.deb ...
+2026-11-24T08:05:42.8497619Z Unpacking fonts-freefont-ttf (20211204+svn4273-4build1) ...
+2026-11-24T08:05:42.9294388Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-11-24T08:05:42.9430647Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1build1_all.deb ...
+2026-11-24T08:05:42.9438459Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1build1) ...
+2026-11-24T08:05:42.9660516Z Selecting previously unselected package fonts-unifont.
+2026-11-24T08:05:42.9799489Z Preparing to unpack .../3-fonts-unifont_1%3a16.0.04-1build1_all.deb ...
+2026-11-24T08:05:42.9806262Z Unpacking fonts-unifont (1:16.0.04-1build1) ...
+2026-11-24T08:05:43.0959767Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-11-24T08:05:43.1095091Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8build1_all.deb ...
+2026-11-24T08:05:43.1237493Z Unpacking fonts-wqy-zenhei (0.9.45-8build1) ...
+2026-11-24T08:05:43.2093472Z Selecting previously unselected package xfonts-encodings.
+2026-11-24T08:05:43.2229341Z Preparing to unpack .../5-xfonts-encodings_1%3a1.0.5-0ubuntu3_all.deb ...
+2026-11-24T08:05:43.2236269Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu3) ...
+2026-11-24T08:05:43.2698052Z Selecting previously unselected package xfonts-utils.
+2026-11-24T08:05:43.2843993Z Preparing to unpack .../6-xfonts-utils_1%3a7.7+7build1_amd64v3.deb ...
+2026-11-24T08:05:43.2850820Z Unpacking xfonts-utils (1:7.7+7build1) ...
+2026-11-24T08:05:43.3194815Z Selecting previously unselected package xfonts-cyrillic.
+2026-11-24T08:05:43.3330309Z Preparing to unpack .../7-xfonts-cyrillic_1%3a1.0.5+nmu1build1_all.deb ...
+2026-11-24T08:05:43.3339880Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1build1) ...
+2026-11-24T08:05:43.3682705Z Selecting previously unselected package xfonts-scalable.
+2026-11-24T08:05:43.3817586Z Preparing to unpack .../8-xfonts-scalable_1%3a1.0.3-1.3build1_all.deb ...
+2026-11-24T08:05:43.3824739Z Unpacking xfonts-scalable (1:1.0.3-1.3build1) ...
+2026-11-24T08:05:43.4258192Z Setting up fonts-wqy-zenhei (0.9.45-8build1) ...
+2026-11-24T08:05:43.4409555Z Setting up fonts-freefont-ttf (20211204+svn4273-4build1) ...
+2026-11-24T08:05:43.4426433Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1build1) ...
+2026-11-24T08:05:43.4447832Z Setting up xfonts-encodings (1:1.0.5-0ubuntu3) ...
+2026-11-24T08:05:43.4465548Z Setting up fonts-ipafont-gothic (00303-23ubuntu1) ...
+2026-11-24T08:05:43.4526159Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-11-24T08:05:43.4541430Z Setting up fonts-unifont (1:16.0.04-1build1) ...
+2026-11-24T08:05:43.4558242Z Setting up xfonts-utils (1:7.7+7build1) ...
+2026-11-24T08:05:43.4608336Z Setting up xfonts-cyrillic (1:1.0.5+nmu1build1) ...
+2026-11-24T08:05:43.5049833Z Setting up xfonts-scalable (1:1.0.3-1.3build1) ...
+2026-11-24T08:05:43.5479548Z Processing triggers for man-db (2.13.1-1build1) ...
+2026-11-24T08:05:43.5504388Z Not building database; man-db/auto-update is not 'true'.
+2026-11-24T08:05:43.5517412Z Processing triggers for fontconfig (2.17.1-3ubuntu1) ...
+2026-11-24T08:05:44.2658757Z 
+2026-11-24T08:05:44.2659482Z Running kernel seems to be up-to-date.
+2026-11-24T08:05:44.2659864Z 
+2026-11-24T08:05:44.2660049Z Restarting services...
+2026-11-24T08:05:44.2755544Z 
+2026-11-24T08:05:44.2756122Z Service restarts being deferred:
+2026-11-24T08:05:44.2759097Z  systemctl restart hosted-compute-agent.service
+2026-11-24T08:05:44.2759618Z 
+2026-11-24T08:05:44.2760028Z No containers need to be restarted.
+2026-11-24T08:05:44.2760364Z 
+2026-11-24T08:05:44.2760679Z No user sessions are running outdated binaries.
+2026-11-24T08:05:44.2761054Z 
+2026-11-24T08:05:44.2761352Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-24T08:05:45.1221127Z Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+2026-11-24T08:05:45.5807428Z |                                                                                |   0% of 186.8 MiB
+2026-11-24T08:05:45.7595063Z |■■■■■■■■                                                                        |  10% of 186.8 MiB
+2026-11-24T08:05:45.8602834Z |■■■■■■■■■■■■■■■■                                                                |  20% of 186.8 MiB
+2026-11-24T08:05:45.9316591Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 186.8 MiB
+2026-11-24T08:05:46.0214363Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 186.8 MiB
+2026-11-24T08:05:46.1236099Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 186.8 MiB
+2026-11-24T08:05:46.2078317Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 186.8 MiB
+2026-11-24T08:05:46.3091088Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 186.8 MiB
+2026-11-24T08:05:46.3948168Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 186.8 MiB
+2026-11-24T08:05:46.5009495Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 186.8 MiB
+2026-11-24T08:05:46.6010335Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 186.8 MiB
+2026-11-24T08:05:49.0398512Z Chrome for Testing 153.0.8010.12 (playwright chromium v1243) downloaded to /home/runner/.cache/ms-playwright/chromium-1243
+2026-11-24T08:05:49.0401871Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+2026-11-24T08:05:49.4668250Z |                                                                                |   0% of 2.3 MiB
+2026-11-24T08:05:49.5221985Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+2026-11-24T08:05:49.5461003Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+2026-11-24T08:05:49.5620415Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+2026-11-24T08:05:49.5706563Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+2026-11-24T08:05:49.5791973Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+2026-11-24T08:05:49.5863837Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+2026-11-24T08:05:49.5925871Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+2026-11-24T08:05:49.5974179Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+2026-11-24T08:05:49.6017265Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+2026-11-24T08:05:49.6053143Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+2026-11-24T08:05:49.6629094Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+2026-11-24T08:05:49.6632462Z Downloading Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-headless-shell-linux64.zip
+2026-11-24T08:05:50.0920147Z |                                                                                |   0% of 114.3 MiB
+2026-11-24T08:05:50.2445097Z |■■■■■■■■                                                                        |  10% of 114.3 MiB
+2026-11-24T08:05:50.3104839Z |■■■■■■■■■■■■■■■■                                                                |  20% of 114.3 MiB
+2026-11-24T08:05:50.3641883Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.3 MiB
+2026-11-24T08:05:50.4211864Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.3 MiB
+2026-11-24T08:05:50.4934551Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.3 MiB
+2026-11-24T08:05:50.5626039Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.3 MiB
+2026-11-24T08:05:50.6238930Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.3 MiB
+2026-11-24T08:05:50.6916033Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.3 MiB
+2026-11-24T08:05:50.7540092Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.3 MiB
+2026-11-24T08:05:50.8159690Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.3 MiB
+2026-11-24T08:05:52.5893247Z Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1243
+2026-11-24T08:05:52.6154757Z ##[group]Run npm run test:unit -- test/chromium/restart-interruption-process-tree.test.js
+2026-11-24T08:05:52.6155892Z [36;1mnpm run test:unit -- test/chromium/restart-interruption-process-tree.test.js[0m
+2026-11-24T08:05:52.6188375Z shell: /usr/bin/bash -e {0}
+2026-11-24T08:05:52.6188639Z ##[endgroup]
+2026-11-24T08:05:52.7118997Z 
+2026-11-24T08:05:52.7119700Z > yomitan@0.0.0 test:unit
+2026-11-24T08:05:52.7120338Z > vitest run test/chromium/restart-interruption-process-tree.test.js
+2026-11-24T08:05:52.7120716Z 
+2026-11-24T08:05:53.0633134Z 
+2026-11-24T08:05:53.0636022Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/home/runner/work/manabitan/manabitan[39m
+2026-11-24T08:05:53.0636459Z 
+2026-11-24T08:05:53.2697838Z  [32m✓[39m test/chromium/restart-interruption-process-tree.test.js [2m([22m[2m5 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+2026-11-24T08:05:53.2736180Z 
+2026-11-24T08:05:53.2741142Z [2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+2026-11-24T08:05:53.2742281Z [2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+2026-11-24T08:05:53.2742980Z [2m   Start at [22m 08:05:53
+2026-11-24T08:05:53.2744109Z [2m   Duration [22m 171ms[2m (transform 28ms, setup 26ms, import 17ms, tests 7ms, environment 0ms)[22m
+2026-11-24T08:05:53.2746840Z 
+2026-11-24T08:05:53.3225290Z ##[group]Run evidence_dir=$(mktemp -d "$RUNNER_TEMP/manabitan-restart.XXXXXX")
+2026-11-24T08:05:53.3226187Z [36;1mevidence_dir=$(mktemp -d "$RUNNER_TEMP/manabitan-restart.XXXXXX")[0m
+2026-11-24T08:05:53.3226737Z [36;1mprintf 'MANABITAN_RESTART_EVIDENCE_DIR=%s\n' "$evidence_dir" >> "$GITHUB_ENV"[0m
+2026-11-24T08:05:53.3258634Z shell: /usr/bin/bash -e {0}
+2026-11-24T08:05:53.3258900Z ##[endgroup]
+2026-11-24T08:05:53.3388191Z ##[group]Run xvfb-run -a npm run test:e2e:chromium-restart-interruption
+2026-11-24T08:05:53.3388737Z [36;1mxvfb-run -a npm run test:e2e:chromium-restart-interruption[0m
+2026-11-24T08:05:53.3417524Z shell: /usr/bin/bash -e {0}
+2026-11-24T08:05:53.3417778Z env:
+2026-11-24T08:05:53.3418132Z   MANABITAN_RESTART_EVIDENCE_DIR: /home/runner/work/_temp/manabitan-restart.wVUQLw
+2026-11-24T08:05:53.3418556Z ##[endgroup]
+2026-11-24T08:05:53.5011033Z 
+2026-11-24T08:05:53.5011625Z > yomitan@0.0.0 test:e2e:chromium-restart-interruption
+2026-11-24T08:05:53.5012496Z > node ./test/chromium/restart-interruption.e2e.js
+2026-11-24T08:06:07.7596881Z 
+2026-11-24T08:06:07.7637115Z ##[group]Run node --input-type=module <<'NODE'
+2026-11-24T08:06:07.7637623Z [36;1mnode --input-type=module <<'NODE'[0m
+2026-11-24T08:06:07.7637920Z [36;1mimport fs from 'node:fs';[0m
+2026-11-24T08:06:07.7638418Z [36;1mconst path = `${process.env.MANABITAN_RESTART_EVIDENCE_DIR}/restart-interruption-campaign.json`;[0m
+2026-11-24T08:06:07.7638930Z [36;1mif (!fs.existsSync(path)) {[0m
+2026-11-24T08:06:07.7639306Z [36;1m  console.error('Restart interruption report was not written.');[0m
+2026-11-24T08:06:07.7639685Z [36;1m  process.exit(1);[0m
+2026-11-24T08:06:07.7639928Z [36;1m}[0m
+2026-11-24T08:06:07.7640205Z [36;1mconst report = JSON.parse(fs.readFileSync(path, 'utf8'));[0m
+2026-11-24T08:06:07.7640709Z [36;1mconst phases = new Map((report.phases || []).map((phase) => [phase.name, phase]));[0m
+2026-11-24T08:06:07.7641389Z [36;1mconst boundary = phases.get('controlled authoritative term-container payload interruption boundary');[0m
+2026-11-24T08:06:07.7642353Z [36;1mconst kill = phases.get('SIGKILL active Chromium process tree after successful authoritative term-container payload write before publication (test-only gate)');[0m
+2026-11-24T08:06:07.7643212Z [36;1mconst oracle = phases.get('restart recovery all-or-nothing generation oracle');[0m
+2026-11-24T08:06:07.7643791Z [36;1mconst largeUpdate = phases.get('completed full large update publication oracle');[0m
+2026-11-24T08:06:07.7644403Z [36;1mconst processCapture = phases.get('captured owned Chromium process tree before SIGKILL');[0m
+2026-11-24T08:06:07.7644871Z [36;1mconst required = [[0m
+2026-11-24T08:06:07.7645212Z [36;1m  phases.get('completed import baseline')?.status === 'passed',[0m
+2026-11-24T08:06:07.7646017Z [36;1m  phases.get('captured owned Chromium process tree before SIGKILL')?.status === 'observed',[0m
+2026-11-24T08:06:07.7646498Z [36;1m  boundary?.status === 'observed',[0m
+2026-11-24T08:06:07.7646787Z [36;1m  kill?.status === 'passed',[0m
+2026-11-24T08:06:07.7647062Z [36;1m  oracle?.status === 'passed',[0m
+2026-11-24T08:06:07.7647352Z [36;1m  largeUpdate?.status === 'passed',[0m
+2026-11-24T08:06:07.7647624Z [36;1m];[0m
+2026-11-24T08:06:07.7647847Z [36;1mconst write = boundary?.observedWrite;[0m
+2026-11-24T08:06:07.7648192Z [36;1mconst sessionId = boundary?.journal?.sessionId;[0m
+2026-11-24T08:06:07.7648561Z [36;1mconst fixtureTitle = 'Restart Campaign Fixture';[0m
+2026-11-24T08:06:07.7648989Z [36;1mconst stagedTitle = typeof write?.dictionaryName === 'string' &&[0m
+2026-11-24T08:06:07.7649620Z [36;1m  write.dictionaryName.startsWith(`${fixtureTitle} [update-staging `) && write.dictionaryName.endsWith(']');[0m
+2026-11-24T08:06:07.7650282Z [36;1mconst boundaryWitness = boundary?.journal?.recordCheckpoint?.shards &&[0m
+2026-11-24T08:06:07.7650817Z [36;1m  typeof sessionId === 'string' && sessionId.length > 0 && write?.held === true &&[0m
+2026-11-24T08:06:07.7651473Z [36;1m  write.sessionId === sessionId && typeof write.fileName === 'string' && write.fileName.endsWith('.mbtr.mbti') &&[0m
+2026-11-24T08:06:07.7652424Z [36;1m  typeof write.descriptorFileName === 'string' && write.descriptorFileName === write.fileName.slice(0, -'.mbti'.length) && write.descriptorFileName.endsWith('.mbtr') &&[0m
+2026-11-24T08:06:07.7653574Z [36;1m  (write.dictionaryName === fixtureTitle || stagedTitle) && Number.isSafeInteger(write.bytes) && Number.isSafeInteger(write.recordCount) && write.recordCount > 0 &&[0m
+2026-11-24T08:06:07.7654355Z [36;1m  write.bytes > 4096 && boundary.checkpointEntry === null &&[0m
+2026-11-24T08:06:07.7654752Z [36;1m  boundary.preUpdateFilesAbsent === true &&[0m
+2026-11-24T08:06:07.7656013Z [36;1m  !boundary.journal.recordCheckpoint.shards.some(({fileName}) => fileName === write.fileName || fileName === write.descriptorFileName) &&[0m
+2026-11-24T08:06:07.7656800Z [36;1m  Array.isArray(kill?.exitedPids) && Array.isArray(processCapture?.processes) &&[0m
+2026-11-24T08:06:07.7657557Z [36;1m  processCapture.processes.every(({pid}) => kill.exitedPids.includes(pid)) &&[0m
+2026-11-24T08:06:07.7658245Z [36;1m  Array.isArray(processCapture?.processes) && processCapture.processes.some(({pid, startedAt, command}) =>[0m
+2026-11-24T08:06:07.7658917Z [36;1m    pid === kill?.rootPid && typeof startedAt === 'string' && startedAt.length > 0 &&[0m
+2026-11-24T08:06:07.7659457Z [36;1m    typeof command === 'string' && command.includes('--user-data-dir=') &&[0m
+2026-11-24T08:06:07.7659893Z [36;1m    !/--type=|crashpad_handler/u.test(command)) &&[0m
+2026-11-24T08:06:07.7660376Z [36;1m  Array.isArray(kill?.signalledPids) && kill.signalledPids.includes(kill.rootPid) &&[0m
+2026-11-24T08:06:07.7660979Z [36;1m  Array.isArray(kill?.exitedPids) && kill.exitedPids.includes(kill.rootPid);[0m
+2026-11-24T08:06:07.7661525Z [36;1mconst launches = Array.isArray(report.launches) ? report.launches : [];[0m
+2026-11-24T08:06:07.7662019Z [36;1mconst validLaunches = ['initial', 'recovery'].every((name) => {[0m
+2026-11-24T08:06:07.7662480Z [36;1m  const launch = launches.find((item) => item.name === name);[0m
+2026-11-24T08:06:07.7662873Z [36;1m  const diagnostics = launch?.diagnostics;[0m
+2026-11-24T08:06:07.7663243Z [36;1m  const storage = diagnostics?.openStorageDiagnostics;[0m
+2026-11-24T08:06:07.7663613Z [36;1m  const worker = storage?.runtimeContext;[0m
+2026-11-24T08:06:07.7664150Z [36;1m  return launch?.runtimeIdentity?.origin === `chrome-extension://${report.runtimeExtensionId}` &&[0m
+2026-11-24T08:06:07.7664773Z [36;1m    launch.runtimeIdentity.runtimeId === report.runtimeExtensionId &&[0m
+2026-11-24T08:06:07.7665677Z [36;1m    launch.serviceWorkerExtensionId === report.runtimeExtensionId && diagnostics?.usesFallbackStorage === false &&[0m
+2026-11-24T08:06:07.7666368Z [36;1m    storage?.mode === 'opfs-sahpool' && storage.hasOpfsSahpoolVfs === true &&[0m
+2026-11-24T08:06:07.7667003Z [36;1m    storage.opfsSahpoolInstallResult === 'installed' && worker?.isDedicatedWorkerGlobalScope === true &&[0m
+2026-11-24T08:06:07.7667701Z [36;1m    worker.hasStorageGetDirectory === true && worker.hasCreateSyncAccessHandle === true;[0m
+2026-11-24T08:06:07.7668157Z [36;1m});[0m
+2026-11-24T08:06:07.7668527Z [36;1mconst oracleWitness = oracle?.revision && typeof oracle.generationId === 'string' &&[0m
+2026-11-24T08:06:07.7669118Z [36;1m  Number.isSafeInteger(oracle.inventory?.terms) && oracle.inventory.terms > 0 &&[0m
+2026-11-24T08:06:07.7669741Z [36;1m  typeof oracle.exactExpression === 'string' && typeof oracle.exactContent === 'string' &&[0m
+2026-11-24T08:06:07.7670455Z [36;1m  typeof oracle.absentExpression === 'string' && oracle.missCount === 0 && oracle.noTransientRows === true &&[0m
+2026-11-24T08:06:07.7670980Z [36;1m  oracle.strictOpfs === true;[0m
+2026-11-24T08:06:07.7671393Z [36;1mconst largeUpdateWitness = largeUpdate?.revision === 'revision-two-c92a' &&[0m
+2026-11-24T08:06:07.7672103Z [36;1m  typeof largeUpdate.previousGenerationId === 'string' && largeUpdate.previousGenerationId === oracle?.generationId &&[0m
+2026-11-24T08:06:07.7672937Z [36;1m  typeof largeUpdate.generationId === 'string' && largeUpdate.generationId !== largeUpdate.previousGenerationId &&[0m
+2026-11-24T08:06:07.7673731Z [36;1m  largeUpdate.inventory?.terms === 350001 && largeUpdate.exactExpression === '再起動証拠新' &&[0m
+2026-11-24T08:06:07.7674344Z [36;1m  largeUpdate.exactContent === 'RESTART_CAMPAIGN_REVISION_TWO_CONTENT_C92A' &&[0m
+2026-11-24T08:06:07.7674900Z [36;1m  largeUpdate.absentExpression === '再起動証拠旧' && largeUpdate.missCount === 0 &&[0m
+2026-11-24T08:06:07.7675689Z [36;1m  largeUpdate.noTransientRows === true && largeUpdate.strictOpfs === true;[0m
+2026-11-24T08:06:07.7676427Z [36;1mconst gitObjectId = (value) => typeof value === 'string' && /^[a-f0-9]{40}$/u.test(value);[0m
+2026-11-24T08:06:07.7676998Z [36;1mconst sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/u.test(value);[0m
+2026-11-24T08:06:07.7677589Z [36;1mconst identities = gitObjectId(report.sourceHead) && gitObjectId(report.sourceTree) &&[0m
+2026-11-24T08:06:07.7678266Z [36;1m  sha256(report.packageSha256) && sha256(report.harnessSha256) &&[0m
+2026-11-24T08:06:07.7678881Z [36;1m  sha256(report.fixtureHashes?.revisionOneSha256) && sha256(report.fixtureHashes?.revisionTwoSha256) &&[0m
+2026-11-24T08:06:07.7679478Z [36;1m  sha256(report.testOnlyPackageObserver?.originalSha256) &&[0m
+2026-11-24T08:06:07.7679943Z [36;1m  sha256(report.testOnlyPackageObserver?.instrumentedSha256) &&[0m
+2026-11-24T08:06:07.7680444Z [36;1m  sha256(report.testOnlyPackageObserver?.originalPackageZipSha256) &&[0m
+2026-11-24T08:06:07.7681032Z [36;1m  sha256(report.testOnlyPackageObserver?.instrumentedExtractedPackageTreeSha256) &&[0m
+2026-11-24T08:06:07.7681697Z [36;1m  report.testOnlyPackageObserver?.originalPackageZipSha256 === report.packageSha256 &&[0m
+2026-11-24T08:06:07.7682343Z [36;1m  typeof report.browserVersion === 'string' && report.browserVersion.length > 0;[0m
+2026-11-24T08:06:07.7682966Z [36;1mif (report.status !== 'success' || required.some((passed) => !passed) || !boundaryWitness ||[0m
+2026-11-24T08:06:07.7683744Z [36;1m    !validLaunches || !oracleWitness || !largeUpdateWitness || !identities || !report.runtimeExtensionId || !report.browserVersion ||[0m
+2026-11-24T08:06:07.7684444Z [36;1m    report.nodeVersion !== 'v22.22.0') {[0m
+2026-11-24T08:06:07.7685076Z [36;1m  console.error(JSON.stringify({status: report.status, requiredPhaseStatuses: required, boundaryWitness: Boolean(boundaryWitness),[0m
+2026-11-24T08:06:07.7686414Z [36;1m    validLaunches, oracleWitness: Boolean(oracleWitness), largeUpdateWitness: Boolean(largeUpdateWitness), identities: Boolean(identities), runtimeExtensionId: report.runtimeExtensionId,[0m
+2026-11-24T08:06:07.7687529Z [36;1m    browserVersion: report.browserVersion, nodeVersion: report.nodeVersion, sourceStatus: report.sourceStatus}, null, 2));[0m
+2026-11-24T08:06:07.7688116Z [36;1m  process.exit(1);[0m
+2026-11-24T08:06:07.7688351Z [36;1m}[0m
+2026-11-24T08:06:07.7688536Z [36;1mNODE[0m
+2026-11-24T08:06:07.7720149Z shell: /usr/bin/bash -e {0}
+2026-11-24T08:06:07.7720405Z env:
+2026-11-24T08:06:07.7720755Z   MANABITAN_RESTART_EVIDENCE_DIR: /home/runner/work/_temp/manabitan-restart.wVUQLw
+2026-11-24T08:06:07.7721176Z ##[endgroup]
+2026-11-24T08:06:07.8104348Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-11-24T08:06:07.8104777Z with:
+2026-11-24T08:06:07.8105017Z   name: chromium-restart-interruption-evidence
+2026-11-24T08:06:07.8105666Z   path: /home/runner/work/_temp/manabitan-restart.wVUQLw
+2026-11-24T08:06:07.8106004Z   if-no-files-found: error
+2026-11-24T08:06:07.8106241Z   compression-level: 6
+2026-11-24T08:06:07.8106470Z   overwrite: false
+2026-11-24T08:06:07.8106689Z   include-hidden-files: false
+2026-11-24T08:06:07.8106931Z env:
+2026-11-24T08:06:07.8107259Z   MANABITAN_RESTART_EVIDENCE_DIR: /home/runner/work/_temp/manabitan-restart.wVUQLw
+2026-11-24T08:06:07.8107660Z ##[endgroup]
+2026-11-24T08:06:07.9835652Z (node:3435) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T08:06:07.9836633Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T08:06:08.1910466Z With the provided path, there will be 1181 files uploaded
+2026-11-24T08:06:08.1916184Z Artifact name is valid!
+2026-11-24T08:06:08.1916829Z Root directory input is valid!
+2026-11-24T08:06:08.4828874Z Beginning upload of artifact content to blob storage
+2026-11-24T08:06:09.4590361Z (node:3435) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-24T08:06:09.9473790Z Uploaded bytes 8388608
+2026-11-24T08:06:10.1887129Z Uploaded bytes 16777216
+2026-11-24T08:06:10.7730800Z Uploaded bytes 25165824
+2026-11-24T08:06:11.6438571Z Uploaded bytes 33554432
+2026-11-24T08:06:11.7034272Z Uploaded bytes 34305543
+2026-11-24T08:06:11.7488068Z Finished uploading artifact content to blob storage!
+2026-11-24T08:06:11.7491904Z SHA256 digest of uploaded artifact zip is 11dff7b8890f5e28b44e6022b769b4b17a26fd1c6c2695a450f167eab01c01a1
+2026-11-24T08:06:11.7494231Z Finalizing artifact upload
+2026-11-24T08:06:12.1202263Z Artifact chromium-restart-interruption-evidence.zip successfully finalized. Artifact ID 14900738725
+2026-11-24T08:06:12.1203975Z Artifact chromium-restart-interruption-evidence has been successfully uploaded! Final size is 34305543 bytes. Artifact ID is 14900738725
+2026-11-24T08:06:12.1210995Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/45353056824/artifacts/14900738725
+2026-11-24T08:06:12.1506528Z Post job cleanup.
+2026-11-24T08:06:12.1510264Z ##[start-action display=Setup node;id=__9988254f-9979-4a38-9174-c2480a208016.__actions_setup-node]
+2026-11-24T08:06:12.1567983Z Post job cleanup.
+2026-11-24T08:06:12.2823142Z (node:3447) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T08:06:12.2824202Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T08:06:12.2828617Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531, not saving cache.
+2026-11-24T08:06:12.2924708Z ##[end-action id=__9988254f-9979-4a38-9174-c2480a208016.__actions_setup-node;outcome=success;conclusion=success;duration_ms=141]
+2026-11-24T08:06:12.3032805Z Post job cleanup.
+2026-11-24T08:06:12.4146757Z [command]/usr/bin/git version
+2026-11-24T08:06:12.4202558Z git version 2.56.1
+2026-11-24T08:06:12.4249250Z Temporarily overriding HOME='/home/runner/work/_temp/99251023-6205-43ae-8775-b93404b17a39' before making global git config changes
+2026-11-24T08:06:12.4251087Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T08:06:12.4258114Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-24T08:06:12.4307049Z Removing SSH command configuration
+2026-11-24T08:06:12.4307970Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T08:06:12.4387383Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T08:06:12.4762830Z Removing HTTP extra header
+2026-11-24T08:06:12.4770339Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T08:06:12.4821852Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T08:06:12.5245796Z Removing includeIf entries pointing to credentials config files
+2026-11-24T08:06:12.5247312Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T08:06:12.5270901Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-24T08:06:12.5272301Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-24T08:06:12.5273656Z includeif.gitdir:/github/workspace/.git.path
+2026-11-24T08:06:12.5274820Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-24T08:06:12.5282452Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-24T08:06:12.5309052Z /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5322714Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5377376Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-24T08:06:12.5393132Z /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5406191Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5441090Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-24T08:06:12.5466149Z /github/runner_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5476419Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5513152Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-24T08:06:12.5537101Z /github/runner_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5580600Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config
+2026-11-24T08:06:12.5626869Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T08:06:12.5915528Z Removing credentials config '/home/runner/work/_temp/git-credentials-023cfc37-f25d-44c8-9526-ebe10f6becb3.config'
+2026-11-24T08:06:12.6112782Z Cleaning up orphan processes
+2026-11-24T08:06:12.6552155Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

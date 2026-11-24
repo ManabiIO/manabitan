@@ -1,0 +1,15 @@
+{"banksCompleted":50,"totalBanks":665,"rows":500000,"projectedRows":10507,"uniqueMediaPaths":10459}
+{"banksCompleted":100,"totalBanks":665,"rows":1000000,"projectedRows":21499,"uniqueMediaPaths":21402}
+{"banksCompleted":150,"totalBanks":665,"rows":1500000,"projectedRows":32056,"uniqueMediaPaths":31911}
+{"banksCompleted":200,"totalBanks":665,"rows":2000000,"projectedRows":42756,"uniqueMediaPaths":42563}
+{"banksCompleted":250,"totalBanks":665,"rows":2500000,"projectedRows":53348,"uniqueMediaPaths":53109}
+{"banksCompleted":300,"totalBanks":665,"rows":3000000,"projectedRows":63554,"uniqueMediaPaths":63266}
+{"banksCompleted":350,"totalBanks":665,"rows":3500000,"projectedRows":74086,"uniqueMediaPaths":73754}
+{"banksCompleted":400,"totalBanks":665,"rows":4000000,"projectedRows":85209,"uniqueMediaPaths":84830}
+{"banksCompleted":450,"totalBanks":665,"rows":4500000,"projectedRows":96784,"uniqueMediaPaths":96359}
+{"banksCompleted":500,"totalBanks":665,"rows":5000000,"projectedRows":107564,"uniqueMediaPaths":107098}
+{"banksCompleted":550,"totalBanks":665,"rows":5500000,"projectedRows":117870,"uniqueMediaPaths":117364}
+{"banksCompleted":600,"totalBanks":665,"rows":6000000,"projectedRows":130338,"uniqueMediaPaths":129783}
+{"banksCompleted":650,"totalBanks":665,"rows":6500000,"projectedRows":143284,"uniqueMediaPaths":142682}
+{"banksCompleted":665,"totalBanks":665,"rows":6648310,"projectedRows":147186,"uniqueMediaPaths":146570}
+{"status":"passed","totals":[{"label":"baseline","rows":6648310,"projectedRows":147186,"requirements":147186,"uniqueDeferred":146570},{"label":"candidate","rows":6648310,"projectedRows":147186,"requirements":147186,"uniqueDeferred":146570}],"structuralObjectLiteralReduction":{"projectedEntryWrappers":147186,"additionalRequirementAndSourceClonesInAllUniqueDeferredReplay":293140,"caveat":"Structural source-level object-literal executions removed for this replay. Browser prefetch/defer selection can change the second count; no allocated-byte or peak-memory conclusion."},"outputPath":"/workspace/scratch/0a1757ac2970/vndb-bookkeeping-projection-parity.json"}

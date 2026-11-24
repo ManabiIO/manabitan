@@ -1,0 +1,1574 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+  "kind": "main-jobs-full",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 19,
+    "jobs": [
+      {
+        "id": 138302579437,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3ni7Q",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579437",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579437",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:03:17Z",
+        "name": "Anki Deduplication Matrix (Chromium)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:06Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:06Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:23Z"
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:23Z",
+            "completed_at": "2026-11-24T08:02:40Z"
+          },
+          {
+            "name": "Run Chromium Anki deduplication matrix",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:02:40Z",
+            "completed_at": "2026-11-24T08:03:12Z"
+          },
+          {
+            "name": "Enforce Chromium Anki matrix success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:03:12Z",
+            "completed_at": "2026-11-24T08:03:12Z"
+          },
+          {
+            "name": "Upload Chromium Anki deduplication report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:03:12Z",
+            "completed_at": "2026-11-24T08:03:14Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-11-24T08:03:14Z",
+            "completed_at": "2026-11-24T08:03:14Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-24T08:03:14Z",
+            "completed_at": "2026-11-24T08:03:14Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-24T08:03:14Z",
+            "completed_at": "2026-11-24T08:03:14Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579437",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085936,
+        "runner_name": "GitHub Actions 1000085936",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579770,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nkOg",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579770",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579770",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:28Z",
+        "name": "TypeScript (dev)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:07Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:07Z",
+            "completed_at": "2026-11-24T08:02:20Z"
+          },
+          {
+            "name": "Run TypeScript (dev) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:20Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:25Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:25Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:25Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579770",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085941,
+        "runner_name": "GitHub Actions 1000085941",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579819,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nkaw",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579819",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579819",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:27Z",
+        "name": "CSS",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:06Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:06Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:22Z"
+          },
+          {
+            "name": "Run CSS tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:22Z",
+            "completed_at": "2026-11-24T08:02:23Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:23Z",
+            "completed_at": "2026-11-24T08:02:24Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:24Z",
+            "completed_at": "2026-11-24T08:02:24Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:24Z",
+            "completed_at": "2026-11-24T08:02:24Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579819",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085938,
+        "runner_name": "GitHub Actions 1000085938",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579834,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nkeg",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579834",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579834",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:51Z",
+        "name": "JSON",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:07Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:07Z",
+            "completed_at": "2026-11-24T08:02:21Z"
+          },
+          {
+            "name": "Run JSON tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:21Z",
+            "completed_at": "2026-11-24T08:02:48Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:48Z",
+            "completed_at": "2026-11-24T08:02:48Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:48Z",
+            "completed_at": "2026-11-24T08:02:48Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:48Z",
+            "completed_at": "2026-11-24T08:02:48Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579834",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085937,
+        "runner_name": "GitHub Actions 1000085937",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579885,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nkrQ",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579885",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579885",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:29Z",
+        "name": "TypeScript (main)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:19Z"
+          },
+          {
+            "name": "Run TypeScript (main) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:19Z",
+            "completed_at": "2026-11-24T08:02:26Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:26Z",
+            "completed_at": "2026-11-24T08:02:26Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:26Z",
+            "completed_at": "2026-11-24T08:02:26Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:26Z",
+            "completed_at": "2026-11-24T08:02:26Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579885",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085944,
+        "runner_name": "GitHub Actions 1000085944",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579891,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nksw",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579891",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579891",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:04:07Z",
+        "name": "Full Extension E2E (Firefox)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:06Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:06Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:22Z"
+          },
+          {
+            "name": "Build Firefox test package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:22Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          },
+          {
+            "name": "Retain tested Firefox release package",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5,
+            "started_at": "2026-11-24T08:02:25Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          },
+          {
+            "name": "Install Firefox Developer Edition",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:02:25Z",
+            "completed_at": "2026-11-24T08:02:29Z"
+          },
+          {
+            "name": "Restore Firefox E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:29Z",
+            "completed_at": "2026-11-24T08:02:31Z"
+          },
+          {
+            "name": "Run Firefox extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:31Z",
+            "completed_at": "2026-11-24T08:04:01Z"
+          },
+          {
+            "name": "Enforce Firefox extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:04:01Z",
+            "completed_at": "2026-11-24T08:04:01Z"
+          },
+          {
+            "name": "Upload Firefox extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-24T08:04:01Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          },
+          {
+            "name": "Upload Firefox extension E2E report",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11,
+            "started_at": "2026-11-24T08:04:03Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          },
+          {
+            "name": "Post Restore Firefox E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-24T08:04:03Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-11-24T08:04:03Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-24T08:04:03Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-24T08:04:03Z",
+            "completed_at": "2026-11-24T08:04:03Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579891",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085942,
+        "runner_name": "GitHub Actions 1000085942",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579920,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nk0A",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579920",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579920",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:05Z",
+        "completed_at": "2026-11-24T08:10:11Z",
+        "name": "Full Extension E2E (Chromium)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:06Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:13Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:13Z",
+            "completed_at": "2026-11-24T08:02:25Z"
+          },
+          {
+            "name": "Build Chromium test package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:25Z",
+            "completed_at": "2026-11-24T08:02:27Z"
+          },
+          {
+            "name": "Retain tested Chromium release package",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5,
+            "started_at": "2026-11-24T08:02:27Z",
+            "completed_at": "2026-11-24T08:02:27Z"
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:02:27Z",
+            "completed_at": "2026-11-24T08:07:55Z"
+          },
+          {
+            "name": "Restore Chromium E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:07:55Z",
+            "completed_at": "2026-11-24T08:07:58Z"
+          },
+          {
+            "name": "Run Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:07:58Z",
+            "completed_at": "2026-11-24T08:10:05Z"
+          },
+          {
+            "name": "Enforce Chromium extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:10:05Z",
+            "completed_at": "2026-11-24T08:10:05Z"
+          },
+          {
+            "name": "Summarize Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-24T08:10:05Z",
+            "completed_at": "2026-11-24T08:10:05Z"
+          },
+          {
+            "name": "Upload Chromium extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-24T08:10:05Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          },
+          {
+            "name": "Upload Chromium extension E2E report",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12,
+            "started_at": "2026-11-24T08:10:07Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          },
+          {
+            "name": "Post Restore Chromium E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-24T08:10:07Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-24T08:10:07Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-11-24T08:10:07Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-11-24T08:10:07Z",
+            "completed_at": "2026-11-24T08:10:07Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579920",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085949,
+        "runner_name": "GitHub Actions 1000085949",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579940,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nk5A",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579940",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579940",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:06:00Z",
+        "name": "Unit Tests",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:07Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:07Z",
+            "completed_at": "2026-11-24T08:02:21Z"
+          },
+          {
+            "name": "Run Unit Tests tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:21Z",
+            "completed_at": "2026-11-24T08:05:58Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:58Z",
+            "completed_at": "2026-11-24T08:05:58Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:58Z",
+            "completed_at": "2026-11-24T08:05:58Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:58Z",
+            "completed_at": "2026-11-24T08:05:59Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579940",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085939,
+        "runner_name": "GitHub Actions 1000085939",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302579965,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nk_Q",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302579965",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302579965",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:45Z",
+        "name": "Test Build",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:07Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:07Z",
+            "completed_at": "2026-11-24T08:02:21Z"
+          },
+          {
+            "name": "Install pinned dictionary WASM toolchain",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:21Z",
+            "completed_at": "2026-11-24T08:02:24Z"
+          },
+          {
+            "name": "Verify pinned dictionary WASM rebuild",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:02:24Z",
+            "completed_at": "2026-11-24T08:02:30Z"
+          },
+          {
+            "name": "Build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:02:30Z",
+            "completed_at": "2026-11-24T08:02:43Z"
+          },
+          {
+            "name": "Retain versioned release packages",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:43Z",
+            "completed_at": "2026-11-24T08:02:43Z"
+          },
+          {
+            "name": "Validate manifest.json of the extension",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:43Z",
+            "completed_at": "2026-11-24T08:02:44Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-24T08:02:44Z",
+            "completed_at": "2026-11-24T08:02:44Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-11-24T08:02:44Z",
+            "completed_at": "2026-11-24T08:02:44Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-24T08:02:44Z",
+            "completed_at": "2026-11-24T08:02:44Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302579965",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000085946,
+        "runner_name": "GitHub Actions 1000085946",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302580010,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nlKg",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302580010",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580010",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:05:21Z",
+        "name": "JavaScript",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:04Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:07Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:07Z",
+            "completed_at": "2026-11-24T08:02:20Z"
+          },
+          {
+            "name": "Run JavaScript tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:20Z",
+            "completed_at": "2026-11-24T08:05:19Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:19Z",
+            "completed_at": "2026-11-24T08:05:20Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:20Z",
+            "completed_at": "2026-11-24T08:05:20Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:20Z",
+            "completed_at": "2026-11-24T08:05:20Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302580010",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085943,
+        "runner_name": "GitHub Actions 1000085943",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302580081,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nlcQ",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302580081",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580081",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:26Z",
+        "name": "Unit Tests (options)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:06Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:06Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:23Z"
+          },
+          {
+            "name": "Run Unit Tests (options) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:23Z",
+            "completed_at": "2026-11-24T08:02:23Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:23Z",
+            "completed_at": "2026-11-24T08:02:23Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:23Z",
+            "completed_at": "2026-11-24T08:02:24Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:24Z",
+            "completed_at": "2026-11-24T08:02:24Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302580081",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085951,
+        "runner_name": "GitHub Actions 1000085951",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302580137,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nlqQ",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302580137",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580137",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:38Z",
+        "name": "TypeScript (bench)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:06Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:06Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:23Z"
+          },
+          {
+            "name": "Run TypeScript (bench) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:23Z",
+            "completed_at": "2026-11-24T08:02:35Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:35Z",
+            "completed_at": "2026-11-24T08:02:35Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:35Z",
+            "completed_at": "2026-11-24T08:02:36Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:36Z",
+            "completed_at": "2026-11-24T08:02:36Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302580137",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085950,
+        "runner_name": "GitHub Actions 1000085950",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302580138,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nlqg",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302580138",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580138",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:13Z",
+        "completed_at": "2026-11-24T08:02:33Z",
+        "name": "HTML",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:13Z",
+            "completed_at": "2026-11-24T08:02:14Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:14Z",
+            "completed_at": "2026-11-24T08:02:17Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:17Z",
+            "completed_at": "2026-11-24T08:02:30Z"
+          },
+          {
+            "name": "Run HTML tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:30Z",
+            "completed_at": "2026-11-24T08:02:31Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:31Z",
+            "completed_at": "2026-11-24T08:02:31Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:31Z",
+            "completed_at": "2026-11-24T08:02:31Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:31Z",
+            "completed_at": "2026-11-24T08:02:31Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302580138",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085952,
+        "runner_name": "GitHub Actions 1000085952",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302580166,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nlxg",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302580166",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580166",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:15Z",
+        "completed_at": "2026-11-24T08:03:07Z",
+        "name": "TypeScript (test)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:16Z",
+            "completed_at": "2026-11-24T08:02:17Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:17Z",
+            "completed_at": "2026-11-24T08:02:19Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:19Z",
+            "completed_at": "2026-11-24T08:02:35Z"
+          },
+          {
+            "name": "Run TypeScript (test) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:35Z",
+            "completed_at": "2026-11-24T08:03:05Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:03:05Z",
+            "completed_at": "2026-11-24T08:03:05Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:03:05Z",
+            "completed_at": "2026-11-24T08:03:05Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:03:05Z",
+            "completed_at": "2026-11-24T08:03:05Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302580166",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085953,
+        "runner_name": "GitHub Actions 1000085953",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302580174,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nlzg",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302580174",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302580174",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:24Z",
+        "name": "Markdown",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:07Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:07Z",
+            "completed_at": "2026-11-24T08:02:20Z"
+          },
+          {
+            "name": "Run Markdown tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:02:20Z",
+            "completed_at": "2026-11-24T08:02:22Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:22Z",
+            "completed_at": "2026-11-24T08:02:22Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:02:22Z",
+            "completed_at": "2026-11-24T08:02:22Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:02:22Z",
+            "completed_at": "2026-11-24T08:02:22Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302580174",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085948,
+        "runner_name": "GitHub Actions 1000085948",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138302581327,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nqTw",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302581327",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302581327",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:02Z",
+        "completed_at": "2026-11-24T08:02:02Z",
+        "name": "Full Extension E2E (Edge)",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302581327",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 138302582091,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3ntSw",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302582091",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302582091",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:02:03Z",
+        "started_at": "2026-11-24T08:02:03Z",
+        "completed_at": "2026-11-24T08:02:02Z",
+        "name": "Published release upgrade and reimport",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302582091",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 138302637795,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3rG4w",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302637795",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302637795",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:02:10Z",
+        "started_at": "2026-11-24T08:02:10Z",
+        "completed_at": "2026-11-24T08:02:02Z",
+        "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302637795",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 138302651817,
+        "run_id": 45352630251,
+        "workflow_name": "CI",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630251",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3r9qQ",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302651817",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630251/job/138302651817",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:02:12Z",
+        "started_at": "2026-11-24T08:02:12Z",
+        "completed_at": "2026-11-24T08:02:02Z",
+        "name": "Firefox Android Installation Smoke (blocking)",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302651817",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      }
+    ]
+  }
+}

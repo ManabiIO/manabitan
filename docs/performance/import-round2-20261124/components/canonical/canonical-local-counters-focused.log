@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 test:unit
+> vitest run --maxWorkers=2 test/term-content-canonical-counters.test.js test/term-content-canonical-scan.test.js test/term-content-unique-metadata.test.js test/dictionary-database-canonical-epoch.test.js
+
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/canonical-local-counters
+
+
+ Test Files  4 passed (4)
+      Tests  59 passed (59)
+   Start at  03:00:26
+   Duration  2.33s (transform 1.49s, setup 45ms, import 2.02s, tests 1.71s, environment 0ms)
+

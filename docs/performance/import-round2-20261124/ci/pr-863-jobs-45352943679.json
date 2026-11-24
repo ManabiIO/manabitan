@@ -1,0 +1,162 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ebb0777114578c5cee879877274e7d872bfea27e",
+  "kind": "jobs-45352943679",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943679/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 138303638497,
+        "run_id": 45352943679,
+        "workflow_name": "ManabiTan static web acceptance",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943679",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oL4Q",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638497",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943679/job/138303638497",
+        "status": "in_progress",
+        "conclusion": null,
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:27Z",
+        "completed_at": null,
+        "name": "chromium",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:31Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:31Z",
+            "completed_at": "2026-11-24T08:04:37Z"
+          },
+          {
+            "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:37Z",
+            "completed_at": "2026-11-24T08:04:44Z"
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:44Z",
+            "completed_at": "2026-11-24T08:04:50Z"
+          },
+          {
+            "name": "Run npm run build:libs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:50Z",
+            "completed_at": "2026-11-24T08:04:51Z"
+          },
+          {
+            "name": "Run node web/build.mjs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:04:51Z",
+            "completed_at": "2026-11-24T08:04:51Z"
+          },
+          {
+            "name": "Run npm run test:ts:main && npm run test:ts:test && npx tsc -p web/tsconfig.json",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:51Z",
+            "completed_at": "2026-11-24T08:05:16Z"
+          },
+          {
+            "name": "Run npx vitest run test/reader-scanner-lifecycle.test.js test/dictionary-importer-shared-buffer.test.js test/term-content-opfs-store.test.js test/term-content-queued-cursor.test.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:16Z",
+            "completed_at": "2026-11-24T08:05:18Z"
+          },
+          {
+            "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:18Z",
+            "completed_at": "2026-11-24T08:05:19Z"
+          },
+          {
+            "name": "Prepare independently verified real dictionary fixtures",
+            "status": "in_progress",
+            "conclusion": null,
+            "number": 10,
+            "started_at": "2026-11-24T08:05:19Z",
+            "completed_at": null
+          },
+          {
+            "name": "Run real no-extension browser acceptance",
+            "status": "pending",
+            "conclusion": null,
+            "number": 11,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02",
+            "status": "pending",
+            "conclusion": null,
+            "number": 12,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "pending",
+            "conclusion": null,
+            "number": 22,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+            "status": "pending",
+            "conclusion": null,
+            "number": 23,
+            "started_at": null,
+            "completed_at": null
+          },
+          {
+            "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+            "status": "pending",
+            "conclusion": null,
+            "number": 24,
+            "started_at": null,
+            "completed_at": null
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638497",
+        "labels": [
+          "ubuntu-24.04"
+        ],
+        "runner_id": 1000085971,
+        "runner_name": "GitHub Actions 1000085971",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

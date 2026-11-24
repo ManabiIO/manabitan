@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "status": "complete local evidence; hosted browser results kept separately",
+  "sources": {
+    "baseline": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "runtimeLocal": "5d35b544a7bb2c74384df470e2f43faad52dde6e",
+    "finalLocal": "0eb65e80712eb31037792cc831f10b24b827ac7c",
+    "publishedPR": 864,
+    "publishedCommit": "d147a60fc4845e898d98d8924968d6094b417007",
+    "tree": "e3b9546229ac4118cc3e539678522446d74cff1d"
+  },
+  "files": [
+    {
+      "path": "canonical-local-counters-EVIDENCE.md",
+      "bytes": 7794,
+      "sha256": "e648ab504a1759cd6491b4366126c6d6becb4e0a8cd9e0e884446b4b3fc5678a"
+    },
+    {
+      "path": "canonical-local-counters-analysis.log",
+      "bytes": 1466,
+      "sha256": "b112da93f2155ad59928ebde69541a8adcf24d1c714d30f4d778452fe0a6b379"
+    },
+    {
+      "path": "canonical-local-counters-analyze.py",
+      "bytes": 5616,
+      "sha256": "781dfb8d9386b72163d816982a11e0745bb8964c6acffdc4cfbe0e426c5bddde"
+    },
+    {
+      "path": "canonical-local-counters-bench-jitendex-analysis.json",
+      "bytes": 11352,
+      "sha256": "9043fb0c66c482e0365e7f0873b77e6fafbbf544a51c399b9d46ee09957a4b3e"
+    },
+    {
+      "path": "canonical-local-counters-bench-jitendex.json",
+      "bytes": 382055,
+      "sha256": "9d4eebf0544a84b59f9e5cddacae5f2bd028ffd1a4576ac9f55065a6f8cc9efc"
+    },
+    {
+      "path": "canonical-local-counters-bench-jitendex.log",
+      "bytes": 517,
+      "sha256": "0d95a9fb530366de320565b6ef826034f4ccf626c4de840ddeb2459267f03f28"
+    },
+    {
+      "path": "canonical-local-counters-build-wasm.log",
+      "bytes": 650,
+      "sha256": "6900055dbf4a2fd50d6ad51f4b0ccd78182856178682fe9303b261dedc7a351d"
+    },
+    {
+      "path": "canonical-local-counters-build.log",
+      "bytes": 430,
+      "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+    },
+    {
+      "path": "canonical-local-counters-corpus.mjs",
+      "bytes": 14305,
+      "sha256": "f59d5cac796540fe583ee373d8941517b95117ca8b1f44653576cbbc3f0683b5"
+    },
+    {
+      "path": "canonical-local-counters-eslint-final.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    {
+      "path": "canonical-local-counters-eslint-fix.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    {
+      "path": "canonical-local-counters-eslint-style-final.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    {
+      "path": "canonical-local-counters-eslint.log",
+      "bytes": 5674,
+      "sha256": "f7842f819afbd13d22de6457e033a0f62e481066a9db398ccb93c8a593369130"
+    },
+    {
+      "path": "canonical-local-counters-focused-final.log",
+      "bytes": 627,
+      "sha256": "1f08bd53db9ce4caddca59c254bcc73063e5d4b8bf4c430900b56f1e0f07c140"
+    },
+    {
+      "path": "canonical-local-counters-focused.log",
+      "bytes": 627,
+      "sha256": "ad804c0627672b7aca9279758cd451d7f0e268ea743aa383d0180705aa8aefcd"
+    },
+    {
+      "path": "canonical-local-counters-full-unit.log",
+      "bytes": 13953,
+      "sha256": "863594e1526bd2aee32c07b82e5123dd6f166e50ccee9c28993d76f5d215728e"
+    },
+    {
+      "path": "canonical-local-counters-parity-jitendex.json",
+      "bytes": 52846,
+      "sha256": "93b187293ca567d6b1db8a22b82d09ee556fb2e285d18f14199426fa3c9b35da"
+    },
+    {
+      "path": "canonical-local-counters-parity-jitendex.log",
+      "bytes": 518,
+      "sha256": "eea7ac0baefc9a8b753ab8556e8fc9089064bffee956ce69d65634957b55e975"
+    },
+    {
+      "path": "canonical-local-counters-prettier.log",
+      "bytes": 150,
+      "sha256": "9aac3da9a7039a99c345545c32f286aa65c358d571bfce7e00d94625d095c829"
+    },
+    {
+      "path": "canonical-local-counters-types-test.log",
+      "bytes": 389,
+      "sha256": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a"
+    },
+    {
+      "path": "canonical-local-counters-wasm-check.log",
+      "bytes": 650,
+      "sha256": "4c035fa9b057fea44db303b3be4f2cbb39d3da08b5b596dcf79bcc86af7953cc"
+    }
+  ],
+  "fileCount": 21,
+  "totalBytes": 502151
+}

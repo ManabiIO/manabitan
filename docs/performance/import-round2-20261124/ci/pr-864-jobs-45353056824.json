@@ -1,0 +1,146 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "d147a60fc4845e898d98d8924968d6094b417007",
+  "kind": "jobs-45353056824",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45353056824/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 138304008652,
+        "run_id": 45353056824,
+        "workflow_name": "Chromium Restart Interruption",
+        "head_branch": "perf/canonical-local-counters-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45353056824",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4-xzA",
+        "head_sha": "d147a60fc4845e898d98d8924968d6094b417007",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138304008652",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45353056824/job/138304008652",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:05:09Z",
+        "started_at": "2026-11-24T08:05:16Z",
+        "completed_at": "2026-11-24T08:06:14Z",
+        "name": "Restart and interruption recovery (Chromium)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:05:16Z",
+            "completed_at": "2026-11-24T08:05:17Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:05:17Z",
+            "completed_at": "2026-11-24T08:05:19Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:05:19Z",
+            "completed_at": "2026-11-24T08:05:33Z"
+          },
+          {
+            "name": "Build stable-key Chromium package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:05:33Z",
+            "completed_at": "2026-11-24T08:05:36Z"
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:05:36Z",
+            "completed_at": "2026-11-24T08:05:52Z"
+          },
+          {
+            "name": "Test owned process-tree selection",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:05:52Z",
+            "completed_at": "2026-11-24T08:05:53Z"
+          },
+          {
+            "name": "Create fresh evidence directory",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:53Z",
+            "completed_at": "2026-11-24T08:05:53Z"
+          },
+          {
+            "name": "Run witnessed interruption recovery campaign",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:53Z",
+            "completed_at": "2026-11-24T08:06:07Z"
+          },
+          {
+            "name": "Enforce recovery report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:06:07Z",
+            "completed_at": "2026-11-24T08:06:07Z"
+          },
+          {
+            "name": "Upload restart interruption evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-24T08:06:07Z",
+            "completed_at": "2026-11-24T08:06:12Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-11-24T08:06:12Z",
+            "completed_at": "2026-11-24T08:06:12Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-24T08:06:12Z",
+            "completed_at": "2026-11-24T08:06:12Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-11-24T08:06:12Z",
+            "completed_at": "2026-11-24T08:06:12Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138304008652",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085983,
+        "runner_name": "GitHub Actions 1000085983",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

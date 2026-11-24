@@ -1,0 +1,82 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+  "kind": "jobs-45352630142",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630142/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 138302578568,
+        "run_id": 45352630142,
+        "workflow_name": "Lint GitHub Actions workflows",
+        "head_branch": "perf/monotonic-sequence-index-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352630142",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM3nfiA",
+        "head_sha": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138302578568",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352630142/job/138302578568",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:02:02Z",
+        "started_at": "2026-11-24T08:02:04Z",
+        "completed_at": "2026-11-24T08:02:11Z",
+        "name": "actionlint",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:05Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:02:05Z",
+            "completed_at": "2026-11-24T08:02:08Z"
+          },
+          {
+            "name": "Check workflow files",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:02:08Z",
+            "completed_at": "2026-11-24T08:02:09Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:02:09Z",
+            "completed_at": "2026-11-24T08:02:10Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:02:10Z",
+            "completed_at": "2026-11-24T08:02:10Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138302578568",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085933,
+        "runner_name": "GitHub Actions 1000085933",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

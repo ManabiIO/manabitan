@@ -1,0 +1,977 @@
+{
+  "schemaVersion": 1,
+  "sourceHead": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+  "candidateCommit": "cc4a0a73fef29c418b1f8d894648c1e9f2c2a230",
+  "node": "v24.22.3",
+  "scriptSha256": "5d9571aad73762f9c150fdb5e407ea6d58580fe27493ea8f2ff524f65e61af08",
+  "moduleSha256": {
+    "A": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+    "B": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+    "C": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+  },
+  "scope": "Diagnostic local native lookup encoder only, 24 resident calls per observation, 12 balanced ABC blocks. First four banks of each verified locked corpus; synthetic adversarial controls reuse JMdict keys with changed sequences. Source I/O, parsing, allocation, WASM compilation, warmups and byte verification excluded. Not full parser or complete-import timing; host contention is not controlled.",
+  "iterations": 24,
+  "blockCount": 12,
+  "fixtures": [
+    {
+      "name": "jmdict-first-four-banks",
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 3224558,
+          "sha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 2724994,
+          "sha256": "854a5035492d01270b134c85cfdf82a7928ea3d50812d43bcb21eb3ad0d33584"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 2716299,
+          "sha256": "6e508b4b9e013723a11a72bc294ed4013ab8a927437018e26a11a23873067594"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 2672529,
+          "sha256": "33d438665d64cd3da81c8228fcc9a4aecab6efae7ca6d4008f75c767d0f3d1e1"
+        }
+      ],
+      "rows": 40000,
+      "keys": 22347,
+      "indexBytes": 1126568,
+      "indexSha256": "4f764ae508f9a6c70f5f4f13197fee3d9223cbafeba728a3452d2e4a630965bd",
+      "heapBytes": {
+        "A": 4653056,
+        "B": 4653056,
+        "C": 4653056
+      },
+      "observations": [
+        {
+          "block": 0,
+          "order": "ABC",
+          "times": {
+            "A": 13.323624999999993,
+            "B": 12.738354000000072,
+            "C": 13.005526999999347
+          }
+        },
+        {
+          "block": 1,
+          "order": "ACB",
+          "times": {
+            "A": 13.746172999999544,
+            "C": 13.47359200000028,
+            "B": 13.15054499999951
+          }
+        },
+        {
+          "block": 2,
+          "order": "BAC",
+          "times": {
+            "B": 13.059527999999773,
+            "A": 13.541755000000194,
+            "C": 13.290006000000176
+          }
+        },
+        {
+          "block": 3,
+          "order": "BCA",
+          "times": {
+            "B": 13.251917999999932,
+            "C": 13.4966459999996,
+            "A": 13.247772000000623
+          }
+        },
+        {
+          "block": 4,
+          "order": "CAB",
+          "times": {
+            "C": 12.940629000000627,
+            "A": 13.005497000000105,
+            "B": 13.365448999999899
+          }
+        },
+        {
+          "block": 5,
+          "order": "CBA",
+          "times": {
+            "C": 13.620492999999442,
+            "B": 12.646736000000601,
+            "A": 13.902246999999988
+          }
+        },
+        {
+          "block": 6,
+          "order": "ABC",
+          "times": {
+            "A": 13.631319000000076,
+            "B": 13.048139999999876,
+            "C": 14.43046299999969
+          }
+        },
+        {
+          "block": 7,
+          "order": "ACB",
+          "times": {
+            "A": 13.563447000000451,
+            "C": 13.504708000000392,
+            "B": 12.782531000000745
+          }
+        },
+        {
+          "block": 8,
+          "order": "BAC",
+          "times": {
+            "B": 12.41909300000043,
+            "A": 13.66965700000037,
+            "C": 13.27943900000082
+          }
+        },
+        {
+          "block": 9,
+          "order": "BCA",
+          "times": {
+            "B": 13.33029499999975,
+            "C": 13.030734999999368,
+            "A": 13.332929999999578
+          }
+        },
+        {
+          "block": 10,
+          "order": "CAB",
+          "times": {
+            "C": 13.070104000000356,
+            "A": 12.956873000000087,
+            "B": 13.433791000000383
+          }
+        },
+        {
+          "block": 11,
+          "order": "CBA",
+          "times": {
+            "C": 13.700874000000113,
+            "B": 17.24254000000019,
+            "A": 13.980395999999928
+          }
+        }
+      ],
+      "stats": {
+        "B/A": {
+          "medianPairedPercent": -3.9196331910397175,
+          "equalWorkPercent": -0.8849635795340594
+        },
+        "B/C": {
+          "medianPairedPercent": -1.9337770100170293,
+          "equalWorkPercent": -0.23270860239392732
+        },
+        "C/A": {
+          "medianPairedPercent": -1.9210082980154197,
+          "equalWorkPercent": -0.6537763709958511
+        }
+      }
+    },
+    {
+      "name": "jitendex-first-four-banks",
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 4919597,
+          "sha256": "ffc608e5a6df35604eca6c9fd16748710e9ce7f029156a72ffcc0acaa79ed20b"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 3869166,
+          "sha256": "085d4b9ee3fa3fbf95d4c38da7d243d79440615cd48511fc60e8b0eca4b92dd9"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 2692980,
+          "sha256": "1c6e2c0c5a0d2b796c98de3d94fe6074c1949c6b7a55d89113fa1dee73f6692a"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 2722465,
+          "sha256": "b0a6100cce82cec784e972ab2a3d0a79dd2f853df6f5671093906a806dbea2b0"
+        }
+      ],
+      "rows": 8000,
+      "keys": 8489,
+      "indexBytes": 337444,
+      "indexSha256": "760a9689b0446b8a2f407f9a22e5fed56140917e753de208bf57937d24bbcbda",
+      "heapBytes": {
+        "A": 1179648,
+        "B": 1179648,
+        "C": 1179648
+      },
+      "observations": [
+        {
+          "block": 0,
+          "order": "ABC",
+          "times": {
+            "A": 2.8049670000000333,
+            "B": 2.8323780000000625,
+            "C": 2.9675710000001345
+          }
+        },
+        {
+          "block": 1,
+          "order": "ACB",
+          "times": {
+            "A": 2.9195789999994304,
+            "C": 2.87600300000031,
+            "B": 2.862753999999768
+          }
+        },
+        {
+          "block": 2,
+          "order": "BAC",
+          "times": {
+            "B": 2.7662880000007135,
+            "A": 3.0513569999993706,
+            "C": 2.9771759999994174
+          }
+        },
+        {
+          "block": 3,
+          "order": "BCA",
+          "times": {
+            "B": 2.9382470000000467,
+            "C": 3.095433999999841,
+            "A": 3.0352240000001984
+          }
+        },
+        {
+          "block": 4,
+          "order": "CAB",
+          "times": {
+            "C": 2.968793000000005,
+            "A": 2.9040960000002087,
+            "B": 3.048934000000372
+          }
+        },
+        {
+          "block": 5,
+          "order": "CBA",
+          "times": {
+            "C": 3.206571000000622,
+            "B": 3.4106790000005276,
+            "A": 2.994582999999693
+          }
+        },
+        {
+          "block": 6,
+          "order": "ABC",
+          "times": {
+            "A": 2.9652879999994184,
+            "B": 2.98919400000068,
+            "C": 3.173461999999745
+          }
+        },
+        {
+          "block": 7,
+          "order": "ACB",
+          "times": {
+            "A": 2.8434940000006463,
+            "C": 2.8387069999998857,
+            "B": 3.2568869999995513
+          }
+        },
+        {
+          "block": 8,
+          "order": "BAC",
+          "times": {
+            "B": 2.7917859999997745,
+            "A": 3.0366659999999683,
+            "C": 3.047722000000249
+          }
+        },
+        {
+          "block": 9,
+          "order": "BCA",
+          "times": {
+            "B": 3.062463999999636,
+            "C": 3.190747999999985,
+            "A": 2.98188300000038
+          }
+        },
+        {
+          "block": 10,
+          "order": "CAB",
+          "times": {
+            "C": 2.8933900000001813,
+            "A": 2.9019930000004024,
+            "B": 2.923735999999735
+          }
+        },
+        {
+          "block": 11,
+          "order": "CBA",
+          "times": {
+            "C": 3.7587830000002214,
+            "B": 2.9553930000001856,
+            "A": 3.250869000000421
+          }
+        }
+      ],
+      "stats": {
+        "B/A": {
+          "medianPairedPercent": 0.7777192941537558,
+          "equalWorkPercent": 0.416758207252621
+        },
+        "B/C": {
+          "medianPairedPercent": -4.288088985030325,
+          "equalWorkPercent": -3.1237734616831436
+        },
+        "C/A": {
+          "medianPairedPercent": 2.105746548419596,
+          "equalWorkPercent": 3.654696095677723
+        }
+      }
+    },
+    {
+      "name": "vndb-first-four-banks",
+      "dictionary": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "banks": [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 6736363,
+          "sha256": "5de77aab89f627f5f9a75d4773b9723c32c12c5eb79207b4522ddb21cf6f3354"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 6737115,
+          "sha256": "bb94f252ed33067ca28477d37faac0bd3ac7fea9eee667ad72164226ab0f9de6"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 6641252,
+          "sha256": "764f2dac2de706326c79cc3ebb44510fec1cf4c9e132aa72e048e6617bb52c21"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 6692824,
+          "sha256": "52b5d2120fea1fc8336342ec6de3dbd916bd6a93b42b07ca5c1e166c48491fdf"
+        }
+      ],
+      "rows": 40000,
+      "keys": 57625,
+      "indexBytes": 2054468,
+      "indexSha256": "4ed68a6944e5934f0fd767b7777351f54faa05f098a9d65b7edb8a65964fd7bb",
+      "heapBytes": {
+        "A": 6356992,
+        "B": 6356992,
+        "C": 6356992
+      },
+      "observations": [
+        {
+          "block": 0,
+          "order": "ABC",
+          "times": {
+            "A": 16.368915000000015,
+            "B": 15.804063999999926,
+            "C": 16.285047999999733
+          }
+        },
+        {
+          "block": 1,
+          "order": "ACB",
+          "times": {
+            "A": 16.466261000000486,
+            "C": 15.95639300000039,
+            "B": 15.635739999999714
+          }
+        },
+        {
+          "block": 2,
+          "order": "BAC",
+          "times": {
+            "B": 16.067509999999857,
+            "A": 15.774710000000596,
+            "C": 15.211860999999772
+          }
+        },
+        {
+          "block": 3,
+          "order": "BCA",
+          "times": {
+            "B": 16.57905099999971,
+            "C": 15.185582000000068,
+            "A": 14.985359000000244
+          }
+        },
+        {
+          "block": 4,
+          "order": "CAB",
+          "times": {
+            "C": 15.514385999999831,
+            "A": 15.09492500000033,
+            "B": 15.349938999999722
+          }
+        },
+        {
+          "block": 5,
+          "order": "CBA",
+          "times": {
+            "C": 14.988884999999755,
+            "B": 16.4269519999998,
+            "A": 14.994423000000097
+          }
+        },
+        {
+          "block": 6,
+          "order": "ABC",
+          "times": {
+            "A": 14.998959999999897,
+            "B": 16.21169800000007,
+            "C": 15.365191999999297
+          }
+        },
+        {
+          "block": 7,
+          "order": "ACB",
+          "times": {
+            "A": 15.553045000000566,
+            "C": 15.844755000000077,
+            "B": 15.912355999999818
+          }
+        },
+        {
+          "block": 8,
+          "order": "BAC",
+          "times": {
+            "B": 15.249847999999474,
+            "A": 15.536690000000817,
+            "C": 16.829647999999906
+          }
+        },
+        {
+          "block": 9,
+          "order": "BCA",
+          "times": {
+            "B": 15.31793099999959,
+            "C": 15.64638500000001,
+            "A": 15.441356999999698
+          }
+        },
+        {
+          "block": 10,
+          "order": "CAB",
+          "times": {
+            "C": 15.519846000000143,
+            "A": 21.14181699999972,
+            "B": 22.006725000000188
+          }
+        },
+        {
+          "block": 11,
+          "order": "CBA",
+          "times": {
+            "C": 16.480142000000342,
+            "B": 16.602927999999338,
+            "A": 16.250275999999758
+          }
+        }
+      ],
+      "stats": {
+        "B/A": {
+          "medianPairedPercent": 2.0131324218182867,
+          "equalWorkPercent": 2.3664821113345003
+        },
+        "B/C": {
+          "medianPairedPercent": 0.585850087580253,
+          "equalWorkPercent": 4.414924465461056
+        },
+        "C/A": {
+          "medianPairedPercent": 1.331954501746535,
+          "equalWorkPercent": -1.961829082014177
+        }
+      }
+    },
+    {
+      "name": "synthetic-descending-control",
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 3224558,
+          "sha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 2724994,
+          "sha256": "854a5035492d01270b134c85cfdf82a7928ea3d50812d43bcb21eb3ad0d33584"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 2716299,
+          "sha256": "6e508b4b9e013723a11a72bc294ed4013ab8a927437018e26a11a23873067594"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 2672529,
+          "sha256": "33d438665d64cd3da81c8228fcc9a4aecab6efae7ca6d4008f75c767d0f3d1e1"
+        }
+      ],
+      "rows": 40000,
+      "keys": 22347,
+      "indexBytes": 1374168,
+      "indexSha256": "f5033a3aa63b763752eafe2726276e7a96c3116c7935633f6d24e7757de25bb6",
+      "heapBytes": {
+        "A": 4653056,
+        "B": 4653056,
+        "C": 4653056
+      },
+      "observations": [
+        {
+          "block": 0,
+          "order": "ABC",
+          "times": {
+            "A": 24.513316999999915,
+            "B": 23.56586900000002,
+            "C": 22.728056999999353
+          }
+        },
+        {
+          "block": 1,
+          "order": "ACB",
+          "times": {
+            "A": 22.313952999999856,
+            "C": 20.150133000000096,
+            "B": 23.267138999999588
+          }
+        },
+        {
+          "block": 2,
+          "order": "BAC",
+          "times": {
+            "B": 24.009237000000212,
+            "A": 23.29688399999941,
+            "C": 23.315240999999332
+          }
+        },
+        {
+          "block": 3,
+          "order": "BCA",
+          "times": {
+            "B": 19.660155000000486,
+            "C": 14.833201000000372,
+            "A": 19.21738699999969
+          }
+        },
+        {
+          "block": 4,
+          "order": "CAB",
+          "times": {
+            "C": 17.603054000000157,
+            "A": 16.883209999999963,
+            "B": 15.763872999999876
+          }
+        },
+        {
+          "block": 5,
+          "order": "CBA",
+          "times": {
+            "C": 16.096574999999575,
+            "B": 17.27709800000048,
+            "A": 16.556397999999717
+          }
+        },
+        {
+          "block": 6,
+          "order": "ABC",
+          "times": {
+            "A": 15.567756999999801,
+            "B": 15.105601000000206,
+            "C": 15.81290699999954
+          }
+        },
+        {
+          "block": 7,
+          "order": "ACB",
+          "times": {
+            "A": 16.733283999999912,
+            "C": 15.889562999999725,
+            "B": 15.52147800000057
+          }
+        },
+        {
+          "block": 8,
+          "order": "BAC",
+          "times": {
+            "B": 15.302107999999862,
+            "A": 15.0815649999995,
+            "C": 15.461857999999665
+          }
+        },
+        {
+          "block": 9,
+          "order": "BCA",
+          "times": {
+            "B": 24.675948000000062,
+            "C": 16.712843000000248,
+            "A": 16.133749999999964
+          }
+        },
+        {
+          "block": 10,
+          "order": "CAB",
+          "times": {
+            "C": 16.208443000000443,
+            "A": 16.858381999999438,
+            "B": 15.206834000000526
+          }
+        },
+        {
+          "block": 11,
+          "order": "CBA",
+          "times": {
+            "C": 17.226477999999588,
+            "B": 15.788179000000127,
+            "A": 16.409185999999863
+          }
+        }
+      ],
+      "stats": {
+        "B/A": {
+          "medianPairedPercent": -0.7531696580638736,
+          "equalWorkPercent": 2.5406800470515023
+        },
+        "B/C": {
+          "medianPairedPercent": 0.9716944818503215,
+          "equalWorkPercent": 6.180563947317608
+        },
+        "C/A": {
+          "medianPairedPercent": -1.3492585454561445,
+          "equalWorkPercent": -3.428013343451508
+        }
+      }
+    },
+    {
+      "name": "synthetic-late-decrease-control",
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 3224558,
+          "sha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 2724994,
+          "sha256": "854a5035492d01270b134c85cfdf82a7928ea3d50812d43bcb21eb3ad0d33584"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 2716299,
+          "sha256": "6e508b4b9e013723a11a72bc294ed4013ab8a927437018e26a11a23873067594"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 2672529,
+          "sha256": "33d438665d64cd3da81c8228fcc9a4aecab6efae7ca6d4008f75c767d0f3d1e1"
+        }
+      ],
+      "rows": 40000,
+      "keys": 22347,
+      "indexBytes": 1374148,
+      "indexSha256": "1167a7080f3baff62ecf5b854d37e31bcb3f26495181d586918353f0d89f97c5",
+      "heapBytes": {
+        "A": 4653056,
+        "B": 4653056,
+        "C": 4653056
+      },
+      "observations": [
+        {
+          "block": 0,
+          "order": "ABC",
+          "times": {
+            "A": 15.307756000000154,
+            "B": 16.28454800000054,
+            "C": 16.13444200000049
+          }
+        },
+        {
+          "block": 1,
+          "order": "ACB",
+          "times": {
+            "A": 16.317747000000054,
+            "C": 15.70245100000011,
+            "B": 20.042630999999346
+          }
+        },
+        {
+          "block": 2,
+          "order": "BAC",
+          "times": {
+            "B": 16.520614000000023,
+            "A": 15.65581099999963,
+            "C": 16.845702999999958
+          }
+        },
+        {
+          "block": 3,
+          "order": "BCA",
+          "times": {
+            "B": 17.184775000000627,
+            "C": 17.138304000000062,
+            "A": 16.935207999999875
+          }
+        },
+        {
+          "block": 4,
+          "order": "CAB",
+          "times": {
+            "C": 15.594548000000032,
+            "A": 15.302337999999509,
+            "B": 16.977270999999746
+          }
+        },
+        {
+          "block": 5,
+          "order": "CBA",
+          "times": {
+            "C": 20.664764000000105,
+            "B": 19.649507999999514,
+            "A": 21.20339899999999
+          }
+        },
+        {
+          "block": 6,
+          "order": "ABC",
+          "times": {
+            "A": 23.008598999999776,
+            "B": 24.716502999999648,
+            "C": 22.833957000000737
+          }
+        },
+        {
+          "block": 7,
+          "order": "ACB",
+          "times": {
+            "A": 21.02750500000002,
+            "C": 14.893971999999849,
+            "B": 17.234870000000228
+          }
+        },
+        {
+          "block": 8,
+          "order": "BAC",
+          "times": {
+            "B": 19.19914400000016,
+            "A": 19.08967500000017,
+            "C": 17.343332999999802
+          }
+        },
+        {
+          "block": 9,
+          "order": "BCA",
+          "times": {
+            "B": 17.50155199999972,
+            "C": 16.583638000000064,
+            "A": 16.55974199999946
+          }
+        },
+        {
+          "block": 10,
+          "order": "CAB",
+          "times": {
+            "C": 18.019021000000066,
+            "A": 16.392029999999977,
+            "B": 18.331953000000794
+          }
+        },
+        {
+          "block": 11,
+          "order": "CBA",
+          "times": {
+            "C": 15.827830000000176,
+            "B": 17.212665999999444,
+            "A": 15.845757000000049
+          }
+        }
+      ],
+      "stats": {
+        "B/A": {
+          "medianPairedPercent": 6.03418688872962,
+          "equalWorkPercent": 3.8611047085694405
+        },
+        "B/C": {
+          "medianPairedPercent": 6.889779963869435,
+          "equalWorkPercent": 6.394617243309453
+        },
+        "C/A": {
+          "medianPairedPercent": 0.01558368919593045,
+          "equalWorkPercent": -2.381241269890777
+        }
+      }
+    },
+    {
+      "name": "synthetic-shuffled-control",
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": [
+        {
+          "name": "term_bank_1.json",
+          "bytes": 3224558,
+          "sha256": "865075ad8393ebe4c64befebfadd35ad4db32b0669f4a8a1619db79277a6485c"
+        },
+        {
+          "name": "term_bank_2.json",
+          "bytes": 2724994,
+          "sha256": "854a5035492d01270b134c85cfdf82a7928ea3d50812d43bcb21eb3ad0d33584"
+        },
+        {
+          "name": "term_bank_3.json",
+          "bytes": 2716299,
+          "sha256": "6e508b4b9e013723a11a72bc294ed4013ab8a927437018e26a11a23873067594"
+        },
+        {
+          "name": "term_bank_4.json",
+          "bytes": 2672529,
+          "sha256": "33d438665d64cd3da81c8228fcc9a4aecab6efae7ca6d4008f75c767d0f3d1e1"
+        }
+      ],
+      "rows": 40000,
+      "keys": 22347,
+      "indexBytes": 1374168,
+      "indexSha256": "ef22c352d8adeaa2fdf229c79dd2d714f416440b3b0c7247470dd2f66ac7e6da",
+      "heapBytes": {
+        "A": 4653056,
+        "B": 4653056,
+        "C": 4653056
+      },
+      "observations": [
+        {
+          "block": 0,
+          "order": "ABC",
+          "times": {
+            "A": 15.737332999999126,
+            "B": 16.107562000000144,
+            "C": 15.920309000000088
+          }
+        },
+        {
+          "block": 1,
+          "order": "ACB",
+          "times": {
+            "A": 16.600924000000305,
+            "C": 16.730054000000564,
+            "B": 15.921860999999808
+          }
+        },
+        {
+          "block": 2,
+          "order": "BAC",
+          "times": {
+            "B": 16.22646999999961,
+            "A": 16.52542100000028,
+            "C": 23.04595100000006
+          }
+        },
+        {
+          "block": 3,
+          "order": "BCA",
+          "times": {
+            "B": 25.687967000000754,
+            "C": 23.419418999999834,
+            "A": 15.072911999999633
+          }
+        },
+        {
+          "block": 4,
+          "order": "CAB",
+          "times": {
+            "C": 14.800360999999612,
+            "A": 14.94737299999997,
+            "B": 15.675459999999475
+          }
+        },
+        {
+          "block": 5,
+          "order": "CBA",
+          "times": {
+            "C": 17.18797899999936,
+            "B": 40.573537000000215,
+            "A": 36.776936000000205
+          }
+        },
+        {
+          "block": 6,
+          "order": "ABC",
+          "times": {
+            "A": 65.35907399999996,
+            "B": 22.819995999999264,
+            "C": 19.668987999999445
+          }
+        },
+        {
+          "block": 7,
+          "order": "ACB",
+          "times": {
+            "A": 17.81588499999998,
+            "C": 16.44114300000001,
+            "B": 18.11787000000004
+          }
+        },
+        {
+          "block": 8,
+          "order": "BAC",
+          "times": {
+            "B": 16.984551999999894,
+            "A": 16.29113799999959,
+            "C": 15.716652000000067
+          }
+        },
+        {
+          "block": 9,
+          "order": "BCA",
+          "times": {
+            "B": 16.099428000000444,
+            "C": 22.336057000000437,
+            "A": 23.425137000000177
+          }
+        },
+        {
+          "block": 10,
+          "order": "CAB",
+          "times": {
+            "C": 22.61966399999983,
+            "A": 16.712553000000298,
+            "B": 16.612200999999914
+          }
+        },
+        {
+          "block": 11,
+          "order": "CBA",
+          "times": {
+            "C": 15.119092000000819,
+            "B": 15.852107000000615,
+            "A": 16.133339999998498
+          }
+        }
+      ],
+      "stats": {
+        "B/A": {
+          "medianPairedPercent": 0.5472867207974685,
+          "equalWorkPercent": -12.792655684237776
+        },
+        "B/C": {
+          "medianPairedPercent": 5.380480408326349,
+          "equalWorkPercent": 6.131387628536045
+        },
+        "C/A": {
+          "medianPairedPercent": -2.2549509466562423,
+          "equalWorkPercent": -17.830769705008187
+        }
+      }
+    }
+  ]
+}

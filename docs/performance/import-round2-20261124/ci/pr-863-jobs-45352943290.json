@@ -1,0 +1,114 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ebb0777114578c5cee879877274e7d872bfea27e",
+  "kind": "jobs-45352943290",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943290/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 1,
+    "jobs": [
+      {
+        "id": 138303637005,
+        "run_id": 45352943290,
+        "workflow_name": "Dependency Review",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943290",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oGDQ",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303637005",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943290/job/138303637005",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:21Z",
+        "completed_at": "2026-11-24T08:04:31Z",
+        "name": "dependency-review",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Pre Harden Runner",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Check dependency graph availability",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Dependency review unavailable",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Harden Runner",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Checkout Repository",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 6,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Dependency Review",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Post Harden Runner",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:30Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-24T08:04:30Z",
+            "completed_at": "2026-11-24T08:04:30Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303637005",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085959,
+        "runner_name": "GitHub Actions 1000085959",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      }
+    ]
+  }
+}

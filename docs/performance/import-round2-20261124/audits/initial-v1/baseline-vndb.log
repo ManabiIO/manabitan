@@ -1,0 +1,54 @@
+{
+  "status": "passed",
+  "stage": "baseline",
+  "dictionary": "vndb",
+  "sourceIdentities": {
+    "A": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "C": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    }
+  },
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "browserVersion": "153.0.8010.12",
+  "attemptedObservations": 4,
+  "lookupReceipts": 288,
+  "exhaustiveDiagnostics": 1,
+  "changedPackageMembers": [],
+  "comparisons": {},
+  "observations": [
+    {
+      "name": "baseline-01-A",
+      "arm": "A",
+      "totalImportMs": 4843.5,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "baseline-02-A",
+      "arm": "A",
+      "totalImportMs": 4842.599999999977,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "baseline-03-A",
+      "arm": "A",
+      "totalImportMs": 4789.900000000023,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "diagnostic-A",
+      "arm": "A",
+      "totalImportMs": 4657.599999999977,
+      "mediaMode": "all",
+      "lookupReceipts": 72
+    }
+  ],
+  "limits": "Full inventory and media identity; 12 sampled terms over six lookup passes. This audit does not prove all-term semantics or process peak memory. Baselines and screens establish no speedup."
+}
+

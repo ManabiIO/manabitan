@@ -1,0 +1,2042 @@
+{
+  "schema": 1,
+  "mode": "parity",
+  "complete": true,
+  "node": "v24.22.3",
+  "v8": "13.6.233.17-node.63",
+  "host": {
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "availableParallelism": 9,
+    "startLoad": [
+      3.58,
+      1.72,
+      0.77
+    ],
+    "totalMemory": 10451427328,
+    "endLoad": [
+      5.32,
+      2.15,
+      0.93
+    ]
+  },
+  "limitations": "Local component timings can overlap concurrent validation on this shared host. They are exploratory, not an isolated hosted whole-import result or a memory measurement.",
+  "scope": "Native canonical scan only. Production parser output and metadata-owner state captured at the pre-call hook, with four-bank component partitions. Each arm resets an independent memory to the complete identical snapshot outside timing. All source banks are included; ZIP inflation, parser, copy/adoption, byte-exact matching, compression, storage and UI are outside the timed kernel. This is not a whole-import benchmark.",
+  "sources": {
+    "baselineCommit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "baselineWasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+    "candidateWasm": "04fdb51271a20d9152b8655f33b3e6fa36a4048380ba69010a5288761143c9f0",
+    "candidateC": "e08f021555b05af151baeb531c61855524a8410809cce683ed853e8e87312366",
+    "candidateHashes": {
+      "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c": "e08f021555b05af151baeb531c61855524a8410809cce683ed853e8e87312366",
+      "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "ext/js/dictionary/term-content-canonical-layout.js": "0d3515f414f79c24865cfb998e167d3d5bd387fb90253076ada4800aa2885b8c",
+      "dev/data/dictionary-wasm/manifest.json": "07b3ee3a18f40ef5ac349f31c6becd2a835963397eaf5c1961c66b91b7c06aa8",
+      "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm": "04fdb51271a20d9152b8655f33b3e6fa36a4048380ba69010a5288761143c9f0",
+      "dev/data/dictionary-wasm/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+    },
+    "harness": "f59d5cac796540fe583ee373d8941517b95117ca8b1f44653576cbbc3f0683b5"
+  },
+  "schedule": [
+    {
+      "warmup": false,
+      "order": [
+        "A",
+        "B"
+      ]
+    }
+  ],
+  "dictionaries": [
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "rows": 436555,
+      "uniqueRows": 363281,
+      "pendingRows": 363243,
+      "exactRows": 38,
+      "fallbackGroups": [],
+      "calls": [
+        {
+          "inputSha256": "260cdc39e4f511bf429bacfbb35662b9f77dafd73fae22e1a79ffaa68310cb8a",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5832,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 1.0091000000001031,
+                "B": 1.233838999999989
+              },
+              "cpuMicros": {
+                "A": 1133,
+                "B": 1152
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5832,
+            5832,
+            5832,
+            0,
+            0,
+            5832,
+            0
+          ],
+          "outputSha256": "163be50521b4cee6ac5c46297ef0ba80f8834edab96eb09b0ae351ba4de5379f"
+        },
+        {
+          "inputSha256": "9159267fb287c91ef79bb1429157ffb7ce683f59eef9a4b2a398ae1b63a97a72",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5917,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.4905989999999747,
+                "B": 0.9467459999998482
+              },
+              "cpuMicros": {
+                "A": 529,
+                "B": 969
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5916,
+            5917,
+            5916,
+            1,
+            0,
+            11748,
+            0
+          ],
+          "outputSha256": "98a93620340928ca9f5c2f02f06c42b0079a41bab1f7e601b9fa22a9ec4a87d8"
+        },
+        {
+          "inputSha256": "1bdb28da497a0cf931820d5d381bf148d7026df5862ed5d08fc750b2d0879097",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6081,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6862740000001395,
+                "B": 0.6386520000000928
+              },
+              "cpuMicros": {
+                "A": 775,
+                "B": 4654
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6081,
+            6081,
+            6081,
+            0,
+            0,
+            17829,
+            0
+          ],
+          "outputSha256": "24188a6014996a2013e3b5eff12154c8d4cd051b6cf65d607bf8fe545ebd2c2a"
+        },
+        {
+          "inputSha256": "969742e8040537b3d212a29f23a3a65a8c098909eea7f601adf69cd243f62cf7",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7115,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6729740000000675,
+                "B": 0.613734999999906
+              },
+              "cpuMicros": {
+                "A": 794,
+                "B": 629
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7114,
+            7115,
+            7114,
+            1,
+            0,
+            24943,
+            0
+          ],
+          "outputSha256": "17675f84e477a13983558fb847a784a0b91d46eb686cff12c841cadbff57ba8b"
+        },
+        {
+          "inputSha256": "a074447786ca7cf9a7eb3b9906c57a670b8ed8e5469167c1c89da3f2d3a6193e",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7245,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7556680000000142,
+                "B": 0.7372609999999895
+              },
+              "cpuMicros": {
+                "A": 707,
+                "B": 774
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7245,
+            7245,
+            7245,
+            0,
+            0,
+            32188,
+            0
+          ],
+          "outputSha256": "95d8f952ecb3528bd3d2fd0ddb5808aee449f83446359e9bb891d6ad9fb95d32"
+        },
+        {
+          "inputSha256": "fa846f6724ceea187827ecafd913450c02218d9b62485acdf8a79e2c249d4866",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7309,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.631640999999945,
+                "B": 0.6316719999999805
+              },
+              "cpuMicros": {
+                "A": 787,
+                "B": 645
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7309,
+            7309,
+            7309,
+            0,
+            0,
+            39497,
+            0
+          ],
+          "outputSha256": "7f05fa6eb1ca072ad70c2ab3ac3dfac71861689bd6887491e4ac1b5456b84d75"
+        },
+        {
+          "inputSha256": "6fed36fe72e6a6972f0e79dba6abea198be65d48ae806ad0f2b39e855c1aaefe",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7188,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7689190000000963,
+                "B": 0.6205150000000685
+              },
+              "cpuMicros": {
+                "A": 798,
+                "B": 657
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7188,
+            7188,
+            7188,
+            0,
+            0,
+            46685,
+            0
+          ],
+          "outputSha256": "076eb9ddeedfed86cdd8f41200fe5f22c2c16449c98db5db12c682d05160daf1"
+        },
+        {
+          "inputSha256": "ed40df6523f8ada9509f0142e49ff1608961d154a22e79ab8d0a8a8197e5201b",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7232,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7287780000001476,
+                "B": 0.6334140000003572
+              },
+              "cpuMicros": {
+                "A": 771,
+                "B": 645
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7232,
+            7232,
+            7232,
+            0,
+            0,
+            53917,
+            0
+          ],
+          "outputSha256": "d3d54886085f251b8b5c103836d17ed98dc916aa17145feb0069d57e75f80c66"
+        },
+        {
+          "inputSha256": "71515a21978c6d8e5022e39cc784388fce3af42067f3d5e0a8d095a04b82f68f",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7122,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.686725000000024,
+                "B": 0.6565600000003542
+              },
+              "cpuMicros": {
+                "A": 676,
+                "B": 668
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7122,
+            7122,
+            7122,
+            0,
+            0,
+            61039,
+            0
+          ],
+          "outputSha256": "eb31e7744fb75f36d115e1623955848704cc89a106c5e92dfd90e76721ff2934"
+        },
+        {
+          "inputSha256": "59657783adf827221aa32d2368b865d875e0ffdcb60476759ffb7602afb3663c",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7313,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8799959999996645,
+                "B": 0.9662760000001072
+              },
+              "cpuMicros": {
+                "A": 910,
+                "B": 987
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7312,
+            7313,
+            7312,
+            1,
+            0,
+            68351,
+            0
+          ],
+          "outputSha256": "3894a26783c1ecc224627ca28e6049c98e35a621af2968c438bfd17d6aadbe94"
+        },
+        {
+          "inputSha256": "df2b5a45ee9921413209cc0edfbb0ef75ce8a2b3309be1ba0f0fc04f5bb1fdd1",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7166,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7391640000000734,
+                "B": 0.6386919999999918
+              },
+              "cpuMicros": {
+                "A": 766,
+                "B": 656
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7165,
+            7166,
+            7165,
+            1,
+            0,
+            75516,
+            0
+          ],
+          "outputSha256": "aa3216b3e39cda49b48bebb41f094021a363fdd0e3514765cf0f969fe58a2ecc"
+        },
+        {
+          "inputSha256": "f13543295bb86235a8ddeac744a4df33597c2380248ce453cb7837eb163d7eb9",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7246,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7612370000001647,
+                "B": 0.8480170000002545
+              },
+              "cpuMicros": {
+                "A": 789,
+                "B": 866
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7246,
+            7246,
+            7246,
+            0,
+            0,
+            82762,
+            0
+          ],
+          "outputSha256": "d68b82a5a4ba836a12f8b257cd715c744c097061155c031769ced62fc49a437c"
+        },
+        {
+          "inputSha256": "ff8eed900fc4bb6a740a3c83115094dc15aae5f70246219fa376a880218c50cd",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7151,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8045019999999568,
+                "B": 1.2488119999998162
+              },
+              "cpuMicros": {
+                "A": 830,
+                "B": 1264
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7151,
+            7151,
+            7151,
+            0,
+            0,
+            89913,
+            0
+          ],
+          "outputSha256": "e16ffcae19cd0c7289dea8ed818006f621cfffed1c7128b25d544e3474afec24"
+        },
+        {
+          "inputSha256": "e4fd9df5eae6a4c3591b51fb3294389920594b12b503aaaeda279ee7f7e58a54",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5565,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6720720000002984,
+                "B": 0.5982719999997244
+              },
+              "cpuMicros": {
+                "A": 715,
+                "B": 609
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5564,
+            5565,
+            5564,
+            1,
+            0,
+            95477,
+            0
+          ],
+          "outputSha256": "b4f7b9e8beb00a1d4c0031aa9eb3e421c81f9410f0a7694b150d6ed3a756755e"
+        },
+        {
+          "inputSha256": "b20bd0b9abed6aa9c90eda52cda64522dc17a5681b6f0926e01597dfe361300b",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6375,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.5896779999998216,
+                "B": 0.609288000000106
+              },
+              "cpuMicros": {
+                "A": 606,
+                "B": 618
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6375,
+            6375,
+            6375,
+            0,
+            0,
+            101852,
+            0
+          ],
+          "outputSha256": "a1acaf18b31c6ffce5c428ce84eb3d57a22aa3fbb261e92c00998f6da47749d0"
+        },
+        {
+          "inputSha256": "5daac533b2b6dd050c62c1eb828ef4723495121ede6cdce1495489e83d99da48",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6521,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6463439999997718,
+                "B": 0.702237999999852
+              },
+              "cpuMicros": {
+                "A": 671,
+                "B": 714
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6521,
+            6521,
+            6521,
+            0,
+            0,
+            108373,
+            0
+          ],
+          "outputSha256": "1273795892e8198a0904335c0bcbeea4879b9c8b9261bbf9d272b54264dfc50b"
+        },
+        {
+          "inputSha256": "45a51bc386586e30249fbe70595f3f5421612a120fe3a94b497497933dd4e688",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6906,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8457840000000942,
+                "B": 0.8376420000004146
+              },
+              "cpuMicros": {
+                "A": 876,
+                "B": 858
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6905,
+            6906,
+            6905,
+            1,
+            0,
+            115278,
+            0
+          ],
+          "outputSha256": "181908ab98e101fedf837ad58d414147800c6c9829637ccc77cb1d4cbb84e546"
+        },
+        {
+          "inputSha256": "13b9ad370f22a18bb2f1652cccaa798755416cc43234bbfd98ae2065cae5e939",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7010,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6913919999997233,
+                "B": 0.6869150000002264
+              },
+              "cpuMicros": {
+                "A": 714,
+                "B": 701
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7010,
+            7010,
+            7010,
+            0,
+            0,
+            122288,
+            0
+          ],
+          "outputSha256": "0acfdd7c2149d52c63705f6f869350fd4b5d2d4d7f9ea110ed094125d094ef0a"
+        },
+        {
+          "inputSha256": "7b14438dbffdf66bbbc2e79ccda439d3e8440f520633a0c9eae4162ecfe94e0f",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6922,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6655020000007426,
+                "B": 0.693424999999479
+              },
+              "cpuMicros": {
+                "A": 686,
+                "B": 699
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6922,
+            6922,
+            6922,
+            0,
+            0,
+            129210,
+            0
+          ],
+          "outputSha256": "9da3abeb9c49fa1576cf38f6f58be339dd1d88be9959e9373801d1e591264503"
+        },
+        {
+          "inputSha256": "545e4f1c75085981b37ac08474880fa875f609af4503da672adfd567b5ffcdc8",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6955,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8268859999998313,
+                "B": 0.7634600000001228
+              },
+              "cpuMicros": {
+                "A": 868,
+                "B": 773
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6955,
+            6955,
+            6955,
+            0,
+            0,
+            136165,
+            0
+          ],
+          "outputSha256": "540f9a960179f3bdd217cd40a124d80ce5312cdc68a73a9d8e37a8ac2c3e935e"
+        },
+        {
+          "inputSha256": "cbb6981d9a5663fc81a3e197b01fec5294ea129c95766bbf84d7789a2dc4e7b3",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6574,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6674860000002809,
+                "B": 0.6603750000003856
+              },
+              "cpuMicros": {
+                "A": 689,
+                "B": 667
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6574,
+            6574,
+            6574,
+            0,
+            0,
+            142739,
+            0
+          ],
+          "outputSha256": "9b1d21e562c7aba1387eadee17d23f10c2c43199dfbcef4dc9a7f4fa2c2292f4"
+        },
+        {
+          "inputSha256": "a1ced1d2ee79bc5b952da4462fec4e69fee87dc3344198302e76b4a5f82a5f6c",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6771,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6985629999999219,
+                "B": 0.6727930000006381
+              },
+              "cpuMicros": {
+                "A": 723,
+                "B": 682
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6771,
+            6771,
+            6771,
+            0,
+            0,
+            149510,
+            0
+          ],
+          "outputSha256": "ff4cf09261b0ca3ae1a3808482865bc4bd4c352d7bb412e0c2955f9b11636314"
+        },
+        {
+          "inputSha256": "553170461b4e9dd4b9c10fb9891a900eb811f3febc128d0adde13496ffb9719e",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7306,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.873236000000361,
+                "B": 0.8623489999999947
+              },
+              "cpuMicros": {
+                "A": 906,
+                "B": 883
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7306,
+            7306,
+            7306,
+            0,
+            0,
+            156816,
+            0
+          ],
+          "outputSha256": "2f4ce7f044ee4ac2f3aca9caf7146d248a4f75dc144524b7e10a055efe9a86fc"
+        },
+        {
+          "inputSha256": "20697f2bf089b13dee8014599a6fd3448be1956e2a557ec169a0310fba49c340",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6991,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7191430000002583,
+                "B": 0.7481769999994867
+              },
+              "cpuMicros": {
+                "A": 740,
+                "B": 759
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6991,
+            6991,
+            6991,
+            0,
+            0,
+            163807,
+            0
+          ],
+          "outputSha256": "6744e8ce41de8e1e9fea63e9dc3245624a5d502f1549deabf4259fccb4f9fae9"
+        },
+        {
+          "inputSha256": "3d9602cb0c3588ace1f27476f3ab9dead6ea4f802e96fd4affa64abf104aa579",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6831,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7038999999995212,
+                "B": 0.7354580000001079
+              },
+              "cpuMicros": {
+                "A": 726,
+                "B": 755
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6831,
+            6831,
+            6831,
+            0,
+            0,
+            170638,
+            0
+          ],
+          "outputSha256": "601987b470dc2ee349db9a36e2645f1733826a622cb09a5e87893f602c896b28"
+        },
+        {
+          "inputSha256": "7867633267d0e0f8479871b25dd471cd6c99b7c05be101acb03c1b2ba90b5a7b",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6221,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8060539999996763,
+                "B": 0.792793999999958
+              },
+              "cpuMicros": {
+                "A": 838,
+                "B": 813
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6221,
+            6221,
+            6221,
+            0,
+            0,
+            176859,
+            0
+          ],
+          "outputSha256": "f0fe28019af0e007cbd3f5b7ac53856b1ccf7d40e21d11091a279d7d4156b136"
+        },
+        {
+          "inputSha256": "2c525296be6d05571a3b457edf921b7dfce6c9b4bff176aa532d26631081666b",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6596,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 4.176543999999922,
+                "B": 0.6629590000002281
+              },
+              "cpuMicros": {
+                "A": 777,
+                "B": 679
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6596,
+            6596,
+            6596,
+            0,
+            0,
+            183455,
+            0
+          ],
+          "outputSha256": "834604a72344e0c615cc44b38ffb91a7bb231378a48f5fe64eed6746dfe86584"
+        },
+        {
+          "inputSha256": "0a60e3dedfa89cc2cb3add2205aff6ab1686434a8d18ee410ad210c909d128ce",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6534,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.9445430000005217,
+                "B": 0.6611659999998665
+              },
+              "cpuMicros": {
+                "A": 930,
+                "B": 676
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6534,
+            6534,
+            6534,
+            0,
+            0,
+            189989,
+            0
+          ],
+          "outputSha256": "72dbf86611c89bed9b11997191d9432387692fd351ff7b8fbb87873e36a371ab"
+        },
+        {
+          "inputSha256": "8b31c76c8128409650abab341f3f3e5010bddfd624dfa3a16288eed326c9e948",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6107,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6716319999995903,
+                "B": 0.6253619999997682
+              },
+              "cpuMicros": {
+                "A": 699,
+                "B": 634
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6107,
+            6107,
+            6107,
+            0,
+            0,
+            196096,
+            0
+          ],
+          "outputSha256": "0f959849644d6404d3132db9249c7530b1bd8a1ed988f3dff6dad29970a25536"
+        },
+        {
+          "inputSha256": "df0acf1bf8adc0ac15781c0af6917dea74228720fd85ce86c46757c766969b3a",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6418,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8097899999993388,
+                "B": 0.6991129999996701
+              },
+              "cpuMicros": {
+                "A": 834,
+                "B": 708
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6416,
+            6418,
+            6416,
+            2,
+            0,
+            202512,
+            0
+          ],
+          "outputSha256": "0784246810c96e26a501914972d25a651aad2e40e85fd3a30c4f724deec25966"
+        },
+        {
+          "inputSha256": "7e4029ba9528c2bc4c8580117b7ef6f023212000fd04647aad526c80a89f57db",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5977,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6290779999999359,
+                "B": 0.6436300000004849
+              },
+              "cpuMicros": {
+                "A": 653,
+                "B": 658
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5976,
+            5977,
+            5976,
+            1,
+            0,
+            208488,
+            0
+          ],
+          "outputSha256": "0335b31e968fc7765065ed8162fbbe699a270dedbb5817e2f3569c244f695c67"
+        },
+        {
+          "inputSha256": "a2cc106966220f13c6b03ec3d5eff2bd08d452af0f0753a7e411276d63327f9d",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5992,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6455329999998867,
+                "B": 0.7425279999997656
+              },
+              "cpuMicros": {
+                "A": 667,
+                "B": 681
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5992,
+            5992,
+            5992,
+            0,
+            0,
+            214480,
+            0
+          ],
+          "outputSha256": "1c559c2221a513ad81d27468438b95bba21731ac668898470fe38b44794d3336"
+        },
+        {
+          "inputSha256": "8a526bb4ba27b70693d752eaf75ae57f2f1c2bb47e34ccee96bb29c5c1ec639e",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 7878,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 1.0321150000008856,
+                "B": 1.0400170000002618
+              },
+              "cpuMicros": {
+                "A": 1058,
+                "B": 1052
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            7878,
+            7878,
+            7878,
+            0,
+            0,
+            222358,
+            0
+          ],
+          "outputSha256": "fa420ae464f75cf17fd71b09d162c037aa0a0b9bf4185d4d83ff569229cb05a7"
+        },
+        {
+          "inputSha256": "b81115527b7e32c500d51542c685e3c713646ee7d06f9b8ba56dca461fa52d86",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6713,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.9225500000002285,
+                "B": 0.7481770000003962
+              },
+              "cpuMicros": {
+                "A": 947,
+                "B": 760
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6713,
+            6713,
+            6713,
+            0,
+            0,
+            229071,
+            0
+          ],
+          "outputSha256": "4f435d5979a710943211c7480909e1346127ce56fefe0d769a3b8e08cf274be1"
+        },
+        {
+          "inputSha256": "41a70b92e700ac82e2e06dab76c8f241adfb43fa0a73b66c209b1b207d766ba0",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5999,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7667050000000017,
+                "B": 0.7023079999999027
+              },
+              "cpuMicros": {
+                "A": 866,
+                "B": 715
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5999,
+            5999,
+            5999,
+            0,
+            0,
+            235070,
+            0
+          ],
+          "outputSha256": "467957dae4e482b5c6a32fbf9d6d8a26e09192f50f5b732349a408554704609b"
+        },
+        {
+          "inputSha256": "37afa25cd6b60441757f728a32f650c4356edddabf11646554f26dc600966ce8",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 5892,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6863640000001396,
+                "B": 0.7285369999999602
+              },
+              "cpuMicros": {
+                "A": 706,
+                "B": 740
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            5892,
+            5892,
+            5892,
+            0,
+            0,
+            240962,
+            0
+          ],
+          "outputSha256": "b80e6a042f25016b8cea83049937516eba8f368b19c877fb2f77091648adde4a"
+        },
+        {
+          "inputSha256": "056128ec92b64daee1b19f899dc0778a9171bf107840a9c2e0813d7c28c3f3bc",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6373,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7152470000000903,
+                "B": 0.8310529999998835
+              },
+              "cpuMicros": {
+                "A": 733,
+                "B": 849
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6373,
+            6373,
+            6373,
+            0,
+            0,
+            247335,
+            0
+          ],
+          "outputSha256": "1171d1c111afdc0e098fe18fb0a31b1c8555cd5fb8a7ff85a4374c3c88e15a09"
+        },
+        {
+          "inputSha256": "94bf052c5d8d924a2ccd084f93eec327fc648716a4812797c1c4e2d1d3bfc215",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6364,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.6919729999999618,
+                "B": 0.7106910000002244
+              },
+              "cpuMicros": {
+                "A": 708,
+                "B": 718
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6363,
+            6364,
+            6363,
+            1,
+            0,
+            253698,
+            0
+          ],
+          "outputSha256": "7eb1829befdc406e1831e010df8c543f9d6300589a3691bf3c6a22ee0ec4b3ff"
+        },
+        {
+          "inputSha256": "a7f55194fc561dd0d68a545f09eec7606e4cfb1bf992ae858e3909b4c1541dca",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6778,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7835909999994328,
+                "B": 0.7794139999996332
+              },
+              "cpuMicros": {
+                "A": 809,
+                "B": 797
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6778,
+            6778,
+            6778,
+            0,
+            0,
+            260476,
+            0
+          ],
+          "outputSha256": "ba80ed6e0a0d55cbeb54cae3757d861bab1a3abf60215bce0699348837121667"
+        },
+        {
+          "inputSha256": "491cd9fb0531e3591df37b9a2876d5d409fd4c6f10f90b4ae14841508ffd2ecd",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6752,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8586340000001655,
+                "B": 0.7741260000002512
+              },
+              "cpuMicros": {
+                "A": 881,
+                "B": 786
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6751,
+            6752,
+            6751,
+            1,
+            0,
+            267227,
+            0
+          ],
+          "outputSha256": "6a0aa73795caa5d9664a8da06285670b3894f794d8b5cb74b927bd7db919af3f"
+        },
+        {
+          "inputSha256": "de6314c9d751164a910e132ec21bc19af6ab981ac0fc153996e886ca99ec04ea",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6460,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.9600769999997283,
+                "B": 0.9846830000005866
+              },
+              "cpuMicros": {
+                "A": 996,
+                "B": 1008
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6459,
+            6460,
+            6459,
+            1,
+            0,
+            273686,
+            0
+          ],
+          "outputSha256": "ddcbb95624b41db4d3be0d843e23fd60927c3de7ed75dabc0b414fbedcfaeaa1"
+        },
+        {
+          "inputSha256": "89d5c5df7a0bc34ff0b15f2e626811ea043e48475ed9a5a34d04c50dfe09928b",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6326,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7097589999993943,
+                "B": 0.7404260000002978
+              },
+              "cpuMicros": {
+                "A": 730,
+                "B": 756
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6326,
+            6326,
+            6326,
+            0,
+            0,
+            280012,
+            0
+          ],
+          "outputSha256": "43b06114f80535f89b659920895cace324a5080e9cb033da76e0f6865be37771"
+        },
+        {
+          "inputSha256": "87435615cbf3e2f8e323580eb196998195eda9b205933021d39f8760b1363930",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6473,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7626990000007936,
+                "B": 0.7219879999993282
+              },
+              "cpuMicros": {
+                "A": 786,
+                "B": 732
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6472,
+            6473,
+            6472,
+            1,
+            0,
+            286484,
+            0
+          ],
+          "outputSha256": "afa3b8346ac78b031e75a012b18215ae575fa90881b8219b42e8cb0d0b7e6af2"
+        },
+        {
+          "inputSha256": "fa9b9c89268e16533305e72eff99a19b669769d226e356714e576d863d48de07",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6439,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7728850000003149,
+                "B": 0.7408259999992879
+              },
+              "cpuMicros": {
+                "A": 796,
+                "B": 747
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6439,
+            6439,
+            6439,
+            0,
+            0,
+            292923,
+            0
+          ],
+          "outputSha256": "12986df5e8ab1ee11c4a83fa7a138166b6d3ac1bfc3f825c812189625edf39cd"
+        },
+        {
+          "inputSha256": "b217d0aa94c805fc2cd267666cd534f9a006de1dd7f4ecd314f676d4979f22f9",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6313,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7517719999996189,
+                "B": 0.7263540000003559
+              },
+              "cpuMicros": {
+                "A": 774,
+                "B": 742
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6312,
+            6313,
+            6312,
+            1,
+            0,
+            299235,
+            0
+          ],
+          "outputSha256": "b8da69f80e343c20f75728a461f4531e6a42f2943ac2fd4635ea1694a7e6b1bd"
+        },
+        {
+          "inputSha256": "5f8cf2feb28ba7e32b8a9b751b1360030cea632bf057603cb3650e079501cd80",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6421,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7774719999997615,
+                "B": 0.7655030000005354
+              },
+              "cpuMicros": {
+                "A": 806,
+                "B": 776
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6419,
+            6421,
+            6419,
+            2,
+            0,
+            305654,
+            0
+          ],
+          "outputSha256": "f1dcf25660c8bbab21ae3802bf811f7e33bbad6fbc5ed737bd43b0cee515413c"
+        },
+        {
+          "inputSha256": "33dca7eb1f7cc2c61805ba8a125cf522da67b8b22e64a0f99095b1fd315dae80",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6499,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.7855930000005173,
+                "B": 0.7947869999989052
+              },
+              "cpuMicros": {
+                "A": 812,
+                "B": 803
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6499,
+            6499,
+            6499,
+            0,
+            0,
+            312153,
+            0
+          ],
+          "outputSha256": "a0747e31a637b1656ff3208342e672c09b371aa159d59917a0f53823b37fb24e"
+        },
+        {
+          "inputSha256": "c3e0e45c522c2ee0be420ba4d6e400d9cd08896ceddc428b0a46739c426fa8d5",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6452,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8206060000011348,
+                "B": 0.8152789999985544
+              },
+              "cpuMicros": {
+                "A": 847,
+                "B": 827
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6451,
+            6452,
+            6451,
+            1,
+            0,
+            318604,
+            0
+          ],
+          "outputSha256": "9b3590febc1536d17e93e15a64029bc346c70b9b135458ddec54794d2602f210"
+        },
+        {
+          "inputSha256": "80d9de701577483f9502e89f9d37048f17d1f42398c597e736f098c2e9be25f6",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6630,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.9763210000000981,
+                "B": 1.0183639999995648
+              },
+              "cpuMicros": {
+                "A": 1009,
+                "B": 1035
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6630,
+            6630,
+            6630,
+            0,
+            0,
+            325234,
+            0
+          ],
+          "outputSha256": "6a1a37fc67d056d83f21e9edd88a722176efb4b06b420df316cb17b2d75d884c"
+        },
+        {
+          "inputSha256": "bc898f99c088c431bae7fe6153dcbf12c4d46a437f471b4cad1663fe7e5e9624",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6851,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8396650000013324,
+                "B": 0.841417999999976
+              },
+              "cpuMicros": {
+                "A": 862,
+                "B": 850
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6850,
+            6851,
+            6850,
+            1,
+            0,
+            332084,
+            0
+          ],
+          "outputSha256": "58ec14eb8ee686cc1eeedb39fb8508ed3d20f2a4ac4127831eaba5de4c43f644"
+        },
+        {
+          "inputSha256": "3a840696a7fa24d41bf745c71ff67a8cc5e229f5f47c1fe2703160988ca39a1d",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6688,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.840516000000207,
+                "B": 0.8725450000001729
+              },
+              "cpuMicros": {
+                "A": 1037,
+                "B": 883
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6687,
+            6688,
+            6687,
+            1,
+            0,
+            338771,
+            0
+          ],
+          "outputSha256": "be2304a81b4e20fdd35efdad3b7aab12d0bff5512b47e53191a23b0e43fe7448"
+        },
+        {
+          "inputSha256": "765f7faa46d1d7d73d28cac5ff65b99c36684ede6fdb6dacdcd29e30c21b9391",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6778,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8411579999992682,
+                "B": 2.190359999998691
+              },
+              "cpuMicros": {
+                "A": 860,
+                "B": 876
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6766,
+            6778,
+            6766,
+            12,
+            0,
+            345537,
+            0
+          ],
+          "outputSha256": "76ce20485fea63557809bfc08babce6f959bbd9f39a3a2b3e877c7b44b6c8c34"
+        },
+        {
+          "inputSha256": "f1e3e7720f1a7d3ed577485067a6d9b8ce071a5d15545027ec1a40cb07bb56bf",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6823,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8567409999996016,
+                "B": 0.8552290000006906
+              },
+              "cpuMicros": {
+                "A": 881,
+                "B": 865
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6819,
+            6823,
+            6819,
+            4,
+            0,
+            352356,
+            0
+          ],
+          "outputSha256": "04b52360a3d35f2bf32e295f1181c8a9cfc41bdf38b562b65e3362cfa9b5720e"
+        },
+        {
+          "inputSha256": "20d9c3ec27597927003c119950e6d4b90ff51a1beaac3bcd7fa1043247a05d75",
+          "memoryBytes": 26214400,
+          "rows": 8000,
+          "first": 0,
+          "last": 6946,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.8598760000004404,
+                "B": 0.8971209999999701
+              },
+              "cpuMicros": {
+                "A": 878,
+                "B": 905
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            6943,
+            6946,
+            6943,
+            3,
+            0,
+            359299,
+            0
+          ],
+          "outputSha256": "6fcfa8b11760ac543412b52509b56105d1e04f2ad2b998d82ac1072bb29ab1b7"
+        },
+        {
+          "inputSha256": "975bcf1ed5037e9e343056e3306a52b46be24d546abdc8ea37170f2d4af2ff6e",
+          "memoryBytes": 26214400,
+          "rows": 4555,
+          "first": 0,
+          "last": 3944,
+          "cursor": 0,
+          "rounds": [
+            {
+              "warmup": false,
+              "order": [
+                "A",
+                "B"
+              ],
+              "timings": {
+                "A": 0.49615799999992305,
+                "B": 0.49660799999946903
+              },
+              "cpuMicros": {
+                "A": 513,
+                "B": 501
+              }
+            }
+          ],
+          "returnCode": 0,
+          "header": [
+            3944,
+            3944,
+            3944,
+            0,
+            0,
+            363243,
+            0
+          ],
+          "outputSha256": "aa8603c210851c1e18c5dcc24b91b4942bec5388a6fcc25138d29bb51e13449a"
+        }
+      ]
+    }
+  ]
+}

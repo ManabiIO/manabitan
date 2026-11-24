@@ -1,0 +1,34 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/0a1757ac2970/vndb-media-bookkeeping/ext/js/dictionary/dictionary-importer.js
+  3032:1  error  The type 'getData' is undefined  jsdoc/no-undefined-types
+
+/workspace/scratch/0a1757ac2970/vndb-media-bookkeeping/test/dictionary-importer-media-batch.test.js
+  73:29  error  Expected newline between test and consequent of ternary expression       @stylistic/multiline-ternary
+  73:41  error  Expected newline between consequent and alternate of ternary expression  @stylistic/multiline-ternary
+
+/workspace/scratch/0a1757ac2970/vndb-media-bookkeeping/test/dictionary-importer-media-reference.test.js
+  290:58  error  This line has 3 statements. Maximum allowed is 2               @stylistic/max-statements-per-line
+  321:29  error  Arrow function used ambiguously with a conditional expression  @stylistic/no-confusing-arrow
+
+/workspace/scratch/0a1757ac2970/vndb-media-bookkeeping/test/raw-zip-range-reader.test.js
+  511:21  error  Nest ternary expression should be parenthesized  unicorn/no-nested-ternary
+  536:40  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+
+✖ 7 problems (7 errors, 0 warnings)
+  5 errors and 0 warnings potentially fixable with the `--fix` option.
+

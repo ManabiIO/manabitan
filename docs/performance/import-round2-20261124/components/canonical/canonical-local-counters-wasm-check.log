@@ -1,0 +1,22 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 build:dictionary-wasm
+> node ./dev/bin/build-dictionary-wasm.js --check
+
+{
+  "mode": "check",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "targets": [
+    {
+      "name": "term-content-canonical-scan-v1.wasm",
+      "sha256": "04fdb51271a20d9152b8655f33b3e6fa36a4048380ba69010a5288761143c9f0"
+    },
+    {
+      "name": "term-bank-parser.wasm",
+      "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "<stdin>", line 12, in <module>
+  File "/workspace/scratch/0a1757ac2970/round2-evidence/audit-import-study.py", line 363, in audit
+    check(git_text(repo, "rev-parse", f"{commit}^") == BASELINE, "Candidate parent differs")
+  File "/workspace/scratch/0a1757ac2970/round2-evidence/audit-import-study.py", line 81, in check
+    raise AssertionError(message)
+AssertionError: Candidate parent differs

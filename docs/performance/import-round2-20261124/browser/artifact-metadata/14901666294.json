@@ -1,0 +1,21 @@
+{
+  "id": 14901666294,
+  "name": "import-crossover-media-bookkeeping-screen-jmdict-45353118407-1",
+  "size_in_bytes": 889784,
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14901666294",
+  "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14901666294/zip",
+  "expired": false,
+  "created_at": "2026-11-24T08:11:23Z",
+  "expires_at": "2026-12-08T08:11:22Z",
+  "updated_at": "2026-11-24T08:11:23Z",
+  "digest": "sha256:1c1fd2bba2cc4f8ddb9f2a541dfbb37a75cf06f2fdc232e8d50d1e1c581b3351",
+  "workflow_run": {
+    "id": 45353118407,
+    "repository_id": 1165902460,
+    "head_repository_id": 1165902460,
+    "head_branch": "perf/import-round2-20261124-0a175-study",
+    "head_sha": "478556323c394977992bfb767ad311d42990ee2a"
+  },
+  "localArchive": "browser/original-artifacts/media-bookkeeping-screen-jmdict.zip",
+  "localExtracted": "browser/screen/media-bookkeeping-jmdict"
+}

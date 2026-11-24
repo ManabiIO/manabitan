@@ -1,0 +1,5 @@
+{"groups":10,"banks":40,"rows":400000,"verifierRows":400000,"operatorBuilds":7874,"removedSquarings":78368}
+{"groups":20,"banks":80,"rows":800000,"verifierRows":800000,"operatorBuilds":16324,"removedSquarings":162265}
+{"groups":30,"banks":120,"rows":1200000,"verifierRows":1160000,"operatorBuilds":23290,"removedSquarings":231259}
+{"groups":40,"banks":160,"rows":1600000,"verifierRows":1480000,"operatorBuilds":29640,"removedSquarings":294333}
+{"groups":50,"banks":200,"rows":2000000,"verifierRows":1840000,"operatorBuilds":36992,"removedSquarings":367388}

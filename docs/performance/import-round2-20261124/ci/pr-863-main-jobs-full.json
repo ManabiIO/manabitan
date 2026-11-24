@@ -1,0 +1,1574 @@
+{
+  "preservedAtUtc": "2026-11-24 08:12:20 UTC",
+  "expectedHead": "ebb0777114578c5cee879877274e7d872bfea27e",
+  "kind": "main-jobs-full",
+  "source": {
+    "tool": "github.fetch",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424/jobs?per_page=100"
+  },
+  "data": {
+    "total_count": 19,
+    "jobs": [
+      {
+        "id": 138303637624,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oIeA",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303637624",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303637624",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:22Z",
+        "completed_at": "2026-11-24T08:05:19Z",
+        "name": "Anki Deduplication Matrix (Chromium)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:25Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:25Z",
+            "completed_at": "2026-11-24T08:04:35Z"
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:35Z",
+            "completed_at": "2026-11-24T08:04:48Z"
+          },
+          {
+            "name": "Run Chromium Anki deduplication matrix",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:48Z",
+            "completed_at": "2026-11-24T08:05:15Z"
+          },
+          {
+            "name": "Enforce Chromium Anki matrix success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:05:15Z",
+            "completed_at": "2026-11-24T08:05:15Z"
+          },
+          {
+            "name": "Upload Chromium Anki deduplication report",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:15Z",
+            "completed_at": "2026-11-24T08:05:16Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13,
+            "started_at": "2026-11-24T08:05:16Z",
+            "completed_at": "2026-11-24T08:05:17Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14,
+            "started_at": "2026-11-24T08:05:17Z",
+            "completed_at": "2026-11-24T08:05:17Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-24T08:05:17Z",
+            "completed_at": "2026-11-24T08:05:17Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303637624",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085962,
+        "runner_name": "GitHub Actions 1000085962",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638064,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oKMA",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638064",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638064",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:22Z",
+        "completed_at": "2026-11-24T08:04:44Z",
+        "name": "Markdown",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:25Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:25Z",
+            "completed_at": "2026-11-24T08:04:40Z"
+          },
+          {
+            "name": "Run Markdown tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:40Z",
+            "completed_at": "2026-11-24T08:04:41Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:41Z",
+            "completed_at": "2026-11-24T08:04:41Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:04:41Z",
+            "completed_at": "2026-11-24T08:04:41Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:04:41Z",
+            "completed_at": "2026-11-24T08:04:42Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638064",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085966,
+        "runner_name": "GitHub Actions 1000085966",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638140,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oKfA",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638140",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638140",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:21Z",
+        "completed_at": "2026-11-24T08:05:04Z",
+        "name": "Test Build",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:25Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:25Z",
+            "completed_at": "2026-11-24T08:04:39Z"
+          },
+          {
+            "name": "Install pinned dictionary WASM toolchain",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:39Z",
+            "completed_at": "2026-11-24T08:04:43Z"
+          },
+          {
+            "name": "Verify pinned dictionary WASM rebuild",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:43Z",
+            "completed_at": "2026-11-24T08:04:47Z"
+          },
+          {
+            "name": "Build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:04:47Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Retain versioned release packages",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Validate manifest.json of the extension",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638140",
+        "labels": [
+          "ubuntu-26.04"
+        ],
+        "runner_id": 1000085964,
+        "runner_name": "GitHub Actions 1000085964",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638158,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oKjg",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638158",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638158",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:22Z",
+        "completed_at": "2026-11-24T08:06:21Z",
+        "name": "Full Extension E2E (Firefox)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:25Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:25Z",
+            "completed_at": "2026-11-24T08:04:38Z"
+          },
+          {
+            "name": "Build Firefox test package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:38Z",
+            "completed_at": "2026-11-24T08:04:42Z"
+          },
+          {
+            "name": "Retain tested Firefox release package",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:42Z",
+            "completed_at": "2026-11-24T08:04:42Z"
+          },
+          {
+            "name": "Install Firefox Developer Edition",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:04:42Z",
+            "completed_at": "2026-11-24T08:04:46Z"
+          },
+          {
+            "name": "Restore Firefox E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:46Z",
+            "completed_at": "2026-11-24T08:04:47Z"
+          },
+          {
+            "name": "Run Firefox extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:04:47Z",
+            "completed_at": "2026-11-24T08:06:18Z"
+          },
+          {
+            "name": "Enforce Firefox extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:06:18Z",
+            "completed_at": "2026-11-24T08:06:18Z"
+          },
+          {
+            "name": "Upload Firefox extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-24T08:06:18Z",
+            "completed_at": "2026-11-24T08:06:19Z"
+          },
+          {
+            "name": "Upload Firefox extension E2E report",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 11,
+            "started_at": "2026-11-24T08:06:19Z",
+            "completed_at": "2026-11-24T08:06:19Z"
+          },
+          {
+            "name": "Post Restore Firefox E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-11-24T08:06:19Z",
+            "completed_at": "2026-11-24T08:06:20Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-11-24T08:06:20Z",
+            "completed_at": "2026-11-24T08:06:20Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-24T08:06:20Z",
+            "completed_at": "2026-11-24T08:06:20Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-24T08:06:20Z",
+            "completed_at": "2026-11-24T08:06:20Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638158",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085967,
+        "runner_name": "GitHub Actions 1000085967",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638262,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oK9g",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638262",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638262",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:22Z",
+        "completed_at": "2026-11-24T08:04:41Z",
+        "name": "CSS",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:22Z",
+            "completed_at": "2026-11-24T08:04:24Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:24Z",
+            "completed_at": "2026-11-24T08:04:29Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:29Z",
+            "completed_at": "2026-11-24T08:04:38Z"
+          },
+          {
+            "name": "Run CSS tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:38Z",
+            "completed_at": "2026-11-24T08:04:39Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:39Z",
+            "completed_at": "2026-11-24T08:04:39Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:04:39Z",
+            "completed_at": "2026-11-24T08:04:40Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:04:40Z",
+            "completed_at": "2026-11-24T08:04:40Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638262",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085965,
+        "runner_name": "GitHub Actions 1000085965",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638422,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oLlg",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638422",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638422",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:22Z",
+        "completed_at": "2026-11-24T08:07:26Z",
+        "name": "Full Extension E2E (Chromium)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:24Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:24Z",
+            "completed_at": "2026-11-24T08:04:26Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:26Z",
+            "completed_at": "2026-11-24T08:04:40Z"
+          },
+          {
+            "name": "Build Chromium test package",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:40Z",
+            "completed_at": "2026-11-24T08:04:43Z"
+          },
+          {
+            "name": "Retain tested Chromium release package",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 5,
+            "started_at": "2026-11-24T08:04:43Z",
+            "completed_at": "2026-11-24T08:04:43Z"
+          },
+          {
+            "name": "Install Playwright Chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-24T08:04:43Z",
+            "completed_at": "2026-11-24T08:05:00Z"
+          },
+          {
+            "name": "Restore Chromium E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:00Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Run Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:07:21Z"
+          },
+          {
+            "name": "Enforce Chromium extension E2E success",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:07:21Z",
+            "completed_at": "2026-11-24T08:07:21Z"
+          },
+          {
+            "name": "Summarize Chromium extension E2E",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-11-24T08:07:21Z",
+            "completed_at": "2026-11-24T08:07:21Z"
+          },
+          {
+            "name": "Upload Chromium extension E2E JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11,
+            "started_at": "2026-11-24T08:07:21Z",
+            "completed_at": "2026-11-24T08:07:22Z"
+          },
+          {
+            "name": "Upload Chromium extension E2E report",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12,
+            "started_at": "2026-11-24T08:07:22Z",
+            "completed_at": "2026-11-24T08:07:22Z"
+          },
+          {
+            "name": "Post Restore Chromium E2E dictionary cache",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-11-24T08:07:22Z",
+            "completed_at": "2026-11-24T08:07:22Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-11-24T08:07:22Z",
+            "completed_at": "2026-11-24T08:07:22Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-11-24T08:07:22Z",
+            "completed_at": "2026-11-24T08:07:23Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-11-24T08:07:23Z",
+            "completed_at": "2026-11-24T08:07:23Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638422",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085969,
+        "runner_name": "GitHub Actions 1000085969",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638425,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oLmQ",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638425",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638425",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:22Z",
+        "completed_at": "2026-11-24T08:04:50Z",
+        "name": "TypeScript (dev)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:23Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:23Z",
+            "completed_at": "2026-11-24T08:04:25Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:25Z",
+            "completed_at": "2026-11-24T08:04:40Z"
+          },
+          {
+            "name": "Run TypeScript (dev) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:40Z",
+            "completed_at": "2026-11-24T08:04:47Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:47Z",
+            "completed_at": "2026-11-24T08:04:48Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:04:48Z",
+            "completed_at": "2026-11-24T08:04:48Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:04:48Z",
+            "completed_at": "2026-11-24T08:04:48Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638425",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085968,
+        "runner_name": "GitHub Actions 1000085968",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638485,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oL1Q",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638485",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638485",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:33Z",
+        "completed_at": "2026-11-24T08:05:19Z",
+        "name": "TypeScript (test)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:34Z",
+            "completed_at": "2026-11-24T08:04:37Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:37Z",
+            "completed_at": "2026-11-24T08:04:44Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:44Z",
+            "completed_at": "2026-11-24T08:04:56Z"
+          },
+          {
+            "name": "Run TypeScript (test) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:56Z",
+            "completed_at": "2026-11-24T08:05:15Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:15Z",
+            "completed_at": "2026-11-24T08:05:15Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:15Z",
+            "completed_at": "2026-11-24T08:05:16Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:16Z",
+            "completed_at": "2026-11-24T08:05:16Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638485",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085975,
+        "runner_name": "GitHub Actions 1000085975",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638486,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oL1g",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638486",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638486",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:27Z",
+        "completed_at": "2026-11-24T08:07:48Z",
+        "name": "JavaScript",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:27Z",
+            "completed_at": "2026-11-24T08:04:28Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:28Z",
+            "completed_at": "2026-11-24T08:04:29Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:29Z",
+            "completed_at": "2026-11-24T08:04:43Z"
+          },
+          {
+            "name": "Run JavaScript tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:43Z",
+            "completed_at": "2026-11-24T08:07:46Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:07:46Z",
+            "completed_at": "2026-11-24T08:07:46Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:07:46Z",
+            "completed_at": "2026-11-24T08:07:46Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:07:46Z",
+            "completed_at": "2026-11-24T08:07:46Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638486",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085973,
+        "runner_name": "GitHub Actions 1000085973",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638542,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oMDg",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638542",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638542",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:29Z",
+        "completed_at": "2026-11-24T08:04:56Z",
+        "name": "TypeScript (bench)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:30Z",
+            "completed_at": "2026-11-24T08:04:30Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:30Z",
+            "completed_at": "2026-11-24T08:04:32Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:32Z",
+            "completed_at": "2026-11-24T08:04:44Z"
+          },
+          {
+            "name": "Run TypeScript (bench) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:44Z",
+            "completed_at": "2026-11-24T08:04:53Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:53Z",
+            "completed_at": "2026-11-24T08:04:54Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:04:54Z",
+            "completed_at": "2026-11-24T08:04:54Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:04:54Z",
+            "completed_at": "2026-11-24T08:04:54Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638542",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085974,
+        "runner_name": "GitHub Actions 1000085974",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638556,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oMHA",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638556",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638556",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:35Z",
+        "completed_at": "2026-11-24T08:04:58Z",
+        "name": "HTML",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:36Z",
+            "completed_at": "2026-11-24T08:04:36Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:36Z",
+            "completed_at": "2026-11-24T08:04:38Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:38Z",
+            "completed_at": "2026-11-24T08:04:53Z"
+          },
+          {
+            "name": "Run HTML tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:53Z",
+            "completed_at": "2026-11-24T08:04:55Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:04:55Z",
+            "completed_at": "2026-11-24T08:04:55Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:04:55Z",
+            "completed_at": "2026-11-24T08:04:55Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:04:55Z",
+            "completed_at": "2026-11-24T08:04:55Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638556",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085976,
+        "runner_name": "GitHub Actions 1000085976",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638561,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oMIQ",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638561",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638561",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:57Z",
+        "completed_at": "2026-11-24T08:05:21Z",
+        "name": "Unit Tests (options)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:58Z",
+            "completed_at": "2026-11-24T08:04:59Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:59Z",
+            "completed_at": "2026-11-24T08:05:01Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:05:01Z",
+            "completed_at": "2026-11-24T08:05:16Z"
+          },
+          {
+            "name": "Run Unit Tests (options) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:05:16Z",
+            "completed_at": "2026-11-24T08:05:17Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:17Z",
+            "completed_at": "2026-11-24T08:05:17Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:17Z",
+            "completed_at": "2026-11-24T08:05:18Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:18Z",
+            "completed_at": "2026-11-24T08:05:18Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638561",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085980,
+        "runner_name": "GitHub Actions 1000085980",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638637,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oMbQ",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638637",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638637",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:45Z",
+        "completed_at": "2026-11-24T08:05:39Z",
+        "name": "JSON",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:46Z",
+            "completed_at": "2026-11-24T08:04:47Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:47Z",
+            "completed_at": "2026-11-24T08:04:49Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:49Z",
+            "completed_at": "2026-11-24T08:05:02Z"
+          },
+          {
+            "name": "Run JSON tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:05:02Z",
+            "completed_at": "2026-11-24T08:05:36Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:36Z",
+            "completed_at": "2026-11-24T08:05:36Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:36Z",
+            "completed_at": "2026-11-24T08:05:36Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:36Z",
+            "completed_at": "2026-11-24T08:05:36Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638637",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085978,
+        "runner_name": "GitHub Actions 1000085978",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638687,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oMnw",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638687",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638687",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:43Z",
+        "completed_at": "2026-11-24T08:05:14Z",
+        "name": "TypeScript (main)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:43Z",
+            "completed_at": "2026-11-24T08:04:44Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:44Z",
+            "completed_at": "2026-11-24T08:04:46Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:46Z",
+            "completed_at": "2026-11-24T08:04:59Z"
+          },
+          {
+            "name": "Run TypeScript (main) tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:04:59Z",
+            "completed_at": "2026-11-24T08:05:12Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:05:12Z",
+            "completed_at": "2026-11-24T08:05:12Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:05:12Z",
+            "completed_at": "2026-11-24T08:05:12Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:05:12Z",
+            "completed_at": "2026-11-24T08:05:12Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638687",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085977,
+        "runner_name": "GitHub Actions 1000085977",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303638740,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oM1A",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303638740",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303638740",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:51Z",
+        "completed_at": "2026-11-24T08:07:52Z",
+        "name": "Unit Tests",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-24T08:04:52Z",
+            "completed_at": "2026-11-24T08:04:52Z"
+          },
+          {
+            "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-24T08:04:52Z",
+            "completed_at": "2026-11-24T08:04:54Z"
+          },
+          {
+            "name": "Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-24T08:04:54Z",
+            "completed_at": "2026-11-24T08:05:06Z"
+          },
+          {
+            "name": "Run Unit Tests tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-11-24T08:05:06Z",
+            "completed_at": "2026-11-24T08:07:49Z"
+          },
+          {
+            "name": "Post Run ./.github/actions/setup",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-24T08:07:49Z",
+            "completed_at": "2026-11-24T08:07:49Z"
+          },
+          {
+            "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8,
+            "started_at": "2026-11-24T08:07:49Z",
+            "completed_at": "2026-11-24T08:07:49Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9,
+            "started_at": "2026-11-24T08:07:49Z",
+            "completed_at": "2026-11-24T08:07:49Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303638740",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": 1000085979,
+        "runner_name": "GitHub Actions 1000085979",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 138303639507,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oP0w",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303639507",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303639507",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:20Z",
+        "completed_at": "2026-11-24T08:04:20Z",
+        "name": "Full Extension E2E (Edge)",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303639507",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 138303640200,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oSiA",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303640200",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303640200",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:20Z",
+        "completed_at": "2026-11-24T08:04:20Z",
+        "name": "Firefox Android Installation Smoke (blocking)",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303640200",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 138303640531,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oT0w",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303640531",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303640531",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:20Z",
+        "completed_at": "2026-11-24T08:04:20Z",
+        "name": "Published release upgrade and reimport",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303640531",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      },
+      {
+        "id": 138303640559,
+        "run_id": 45352943424,
+        "workflow_name": "CI",
+        "head_branch": "perf/vndb-media-bookkeeping-20261124-0a175",
+        "run_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/45352943424",
+        "run_attempt": 1,
+        "node_id": "CR_kwDORX5CfM8AAAAgM4oT7w",
+        "head_sha": "ebb0777114578c5cee879877274e7d872bfea27e",
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/jobs/138303640559",
+        "html_url": "https://github.com/ManabiIO/manabitan/actions/runs/45352943424/job/138303640559",
+        "status": "completed",
+        "conclusion": "skipped",
+        "created_at": "2026-11-24T08:04:20Z",
+        "started_at": "2026-11-24T08:04:20Z",
+        "completed_at": "2026-11-24T08:04:20Z",
+        "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/ManabiIO/manabitan/check-runs/138303640559",
+        "labels": [
+          "ubuntu-latest"
+        ],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      }
+    ]
+  }
+}

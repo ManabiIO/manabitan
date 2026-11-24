@@ -1,0 +1,236 @@
+{
+  "status": "passed",
+  "stage": "screen",
+  "dictionary": "jmdict",
+  "sourceIdentities": {
+    "A": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    },
+    "B": {
+      "commit": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+      "tree": "3dd10f7c9b24e9ba3429a4d65540210a86d17fa3"
+    },
+    "C": {
+      "commit": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+      "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+    }
+  },
+  "runnerSha256": "81931ea66937ebdf7fc55c6cdac2998a54d364485de7aae19909beef5aaa917b",
+  "browserVersion": "153.0.8010.12",
+  "attemptedObservations": 20,
+  "lookupReceipts": 1440,
+  "exhaustiveDiagnostics": 2,
+  "changedPackageMembers": [
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "comparisons": {
+    "candidate": {
+      "baselineMedianMs": 946.5,
+      "candidateMedianMs": 941.5,
+      "equalWorkPercent": -4.013166871333851,
+      "fasterPairs": 3,
+      "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+      "pairedChangesPercent": [
+        -18.085106382981564,
+        1.1784872509106536,
+        3.0296377607031744,
+        -3.2384488448868654,
+        1.909537017281182,
+        -5.368354960233324
+      ],
+      "pairedMedianBootstrap95Percent": [
+        -11.726730671607445,
+        2.4695873889921782
+      ],
+      "pairedMedianPercent": -1.0299807969881059,
+      "pairs": 6
+    },
+    "candidateVsSecondBaseline": {
+      "baselineMedianMs": 949.6999999999971,
+      "candidateMedianMs": 941.5,
+      "equalWorkPercent": -1.3445289766155777,
+      "fasterPairs": 4,
+      "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+      "pairedChangesPercent": [
+        0.8196721311456878,
+        -1.9110926464472766,
+        -2.2902352696201778,
+        -1.1276214564244658,
+        1.368845500848237,
+        -4.860599684377864
+      ],
+      "pairedMedianBootstrap95Percent": [
+        -3.575417476999021,
+        1.0942588159969624
+      ],
+      "pairedMedianPercent": -1.5193570514358712,
+      "pairs": 6
+    },
+    "identicalProductControl": {
+      "baselineMedianMs": 946.5,
+      "candidateMedianMs": 949.6999999999971,
+      "equalWorkPercent": -2.705007504435031,
+      "fasterPairs": 3,
+      "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261123; no multiple-comparison correction",
+      "pairedChangesPercent": [
+        -18.751081127833878,
+        3.149775016069678,
+        5.444566410535323,
+        -2.134900990100197,
+        0.5333902282909975,
+        -0.5336961071553792
+      ],
+      "pairedMedianBootstrap95Percent": [
+        -10.442991058967037,
+        4.297170713302501
+      ],
+      "pairedMedianPercent": -0.00015293943219085726,
+      "pairs": 6
+    }
+  },
+  "observations": [
+    {
+      "name": "block-01-1-A",
+      "arm": "A",
+      "totalImportMs": 1156.2000000000116,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-01-2-B",
+      "arm": "B",
+      "totalImportMs": 947.0999999999767,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-01-3-C",
+      "arm": "C",
+      "totalImportMs": 939.3999999999942,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-02-1-C",
+      "arm": "C",
+      "totalImportMs": 962.7999999999884,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-02-2-B",
+      "arm": "B",
+      "totalImportMs": 944.3999999999942,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-02-3-A",
+      "arm": "A",
+      "totalImportMs": 933.3999999999942,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-03-1-B",
+      "arm": "B",
+      "totalImportMs": 938.6000000000058,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-03-2-A",
+      "arm": "A",
+      "totalImportMs": 911,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-03-3-C",
+      "arm": "C",
+      "totalImportMs": 960.5999999999767,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-04-1-C",
+      "arm": "C",
+      "totalImportMs": 948.8999999999942,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-04-2-A",
+      "arm": "A",
+      "totalImportMs": 969.6000000000058,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-04-3-B",
+      "arm": "B",
+      "totalImportMs": 938.1999999999825,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-05-1-B",
+      "arm": "B",
+      "totalImportMs": 955.3000000000175,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-05-2-C",
+      "arm": "C",
+      "totalImportMs": 942.4000000000233,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-05-3-A",
+      "arm": "A",
+      "totalImportMs": 937.4000000000233,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-06-1-A",
+      "arm": "A",
+      "totalImportMs": 955.5999999999767,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-06-2-C",
+      "arm": "C",
+      "totalImportMs": 950.5,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "block-06-3-B",
+      "arm": "B",
+      "totalImportMs": 904.2999999999884,
+      "mediaMode": "sample",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "diagnostic-A",
+      "arm": "A",
+      "totalImportMs": 990.2999999999884,
+      "mediaMode": "all",
+      "lookupReceipts": 72
+    },
+    {
+      "name": "diagnostic-B",
+      "arm": "B",
+      "totalImportMs": 1008.5999999999767,
+      "mediaMode": "all",
+      "lookupReceipts": 72
+    }
+  ],
+  "limits": "Full inventory and media identity; 12 sampled terms over six lookup passes. This audit does not prove all-term semantics or process peak memory. Baselines and screens establish no speedup."
+}

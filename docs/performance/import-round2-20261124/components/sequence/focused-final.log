@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/0a1757ac2970/jmdict-sequence
+
+
+ Test Files  3 passed (3)
+      Tests  107 passed (107)
+   Start at  02:59:08
+   Duration  7.93s (transform 444ms, setup 48ms, import 556ms, tests 8.94s, environment 0ms)
+

@@ -1,0 +1,45 @@
+{
+  "source": {
+    "baseline": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "localCommit": "cc4a0a73fef29c418b1f8d894648c1e9f2c2a230",
+    "publishedCommit": "ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf",
+    "tree": "3dd10f7c9b24e9ba3429a4d65540210a86d17fa3",
+    "pullRequest": 862
+  },
+  "passed": {
+    "focusedTests": 107,
+    "fullUnit": {
+      "files": 642,
+      "passed": 14427,
+      "skipped": 47,
+      "failed": 0
+    },
+    "scopedEslint": true,
+    "testTypescript": true,
+    "allTargetDryBuild": true,
+    "pinnedWasmReproduction": true
+  },
+  "corpusOracle": {
+    "result": "corpus-oracle.json",
+    "sha256": "5e043750392ec2b0070e939a3614a58c79ac7307a12d2a3eeca06d94de5a05ae",
+    "rows": 7613164,
+    "banks": 937,
+    "scope": "Exact full-source parser/content/key/index/media-projection parity and independent JSON key/numeric checks; fixed four-bank component groups, ordinary row metadata. Excludes worker scheduling, compression, persistence and end-to-end timing."
+  },
+  "componentDiagnostic": {
+    "result": "lookup-component.json",
+    "sha256": "9964dc126ee2c04c479ff4143f32f92dc0a6a7c99eed04077316c47eb4dc0fac",
+    "scope": "Native lookup encoder only on first four banks of each locked corpus plus changed-sequence adversarial controls; 12 balanced ABC blocks,24 resident calls per observation. Shared host with sibling unit suites active; own final WASM reproduction check may overlap fixture preparation. No timing qualification or complete-import claim. All raw observations retained. Late-first-decrease control is slower by about6% versus both controls."
+  },
+  "retainedAttempts": [
+    {
+      "log": "focused-initial.log",
+      "result": "8 failed/98 passed using stale baseline ext/lib WASM after only dev artifact regeneration; setup issue. These were implementation-only scratch assertions removed from final tests. After build:libs and final behavior-focused tests,107 passed."
+    },
+    {
+      "log": "lint-initial.log",
+      "result": "14 formatting errors, fixed by scoped ESLint autofix before commit."
+    }
+  ],
+  "review": "Root, vndb and prior_work independently reviewed frozen runtime; no correctness blocker. No product source edits after frozen commit."
+}

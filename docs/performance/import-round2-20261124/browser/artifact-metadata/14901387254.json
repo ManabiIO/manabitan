@@ -1,0 +1,21 @@
+{
+  "id": 14901387254,
+  "name": "import-crossover-canonical-counters-screen-jmdict-45353118407-1",
+  "size_in_bytes": 889292,
+  "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14901387254",
+  "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14901387254/zip",
+  "expired": false,
+  "created_at": "2026-11-24T08:11:02Z",
+  "expires_at": "2026-12-08T08:11:02Z",
+  "updated_at": "2026-11-24T08:11:02Z",
+  "digest": "sha256:c37683a54c75b03580be8b41306283100d94ec52339bdf47596205ce2c519c01",
+  "workflow_run": {
+    "id": 45353118407,
+    "repository_id": 1165902460,
+    "head_repository_id": 1165902460,
+    "head_branch": "perf/import-round2-20261124-0a175-study",
+    "head_sha": "478556323c394977992bfb767ad311d42990ee2a"
+  },
+  "localArchive": "browser/original-artifacts/canonical-counters-screen-jmdict.zip",
+  "localExtracted": "browser/screen/canonical-counters-jmdict"
+}

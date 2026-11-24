@@ -1,0 +1,8 @@
+ ext/js/dictionary/dictionary-importer.js         |  40 ++++++--
+ ext/js/dictionary/source-zip-media-pack.js       |  12 ++-
+ test/dictionary-importer-media-batch.test.js     |  14 ++-
+ test/dictionary-importer-media-keys.test.js      |   1 +
+ test/dictionary-importer-media-reference.test.js | 118 ++++++++++++++++++++++-
+ test/raw-zip-range-reader.test.js                |  38 ++++++--
+ types/ext/dictionary-importer.d.ts               |  13 ++-
+ 7 files changed, 213 insertions(+), 23 deletions(-)

@@ -1,0 +1,193 @@
+{
+  "status": "passed",
+  "auditSha256": "ea103c0581a0f8b90d77b9b6313e128fb96e5df645da2577e12fe75fc5e7d824",
+  "controlCount": 37,
+  "method": "In-memory negative controls for the independent analysis verifier.\n\nOriginal packets and product sources are never mutated. Original ZIP member\nverification stays enabled; selected JSON reads are changed only in memory to\nexercise deeper identity, selection, raw-clock, correctness and statistics gates.",
+  "results": [
+    {
+      "name": "unregistered-run",
+      "status": "rejected-as-expected",
+      "reason": "Unregistered workflow run: 999999"
+    },
+    {
+      "name": "source-tree",
+      "status": "rejected-as-expected",
+      "reason": "Protocol source identities differ from frozen publication"
+    },
+    {
+      "name": "runner-identity",
+      "status": "rejected-as-expected",
+      "reason": "Frozen runner differs"
+    },
+    {
+      "name": "frozen-harness-omission",
+      "status": "rejected-as-expected",
+      "reason": "Full frozen harness differs"
+    },
+    {
+      "name": "fixture-lock-digest",
+      "status": "rejected-as-expected",
+      "reason": "Fixture differs from frozen d24 lock"
+    },
+    {
+      "name": "diagnostic-arm-omission",
+      "status": "rejected-as-expected",
+      "reason": "Prespecified cohort selection differs"
+    },
+    {
+      "name": "attempt-omission",
+      "status": "rejected-as-expected",
+      "reason": "Observation tuple omission/reorder/relabel"
+    },
+    {
+      "name": "arm-relabel",
+      "status": "rejected-as-expected",
+      "reason": "Observation tuple omission/reorder/relabel"
+    },
+    {
+      "name": "cohort-relabel",
+      "status": "rejected-as-expected",
+      "reason": "Observation tuple omission/reorder/relabel"
+    },
+    {
+      "name": "position-relabel",
+      "status": "rejected-as-expected",
+      "reason": "Observation tuple omission/reorder/relabel"
+    },
+    {
+      "name": "summary-path-traversal",
+      "status": "rejected-as-expected",
+      "reason": "Observation file alias/traversal: block-01-1-A"
+    },
+    {
+      "name": "raw-report-alias",
+      "status": "rejected-as-expected",
+      "reason": "Report path alias/traversal: block-01-1-A"
+    },
+    {
+      "name": "emitted-harness-omission",
+      "status": "rejected-as-expected",
+      "reason": "Missing/additional/changed emitted provenance: block-01-1-A"
+    },
+    {
+      "name": "changed-package-member",
+      "status": "rejected-as-expected",
+      "reason": "Release package delta exceeds intended runtime members"
+    },
+    {
+      "name": "wrong-packaged-native-bytes",
+      "status": "rejected-as-expected",
+      "reason": "Packaged runtime differs from frozen source: B/lib/term-bank-parser.wasm"
+    },
+    {
+      "name": "raw-profile-enabled",
+      "status": "rejected-as-expected",
+      "reason": "Raw benchmark configuration differs: block-01-1-A"
+    },
+    {
+      "name": "raw-skip-verification",
+      "status": "rejected-as-expected",
+      "reason": "Failed/skipped raw report: block-01-1-A"
+    },
+    {
+      "name": "raw-clock-changed",
+      "status": "rejected-as-expected",
+      "reason": "Summary duration differs from raw clocks: block-01-1-A"
+    },
+    {
+      "name": "raw-stale-import-sequence",
+      "status": "rejected-as-expected",
+      "reason": "Missing/current-operation browser timing invalid: block-01-1-A"
+    },
+    {
+      "name": "restart-count",
+      "status": "rejected-as-expected",
+      "reason": "Restart inventory/content differs: block-01-1-A"
+    },
+    {
+      "name": "duplicate-probe",
+      "status": "rejected-as-expected",
+      "reason": "Invalid distinct probes: block-01-1-A"
+    },
+    {
+      "name": "duplicate-lookup",
+      "status": "rejected-as-expected",
+      "reason": "Missing/duplicate/reordered lookup observations: block-01-1-A"
+    },
+    {
+      "name": "storage-total",
+      "status": "rejected-as-expected",
+      "reason": "Storage inventory sum/uniqueness differs: block-01-1-A"
+    },
+    {
+      "name": "missing-phase-counters",
+      "status": "rejected-as-expected",
+      "reason": "Copied phase counters differ from raw report: block-01-1-A"
+    },
+    {
+      "name": "analysis-pairs",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-fasterPairs",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-pairedChangesPercent",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-pairedMedianPercent",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-pairedMedianBootstrap95Percent",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-intervalMethod",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-equalWorkPercent",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-baselineMedianMs",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-candidateMedianMs",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-raw-timing",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "analysis-screen-status",
+      "status": "rejected-as-expected",
+      "reason": "Analysis differs from independent raw-clock statistics"
+    },
+    {
+      "name": "Duplicate JSON key",
+      "status": "rejected-as-expected",
+      "reason": "Duplicate JSON key: x"
+    },
+    {
+      "name": "Non-finite JSON constant",
+      "status": "rejected-as-expected",
+      "reason": "Non-finite JSON constant: NaN"
+    }
+  ]
+}

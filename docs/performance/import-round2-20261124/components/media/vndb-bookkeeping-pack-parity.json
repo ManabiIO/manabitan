@@ -1,0 +1,87 @@
+{
+  "scope": "Node component parity for actual dense archive admission, full native CRC-checked source-media packing, index bytes, and packed Blob bytes. No browser import timing or memory claim.",
+  "node": "v24.22.3",
+  "source": {
+    "path": "/workspace/scratch/0a1757ac2970/manabitan/builds/e2e-dictionary-cache/vndb_characters_by_bee.zip",
+    "bytes": 291705969,
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "baseline": {
+    "head": "d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26",
+    "tree": "7f5c6cd0657114da17b832d3f074b9cea0c6c880"
+  },
+  "candidate": {
+    "head": "fab9802f03b82a6cce221576e4703c624d76aa1d",
+    "tree": "923cd36b875afbbee6e6674fd1b4450bed6ce362"
+  },
+  "outputPath": "/workspace/scratch/0a1757ac2970/vndb-bookkeeping-pack-parity.json",
+  "runs": [
+    {
+      "label": "baseline",
+      "catalog": "dense-zip",
+      "catalogEntries": 147237,
+      "termBanks": 665,
+      "mediaEntries": 146570,
+      "physicalMediaOffsetsNondecreasing": true,
+      "catalogSha256": "60672967cb72897911db45659ce476e13513d11e2921fe349ae42cdd0eee3f36",
+      "sourceIndexJsonSha256": "0a28a9ce238ed33bee743b3165eb331ac51cf63125baddcb6141e8b71689f6b5",
+      "denseGetDataTemporaryObjects": 147237,
+      "mediaOrderSortCalls": 1,
+      "mediaOrderComparatorCalls": 146569,
+      "mediaRecordSha256": "8e1c76f5fe024b33688234994de8efe8462d2847d07fc7341aa17dac407accf4",
+      "packedBlobBytes": 195649882,
+      "packedBlobSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+      "planDescriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "planIndexBytes": 3912816,
+      "planIndexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "rangeReadCount": 144,
+        "rangeReadBytes": 205086922,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      }
+    },
+    {
+      "label": "candidate",
+      "catalog": "dense-zip",
+      "catalogEntries": 147237,
+      "termBanks": 665,
+      "mediaEntries": 146570,
+      "physicalMediaOffsetsNondecreasing": true,
+      "catalogSha256": "60672967cb72897911db45659ce476e13513d11e2921fe349ae42cdd0eee3f36",
+      "sourceIndexJsonSha256": "0a28a9ce238ed33bee743b3165eb331ac51cf63125baddcb6141e8b71689f6b5",
+      "denseGetDataTemporaryObjects": 0,
+      "mediaOrderSortCalls": 0,
+      "mediaOrderComparatorCalls": 0,
+      "mediaRecordSha256": "8e1c76f5fe024b33688234994de8efe8462d2847d07fc7341aa17dac407accf4",
+      "packedBlobBytes": 195649882,
+      "packedBlobSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+      "planDescriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "planIndexBytes": 3912816,
+      "planIndexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "rangeReadCount": 144,
+        "rangeReadBytes": 205086922,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      }
+    }
+  ],
+  "status": "passed"
+}

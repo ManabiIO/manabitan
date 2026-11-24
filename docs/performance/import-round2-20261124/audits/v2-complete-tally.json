@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "auditSha256": "7b119cbe86da3a2a8be6889b5b2a62af12fb69958d1275158d6fc97113561853",
+  "packets": 12,
+  "baselinePackets": 3,
+  "screenPackets": 9,
+  "attemptedImports": 192,
+  "timedImports": 162,
+  "baselineSnapshotImports": 9,
+  "exhaustiveDiagnosticImports": 21,
+  "lookupReceipts": 13824,
+  "selection": "All 12 prespecified packets, all 192 attempted imports, no exclusions or pooled stage statistics."
+}

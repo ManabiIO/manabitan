@@ -1,0 +1,79 @@
+{
+  "files": [
+    {
+      "path": "vndb-bookkeeping-build.log",
+      "bytes": 430,
+      "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+    },
+    {
+      "path": "vndb-bookkeeping-component-summary.json",
+      "bytes": 4762,
+      "sha256": "4a9a832f5c8ca7c3e442e876f443fcc390734f8dd634968031d8bf90d18bc144"
+    },
+    {
+      "path": "vndb-bookkeeping-focused.log",
+      "bytes": 395,
+      "sha256": "853b663066d83de25a0a27a2d664ced5682a9dd38991882e290370d04d18f6c7"
+    },
+    {
+      "path": "vndb-bookkeeping-lint-initial.log",
+      "bytes": 2064,
+      "sha256": "ee3f60173d77c54ca9c09c9983682cfa1bf35e9f1ba504cea28d58213c42ac01"
+    },
+    {
+      "path": "vndb-bookkeeping-lint.log",
+      "bytes": 844,
+      "sha256": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a"
+    },
+    {
+      "path": "vndb-bookkeeping-pack-parity.json",
+      "bytes": 3352,
+      "sha256": "4b448a43c1c16ff6b49c0dc7c54163de4dbc705bca5a4fdb9f1861aeb3d4e2c9"
+    },
+    {
+      "path": "vndb-bookkeeping-pack-parity.log",
+      "bytes": 2052,
+      "sha256": "6bce2dc5667f89dff70ed40ba0e46c072393109476d018c6779abb23a244de63"
+    },
+    {
+      "path": "vndb-bookkeeping-pack-parity.mjs",
+      "bytes": 7690,
+      "sha256": "0abf26beb39de3b20c816277db72c6d52b57080fa0a3df87cd64519b5ebfe23f"
+    },
+    {
+      "path": "vndb-bookkeeping-projection-parity.json",
+      "bytes": 899883,
+      "sha256": "29aba9efa524aec06a38b86c3ab80b1fb55f58b34501c01456e3eb910071a84b"
+    },
+    {
+      "path": "vndb-bookkeeping-projection-parity.log",
+      "bytes": 2098,
+      "sha256": "706481a8f06ab3396db7983575239a11ef91b44808c0dfe469696d5ac8b522ab"
+    },
+    {
+      "path": "vndb-bookkeeping-projection-parity.mjs",
+      "bytes": 11742,
+      "sha256": "512b2c3617f7d7894a46198e4a8578557365d48dd29cf444c669edac979b0900"
+    },
+    {
+      "path": "vndb-bookkeeping-types-main.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "vndb-bookkeeping-types-test-initial.log",
+      "bytes": 426,
+      "sha256": "81f355413fd81cd4b553ccdbb621879b93c8e29f2e3de7ca3558e69c3e11f2f0"
+    },
+    {
+      "path": "vndb-bookkeeping-types-test.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "vndb-bookkeeping-unit-full.log",
+      "bytes": 14123,
+      "sha256": "a68bc22db66f3e11f338e1b88d6fe5ace1957b1c64a24cd675ee39b0887c2fc8"
+    }
+  ]
+}

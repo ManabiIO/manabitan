@@ -1,0 +1,14 @@
+{
+  "status": "approved",
+  "reviewer": "prior_work",
+  "reviewedPredicateVersionSha256": "ea103c0581a0f8b90d77b9b6313e128fb96e5df645da2577e12fe75fc5e7d824",
+  "finalScriptSha256": "7b119cbe86da3a2a8be6889b5b2a62af12fb69958d1275158d6fc97113561853",
+  "changeAfterReview": "Output limits wording only: explicitly disclose missing product ZIP archives and manifest/reported-hash verification scope; no predicate, timing, source, protocol or selection changes.",
+  "negativeControls": "v2-negative-controls.json: 37 accepted rejection controls on the reviewed predicates; predicates unchanged in final version.",
+  "initialCorrections": [
+    "First baseline audit compared projected phase objects with full raw phases including epoch fields; corrected to the frozen runner projection.",
+    "Canonical local checkout includes an additional test-style commit. Check local baseline ancestry plus exact published/local tree equality, and exact published immediate baseline parent."
+  ],
+  "availablePackets": 9,
+  "availableImports": 132
+}

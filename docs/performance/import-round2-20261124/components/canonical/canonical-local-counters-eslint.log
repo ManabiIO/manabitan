@@ -1,0 +1,57 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/0a1757ac2970/canonical-local-counters/test/term-content-canonical-counters.test.js
+   18:19  error  Requires 'eslint-enable' directive for '@stylistic/semi'                     eslint-comments/disable-enable-pair
+   58:32  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   59:32  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   59:56  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   60:33  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   61:37  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   61:66  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   62:28  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   62:31  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   62:38  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   62:45  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   62:60  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   62:63  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   63:11  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   63:22  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   63:25  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+   63:28  error  There should be a linebreak after this element                               @stylistic/array-element-newline
+  118:58  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  118:69  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  124:8   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  125:56  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  125:67  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  128:8   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  129:61  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  129:74  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  132:8   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  132:19  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  139:34  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  139:45  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  141:8   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  142:37  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  142:48  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  146:8   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  149:48  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  149:59  error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+  153:8   error  Object properties must go on a new line if they aren't all on the same line  @stylistic/object-property-newline
+
+✖ 36 problems (36 errors, 0 warnings)
+  35 errors and 0 warnings potentially fixable with the `--fix` option.
+
