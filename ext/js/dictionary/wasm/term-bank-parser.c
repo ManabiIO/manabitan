@@ -1155,6 +1155,124 @@ static int parse_value_span(const uint8_t* src, uint32_t len, uint32_t start, ui
     return parse_scalar_span(src, len, start, out_end);
 }
 
+typedef struct {
+    uint32_t count;
+    uint32_t start;
+    uint32_t length;
+} GlossaryImagePath;
+
+enum { MEDIA_GLOSSARY, MEDIA_GLOSSARY_ITEM, MEDIA_STRUCTURED_CONTENT };
+
+/* Project the same semantic edges as the JavaScript image collector. Objects
+ * retain only their last content/path/type/tag value. A later image selector
+ * replaces child paths, while an ordinary structured tag retains its content.
+ * Count saturates at two: multiple paths keep the general JavaScript path. */
+static int project_glossary_image_value(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t role,
+    uint32_t depth, uint32_t* out_end, GlossaryImagePath* out
+) {
+    *out = (GlossaryImagePath){0u, 0u, 0u};
+    if (start >= len) { return 0; }
+    const uint8_t first = src[start];
+    if (first != '[' && first != '{') {
+        return parse_value_span(src, len, start, out_end);
+    }
+    if (depth >= MAX_JSON_NESTING) { return 0; }
+    if (first == '[') {
+        if (role == MEDIA_GLOSSARY_ITEM) {
+            return parse_composite_span(src, len, start, out_end);
+        }
+        uint32_t i = skip_ws(src, len, start + 1u);
+        if (i < len && src[i] == ']') { *out_end = i + 1u; return 1; }
+        while (i < len) {
+            uint32_t end;
+            GlossaryImagePath item;
+            if (!project_glossary_image_value(src, len, i,
+                role == MEDIA_GLOSSARY ? MEDIA_GLOSSARY_ITEM : MEDIA_STRUCTURED_CONTENT,
+                depth + 1u, &end, &item)) { return 0; }
+            if (item.count != 0u) {
+                if (out->count == 0u) { *out = item; }
+                else { out->count = 2u; }
+            }
+            i = skip_ws(src, len, end);
+            if (i >= len) { return 0; }
+            if (src[i] == ']') { *out_end = i + 1u; return 1; }
+            if (src[i] != ',') { return 0; }
+            i = skip_ws(src, len, i + 1u);
+            if (i >= len || src[i] == ']') { return 0; }
+        }
+        return 0;
+    }
+    if (role == MEDIA_GLOSSARY) { return 0; }
+    uint32_t selector = 0u;
+    GlossaryImagePath path = {0u, 0u, 0u};
+    GlossaryImagePath content = {0u, 0u, 0u};
+    uint32_t i = skip_ws(src, len, start + 1u);
+    if (i < len && src[i] == '}') { *out_end = i + 1u; return 1; }
+    while (i < len) {
+        const uint32_t key_start = i;
+        uint32_t key_end;
+        if (!parse_string_span(src, len, key_start, &key_end)) { return 0; }
+        const int content_key = json_string_matches_ascii(src, key_start, key_end, "content", 7u);
+        const int path_key = json_string_matches_ascii(src, key_start, key_end, "path", 4u);
+        const int selector_key = role == MEDIA_GLOSSARY_ITEM ?
+            json_string_matches_ascii(src, key_start, key_end, "type", 4u) :
+            json_string_matches_ascii(src, key_start, key_end, "tag", 3u);
+        i = skip_ws(src, len, key_end);
+        if (i >= len || src[i] != ':') { return 0; }
+        const uint32_t value_start = skip_ws(src, len, i + 1u);
+        uint32_t value_end;
+        if (content_key) {
+            if (!project_glossary_image_value(src, len, value_start, MEDIA_STRUCTURED_CONTENT,
+                depth + 1u, &value_end, &content)) { return 0; }
+        } else {
+            if (!parse_value_span(src, len, value_start, &value_end)) { return 0; }
+        }
+        if (path_key) {
+            path = src[value_start] == '"' ?
+                (GlossaryImagePath){1u, value_start, value_end - value_start} :
+                (GlossaryImagePath){0u, 0u, 0u};
+        }
+        if (selector_key) {
+            if (role == MEDIA_GLOSSARY_ITEM) {
+                selector = json_string_matches_ascii(src, value_start, value_end, "image", 5u) ? 1u :
+                    json_string_matches_ascii(src, value_start, value_end, "structured-content", 18u) ? 2u : 0u;
+            } else {
+                selector = json_string_matches_ascii(src, value_start, value_end, "img", 3u) ? 1u : 0u;
+            }
+        }
+        i = skip_ws(src, len, value_end);
+        if (i >= len) { return 0; }
+        if (src[i] == '}') {
+            *out = selector == 1u ? path :
+                (role == MEDIA_STRUCTURED_CONTENT || selector == 2u ? content : (GlossaryImagePath){0u, 0u, 0u});
+            *out_end = i + 1u;
+            return 1;
+        }
+        if (src[i] != ',') { return 0; }
+        i = skip_ws(src, len, i + 1u);
+        if (i >= len || src[i] == '}') { return 0; }
+    }
+    return 0;
+}
+
+/* No arena allocation or row metadata is needed for the common single-image
+ * result. The caller decodes only this quoted token before parser memory can
+ * be reused. Empty, multiple-path, malformed and unsupported spans fall back. */
+__attribute__((visibility("default")))
+uint64_t project_single_glossary_image_path(uint32_t source_ptr, uint32_t source_length) {
+    const uint64_t memory_bytes = (uint64_t)__builtin_wasm_memory_size(0) * WASM_PAGE_SIZE;
+    if ((uint64_t)source_ptr + source_length > memory_bytes) { return 0u; }
+    const uint8_t* src = (const uint8_t*)(uintptr_t)source_ptr;
+    const uint32_t start = skip_ws(src, source_length, 0u);
+    if (start >= source_length || src[start] != '[') { return 0u; }
+    GlossaryImagePath path;
+    uint32_t end;
+    if (!project_glossary_image_value(src, source_length, start, MEDIA_GLOSSARY, 0u, &end, &path) ||
+        skip_ws(src, source_length, end) != source_length || path.count != 1u) { return 0u; }
+    return ((uint64_t)path.start << 32u) | path.length;
+}
+
 static int parse_value_span_with_glossary_hints(
     const uint8_t* src,
     uint32_t len,

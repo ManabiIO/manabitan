@@ -98,6 +98,7 @@ async function parse(data) {
         );
         const experiments = snapshotTermBankExperiments(options);
         const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
+        /** @type {Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>|undefined} */
         let preloadedSource;
         if (typeof data.sourceMetadata !== 'undefined') {
             if (!Array.isArray(data.sourceMetadata) || data.sourceMetadata.length !== sourceBytes.length) {
@@ -140,7 +141,7 @@ async function parse(data) {
                     chunk.rowCount,
                 );
                 const shareContentBytes = options.ownContentBytes !== true;
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, preloadedSource);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer

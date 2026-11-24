@@ -4,7 +4,7 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
+    "sourceDigest": "02fd714697c6035b04295d562510c07d97d8d69993a13a3151d9ad807be36555",
     "sourceFileCount": 14,
     "targets": [
         {
@@ -46,6 +46,7 @@
                 "-Wl,--export=inflate_and_join_term_banks",
                 "-Wl,--export=verify_term_bank_source_crcs",
                 "-Wl,--export=inflate_zip_media_batch",
+                "-Wl,--export=project_single_glossary_image_path",
                 "-Wl,--export=parse_term_bank",
                 "-Wl,--export=parse_term_bank_with_media_hints",
                 "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
@@ -58,7 +59,7 @@
                 "-Wl,--export=encode_term_content_token_binary_dedup",
                 "-Wl,--strip-all"
             ],
-            "sha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            "sha256": "75989e16062aee072a5b4e3ffa65f1696b0bee0db267540372f0a57cef30357f"
         }
     ]
 }

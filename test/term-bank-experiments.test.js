@@ -599,6 +599,51 @@ function requestWorker(worker, request) {
 }
 
 describe('actual parser worker flag propagation', () => {
+    test('projects a compressed media source without reconstructing its complete glossary', async () => {
+        const glossary = JSON.stringify([{type: 'structured-content', content: {tag: 'div', content: ['text'.repeat(1024), {tag: 'img', path: 'img/猫.webp'}]}}])
+        const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
+        const bridge = `import {parentPort} from 'node:worker_threads'
+            const parse = JSON.parse
+            JSON.parse = (value, reviver) => {
+                if (value === ${JSON.stringify(glossary)}) { throw new Error('Unexpected full glossary reconstruction') }
+                return parse(value, reviver)
+            }
+            globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
+                postMessage: (data, transfer) => parentPort.postMessage(data, transfer)}
+            await import(${JSON.stringify(workerUrl)})
+            parentPort.postMessage({type: 'loaded'})`
+        const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`))
+        try {
+            expect((await requestWorker(worker, null)).type).toBe('loaded')
+            const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
+            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
+            let prior
+            let snapshot
+            for (const current of [glossary, '[{"type":"image","path":"later.png"}]']) {
+                const payload = compressed(`[["画像","がぞう","","",0,${current},1,""]]`, 8)
+                const reply = await requestWorker(worker, {type: 'parse',
+                    id: 1,
+                    version: 3,
+                    sourceBuffers: [payload.bytes.buffer],
+                    sourceMetadata: [payload],
+                    options: {computeContentHashes: true,
+                        emitContentSlab: true,
+                        emitTokenBinaryContent: true,
+                        mediaHintFastScan: true,
+                        projectImagePaths: true,
+                        validateGlossaryTypes: true,
+                        ownContentBytes: true,
+                        prepareLookupIndexes: true}})
+                expect(reply.type, JSON.stringify(reply.error)).toBe('result')
+                expect(reply.chunk?.mediaRows[0].imagePaths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
+                expect(reply.borrowsWorkerMemory).toBe(false)
+                if (prior) { expect(prior).toEqual(snapshot) }
+                prior = reply.chunk
+                snapshot = structuredClone(reply.chunk)
+            }
+        } finally { await worker.terminate() }
+    })
+
     test('transfers the diagnostic key arena once and preserves its views after another request', async () => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'
