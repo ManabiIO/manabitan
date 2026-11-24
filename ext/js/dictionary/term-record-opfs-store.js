@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {prepareImportIndexChunkParts} from './term-record-import-index-chunk.js';
+import {canTakeOwnedTermLookupIndex, registerOwnedTermRecordFields, takeOwnedTermLookupIndex} from './term-lookup-index-ownership.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -749,7 +751,7 @@ class DenseIdRecordStore {
  * @property {number} segmentIndex
  * @property {string} logicalKey
  * @property {number} initialFileLength
- * @property {Uint8Array[]} pendingLookupIndexChunks
+ * @property {import('./term-record-import-index-chunk.js').ImportIndexChunk[]} pendingLookupIndexChunks
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
@@ -2513,6 +2515,7 @@ export class TermRecordOpfsStore {
                 encodedChunk.lookupIndexBytes,
                 encodedChunk.recordFields,
                 encodedChunk.recordFieldsFormat,
+                preparedLookupIndex,
             );
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
@@ -5718,6 +5721,7 @@ export class TermRecordOpfsStore {
             contentLengths,
             contentOffsetBase,
         );
+        registerOwnedTermRecordFields(recordFields);
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes
         // so the encoder remains the only owner of score representation.
@@ -5767,6 +5771,7 @@ export class TermRecordOpfsStore {
      * @param {Uint8Array|null} [lookupIndexBytes=null]
      * @param {Uint8Array|null} [recordFields=null]
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} [preparedLookupIndex=null]
      * @returns {Promise<void>}
      */
     async _appendEncodedChunk(
@@ -5778,6 +5783,7 @@ export class TermRecordOpfsStore {
         lookupIndexBytes = null,
         recordFields = null,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+        preparedLookupIndex = null,
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
@@ -5808,13 +5814,14 @@ export class TermRecordOpfsStore {
             lookupIndexBytes instanceof Uint8Array &&
             lookupIndexBytes.byteLength > 0
         ) {
-            const lookupIndexChunk = this._createLookupIndexChunk(
+            const lookupIndexChunk = this._createPendingLookupIndexChunk(
                 firstId,
                 count,
                 contentOffsetBase,
                 lookupIndexBytes,
                 recordFields,
                 recordFieldsFormat,
+                preparedLookupIndex,
             );
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
@@ -5890,6 +5897,51 @@ export class TermRecordOpfsStore {
             generationId[i] = Math.floor(Math.random() * 256);
         }
         return generationId;
+    }
+
+    /**
+     * Main-thread validation retains its existing order. Only witnessed private
+     * parser/store buffers may move into an unpublished scatter-write snapshot.
+     * Other inputs keep the established eager copying contract.
+     * @param {number} firstId
+     * @param {number} count
+     * @param {number} contentOffsetBase
+     * @param {Uint8Array} payload
+     * @param {Uint8Array|null} recordFields
+     * @param {number} recordFieldsFormat
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} prepared
+     * @returns {import('./term-record-import-index-chunk.js').ImportIndexChunk}
+     * @throws {Error} If the authoritative fields or lookup framing are invalid.
+     */
+    _createPendingLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat, prepared) {
+        if (
+            !this._importSessionActive || this._rawTermBankSourceBytes === null ||
+            this._rawTermBankSourceBytes < MIN_INDEX_WORKER_SOURCE_BYTES ||
+            !canTakeOwnedTermLookupIndex(prepared, payload, recordFields)
+        ) {
+            return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
+        }
+        if (!(recordFields instanceof Uint8Array) ||
+        getRecordFieldsByteLength(recordFields, 0, count, recordFieldsFormat) !== recordFields.byteLength) {
+            throw new Error('Invalid authoritative term-record fields');
+        }
+        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);
+        const {base} = splitPersistedTermLookupIndex(payload);
+        const byteLength = LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength + recordFields.byteLength;
+        const header = new Uint8Array(LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+        const view = new DataView(header.buffer);
+        view.setUint32(0, firstId, true);
+        view.setUint32(4, count, true);
+        writeSafeU64Le(view, 8, contentOffsetBase);
+        view.setUint32(16, payload.byteLength, true);
+        view.setUint32(20, base.byteLength, true);
+        view.setUint32(36, recordFieldsFormat, true);
+        const owned = takeOwnedTermLookupIndex(
+            /** @type {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex} */ (prepared),
+            payload,
+            recordFields,
+        );
+        return {header, ...owned, byteLength};
     }
 
     /**
@@ -6053,14 +6105,13 @@ export class TermRecordOpfsStore {
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
-                    // _createLookupIndexChunk owns each complete buffer. The
-                    // existing queue budget remains charged until this worker
-                    // acknowledges the write, including any periodic flush.
-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
-                } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
-                    await state.lookupIndexWritable.writeChunks(chunks);
+                    // Both representations own immutable complete buffers. The
+                    // byte budget covers the entire logical envelope through
+                    // the worker acknowledgement, including periodic flushes.
+                    await state.lookupIndexWritable.writeOwnedIndexChunks(chunks);
                 } else {
-                    await state.lookupIndexWritable.write(new Blob(chunks));
+                    const parts = prepareImportIndexChunkParts(chunks);
+                    await (state.lookupIndexWritable instanceof SyncImportIndexWriter ? state.lookupIndexWritable.writeChunks(parts) : state.lookupIndexWritable.write(new Blob(parts)));
                 }
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
