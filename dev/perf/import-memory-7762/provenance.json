@@ -1,0 +1,14 @@
+{
+    "sourceCommit": "f2f08c8ee74cdea548c5c1b494ec15bf10360b46",
+    "sourceDirectory": "dev/perf/import-memory-20261123-72c24",
+    "unchangedFiles": {
+        "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce"
+    },
+    "extractedHelpers": [
+        "memory_overlay",
+        "schedule"
+    ]
+}
