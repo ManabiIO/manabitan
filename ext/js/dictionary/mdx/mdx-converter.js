@@ -1953,7 +1953,7 @@ function appendStructuredContent(parent, content, details) {
 
         if (mappedTag === 'a') {
             const sourceHref = attrs.href ?? attrs.src ?? '';
-            element.href = convertLinkHref(sourceHref, details);
+            element.href = tagName === 'audio' && !details.enableAudio ? '#' : convertLinkHref(sourceHref, details);
         } else if (mappedTag === 'td' || mappedTag === 'th') {
             const colSpan = typeof attrs.colspan === 'string' && /^\d+$/u.test(attrs.colspan) ? Number.parseInt(attrs.colspan, 10) : Number.NaN;
             if (Number.isFinite(colSpan) && colSpan >= 1) { element.colSpan = colSpan; }
