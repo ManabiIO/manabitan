@@ -1,0 +1,10 @@
+{
+  "local": "49fd49099925c6e8b2415f3d30f2ae0e114880d3",
+  "remote": "d5ddb829542111e2067343ca16479d685eca3866",
+  "tree": "1c6fe278ad76d16c2f08600d3fb7e5098a206780",
+  "branch": "perf/import-critical-path-20261124-3aac",
+  "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+  "finalRemote": "aefca55540973732f48b9a86fa4d35d892894f23",
+  "finalTree": "ffc04a8962d5215db3ff691b3566b0394fcea698",
+  "runId": 45458569610
+}

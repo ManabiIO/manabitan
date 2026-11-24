@@ -1,0 +1,60 @@
+{
+  "name": "vndb-media-qualification-independent-audit",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": null,
+  "packagerSha256": "e4c2727eb2e9b4adcf8410606ded0e9d7e33d9e1779dec762e19c4f1f9fbc1a6",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 66330,
+  "retainedFiles": [
+    {
+      "bytes": 6905,
+      "path": "README.md",
+      "sha256": "2eac3e27e0c05dd562112d84c174d358e4c1e141a5864e410d6ed790cb330f3b"
+    },
+    {
+      "bytes": 1071,
+      "path": "artifact-provenance.json",
+      "sha256": "796de709dfad42ff8e8ba06a6580db548717e9b26ab860d14a6e5f3479064ff4"
+    },
+    {
+      "bytes": 40502,
+      "path": "receipt.json",
+      "sha256": "18df9b9761cd4b55685f1153d11d8a7bba9440e2b0e68caca3ed83f81b124a80"
+    },
+    {
+      "bytes": 17852,
+      "path": "reconcile.py",
+      "sha256": "73bcf332dad227f48e7cd756960d6b4f89d3e90d2414e0072b6521c995fd542e"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceBytes": 66330,
+  "sourceFileCount": 4,
+  "sourceInventory": [
+    {
+      "bytes": 6905,
+      "path": "README.md",
+      "sha256": "2eac3e27e0c05dd562112d84c174d358e4c1e141a5864e410d6ed790cb330f3b"
+    },
+    {
+      "bytes": 1071,
+      "path": "artifact-provenance.json",
+      "sha256": "796de709dfad42ff8e8ba06a6580db548717e9b26ab860d14a6e5f3479064ff4"
+    },
+    {
+      "bytes": 40502,
+      "path": "receipt.json",
+      "sha256": "18df9b9761cd4b55685f1153d11d8a7bba9440e2b0e68caca3ed83f81b124a80"
+    },
+    {
+      "bytes": 17852,
+      "path": "reconcile.py",
+      "sha256": "73bcf332dad227f48e7cd756960d6b4f89d3e90d2414e0072b6521c995fd542e"
+    }
+  ],
+  "sourceInventorySha256": "fa59d8b01ca5b430ce6f710d38871c73e595b7672982f1aa495a1f96e14551a8",
+  "sourceRoot": "vndb-media-qualification-independent-audit",
+  "stage": "supporting",
+  "timingClaim": "none; supporting source/oracle/failure/provenance evidence"
+}

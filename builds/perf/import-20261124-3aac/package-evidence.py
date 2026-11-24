@@ -6,6 +6,8 @@ Each input directory receives its own archive and manifest. Changed inputs get
 a new content-derived version, so an earlier failed or incomplete snapshot is
 never replaced. The sole CI-content omission is a built product ZIP whose full
 archive hash and every package-entry hash are checked against retained receipts.
+Product ZIPs absent from the original CI artifacts are not independently
+rehashed; their original hash and entry-inventory receipts remain retained.
 """
 
 import argparse
@@ -46,6 +48,12 @@ LOCAL_RECEIPTS = {
     'six-screen-independent-review.json', 'prefix-qualification-artifact-provenance.json',
     'package-guards.json', 'private-prefix-handoff.md', 'memory-tooling-tests.log',
     'private-prefix-qualification-receipt.md',
+    'canonical-vndb-artifact-metadata.json', 'canonical-vndb-artifact-receipt.json',
+    'media-qualification-artifact-metadata.json', 'media-qualification-artifact-receipts.json',
+    'final-source-ci.json',
+    'checkpoint.json',
+    'evidence-markdown-validation.json',
+    'final-handoff-append-receipt.json',
     'jmdict-cache-receipt.json', 'jmdict-cache-focused-setup-failure.log',
     'jmdict-cache-focused.log', 'jmdict-cache-lint.log', 'jmdict-cache-lint-final.log',
     'jmdict-cache-types-main.log', 'jmdict-cache-types-test.log',
@@ -384,6 +392,8 @@ def refresh(round2, output, media_run):
     supporting = [
         ('vndb-audit', None), ('storage-protocol', None), ('jmdict-audit', None),
         ('media-memory-attribution', None),
+        ('vndb-screen-independent-audit', None),
+        ('vndb-media-qualification-independent-audit', None),
         (f'activation-failures-{RUNS["activation-failures"]}',
          lambda p: not p.parts[0].startswith('artifact-') or len(p.parts) == 1),
         (f'activation-corrected-{RUNS["activation-corrected"]}',
@@ -409,7 +419,7 @@ def refresh(round2, output, media_run):
               'scope': 'Separate fixed timing cohorts, memory replications, failed activation diagnostics and supporting source evidence; no pooling.',
               'packagerSha256': digest(Path(__file__)),
               'archiveFormat': 'Sorted regular-file tar, uid/gid=0, mode=0644, mtime=0; gzip mtime=0 and empty filename.',
-              'productZipExclusion': 'Every built product ZIP omitted only after its full archive SHA and all entry hashes match retained receipts; raw reports/scans/markers/logs retained.',
+              'productZipExclusion': 'Each product ZIP actually present in a downloaded artifact is omitted only after its full archive SHA and all entry hashes match retained receipts. Timing artifacts never included product ZIP bytes; their original hashes/entry inventories are retained and reconciled without independently rehashing unavailable ZIPs. Raw reports/scans/markers/logs are retained.',
               'expectedArtifactNames': expected,
               'plannedStages': [{
                   'stage': 'media-qualification', 'runId': RUNS['media-qualification'],
@@ -432,6 +442,7 @@ def refresh(round2, output, media_run):
     lines = ['# Import evidence snapshot — 2026-11-24', '',
              'Every cell is preserved separately. The status below is copied from the original study; packaging does not qualify a study, pool cohorts, remove tails, or replace failed observations.', '',
              'Built product ZIP bytes are the sole CI-content exclusion. Their full archive SHA-256 and every package-entry hash were checked before omission, and their identity receipts, original CI links, source revisions and build recipes remain retained. Full native JSON, protocols, raw memory scans, markers, logs and failures remain in the archives. Rebuilt ZIP container bytes may differ even when package contents match.', '',
+             'The ZIP-byte checks apply only to product ZIPs actually present in the downloaded memory artifacts. The original timing artifacts never included product ZIP bytes; those cells retain the original archive hashes and package-entry inventories, which were reconciled without independently rehashing unavailable ZIPs. An empty omitted-product list does not imply that original CI included a product ZIP.', '',
              'Run `python3 package-evidence.py --verify` to audit archive/member hashes and readable receipts. Extract an archive with `tar -xzf <archive> -C <empty-directory>`. Omitted product ZIPs needed by the original memory receipt verifier can be recovered from the linked original CI artifact while available; their expected hashes are in each manifest.', '',
              'Refresh from the acquisition workspace with `python3 package-evidence.py --round2 /absolute/path/to/round2`. Add `--media-memory-run RUN_ID` before those artifacts arrive if needed. The script runs no tests, browser acquisitions or benchmarks. Input-content changes create a new version; prior snapshots are never removed.', '',
              f'Total compressed archive bytes: **{result["allArchiveBytes"]:,}**.', '',

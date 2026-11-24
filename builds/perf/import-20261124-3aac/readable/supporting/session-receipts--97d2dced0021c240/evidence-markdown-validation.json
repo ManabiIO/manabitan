@@ -1,0 +1,38 @@
+{
+  "scope": "Normal repository Markdown command excludes builds/ evidence; byte-preserved historical documents are not reformatted. Root separately checks the consolidated handoff.",
+  "normalCommand": "prettier . --check",
+  "checks": [
+    {
+      "path": "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/AGENTS.md",
+      "command": [
+        "prettier",
+        "--file-info",
+        "builds/perf/import-20261124-3aac/readable/supporting/vndb-audit--c49686d7852be538/AGENTS.md"
+      ],
+      "result": {
+        "ignored": true,
+        "inferredParser": null
+      },
+      "exitCode": 0
+    },
+    {
+      "path": "builds/perf/import-20261124-3aac/README.md",
+      "command": [
+        "prettier",
+        "--file-info",
+        "builds/perf/import-20261124-3aac/README.md"
+      ],
+      "result": {
+        "ignored": true,
+        "inferredParser": null
+      },
+      "exitCode": 0
+    }
+  ],
+  "configurationSha256": {
+    "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+    ".prettierignore": "8db2cf8adb5a9be4ba50207c163bdebb3c9882163c82b3137cd575f3db71d4cd",
+    ".gitignore": "8005163ac23ea887e284b61f597036451aea480128636c75db87a47c1d2c85c6"
+  },
+  "rawEvidenceChangedForStyle": false
+}

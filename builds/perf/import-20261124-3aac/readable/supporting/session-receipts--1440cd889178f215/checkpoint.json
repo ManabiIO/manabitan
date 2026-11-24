@@ -1,0 +1,410 @@
+{
+  "baseline": {
+    "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+  },
+  "diagnostics": {
+    "run": 45458569610,
+    "allJobs": "success",
+    "initialTooling": "d5ddb829542111e2067343ca16479d685eca3866",
+    "finalTooling": "aefca55540973732f48b9a86fa4d35d892894f23",
+    "finalWorkflowLint": "success",
+    "artifactsRoot": "/workspace/scratch/3aacd533c01f/round2/artifacts",
+    "ordinaryImportMs": {
+      "jmdict": 1007.4,
+      "jitendex": 1929.3,
+      "vndb": 8027.3
+    },
+    "claims": "Single observations for attribution only; no comparative performance claim"
+  },
+  "runtime": {
+    "node": "22.22.0",
+    "chromium": "153.0.8010.12",
+    "browserTarSha256": "cb692ecd393443b0a278fdfb31838b6e3ec86416c46b133336f4be08a5c4361b",
+    "environmentFile": "/workspace/scratch/3aacd533c01f/round2/env.sh"
+  },
+  "workstreams": {
+    "jmdict": "Synchronous contiguous publication-to-cache validation reuse; new baseline#824",
+    "jitendex": "Private ArrayBuffer prefix reservation under codec bound; targeted tests",
+    "vndb": "Native exact single-image semantic projection; pinned C/WASM rebuild and tests"
+  },
+  "studyTooling": "/workspace/scratch/3aacd533c01f/round2/study-tooling",
+  "updatedUtc": "2026-11-24T20:34:45.797445+00:00",
+  "diagnosticBaseline": {
+    "commit": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+    "tree": "c0d683158cd52869fa4861fd4790054f49bf0721"
+  },
+  "rejectedAlternative": "Fresh exact-sized owned SharedArrayBuffer matches rejected#810/#839 core; no source-lifetime fix explains prior~10% memoryregression. No new benchmark/prototype published.",
+  "sourcePullRequests": {
+    "prefix": {
+      "number": 874,
+      "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd",
+      "branch": "perf/accepted-private-content-overlap-20261124-3aac",
+      "state": "draft HOLD after inconsistent independent timing"
+    },
+    "media": {
+      "number": 875,
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103",
+      "branch": "perf/native-media-projection-20261124-3aac",
+      "state": "draft HOLD: complete VNDB timing benefit replicated on both independent hosts; memory qualification failed"
+    },
+    "cache": {
+      "number": 876,
+      "commit": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+      "tree": "1edef4035041ef848175e3278169daf2260ac34a",
+      "branch": "perf/jmdict-cache-publication-20261124-3aac",
+      "state": "closed after no material gain"
+    },
+    "canonical": {
+      "number": 880,
+      "commit": "2dfa72962c9d9f1976011e41b9bbce2375f4dbb5",
+      "tree": "64345e92fff3800b5035b6aab52dff06e20bc874",
+      "branch": "perf/canonical-input-snapshots-20261124-3aac",
+      "state": "draft HOLD: all three complete-import screens inconclusive"
+    }
+  },
+  "timingScreen": {
+    "run": 45465463257,
+    "toolingCommit": "7147cf5a1d1d68a38105c407c4ad5ca92f56e056",
+    "stage": "screen",
+    "cells": 9,
+    "plannedBlocksPerCell": 6,
+    "status": "6 completed, 3 VNDB cells incomplete on storage allocation invariant",
+    "unchangedSourceControls": "A/C exactsamepackage",
+    "completed": "All JMdict/Jitendex cells",
+    "failedPreserved": true
+  },
+  "oldDraftsClosed": [
+    848,
+    854,
+    876
+  ],
+  "sourceCI": {
+    "874": {
+      "allCompleted": true,
+      "failures": 0,
+      "success": 25,
+      "skipped": 4
+    },
+    "875": {
+      "allCompleted": true,
+      "failures": 0,
+      "success": 27,
+      "skipped": 4
+    },
+    "876": {
+      "allCompleted": true,
+      "failures": 0,
+      "success": 25,
+      "skipped": 4
+    },
+    "880": {
+      "allCompleted": true,
+      "failures": 0,
+      "success": 25,
+      "skipped": 4
+    }
+  },
+  "prefixQualification": {
+    "run": 45468314006,
+    "toolingCommit": "eeec4c2055ed911de92ba98fdc815c8ff0444edb",
+    "dictionaries": [
+      "jmdict",
+      "jitendex"
+    ],
+    "blocksPerCell": 12,
+    "replications": [
+      "forward",
+      "reverse"
+    ],
+    "status": "all four complete, independently audited; HOLD"
+  },
+  "prefixMemory": {
+    "run": 45468614083,
+    "toolingCommit": "a96671c223ed1e7ed49f0c96427b2ef09229f4cc",
+    "status": "both independent replications pass and raw evidence independently audited",
+    "dictionaries": [
+      "jitendex"
+    ]
+  },
+  "vndbStorageScreen": {
+    "run": 45469432793,
+    "toolingCommit": "f44fbe93a4cb2da44cf94cc2a03236acde8755a8",
+    "status": "both cells complete, all correctness and exhaustive media checks passed",
+    "candidates": [
+      "prefix",
+      "media"
+    ],
+    "prospectiveStoragePolicy": "pinned-import-storage-20261124-v1",
+    "priorCohortsRemainFailed": true,
+    "mediaPairedMedianPercent": {
+      "B/A": -4.021103847903896,
+      "B/C": -4.324894318626943,
+      "C/A": -0.5984132226168337
+    },
+    "prefixPairedMedianPercent": {
+      "B/A": 0.14977353079200229,
+      "B/C": 0.7808594909580413,
+      "C/A": -1.3669266141872027
+    }
+  },
+  "activation": {
+    "run": 45468163108,
+    "toolingCommit": "81ebec7d94cea24c0b2b1ec88af78187b193905b",
+    "status": "failed; instrumentation hit fallback worker instead of offscreen production entry; Jit fixture-setup fetch timeout",
+    "correctionOwner": "jitendex_import",
+    "candidateUnchanged": true
+  },
+  "sourceReview": {
+    "prefix": "Independent VNDB-agent correctness/lifetime/rollback review found no blocker",
+    "media": "Full production VNDB parity 6648310rows/146725native projections; 0 glossary JSON parses",
+    "cache": "No material screen gain; no unchanged candidate rerun planned"
+  },
+  "nextJmdictWork": "None scheduled for unchanged candidates; native immutable-input screen is complete and inconclusive",
+  "mediaQualification": {
+    "run": 45475087387,
+    "toolingCommit": "2fb6c247852c64be1b836aff60b3eba5eb1acc7e",
+    "status": "both independent twelve-block hosts complete; all 82 observations independently reconciled; timing benefit replicated",
+    "dictionary": "vndb",
+    "blocksPerCell": 12,
+    "replications": [
+      "forward",
+      "reverse"
+    ],
+    "memoryHoldUnaffected": true,
+    "observations": 82,
+    "results": {
+      "forward": {
+        "candidate": {
+          "baselineMedianMs": 4634.000000000029,
+          "bestPairPercent": -6.907782697547715,
+          "candidateMedianMs": 4401.099999999977,
+          "equalWorkPercent": -5.099846943369468,
+          "fasterPairs": 12,
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+          "pairedChangesPercent": [
+            -6.088755738517559,
+            -3.1737934705459825,
+            -6.848019704001896,
+            -5.979820822823356,
+            -4.881066666667655,
+            -5.60091133472328,
+            -6.1259651585730985,
+            -6.907782697547715,
+            -3.9953765293452514,
+            -4.93970215870706,
+            -3.079362981564482,
+            -3.461314089407952
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -6.107360448545329,
+            -3.7283453093766017
+          ],
+          "pairedMedianPercent": -5.27030674671517,
+          "pairs": 12,
+          "worstPairPercent": -3.079362981564482
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 4643.049999999988,
+          "bestPairPercent": -9.014949737951428,
+          "candidateMedianMs": 4401.099999999977,
+          "equalWorkPercent": -5.248964445978565,
+          "fasterPairs": 12,
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+          "pairedChangesPercent": [
+            -3.5377462917863256,
+            -2.7467141902425607,
+            -9.014949737951428,
+            -6.657743620742251,
+            -3.9570049974166133,
+            -5.0641773628928295,
+            -6.660039761429504,
+            -5.07293566032968,
+            -6.042431486382216,
+            -4.601933802785618,
+            -5.045426098967298,
+            -4.423624034737306
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -6.350087553562234,
+            -4.19031451607696
+          ],
+          "pairedMedianPercent": -5.054801730930064,
+          "pairs": 12,
+          "worstPairPercent": -2.7467141902425607
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 4634.000000000029,
+          "bestPairPercent": -2.644567536694431,
+          "candidateMedianMs": 4643.049999999988,
+          "equalWorkPercent": 0.1573782299445936,
+          "fasterPairs": 6,
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+          "pairedChangesPercent": [
+            -2.644567536694431,
+            -0.43914123491812784,
+            2.3816330569785826,
+            0.7262764199361449,
+            -0.9621333333328375,
+            -0.5653650612815753,
+            0.5721821623786205,
+            -1.9329019073554665,
+            2.1787015026259127,
+            -0.3540620574249198,
+            2.0705301878895854,
+            1.0068491670777613
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -0.7637491973072064,
+            1.5386896774836734
+          ],
+          "pairedMedianPercent": 0.10906005247685036,
+          "pairs": 12,
+          "worstPairPercent": 2.3816330569785826
+        }
+      },
+      "reverse": {
+        "candidate": {
+          "baselineMedianMs": 6707.899999999994,
+          "bestPairPercent": -9.333216813773227,
+          "candidateMedianMs": 6410.0,
+          "equalWorkPercent": -4.889661091354103,
+          "fasterPairs": 12,
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+          "pairedChangesPercent": [
+            -5.275416499769747,
+            -6.825867385701889,
+            -4.715425212905466,
+            -5.664363957861884,
+            -7.49403409907613,
+            -2.2454920581073567,
+            -3.4297563813744048,
+            -9.333216813773227,
+            -4.319163783761725,
+            -4.621861465306798,
+            -3.0301671970960564,
+            -1.6380163801665737
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -6.245115671781886,
+            -3.2299617892352304
+          ],
+          "pairedMedianPercent": -4.668643339106133,
+          "pairs": 12,
+          "worstPairPercent": -1.6380163801665737
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 6712.4000000000815,
+          "bestPairPercent": -9.369399641576381,
+          "candidateMedianMs": 6410.0,
+          "equalWorkPercent": -4.726947976150697,
+          "fasterPairs": 11,
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+          "pairedChangesPercent": [
+            -4.095947610322326,
+            -5.316620494421653,
+            -4.668256754120781,
+            -7.979594223234388,
+            -6.169437153688784,
+            2.4344375175848754,
+            -9.369399641576381,
+            -2.5272453964678476,
+            -4.874232404345147,
+            -5.578459739443364,
+            -2.724942668289554,
+            -5.373892464430963
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -5.873948446566073,
+            -3.41044513930594
+          ],
+          "pairedMedianPercent": -5.0954264493834,
+          "pairs": 12,
+          "worstPairPercent": 2.4344375175848754
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 6707.899999999994,
+          "bestPairPercent": -6.98243467622156,
+          "candidateMedianMs": 6712.4000000000815,
+          "equalWorkPercent": -0.17078608457160582,
+          "fasterPairs": 7,
+          "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+          "pairedChangesPercent": [
+            -1.229842597948827,
+            -1.5939934750547446,
+            -0.049478229578814314,
+            2.5159965833980946,
+            -1.4116902906752826,
+            -4.5687072522742405,
+            6.553684116305103,
+            -6.98243467622156,
+            0.5835102671053694,
+            1.01311445618959,
+            -0.3137747097549215,
+            3.948039480394061
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -1.5028418828650136,
+            1.7645555197938423
+          ],
+          "pairedMedianPercent": -0.1816264696668679,
+          "pairs": 12,
+          "worstPairPercent": 6.553684116305103
+        }
+      }
+    }
+  },
+  "mediaMemory": {
+    "run": 45471351138,
+    "toolingCommit": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc",
+    "status": "unqualified for both dictionaries",
+    "observations": 16,
+    "rawScans": 1684,
+    "allCorrectnessPassed": true,
+    "passingCells": [
+      "jitendex-rep1",
+      "vndb-rep2"
+    ],
+    "failedCells": {
+      "jitendex-rep2": "A2 covered scan gap253.166629ms plus qualified first private pair+11.5409%; aggregate null",
+      "vndb-rep1": "both baseline coverage gaps353.233063ms/275.115924ms; no qualified pairs"
+    },
+    "noRerunsOrThresholdChanges": true,
+    "memoryAttribution": "No concrete new owner/retention defect; transient renderer excess has unresolved cause; failure retained"
+  },
+  "canonicalScreen": {
+    "run": 45472377306,
+    "toolingCommit": "8774a1cebe9974e5353af48453159413350d9a6a",
+    "status": "all three complete and independently reconciled; no material complete-import gain established",
+    "blocksPerCell": 6,
+    "noAdditionalUnchangedTimingPlanned": true,
+    "observations": 69
+  },
+  "activationCorrection": {
+    "run": 45470204352,
+    "toolingCommit": "200b8680bad62e9f40b015ceebebc7382b54dd4b",
+    "status": "all four complete and independently reconciled",
+    "prefixJitPrivateAdmissions": 21,
+    "prefixJMSharedAdmissions": 12,
+    "prefixVNDBAdmissions": 0,
+    "cacheJMProofReuses": 12,
+    "timingAuthoritative": false
+  },
+  "evidencePublication": {
+    "owner": "vndb_import",
+    "localRoot": "/workspace/scratch/3aacd533c01f/round2/evidence",
+    "branch": "perf/import-evidence-20261124-3aac",
+    "status": "initial exact-tree snapshot published; final complete-results and handoff incremental publication in progress",
+    "initialRemoteCommit": "2ac54db68ee3b354806b3aa62ebef14c49e1701c",
+    "initialTree": "7ce1f3a8b4b54e9c6328128c6c3d332add0cbef5"
+  },
+  "developAtFinalReview": {
+    "commit": "9a677aec40f81256dd84233de84ff6a0c43aed43",
+    "tree": "ff67d3e0dd465be8378c53d12b00082fe060e4c4",
+    "mergedPR": 883,
+    "qualificationScope": "All source performance evidence remains frozen to bbcc; current develop index-yield change is not included in these packages"
+  },
+  "noFurtherAcquisitionsScheduled": true
+}

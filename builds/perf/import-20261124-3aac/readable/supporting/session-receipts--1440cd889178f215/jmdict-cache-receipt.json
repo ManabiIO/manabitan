@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "candidate": "Synchronous publication proof reused only by immediate recent-source cache call",
+  "head": "d1338550aaff783738daa05cca189810bee807d9",
+  "tree": "1edef4035041ef848175e3278169daf2260ac34a",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "branch": "perf/jmdict-cache-publication-20261124-3aac",
+  "trackedClean": true,
+  "sourceFiles": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "sha256": "3181961c1776a4405fe0ef8b80e8f35b6eb4d8e21c55b3bce8ea6ac633f2cd8e"
+    },
+    {
+      "path": "test/dictionary-content-publication-range.test.js",
+      "sha256": "68c2136083d420475b70584ebd4cde49b04ac0c267628ead8bf13fb9f6fed424"
+    }
+  ],
+  "environment": {
+    "node": "22.22.0",
+    "envScript": "/workspace/scratch/3aacd533c01f/round2/env.sh"
+  },
+  "change": {
+    "removedWork": "Repeated published-state table reads in cache sampling/span scan and one full contiguous-reservation index scan after successful synchronous range publication.",
+    "preserved": [
+      "Every source span bounds check and byte sum",
+      "Sampling/admission/cache capacity/coverage",
+      "Full backing allocation accounting and FIFO eviction from merged PR824",
+      "Existing owned-view adoption and exact content comparisons",
+      "Generic, partial and collision publication paths",
+      "No witness persists across an await or on the database object"
+    ],
+    "aliasGuard": "Do not reuse publication proof when reservation indexes share a buffer with either cache mapping table."
+  },
+  "validation": [
+    {
+      "name": "focused",
+      "command": "npm run test:unit -- --maxWorkers=2 test/dictionary-content-publication-range.test.js test/dictionary-database-content-dedup.test.js",
+      "exitCode": 0,
+      "log": "/workspace/scratch/3aacd533c01f/round2/jmdict-cache-focused.log",
+      "sha256": "72b1eb8e10e30f54a6d1e265aa9ce4bf9e563dc5e696b369bb793a71df295656",
+      "suites": 2,
+      "testsPassed": 184
+    },
+    {
+      "name": "lint",
+      "command": "npx eslint ext/js/dictionary/dictionary-database.js test/dictionary-content-publication-range.test.js",
+      "exitCode": 0,
+      "log": "/workspace/scratch/3aacd533c01f/round2/jmdict-cache-lint-final.log",
+      "sha256": "1b469690b421d5bfc60e6ee1e741308fa0d2fe4c715caa7d481f27de31ac32e9"
+    },
+    {
+      "name": "mainTypes",
+      "command": "npm run test:ts:main",
+      "exitCode": 0,
+      "log": "/workspace/scratch/3aacd533c01f/round2/jmdict-cache-types-main.log",
+      "sha256": "1da0c33bb0ac8394f835f2a3bb1f5dacac73d329dc8c08413d28fbe012148bce"
+    },
+    {
+      "name": "testTypes",
+      "command": "npm run test:ts:test",
+      "exitCode": 0,
+      "log": "/workspace/scratch/3aacd533c01f/round2/jmdict-cache-types-test.log",
+      "sha256": "0dd69ab165673cfe8fff713333316d24d34c602971d036454dd4e8977a3829a0"
+    }
+  ],
+  "addedCoverage": [
+    "owned complete source",
+    "owned partial source",
+    "borrowed shared source",
+    "over-budget admission",
+    "FIFO eviction",
+    "identifier wrap",
+    "wrap with aliased reservation indexes",
+    "cache-offset mapping alias",
+    "short mapping table"
+  ],
+  "retainedFailures": [
+    {
+      "kind": "test environment setup",
+      "log": "/workspace/scratch/3aacd533c01f/round2/jmdict-cache-focused-setup-failure.log",
+      "sha256": "c1f94bb55288022b9ee9edbf672dd9487aded4ff874ff2ea11f94c5f8815b4f6",
+      "explanation": "Two suites failed to load because local ext/lib symlink target was incorrect; no tests ran. Corrected the untracked local symlink and reran the same fixed focused command."
+    },
+    {
+      "kind": "scoped lint",
+      "log": "/workspace/scratch/3aacd533c01f/round2/jmdict-cache-lint.log",
+      "sha256": "12abfb85dfe326c4363e4d8ec2c89b605d885bf96b5bbb9e83986a603a989104",
+      "explanation": "One multiline binary-expression indentation error; corrected with parentheses only, final scoped lint exits0."
+    }
+  ],
+  "pendingGates": [
+    "Exact-source full unit/options and all-target build in PR CI, delegated to root",
+    "Independent whole-import controlled screen; no candidate timing or memory improvement claimed",
+    "Actual full-corpus cache-witness route count diagnostic if feasible"
+  ],
+  "bottleneckScope": {
+    "baselineHead": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+    "ordinaryJMdictCacheMs": 56.80000000002474,
+    "traceJMdictCacheSampleSelfMs": 46.43,
+    "warning": "Separate trace overhead; cache time includes mandatory work retained by this candidate, is not a savings estimate, and overlaps compression."
+  }
+}
