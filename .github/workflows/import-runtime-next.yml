@@ -24,20 +24,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - candidate: baseline-round2
+          - candidate: monotonic-sequence
             baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            sha: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            stage: baseline
+            sha: ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf
+            stage: screen
             dictionary: jmdict
-          - candidate: baseline-round2
+          - candidate: monotonic-sequence
             baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            sha: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            stage: baseline
+            sha: ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf
+            stage: screen
             dictionary: jitendex
-          - candidate: baseline-round2
+          - candidate: monotonic-sequence
             baseline: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            sha: d24b4e56ceb1fe14ad96ef3853f4d397efa6fa26
-            stage: baseline
+            sha: ec4e81395a1eb0f6f5fbf4f6d4c591201887e8cf
+            stage: screen
             dictionary: vndb
     env:
       PERF_BASELINE_SHA: ${{ matrix.baseline }}
