@@ -87,6 +87,10 @@ export class SyncImportIndexWriter {
         this._workStartedAt = 0;
         /** @type {number} */
         this._workElapsedMs = 0;
+        /** @type {MessageChannel|null} */
+        this._yieldChannel = null;
+        /** @type {(() => void)|null} */
+        this._pendingYield = null;
     }
 
     /** @param {number} offset */
@@ -193,6 +197,7 @@ export class SyncImportIndexWriter {
         this._aborted = abort;
         this._closePromise = (async () => {
             await this._queue;
+            this._closeYieldChannel();
             const errors = this._failure === null ? [] : [this._failure];
             if (!abort && errors.length === 0) {
                 try {
@@ -286,8 +291,47 @@ export class SyncImportIndexWriter {
         this._workElapsedMs += now - this._workStartedAt;
         this._workStartedAt = now;
         if (this._workElapsedMs < WRITE_TIME_BUDGET_MS) { return; }
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
+        await this._yieldToNextTask();
         this._workElapsedMs = 0;
         this._workStartedAt = safePerformance.now();
+    }
+
+    /** @returns {Promise<void>} */
+    _yieldToNextTask() {
+        if (typeof MessageChannel !== 'function') {
+            return new Promise((resolve) => { setTimeout(resolve, 0); });
+        }
+        if (this._yieldChannel === null) {
+            try {
+                this._yieldChannel = new MessageChannel();
+                this._yieldChannel.port1.onmessage = () => {
+                    const resolve = this._pendingYield;
+                    this._pendingYield = null;
+                    resolve?.();
+                };
+            } catch {
+                this._yieldChannel = null;
+                return new Promise((resolve) => { setTimeout(resolve, 0); });
+            }
+        }
+        return new Promise((resolve) => {
+            this._pendingYield = resolve;
+            try {
+                this._yieldChannel?.port2.postMessage(0);
+            } catch {
+                this._pendingYield = null;
+                this._closeYieldChannel();
+                setTimeout(resolve, 0);
+            }
+        });
+    }
+
+    /** Closes the per-writer task-yield channel after queued writes settle. */
+    _closeYieldChannel() {
+        if (this._yieldChannel === null) { return; }
+        this._yieldChannel.port1.onmessage = null;
+        this._yieldChannel.port1.close();
+        this._yieldChannel.port2.close();
+        this._yieldChannel = null;
     }
 }
