@@ -2860,6 +2860,8 @@ class ParallelTermBankPipelineRun {
         /** @type {number} */
         this._nextWorkerGroupIndex = 0;
         /** @type {number} */
+        this._nextSourceActivationGroupIndex = 0;
+        /** @type {number} */
         this._maxLeadGroups = 1;
         /** @type {number} */
         this._ownedContentBytes = 0;
@@ -3127,11 +3129,13 @@ class ParallelTermBankPipelineRun {
             this._groups.length,
             this._nextSinkGroupIndex + this._maxLeadGroups,
         );
-        for (let groupIndex = this._nextSinkGroupIndex; groupIndex < end; ++groupIndex) {
+        // Source promises in the existing window are already observed.
+        for (let groupIndex = this._nextSourceActivationGroupIndex; groupIndex < end; ++groupIndex) {
             for (const source of this._groups[groupIndex]) {
                 void loadParallelTermBankSource(source).catch(() => {});
             }
         }
+        this._nextSourceActivationGroupIndex = end;
     }
 }
 
