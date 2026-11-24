@@ -1,0 +1,71 @@
+{
+    "schema": 1,
+    "complete": false,
+    "boundary": "Actual production media-preparation worker handler through posted packed Blob/index; includes dense ZIP reads, entry selection, planning, all payload reads and CRC checks, and index creation. Worker startup, module imports, WASM compilation, file opening and oracle hashing are outside timing. Each invocation uses a fresh Node worker. No browser import or peak-memory claim.",
+    "node": "v22.22.0",
+    "v8": "12.4.254.21-node.33",
+    "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+    "sourceIdentity": {
+        "A": {
+            "root": "/workspace/scratch/fd1e0bf33ec2/manabitan-base",
+            "head": "e35f179f213535497498086c8e26b5d413600891",
+            "files": {
+                "ext/js/dictionary/source-zip-media-preparation-worker.js": "1b7213795a58f3980977ba4e0684430bc972c369393b788a27246b5231499759",
+                "ext/js/dictionary/source-zip-media-pack.js": "8e9f213cb2c9d616b1f276cacc7fe097a1134b5d7623c32f588f571d125adbef",
+                "ext/js/dictionary/dense-zip-directory.js": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506",
+                "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "10c547e7c49d0931b9c931d9446141cdd4e5c0708654d8e74decb4493684c22d",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "4caba3bb7d6afba6871a94a4daacc123ec29462ee25e6e0eac4d0ecf1d640066",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/lib/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+        },
+        "B": {
+            "root": "/workspace/scratch/fd1e0bf33ec2/vndb",
+            "head": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+            "files": {
+                "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+                "ext/js/dictionary/source-zip-media-pack.js": "f5f8a7fbcff4e7c814631b6749753c6fc47bd417373c84d1736b1bfd10298aed",
+                "ext/js/dictionary/dense-zip-directory.js": "77138b2319b8542d48e132ae44a05a16cb9326720aa3991e7d8f4c8dccb61506",
+                "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "10c547e7c49d0931b9c931d9446141cdd4e5c0708654d8e74decb4493684c22d",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "b453d9e6511cd0cb3c55cddedfd0f400ae606e88cb75ffa2f595354df967fea2",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/lib/term-bank-parser.wasm": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c"
+            }
+        }
+    },
+    "runnerSha256": "ea2021c4e0abc4c6c0f535cf7e7d6b3125334eff83ee898abe005cd34ca6c9ce",
+    "workerShimSha256": "b6acb573cfee00e21b0c8cd013cfe524336ca859025b72dec06ff25f9f7d3fc4",
+    "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true,
+        "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "protocol": {
+        "warmups": "AB",
+        "measured": "ABBAABBA"
+    },
+    "hostBefore": {
+        "at": "2026-11-23T20:46:09.657Z",
+        "load": [
+            9.24,
+            9.2,
+            7.2
+        ],
+        "freeMemory": 3135131648
+    },
+    "oracle": [],
+    "observations": []
+}

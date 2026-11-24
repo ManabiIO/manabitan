@@ -58,6 +58,7 @@ import {injectStylesheet} from './script-manager.js';
 
 const STARTUP_DIAGNOSTICS_STORAGE_KEY = 'manabitanStartupDiagnostics';
 const DICTIONARY_REFRESH_RETRY_DELAYS_MS = [250, 1000, 3000, 10000];
+const POST_IMPORT_LOOKUP_WARM_DELAY_MS = 1500;
 
 /**
  * @typedef {object} OwnedDictionaryImportOperation
@@ -247,6 +248,10 @@ export class Backend {
         this._dictionaryLookupWarmPromise = null;
         /** @type {?string} */
         this._dictionaryLookupWarmQueuedReason = null;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._dictionaryLookupWarmDelayTimer = null;
+        /** @type {(() => void)|null} */
+        this._dictionaryLookupWarmDelayResolve = null;
         /** @type {?Promise<void>} */
         this._dictionaryMutationPromise = null;
         /** @type {boolean} */
@@ -5089,7 +5094,9 @@ null;
             }
         } while (rerunRefresh);
         this._clearTextParseCache();
-        this._warmEnabledDictionaryLookupCaches('dictionary-refresh-after-update');
+        this._warmEnabledDictionaryLookupCaches(
+            reuseActiveImportConnection ? 'dictionary-post-import-refresh' : 'dictionary-refresh-after-update',
+        );
     }
 
     /**
@@ -5284,42 +5291,95 @@ null;
         if (this._options === null) {
             return;
         }
+        if (reason === 'settings-enabled-dictionaries-changed' && this._dictionaryImportModeActive) {
+            reportDiagnostics('dictionary-lookup-cache-warm-deferred-during-import', {reason});
+            return;
+        }
         if (this._dictionaryLookupWarmPromise !== null) {
+            if (reason === 'settings-enabled-dictionaries-changed' && this._dictionaryLookupWarmDelayResolve !== null) {
+                if (this._dictionaryLookupWarmDelayTimer !== null) {
+                    clearTimeout(this._dictionaryLookupWarmDelayTimer);
+                    this._dictionaryLookupWarmDelayTimer = null;
+                }
+                this._dictionaryLookupWarmQueuedReason = null;
+                const resolve = this._dictionaryLookupWarmDelayResolve;
+                this._dictionaryLookupWarmDelayResolve = null;
+                resolve();
+                return;
+            }
             this._dictionaryLookupWarmQueuedReason = reason;
             return;
         }
-        const options = this._getProfileOptions({current: true}, false);
-        const enabledTitles = options.dictionaries
+        const isPostImportWarm = (
+            reason === 'dictionary-import-connection-adopted' ||
+            reason === 'dictionary-post-import-refresh'
+        );
+        const delayMs = isPostImportWarm ? POST_IMPORT_LOOKUP_WARM_DELAY_MS : 0;
+        if (delayMs > 0) {
+            reportDiagnostics('dictionary-lookup-cache-warm-delay-scheduled', {reason, delayMs});
+        }
+        const getEnabledTitles = () => this._getProfileOptions({current: true}, false).dictionaries
             .filter((dictionary) => dictionary.enabled)
             .map((dictionary) => dictionary.name)
             .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
-        if (enabledTitles.length === 0) { return; }
-        const startedAt = safePerformance.now();
+        if (getEnabledTitles().length === 0) { return; }
+        /** @type {number|null} */
+        let startedAt = null;
+        /** @type {string[]} */
+        let warmedDictionaryTitles = [];
         const warmPromise = (async () => {
+            if (delayMs > 0) {
+                /** @type {Promise<void>} */
+                const delay = new Promise((resolve) => {
+                    this._dictionaryLookupWarmDelayResolve = resolve;
+                    this._dictionaryLookupWarmDelayTimer = setTimeout(() => {
+                        this._dictionaryLookupWarmDelayTimer = null;
+                        this._dictionaryLookupWarmDelayResolve = null;
+                        resolve();
+                    }, delayMs);
+                });
+                await delay;
+            }
+            if (this._dictionaryImportModeActive) {
+                reportDiagnostics('dictionary-lookup-cache-warm-skipped-during-import', {reason});
+                return;
+            }
             await this._awaitDictionaryRefreshSettled();
             await this._ensureDictionaryDatabaseReady();
+            if (this._dictionaryImportModeActive) {
+                reportDiagnostics('dictionary-lookup-cache-warm-skipped-during-import', {reason});
+                return;
+            }
+            warmedDictionaryTitles = getEnabledTitles();
+            if (warmedDictionaryTitles.length === 0) { return; }
+            startedAt = safePerformance.now();
             const warmMethod = /** @type {unknown} */ (Reflect.get(this._dictionaryDatabase, 'warmTermLookupCaches'));
             if (typeof warmMethod !== 'function') { return; }
-            await /** @type {(dictionaryNames: string[]) => Promise<void>} */ (warmMethod).call(this._dictionaryDatabase, enabledTitles);
+            await /** @type {(dictionaryNames: string[]) => Promise<void>} */ (warmMethod).call(this._dictionaryDatabase, warmedDictionaryTitles);
         })();
         this._dictionaryLookupWarmPromise = warmPromise;
         warmPromise
             .then(() => {
                 reportDiagnostics('dictionary-lookup-cache-warm-summary', {
                     reason,
-                    dictionaryNames: enabledTitles,
-                    elapsedMs: safePerformance.now() - startedAt,
+                    dictionaryNames: warmedDictionaryTitles,
+                    elapsedMs: startedAt === null ? null : safePerformance.now() - startedAt,
                 });
             })
             .catch((error) => {
                 reportDiagnostics('dictionary-lookup-cache-warm-error', {
                     reason,
-                    dictionaryNames: enabledTitles,
+                    dictionaryNames: warmedDictionaryTitles,
                     error: `${error}`,
                 });
             })
             .finally(() => {
                 if (this._dictionaryLookupWarmPromise !== warmPromise) { return; }
+                if (this._dictionaryLookupWarmDelayTimer !== null) {
+                    clearTimeout(this._dictionaryLookupWarmDelayTimer);
+                    this._dictionaryLookupWarmDelayTimer = null;
+                }
+                this._dictionaryLookupWarmDelayResolve = null;
                 this._dictionaryLookupWarmPromise = null;
                 const queuedReason = this._dictionaryLookupWarmQueuedReason;
                 this._dictionaryLookupWarmQueuedReason = null;
