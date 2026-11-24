@@ -65,6 +65,13 @@ async function compressContent(event) {
                 dictName,
                 options,
             );
+            // The prepared job owns its gathered WASM bytes. A retained message
+            // must no longer keep this whole shared source slab reachable.
+            /* eslint-disable @stylistic/semi */
+            data.source = void 0
+            data.sourceOffsets = void 0
+            data.sourceLengths = void 0
+            /* eslint-enable @stylistic/semi */
             self.postMessage({type: 'source-consumed', id});
             result = finishWrappedTermContentZstdSpans(prepared);
         } else {

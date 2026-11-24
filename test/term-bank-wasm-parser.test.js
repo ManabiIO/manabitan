@@ -594,7 +594,7 @@ describe('term-bank WASM parser', () => {
         expect([...mediaContentBytes]).toStrictEqual([40, 41, 42]);
     });
 
-    test('borrows an exact shared content span while copying mutable metadata', () => {
+    test.each([false, true])('copies mutable metadata with owned shared content: %s', (ownSharedContentBytes) => {
         const heap = new Uint8Array(new SharedArrayBuffer(128));
         heap.set([1, 2, 3, 4], 64);
         const contentMetaList = new Uint32Array(heap.buffer, 8, 8);
@@ -623,13 +623,18 @@ describe('term-bank WASM parser', () => {
                 readingIndexes: new Uint32Array(2),
             },
             mediaRows: [],
-        }, true);
+        }, true, false, ownSharedContentBytes);
 
-        expect(result.contentBytesBuffer?.buffer).toBe(heap.buffer);
-        expect(result.contentBytesBuffer?.byteOffset).toBe(64);
-        if (!(result.contentBytesBuffer instanceof Uint8Array)) { throw new Error('Expected borrowed content buffer'); }
+        expect(result.contentBytesBuffer?.buffer === heap.buffer).toBe(!ownSharedContentBytes);
+        expect(result.contentBytesBuffer?.buffer).toBeInstanceOf(SharedArrayBuffer);
+        expect(result.contentBytesBuffer?.byteOffset).toBe(ownSharedContentBytes ? 0 : 64);
+        expect(result.contentBytesBuffer?.byteLength).toBe(4);
+        if (!(result.contentBytesBuffer instanceof Uint8Array)) { throw new Error('Expected content buffer'); }
         expect([...result.contentBytesBuffer]).toStrictEqual([1, 2, 3, 4]);
         expect(result.contentMetaList?.buffer).not.toBe(heap.buffer);
+        heap.fill(0);
+        expect([...result.contentBytesBuffer]).toStrictEqual(ownSharedContentBytes ? [1, 2, 3, 4] : [0, 0, 0, 0]);
+        expect(result.contentMetaList).toStrictEqual(new Uint32Array([0, 2, 11, 12, 2, 2, 13, 14]));
     });
 
     maybeTest('uses the native slab extent for a complete group and row extents for partial chunks', async () => {

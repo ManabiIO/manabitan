@@ -564,7 +564,7 @@ describe('deterministic escaped-key differential', () => {
     })
 })
 
-/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number}}} WorkerReply */
+/** @typedef {{type: string, id?: number, borrowsWorkerMemory?: boolean, ownsContentBytes?: boolean, chunk?: ReturnType<typeof import('../ext/js/dictionary/term-bank-wasm-parser.js').copyWasmBackedColumnChunk>, profile?: ReturnType<typeof consumeLastTermBankWasmParseProfile>, error?: unknown, transferObservation?: {count: number, uniqueCount: number, keyArenaOccurrences: number, keyBuffers: number, keyBuffersOutsideArena: number}}} WorkerReply */
 /**
  * One request at a time, as required by the production parser worker's lease.
  * @param {Worker} worker
@@ -736,7 +736,8 @@ describe('actual parser worker flag propagation', () => {
                 if (!chunk) { throw new Error('Missing worker chunk') }
                 expect(snapshotChunk(chunk)).toEqual(oracle.rows)
                 expect(reply.borrowsWorkerMemory).toBe(false)
-                expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(mask === 15 ? ArrayBuffer : SharedArrayBuffer)
+                expect(reply.ownsContentBytes).toBe(true)
+                expect(chunk.contentBytesBuffer?.buffer).toBeInstanceOf(SharedArrayBuffer)
                 if (previousOwnedContent) { expect(previousOwnedContent).toEqual(previousOwnedContentCopy) }
                 previousOwnedContent = chunk.contentBytesBuffer
                 previousOwnedContentCopy = chunk.contentBytesBuffer?.slice()

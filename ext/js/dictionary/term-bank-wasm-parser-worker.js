@@ -139,8 +139,11 @@ async function parse(data) {
                     chunk.contentDedupPlan?.sourceRowCount,
                     chunk.rowCount,
                 );
-                const shareContentBytes = options.ownContentBytes !== true;
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
+                // Owned projected slabs also remain shareable with compression
+                // workers, without borrowing the reusable parser heap.
+                const ownSharedContentBytes = options.ownContentBytes === true && typeof SharedArrayBuffer === 'function';
+                const shareContentBytes = options.ownContentBytes !== true || ownSharedContentBytes;
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, ownSharedContentBytes);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
@@ -152,7 +155,7 @@ async function parse(data) {
                     owned.set(resultChunk.contentBytesBuffer);
                     resultChunk.contentBytesBuffer = owned;
                 }
-                ownsContentBytes = ownCacheableContent || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
+                ownsContentBytes = ownCacheableContent || ownSharedContentBytes || resultChunk.contentBytesBuffer?.buffer instanceof ArrayBuffer;
                 borrowsWorkerMemory = (
                     typeof SharedArrayBuffer === 'function' &&
                     chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&

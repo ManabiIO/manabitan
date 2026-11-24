@@ -113,7 +113,7 @@ const glossaryJsonDecoder = new TextDecoder();
 /** @type {TextEncoder} */
 const textEncoder = new TextEncoder();
 
-/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCrcMs?: number, sourceCrcScannedBytes?: number, sourceCrcReusedBytes?: number, sourceCrcReusedGlossaryCount?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number})|null} */
+/** @type {(TermBankExperimentProfile & {bufferSetupMs: number, allocationMs: number, nativeStringPlanAllocationMs?: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, rowDecodeMs: number, nativeStringPlanMs?: number, nativeStringPlanChunkCount?: number, nativeStringPlanFallbackChunkCount?: number, chunkDispatchMs: number, sourcePreparationMs?: number, sourceDeliveryMs?: number, sourceTransferredBytes?: number, sourceInflateMs?: number, sourceCrcMs?: number, sourceCrcScannedBytes?: number, sourceCrcReusedBytes?: number, sourceCrcReusedGlossaryCount?: number, sourceCompressedBytes?: number, sourceUncompressedBytes?: number, resultCopyMs?: number, resultDeliveryMs?: number, orderedSinkWaitMs?: number, borrowedContentResultCount?: number, nativeLookupScratchReusedBytes?: number, nativeLookupScratchReuseGroups?: number, nativeLookupScratchReuseMisses?: number, nativeSegmentedLookupSegments?: number, directLookupArenaSegments?: number, directLookupArenaCopiedBytesAvoided?: number, lookupCompactionSourceValidationPasses?: number, nativeSegmentedLookupFallbacks?: number, lookupIndexPrepareMs?: number, lookupIndexCompactMs?: number, lookupIndexEncodeMs?: number, rowCount: number, metaCapacity: number, metaAllocatedBytes: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, chunkCount: number, chunkSize: number, maxPendingChunks: number, minimalDecode: boolean, includeContentMetadata: boolean, copyContentBytes: boolean, reuseExpressionForReadingDecode: boolean, skipTagRuleDecode: boolean, lazyGlossaryDecode: boolean, mediaHintFastScan: boolean, parallelWorkerCount?: number, parallelPipelineGroupsPerWorker?: number, parallelGroupCount?: number, parallelWorkerWallMs?: number, parallelSourceReadWallMs?: number, parallelOwnedContentBytes?: number, parallelPeakQueuedOwnedContentBytes?: number, parallelContentByteBudget?: number, parallelPeakOwnedOrReservedContentBytes?: number, parallelByteBackpressureWaitCount?: number})|null} */
 let lastTermBankWasmParseProfile = null;
 /** @type {string|null} */
 let lastParallelParserSkipReason = null;
@@ -2864,7 +2864,17 @@ class ParallelTermBankPipelineRun {
         /** @type {number|null} Null means each activation scans the whole read window. */
         this._nextSourceActivationGroupIndex = null;
         /** @type {number} */
+        this._nextAdmittedGroupIndex = 0;
+        /** @type {number} */
         this._maxLeadGroups = 1;
+        /** @type {number} */
+        this._contentByteBudget = 0;
+        /** @type {number} */
+        this._reservedSourceBytes = 0;
+        /** @type {number} */
+        this._peakOwnedOrReservedContentBytes = 0;
+        /** @type {number} */
+        this._byteBackpressureWaitCount = 0;
         /** @type {number} */
         this._ownedContentBytes = 0;
         /** @type {number} */
@@ -2901,6 +2911,7 @@ class ParallelTermBankPipelineRun {
         if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
             this._nextSourceActivationGroupIndex = 0;
         }
+        this._contentByteBudget = workers.length * LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES;
         this._activateLeadSources();
         this._workerLoops = workers.map((worker) => this._runWorkerLoop(worker));
         try {
@@ -2982,6 +2993,9 @@ class ParallelTermBankPipelineRun {
                 parallelSourceReadWallMs: getParallelSourceReadWallMs(this._sources, this._startedAt),
                 parallelOwnedContentBytes: this._ownedContentBytes,
                 parallelPeakQueuedOwnedContentBytes: this._peakQueuedOwnedContentBytes,
+                parallelContentByteBudget: this._contentByteBudget,
+                parallelPeakOwnedOrReservedContentBytes: this._peakOwnedOrReservedContentBytes,
+                parallelByteBackpressureWaitCount: this._byteBackpressureWaitCount,
             };
         } catch (error) {
             this._fail(error);
@@ -3004,11 +3018,12 @@ class ParallelTermBankPipelineRun {
      * @param {Worker} worker
      */
     async _runWorkerLoop(worker) {
+        let reservedSourceBytes = 0;
         try {
             while (this._nextWorkerGroupIndex < this._groups.length) {
                 const groupIndex = this._nextWorkerGroupIndex++;
                 if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
-                await this._waitForLead(groupIndex);
+                reservedSourceBytes = await this._waitForLead(groupIndex);
                 const sourceGroup = this._groups[groupIndex];
                 const group = await waitForParallelWork(
                     sourceGroup.map((source) => loadParallelTermBankSource(source)),
@@ -3063,13 +3078,20 @@ class ParallelTermBankPipelineRun {
                     if (this._failed) { consumeResult(); }
                 }
                 const ownedContentBytes = result.borrowsWorkerMemory ? 0 : result.chunk?.contentBytesBuffer?.buffer.byteLength ?? 0;
+                // Replace the active estimate with exact owned bytes without
+                // yielding, so peers cannot admit work between the two charges.
+                this._reservedSourceBytes -= reservedSourceBytes;
+                reservedSourceBytes = 0;
                 this._ownedContentBytes += ownedContentBytes;
                 this._queuedOwnedContentBytes += ownedContentBytes;
                 this._peakQueuedOwnedContentBytes = Math.max(this._peakQueuedOwnedContentBytes, this._queuedOwnedContentBytes);
+                this._recordContentLeadPeak();
                 this._resultSlots[groupIndex].resolve({...result, sourceBytes, ownedContentBytes, consume});
+                this._wakeLeadWaiters();
                 if (consumed !== null) { await consumed; }
             }
         } catch (error) {
+            this._reservedSourceBytes -= reservedSourceBytes;
             this._fail(error);
         }
     }
@@ -3097,15 +3119,39 @@ class ParallelTermBankPipelineRun {
     }
 
     /**
-     * Waits until the ordered sink opens room in the bounded parser lead.
+     * Reserves one group's source estimate before it can start parsing. Only
+     * the next group may enter, preventing smaller later groups from filling
+     * the byte budget ahead of a group required by the ordered sink.
      * @param {number} groupIndex
-     * @returns {Promise<void>}
+     * @returns {Promise<number>}
      */
     async _waitForLead(groupIndex) {
-        while (
-            !this._failed &&
-            groupIndex >= this._nextSinkGroupIndex + this._maxLeadGroups
-        ) {
+        const sourceBytes = this._groups[groupIndex].reduce((sum, source) => sum + source.estimatedBytes, 0);
+        let recordedByteWait = false;
+        while (true) {
+            this._throwIfStopped();
+            const chargedBytes = this._queuedOwnedContentBytes + this._reservedSourceBytes;
+            // One indivisible oversized group can make progress only after
+            // every prior group has drained. Output can exceed its estimate;
+            // such excess blocks further admission, not already active parses.
+            const fitsByteBudget = chargedBytes + sourceBytes <= this._contentByteBudget || (
+                chargedBytes === 0 && groupIndex === this._nextSinkGroupIndex
+            );
+            if (
+                groupIndex === this._nextAdmittedGroupIndex &&
+                groupIndex < this._nextSinkGroupIndex + this._maxLeadGroups &&
+                fitsByteBudget
+            ) {
+                this._reservedSourceBytes += sourceBytes;
+                ++this._nextAdmittedGroupIndex;
+                this._recordContentLeadPeak();
+                this._wakeLeadWaiters();
+                return sourceBytes;
+            }
+            if (groupIndex === this._nextAdmittedGroupIndex && !fitsByteBudget && !recordedByteWait) {
+                ++this._byteBackpressureWaitCount;
+                recordedByteWait = true;
+            }
             await new Promise(/** @param {(value?: void|PromiseLike<void>) => void} resolve */ (resolve) => {
                 const timeoutId = setTimeout(() => {
                     this._leadWaiters.delete(wake);
@@ -3119,6 +3165,14 @@ class ParallelTermBankPipelineRun {
             });
             if (this._pipelineShouldCancel()) { throw createParallelParserCancellationError(); }
         }
+    }
+
+    /** Records estimates for active parses plus exact bytes awaiting the sink. */
+    _recordContentLeadPeak() {
+        this._peakOwnedOrReservedContentBytes = Math.max(
+            this._peakOwnedOrReservedContentBytes,
+            this._reservedSourceBytes + this._queuedOwnedContentBytes,
+        );
     }
 
     /** Wakes parser workers after sink progress or terminal failure. */
@@ -4006,10 +4060,11 @@ function copyProjectedMediaKeyBytes(bytes, index, offsets, lengths, ownedStrings
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
+ * @param {boolean} [ownSharedContentBytes=false]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, ownSharedContentBytes = false) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4030,7 +4085,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         shareContentBytes &&
         typeof SharedArrayBuffer === 'function'
     ) {
-        if (contentBytesSource.buffer instanceof SharedArrayBuffer) {
+        if (contentBytesSource.buffer instanceof SharedArrayBuffer && !ownSharedContentBytes) {
             contentBytesBuffer = contentBytesSource;
         } else {
             contentBytesBuffer = new Uint8Array(new SharedArrayBuffer(contentBytesLength));
