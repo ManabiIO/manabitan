@@ -23,15 +23,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [vndb]
+        dictionary: [jmdict, jitendex, vndb]
         replication: ["forward"]
         candidate:
-          - label: prefix
-            sha: ebb1da8d2cc2b28901400968891b632605f1b3f0
-            differences: '["js/dictionary/term-content-block-store.js","js/dictionary/term-content-opfs-store.js","js/dictionary/term-content-ownership.js","js/dictionary/zstd-term-content.js","lib/zstd-wasm.js","lib/zstd-wasm.js.map"]'
-          - label: media
-            sha: fb71a03f4611bcfa71e135693bebd1fe778153bf
-            differences: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+          - label: canonical
+            sha: 2dfa72962c9d9f1976011e41b9bbce2375f4dbb5
+            differences: '["js/dictionary/wasm/term-content-canonical-scan-v1.c","lib/term-content-canonical-scan-v1.wasm"]'
     env:
       PERF_BASELINE_SHA: bbccabd520972cc351a65d9f545bd5369b6e9747
       PERF_CANDIDATE_SHA: ${{ matrix.candidate.sha }}
