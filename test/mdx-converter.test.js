@@ -524,6 +524,39 @@ describe('convertMdxToArchive', () => {
         expect(lookupKeys).toStrictEqual(['styles/extra.css', 'images/css-bg.png']);
     });
 
+    test('ignores MDD references in omitted inline CSS declarations', async () => {
+        /** @type {string[]} */
+        const lookupKeys = [];
+        mockState.onLookupRecord = (_fileName, keyText) => { lookupKeys.push(keyText); };
+        mockState.mdxFactory = () => ({
+            header: {Title: 'Inline CSS asset fixture'},
+            entries: [{
+                keyText: 'Styled',
+                definition: '<div style="background-image:url(images/kept.png);filter:url(images/unused.png);text-decoration:url(images/missing.png)">Styled</div>',
+            }],
+        });
+        mockState.mddFactory = () => [
+            {keyText: 'images/kept.png', value: Uint8Array.of(7, 8, 9)},
+            {keyText: 'images/unused.png', value: Uint8Array.of(1, 2, 3)},
+        ];
+
+        const result = await convertMdxToArchive(
+            'inline-css.mdx',
+            {},
+            Uint8Array.of(1),
+            [{name: 'inline-css.mdd', bytes: Uint8Array.of(1)}],
+        );
+        const zip = await loadArchive(result.archiveContent);
+        const terms = await readJson(zip, 'term_bank_1.json');
+        const assetPhase = result.phaseTimings.find(({phase}) => phase === 'prepare-mdx:materialize-assets');
+
+        expect(JSON.stringify(terms)).toContain('mdict-media/images/kept.png');
+        expect(await zip.file('mdict-media/images/kept.png')?.async('uint8array')).toStrictEqual(Uint8Array.of(7, 8, 9));
+        expect(zip.file('mdict-media/images/unused.png')).toBeNull();
+        expect(lookupKeys).toStrictEqual(['images/kept.png']);
+        expect(assetPhase?.details).toMatchObject({missingReferencedAssetCount: 0});
+    });
+
     test('does not navigate, lookup or archive sound resources when dictionary audio is disabled', async () => {
         /** @type {string[]} */
         const lookupKeys = [];

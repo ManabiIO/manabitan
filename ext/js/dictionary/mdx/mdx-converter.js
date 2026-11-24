@@ -1758,9 +1758,6 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
         const propertyName = trimCssWhitespace(declaration.slice(0, separator)).toLowerCase();
         let value = trimCssWhitespace(declaration.slice(separator + 1));
         if (propertyName.length === 0 || value.length === 0) { continue; }
-        if (/url\(/iu.test(value)) {
-            value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
-        }
         if (propertyName === 'text-decoration' || propertyName === 'text-decoration-line') {
             const parts = value.split(/[\t\n\f\r ]+/u).filter((part) => ['underline', 'overline', 'line-through', 'none'].includes(part));
             if (parts.length === 0) { continue; }
@@ -1769,6 +1766,9 @@ function convertInlineStyle(styleText, assetPrefix, assetReferences) {
         }
         const mappedName = INLINE_STYLE_PROPERTY_MAP.get(propertyName);
         if (typeof mappedName !== 'string') { continue; }
+        if (/url\(/iu.test(value)) {
+            value = rewriteCssAssetUrls(value, assetPrefix, null, assetReferences);
+        }
         style[mappedName] = value;
     }
     return Object.keys(style).length > 0 ? style : null;
