@@ -27,6 +27,7 @@ import {
     finishPreparedSpanCompression,
     freeCCtx,
     freeDCtx,
+    getCompressionBound,
     init,
     prepareSpanCompression,
 } from '../../lib/zstd-wasm.js';
@@ -851,6 +852,15 @@ export function resolveTermContentZstdDictName(dictionaryTitle) {
         return 'jmdict';
     }
     return null;
+}
+
+/**
+ * @param {number} contentBytes
+ * @returns {number} An upper bound for the complete stored compression block.
+ */
+export function getTermContentZstdBlockSizeBound(contentBytes) {
+    const bound = Number(getCompressionBound(contentBytes));
+    return bound > 0 ? bound + TERM_CONTENT_BLOCK_ENVELOPE_BYTES : Infinity;
 }
 
 /**

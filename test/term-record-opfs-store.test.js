@@ -6275,6 +6275,77 @@ void 0,
 });
 
 
+describe('TermRecordOpfsStore content placement equivalence', () => {
+    test.each([100, 0xfffffffe - 430])('preserves prepared partitions and persisted size with old and relocated references at %s', async (start) => {
+        const dictionary = 'Relocated content';
+        const rowCount = 12;
+        const expressions = Array.from({length: rowCount}, (_, index) => new TextEncoder().encode(`語${index % 3}`));
+        const builder = createTermRecordPreinternedPlanBuilder(3);
+        const indexes = Uint32Array.from(expressions, (bytes) => builder.internStringBytes(bytes));
+        const chunk = {
+            dictionary,
+            rowCount,
+            expressionBytesList: expressions,
+            readingBytesList: expressions,
+            readingEqualsExpressionList: new Uint8Array(rowCount).fill(1),
+            scoreList: Int32Array.from({length: rowCount}, (_, index) => index % 2),
+            sequenceList: Int32Array.from({length: rowCount}, (_, index) => index),
+            termRecordPreinternedPlan: builder.buildPlan(indexes, indexes),
+        };
+        const prepared = new TermRecordOpfsStore().prepareArtifactChunkLookupIndexes(chunk);
+        if (prepared === null) { throw new Error('Expected a prepared lookup index'); }
+        expect([...prepared.indexes.keys()]).toEqual(['0:12']);
+        const preparedSnapshot = Uint8Array.from(prepared.indexes.get('0:12')?.bytes ?? []);
+        const lengths = Uint32Array.from({length: rowCount}, (_, index) => (index === 2 ? 0 : 10 + index));
+        const compressedBytes = 350;
+        /** @type {Array<{storageBytes: number, calls: Parameters<TermRecordOpfsStore['_appendEncodedChunk']>[]}>} */
+        const results = [];
+        for (const prefix of [false, true]) {
+            const offsets = Float64Array.from({length: rowCount}, (_, index) => {
+                if (index === 0) { return 0; }
+                if (index === 1) { return 11; }
+                if (index === 2) { return -1; }
+                return start + (prefix ? 0 : compressedBytes) + ((index - 3) % 4) * 20;
+            });
+            /** @type {Map<string, Uint8Array>} */
+            const files = new Map();
+            const directory = createFakeDirectoryHandle(files);
+            const writer = new TermRecordOpfsStore();
+            Reflect.set(writer, '_recordsDirectoryHandle', directory);
+            const append = vi.spyOn(writer, '_appendEncodedChunk');
+            await writer.beginImportSession();
+            await writer.appendBatchFromArtifactChunkResolvedContent({...chunk, preparedLookupIndexes: prepared.indexes}, offsets, lengths, 'raw-block-v2:jmdict');
+            await writer.endImportSession();
+            expect(append).toHaveBeenCalledOnce();
+            expect(append.mock.calls[0][1]).toBe(1);
+            expect(append.mock.calls[0][2]).toBe(rowCount);
+            expect(append.mock.calls[0][5]).toEqual(preparedSnapshot);
+            expect(prepared.indexes.get('0:12')?.bytes).toEqual(preparedSnapshot);
+            const reader = new TermRecordOpfsStore();
+            Reflect.set(reader, '_recordsDirectoryHandle', directory);
+            await reader._loadShardFiles(false);
+            await reader.ensureDictionariesLoaded([dictionary]);
+            const records = await reader.getByIdsAsync(Array.from({length: rowCount}, (_, index) => index + 1));
+            expect(records.size).toBe(rowCount);
+            for (let index = 0; index < rowCount; ++index) {
+                expect(records.get(index + 1)).toMatchObject({
+                    expression: `語${index % 3}`,
+                    reading: `語${index % 3}`,
+                    entryContentOffset: offsets[index],
+                    entryContentLength: lengths[index],
+                    sequence: index,
+                    score: index % 2,
+                });
+            }
+            results.push({storageBytes: [...files.values()].reduce((sum, bytes) => sum + bytes.byteLength, 0), calls: append.mock.calls});
+        }
+        expect(results[1].storageBytes).toBe(results[0].storageBytes);
+        expect(results[1].calls[0][7]).toBe(results[0].calls[0][7]);
+        expect(results[1].calls[0][6]?.byteLength).toBe(results[0].calls[0][6]?.byteLength);
+        expect(results[1].calls[0][6]).not.toEqual(results[0].calls[0][6]);
+    });
+});
+
 describe('TermRecordOpfsStore string decoding buffer ownership', () => {
     for (const shared of [false, true]) {
         test(`decodes an offset string from ${shared ? 'shared' : 'ordinary'} bytes`, () => {

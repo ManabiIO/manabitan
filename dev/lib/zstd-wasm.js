@@ -126,6 +126,16 @@ function releaseContextBuffers(context) {
     contextBuffers.delete(context);
 }
 
+/**
+ * The codec's bound lets callers check a future append range without reserving
+ * storage or changing the compression operation.
+ * @param {number} contentBytes
+ * @returns {number}
+ */
+export function getCompressionBound(contentBytes) {
+    return getModule()._ZSTD_compressBound(contentBytes);
+}
+
 /** @returns {number} */
 export function createCCtx() { return getModule()._ZSTD_createCCtx(); }
 

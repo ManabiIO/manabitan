@@ -6,6 +6,7 @@
 
 import {describe, expect, test} from 'vitest'
 import {
+    hasOwnedTermContent,
     registerOwnedTermContent,
     shouldOwnTermContentBytes,
     takeOwnedTermContent,
@@ -45,6 +46,20 @@ describe('compact parser content ownership', () => {
         registerOwnedTermContent(transferred)
         expect(takeOwnedTermContent(transferred)).toBe(true)
         expect(takeOwnedTermContent(transferred)).toBe(false)
+    })
+
+    test('observes ownership without consuming the cache adoption witness', () => {
+        const source = Uint8Array.of(1, 2, 3, 4)
+        expect(hasOwnedTermContent(source)).toBe(false)
+        registerOwnedTermContent(source)
+        expect(hasOwnedTermContent(source)).toBe(true)
+        expect(hasOwnedTermContent(source)).toBe(true)
+        expect(hasOwnedTermContent(source.subarray(1))).toBe(false)
+        expect(takeOwnedTermContent(source)).toBe(true)
+        expect(hasOwnedTermContent(source)).toBe(false)
+        registerOwnedTermContent(source)
+        structuredClone(source, {transfer: [source.buffer]})
+        expect(hasOwnedTermContent(source)).toBe(false)
     })
 
     test('never registers empty or partial backing buffers', () => {

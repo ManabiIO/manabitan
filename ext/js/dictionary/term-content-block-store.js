@@ -35,8 +35,9 @@ import {
     wrapCompressedTermContentBlock,
 } from './term-content-block-envelope.js';
 import {TermContentIntegrityError} from './term-content-opfs-store.js';
+import {hasOwnedTermContent} from './term-content-ownership.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdBlocks, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdBlocks, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd, getTermContentZstdBlockSizeBound} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
@@ -63,6 +64,10 @@ const DEFAULT_CACHE_MAX_BYTES = 48 * 1024 * 1024;
 const EARLY_SELECTION_MAX_SAMPLES = 32 * 1024;
 const EARLY_SELECTION_MAX_SPANS = 512;
 const EARLY_SELECTION_SAVINGS_MARGIN = 0.08;
+// Record chunks use u32 deltas with 0xffffffff reserved for a null reference.
+// Below this absolute cursor, changing frame/reference order cannot alter the
+// offset-span splits that determine record and prepared-lookup partitions.
+const MAX_RESERVED_CONTENT_END_OFFSET = 0xfffffffe;
 
 export class TermContentBlockImportSession {
     /**
@@ -751,13 +756,10 @@ export class TermContentBlockStore {
      */
     tryBeginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, force = false) {
         const uncompressedBytes = validateTermContentSpans(sourceBytes, sourceOffsets, sourceLengths);
-        if (
-            uncompressedBytes === 0 ||
-            compressionDictName !== 'jmdict' ||
-            typeof SharedArrayBuffer !== 'function' ||
-            !(sourceBytes.buffer instanceof SharedArrayBuffer)
-        ) {
-            return null;
+        if (uncompressedBytes === 0 || compressionDictName !== 'jmdict') { return null; }
+        if (typeof SharedArrayBuffer !== 'function' || !(sourceBytes.buffer instanceof SharedArrayBuffer)) {
+            if (!force || !(sourceBytes.buffer instanceof ArrayBuffer) || !hasOwnedTermContent(sourceBytes)) { return null; }
+            return this._beginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, false, true);
         }
         if (
             !force &&
@@ -792,9 +794,37 @@ export class TermContentBlockStore {
      * @returns {{storage: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string}>, sourceConsumed: Promise<void>, completion: Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>}}
      */
     _beginAppendSharedSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection) {
+        return this._beginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection, false);
+    }
+
+    /**
+     * @param {Uint8Array} sourceBytes
+     * @param {Uint32Array} sourceOffsets
+     * @param {Uint32Array} sourceLengths
+     * @param {string} compressionDictName
+     * @param {number} uncompressedBytes
+     * @param {boolean} initialSelection
+     * @param {boolean} privateSource
+     * @returns {ReturnType<TermContentBlockStore['_beginAppendSharedSpans']>}
+     */
+    _beginAppendSpans(sourceBytes, sourceOffsets, sourceLengths, compressionDictName, uncompressedBytes, initialSelection, privateSource) {
         const compressionExperiments = this._compressionExperiments;
         const planStart = safePerformance.now();
         const packed = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+        let prefixLimits = null;
+        if (privateSource) {
+            let primaryBytesUpperBound = 0;
+            try {
+                for (const length of packed.packedChunkLengths) {
+                    primaryBytesUpperBound += getTermContentZstdBlockSizeBound(length);
+                }
+            } catch (_) {
+                // A not-yet-ready codec cannot prove the final cursor. Keep
+                // its ordinary suffix placement after compression completes.
+                primaryBytesUpperBound = Infinity;
+            }
+            prefixLimits = {maximumEndOffset: MAX_RESERVED_CONTENT_END_OFFSET, primaryBytesUpperBound};
+        }
         let packMs = safePerformance.now() - planStart;
         const referenceLayout = createTermContentReferenceLayout(
             sourceLengths.length,
@@ -815,27 +845,50 @@ export class TermContentBlockStore {
             let envelopeMs = 0;
             let compressionStart = safePerformance.now();
             let sourceWasConsumed = false;
+            let compressionPackMs = 0;
             try {
-                const operation = beginCompressWrappedTermContentZstdSpansBatch(
-                    sourceBytes,
-                    sourceOffsets,
-                    sourceLengths,
-                    packed.blockStartIndexes,
-                    packed.packedChunkLengths,
-                    compressionDictName,
-                    compressionExperiments,
-                );
-                const consumed = operation.sourceConsumed.then(() => {
-                    sourceWasConsumed = true;
-                    resolveSourceConsumed();
-                });
-                void consumed.catch(() => {});
                 let result;
-                try {
-                    result = await operation.completion;
-                } catch (error) {
-                    await consumed.catch(() => {});
-                    throw error;
+                if (privateSource) {
+                    // Each packed block is still snapshotted and dispatched
+                    // before the first await. Retain the owned source slab for
+                    // collision checks, cache adoption and worker-failure retry.
+                    result = await compressWrappedTermContentZstdBlocks(packed.packedChunkLengths, (blockIndex) => {
+                        const packStart = safePerformance.now();
+                        const content = packContentSpanBlock(
+                            sourceBytes,
+                            sourceOffsets,
+                            sourceLengths,
+                            packed.blockStartIndexes[blockIndex],
+                            packed.blockStartIndexes[blockIndex + 1],
+                            packed.packedChunkLengths[blockIndex],
+                            blockIndex,
+                        );
+                        const elapsed = safePerformance.now() - packStart;
+                        packMs += elapsed;
+                        compressionPackMs += elapsed;
+                        return content;
+                    }, compressionDictName, compressionExperiments);
+                } else {
+                    const operation = beginCompressWrappedTermContentZstdSpansBatch(
+                        sourceBytes,
+                        sourceOffsets,
+                        sourceLengths,
+                        packed.blockStartIndexes,
+                        packed.packedChunkLengths,
+                        compressionDictName,
+                        compressionExperiments,
+                    );
+                    const consumed = operation.sourceConsumed.then(() => {
+                        sourceWasConsumed = true;
+                        resolveSourceConsumed();
+                    });
+                    void consumed.catch(() => {});
+                    try {
+                        result = await operation.completion;
+                    } catch (error) {
+                        await consumed.catch(() => {});
+                        throw error;
+                    }
                 }
                 compressedChunks = result.chunks;
                 envelopeMs = result.envelopeMs;
@@ -845,6 +898,7 @@ export class TermContentBlockStore {
                     envelopeMs += safePerformance.now() - envelopeStart;
                 }
                 validateCompressedChunks(compressedChunks, packed.packedChunkLengths.length);
+                if (privateSource) { resolveSourceConsumed(); }
             } catch (error) {
                 if (sourceWasConsumed) {
                     throw error;
@@ -859,6 +913,7 @@ export class TermContentBlockStore {
                 );
                 packMs += safePerformance.now() - retryPackStart;
                 compressionStart = safePerformance.now();
+                compressionPackMs = 0;
                 compressedChunks = packedChunks.map((content) => {
                     const compressed = compressTermContentZstd(content, compressionDictName);
                     const envelopeStart = safePerformance.now();
@@ -870,7 +925,7 @@ export class TermContentBlockStore {
                 resolveSourceConsumed();
             }
             const completedAt = safePerformance.now();
-            const compressMs = Math.max(0, completedAt - compressionStart - envelopeMs);
+            const compressMs = Math.max(0, completedAt - compressionStart - envelopeMs - compressionPackMs);
             let compressedBytes = 0;
             for (const chunk of compressedChunks) { compressedBytes += chunk.byteLength; }
             return {chunks: compressedChunks, compressedBytes, packMs, compressMs, envelopeMs, completedAt};
@@ -898,6 +953,7 @@ export class TermContentBlockStore {
                     referenceMs += safePerformance.now() - referenceStart;
                     return references;
                 },
+                prefixLimits,
             );
         } catch (error) {
             // Reservation setup may fail before it takes ownership of this

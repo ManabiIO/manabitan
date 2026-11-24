@@ -725,35 +725,46 @@ export class TermContentOpfsStore {
             if (primaryChunks.length === 0) {
                 return {primaryOffsets: [], primaryLengths: [], derivedOffsets: [], derivedLengths: []};
             }
-            const startOffset = this._getBufferedLength();
-            /** @type {number[]} */
-            const primaryOffsets = new Array(primaryChunks.length);
-            /** @type {number[]} */
-            const primaryLengths = new Array(primaryChunks.length);
-            let nextOffset = startOffset;
-            for (let i = 0; i < primaryChunks.length; ++i) {
-                primaryOffsets[i] = nextOffset;
-                primaryLengths[i] = primaryChunks[i].byteLength;
-                nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
-            }
-            const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
-            if (!Array.isArray(derivedChunks)) {
-                throw new TypeError('Derived term-content chunks must be an array');
-            }
-            const allChunks = [...primaryChunks, ...derivedChunks];
-            /** @type {number[]} */
-            const allOffsets = [];
-            /** @type {number[]} */
-            const allLengths = [];
-            this._appendBatchInternal(allChunks, allOffsets, allLengths);
-            await this._finalizeAppendBatch(allChunks);
-            return {
-                primaryOffsets: allOffsets.slice(0, primaryChunks.length),
-                primaryLengths: allLengths.slice(0, primaryChunks.length),
-                derivedOffsets: allOffsets.slice(primaryChunks.length),
-                derivedLengths: allLengths.slice(primaryChunks.length),
-            };
+            return await this._appendBatchWithDerivedChunksInternal(primaryChunks, createDerivedChunks);
         });
+    }
+
+    /**
+     * Called only while the mutation owner is held. The prefix-reservation
+     * operation also uses this original layout when its offset proof fails.
+     * @param {Uint8Array[]} primaryChunks
+     * @param {(offsets: number[], lengths: number[]) => Uint8Array[]} createDerivedChunks
+     * @returns {Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>}
+     */
+    async _appendBatchWithDerivedChunksInternal(primaryChunks, createDerivedChunks) {
+        const startOffset = this._getBufferedLength();
+        /** @type {number[]} */
+        const primaryOffsets = new Array(primaryChunks.length);
+        /** @type {number[]} */
+        const primaryLengths = new Array(primaryChunks.length);
+        let nextOffset = startOffset;
+        for (let i = 0; i < primaryChunks.length; ++i) {
+            primaryOffsets[i] = nextOffset;
+            primaryLengths[i] = primaryChunks[i].byteLength;
+            nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
+        }
+        const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
+        if (!Array.isArray(derivedChunks)) {
+            throw new TypeError('Derived term-content chunks must be an array');
+        }
+        const allChunks = [...primaryChunks, ...derivedChunks];
+        /** @type {number[]} */
+        const allOffsets = [];
+        /** @type {number[]} */
+        const allLengths = [];
+        this._appendBatchInternal(allChunks, allOffsets, allLengths);
+        await this._finalizeAppendBatch(allChunks);
+        return {
+            primaryOffsets: allOffsets.slice(0, primaryChunks.length),
+            primaryLengths: allLengths.slice(0, primaryChunks.length),
+            derivedOffsets: allOffsets.slice(primaryChunks.length),
+            derivedLengths: allLengths.slice(primaryChunks.length),
+        };
     }
 
     /**
@@ -763,10 +774,11 @@ export class TermContentOpfsStore {
      * @param {Promise<Uint8Array[]>} primaryChunksPromise
      * @param {number[]|Uint32Array} derivedChunkLengths
      * @param {(primaryOffsets: number[], primaryLengths: number[]) => Uint8Array[]} createDerivedChunks
+     * @param {{maximumEndOffset: number, primaryBytesUpperBound: number}|null} [prefixLimits]
      * @returns {{reserved: Promise<{derivedOffsets: number[], derivedLengths: number[]}>, completion: Promise<{primaryOffsets: number[], primaryLengths: number[], derivedOffsets: number[], derivedLengths: number[]}>}}
      * @throws {TypeError|RangeError} If the reservation lengths are invalid.
      */
-    beginAppendBatchWithDerivedPrefix(primaryChunksPromise, derivedChunkLengths, createDerivedChunks) {
+    beginAppendBatchWithDerivedPrefix(primaryChunksPromise, derivedChunkLengths, createDerivedChunks, prefixLimits = null) {
         if (
             !(derivedChunkLengths instanceof Uint32Array) &&
             !Array.isArray(derivedChunkLengths)
@@ -779,6 +791,28 @@ export class TermContentOpfsStore {
             }
             return length;
         });
+        const maximumEndOffset = prefixLimits?.maximumEndOffset ?? null;
+        const primaryBytesUpperBound = prefixLimits?.primaryBytesUpperBound ?? null;
+        /**
+         * @param {number[]} primaryOffsets
+         * @param {number[]} primaryLengths
+         * @returns {Uint8Array[]}
+         * @throws {TypeError} If derived chunks differ from their reservation.
+         */
+        const createReservedDerivedChunks = (primaryOffsets, primaryLengths) => {
+            const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
+            if (
+                !Array.isArray(derivedChunks) ||
+                derivedChunks.length !== normalizedDerivedLengths.length ||
+                derivedChunks.some((chunk, index) => (
+                    !(chunk instanceof Uint8Array) ||
+                    chunk.byteLength !== normalizedDerivedLengths[index]
+                ))
+            ) {
+                throw new TypeError('Derived term-content chunks do not match their reservation');
+            }
+            return derivedChunks;
+        };
         const primaryPromise = Promise.resolve(primaryChunksPromise);
         void primaryPromise.catch(() => {});
         /** @type {(value: {derivedOffsets: number[], derivedLengths: number[]}) => void} */
@@ -802,6 +836,26 @@ export class TermContentOpfsStore {
                     derivedOffsets[i] = primaryStartOffset;
                     primaryStartOffset = addSafeByteLength(primaryStartOffset, normalizedDerivedLengths[i]);
                 }
+                if (
+                    prefixLimits !== null &&
+                    (
+                        maximumEndOffset === null || !Number.isSafeInteger(maximumEndOffset) || maximumEndOffset < 0 ||
+                        primaryBytesUpperBound === null || !Number.isSafeInteger(primaryBytesUpperBound) || primaryBytesUpperBound < 0 ||
+                        primaryStartOffset > maximumEndOffset - primaryBytesUpperBound
+                    )
+                ) {
+                    // Check under the append owner after every earlier mutation.
+                    // Keep high offsets on the old suffix layout so placement
+                    // cannot change record offset-span/index partitioning.
+                    const primaryChunks = await primaryPromise;
+                    if (!Array.isArray(primaryChunks) || primaryChunks.some((chunk) => !(chunk instanceof Uint8Array))) {
+                        throw new TypeError('Primary term-content chunks must be Uint8Arrays');
+                    }
+                    const result = await this._appendBatchWithDerivedChunksInternal(primaryChunks, createReservedDerivedChunks);
+                    reservationSettled = true;
+                    resolveReserved({derivedOffsets: result.derivedOffsets, derivedLengths: result.derivedLengths});
+                    return result;
+                }
                 reservationSettled = true;
                 resolveReserved({
                     derivedOffsets: [...derivedOffsets],
@@ -822,17 +876,10 @@ export class TermContentOpfsStore {
                     primaryLengths[i] = primaryChunks[i].byteLength;
                     nextOffset = addSafeByteLength(nextOffset, primaryLengths[i]);
                 }
-                const derivedChunks = createDerivedChunks(primaryOffsets, primaryLengths);
-                if (
-                    !Array.isArray(derivedChunks) ||
-                    derivedChunks.length !== normalizedDerivedLengths.length ||
-                    derivedChunks.some((chunk, index) => (
-                        !(chunk instanceof Uint8Array) ||
-                        chunk.byteLength !== normalizedDerivedLengths[index]
-                    ))
-                ) {
-                    throw new TypeError('Derived term-content chunks do not match their reservation');
+                if (primaryBytesUpperBound !== null && nextOffset - primaryStartOffset > primaryBytesUpperBound) {
+                    throw new RangeError('Primary term-content chunks exceed their reserved bound');
                 }
+                const derivedChunks = createReservedDerivedChunks(primaryOffsets, primaryLengths);
                 const chunks = [...derivedChunks, ...primaryChunks];
                 /** @type {number[]} */
                 const offsets = [];
