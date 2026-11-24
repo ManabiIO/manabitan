@@ -19,6 +19,7 @@
 
 import {describe, expect, test, vi} from 'vitest'
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
+import {registerOwnedTermContent} from '../ext/js/dictionary/term-content-ownership.js'
 
 /** @typedef {Parameters<DictionaryDatabase['_publishArtifactTermContentMetadata']>[0]} PublicationState */
 /** @typedef {{database: DictionaryDatabase, state: PublicationState, staged: NonNullable<PublicationState['stagedContentMetadata']>}} Harness */
@@ -162,6 +163,66 @@ describe('contiguous content metadata publication', () => {
             change: ({state}) => {
                 if (state.pendingContentSpans === null) { throw new Error('Expected source spans') }
                 state.pendingContentSpans.offsets[2] = 20
+            }},
+        {name: 'owned complete cache source',
+            expectedFast: true,
+            change: ({state}) => {
+                if (state.pendingContentSpans === null) { throw new Error('Expected source spans') }
+                registerOwnedTermContent(state.pendingContentSpans.buffer)
+            }},
+        {name: 'owned partial cache source',
+            expectedFast: true,
+            change: ({state}) => {
+                if (state.pendingContentSpans === null) { throw new Error('Expected source spans') }
+                const source = new Uint8Array(16)
+                source.set(state.pendingContentSpans.buffer, 2)
+                state.pendingContentSpans.buffer = source
+                state.pendingContentSpans.offsets = new Uint32Array([2, 6, 10])
+                registerOwnedTermContent(source)
+            }},
+        {name: 'borrowed shared cache source',
+            expectedFast: true,
+            change: ({state}) => {
+                if (state.pendingContentSpans === null) { throw new Error('Expected source spans') }
+                const source = new Uint8Array(new SharedArrayBuffer(12))
+                source.set(state.pendingContentSpans.buffer)
+                state.pendingContentSpans.buffer = source
+            }},
+        {name: 'cache admission rejects complete source over budget',
+            expectedFast: true,
+            change: ({database}) => { Reflect.set(database, '_recentTermContentSourceCacheMaxBytes', 8) }},
+        {name: 'cache eviction retains the same source coverage',
+            expectedFast: true,
+            change: ({database}) => {
+                Reflect.set(database, '_recentTermContentSourceCacheMaxBytes', 16)
+                Reflect.get(database, '_recentTermContentSourceBatches').set(99, new Uint8Array(8))
+                Reflect.set(database, '_recentTermContentSourceBatchBytes', 8)
+            }},
+        {name: 'cache identifier wrap',
+            expectedFast: true,
+            change: ({database}) => { Reflect.set(database, '_nextRecentTermContentSourceBatchId', 0x100000000) }},
+        {name: 'cache identifier wrap overwrites aliased reservation indexes',
+            expectedFast: true,
+            change: ({database, staged}) => {
+                const ids = /** @type {Uint32Array} */ (Reflect.get(database, '_termEntryContentMetaRecentSourceBatchIdTable'))
+                const indexes = new Int32Array(ids.buffer, ids.byteOffset, staged.indexes.length)
+                indexes.set(staged.indexes)
+                staged.indexes = indexes
+                Reflect.set(database, '_nextRecentTermContentSourceBatchId', 0x100000000)
+            }},
+        {name: 'cache mappings alias reservation indexes',
+            expectedFast: true,
+            change: ({database, staged}) => {
+                const offsets = /** @type {Uint32Array} */ (Reflect.get(database, '_termEntryContentMetaRecentSourceOffsetTable'))
+                const indexes = new Int32Array(offsets.buffer, offsets.byteOffset, staged.indexes.length)
+                indexes.set(staged.indexes)
+                staged.indexes = indexes
+            }},
+        {name: 'short cache mapping table',
+            expectedFast: true,
+            change: ({database}) => {
+                const ids = /** @type {Uint32Array} */ (Reflect.get(database, '_termEntryContentMetaRecentSourceBatchIdTable'))
+                Reflect.set(database, '_termEntryContentMetaRecentSourceBatchIdTable', ids.subarray(0, 2))
             }},
         {name: 'subarray columns',
             expectedFast: true,

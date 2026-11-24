@@ -6752,9 +6752,10 @@ null;
      * @param {{indexes: Int32Array, active: boolean}|null} staged
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} spans
      * @param {Record<string, number>|null} [importMetrics]
+     * @param {boolean} [publishedContiguous] Only the immediately preceding synchronous publication may supply this proof.
      * @returns {number} Number of owned source bytes retained.
      */
-    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null) {
+    _cacheRecentPublishedTermContentSources(staged, spans, importMetrics = null, publishedContiguous = false) {
         if (staged === null || spans === null || staged.indexes.length === 0) { return 0; }
         if (
             !(spans.buffer instanceof Uint8Array) ||
@@ -6763,6 +6764,14 @@ null;
         ) {
             return 0;
         }
+        // Publication has already checked every reservation index and marked
+        // the complete range as published. Reuse that proof only in this call;
+        // cache identifier wrap may overwrite aliased reservation columns.
+        const reusePublishedRange = (
+            publishedContiguous &&
+            staged.indexes.buffer !== this._termEntryContentMetaRecentSourceBatchIdTable.buffer &&
+            staged.indexes.buffer !== this._termEntryContentMetaRecentSourceOffsetTable.buffer
+        );
         const averageSampleCount = Math.min(
             staged.indexes.length,
             TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
@@ -6773,8 +6782,10 @@ null;
             const sourceIndex = averageSampleCount === 1 ?
                 0 :
                 Math.floor(i * (staged.indexes.length - 1) / (averageSampleCount - 1));
-            const index = staged.indexes[sourceIndex];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            if (!reusePublishedRange) {
+                const index = staged.indexes[sourceIndex];
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            }
             ++sampledPublishedCount;
             sampledContentBytes += spans.lengths[sourceIndex];
         }
@@ -6789,8 +6800,10 @@ null;
         let publishedCount = 0;
         let publishedContentBytes = 0;
         for (let i = 0; i < staged.indexes.length; ++i) {
-            const index = staged.indexes[i];
-            if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            if (!reusePublishedRange) {
+                const index = staged.indexes[i];
+                if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
+            }
             const offset = spans.offsets[i];
             const length = spans.lengths[i];
             if (offset > spans.buffer.byteLength || length > spans.buffer.byteLength - offset) { return 0; }
@@ -6855,7 +6868,7 @@ null;
             endIndex <= this._termEntryContentMetaRecentSourceBatchIdTable.length &&
             endIndex <= this._termEntryContentMetaRecentSourceOffsetTable.length
         );
-        if (contiguousPublished) {
+        if (contiguousPublished && !reusePublishedRange) {
             for (let i = 1; i < staged.indexes.length; ++i) {
                 if (staged.indexes[i] !== firstIndex + i) {
                     contiguousPublished = false;
@@ -9974,6 +9987,7 @@ null :
             stagedContentMetadata,
             pendingContentSpans,
             importMetrics,
+            publishedContiguous,
         );
         if (importMetrics !== null) {
             importMetrics.dedupRecentSourceCacheMs += safePerformance.now() - recentSourceCacheStart;
