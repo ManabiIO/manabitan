@@ -1,0 +1,85 @@
+name: Import source study 20261124
+
+on:
+  push:
+    branches: [perf/import-studies-20261124-3aac]
+    paths:
+      - '.github/workflows/import-studies-20261124-3aac.yml'
+      - 'dev/perf/import-runtime-20261124-3aac.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-source-study-3aac-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  compare:
+    name: ${{ matrix.candidate.label }} screen (${{ matrix.dictionary }}, ${{ matrix.replication }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        replication: ["forward"]
+        candidate:
+          - label: prefix
+            sha: ebb1da8d2cc2b28901400968891b632605f1b3f0
+            differences: '["js/dictionary/term-content-block-store.js","js/dictionary/term-content-opfs-store.js","js/dictionary/term-content-ownership.js","js/dictionary/zstd-term-content.js","lib/zstd-wasm.js","lib/zstd-wasm.js.map"]'
+          - label: media
+            sha: fb71a03f4611bcfa71e135693bebd1fe778153bf
+            differences: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+          - label: cache
+            sha: cdb23a11d991a72f860e400d0d81bb0747a5b4f9
+            differences: '["js/dictionary/dictionary-database.js"]'
+    env:
+      PERF_BASELINE_SHA: bbccabd520972cc351a65d9f545bd5369b6e9747
+      PERF_CANDIDATE_SHA: ${{ matrix.candidate.sha }}
+      PERF_EXPECTED_DIFFERENCES: ${{ matrix.candidate.differences }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_REPLICATION: ${{ matrix.replication }}
+      PERF_STAGE: screen
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Fetch the frozen source commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=64 origin "$PERF_BASELINE_SHA" "$PERF_CANDIDATE_SHA"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install the pinned Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the complete fixed cohort
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/import-study-evidence"
+          cp .github/workflows/import-studies-20261124-3aac.yml "$RUNNER_TEMP/import-study-evidence/workflow.yml"
+          cp dev/perf/import-runtime-20261124-3aac.py "$RUNNER_TEMP/import-study-evidence/runner.py"
+          reverse_args=()
+          if [[ "$PERF_REPLICATION" == reverse ]]; then reverse_args+=(--reverse); fi
+          python3 dev/perf/import-runtime-20261124-3aac.py \
+            --baseline "$PERF_BASELINE_SHA" --candidate "$PERF_CANDIDATE_SHA" \
+            --dictionary "$PERF_DICTIONARY" --stage "$PERF_STAGE" \
+            --expected-differences "$PERF_EXPECTED_DIFFERENCES" \
+            --output "$RUNNER_TEMP/import-study-evidence/cohort" "${reverse_args[@]}" \
+            2>&1 | tee "$RUNNER_TEMP/import-study-evidence/runner.log"
+      - name: Retain every attempted observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-${{ matrix.candidate.label }}-screen-${{ matrix.dictionary }}-${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/import-study-evidence
+          if-no-files-found: error
+          retention-days: 30
