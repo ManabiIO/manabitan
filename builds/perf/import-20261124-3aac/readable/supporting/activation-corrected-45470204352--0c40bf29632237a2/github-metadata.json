@@ -1,0 +1,508 @@
+{
+  "run": 45470204352,
+  "head": "200b8680bad62e9f40b015ceebebc7382b54dd4b",
+  "artifacts": [
+    {
+      "id": 14957926735,
+      "name": "import-activation-3aac-cache-jmdict-45470204352-1",
+      "size_in_bytes": 48657,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957926735",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957926735/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:27:33Z",
+      "expires_at": "2026-12-24T19:27:32Z",
+      "updated_at": "2026-11-24T19:27:33Z",
+      "digest": "sha256:086fac74d7b9348bcb48dfd9f6570570f475486a1f03f9838188498118f397c0",
+      "workflow_run": {
+        "id": 45470204352,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "200b8680bad62e9f40b015ceebebc7382b54dd4b"
+      }
+    },
+    {
+      "id": 14956967658,
+      "name": "import-activation-3aac-prefix-vndb-45470204352-1",
+      "size_in_bytes": 85822,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956967658",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956967658/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:27:35Z",
+      "expires_at": "2026-12-24T19:27:34Z",
+      "updated_at": "2026-11-24T19:27:35Z",
+      "digest": "sha256:5d12544116d6587f8ca5db3238cb2d1b66e0faee1b5a93e1f0e8a82eb9a6867e",
+      "workflow_run": {
+        "id": 45470204352,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "200b8680bad62e9f40b015ceebebc7382b54dd4b"
+      }
+    },
+    {
+      "id": 14956736581,
+      "name": "import-activation-3aac-prefix-jmdict-45470204352-1",
+      "size_in_bytes": 52601,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956736581",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956736581/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:27:13Z",
+      "expires_at": "2026-12-24T19:27:12Z",
+      "updated_at": "2026-11-24T19:27:13Z",
+      "digest": "sha256:88fbfc6b059405feaf1f6f28f8e0de8ae60ce80b0e56f51273cab2253954b9b2",
+      "workflow_run": {
+        "id": 45470204352,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "200b8680bad62e9f40b015ceebebc7382b54dd4b"
+      }
+    },
+    {
+      "id": 14956446688,
+      "name": "import-activation-3aac-prefix-jitendex-45470204352-1",
+      "size_in_bytes": 67552,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956446688",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956446688/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:27:13Z",
+      "expires_at": "2026-12-24T19:27:13Z",
+      "updated_at": "2026-11-24T19:27:13Z",
+      "digest": "sha256:7822ac53c54913d9b05696099678184b4a34e7024c7464fae96b3ac5981abc33",
+      "workflow_run": {
+        "id": 45470204352,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "200b8680bad62e9f40b015ceebebc7382b54dd4b"
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "id": 138715794005,
+      "name": "Activation (cache-jmdict)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45470204352,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Retain the exact diagnostic instrumentation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install matching Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify source identity and apply diagnostic-only counters",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Prepare and verify the complete native setup fixture set",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Observe activation in a complete import",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Retain every output and failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        }
+      ]
+    },
+    {
+      "id": 138715794491,
+      "name": "Activation (prefix-vndb)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45470204352,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Retain the exact diagnostic instrumentation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install matching Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify source identity and apply diagnostic-only counters",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Prepare and verify the complete native setup fixture set",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Observe activation in a complete import",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Retain every output and failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        }
+      ]
+    },
+    {
+      "id": 138715794533,
+      "name": "Activation (prefix-jmdict)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45470204352,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Retain the exact diagnostic instrumentation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install matching Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify source identity and apply diagnostic-only counters",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Prepare and verify the complete native setup fixture set",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Observe activation in a complete import",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Retain every output and failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        }
+      ]
+    },
+    {
+      "id": 138715795093,
+      "name": "Activation (prefix-jitendex)",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 45470204352,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Retain the exact diagnostic instrumentation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Install matching Chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify source identity and apply diagnostic-only counters",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Prepare and verify the complete native setup fixture set",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Observe activation in a complete import",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Retain every output and failure",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Restore pinned source archives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Run ./.github/actions/setup",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "run": 45468314006,
+    "artifactId": 14957690529,
+    "name": "import-prefix-qualification-jitendex-reverse-45468314006-1",
+    "archiveSha256FromGithub": "16dd075b11b67199067b0bea5d40e9b63e3c0c7366a3acbeffd2dbe3ce1462e1",
+    "archiveBytes": 1739065,
+    "toolingCommit": "eeec4c2055ed911de92ba98fdc815c8ff0444edb"
+  },
+  {
+    "run": 45468314006,
+    "artifactId": 14957490587,
+    "name": "import-prefix-qualification-jmdict-forward-45468314006-1",
+    "archiveSha256FromGithub": "d604e427b9e74854cac932825aa892bd1fed121dea3bf6ecbd1dc30848a5e51c",
+    "archiveBytes": 1718795,
+    "toolingCommit": "eeec4c2055ed911de92ba98fdc815c8ff0444edb"
+  },
+  {
+    "run": 45468314006,
+    "artifactId": 14957421662,
+    "name": "import-prefix-qualification-jmdict-reverse-45468314006-1",
+    "archiveSha256FromGithub": "a8a9e0f4d446fac0b6655483a2ef1a207afcb559189786d30ab6514ba783198d",
+    "archiveBytes": 1723466,
+    "toolingCommit": "eeec4c2055ed911de92ba98fdc815c8ff0444edb"
+  },
+  {
+    "run": 45468314006,
+    "artifactId": 14955843365,
+    "name": "import-prefix-qualification-jitendex-forward-45468314006-1",
+    "archiveSha256FromGithub": "4cafd2fff1051733f6e862e9ed111e01e1b1ff19d205372b0c72014a2b79b743",
+    "archiveBytes": 1744463,
+    "toolingCommit": "eeec4c2055ed911de92ba98fdc815c8ff0444edb"
+  },
+  {
+    "run": 45468614083,
+    "artifactId": 14957595656,
+    "name": "import-memory-3aac-prefix-jitendex-rep1-45468614083-1",
+    "archiveSha256FromGithub": "97f3970fd1a12d69bcdf8852ba589354725251ebee83da45b8510d5068649e70",
+    "archiveBytes": 34192286,
+    "toolingCommit": "a96671c223ed1e7ed49f0c96427b2ef09229f4cc"
+  },
+  {
+    "run": 45468614083,
+    "artifactId": 14955817975,
+    "name": "import-memory-3aac-prefix-jitendex-rep2-45468614083-1",
+    "archiveSha256FromGithub": "5dd22836b6a599f73c553d26c544c608b490c0e0573bfd3d346832988329edbb",
+    "archiveBytes": 34201883,
+    "toolingCommit": "a96671c223ed1e7ed49f0c96427b2ef09229f4cc"
+  }
+]

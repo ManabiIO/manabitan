@@ -1,0 +1,58 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/media-critical",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "33594ec55b34b8c88fe2c50e30c1302d50ee5847",
+  "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103",
+  "files": [
+    {
+      "path": "dev/data/dictionary-wasm/manifest.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cefac6158e83c37342aaec24675150db09567233",
+      "size": 2588
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "916a0d0883e97d297b1d4444b6a7905fe6adea63",
+      "size": 67329
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5db0c06f5d6dd017a5e5aad68563ccb199b15d63",
+      "size": 15449
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0c22c2818f795f4941e4494e4959c99f69511d6a",
+      "size": 205979
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0520b1b7dc931a764b984a0f92732969575e563f",
+      "size": 154841
+    },
+    {
+      "path": "test/term-bank-experiments.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e51fdfdd873c0b80154d1710b0269e5d54b59c52",
+      "size": 48667
+    },
+    {
+      "path": "test/term-bank-media-projection.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf58f3703b10f665040c12e35096cb624a91607f",
+      "size": 11926
+    }
+  ]
+}

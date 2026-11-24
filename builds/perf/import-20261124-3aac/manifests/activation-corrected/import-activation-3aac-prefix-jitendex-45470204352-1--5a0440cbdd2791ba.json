@@ -1,0 +1,207 @@
+{
+  "name": "import-activation-3aac-prefix-jitendex-45470204352-1",
+  "omittedBuiltProducts": [],
+  "originalArchiveLocallyVerifiedSha256": "7822ac53c54913d9b05696099678184b4a34e7024c7464fae96b3ac5981abc33",
+  "originalGithubArtifact": {
+    "artifact": {
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956446688/zip",
+      "created_at": "2026-11-24T19:27:13Z",
+      "digest": "sha256:7822ac53c54913d9b05696099678184b4a34e7024c7464fae96b3ac5981abc33",
+      "expired": false,
+      "expires_at": "2026-12-24T19:27:13Z",
+      "id": 14956446688,
+      "name": "import-activation-3aac-prefix-jitendex-45470204352-1",
+      "size_in_bytes": 67552,
+      "updated_at": "2026-11-24T19:27:13Z",
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956446688",
+      "workflow_run": {
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_repository_id": 1165902460,
+        "head_sha": "200b8680bad62e9f40b015ceebebc7382b54dd4b",
+        "id": 45470204352,
+        "repository_id": 1165902460
+      }
+    },
+    "artifactUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470204352/artifacts/14956446688",
+    "metadataReceipt": "provenance/metadata/104c582c1edd0db853462d6e46b2a433de57a411fe1452707c31af48cc1617e8.json",
+    "metadataReceiptSha256": "104c582c1edd0db853462d6e46b2a433de57a411fe1452707c31af48cc1617e8",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45470204352,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45470204352"
+  },
+  "packagerSha256": "d5db8075998fca4e081af09c85609bdebcc11585a54249453c70bb2c2accedd2",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 468859,
+  "retainedFiles": [
+    {
+      "bytes": 13808,
+      "path": "activation.json",
+      "sha256": "2a9a33083b17c628466e870646b4cf32e44f726b5a809a1691cfbca525cff5a9"
+    },
+    {
+      "bytes": 6529,
+      "path": "actual-source.patch",
+      "sha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911"
+    },
+    {
+      "bytes": 125013,
+      "path": "diagnostic/run-1.html",
+      "sha256": "4628c494723ce9b6d719e6731786196b4a013314a38abd7a1482c4d073e7896e"
+    },
+    {
+      "bytes": 221076,
+      "path": "diagnostic/run-1.json",
+      "sha256": "70c038e8333d48a11dd92131c9e8e31ae18fb1cd515fdcae042488932b258829"
+    },
+    {
+      "bytes": 77871,
+      "path": "diagnostic/summary.json",
+      "sha256": "f8242fd5ee6abc82cece720bad66d8f13ea3ad7e9f7c038a34780c20a148be18"
+    },
+    {
+      "bytes": 1574,
+      "path": "diagnostic.log",
+      "sha256": "1fbdeb740adbc0d1c116c233523a85a2381020c61573c4357efe3751e29087e3"
+    },
+    {
+      "bytes": 3047,
+      "path": "dictionaries.lock.json",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "bytes": 6529,
+      "path": "instrumentation.patch",
+      "sha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911"
+    },
+    {
+      "bytes": 130,
+      "path": "instrumentation.sha256",
+      "sha256": "cc4b3bb1ba41f0e71c36df9b6c8eca1608aa1e630e60340c18dff6e424e61afc"
+    },
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "83a3ae180a71a0178bed2aa5f3ff3fb514514babd6adb405aaf718dc62fd303e"
+    },
+    {
+      "bytes": 487,
+      "path": "prepare-dictionaries.log",
+      "sha256": "6aadf316e961c38b614247ea2a880a6af1543b39615b32ea29975a01b52cb149"
+    },
+    {
+      "bytes": 82,
+      "path": "source-identity.txt",
+      "sha256": "cd928d0334b2bc7962077c6ece7eeb49b5517155a5062084caeb36a569b855bd"
+    },
+    {
+      "bytes": 6285,
+      "path": "summarize.py",
+      "sha256": "497228c094757ad798619bc8b82cba1b1f86816c21fb39fdb6d6620e365a584c"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d4eede18c314acfcd6dc004645937c0e4c2c2eaaf821b6ec84db0dac22b56fe7"
+    },
+    {
+      "bytes": 6284,
+      "path": "workflow.yml",
+      "sha256": "6a20fafc9ff171af13260c6798b29c6895993b495483dc43cb8dff6efbeda60a"
+    }
+  ],
+  "runId": 45470204352,
+  "schemaVersion": 1,
+  "sourceBytes": 468859,
+  "sourceFileCount": 16,
+  "sourceInventory": [
+    {
+      "bytes": 13808,
+      "path": "activation.json",
+      "sha256": "2a9a33083b17c628466e870646b4cf32e44f726b5a809a1691cfbca525cff5a9"
+    },
+    {
+      "bytes": 6529,
+      "path": "actual-source.patch",
+      "sha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911"
+    },
+    {
+      "bytes": 125013,
+      "path": "diagnostic/run-1.html",
+      "sha256": "4628c494723ce9b6d719e6731786196b4a013314a38abd7a1482c4d073e7896e"
+    },
+    {
+      "bytes": 221076,
+      "path": "diagnostic/run-1.json",
+      "sha256": "70c038e8333d48a11dd92131c9e8e31ae18fb1cd515fdcae042488932b258829"
+    },
+    {
+      "bytes": 77871,
+      "path": "diagnostic/summary.json",
+      "sha256": "f8242fd5ee6abc82cece720bad66d8f13ea3ad7e9f7c038a34780c20a148be18"
+    },
+    {
+      "bytes": 1574,
+      "path": "diagnostic.log",
+      "sha256": "1fbdeb740adbc0d1c116c233523a85a2381020c61573c4357efe3751e29087e3"
+    },
+    {
+      "bytes": 3047,
+      "path": "dictionaries.lock.json",
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    {
+      "bytes": 6529,
+      "path": "instrumentation.patch",
+      "sha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911"
+    },
+    {
+      "bytes": 130,
+      "path": "instrumentation.sha256",
+      "sha256": "cc4b3bb1ba41f0e71c36df9b6c8eca1608aa1e630e60340c18dff6e424e61afc"
+    },
+    {
+      "bytes": 9,
+      "path": "node-version.txt",
+      "sha256": "c414f17896fa3ddfbd81ec3e6037beef712f6ec9200decd2d47c9c1e1594385a"
+    },
+    {
+      "bytes": 94,
+      "path": "package.sha256",
+      "sha256": "83a3ae180a71a0178bed2aa5f3ff3fb514514babd6adb405aaf718dc62fd303e"
+    },
+    {
+      "bytes": 487,
+      "path": "prepare-dictionaries.log",
+      "sha256": "6aadf316e961c38b614247ea2a880a6af1543b39615b32ea29975a01b52cb149"
+    },
+    {
+      "bytes": 82,
+      "path": "source-identity.txt",
+      "sha256": "cd928d0334b2bc7962077c6ece7eeb49b5517155a5062084caeb36a569b855bd"
+    },
+    {
+      "bytes": 6285,
+      "path": "summarize.py",
+      "sha256": "497228c094757ad798619bc8b82cba1b1f86816c21fb39fdb6d6620e365a584c"
+    },
+    {
+      "bytes": 41,
+      "path": "tooling-sha.txt",
+      "sha256": "d4eede18c314acfcd6dc004645937c0e4c2c2eaaf821b6ec84db0dac22b56fe7"
+    },
+    {
+      "bytes": 6284,
+      "path": "workflow.yml",
+      "sha256": "6a20fafc9ff171af13260c6798b29c6895993b495483dc43cb8dff6efbeda60a"
+    }
+  ],
+  "sourceInventorySha256": "5a0440cbdd2791ba7db9f49021147df4fccbac47be41e839764d6919a8f51191",
+  "sourceRoot": "activation-corrected-45470204352/artifact-14956446688",
+  "stage": "activation-corrected"
+}

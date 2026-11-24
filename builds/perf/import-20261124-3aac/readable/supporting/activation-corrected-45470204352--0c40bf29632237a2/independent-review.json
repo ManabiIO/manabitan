@@ -1,0 +1,201 @@
+{
+  "schemaVersion": 1,
+  "runId": 45470204352,
+  "toolingSha": "200b8680bad62e9f40b015ceebebc7382b54dd4b",
+  "toolingTree": "02fd3a7018bd0025141f178bd3ca35b3d7244a85",
+  "allChecksPass": true,
+  "timingsAuthoritative": false,
+  "timingCaveat": "Raw standard benchmark.authoritativeTiming remains true because the benchmark harness was unchanged. Instrumentation overlay makes these four observations diagnostic-only; no timing is used.",
+  "packageCaveat": "The archive retains package SHA receipts but not built product ZIPs; reported package hashes are reconciled across raw report, summary and sha256 receipt, not independently rehashed from absent product bytes.",
+  "correctnessScope": "Complete row counts and restart, 72 deterministic canonical lookup receipts (12 terms x 6 passes), sampled media, exact normalized per-file logical sizes; no exhaustive all-row content or full-media parity claim for these diagnostic runs.",
+  "firstFailuresRetained": "/workspace/scratch/3aacd533c01f/round2/activation-failures-45468163108",
+  "results": [
+    {
+      "artifactId": 14957926735,
+      "archiveSha256": "086fac74d7b9348bcb48dfd9f6570570f475486a1f03f9838188498118f397c0",
+      "mode": "cache",
+      "dictionary": "jmdict",
+      "source": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+      "tree": "1edef4035041ef848175e3278169daf2260ac34a",
+      "instrumentationSha256": "9035eccfba46bcf950ea9aeb848b6879729bb8ae2fa3cb66c4fbde1c1f13ab8c",
+      "packageSha256Reported": "ef0e0650191f6e7b53268a19d592830b452a3c27bf9d892f81dfbb005632abcb",
+      "reportSha256": "1145e77cfc8cff101814b9cdf4d132762e244a29f663bae2d82c239d9990bce9",
+      "owner": "offscreen",
+      "eventCounts": {
+        "cache-publisher": 12,
+        "cache-receiver": 12
+      },
+      "activation": {
+        "publisherCalls": 12,
+        "publisherProofTrueCalls": 12,
+        "receiverCalls": 12,
+        "receiverReusedProofCalls": 12,
+        "receiverReusedProofRows": 362032,
+        "receiverReusedSourceBytes": 101143985
+      },
+      "independentSequenceChecks": {
+        "publisherCalls": 12,
+        "publisherProofTrueCalls": 12,
+        "receiverCalls": 12,
+        "receiverReusedProofCalls": 12,
+        "receiverReusedProofRows": 362032,
+        "receiverReusedSourceBytes": 101143985
+      },
+      "termRows": 528299,
+      "lookupReceipts": 72,
+      "sampledMedia": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "storageBytes": 43520477,
+      "priorCorrectnessReference": "/workspace/scratch/3aacd533c01f/round2/artifacts/import-prefix-qualification-jmdict-forward-45468314006-1/cohort/diagnostic-A/run-1.json",
+      "allChecksPass": true
+    },
+    {
+      "artifactId": 14956967658,
+      "archiveSha256": "5d12544116d6587f8ca5db3238cb2d1b66e0faee1b5a93e1f0e8a82eb9a6867e",
+      "mode": "prefix",
+      "dictionary": "vndb",
+      "source": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd",
+      "instrumentationSha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911",
+      "packageSha256Reported": "1ee8cf3f236bca5416c1ceb2753dc8f194a5e99701be8ec084292eae5913f560",
+      "reportSha256": "c8e5caeff3c74633f45ff668da88fcefc9862f98fb942df9dbe1965c5fd49582",
+      "owner": "offscreen",
+      "eventCounts": {
+        "attempt": 170
+      },
+      "activation": {
+        "attempts": 170,
+        "privateAdmissions": 0,
+        "privatePrefixReservations": 0,
+        "privateSuffixFallbacks": 0,
+        "existingSharedAdmissions": 0,
+        "firstPrivateAttempts": 2,
+        "privateAdmittedContentBytes": 0,
+        "privateAdmittedUniqueCount": 0,
+        "eligibleOwnedSourceBytes": 0
+      },
+      "independentSequenceChecks": {
+        "attempts": 170,
+        "unforcedSelectionAttempts": 2,
+        "privateAdmissions": 0,
+        "sharedAdmissions": 0
+      },
+      "termRows": 6648310,
+      "lookupReceipts": 72,
+      "sampledMedia": {
+        "mode": "sample",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 64,
+        "bytes": 86256,
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+      },
+      "storageBytes": 609553611,
+      "priorCorrectnessReference": "/workspace/scratch/3aacd533c01f/round2/activation-failures-45468163108/artifact-14956350395/diagnostic/run-1.json",
+      "allChecksPass": true
+    },
+    {
+      "artifactId": 14956736581,
+      "archiveSha256": "88fbfc6b059405feaf1f6f28f8e0de8ae60ce80b0e56f51273cab2253954b9b2",
+      "mode": "prefix",
+      "dictionary": "jmdict",
+      "source": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd",
+      "instrumentationSha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911",
+      "packageSha256Reported": "40a2301cc4d49dc66dce3cfea23953edb4e21a4dc2bb71c4dcacbe7498f3591a",
+      "reportSha256": "aaa96fec1d6fa22202bfc4dfe21cd2782b6ba4a386d61cacad0b00e85dfe4dba",
+      "owner": "offscreen",
+      "eventCounts": {
+        "attempt": 12,
+        "begin": 12
+      },
+      "activation": {
+        "attempts": 12,
+        "privateAdmissions": 0,
+        "privatePrefixReservations": 0,
+        "privateSuffixFallbacks": 0,
+        "existingSharedAdmissions": 12,
+        "firstPrivateAttempts": 0,
+        "privateAdmittedContentBytes": 0,
+        "privateAdmittedUniqueCount": 0,
+        "eligibleOwnedSourceBytes": 0
+      },
+      "independentSequenceChecks": {
+        "existingSharedAdmissions": 12,
+        "initialSharedSelection": 1,
+        "privateAdmissions": 0
+      },
+      "termRows": 528299,
+      "lookupReceipts": 72,
+      "sampledMedia": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "storageBytes": 43520477,
+      "priorCorrectnessReference": "/workspace/scratch/3aacd533c01f/round2/artifacts/import-prefix-qualification-jmdict-forward-45468314006-1/cohort/diagnostic-A/run-1.json",
+      "allChecksPass": true
+    },
+    {
+      "artifactId": 14956446688,
+      "archiveSha256": "7822ac53c54913d9b05696099678184b4a34e7024c7464fae96b3ac5981abc33",
+      "mode": "prefix",
+      "dictionary": "jitendex",
+      "source": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+      "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd",
+      "instrumentationSha256": "77febad7eb75e9355a74b11e2dadb740a35f4e1fdf0cf0eb2e924f7c88431911",
+      "packageSha256Reported": "93492192fcefec4d01f0228fc566403e9d4744be5639dcc00e7669569e93ce1c",
+      "reportSha256": "70c038e8333d48a11dd92131c9e8e31ae18fb1cd515fdcae042488932b258829",
+      "owner": "offscreen",
+      "eventCounts": {
+        "attempt": 22,
+        "begin": 21,
+        "private-prefix": 21
+      },
+      "activation": {
+        "attempts": 22,
+        "privateAdmissions": 21,
+        "privatePrefixReservations": 21,
+        "privateSuffixFallbacks": 0,
+        "existingSharedAdmissions": 0,
+        "firstPrivateAttempts": 1,
+        "privateAdmittedContentBytes": 372728692,
+        "privateAdmittedUniqueCount": 351495,
+        "eligibleOwnedSourceBytes": 372749014
+      },
+      "independentSequenceChecks": {
+        "attempts": 22,
+        "privateAdmissions": 21,
+        "privatePrefixReservations": 21,
+        "privateSuffixFallbacks": 0,
+        "existingSharedAdmissions": 0,
+        "firstPrivateAttempts": 1,
+        "privateAdmittedContentBytes": 372728692,
+        "privateAdmittedUniqueCount": 351495,
+        "eligibleOwnedSourceBytes": 372749014
+      },
+      "termRows": 436555,
+      "lookupReceipts": 72,
+      "sampledMedia": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "storageBytes": 67466332,
+      "priorCorrectnessReference": "/workspace/scratch/3aacd533c01f/round2/artifacts/import-prefix-qualification-jitendex-forward-45468314006-1/cohort/diagnostic-B/run-1.json",
+      "allChecksPass": true
+    }
+  ]
+}

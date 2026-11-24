@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "synthetic",
+  "tree": "synthetic",
+  "dictionary": "jmdict",
+  "mode": "cache",
+  "packageSha256": "94ca2fadb4d8d6e655182f68f914690230e1358c1223a4d31b9b988926d9385b",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "efae378a2a031e1d015b8711add040f5f4f58e0c58003114b07312ce71ec9bb1",
+  "activationOwner": "fallback",
+  "eventCounts": {
+    "cache-publisher": 1,
+    "cache-receiver": 1
+  },
+  "activation": {
+    "publisherCalls": 1,
+    "publisherProofTrueCalls": 1,
+    "receiverCalls": 1,
+    "receiverReusedProofCalls": 1,
+    "receiverReusedProofRows": 2,
+    "receiverReusedSourceBytes": 20
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": true,
+    "diagnosticOnly": true,
+    "productionOffscreenOwner": false,
+    "eventsObserved": true,
+    "publishersObserved": true,
+    "cacheReceiverObserved": true,
+    "synchronousProofActivated": true,
+    "receiverMatchesImmediatePublisher": true,
+    "reuseRequiresPublicationProof": true
+  },
+  "allChecksPass": false,
+  "events": [
+    {
+      "event": "cache-publisher",
+      "count": 2,
+      "sourceBytes": 20,
+      "publishedContiguous": true
+    },
+    {
+      "event": "cache-receiver",
+      "count": 2,
+      "sourceBytes": 20,
+      "publishedContiguous": true,
+      "reusePublishedRange": true
+    }
+  ]
+}

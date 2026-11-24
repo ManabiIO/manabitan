@@ -1,0 +1,37 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/activation-tooling",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "34496cb470e6b5cf8ab90149417d50e7893a176d",
+  "tree": "efffe9f92863fdc0c8cb97c53d040ab57b85f28d",
+  "files": [
+    {
+      "path": ".github/workflows/import-activation-20261124-3aac.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41b2f43ef75f83b90684eabac365bd3ac5e58676",
+      "size": 5876
+    },
+    {
+      "path": "dev/perf/activation-20261124/cache-publication.patch",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba8d9a75479cc7f413aa93663831f6b7356c237a",
+      "size": 3020
+    },
+    {
+      "path": "dev/perf/activation-20261124/private-prefix.patch",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bb03ea8eb4689623e96f10f89d47eb94a7a943d",
+      "size": 5137
+    },
+    {
+      "path": "dev/perf/activation-20261124/summarize.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19470d48ee6df408ddabaf5f70439e7aef7253cd",
+      "size": 6096
+    }
+  ]
+}

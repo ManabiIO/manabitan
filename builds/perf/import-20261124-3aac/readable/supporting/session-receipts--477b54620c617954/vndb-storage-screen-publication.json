@@ -1,0 +1,47 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/study-tooling",
+  "base": "d5e5ffc43101c8de86bc2eb1844d03f7ed4e17f6",
+  "baseTree": "f33e2e03846eab3b40d16609c08a554eca5c0335",
+  "localCommit": "1faa11effb207c6e9cf21219982255b9b0cef843",
+  "tree": "15400d1067b990eb00c91be7efb73962df8b2ed2",
+  "files": [
+    {
+      "path": ".github/workflows/import-studies-20261124-3aac.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ba7652da24b43dcaba6e54cfb37f84ccd55d60f",
+      "size": 4103
+    },
+    {
+      "path": "dev/perf/import-runtime-20261124-3aac.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e58ababba36803d31673301cf0fd361f49169a1f",
+      "size": 23073
+    },
+    {
+      "path": "dev/perf/import-storage-20261124-3aac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d102f7fcbd9feb0710d7e67b8b913a4c4898a01",
+      "size": 5118
+    },
+    {
+      "path": "dev/perf/import-storage-20261124-3aac/storage_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3fbb19af9b557835e55a84ddc8df4fb40fd98d4b",
+      "size": 8497
+    },
+    {
+      "path": "dev/perf/import-storage-20261124-3aac/test_storage_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f56cbddc8d3de581af7d5f8ad01e96308198836",
+      "size": 8716
+    }
+  ],
+  "remoteParent": "eeec4c2055ed911de92ba98fdc815c8ff0444edb",
+  "remoteCommit": "f44fbe93a4cb2da44cf94cc2a03236acde8755a8",
+  "branch": "perf/import-studies-20261124-3aac"
+}

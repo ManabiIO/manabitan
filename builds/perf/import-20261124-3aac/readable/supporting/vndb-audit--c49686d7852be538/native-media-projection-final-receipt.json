@@ -1,0 +1,275 @@
+{
+  "schema": 2,
+  "frozenCommit": "33594ec55b34b8c88fe2c50e30c1302d50ee5847",
+  "frozenTree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "sourceClean": true,
+  "evidenceScope": "Correctness and exact mechanical counts on a complete pinned VNDB replay. Browser total-import timing, peak memory, and release package size are qualified separately by the parent study. No timing estimates derive from this replay.",
+  "runtimeFileChanges": [
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "baselineBytes": 204189,
+      "candidateBytes": 205979,
+      "deltaBytes": 1790,
+      "baselineSha256": "bcf95af0cd0fbc9eb8bb933d812e8de4a3c5d4538a8e28be267d5991e44224ed",
+      "candidateSha256": "307986bb4e4494a55a3ad2422a4feef8c7de8b19b68f97020aa10f2436a8df3d"
+    },
+    {
+      "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "baselineBytes": 15334,
+      "candidateBytes": 15449,
+      "deltaBytes": 115,
+      "baselineSha256": "802c71c1dce71d3c68931eb2fd52f651d2ffe03b4b2ac86136cb031aaa7d5257",
+      "candidateSha256": "2c795c5afe80885b0b895c19e8465d9650839a2cd331f6c0b53d20aa8b63846c"
+    },
+    {
+      "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "baselineBytes": 149389,
+      "candidateBytes": 154841,
+      "deltaBytes": 5452,
+      "baselineSha256": "fc6c73c88a8e2663dcec8c841e29c46462cbd2699dc20239be4bc39274183de4",
+      "candidateSha256": "97ff96051cbbd19f89c1e693de2cc1362b899b3a9c0121187af2d423f0cea544"
+    },
+    {
+      "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "baselineBytes": 62783,
+      "candidateBytes": 67329,
+      "deltaBytes": 4546,
+      "baselineSha256": "25149bac5db0dda3bba85fe8e133fb06d51881a822f27565e4587ba223dde41c",
+      "candidateSha256": "75989e16062aee072a5b4e3ffa65f1696b0bee0db267540372f0a57cef30357f"
+    }
+  ],
+  "runtimeRawDeltaBytes": 11903,
+  "packageQualification": "The C source is included in extension packages. This raw file sum is not a compressed archive delta; complete release package qualification is pending separately.",
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "partition": {
+    "workerCount": 3,
+    "groupsPerWorker": 3,
+    "targetGroupBytes": 25165824,
+    "groupCount": 170,
+    "totalBytes": 4267992967
+  },
+  "effectiveParserOptions": {
+    "experimentalNativeEscapedKeys": true,
+    "singleChunk": true,
+    "maxPendingChunks": 1,
+    "emitTermByteLists": false,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "compactContentMetadata": true,
+    "mediaHintFastScan": true,
+    "validateGlossaryTypes": true,
+    "prepareLookupIndexes": true
+  },
+  "productionOracle": {
+    "complete": true,
+    "rows": 6648310,
+    "bankCount": 665,
+    "groups": 170,
+    "projectedRows": 146725,
+    "projectedPathCounts": {
+      "1": 146725
+    },
+    "uniquePaths": 146570,
+    "pathDigest": "178cc8ec07fe43a1b6f66ef201381703f1d570c49979d61fa3e6a6785be56c0a",
+    "nativeCounts": {
+      "calls": 146725,
+      "singlePathSpans": 146725,
+      "fallbackSpans": 0
+    },
+    "legacyProjectionTotals": {
+      "glossaryJsonParseCalls": 146725,
+      "glossaryJsonParseUtf8Bytes": 84398732,
+      "glossaryDecodeCalls": 146725,
+      "glossaryDecodeBytes": 84398732
+    },
+    "candidateJsonParseCalls": 0,
+    "candidateJsonParseUtf8Bytes": 0,
+    "candidateDecodeCalls": 146725,
+    "candidateDecodeBytes": 2391178,
+    "glossarySourceBytesStillValidatedNatively": 84398732,
+    "fusedParseAttempts": 170,
+    "fusedParseFallbacks": 0,
+    "escapedKeyDecodeCount": 1870,
+    "oracle": "Every legacy and candidate chunk is assert.deepEqual compared, including projected media paths, content columns, string/key plans, and prepared indexes. Owned output is compared with its snapshot after the next native parse, including the final chunk."
+  },
+  "retainedCorrections": [
+    {
+      "originalReceiptSha256": "ff28d3b6d13262b2067515702beb4bbafae0080ca54c55f5cab5b6e9b4d133c5",
+      "recordedGroupsPerWorker": 4,
+      "actualMediaGroupsPerWorker": 3,
+      "workers": 3,
+      "dominantSizeBoundGroups": 170,
+      "explanation": "The original count-only replay recorded the plain-path minimum of four groups per worker. The executed media path uses three. Both minima are below ceil(4,267,992,967 / 25,165,824)=170, so the requested group count and the pure greedy bank partition are identical. Original receipt is retained unchanged. Candidate oracle uses the correct media minimum."
+    },
+    {
+      "scope": "Earlier complete native oracle retained as fallback correctness coverage, not the effective production recipe.",
+      "earlierOptions": "experimentalNativeEscapedKeys omitted and defaults false; production large projected imports force true.",
+      "earlierFusedFallbackGroups": 26,
+      "earlierNativeAdmittedRows": 146296,
+      "earlierGuardFallbackRows": 429,
+      "earlierCandidateDecodeBytes": 2626586,
+      "sameCompleteOutputAndPathDigest": true,
+      "diagnostic": "A separate intentionally partial first-24-group replay found 13 before-source bounds rejections in group 23 after native fallback relocation. This is sample evidence explaining the conservative guard; it is not a full enumeration of all 429 rejections. The old source range was not widened. Corrected production flags have 0 fused fallbacks and admit all 146,725 native projections."
+    }
+  ],
+  "validation": {
+    "pinnedCompiler": "21.1.8",
+    "node": "22.22.0",
+    "focusedTestsPassed": 222,
+    "mainTypeScript": "passed",
+    "testTypeScript": "passed",
+    "changedFileEslint": "passed",
+    "fullUnitAndBuild": "delegated to exact-source PR CI; pending at receipt creation"
+  },
+  "validationAttemptQualification": "Initial new-code type and formatting failures are retained in the listed logs. Final targeted lint, main/test type checks, and all four focused suites passed; no failed assertion was retried selectively. Full unit/alltarget CI and complete-browser study are separately owned by the parent.",
+  "traceQualification": "Baseline CPU trace is diagnostic only. Signed negative Chrome timeDeltas are retained; positive-only sensitivity is separate. Weighted sample sums are neither exact CPU consumption nor predicted elapsed savings.",
+  "artifacts": [
+    {
+      "path": "verify-production-media-projection.mjs",
+      "bytes": 10617,
+      "sha256": "9a516feda3d781ee172fafc3b5ddfe4623cc3999f21095e6b2ebb97dde157f6e"
+    },
+    {
+      "path": "production-media-projection-oracle.json",
+      "bytes": 578308,
+      "sha256": "73cd4cdd23b623ee08d56e5f4f9357134814a3737a79f48f7e4724467fddd06c"
+    },
+    {
+      "path": "production-media-projection-oracle.log",
+      "bytes": 6505,
+      "sha256": "674e5e636374553b087c17909e2a91d266a15970111c00a391a555171e4be52a"
+    },
+    {
+      "path": "analyze-media-projection-trace.py",
+      "bytes": 5550,
+      "sha256": "f1332f2f15252585bf69d79e7970ee08bf5504e2ee2e962002b07fe36b8dd167"
+    },
+    {
+      "path": "media-projection-trace-attribution.json",
+      "bytes": 21756,
+      "sha256": "1dc8911d381b45e8982ce59df9995319cf868b29178a17024218499dcd918a33"
+    },
+    {
+      "path": "count-media-projection.mjs",
+      "bytes": 8394,
+      "sha256": "606aa1740aa4a80bf81edddede8dade8e1fa50955ba093b0e219952136e2ffb6"
+    },
+    {
+      "path": "media-projection-counts.json",
+      "bytes": 545524,
+      "sha256": "ff28d3b6d13262b2067515702beb4bbafae0080ca54c55f5cab5b6e9b4d133c5"
+    },
+    {
+      "path": "media-projection-counts.log",
+      "bytes": 6276,
+      "sha256": "603ea4fc98a9c24a14c441d6aea5db028c5d587696e9755826c347d7682cd4b2"
+    },
+    {
+      "path": "verify-native-media-projection.mjs",
+      "bytes": 9728,
+      "sha256": "817e4394aeb67d73012cfd3ba07b10d05b16b3a7c7333b060a0015c330c211b6"
+    },
+    {
+      "path": "native-media-projection-oracle.json",
+      "bytes": 544665,
+      "sha256": "3ce83e9e6d8b5e66bd114a695787c116c3cb3c2752eceaf819c8f9953c6f69b3"
+    },
+    {
+      "path": "native-media-projection-oracle.log",
+      "bytes": 6351,
+      "sha256": "b43b8f04657f6a2042cdab53ca9994483527db98f5cf92f9ab29079f6ebedd89"
+    },
+    {
+      "path": "native-media-projection-source-receipt.json",
+      "bytes": 5659,
+      "sha256": "a6c77f4bdd52e9b1a4ba0d825787489e23b08e0bc17e709091893995706dd803"
+    },
+    {
+      "path": "diagnose-native-admission.mjs",
+      "bytes": 11224,
+      "sha256": "6fc22c7387799e548e11a7f9292c886800984902882230f97d6c1b307c88c2ad"
+    },
+    {
+      "path": "native-admission-diagnostic.json",
+      "bytes": 83092,
+      "sha256": "8d3f0e26ef56fbb4de03cdcbca22afeaf504b7e6ed467b82359222a3fc243081"
+    },
+    {
+      "path": "native-admission-diagnostic.log",
+      "bytes": 3866,
+      "sha256": "6821dba872ae9ccaeb2826699ffaae997d5d989edcfaed73da63284dfc3d62bb"
+    },
+    {
+      "path": "projection-focused-final.log",
+      "bytes": 2153,
+      "sha256": "15df148cd2e7fff1327c49c52a40082cd02e486b8c538106545fd87686b0c1fe"
+    },
+    {
+      "path": "projection-focused.log",
+      "bytes": 1967,
+      "sha256": "ef40ec6ee05b2c8c03117586d077871b52f26308904798b3faad316478c57c82"
+    },
+    {
+      "path": "projection-lint-final.log",
+      "bytes": 2601,
+      "sha256": "d912d39a9105e03cbbfd8754f44b9e11672c3292c5a02113174e09c26280f5c2"
+    },
+    {
+      "path": "projection-lint-fix.log",
+      "bytes": 1368,
+      "sha256": "dd1ba7eb6704a40d5cbed62e40c03fdaa0bce78c6d9f92b593e7cd22d6cf8fbf"
+    },
+    {
+      "path": "projection-lint-passed.log",
+      "bytes": 1369,
+      "sha256": "2fec8a434d059e36a60657d23d83a7bf7882642a3f7c57c109e2ff7d04230482"
+    },
+    {
+      "path": "projection-lint.log",
+      "bytes": 3569,
+      "sha256": "6e42506a4cb59d5540de0b83d9ef1ec57f53769504011527c150c2e73d631eda"
+    },
+    {
+      "path": "projection-types-main-final.log",
+      "bytes": 724,
+      "sha256": "0e296ec2011b42a06a8cdf5eabd8c5fd79b281a95ff58b0926c48e5f2ffbb13b"
+    },
+    {
+      "path": "projection-types-main.log",
+      "bytes": 1036,
+      "sha256": "ebc26d4a7b54f8d82ba4c9eb579befcc9945b67179e32252b6c2bdfd59d84caf"
+    },
+    {
+      "path": "projection-types-test-final.log",
+      "bytes": 739,
+      "sha256": "27ae062b99a4663f4df14446436985e8803f2dc00a0317bc2812bdf65bd8c5f6"
+    },
+    {
+      "path": "projection-types-test.log",
+      "bytes": 1162,
+      "sha256": "d8bb5bc0c1893cb3a86f98c1a1f53901e78c5efb3c51045848dc7f94a952c3d0"
+    },
+    {
+      "path": "projection-worker-test-lint-fix.log",
+      "bytes": 1368,
+      "sha256": "1b469690b421d5bfc60e6ee1e741308fa0d2fe4c715caa7d481f27de31ac32e9"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "archives": 45,
+  "compressedArchiveBytes": 27043003,
+  "failedCohortsReclassified": false,
+  "missingExpectedArtifacts": [
+    "import-canonical-screen-storage-v1-vndb-forward-45472377306-1",
+    "import-media-qualification-storage-v1-vndb-forward-45475087387-1",
+    "import-media-qualification-storage-v1-vndb-reverse-45475087387-1"
+  ],
+  "retainedBytesVerified": 276815269,
+  "retainedFilesVerified": 4380,
+  "status": "passed"
+}

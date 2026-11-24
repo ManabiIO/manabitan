@@ -1,0 +1,1492 @@
+{
+  "schemaVersion": 3,
+  "dictionary": "jitendex",
+  "buildTarget": "chrome",
+  "fixture": {
+    "label": "Jitendex",
+    "cacheFile": "jitendex-yomitan.zip",
+    "release": "2026.10.03.0",
+    "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822,
+    "expectedTitle": "Jitendex.org [2026-10-03]",
+    "revision": "2026.10.03.0",
+    "termRows": 436555,
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "unreferencedMediaPaths": [
+      "jitendex/HanaMinA/05167.svg",
+      "jitendex/HanaMinA/05641.svg",
+      "jitendex/HanaMinA/0576b.svg",
+      "jitendex/HanaMinA/05bda.svg",
+      "jitendex/HanaMinA/06207.svg",
+      "jitendex/HanaMinA/07055.svg",
+      "jitendex/HanaMinA/07575.svg",
+      "jitendex/HanaMinA/076a5.svg",
+      "jitendex/HanaMinA/0793d.svg",
+      "jitendex/HanaMinA/080ed.svg",
+      "jitendex/HanaMinA/09093.svg",
+      "jitendex/HanaMinA/09c81.svg",
+      "jitendex/HanaMinA/20bb7.svg"
+    ]
+  },
+  "authoritativeTiming": true,
+  "traceEnabled": false,
+  "gitSha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "source": {
+    "gitSha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "dirty": true,
+    "sha256": {
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "f91b771c20de6d6f172e226991d681329115f32c9ce995f8725c1b4b1481f073"
+    }
+  },
+  "hostEnvironment": {
+    "capturedAtIso": "2026-11-24T19:34:30.362Z",
+    "loadAverage": [
+      4.19,
+      1.44,
+      0.52
+    ],
+    "freeMemoryBytes": 15000932352,
+    "nodeVersion": "v22.22.0",
+    "v8Version": "12.4.254.21-node.33",
+    "platform": "linux",
+    "arch": "x64",
+    "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpuCount": 4,
+    "availableParallelism": 4,
+    "totalMemoryBytes": 16759431168,
+    "cgroupCpuMax": null,
+    "cgroupCpuQuotaCores": null,
+    "cgroupMemoryMaxBytes": null,
+    "cgroupMemoryCurrentBytes": null
+  },
+  "browserVersion": "153.0.8010.12",
+  "importFlags": null,
+  "mediaCheck": "sample",
+  "runs": [
+    {
+      "index": 1,
+      "reportPath": "/home/runner/work/_temp/import-memory-3aac/A2/run-1.html",
+      "reportJsonPath": "/home/runner/work/_temp/import-memory-3aac/A2/run-1.json",
+      "tracePath": null,
+      "browserVersion": "153.0.8010.12",
+      "packageSha256": "f91b771c20de6d6f172e226991d681329115f32c9ce995f8725c1b4b1481f073",
+      "totalImportMs": 1972,
+      "automationObservedImportMs": 2028.9602750000004,
+      "workerImportMs": 1940.199999999997,
+      "stepTimingSummary": {
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "stepDisplay": "Step 1 of 5",
+                "label": "Starting import state",
+                "elapsedMs": 0.29999999998835847,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 2 of 5",
+                "label": "Initializing import",
+                "elapsedMs": 9.10000000000582,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 3 of 5",
+                "label": "Loading dictionary",
+                "elapsedMs": 14.39999999999418,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 4 of 5",
+                "label": "Importing data",
+                "elapsedMs": 1769.6000000000058,
+                "heapDeltaBytes": 1250249,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 5 of 5",
+                "label": "Finalizing import",
+                "elapsedMs": 165.89999999999418,
+                "heapDeltaBytes": 330144,
+                "finalOpenStep": true
+              }
+            ]
+          }
+        ],
+        "aggregateByStep": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "count": 1,
+            "totalElapsedMs": 0.29999999998835847
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "count": 1,
+            "totalElapsedMs": 9.10000000000582
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "count": 1,
+            "totalElapsedMs": 14.39999999999418
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "count": 1,
+            "totalElapsedMs": 1769.6000000000058
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "count": 1,
+            "totalElapsedMs": 165.89999999999418
+          }
+        ]
+      },
+      "step4Breakdown": {
+        "dictionaries": [
+          {
+            "title": "Jitendex.org [2026-10-03]",
+            "termParseMs": 411,
+            "termSerializationMs": 0,
+            "bulkAddTermsMs": 1252,
+            "bulkAddTagsMetaMs": 0,
+            "mediaResolveMs": 34,
+            "mediaWriteMs": 31,
+            "accountedMs": 1728,
+            "otherMs": 26,
+            "parserWorkerCount": 3,
+            "parserPipelineGroupsPerWorker": 3,
+            "parserGroupCount": 22
+          }
+        ],
+        "aggregate": {
+          "termParseMs": 411,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 1252,
+          "bulkAddTagsMetaMs": 0,
+          "mediaResolveMs": 34,
+          "mediaWriteMs": 31,
+          "accountedMs": 1728,
+          "otherMs": 26
+        }
+      },
+      "importDebug": {
+        "dictionaryTitle": "jitendex-yomitan.zip",
+        "hasResult": true,
+        "resultTitle": "Jitendex.org [2026-10-03]",
+        "sourceTitle": "Jitendex.org [2026-10-03]",
+        "errorCount": 0,
+        "addSettingsErrorCount": 0,
+        "fallbackDatabaseContentBase64Length": null,
+        "usesFallbackStorage": false,
+        "openStorageDiagnostics": {
+          "mode": "opfs-sahpool",
+          "caller": "DictionaryDatabase._openConnection",
+          "runtimeContext": {
+            "href": "chrome-extension://gamfdkcmkdcadknahjgajnhdjgjijmbf/js/background/offscreen-dictionary-worker.js",
+            "origin": "chrome-extension://gamfdkcmkdcadknahjgajnhdjgjijmbf",
+            "globalConstructor": "DedicatedWorkerGlobalScope",
+            "isWindow": false,
+            "isWorkerGlobalScope": true,
+            "isServiceWorkerGlobalScope": false,
+            "isDedicatedWorkerGlobalScope": true,
+            "crossOriginIsolated": false,
+            "hasSharedArrayBuffer": true,
+            "hasAtomics": true,
+            "hasNavigatorStorage": true,
+            "hasStorageGetDirectory": true,
+            "hasFileSystemHandle": true,
+            "hasFileSystemDirectoryHandle": true,
+            "hasFileSystemFileHandle": true,
+            "hasCreateSyncAccessHandle": true,
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+          },
+          "forceFallback": false,
+          "opfsReadyTimeoutMs": 0,
+          "opfsReadyWait": null,
+          "hasOpfsDbCtor": true,
+          "hasOpfsImportDb": true,
+          "hasWasmfsDir": true,
+          "hasInstallOpfsSAHPoolVfs": true,
+          "hasOpfsVfs": true,
+          "hasOpfsSahpoolVfs": true,
+          "opfsVfsPtr": 786960,
+          "opfsSahpoolVfsPtr": 787088,
+          "opfsSahpoolInstallAttempted": false,
+          "opfsSahpoolInstallResult": null,
+          "opfsSahpoolInstallError": null,
+          "opfsSahpoolDirectory": "/manabitan/sqlite-sahpool-v1",
+          "opfsSahpoolCapacity": 8,
+          "opfsSahpoolFileCount": 1,
+          "opfsSahpoolFileNames": [
+            "/dict.sqlite3"
+          ],
+          "openFailureClass": null,
+          "attempts": [],
+          "lastError": null
+        },
+        "useImportSession": true,
+        "finalizeImportSession": true,
+        "importerPhaseTimings": [
+          {
+            "phase": "archive-and-index",
+            "elapsedMs": 12,
+            "startEpochMs": 1795548865183,
+            "endEpochMs": 1795548865195,
+            "details": {
+              "ok": true,
+              "fileCount": 475,
+              "catalog": "zip.js",
+              "indexVersion": 3,
+              "zipMaxWorkers": 4,
+              "zipChunkSize": null,
+              "zipUseWebWorkers": true,
+              "autoZipMaxWorkersForLargeArchive": false,
+              "archiveSizeBytes": 38831822
+            }
+          },
+          {
+            "phase": "term-file-fast-path:term_bank_1.json..term_bank_219.json",
+            "elapsedMs": 1675,
+            "startEpochMs": 1795548865220,
+            "endEpochMs": 1795548866895,
+            "details": {
+              "batchedFileCount": 219,
+              "rows": 436555,
+              "chunkCount": 22,
+              "importerMaterializationMs": 11,
+              "importerChunkSinkMs": 1285,
+              "sourceArchiveReadMs": 1314.4000000000087,
+              "sourceBatchMaxBytes": 201326592,
+              "sourcePrefetchMaxBytes": 100663296,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false,
+              "sourceFirstBatchFileCount": 67,
+              "sourceFirstBatchEstimatedBytes": 200417836,
+              "sourceFirstBatchSizeKnown": true,
+              "parserExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": true,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "parserFusedAttempts": 22,
+              "parserFusedFallbacks": 0,
+              "parserDiscardedFusedMs": 0,
+              "parserDiscardedFusedRows": 0,
+              "parserBankSpanCount": 219,
+              "parserEscapedKeyDecodeCount": 0,
+              "parserValidatedGlossaryReuseCount": 85996,
+              "parserGlobalExactContentReuseCount": 0,
+              "parserFastGlossaryNormalizationCount": 0,
+              "parserFastGlossaryNormalizationFallbackCount": 0,
+              "parserFusedSingleBankGroups": 0,
+              "parserNativeLookupScratchReusedBytes": 28790800,
+              "parserNativeLookupScratchReuseGroups": 22,
+              "parserNativeLookupScratchReuseMisses": 0,
+              "parserNativeSegmentedLookupSegments": 0,
+              "parserNativeSegmentedLookupFallbacks": 0,
+              "parserDirectLookupArenaSegments": 0,
+              "parserDirectLookupArenaCopiedBytesAvoided": 0,
+              "parserLookupCompactionSourceValidationPasses": 0,
+              "parserMaxWasmHeapBytes": 76087296,
+              "parserBufferSetupMs": 1494,
+              "parserAllocationMs": 43,
+              "parserCopyJsonMs": 0,
+              "parserParseBankMs": 1402,
+              "parserEncodeContentMs": 0,
+              "parserRecentContentDedupHitCount": 73242,
+              "parserRowDecodeMs": 27,
+              "parserChunkDispatchMs": 543,
+              "parserSourcePreparationMs": 0.5000000000291038,
+              "parserSourceDeliveryMs": 30,
+              "parserSourceTransferredBytes": 33829614,
+              "parserSourceInflateMs": 918.8000000000029,
+              "parserSourceCrcMs": 0,
+              "parserSourceCrcScannedBytes": 0,
+              "parserSourceCrcReusedBytes": 0,
+              "parserSourceCrcReusedGlossaryCount": 0,
+              "parserSourceCompressedBytes": 33829614,
+              "parserSourceUncompressedBytes": 538927310,
+              "parserResultCopyMs": 543.1000000000204,
+              "parserCompactContentMetadataGroups": 0,
+              "parserCompactContentMetadataBytesAvoided": 0,
+              "parserResultDeliveryMs": 242,
+              "parserOrderedSinkWaitMs": 5971.499999999985,
+              "parserBorrowedContentResultCount": 0,
+              "parserLookupIndexPrepareMs": 65.60000000002037,
+              "parserLookupIndexCompactMs": 0,
+              "parserLookupIndexEncodeMs": 65.60000000002037,
+              "parserParallelWorkerCount": 3,
+              "parserParallelPipelineGroupsPerWorker": 3,
+              "parserParallelGroupCount": 22,
+              "parserParallelWorkerWallMs": 1472.1000000000058,
+              "parserParallelSourceReadWallMs": 1314.4000000000087,
+              "parserParallelOwnedContentBytes": 389707807,
+              "parserParallelPeakQueuedOwnedContentBytes": 137503174,
+              "parserParallelSkipReason": null,
+              "parserMetaCapacity": 637500,
+              "parserMetaAllocatedBytes": 43350000,
+              "parserEncodedContentBytes": 389707807,
+              "parserContentCapacity": 481920000,
+              "parserInitialContentBytesPerRow": 48,
+              "parserChunkSize": 0,
+              "parserMinimalDecode": true,
+              "dedupNativeCallCount": 22,
+              "dedupNativeScannedRows": 363277,
+              "dedupNativeBulkPendingRows": 363243,
+              "dedupNativeExactCandidates": 34,
+              "dedupNativeCopiedInputBytes": 14906809,
+              "dedupNativeCopiedOutputBytes": 272,
+              "dedupNativeSnapshotBytes": 0,
+              "dedupNativeFallbackCount": 0,
+              "dedupNativeFallbackEligibilityCount": 0,
+              "dedupNativeFallbackAssetCount": 0,
+              "dedupNativeFallbackUnsupportedCount": 0,
+              "mediaResolveMs": 0,
+              "mediaWriteMs": 0,
+              "serializationMs": 0,
+              "bulkAddTermsMs": 1252,
+              "contentAppendMs": 1098.699999999968,
+              "dedupScanMs": 194.89999999999418,
+              "dedupCapacityMs": 25.80000000000291,
+              "dedupCanonicalScanMs": 119.10000000000582,
+              "dedupExactCompareMs": 45.09999999997672,
+              "contentStoreMs": 888.5,
+              "contentPackMs": 476.3999999999651,
+              "contentCompressMs": 319.30000000001746,
+              "contentEnvelopeMs": 0,
+              "contentReferenceMs": 24.5,
+              "contentOpfsAppendMs": 49.60000000002037,
+              "contentInitialReservationCount": 0,
+              "contentInitialReservationSavingsMissCount": 0,
+              "contentMetadataMs": 14.899999999979627,
+              "contentMetadataStageMs": 0,
+              "contentMetadataPublishMs": 14.899999999979627,
+              "contentMetadataProjectionMs": 0.1999999999825377,
+              "contentMetadataIndexPublishMs": 8.5,
+              "dedupPendingHitCount": 73278,
+              "dedupPersistedHitCount": 34,
+              "dedupUniqueCount": 363243,
+              "dedupExactFallbackCount": 34,
+              "dedupRecentSourceHitCount": 0,
+              "dedupRecentSourceCacheMs": 0.6999999999825377,
+              "dedupRecentSourceCacheBytes": 0,
+              "dedupRecentSourceAdoptedBytes": 0,
+              "termRecordBuildMs": 0.09999999999126885,
+              "termRecordEncodeMs": 33.800000000032014,
+              "termRecordWriteMs": 52.2999999999447,
+              "termsVtabInsertMs": 0,
+              "termRecordInternMs": 0,
+              "termRecordPackLengthsMs": 0,
+              "termRecordHeapCopyMs": 0,
+              "termRecordFieldEncodeMs": 32.700000000040745,
+              "termRecordValidationMs": 33.29999999998836,
+              "termLookupIndexEncodeMs": 65.60000000002037
+            }
+          },
+          {
+            "phase": "import-data-banks",
+            "elapsedMs": 1755,
+            "startEpochMs": 1795548865212,
+            "endEpochMs": 1795548866967,
+            "details": {
+              "terms": 436555,
+              "termMeta": 0,
+              "kanji": 0,
+              "kanjiMeta": 0,
+              "tagMeta": 8,
+              "media": 236,
+              "step4TermParseMs": 411,
+              "step4TermArchiveReadMs": 1314.4000000000087,
+              "step4TermSerializationMs": 0,
+              "step4BulkAddTermsMs": 1252,
+              "step4BulkAddTagsMetaMs": 0,
+              "step4MediaResolveMs": 34,
+              "step4MediaWriteMs": 31,
+              "step4MediaZipBatchReadMs": 36,
+              "step4MediaZipBatchInflateMs": 25,
+              "step4MediaZipBatchCount": 7,
+              "step4MediaZipBatchEntryCount": 236,
+              "step4MediaZipBatchRangeBytes": 7964965,
+              "step4MediaZipBatchCompressedBytes": 4913668,
+              "step4MediaZipBatchUncompressedBytes": 4992155,
+              "step4SourcePackedMediaEntryCount": 0,
+              "step4SourcePackedMediaBytes": 0,
+              "step4SourcePackedMediaAppendMs": 0,
+              "step4SourcePackedMediaParallel": false,
+              "step4SourcePackedMediaEarlyPayload": false,
+              "step4TermFileNonParseWriteMs": 0,
+              "step4ArtifactPreloadMs": 0,
+              "step4ArtifactReadBytesMs": 0,
+              "step4ArtifactMetadataRebaseMs": 0,
+              "step4ArtifactMetadataAppendMs": 0,
+              "step4SharedGlossaryAppendMs": 0,
+              "step4TermMetaReadMs": 0,
+              "step4KanjiReadMs": 0,
+              "step4KanjiMetaReadMs": 0,
+              "step4TagReadMs": 3,
+              "step4AccountedMs": 1728,
+              "step4OtherMs": 26,
+              "fastPathChunkCount": 22,
+              "fastPathChunkSinkMs": 1285,
+              "fastPathParserExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "fastPathParserEffectiveExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": true,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "fastPathParserFusedAttempts": 22,
+              "fastPathParserFusedFallbacks": 0,
+              "fastPathParserDiscardedFusedMs": 0,
+              "fastPathParserDiscardedFusedRows": 0,
+              "fastPathParserBankSpanCount": 219,
+              "fastPathParserEscapedKeyDecodeCount": 0,
+              "fastPathParserValidatedGlossaryReuseCount": 85996,
+              "fastPathParserGlobalExactContentReuseCount": 0,
+              "fastPathParserFastGlossaryNormalizationCount": 0,
+              "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+              "fastPathParserFusedSingleBankGroups": 0,
+              "fastPathParserNativeLookupScratchReusedBytes": 28790800,
+              "fastPathParserNativeLookupScratchReuseGroups": 22,
+              "fastPathParserNativeLookupScratchReuseMisses": 0,
+              "fastPathParserNativeSegmentedLookupSegments": 0,
+              "fastPathParserNativeSegmentedLookupFallbacks": 0,
+              "fastPathParserDirectLookupArenaSegments": 0,
+              "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+              "fastPathParserLookupCompactionSourceValidationPasses": 0,
+              "fastPathParserMaxWasmHeapBytes": 76087296,
+              "fastPathParserBufferSetupMs": 1494,
+              "fastPathParserAllocationMs": 43,
+              "fastPathParserCopyJsonMs": 0,
+              "fastPathParserParseBankMs": 1402,
+              "fastPathParserEncodeContentMs": 0,
+              "fastPathParserRecentContentDedupHitCount": 73242,
+              "fastPathParserRowDecodeMs": 27,
+              "fastPathParserStringPlanMs": 0,
+              "fastPathParserChunkDispatchMs": 543,
+              "fastPathParserSourcePreparationMs": 0.5000000000291038,
+              "fastPathParserSourceDeliveryMs": 30,
+              "fastPathParserSourceTransferredBytes": 33829614,
+              "fastPathParserSourceInflateMs": 918.8000000000029,
+              "fastPathParserSourceCrcMs": 0,
+              "fastPathParserSourceCrcScannedBytes": 0,
+              "fastPathParserSourceCrcReusedBytes": 0,
+              "fastPathParserSourceCrcReusedGlossaryCount": 0,
+              "fastPathParserSourceCompressedBytes": 33829614,
+              "fastPathParserSourceUncompressedBytes": 538927310,
+              "fastPathParserResultCopyMs": 543.1000000000204,
+              "fastPathParserCompactContentMetadataGroups": 0,
+              "fastPathParserCompactContentMetadataBytesAvoided": 0,
+              "fastPathParserResultDeliveryMs": 242,
+              "fastPathParserOrderedSinkWaitMs": 5971.499999999985,
+              "fastPathParserBorrowedContentResultCount": 0,
+              "fastPathParserLookupIndexPrepareMs": 65.60000000002037,
+              "fastPathParserLookupIndexCompactMs": 0,
+              "fastPathParserLookupIndexEncodeMs": 65.60000000002037,
+              "fastPathParserParallelWorkerCount": 3,
+              "fastPathParserParallelPipelineGroupsPerWorker": 3,
+              "fastPathParserParallelGroupCount": 22,
+              "fastPathParserParallelWorkerWallMs": 1472.1000000000058,
+              "fastPathParserParallelSourceReadWallMs": 1314.4000000000087,
+              "fastPathParserParallelOwnedContentBytes": 389707807,
+              "fastPathParserParallelPeakQueuedOwnedContentBytes": 137503174,
+              "fastPathParserParallelSkipReason": null,
+              "sourceZipLogicalRangeReadCount": 0,
+              "sourceZipPhysicalRangeReadCount": 0,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false,
+              "sourceFirstBatchFileCount": 67,
+              "sourceFirstBatchEstimatedBytes": 200417836,
+              "sourceFirstBatchSizeKnown": true,
+              "useMediaPipeline": true,
+              "hasArchiveImageMediaFiles": true
+            }
+          },
+          {
+            "phase": "finalize-descriptor",
+            "elapsedMs": 4,
+            "startEpochMs": 1795548866967,
+            "endEpochMs": 1795548866971,
+            "details": {
+              "hasStyles": true
+            }
+          },
+          {
+            "phase": "bulk-finalization",
+            "elapsedMs": 143,
+            "startEpochMs": 1795548866972,
+            "endEpochMs": 1795548867115,
+            "details": {
+              "ok": true,
+              "commitMs": 14.700000000011642,
+              "termContentEndImportSessionMs": 3.1999999999970896,
+              "termContentEndImportSessionFlushPendingWritesMs": 0,
+              "termContentEndImportSessionAwaitQueuedWritesMs": 0,
+              "termContentEndImportSessionCloseWritableMs": 0.7000000000116415,
+              "termContentDrainCycleCount": 5,
+              "termContentWriteCallCount": 5,
+              "termContentSingleChunkWriteCount": 0,
+              "termContentMergedWriteCount": 5,
+              "termContentTotalWriteBytes": 38386795,
+              "termContentMergedWriteBytes": 38386795,
+              "termContentMaxWriteBytes": 9918389,
+              "termContentMergedGroupChunkCount": 407,
+              "termContentMaxMergedGroupChunkCount": 106,
+              "termContentFlushDueToBytesCount": 0,
+              "termContentFlushDueToChunkCount": 0,
+              "termContentFlushFinalGroupCount": 5,
+              "termContentWriteCoalesceTargetBytes": 67108864,
+              "termContentWriteCoalesceMaxChunks": 8192,
+              "termContentWriteFlushThresholdBytes": 8388608,
+              "termRecordEndImportSessionMs": 120.69999999999709,
+              "termRecordEndImportSessionFlushPendingWritesMs": 3.8000000000029104,
+              "termRecordEndImportSessionAwaitQueuedWritesMs": 1.1999999999970896,
+              "termRecordEndImportSessionCloseWritableMs": 115.60000000000582,
+              "termRecordDrainCycleCount": 1,
+              "termRecordWriteCallCount": 1,
+              "termRecordSingleChunkWriteCount": 1,
+              "termRecordMergedWriteCount": 0,
+              "termRecordTotalWriteBytes": 45,
+              "termRecordMergedWriteBytes": 0,
+              "termRecordMaxWriteBytes": 45,
+              "termRecordMergedGroupChunkCount": 0,
+              "termRecordMaxMergedGroupChunkCount": 0,
+              "termRecordWriteCoalesceTargetBytes": 16777216,
+              "termRecordLookupIndexWriteCallCount": 6,
+              "termRecordLookupIndexWriteBytes": 23590812,
+              "compressionExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "termRecordLookupIndexAwaitMs": 0.8999999999941792,
+              "termRecordLookupIndexMaxQueuedBytes": 5099976,
+              "termRecordLookupIndexWorkerFileCount": 0,
+              "termsVirtualTableSyncMs": 0,
+              "createIndexesMs": 0,
+              "createIndexesCheckpointCount": 0,
+              "cacheResetMs": 0,
+              "runtimePragmasMs": 0.09999999999126885,
+              "totalMs": 140.29999999998836,
+              "published": true,
+              "housekeepingErrors": []
+            }
+          },
+          {
+            "phase": "write-summary",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548867115,
+            "endEpochMs": 1795548867115,
+            "details": {
+              "ok": true,
+              "fusedWithBulkFinalization": true
+            }
+          },
+          {
+            "phase": "post-finalization-integrity-sample",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548867115,
+            "endEpochMs": 1795548867115,
+            "details": {
+              "skipped": true,
+              "reason": "transaction-commit-completed",
+              "termCount": 436555
+            }
+          }
+        ],
+        "localPhaseTimings": [
+          {
+            "phase": "read-archive",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548865176,
+            "endEpochMs": 1795548865176,
+            "details": {
+              "sizeBytes": 38831822,
+              "source": "file-handle"
+            }
+          },
+          {
+            "phase": "worker-import-dictionary",
+            "elapsedMs": 1940.199999999997,
+            "startEpochMs": 1795548865176.8,
+            "endEpochMs": 1795548867117,
+            "details": {
+              "useImportSession": true,
+              "finalizeImportSession": true
+            }
+          },
+          {
+            "phase": "page-side-finalization-queued",
+            "elapsedMs": 0,
+            "details": {
+              "deferred": true
+            }
+          },
+          {
+            "phase": "add-dictionary-settings",
+            "elapsedMs": 8.5,
+            "startEpochMs": 1795548867118.5,
+            "endEpochMs": 1795548867127,
+            "details": {
+              "settingsErrorCount": 0,
+              "skipped": false
+            }
+          },
+          {
+            "phase": "trigger-database-updated",
+            "elapsedMs": 0,
+            "details": {
+              "deferred": true
+            }
+          },
+          {
+            "phase": "verify-imported-dictionary-options-batch-read",
+            "elapsedMs": 1.4000000000087311,
+            "startEpochMs": 1795548867130.6,
+            "endEpochMs": 1795548867132,
+            "details": {
+              "dictionaryCount": 1,
+              "batchFinalization": true
+            }
+          },
+          {
+            "phase": "verify-imported-dictionary-visible",
+            "elapsedMs": 0.5999999999912689,
+            "startEpochMs": 1795548867132.4,
+            "endEpochMs": 1795548867133,
+            "details": {
+              "dictionaryTitle": "Jitendex.org [2026-10-03]",
+              "requireEnabledForActiveProfile": true,
+              "batchFinalization": true
+            }
+          }
+        ]
+      },
+      "validation": {
+        "title": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+          "ヽ",
+          "お坊っちゃん",
+          "吃逆",
+          "どうやら",
+          "鈎爪",
+          "心ここに在らず",
+          "居残り手當て",
+          "水墨山水",
+          "野犬",
+          "寫真加工アプリ",
+          "気まＺ",
+          "ＪＭｄｉｃｔ"
+        ],
+        "outputDigestSha256": "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723",
+        "media": {
+          "mode": "sample",
+          "totalFiles": 236,
+          "totalBytes": 4992155,
+          "files": 64,
+          "bytes": 1302012,
+          "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+        },
+        "storage": {
+          "kind": "OPFS logical file sizes after restart and verification",
+          "bytes": 67466332,
+          "files": [
+            {
+              "path": "manabitan-term-content.bin",
+              "bytes": 38386795
+            },
+            {
+              "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr",
+              "bytes": 45
+            },
+            {
+              "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti",
+              "bytes": 23590852
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/21bzu2mn9ze",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/53jgjn4ue4d",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/foojitwo36r",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ft0v8n5olsk",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/mtw2laz04r8",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/mx2zi8n27q",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/snzao9avbjl",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/zbby8iu9rl8",
+              "bytes": 5459968
+            }
+          ]
+        },
+        "lookup": {
+          "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing",
+          "observations": [
+            {
+              "pass": 0,
+              "term": "ヽ",
+              "elapsedMs": 2.400000000008731,
+              "results": 1,
+              "originalTextLength": 1,
+              "hasExactHeadwordMatch": true,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+            },
+            {
+              "pass": 0,
+              "term": "お坊っちゃん",
+              "elapsedMs": 2.3000000000029104,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+            },
+            {
+              "pass": 0,
+              "term": "吃逆",
+              "elapsedMs": 8.10000000000582,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+            },
+            {
+              "pass": 0,
+              "term": "どうやら",
+              "elapsedMs": 8.5,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+            },
+            {
+              "pass": 0,
+              "term": "鈎爪",
+              "elapsedMs": 6.30000000000291,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+            },
+            {
+              "pass": 0,
+              "term": "心ここに在らず",
+              "elapsedMs": 6,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+            },
+            {
+              "pass": 0,
+              "term": "居残り手當て",
+              "elapsedMs": 5,
+              "results": 2,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+            },
+            {
+              "pass": 0,
+              "term": "水墨山水",
+              "elapsedMs": 4.600000000005821,
+              "results": 2,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+            },
+            {
+              "pass": 0,
+              "term": "野犬",
+              "elapsedMs": 11.099999999991269,
+              "results": 2,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+            },
+            {
+              "pass": 0,
+              "term": "寫真加工アプリ",
+              "elapsedMs": 2.1999999999970896,
+              "results": 2,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+            },
+            {
+              "pass": 0,
+              "term": "気まＺ",
+              "elapsedMs": 1.3999999999941792,
+              "results": 2,
+              "originalTextLength": 3,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+            },
+            {
+              "pass": 0,
+              "term": "ＪＭｄｉｃｔ",
+              "elapsedMs": 1.8000000000029104,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+            },
+            {
+              "pass": 1,
+              "term": "ヽ",
+              "elapsedMs": 1.4000000000087311,
+              "results": 1,
+              "originalTextLength": 1,
+              "hasExactHeadwordMatch": true,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+            },
+            {
+              "pass": 1,
+              "term": "お坊っちゃん",
+              "elapsedMs": 1.2000000000116415,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+            },
+            {
+              "pass": 1,
+              "term": "吃逆",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+            },
+            {
+              "pass": 1,
+              "term": "どうやら",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+            },
+            {
+              "pass": 1,
+              "term": "鈎爪",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+            },
+            {
+              "pass": 1,
+              "term": "心ここに在らず",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+            },
+            {
+              "pass": 1,
+              "term": "居残り手當て",
+              "elapsedMs": 1.2000000000116415,
+              "results": 2,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+            },
+            {
+              "pass": 1,
+              "term": "水墨山水",
+              "elapsedMs": 0.8999999999941792,
+              "results": 2,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+            },
+            {
+              "pass": 1,
+              "term": "野犬",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+            },
+            {
+              "pass": 1,
+              "term": "寫真加工アプリ",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+            },
+            {
+              "pass": 1,
+              "term": "気まＺ",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 3,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+            },
+            {
+              "pass": 1,
+              "term": "ＪＭｄｉｃｔ",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+            },
+            {
+              "pass": 2,
+              "term": "ヽ",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 1,
+              "hasExactHeadwordMatch": true,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+            },
+            {
+              "pass": 2,
+              "term": "お坊っちゃん",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+            },
+            {
+              "pass": 2,
+              "term": "吃逆",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+            },
+            {
+              "pass": 2,
+              "term": "どうやら",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+            },
+            {
+              "pass": 2,
+              "term": "鈎爪",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+            },
+            {
+              "pass": 2,
+              "term": "心ここに在らず",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+            },
+            {
+              "pass": 2,
+              "term": "居残り手當て",
+              "elapsedMs": 1,
+              "results": 2,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+            },
+            {
+              "pass": 2,
+              "term": "水墨山水",
+              "elapsedMs": 1.1000000000058208,
+              "results": 2,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+            },
+            {
+              "pass": 2,
+              "term": "野犬",
+              "elapsedMs": 1,
+              "results": 2,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+            },
+            {
+              "pass": 2,
+              "term": "寫真加工アプリ",
+              "elapsedMs": 1.3000000000029104,
+              "results": 2,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+            },
+            {
+              "pass": 2,
+              "term": "気まＺ",
+              "elapsedMs": 1.0999999999912689,
+              "results": 2,
+              "originalTextLength": 3,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+            },
+            {
+              "pass": 2,
+              "term": "ＪＭｄｉｃｔ",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+            },
+            {
+              "pass": 3,
+              "term": "ヽ",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 1,
+              "hasExactHeadwordMatch": true,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+            },
+            {
+              "pass": 3,
+              "term": "お坊っちゃん",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+            },
+            {
+              "pass": 3,
+              "term": "吃逆",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+            },
+            {
+              "pass": 3,
+              "term": "どうやら",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+            },
+            {
+              "pass": 3,
+              "term": "鈎爪",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+            },
+            {
+              "pass": 3,
+              "term": "心ここに在らず",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+            },
+            {
+              "pass": 3,
+              "term": "居残り手當て",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+            },
+            {
+              "pass": 3,
+              "term": "水墨山水",
+              "elapsedMs": 1.2000000000116415,
+              "results": 2,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+            },
+            {
+              "pass": 3,
+              "term": "野犬",
+              "elapsedMs": 1.1000000000058208,
+              "results": 2,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+            },
+            {
+              "pass": 3,
+              "term": "寫真加工アプリ",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+            },
+            {
+              "pass": 3,
+              "term": "気まＺ",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 3,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+            },
+            {
+              "pass": 3,
+              "term": "ＪＭｄｉｃｔ",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+            },
+            {
+              "pass": 4,
+              "term": "ヽ",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 1,
+              "hasExactHeadwordMatch": true,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+            },
+            {
+              "pass": 4,
+              "term": "お坊っちゃん",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+            },
+            {
+              "pass": 4,
+              "term": "吃逆",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+            },
+            {
+              "pass": 4,
+              "term": "どうやら",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+            },
+            {
+              "pass": 4,
+              "term": "鈎爪",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+            },
+            {
+              "pass": 4,
+              "term": "心ここに在らず",
+              "elapsedMs": 2.099999999991269,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+            },
+            {
+              "pass": 4,
+              "term": "居残り手當て",
+              "elapsedMs": 1.1000000000058208,
+              "results": 2,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+            },
+            {
+              "pass": 4,
+              "term": "水墨山水",
+              "elapsedMs": 1.3000000000029104,
+              "results": 2,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+            },
+            {
+              "pass": 4,
+              "term": "野犬",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+            },
+            {
+              "pass": 4,
+              "term": "寫真加工アプリ",
+              "elapsedMs": 1.0999999999912689,
+              "results": 2,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+            },
+            {
+              "pass": 4,
+              "term": "気まＺ",
+              "elapsedMs": 1.3000000000029104,
+              "results": 2,
+              "originalTextLength": 3,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+            },
+            {
+              "pass": 4,
+              "term": "ＪＭｄｉｃｔ",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+            },
+            {
+              "pass": 5,
+              "term": "ヽ",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 1,
+              "hasExactHeadwordMatch": true,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140"
+            },
+            {
+              "pass": 5,
+              "term": "お坊っちゃん",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda"
+            },
+            {
+              "pass": 5,
+              "term": "吃逆",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610"
+            },
+            {
+              "pass": 5,
+              "term": "どうやら",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91"
+            },
+            {
+              "pass": 5,
+              "term": "鈎爪",
+              "elapsedMs": 1.2999999999883585,
+              "results": 1,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d"
+            },
+            {
+              "pass": 5,
+              "term": "心ここに在らず",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b"
+            },
+            {
+              "pass": 5,
+              "term": "居残り手當て",
+              "elapsedMs": 1.2999999999883585,
+              "results": 2,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849"
+            },
+            {
+              "pass": 5,
+              "term": "水墨山水",
+              "elapsedMs": 1.3000000000029104,
+              "results": 2,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92"
+            },
+            {
+              "pass": 5,
+              "term": "野犬",
+              "elapsedMs": 1.3000000000029104,
+              "results": 2,
+              "originalTextLength": 2,
+              "hasExactHeadwordMatch": true,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7"
+            },
+            {
+              "pass": 5,
+              "term": "寫真加工アプリ",
+              "elapsedMs": 1.2999999999883585,
+              "results": 2,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9"
+            },
+            {
+              "pass": 5,
+              "term": "気まＺ",
+              "elapsedMs": 1,
+              "results": 2,
+              "originalTextLength": 3,
+              "hasExactHeadwordMatch": true,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061"
+            },
+            {
+              "pass": 5,
+              "term": "ＪＭｄｉｃｔ",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 6,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e"
+            }
+          ]
+        },
+        "restart": {
+          "title": "Jitendex.org [2026-10-03]",
+          "revision": "2026.10.03.0",
+          "termRows": 436555,
+          "mediaFiles": 236,
+          "contentReadable": true,
+          "probeCount": 12
+        }
+      }
+    }
+  ],
+  "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+  "timing": {
+    "count": 1,
+    "minMs": 1972,
+    "medianMs": 1972,
+    "p95Ms": 1972,
+    "maxMs": 1972
+  },
+  "automationObservedTiming": {
+    "count": 1,
+    "minMs": 2028.9602750000004,
+    "medianMs": 2028.9602750000004,
+    "p95Ms": 2028.9602750000004,
+    "maxMs": 2028.9602750000004
+  },
+  "workerTiming": {
+    "count": 1,
+    "minMs": 1940.199999999997,
+    "medianMs": 1940.199999999997,
+    "p95Ms": 1940.199999999997,
+    "maxMs": 1940.199999999997
+  }
+}

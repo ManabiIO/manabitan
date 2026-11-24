@@ -1,0 +1,140 @@
+{
+  "allTimingsMs": {
+    "A": [
+      861.5,
+      850.5999999999913,
+      921.5,
+      852.2999999999884,
+      867,
+      854.1000000000058,
+      865.7999999999884,
+      856.0999999999767,
+      848.5,
+      841,
+      862.2999999999884,
+      857.4000000000233
+    ],
+    "B": [
+      830.5999999999913,
+      845.1000000000058,
+      850.2000000000116,
+      843.8000000000175,
+      848.2000000000116,
+      854.8000000000175,
+      857.7999999999884,
+      847,
+      842.2000000000116,
+      845.9000000000233,
+      863.0999999999767,
+      845.7000000000116
+    ],
+    "C": [
+      843.8000000000029,
+      859.5,
+      850,
+      858.1000000000058,
+      847,
+      859,
+      853.3999999999942,
+      847.6000000000058,
+      866.9000000000233,
+      829.7000000000116,
+      849.7999999999884,
+      853.9000000000233
+    ]
+  },
+  "browserVersion": "153.0.8010.12",
+  "candidate": {
+    "baselineMedianMs": 856.75,
+    "bestPairPercent": -7.737384698859295,
+    "candidateMedianMs": 846.4500000000116,
+    "equalWorkPercent": -1.5834631121762754,
+    "fasterPairs": 9,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -3.5867672663968397,
+      -0.6466023983053737,
+      -7.737384698859295,
+      -0.9973014196845043,
+      -2.168396770471548,
+      0.08195761620555242,
+      -0.9240009240009339,
+      -1.0629599345843954,
+      -0.7424867413068137,
+      0.5826397146282192,
+      0.0927751362621354,
+      -1.3645906228144766
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -1.7664936966430123,
+      -0.28232239104991064
+    ],
+    "pairedMedianPercent": -0.9606511718427191,
+    "pairs": 12,
+    "worstPairPercent": 0.5826397146282192
+  },
+  "candidateVsSecondBaseline": {
+    "baselineMedianMs": 851.6999999999971,
+    "bestPairPercent": -2.849232898836196,
+    "candidateMedianMs": 846.4500000000116,
+    "equalWorkPercent": -0.4335189407653428,
+    "fasterPairs": 7,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -1.5643517421203623,
+      -1.6753926701563948,
+      0.0235294117660656,
+      -1.6664724391082908,
+      0.1416765053142477,
+      -0.48894062863591436,
+      0.5155847199430852,
+      -0.07078810759860721,
+      -2.849232898836196,
+      1.952512956491681,
+      1.5650741350892616,
+      -0.9602998009147878
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -1.6154120906143266,
+      0.32863061262866644
+    ],
+    "pairedMedianPercent": -0.2798643681172608,
+    "pairs": 12,
+    "worstPairPercent": 1.952512956491681
+  },
+  "dictionary": "jmdict",
+  "identicalProductControl": {
+    "baselineMedianMs": 856.75,
+    "bestPairPercent": -7.759088442756379,
+    "candidateMedianMs": 851.6999999999971,
+    "equalWorkPercent": -1.154951103199886,
+    "fasterPairs": 8,
+    "intervalMethod": "Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction",
+    "pairedChangesPercent": [
+      -2.0545560069642588,
+      1.0463202445343045,
+      -7.759088442756379,
+      0.6805115569655795,
+      -2.3068050749711633,
+      0.5737033134286529,
+      -1.4322014322007748,
+      -0.9928746641713726,
+      2.168532704775883,
+      -1.3436385255634176,
+      -1.449611504116921,
+      -0.40821087007230084
+    ],
+    "pairedMedianBootstrap95Percent": [
+      -1.75208375554059,
+      0.6271074351971162
+    ],
+    "pairedMedianPercent": -1.168256594867395,
+    "pairs": 12,
+    "worstPairPercent": 2.168532704775883
+  },
+  "independentQualificationRequired": false,
+  "intervalCaveat": "Intervals are descriptive; six-pair screens are exploratory. Assess candidate comparisons together with identical-product drift. Do not pool independent stages.",
+  "screeningOnly": false,
+  "stage": "qualification",
+  "status": "complete"
+}

@@ -1,0 +1,5 @@
+Initial packaging invocation: python builds/perf/import-20261124-3aac/package-evidence.py --round2 /workspace/scratch/3aacd533c01f/round2
+Exit 1 after archiving CI/supporting inputs, before index publication.
+ValueError: Unexpected source symlink: /workspace/scratch/3aacd533c01f/round2/current-baseline/builds/e2e-dictionary-cache
+Cause: the top-level session-receipt selection still recursively enumerated unrelated worktrees before filtering. Fixed by shallow enumeration for that selected input and applying selection before symlink rejection. No acquisition or original evidence mutation occurred; completed archives are reused and verified on refresh.
+Original packager SHA256: 65d24feb40bc8c038db184df9de23158036ac64d5b94d87e6c0ae98744a9a461

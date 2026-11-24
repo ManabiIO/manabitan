@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "retained-failed-diagnostic",
+  "tree": "retained-failed-diagnostic",
+  "dictionary": "vndb",
+  "mode": "prefix",
+  "packageSha256": "33e5ce27a5ab9edb67dea43834043eabd7f27e6b3c006e3fe2d8a653aa92e73e",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "6d256a93b8c9853141645f9b565833d536fae903f18b3bf4fb7e29c911a52f1d",
+  "activationOwner": null,
+  "eventCounts": {},
+  "activation": {
+    "attempts": 0,
+    "privateAdmissions": 0,
+    "privatePrefixReservations": 0,
+    "privateSuffixFallbacks": 0,
+    "existingSharedAdmissions": 0,
+    "firstPrivateAttempts": 0,
+    "privateAdmittedContentBytes": 0,
+    "privateAdmittedUniqueCount": 0,
+    "eligibleOwnedSourceBytes": 0
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": false,
+    "diagnosticOnly": false,
+    "productionOffscreenOwner": false,
+    "eventsObserved": false,
+    "attemptsObserved": false,
+    "privateAdmissionMatchesOwnedForcedInputs": true,
+    "everyPrivateAdmissionHasOnePlacement": true,
+    "firstPrivateSelectionUnchanged": true,
+    "boundedPrefixCursor": true,
+    "negativeControlHasNoPrivateAdmission": true
+  },
+  "allChecksPass": false,
+  "events": []
+}

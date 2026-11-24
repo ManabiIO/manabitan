@@ -1,0 +1,23 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/jmdict-sidecar",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "d1338550aaff783738daa05cca189810bee807d9",
+  "tree": "1edef4035041ef848175e3278169daf2260ac34a",
+  "files": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "141119b60c9c47edd936687f4640212e50cd30b6",
+      "size": 607637
+    },
+    {
+      "path": "test/dictionary-content-publication-range.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f177279d3c8cca2ef5ae9a2a5a32b61cbdcd52d",
+      "size": 20331
+    }
+  ]
+}

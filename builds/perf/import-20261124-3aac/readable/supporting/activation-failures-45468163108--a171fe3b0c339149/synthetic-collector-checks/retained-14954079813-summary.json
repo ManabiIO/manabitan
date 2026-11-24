@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "retained-failed-diagnostic",
+  "tree": "retained-failed-diagnostic",
+  "dictionary": "jmdict",
+  "mode": "prefix",
+  "packageSha256": "94ca2fadb4d8d6e655182f68f914690230e1358c1223a4d31b9b988926d9385b",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "4b06ec6030da12d528bd22e564046cac2f5000384c54b0ae5789cf8328518ab9",
+  "activationOwner": null,
+  "eventCounts": {},
+  "activation": {
+    "attempts": 0,
+    "privateAdmissions": 0,
+    "privatePrefixReservations": 0,
+    "privateSuffixFallbacks": 0,
+    "existingSharedAdmissions": 0,
+    "firstPrivateAttempts": 0,
+    "privateAdmittedContentBytes": 0,
+    "privateAdmittedUniqueCount": 0,
+    "eligibleOwnedSourceBytes": 0
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": false,
+    "diagnosticOnly": false,
+    "productionOffscreenOwner": false,
+    "eventsObserved": false,
+    "attemptsObserved": false,
+    "privateAdmissionMatchesOwnedForcedInputs": true,
+    "everyPrivateAdmissionHasOnePlacement": true,
+    "firstPrivateSelectionUnchanged": true,
+    "boundedPrefixCursor": true,
+    "negativeControlHasNoPrivateAdmission": true,
+    "existingSharedRouteActivated": false
+  },
+  "allChecksPass": false,
+  "events": []
+}

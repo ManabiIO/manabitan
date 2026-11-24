@@ -1,0 +1,17 @@
+{
+  "fixture": {
+    "cacheFile": "JMdict.zip",
+    "expectedTitle": "JMdict [2026-11-22]",
+    "label": "JMdict",
+    "mediaBytes": 0,
+    "mediaFiles": 0,
+    "release": "2026-11-22",
+    "revision": "JMdict.2026-11-22",
+    "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "sizeBytes": 15645766,
+    "termRows": 528299,
+    "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip"
+  },
+  "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "sizeBytes": 15645766
+}

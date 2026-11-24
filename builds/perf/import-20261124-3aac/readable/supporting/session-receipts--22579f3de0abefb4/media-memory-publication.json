@@ -1,0 +1,82 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/media-memory-study",
+  "base": "20a9be91160d2ef6d438ece46c68efedaefba041",
+  "baseTree": "24dd26eda0d64d184710876cb3c2eb87fa83961e",
+  "localCommit": "d3a4d79ab974dd6d1733b53f3aa96e4432007af3",
+  "tree": "66f22c36779eaaaf270e68e1195555862ce0f03c",
+  "files": [
+    {
+      "path": ".github/workflows/import-memory-20261124-3aac.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "924239ed3301f7afde9a84a4267ee3724d87472f",
+      "size": 3449
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19237580a5c662e75620ed29274f074f05f61ac6",
+      "size": 5381
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d102f7fcbd9feb0710d7e67b8b913a4c4898a01",
+      "size": 5118
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/protocol.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63570c4390ae700a72e6b5b6a066d6f6152177a9",
+      "size": 11699
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/run_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "227d8395864cda043cfeaddd7e37adeea9b82238",
+      "size": 15454
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/storage_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3fbb19af9b557835e55a84ddc8df4fb40fd98d4b",
+      "size": 8497
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_protocol.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1f818b203895c5342b7f90deff3c251dcced0bf",
+      "size": 10843
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "586d71f07095806227cca90a7c54527f88f637c8",
+      "size": 7160
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f56cbddc8d3de581af7d5f8ad01e96308198836",
+      "size": 8716
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/verify_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25dbd01cc0e848f0f23a5b5b37cc75eaeb9e8c21",
+      "size": 5079
+    }
+  ],
+  "remoteParent": "a96671c223ed1e7ed49f0c96427b2ef09229f4cc",
+  "remoteCommit": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc",
+  "branch": "perf/import-media-memory-20261124-3aac"
+}
