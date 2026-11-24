@@ -37,6 +37,11 @@
         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
+        {"path": "dev/perf/direct-media-entries-20261123/exact-base-worker-oracle.json", "ignore": true},
+        {"path": "dev/perf/direct-media-entries-20261123/historical-base-worker-oracle.json", "ignore": true},
+        {"path": "dev/perf/direct-media-entries-20261123/media-verification.json", "ignore": true},
+        {"path": "dev/perf/direct-media-entries-20261123/node-worker-setup-attempt.json", "ignore": true},
+        {"path": "dev/perf/direct-media-entries-20261123/validation.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",
