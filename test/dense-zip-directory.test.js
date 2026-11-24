@@ -80,6 +80,75 @@ describe('dense ZIP directory', () => {
         expect(entries?.at(-1)?.filename).toBe('8191.png');
     });
 
+    /* eslint-disable @stylistic/semi */
+    test('retains exact, non-overlapping filename views without central headers', async () => {
+        const entries = await readDenseZipDirectory(new SparseZipDirectory())
+        expect(entries).not.toBeNull()
+        if (entries === null) { throw new Error('Expected a dense directory'); }
+        const backing = entries[0].rawFilename.buffer
+        expect(backing.byteLength).toBe(count * filenameLength)
+        const decoder = new TextDecoder()
+        for (let i = 0; i < entries.length; ++i) {
+            const {filename, rawFilename} = entries[i]
+            expect(rawFilename.buffer).toBe(backing)
+            expect(rawFilename.byteOffset).toBe(i * filenameLength)
+            expect(rawFilename.byteLength).toBe(filenameLength)
+            expect(decoder.decode(rawFilename)).toBe(filename)
+        }
+        entries[0].rawFilename[0] = 0x78
+        expect(entries[0].filename).toBe('0000.png')
+        expect(decoder.decode(entries[1].rawFilename)).toBe('0001.png')
+    })
+
+    test('copies both printable ASCII endpoints exactly', async () => {
+        const archive = new SparseZipDirectory()
+        archive.directory[46] = 0x20
+        archive.directory[46 + filenameLength - 1] = 0x7e
+        const entries = await readDenseZipDirectory(archive)
+        expect(entries?.[0].filename).toBe(' 000.pn~')
+        expect(entries?.[0].rawFilename).toEqual(new TextEncoder().encode(' 000.pn~'))
+    })
+
+    test('packs variable-length names without gaps or overlap', async () => {
+        const archive = new SparseZipDirectory()
+        const encoder = new TextEncoder()
+        const first = encoder.encode('a.png')
+        const second = encoder.encode('0000001.png')
+        const firstHeader = archive.directory.slice(0, 46)
+        const secondHeader = archive.directory.slice(54, 100)
+        new DataView(firstHeader.buffer).setUint16(28, first.byteLength, true)
+        const secondView = new DataView(secondHeader.buffer)
+        secondView.setUint16(28, second.byteLength, true)
+        secondView.setUint32(42, 30 + first.byteLength + packedLength, true)
+        archive.directory.set(firstHeader, 0)
+        archive.directory.set(first, 46)
+        archive.directory.set(secondHeader, 46 + first.byteLength)
+        archive.directory.set(second, 92 + first.byteLength)
+        const entries = await readDenseZipDirectory(archive)
+        expect(entries).not.toBeNull()
+        expect(entries?.[0].rawFilename).toEqual(first)
+        expect(entries?.[1].rawFilename).toEqual(second)
+        expect(entries?.[1].rawFilename.byteOffset).toBe(first.byteLength)
+        expect(entries?.[2].rawFilename.byteOffset).toBe(first.byteLength + second.byteLength)
+        expect(entries?.[2].filename).toBe('0002.png')
+        expect(entries?.[0].rawFilename.buffer.byteLength).toBe(count * filenameLength)
+    })
+
+    test('defers a directory whose declared entry count leaves insufficient filename space', async () => {
+        const archive = new SparseZipDirectory()
+        const tail = new DataView(archive.tail.buffer)
+        tail.setUint16(84, count + 1, true)
+        tail.setUint16(86, count + 1, true)
+        expect(await readDenseZipDirectory(archive)).toBeNull()
+    })
+
+    test.each([0x1f, 0x7f])('defers non-printable filename byte %s to the generic reader', async (value) => {
+        const archive = new SparseZipDirectory()
+        archive.directory[46] = value
+        expect(await readDenseZipDirectory(archive)).toBeNull()
+    })
+
+    /* eslint-enable @stylistic/semi */
     test('checks cancellation before reading the bounded central directory', async () => {
         let checks = 0;
         const error = new DOMException('Dictionary import cancelled', 'AbortError');

@@ -1699,7 +1699,12 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('bounds lazy source loading while the ordered sink is blocked', async () => {
+    maybeTest.each([
+        {sourceCount: 31, outcome: 'complete'},
+        {sourceCount: 32, outcome: 'complete'},
+        {sourceCount: 33, outcome: 'cancel'},
+        {sourceCount: 33, outcome: 'read-error'},
+    ])('keeps lazy source activation bounded across $sourceCount groups on $outcome', async ({sourceCount, outcome}) => {
         /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
@@ -1737,36 +1742,66 @@ describe('term-bank WASM parser', () => {
             terminate() {}
         }
 
+        const originalNavigator = globalThis.navigator;
+        vi.stubGlobal('navigator', {hardwareConcurrency: 2, deviceMemory: 8});
         vi.stubGlobal('Worker', SuccessfulWorker);
-        /** @type {(value?: void|PromiseLike<void>) => void} */
-        let releaseSink = () => {};
-        const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
-        let loadCount = 0;
+        /** @type {PromiseWithResolvers<void>} */
+        const firstSink = Promise.withResolvers();
+        /** @type {PromiseWithResolvers<void>} */
+        const secondSink = Promise.withResolvers();
+        const initialLead = 8;
+        const sourceOrder = Array.from({length: sourceCount}, (_, index) => index);
+        const readError = new DictionarySourceIntegrityError('Newly admitted ZIP read failed');
+        const emptyBank = textEncoder.encode('[]');
+        /** @type {number[]} */
+        const loadedSources = [];
+        let sinkIndex = 0;
+        let cancelled = false;
+        const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
+            sourceOrder.map((index) => async () => {
+                loadedSources.push(index);
+                if (outcome === 'read-error' && index === initialLead) { throw readError; }
+                return new Uint8Array(emptyBank);
+            }),
+            Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
+            3,
+            async (_chunk, progress) => {
+                sinkIndex = progress.chunkIndex;
+                if (sinkIndex === 1) { await firstSink.promise; }
+                if (sinkIndex === 2) { await secondSink.promise; }
+            },
+            {emitContentSlab: true},
+            () => cancelled,
+        );
+        void parsing.catch(() => {});
         try {
-            const sourceCount = 24;
-            const emptyBank = textEncoder.encode('[]');
-            const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
-                Array.from({length: sourceCount}, () => async () => {
-                    ++loadCount;
-                    return new Uint8Array(emptyBank);
-                }),
-                Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
-                3,
-                async (_chunk, progress) => {
-                    if (progress.chunkIndex === 1) { await sinkGate; }
-                },
-                {emitContentSlab: true},
-            );
-            await vi.waitFor(() => { expect(loadCount).toBeGreaterThan(0); });
-            await new Promise((resolve) => { setTimeout(resolve, 25); });
-            expect(loadCount).toBeLessThan(sourceCount);
-            expect(loadCount).toBeLessThanOrEqual(getParallelTermBankParserWorkerCount() * 4);
-            releaseSink();
-            await expect(parsing).resolves.toBe(true);
-            expect(loadCount).toBe(sourceCount);
+            await vi.waitFor(() => { expect(sinkIndex).toBe(1); });
+            expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead));
+
+            firstSink.resolve();
+            await vi.waitFor(() => { expect(sinkIndex).toBe(2); });
+            expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+
+            cancelled = outcome === 'cancel';
+            secondSink.resolve();
+            if (outcome === 'cancel') {
+                await expect(parsing).rejects.toThrow(/cancel/i);
+                expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+            } else if (outcome === 'read-error') {
+                await expect(parsing).rejects.toMatchObject({name: readError.name, message: readError.message});
+                expect(sinkIndex).toBeLessThanOrEqual(initialLead);
+            } else {
+                await expect(parsing).resolves.toBe(true);
+                expect(loadedSources).toEqual(sourceOrder);
+                expect(consumeLastTermBankWasmParseProfile()?.parallelGroupCount).toBe(sourceCount);
+            }
         } finally {
-            releaseSink();
+            cancelled = true;
+            firstSink.resolve();
+            secondSink.resolve();
+            await parsing.catch(() => {});
             await disposeParallelTermBankParser();
+            vi.stubGlobal('navigator', originalNavigator);
             vi.stubGlobal('Worker', void 0);
         }
     });
@@ -3073,6 +3108,93 @@ describe('term-bank WASM parser', () => {
             {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, singleChunk: true},
         );
         expect(version1Chunks[0].sequenceList).toStrictEqual(new Int32Array([-1, -1, -1]));
+    });
+
+    maybeTest.each([false, true])('compacts whole-group content metadata without changing row references (fallback=%s)', async (fallback) => {
+        const rows = Array.from({length: 18}, (_, i) => [
+            `word-${i}`,
+i % 2 === 0 ? '' : `reading-${i}`,
+'',
+'',
+fallback ? i + 0.5 : i,
+            i % 3 === 0 ? [{type: 'image', path: 'image.png', width: 10, height: 20}] : [`meaning-${i % 3}`],
+            i + 100,
+            '',
+        ]);
+        const sources = [textEncoder.encode(JSON.stringify(rows.slice(0, 9))), textEncoder.encode(JSON.stringify(rows.slice(9)))];
+        /**
+         * @param {boolean} compactContentMetadata
+         * @param {boolean} [singleChunk]
+         * @returns {Promise<TermBankColumnChunk[]>}
+         */
+        const parse = async (compactContentMetadata, singleChunk = true) => {
+            /** @type {TermBankColumnChunk[]} */
+            const chunks = [];
+            await parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+                chunks.push(copyWasmBackedColumnChunk(chunk));
+            }, 6, {
+                emitContentSlab: true,
+                emitTokenBinaryContent: true,
+                emitTermByteLists: false,
+                mediaHintFastScan: true,
+                singleChunk,
+                compactContentMetadata,
+                prepareLookupIndexes: true,
+            });
+            return chunks;
+        };
+        const [baseline] = await parse(false);
+        const [compact] = await parse(true);
+        const profile = consumeLastTermBankWasmParseProfile();
+        expect(compact.contentMetaByUniqueIndex).toBe(true);
+        expect(compact.contentMetaList).toHaveLength(3 * 4);
+        expect(compact.contentDedupPlan.pendingEpochs).toBeNull();
+        expect(compact.contentDedupPlan.pendingIndexes).toBeNull();
+        expect(compact.contentDedupPlan.pendingSpanOffsetsScratch).toBeUndefined();
+        expect(compact.contentDedupPlan.pendingSpanLengthsScratch).toBeUndefined();
+        expect(profile?.compactContentMetadataGroups).toBe(1);
+        expect(profile?.compactContentMetadataBytesAvoided).toBe((18 - 3) * 16);
+        expect(profile?.fusedParseFallbacks).toBe(fallback ? 1 : 0);
+        for (const field of ['rowCount', 'scoreList', 'sequenceList', 'readingEqualsExpressionList', 'contentUniqueIndexList', 'contentBytesBuffer', 'mediaRows', 'termRecordPreinternedPlan', 'preparedLookupIndexes']) {
+            expect(Reflect.get(compact, field), field).toStrictEqual(Reflect.get(baseline, field));
+        }
+        const compactMetas = compact.contentMetaList;
+        const baselineMetas = baseline.contentMetaList;
+        const ids = compact.contentUniqueIndexList;
+        if (!(compactMetas instanceof Uint32Array) || !(baselineMetas instanceof Uint32Array) || ids === null) {
+            throw new Error('Missing content metadata');
+        }
+        for (let row = 0; row < rows.length; ++row) {
+            expect(compactMetas.subarray(ids[row] * 4, ids[row] * 4 + 4)).toStrictEqual(baselineMetas.subarray(row * 4, row * 4 + 4));
+        }
+        const expected = new Uint32Array(compactMetas);
+        // Worker transfer and the next parse must not retain the reusable heap.
+        const transferred = structuredClone(compact, {transfer: [(compactMetas.buffer)]});
+        expect(compactMetas.byteLength).toBe(0);
+        expect(transferred.contentMetaByUniqueIndex).toBe(true);
+        const split = await parse(true, false);
+        expect(split).toHaveLength(3);
+        for (const chunk of split) {
+            expect(chunk.contentMetaByUniqueIndex).not.toBe(true);
+            expect(chunk.contentMetaList).toHaveLength(chunk.rowCount * 4);
+        }
+        expect(transferred.contentMetaList).toStrictEqual(expected);
+    });
+
+    maybeTest('keeps dense content metadata row-indexed when compacting would save less than half', async () => {
+        const source = textEncoder.encode(JSON.stringify([
+            ['first', '', '', '', 0, ['one'], 1, ''],
+            ['second', '', '', '', 0, ['two'], 2, ''],
+            ['third', '', '', '', 0, ['one'], 3, ''],
+        ]));
+        await parseTermBankWithWasmColumnChunks([source, source], 3, (chunk) => {
+            expect(chunk.contentMetaByUniqueIndex).toBe(true);
+        }, 10, {emitContentSlab: true, emitTokenBinaryContent: true, compactContentMetadata: true, singleChunk: true});
+        await parseTermBankWithWasmColumnChunks(source, 3, (chunk) => {
+            expect(chunk.contentMetaByUniqueIndex).not.toBe(true);
+            expect(chunk.contentMetaList).toHaveLength(12);
+        }, 10, {emitContentSlab: true, emitTokenBinaryContent: true, compactContentMetadata: true, singleChunk: true});
+        expect(consumeLastTermBankWasmParseProfile()?.compactContentMetadataGroups).toBe(0);
     });
 
     maybeTest('encodes parser-owned lookup sidecars byte-identically in WASM', async () => {

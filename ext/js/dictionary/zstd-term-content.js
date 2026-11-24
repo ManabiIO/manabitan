@@ -144,6 +144,58 @@ export class TermContentCompressionPool {
     }
 
     /**
+     * Creates each owned packing buffer immediately before dispatch, so the
+     * workers can compress earlier blocks while later blocks are being packed.
+     * The factory must produce a fresh complete ArrayBuffer for every block.
+     * @param {Uint32Array} blockLengths
+     * @param {(index: number) => Uint8Array} createBlock
+     * @param {string|null} dictName
+     * @param {import('dictionary-importer').ImportExperiments} [options]
+     * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: true}>}
+     */
+    async compressWrappedBlocks(blockLengths, createBlock, dictName, options = {}) {
+        if (this._failed) { throw new Error('Term content compression pool is unavailable'); }
+        const compressionExperiments = snapshotTermBankExperiments(options);
+        const workerCount = this._workers.length;
+        const envelopeMsByWorker = new Float64Array(workerCount);
+        /** @type {Array<Promise<{bytes: Uint8Array, envelopeMs: number}>>} */
+        const jobs = [];
+        const noFailure = Symbol();
+        /** @type {unknown} */
+        let packingFailure = noFailure;
+        try {
+            for (let index = 0; index < blockLengths.length; ++index) {
+                const content = createOwnedCompressionBlock(createBlock, index, blockLengths[index]);
+                const job = this._dispatch(
+                    index % workerCount,
+                    {content, dictName, wrap: true, compressionExperiments},
+                    [content.buffer],
+                );
+                // A later factory call can throw before the aggregate is made.
+                // Observe every already-dispatched rejection immediately.
+                void job.catch(() => {});
+                jobs.push(job);
+            }
+        } catch (error) {
+            packingFailure = error;
+        }
+        // A partial factory failure must not leave live jobs behind when the
+        // caller repacks. Keep all dispatched buffers owned by their workers
+        // until completion (or pool failure) settles every job.
+        const settled = await Promise.allSettled(jobs);
+        if (packingFailure !== noFailure) { throw packingFailure; }
+        /** @type {Uint8Array[]} */
+        const chunks = new Array(settled.length);
+        for (let index = 0; index < settled.length; ++index) {
+            const result = settled[index];
+            if (result.status === 'rejected') { throw result.reason; }
+            chunks[index] = result.value.bytes;
+            envelopeMsByWorker[index % workerCount] += result.value.envelopeMs;
+        }
+        return {chunks, envelopeMs: Math.max(0, ...envelopeMsByWorker), wrapped: true};
+    }
+
+    /**
      * @param {Uint8Array} source
      * @param {Uint32Array} sourceOffsets
      * @param {Uint32Array} sourceLengths
@@ -529,6 +581,60 @@ export async function compressWrappedTermContentZstdBatch(contents, dictName, op
         return result.bytes;
     });
     return {chunks, envelopeMs, wrapped: true};
+}
+
+/**
+ * Compresses a validated block plan while packing later blocks. Every factory
+ * call happens before the first await, preserving the caller's source snapshot
+ * boundary. A pool that is still starting uses the existing eager batch path.
+ * @param {Uint32Array} blockLengths
+ * @param {(index: number) => Uint8Array} createBlock
+ * @param {string|null} dictName
+ * @param {import('dictionary-importer').ImportExperiments} [options]
+ * @returns {Promise<{chunks: Uint8Array[], envelopeMs: number, wrapped: boolean}>}
+ */
+export async function compressWrappedTermContentZstdBlocks(blockLengths, createBlock, dictName, options = {}) {
+    options = snapshotTermBankExperiments(options);
+    if (blockLengths.length >= 2) {
+        const pool = compressionPool;
+        if (pool !== null && !pool.failed) {
+            try {
+                return await pool.compressWrappedBlocks(blockLengths, createBlock, dictName, options);
+            } catch (error) {
+                log.warn(new Error(`Parallel packed term content compression failed; caller repack required: ${error}`));
+                discardCompressionPool(pool);
+                throw error;
+            }
+        }
+        const contents = Array.from(blockLengths, (length, index) => createOwnedCompressionBlock(createBlock, index, length));
+        return await compressWrappedTermContentZstdBatch(contents, dictName, options);
+    }
+    let envelopeMs = 0;
+    const chunks = Array.from(blockLengths, (length, index) => {
+        const content = createOwnedCompressionBlock(createBlock, index, length);
+        const result = compressWrappedTermContentZstd(content, dictName, options);
+        envelopeMs += result.envelopeMs;
+        return result.bytes;
+    });
+    return {chunks, envelopeMs, wrapped: true};
+}
+
+/**
+ * @param {(index: number) => Uint8Array} createBlock
+ * @param {number} index
+ * @param {number} length
+ * @returns {Uint8Array<ArrayBuffer>}
+ * @throws {TypeError|RangeError} If the factory did not create an owned block.
+ */
+function createOwnedCompressionBlock(createBlock, index, length) {
+    const content = createBlock(index);
+    if (!(content instanceof Uint8Array) || !(content.buffer instanceof ArrayBuffer)) {
+        throw new TypeError('Packed compression block must own an ArrayBuffer');
+    }
+    if (content.byteOffset !== 0 || content.byteLength !== content.buffer.byteLength || content.byteLength !== length) {
+        throw new RangeError(`Packed compression block ${index} has an invalid length or backing range`);
+    }
+    return /** @type {Uint8Array<ArrayBuffer>} */ (content);
 }
 
 /**

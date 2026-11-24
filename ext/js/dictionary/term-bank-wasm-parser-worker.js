@@ -161,7 +161,7 @@ async function parse(data) {
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
-            {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, preloadedSource},
+            {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, compactContentMetadata: true, preloadedSource},
         );
         const profile = consumeLastTermBankWasmParseProfile();
         // A validated empty group emits no storage chunk. Keep that distinct

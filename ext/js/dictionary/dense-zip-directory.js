@@ -94,10 +94,15 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
     if (dir.byteLength !== length) { return null; }
     const view = new DataView(dir);
     const bytes = new Uint8Array(dir);
+    /* eslint-disable @stylistic/semi */
+    // This narrow directory has no extra fields or comments. Filename views
+    // retain a compact arena so catalog entries can release central headers.
+    const filenameBytes = new Uint8Array(length - count * DIRECTORY_HEADER_BYTES)
     /** @type {DenseZipEntry[]} */
     const entries = [];
     let position = 0;
     let localEnd = 0;
+    let filenamePosition = 0
     while (entries.length < count) {
         if (position > length - DIRECTORY_HEADER_BYTES || view.getUint32(position, true) !== 0x02014b50) { return null; }
         const flags = view.getUint16(position + 8, true);
@@ -114,6 +119,7 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
             (compressionMethod !== 0 && compressionMethod !== 8) ||
             uncompressedSize === UINT32_MAX ||
             filenameLength === 0 || filenameEnd > length ||
+            filenameLength > filenameBytes.byteLength - filenamePosition ||
             view.getUint32(position + 30, true) !== 0 || // Extra field and comment.
             view.getUint16(position + 34, true) !== 0 ||
             (view.getUint8(position + 38) & 0x10) !== 0 ||
@@ -121,10 +127,12 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
             localOffset !== localEnd ||
             localOffset + LOCAL_HEADER_BYTES + filenameLength + compressedSize > offset
         ) { return null; }
-        for (let i = filenameStart; i < filenameEnd; ++i) {
-            if (bytes[i] < 0x20 || bytes[i] > 0x7e) { return null; }
+        for (let i = 0; i < filenameLength; ++i) {
+            const value = bytes[filenameStart + i]
+            if (value < 0x20 || value > 0x7e) { return null; }
+            filenameBytes[filenamePosition + i] = value
         }
-        const rawFilename = bytes.subarray(filenameStart, filenameEnd);
+        const rawFilename = filenameBytes.subarray(filenamePosition, filenamePosition + filenameLength)
         entries.push({
             filename: decoder.decode(rawFilename),
             rawFilename,
@@ -138,6 +146,8 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
         });
         position = filenameEnd;
         localEnd = localOffset + LOCAL_HEADER_BYTES + filenameLength + compressedSize;
+        filenamePosition += filenameLength
     }
+    /* eslint-enable @stylistic/semi */
     return position === length && localEnd === offset ? entries : null;
 }

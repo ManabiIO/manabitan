@@ -231,6 +231,10 @@ export class RawZipPayloadReader {
             const firstOffset = first.offset;
             let endIndex = startIndex;
             let rangeEnd = firstOffset;
+            /* eslint-disable @stylistic/semi */
+            let minimumRangeEnd = firstOffset
+            let contiguousMedia = borrowPayloadViews
+            /* eslint-enable @stylistic/semi */
             while (endIndex < entries.length) {
                 const entry = entries[endIndex];
                 // The local name must match the known central name. Only the
@@ -250,62 +254,92 @@ export class RawZipPayloadReader {
                     return null;
                 }
                 rangeEnd = Math.max(rangeEnd, entryUpperEnd);
+                /* eslint-disable @stylistic/semi */
+                if (borrowPayloadViews) {
+                    if (endIndex > startIndex && entry.offset !== minimumRangeEnd) { contiguousMedia = false }
+                    minimumRangeEnd = Math.max(minimumRangeEnd, entry.offset + Math.min(archiveSize - entry.offset, entryUpperLength - 0xffff))
+                }
+                /* eslint-enable @stylistic/semi */
                 ++endIndex;
             }
             const boundedEnd = Math.min(archiveSize, rangeEnd);
             const rangeLength = boundedEnd - firstOffset;
-            const bytes = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES ?
-                await this._readBlobRange(firstOffset, rangeLength, signal) :
-                (await this._getArchiveBytes()).subarray(firstOffset, boundedEnd);
-            signal.throwIfAborted();
-            ++rangeReadCount;
-            rangeReadBytes += rangeLength;
-            if (isCancelled()) { throw new Error('Dictionary import was cancelled'); }
-            const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-            for (let i = startIndex; i < endIndex; ++i) {
-                const entry = entries[i];
-                const headerOffset = entry.offset - firstOffset;
-                if (headerOffset < 0 || headerOffset > bytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH || view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
-                    throw new DictionarySourceIntegrityError(`Raw ZIP local header is invalid for '${entry.filename}'`);
-                }
-                const localFlags = view.getUint16(headerOffset + 6, true);
-                const localCompressionMethod = view.getUint16(headerOffset + 8, true);
-                if ((localFlags & 0x1) !== 0 || localCompressionMethod !== entry.compressionMethod) {
-                    throw new DictionarySourceIntegrityError(`Raw ZIP local header disagrees with central metadata for '${entry.filename}'`);
-                }
-                const filenameLength = view.getUint16(headerOffset + 26, true);
-                const extraFieldLength = view.getUint16(headerOffset + 28, true);
-                const {rawFilename} = entry;
-                if (filenameLength !== rawFilename.byteLength) {
-                    throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
-                }
-                const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH;
-                const dataOffset = localFilenameOffset + filenameLength + extraFieldLength;
-                const payloadEnd = dataOffset + entry.compressedSize;
-                const absoluteDataOffset = entry.offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength;
-                if (
-                    !Number.isSafeInteger(payloadEnd) || payloadEnd > bytes.byteLength ||
-                    !Number.isSafeInteger(absoluteDataOffset) || absoluteDataOffset > archiveSize ||
-                    entry.compressedSize > archiveSize - absoluteDataOffset
-                ) {
-                    throw new DictionarySourceIntegrityError(`Raw ZIP payload is out of bounds for '${entry.filename}'`);
-                }
-                for (let j = 0; j < filenameLength; ++j) {
-                    if (bytes[localFilenameOffset + j] !== rawFilename[j]) {
-                        throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`);
+            /* eslint-disable @stylistic/semi */
+            // Isolated or nonadjacent media retain the original single read.
+            // Adjacency supplies evidence for omitting unused tail slack; an
+            // exceptional extra field on the last member can still retry.
+            const tightRange = contiguousMedia && endIndex - startIndex >= 2
+            const initialLength = tightRange ? minimumRangeEnd - firstOffset : rangeLength
+            let bytes = this._archiveContent instanceof Blob && archiveSize > RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES ?
+                await this._readBlobRange(firstOffset, initialLength, signal) :
+                (await this._getArchiveBytes()).subarray(firstOffset, boundedEnd)
+            ++rangeReadCount
+            rangeReadBytes += initialLength
+            signal.throwIfAborted()
+            if (isCancelled()) { throw new Error('Dictionary import was cancelled') }
+            const rangeResultStart = result.length
+            for (;;) {
+                const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+                let retry = false
+                for (let i = startIndex; i < endIndex; ++i) {
+                    const entry = entries[i]
+                    const headerOffset = entry.offset - firstOffset
+                    if (headerOffset < 0 || headerOffset > bytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH || view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
+                        throw new DictionarySourceIntegrityError(`Raw ZIP local header is invalid for '${entry.filename}'`)
                     }
+                    const localFlags = view.getUint16(headerOffset + 6, true)
+                    const localCompressionMethod = view.getUint16(headerOffset + 8, true)
+                    if ((localFlags & 0x1) !== 0 || localCompressionMethod !== entry.compressionMethod) {
+                        throw new DictionarySourceIntegrityError(`Raw ZIP local header disagrees with central metadata for '${entry.filename}'`)
+                    }
+                    const filenameLength = view.getUint16(headerOffset + 26, true)
+                    const extraFieldLength = view.getUint16(headerOffset + 28, true)
+                    const {rawFilename} = entry
+                    if (filenameLength !== rawFilename.byteLength) {
+                        throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`)
+                    }
+                    const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH
+                    const dataOffset = localFilenameOffset + filenameLength + extraFieldLength
+                    const payloadEnd = dataOffset + entry.compressedSize
+                    const absoluteDataOffset = entry.offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength
+                    if (
+                        !Number.isSafeInteger(payloadEnd) || payloadEnd > rangeLength || (!borrowPayloadViews && payloadEnd > bytes.byteLength) ||
+                        !Number.isSafeInteger(absoluteDataOffset) || absoluteDataOffset > archiveSize ||
+                        entry.compressedSize > archiveSize - absoluteDataOffset
+                    ) {
+                        throw new DictionarySourceIntegrityError(`Raw ZIP payload is out of bounds for '${entry.filename}'`)
+                    }
+                    for (let j = 0; j < filenameLength; ++j) {
+                        if (bytes[localFilenameOffset + j] !== rawFilename[j]) {
+                            throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`)
+                        }
+                    }
+                    if (payloadEnd > bytes.byteLength) {
+                        retry = true
+                        break
+                    }
+                    result.push({
+                        file: entry.file,
+                        archiveOffset: absoluteDataOffset,
+                        bytes: borrowPayloadViews ? bytes.subarray(dataOffset, payloadEnd) : Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
+                        compressionMethod: entry.compressionMethod,
+                        compressedSize: entry.compressedSize,
+                        uncompressedSize: entry.uncompressedSize,
+                        signature: entry.signature,
+                        filename: entry.filename,
+                    })
                 }
-                result.push({
-                    file: entry.file,
-                    archiveOffset: absoluteDataOffset,
-                    bytes: borrowPayloadViews ? bytes.subarray(dataOffset, payloadEnd) : Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
-                    compressionMethod: entry.compressionMethod,
-                    compressedSize: entry.compressedSize,
-                    uncompressedSize: entry.uncompressedSize,
-                    signature: entry.signature,
-                    filename: entry.filename,
-                });
+                if (!retry) { break }
+                // Only an actual local extra field can exceed the minimum
+                // media span. Retry the original bounded range once, dropping
+                // provisional views and revalidating every entry afterward.
+                result.length = rangeResultStart
+                bytes = await this._readBlobRange(firstOffset, rangeLength, signal)
+                ++rangeReadCount
+                rangeReadBytes += rangeLength
+                if (isCancelled()) { throw new Error('Dictionary import was cancelled') }
             }
+            /* eslint-enable @stylistic/semi */
             startIndex = endIndex;
         }
         return {sources: result, rangeReadCount, rangeReadBytes};

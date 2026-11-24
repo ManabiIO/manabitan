@@ -56,6 +56,8 @@ const MID_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 3;
 const LOW_MEMORY_DEVICE_GIB = 4;
 const PLAIN_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 4;
 const MEDIA_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 3;
+// The cursor is qualified for long queues. Shorter queues keep their existing policy.
+const MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION = 4;
 const LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES = 24 * 1024 * 1024;
 const PARALLEL_WORKER_READY_TIMEOUT_MS = 60_000;
 const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
@@ -70,7 +72,7 @@ const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -88,6 +90,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * maxPendingChunks?: number,
  * computeContentHashes?: boolean,
  * emitContentSlab?: boolean,
+ * compactContentMetadata?: boolean,
  * emitTokenBinaryContent?: boolean,
  * useNativeStringPlan?: boolean,
  * emitTermByteLists?: boolean,
@@ -96,7 +99,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number}} TermBankExperimentProfile */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
@@ -2255,6 +2258,8 @@ null :
     let nativeLookupIndexEncodeMs = 0;
     let nativeSegmentedLookupSegments = 0;
     let nativeSegmentedLookupFallbacks = segmentedLookup && nativeCompactionScratch === null ? 1 : 0;
+    let compactContentMetadataGroups = 0;
+    let compactContentMetadataBytesAvoided = 0;
     let chunkDispatchMs = 0;
     /** @type {Promise<void>[]} */
     const pendingDispatches = [];
@@ -2480,6 +2485,29 @@ null :
                 mediaRows,
             };
             if (
+                options.compactContentMetadata === true && emitContentSlab &&
+                start === 0 && end === rowCount && contentDedupPlan !== null &&
+                contentDedupPlan.uniqueCount * 2 < rowCount
+            ) {
+                // Exact native content IDs include all encoded content fields.
+                // Transfer one descriptor for each unique value; the existing
+                // per-row ID column retains every term's original reference.
+                const uniqueMetas = new Uint32Array(contentDedupPlan.uniqueCount * CONTENT_META_U32_FIELDS);
+                const uniqueRows = contentDedupPlan.uniqueRowIndexes;
+                for (let uniqueIndex = 0; uniqueIndex < uniqueRows.length; ++uniqueIndex) {
+                    const sourceOffset = uniqueRows[uniqueIndex] * CONTENT_META_U32_FIELDS;
+                    const targetOffset = uniqueIndex * CONTENT_META_U32_FIELDS;
+                    uniqueMetas[targetOffset] = contentMetaList[sourceOffset];
+                    uniqueMetas[targetOffset + 1] = contentMetaList[sourceOffset + 1];
+                    uniqueMetas[targetOffset + 2] = contentMetaList[sourceOffset + 2];
+                    uniqueMetas[targetOffset + 3] = contentMetaList[sourceOffset + 3];
+                }
+                chunk.contentMetaList = uniqueMetas;
+                chunk.contentMetaByUniqueIndex = true;
+                ++compactContentMetadataGroups;
+                compactContentMetadataBytesAvoided += contentMetaList.byteLength - uniqueMetas.byteLength;
+            }
+            if (
                 nativeLookupIndexScratch !== null &&
                 parsed.wasm !== null &&
                 nativeStringPlan !== null &&
@@ -2578,6 +2606,8 @@ null :
         nativeStringPlanChunkCount,
         nativeStringPlanFallbackChunkCount,
         nativeLookupScratchReusedBytes,
+        compactContentMetadataGroups,
+        compactContentMetadataBytesAvoided,
         nativeLookupScratchReuseGroups,
         nativeLookupScratchReuseMisses,
         nativeSegmentedLookupSegments,
@@ -2831,6 +2861,8 @@ class ParallelTermBankPipelineRun {
         this._nextSinkGroupIndex = 0;
         /** @type {number} */
         this._nextWorkerGroupIndex = 0;
+        /** @type {number|null} Null means each activation scans the whole read window. */
+        this._nextSourceActivationGroupIndex = null;
         /** @type {number} */
         this._maxLeadGroups = 1;
         /** @type {number} */
@@ -2866,6 +2898,9 @@ class ParallelTermBankPipelineRun {
     async _runPipeline(workers) {
         this._createSlots();
         this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
+        if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
+            this._nextSourceActivationGroupIndex = 0;
+        }
         this._activateLeadSources();
         this._workerLoops = workers.map((worker) => this._runWorkerLoop(worker));
         try {
@@ -3099,10 +3134,14 @@ class ParallelTermBankPipelineRun {
             this._groups.length,
             this._nextSinkGroupIndex + this._maxLeadGroups,
         );
-        for (let groupIndex = this._nextSinkGroupIndex; groupIndex < end; ++groupIndex) {
+        const start = this._nextSourceActivationGroupIndex ?? this._nextSinkGroupIndex;
+        for (let groupIndex = start; groupIndex < end; ++groupIndex) {
             for (const source of this._groups[groupIndex]) {
                 void loadParallelTermBankSource(source).catch(() => {});
             }
+        }
+        if (this._nextSourceActivationGroupIndex !== null) {
+            this._nextSourceActivationGroupIndex = end;
         }
     }
 }
@@ -3940,6 +3979,30 @@ function isCompressedTermBankSource(value) {
 }
 
 /**
+ * Projected diagnostics can reuse the result's owned key arena. Check the
+ * actual bytes so foreign or incomplete plans keep the independent-copy path.
+ * @param {Uint8Array|undefined} bytes
+ * @param {number} index
+ * @param {Uint32Array} offsets
+ * @param {Uint16Array} lengths
+ * @param {Uint8Array} ownedStrings
+ * @returns {Uint8Array|undefined}
+ */
+function copyProjectedMediaKeyBytes(bytes, index, offsets, lengths, ownedStrings) {
+    if (!(bytes instanceof Uint8Array)) { return void 0; }
+    const offset = offsets[index];
+    const length = lengths[index];
+    if (
+        bytes.byteLength === 0 || bytes.byteLength !== length ||
+        !Number.isInteger(offset) || offset + length > ownedStrings.byteLength
+    ) { return new Uint8Array(bytes); }
+    for (let i = 0; i < length; ++i) {
+        if (bytes[i] !== ownedStrings[offset + i]) { return new Uint8Array(bytes); }
+    }
+    return ownedStrings.subarray(offset, offset + length);
+}
+
+/**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
@@ -3981,13 +4044,14 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     if (!(stringOffsets instanceof Uint32Array)) {
         throw new Error('Term record string offsets are unavailable');
     }
+    const ownedStrings = new Uint8Array(plan.stringsBuffer);
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
-                    Uint8Array.from(row.glossaryJsonBytes))) :
+                    new Uint8Array(row.glossaryJsonBytes))) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
         return {
@@ -3995,8 +4059,12 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
             ...(useProjectedPaths ? {imagePaths} : {}),
             row: {
                 ...row,
-                expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
-                readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
+                expressionBytes: useProjectedPaths ?
+                    copyProjectedMediaKeyBytes(row.expressionBytes, plan.expressionIndexes[index], stringOffsets, plan.stringLengths, ownedStrings) :
+                    (row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0),
+                readingBytes: useProjectedPaths ?
+                    copyProjectedMediaKeyBytes(row.readingBytes, plan.readingIndexes[index], stringOffsets, plan.stringLengths, ownedStrings) :
+                    (row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0),
                 glossaryJsonBytes: !useProjectedPaths && row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
                 termEntryContentBytes: useProjectedPaths ? EMPTY_UINT8_ARRAY : new Uint8Array(row.termEntryContentBytes),
             },
@@ -4014,7 +4082,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     new Uint32Array(plan.stringHashes) :
                     void 0
             ),
-        stringsBuffer: new Uint8Array(plan.stringsBuffer),
+        stringsBuffer: ownedStrings,
         expressionIndexes: new Uint32Array(plan.expressionIndexes),
         readingIndexes: new Uint32Array(plan.readingIndexes),
     };
@@ -4117,6 +4185,8 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         orderedSinkWaitMs: sum('orderedSinkWaitMs'),
         borrowedContentResultCount: sum('borrowedContentResultCount'),
         nativeLookupScratchReusedBytes: sum('nativeLookupScratchReusedBytes'),
+        compactContentMetadataGroups: sum('compactContentMetadataGroups'),
+        compactContentMetadataBytesAvoided: sum('compactContentMetadataBytesAvoided'),
         nativeLookupScratchReuseGroups: sum('nativeLookupScratchReuseGroups'),
         nativeLookupScratchReuseMisses: sum('nativeLookupScratchReuseMisses'),
         nativeSegmentedLookupSegments: sum('nativeSegmentedLookupSegments'),
