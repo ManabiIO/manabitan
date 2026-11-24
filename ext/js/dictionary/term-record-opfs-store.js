@@ -403,6 +403,33 @@ function getSynchronousResolvedContentReferences(chunk, count) {
     return {uniqueIndexList, offsets, lengths};
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * Selects columns that stay stable across the synchronous score and field passes.
+ * Reuse the existing factory-origin proof; shared or accessor-backed inputs keep
+ * their original per-row reads and staged columns.
+ * @param {{scoreList: number[]|Int32Array|Float64Array, fixedContentLength?: number, resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
+ * @param {number} count
+ * @returns {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}|null}
+ */
+function getSynchronousRecordFieldReferences(chunk, count) {
+    const references = getSynchronousResolvedContentReferences(chunk, count)
+    if (references === null) { return null }
+    const scores = /** @type {unknown} */ (Object.getOwnPropertyDescriptor(chunk, 'scoreList')?.value)
+    if (
+        typeof ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR?.get !== 'function' ||
+        !(scores instanceof Int32Array) || !ArrayBuffer.isView(scores) ||
+        Object.getPrototypeOf(scores) !== Int32Array.prototype ||
+        Object.hasOwn(scores, 'length') || Object.hasOwn(scores, 'buffer') ||
+        scores.length < count
+    ) { return null }
+    try {
+        ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR.get.call(scores.buffer)
+    } catch { return null }
+    return references
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * @param {{resolvedContentReferences?: {uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}}} chunk
  * @param {number} start
@@ -5524,14 +5551,7 @@ export class TermRecordOpfsStore {
     _encodeArtifactRecordFields(chunk, contentOffsets, contentLengths, contentOffsetBase) {
         const count = chunk.rowCount;
         const useFixedContentSpan = hasFixedContentSpan(chunk, count);
-        const offsets = new Uint32Array(count);
-        const lengths = new Uint16Array(count);
-        const scoreKeys = new Uint16Array(count);
-        /** @type {number[]} */
-        const scores = [];
         const useFloat64Scores = !(chunk.scoreList instanceof Int32Array) && chunk.scoreList.some((score) => !isLosslessInt32Score(score ?? 0));
-        /** @type {Map<number, number>} */
-        const scoreIndexes = new Map();
         if (useFloat64Scores) {
             const output = new Uint8Array(count * FLOAT64_SCORE_RECORD_FIELDS_BYTES);
             const view = new DataView(output.buffer);
@@ -5545,6 +5565,16 @@ export class TermRecordOpfsStore {
             }
             return output;
         }
+        /* eslint-disable @stylistic/semi */
+        const directReferences = getSynchronousRecordFieldReferences(chunk, count)
+        const offsets = directReferences === null ? new Uint32Array(count) : null
+        const lengths = directReferences === null ? new Uint16Array(count) : null
+        /* eslint-enable @stylistic/semi */
+        const scoreKeys = new Uint16Array(count);
+        /** @type {number[]} */
+        const scores = [];
+        /** @type {Map<number, number>} */
+        const scoreIndexes = new Map();
         // Common integer scores use a bounded table. Store the key plus one
         // so zero can mark an unseen score without initializing the table.
         const inlineScoreIndexes = chunk.scoreList instanceof Int32Array && count >= COMPACT_SCORE_TABLE_MIN_ROWS ?
@@ -5552,14 +5582,19 @@ export class TermRecordOpfsStore {
             null;
         let compact = true;
         for (let i = 0; i < count; ++i) {
-            const contentOffset = getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan);
+            /* eslint-disable-next-line @stylistic/semi */
+            const contentOffset = directReferences === null ? getArtifactContentOffset(chunk, contentOffsets, i, useFixedContentSpan) : 0
             const contentLength = getArtifactContentLength(chunk, contentLengths, i);
             if (contentLength >= U16_NULL) {
                 compact = false;
                 break;
             }
-            offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase;
-            lengths[i] = contentLength < 0 ? U16_NULL : contentLength;
+            /* eslint-disable @stylistic/semi */
+            if (offsets !== null && lengths !== null) {
+                offsets[i] = contentOffset < 0 ? U32_NULL : contentOffset - contentOffsetBase
+                lengths[i] = contentLength < 0 ? U16_NULL : contentLength
+            }
+            /* eslint-enable @stylistic/semi */
             const score = chunk.scoreList[i] ?? 0;
             const inlineScore = score + COMPACT_SCORE_TABLE_RADIUS;
             const useInlineScore = inlineScoreIndexes !== null && inlineScore >= 0 && inlineScore < inlineScoreIndexes.length;
@@ -5611,9 +5646,26 @@ export class TermRecordOpfsStore {
         let cursor = COMPACT_RECORD_FIELDS_HEADER_BYTES;
         new Int32Array(output.buffer, cursor, scores.length).set(scores);
         cursor += scores.length * 4;
-        new Uint32Array(output.buffer, cursor, count).set(offsets);
-        cursor += count * 4;
-        new Uint16Array(output.buffer, cursor, count).set(lengths);
+        /* eslint-disable @stylistic/semi */
+        const outputOffsets = new Uint32Array(output.buffer, cursor, count)
+        cursor += count * 4
+        const outputLengths = new Uint16Array(output.buffer, cursor, count)
+        if (directReferences !== null) {
+            // No await or caller-controlled getter separates these passes.
+            // Write final columns directly instead of allocating and copying
+            // another six bytes per row of offset/length staging.
+            const {uniqueIndexList, offsets: resolvedOffsets, lengths: resolvedLengths} = directReferences
+            for (let i = 0; i < count; ++i) {
+                const unique = uniqueIndexList[i]
+                const offset = resolvedOffsets[unique]
+                outputOffsets[i] = offset < 0 ? U32_NULL : offset - contentOffsetBase
+                outputLengths[i] = resolvedLengths[unique]
+            }
+        } else if (offsets !== null && lengths !== null) {
+            outputOffsets.set(offsets)
+            outputLengths.set(lengths)
+        }
+        /* eslint-enable @stylistic/semi */
         cursor += count * 2;
         new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
         return output;
