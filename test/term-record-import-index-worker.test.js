@@ -10,6 +10,7 @@ import {createImportIndexWorkerClient, WorkerImportIndexWriter} from '../ext/js/
 import {SyncImportIndexWriter} from '../ext/js/dictionary/term-record-import-index-writer.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
+import {createImportIndexChunkFixture} from './util/import-index-chunk-fixture.js';
 
 /** @type {NodeWorker[]} */
 const workers = [];
@@ -145,6 +146,78 @@ afterEach(async () => {
 });
 
 describe('production import index worker', () => {
+    test('writes exact owned envelope parts through short writes without changing logical chunk counts', async () => {
+        const file = fixture({shortWrite: 200_003});
+        const prepared = await createImportIndexChunkFixture(30000);
+        const chunk = prepared.adopt();
+        if (chunk instanceof Uint8Array) { throw new Error('Expected owned envelope parts'); }
+        const chunks = Array.from({length: 4}, () => structuredClone(chunk));
+        const {store, state} = storeWithPendingIndex(file, new Uint8Array());
+        state.pendingLookupIndexChunks = chunks;
+        state.pendingLookupIndexBytes = chunks.reduce((sum, item) => sum + item.byteLength, 0);
+        state.pendingLookupIndexRecordCount = prepared.chunk.rowCount * chunks.length;
+        await store._flushPendingLookupIndexChunks(state, true);
+        expect(state.lookupIndexChunkCount).toBe(4);
+        expect(state.lookupIndexRecordCount).toBe(120000);
+        expect(state.lookupIndexQueuedBytes).toBe(0);
+        await store.endImportSession();
+        const stored = readFileSync(file.filePath);
+        const view = new DataView(stored.buffer, stored.byteOffset, stored.byteLength);
+        expect(view.getUint32(16, true)).toBe(4);
+        expect(view.getUint32(20, true)).toBe(120000);
+        expect(digest(stored.subarray(40))).toBe(digest(Buffer.concat(Array.from({length: 4}, () => prepared.expected))));
+        expect(chunks.every((item) => item.header.byteLength === 0 && item.payload.byteLength === 0 && item.recordFields.byteLength === 0)).toBe(true);
+        expect(Atomics.load(file.counters, 7)).toBeLessThanOrEqual(512 * 1024);
+        expect(workers).toHaveLength(1);
+    });
+
+    test('keeps every envelope byte charged through a blocked periodic flush and rollback', async () => {
+        const file = fixture({blockFlushAt: 1});
+        const prepared = await createImportIndexChunkFixture(30000);
+        const chunk = prepared.adopt();
+        if (chunk instanceof Uint8Array) { throw new Error('Expected owned envelope parts'); }
+        const chunks = Array.from({length: 32}, () => structuredClone(chunk));
+        const {store, state} = storeWithPendingIndex(file, new Uint8Array());
+        const byteLength = chunks.reduce((sum, item) => sum + item.byteLength, 0);
+        expect(byteLength).toBeGreaterThan(16 * 1024 * 1024);
+        state.pendingLookupIndexChunks = chunks;
+        state.pendingLookupIndexBytes = byteLength;
+        state.pendingLookupIndexRecordCount = prepared.chunk.rowCount * chunks.length;
+        Reflect.set(store, '_queuedWriteBudgetBytes', 8 * 1024 * 1024);
+        let acknowledged = false;
+        const writing = store._flushPendingLookupIndexChunks(state, false).then(() => { acknowledged = true; });
+        await expect.poll(() => Atomics.load(file.counters, 4)).toBe(2);
+        expect(state.lookupIndexQueuedBytes).toBe(byteLength);
+        expect(acknowledged).toBe(false);
+        let abandoned = false;
+        const rollback = store._abandonImportWritesForRollback().then(() => { abandoned = true; });
+        await Promise.resolve();
+        expect(abandoned).toBe(false);
+        release(file);
+        await Promise.all([writing, rollback]);
+        expect(state.lookupIndexQueuedBytes).toBe(0);
+        expect(state.lookupIndexWritable).toBeNull();
+        expect(Atomics.load(file.counters, 2)).toBe(1);
+        expect(Atomics.load(file.counters, 3)).toBe(1);
+        expect(digest(readFileSync(file.filePath).subarray(40))).toBe(digest(Buffer.concat(Array.from({length: 32}, () => prepared.expected))));
+    });
+
+    test('an earlier write failure remains authoritative before deferred envelope preparation', async () => {
+        const file = fixture({writeErrorAt: 2});
+        const {client, writer} = await openWorker(file);
+        const prepared = await createImportIndexChunkFixture();
+        const first = writer.writeOwnedChunks([patternedBytes(1024 * 1024)]);
+        const second = writer.writeOwnedIndexChunks([prepared.adopt()]);
+        const failures = await Promise.all([first.catch((error) => error), second.catch((error) => error)]);
+        expect(failures[0]).toMatchObject({message: 'Worker write witness'});
+        expect(failures[1]).toBe(failures[0]);
+        await expect(writer.close()).rejects.toBe(failures[0]);
+        expect(Atomics.load(file.counters, 1)).toBe(2);
+        expect(Atomics.load(file.counters, 2)).toBe(0);
+        expect(Atomics.load(file.counters, 3)).toBe(1);
+        client.dispose();
+    });
+
     test('preserves positional byte parity across owned transfer, short writes and periodic/final flush', async () => {
         const file = fixture({shortWrite: 200_003});
         const {client, writer} = await openWorker(file);

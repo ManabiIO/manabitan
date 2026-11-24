@@ -63,6 +63,9 @@ async function handleRequest(value) {
                 case 'writeChunks':
                     await writer.writeChunks(/** @type {Uint8Array[]} */ (data.chunks));
                     break;
+                case 'writeIndexChunks':
+                    await writer.writeIndexChunks(/** @type {import('./term-record-import-index-chunk.js').ImportIndexChunk[]} */ (data.chunks));
+                    break;
                 case 'seek':
                     await writer.seek(/** @type {number} */ (data.offset));
                     break;
