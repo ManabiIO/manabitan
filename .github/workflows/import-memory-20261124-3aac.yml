@@ -1,0 +1,81 @@
+name: Import memory qualification 20261124
+
+on:
+  push:
+    branches: [perf/import-memory-20261124-3aac]
+    paths:
+      - '.github/workflows/import-memory-20261124-3aac.yml'
+      - 'dev/perf/import-memory-20261124-3aac/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: import-memory-3aac-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    name: ${{ matrix.dictionary }} memory replication ${{ matrix.replication }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jitendex]
+        replication: [1, 2]
+    env:
+      MEMORY_BASELINE: bbccabd520972cc351a65d9f545bd5369b6e9747
+      MEMORY_BASELINE_TREE: f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07
+      MEMORY_CANDIDATE: ebb1da8d2cc2b28901400968891b632605f1b3f0
+      MEMORY_CANDIDATE_TREE: 243ab638da9cb73e08d84609c41dcdfdf08475cd
+      MEMORY_DICTIONARY: ${{ matrix.dictionary }}
+      MEMORY_REPLICATION: ${{ matrix.replication }}
+      MEMORY_DIFFERENCES: '["js/dictionary/term-content-block-store.js","js/dictionary/term-content-opfs-store.js","js/dictionary/term-content-ownership.js","js/dictionary/zstd-term-content.js","lib/zstd-wasm.js","lib/zstd-wasm.js.map"]'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact source revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$MEMORY_BASELINE" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$MEMORY_CANDIDATE" =~ ^[0-9a-f]{40}$ ]]
+          git fetch --no-tags origin "$MEMORY_BASELINE" "$MEMORY_CANDIDATE"
+          test "$(git rev-parse "${MEMORY_BASELINE}^{tree}")" = "$MEMORY_BASELINE_TREE"
+          test "$(git rev-parse "${MEMORY_CANDIDATE}^{tree}")" = "$MEMORY_CANDIDATE_TREE"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install the matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Validate the frozen observer and protocol
+        run: python3 -m unittest discover -s dev/perf/import-memory-20261124-3aac -p 'test_*.py' -v
+      - name: Acquire every fixed observation once
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-memory-20261124-3aac/run_memory.py \
+            --baseline "$MEMORY_BASELINE" \
+            --candidate "$MEMORY_CANDIDATE" \
+            --dictionary "$MEMORY_DICTIONARY" \
+            --replication "$MEMORY_REPLICATION" \
+            --expected-differences "$MEMORY_DIFFERENCES" \
+            --output "$RUNNER_TEMP/import-memory-3aac"
+      - name: Retain all scans, markers, packages and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-memory-3aac-prefix-${{ matrix.dictionary }}-rep${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/import-memory-3aac
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
