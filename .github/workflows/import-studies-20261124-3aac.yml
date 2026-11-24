@@ -17,25 +17,25 @@ concurrency:
 
 jobs:
   compare:
-    name: ${{ matrix.candidate.label }} screen storage-v1 (${{ matrix.dictionary }}, ${{ matrix.replication }})
+    name: ${{ matrix.candidate.label }} qualification storage-v1 (${{ matrix.dictionary }}, ${{ matrix.replication }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, vndb]
-        replication: ["forward"]
+        dictionary: [vndb]
+        replication: ["forward", "reverse"]
         candidate:
-          - label: canonical
-            sha: 2dfa72962c9d9f1976011e41b9bbce2375f4dbb5
-            differences: '["js/dictionary/wasm/term-content-canonical-scan-v1.c","lib/term-content-canonical-scan-v1.wasm"]'
+          - label: media
+            sha: fb71a03f4611bcfa71e135693bebd1fe778153bf
+            differences: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
     env:
       PERF_BASELINE_SHA: bbccabd520972cc351a65d9f545bd5369b6e9747
       PERF_CANDIDATE_SHA: ${{ matrix.candidate.sha }}
       PERF_EXPECTED_DIFFERENCES: ${{ matrix.candidate.differences }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
       PERF_REPLICATION: ${{ matrix.replication }}
-      PERF_STAGE: screen
+      PERF_STAGE: qualification
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -77,7 +77,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: import-${{ matrix.candidate.label }}-screen-storage-v1-${{ matrix.dictionary }}-${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: import-${{ matrix.candidate.label }}-qualification-storage-v1-${{ matrix.dictionary }}-${{ matrix.replication }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/import-study-evidence
           if-no-files-found: error
           retention-days: 30
