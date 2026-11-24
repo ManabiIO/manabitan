@@ -31,7 +31,7 @@ const instances = new WeakMap();
 export function compileCanonicalScanModule() {
     if (modulePromise === null) {
         modulePromise = (async () => {
-            const response = await fetch(new URL('../../lib/term-content-canonical-scan-v1.wasm', import.meta.url));
+            const response = await fetch(new URL('../../lib/term-content-canonical-scan-v2.wasm', import.meta.url));
             if (!response.ok) {
                 throw new Error(`Failed to load canonical scan WASM: ${response.status}`);
             }
@@ -381,12 +381,13 @@ export class NativeCanonicalScanner {
                 cursor = next;
             } catch (error) {
                 // Only this unaccepted synchronous segment may rewind its new dense suffix.
-                const journal = new Uint32Array(buffer, JOURNAL, header[0] * 3);
+                /* eslint-disable @stylistic/semi */
+                const journal = new Uint32Array(buffer, JOURNAL, header[0])
                 for (let j = header[0] - 1; j >= 0; --j) {
-                    const slot = journal[j * 3],
-                        previous = journal[j * 3 + 1],
-                        index = journal[j * 3 + 2];
-                    a.slots[slot] = previous;
+                    const slot = journal[j]
+                    const index = beforeDense + j
+                    a.slots[slot] = 0
+                    /* eslint-enable @stylistic/semi */
                     a.state[index] = 0;
                     a.hash1[index] = a.hash2[index] = a.length[index] = 0;
                     a.signaturePresent[index] = a.signature1[index] = a.signature2[index] = a.signature3[index] = 0;

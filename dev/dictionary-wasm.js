@@ -25,7 +25,7 @@ export const dictionaryWasmRoot = path.resolve(path.dirname(fileURLToPath(import
 
 const sourceDirectory = 'ext/js/dictionary/wasm';
 const artifactDirectory = 'dev/data/dictionary-wasm';
-const artifactNames = ['term-bank-parser.wasm', 'term-content-canonical-scan-v1.wasm'];
+const artifactNames = ['term-bank-parser.wasm', 'term-content-canonical-scan-v2.wasm'];
 const digestPattern = /^[a-f0-9]{64}$/;
 
 /** @typedef {import('dev/dictionary-wasm').DictionaryWasmManifest} DictionaryWasmManifest */

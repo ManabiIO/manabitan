@@ -4,13 +4,13 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "023bb2e263040d26c5b9d86e72d5a866dcf7e09564aa6696910afaf5b2538770",
+    "sourceDigest": "924c4e245dc27db2ac376cdb3438048fd70d1bc0abadbee2b0fa0acc0371720f",
     "sourceFileCount": 14,
     "targets": [
         {
-            "name": "term-content-canonical-scan-v1.wasm",
+            "name": "term-content-canonical-scan-v2.wasm",
             "sources": [
-                "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+                "ext/js/dictionary/wasm/term-content-canonical-scan-v2.c"
             ],
             "arguments": [
                 "--target=wasm32",
@@ -21,7 +21,7 @@
                 "-Wl,-z,stack-size=65536",
                 "-Wl,--strip-all"
             ],
-            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+            "sha256": "1cc8f55258075d5363cc2865a6335c0059fe929ccdbbd4086a095f51f08b118e"
         },
         {
             "name": "term-bank-parser.wasm",
