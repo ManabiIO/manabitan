@@ -350,6 +350,124 @@ describe('Backend lookup refresh gating', () => {
         expect(Reflect.get(backend, '_dictionaryLookupWarmQueuedReason')).toBe(null);
     });
 
+    test('post-import lookup warmup waits for the delay after settings changes during import', async () => {
+        vi.useFakeTimers();
+        try {
+            const warmTermLookupCaches = vi.fn().mockResolvedValue(void 0);
+            const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+            Reflect.set(backend, '_options', {});
+            Reflect.set(backend, '_dictionaryImportModeActive', true);
+            Reflect.set(backend, '_dictionaryRefreshPromise', null);
+            Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
+            Reflect.set(backend, '_dictionaryLookupWarmQueuedReason', null);
+            Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(backend, '_dictionaryDatabase', {warmTermLookupCaches});
+            Reflect.set(backend, '_getProfileOptions', vi.fn().mockReturnValue({
+                dictionaries: [{name: 'VNDB', enabled: true}],
+            }));
+
+            Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'settings-enabled-dictionaries-changed');
+            expect(warmTermLookupCaches).not.toHaveBeenCalled();
+
+            Reflect.set(backend, '_dictionaryImportModeActive', false);
+            Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'dictionary-post-import-refresh');
+            await vi.advanceTimersByTimeAsync(1499);
+            expect(warmTermLookupCaches).not.toHaveBeenCalled();
+            await vi.advanceTimersByTimeAsync(1);
+            await Reflect.get(backend, '_dictionaryLookupWarmPromise');
+            expect(warmTermLookupCaches).toHaveBeenCalledOnce();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('a second import during the grace period prevents stale lookup warmup', async () => {
+        vi.useFakeTimers();
+        try {
+            const warmTermLookupCaches = vi.fn().mockResolvedValue(void 0);
+            const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+            Reflect.set(backend, '_options', {});
+            Reflect.set(backend, '_dictionaryImportModeActive', false);
+            Reflect.set(backend, '_dictionaryRefreshPromise', null);
+            Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
+            Reflect.set(backend, '_dictionaryLookupWarmQueuedReason', null);
+            Reflect.set(backend, '_dictionaryLookupWarmDelayTimer', null);
+            Reflect.set(backend, '_dictionaryLookupWarmDelayResolve', null);
+            Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(backend, '_dictionaryDatabase', {warmTermLookupCaches});
+            Reflect.set(backend, '_getProfileOptions', vi.fn().mockReturnValue({
+                dictionaries: [{name: 'VNDB', enabled: true}],
+            }));
+
+            Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'dictionary-post-import-refresh');
+            const firstWarm = Reflect.get(backend, '_dictionaryLookupWarmPromise');
+            await vi.advanceTimersByTimeAsync(1000);
+            Reflect.set(backend, '_dictionaryImportModeActive', true);
+            await vi.advanceTimersByTimeAsync(500);
+            await firstWarm;
+            expect(warmTermLookupCaches).not.toHaveBeenCalled();
+
+            Reflect.set(backend, '_dictionaryImportModeActive', false);
+            Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'dictionary-post-import-refresh');
+            const secondWarm = Reflect.get(backend, '_dictionaryLookupWarmPromise');
+            await vi.advanceTimersByTimeAsync(1500);
+            await secondWarm;
+            expect(warmTermLookupCaches).toHaveBeenCalledOnce();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('settings changes during the grace period re-resolve enabled dictionaries', async () => {
+        vi.useFakeTimers();
+        try {
+            const warmTermLookupCaches = vi.fn().mockResolvedValue(void 0);
+            let profileOptions = {dictionaries: [{name: 'VNDB', enabled: true}]};
+            const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+            Reflect.set(backend, '_options', {});
+            Reflect.set(backend, '_dictionaryImportModeActive', false);
+            Reflect.set(backend, '_dictionaryRefreshPromise', null);
+            Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
+            Reflect.set(backend, '_dictionaryLookupWarmQueuedReason', null);
+            Reflect.set(backend, '_dictionaryLookupWarmDelayTimer', null);
+            Reflect.set(backend, '_dictionaryLookupWarmDelayResolve', null);
+            Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+            Reflect.set(backend, '_dictionaryDatabase', {warmTermLookupCaches});
+            Reflect.set(backend, '_getProfileOptions', vi.fn().mockImplementation(() => profileOptions));
+
+            Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'dictionary-post-import-refresh');
+            const pendingWarm = Reflect.get(backend, '_dictionaryLookupWarmPromise');
+            await vi.advanceTimersByTimeAsync(500);
+            profileOptions = {dictionaries: []};
+            Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'settings-enabled-dictionaries-changed');
+            await pendingWarm;
+
+            expect(warmTermLookupCaches).not.toHaveBeenCalled();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('normal user-enabled lookup cache warmup remains immediate', async () => {
+        const warmTermLookupCaches = vi.fn().mockResolvedValue(void 0);
+        const backend = /** @type {Backend} */ (/** @type {unknown} */ (Object.create(Backend.prototype)));
+        Reflect.set(backend, '_options', {});
+        Reflect.set(backend, '_dictionaryImportModeActive', false);
+        Reflect.set(backend, '_dictionaryRefreshPromise', null);
+        Reflect.set(backend, '_dictionaryLookupWarmPromise', null);
+        Reflect.set(backend, '_dictionaryLookupWarmQueuedReason', null);
+        Reflect.set(backend, '_ensureDictionaryDatabaseReady', vi.fn().mockResolvedValue(void 0));
+        Reflect.set(backend, '_dictionaryDatabase', {warmTermLookupCaches});
+        Reflect.set(backend, '_getProfileOptions', vi.fn().mockReturnValue({
+            dictionaries: [{name: 'VNDB', enabled: true}],
+        }));
+
+        Backend.prototype._warmEnabledDictionaryLookupCaches.call(backend, 'settings-enabled-dictionaries-changed');
+        await waitForTaskQueue();
+
+        expect(warmTermLookupCaches).toHaveBeenCalledOnce();
+    });
+
     test('dictionary refresh uses proxy refreshConnection without duplicate offscreen refresh', async () => {
         const refreshConnection = vi.fn().mockResolvedValue(void 0);
         const sendMessagePromise = vi.fn().mockResolvedValue(void 0);
@@ -406,7 +524,7 @@ describe('Backend lookup refresh gating', () => {
 
         expect(adoptCurrentConnectionAfterImport).toHaveBeenCalledOnce();
         expect(refreshConnection).toHaveBeenCalledOnce();
-        expect(warmEnabledDictionaryLookupCaches).toHaveBeenCalledWith('dictionary-refresh-after-update');
+        expect(warmEnabledDictionaryLookupCaches).toHaveBeenCalledWith('dictionary-post-import-refresh');
     });
 
     test('dictionary refresh fallback continues when direct offscreen refresh fails', async () => {
