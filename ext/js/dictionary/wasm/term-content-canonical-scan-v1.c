@@ -52,6 +52,16 @@ uint32_t canonical_max_rows(void) { return MAX_ROWS; }
 __attribute__((export_name("canonical_prefix_bytes")))
 uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 
+static inline void publish_counters(volatile uint32_t *h, uint32_t next,
+                                   uint32_t pending, uint32_t exact,
+                                   uint32_t resolved, uint32_t dense) {
+    h[1] = next;
+    h[2] = pending;
+    h[3] = exact;
+    h[4] = resolved;
+    h[5] = dense;
+}
+
 // Header at 1024: journal progress, next cursor, pending count, exact count,
 // resolved count, dense count, reserved. The journal count is volatile so a
 // trap cannot hide an insertion from the synchronous JS rollback owner.
@@ -87,25 +97,29 @@ int32_t scan_canonical(void) {
     const uint8_t *flags = U8(FLAGS);
     uint32_t *out = U32(OUT), *journal = U32(JOURNAL), *exact = U32(EXACT);
     const uint32_t n = c[14] - c[13], mask = c[1] - 1;
+    // Only journal progress must reach memory before each mutation. Preserve
+    // every other header field at returns and the intentional trap boundary.
+    uint32_t next = c[15], pending = 0, exact_count = 0, resolved = 0, dense = c[11];
+    int32_t result = 0;
     for (uint32_t i = c[15]; i < n; ++i) {
         const uint32_t unique = c[13] + i, global = rows[i];
-        if (global < c[16] || (uint64_t)global - c[16] >= c[12]) { return -2; }
+        if (global < c[16] || (uint64_t)global - c[16] >= c[12]) { result = -2; goto finished; }
         const uint32_t row = global - c[16];
-        if (identity[row] != unique) { return -2; }
-        h[1] = i + 1;
+        if (identity[row] != unique) { result = -2; goto finished; }
+        next = i + 1;
         if (flags[i] == 1) {
-            ++h[4];
+            ++resolved;
             continue;
         }
         const uint32_t *m = meta + row * 4;
         const uint64_t offset = (uint64_t)c[17] + m[0], end = offset + m[1];
-        if (end > c[18] || offset > 0xffffffffu) { return -3; }
+        if (end > c[18] || offset > 0xffffffffu) { result = -3; goto finished; }
         uint32_t hash = m[2] ^ (m[3] * 0x9e3779b1u);
         hash ^= hash >> 16;
         uint32_t slot = hash & mask, probes = 0, existing = 0xffffffffu, pair = 0;
         while (slots[slot]) {
             uint32_t index = slots[slot] - 1;
-            if (index >= c[10] || ++probes >= c[1]) { return -4; }
+            if (index >= c[10] || ++probes >= c[1]) { result = -4; goto finished; }
             if (hash1[index] == m[2] && hash2[index] == m[3]) {
                 pair = 1;
                 if (c[19] && state[index] == 1) {
@@ -116,18 +130,18 @@ int32_t scan_canonical(void) {
             slot = (slot + 1) & mask;
         }
         if (existing != 0xffffffffu) {
-            uint32_t j = h[3];
+            uint32_t j = exact_count;
             exact[j * 2] = i;
             exact[j * 2 + 1] = existing;
-            h[3] = j + 1;
+            exact_count = j + 1;
             // Do not inspect the following row before the exact-byte await.
-            if (h[3] == EXACT_BATCH_SIZE) { return 1; }
+            if (exact_count == EXACT_BATCH_SIZE) { result = 1; goto finished; }
             continue;
         }
         uint32_t staged = 0xffffffffu;
         if (c[20] && !pair) {
-            const uint32_t index = h[5];
-            if (index >= c[10] || state[index] != 0 || m[1] == 0xffffffffu) { return -5; }
+            const uint32_t index = dense;
+            if (index >= c[10] || state[index] != 0 || m[1] == 0xffffffffu) { result = -5; goto finished; }
             uint32_t j = h[0];
             journal[j * 3] = slot;
             journal[j * 3 + 1] = slots[slot];
@@ -144,10 +158,13 @@ int32_t scan_canonical(void) {
             state[index] = 2;
             slots[slot] = index + 1;
             staged = index;
-            h[5] = index + 1;
-            if (c[21] && h[0] == c[21]) { __builtin_trap(); }
+            dense = index + 1;
+            if (c[21] && h[0] == c[21]) {
+                publish_counters(h, next, pending, exact_count, resolved, dense);
+                __builtin_trap();
+            }
         }
-        uint32_t j = h[2]++;
+        uint32_t j = pending++;
         out[j] = (uint32_t)offset;
         out[MAX_ROWS + j] = m[1];
         out[2u * MAX_ROWS + j] = m[2];
@@ -155,5 +172,7 @@ int32_t scan_canonical(void) {
         out[4u * MAX_ROWS + j] = unique;
         out[5u * MAX_ROWS + j] = staged;
     }
-    return 0;
+finished:
+    publish_counters(h, next, pending, exact_count, resolved, dense);
+    return result;
 }
