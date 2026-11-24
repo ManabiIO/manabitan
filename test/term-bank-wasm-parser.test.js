@@ -1699,7 +1699,12 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest('bounds lazy source loading while the ordered sink is blocked', async () => {
+    maybeTest.each([
+        {sourceCount: 31, outcome: 'complete'},
+        {sourceCount: 32, outcome: 'complete'},
+        {sourceCount: 33, outcome: 'cancel'},
+        {sourceCount: 33, outcome: 'read-error'},
+    ])('keeps lazy source activation bounded across $sourceCount groups on $outcome', async ({sourceCount, outcome}) => {
         /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
@@ -1737,36 +1742,66 @@ describe('term-bank WASM parser', () => {
             terminate() {}
         }
 
+        const originalNavigator = globalThis.navigator;
+        vi.stubGlobal('navigator', {hardwareConcurrency: 2, deviceMemory: 8});
         vi.stubGlobal('Worker', SuccessfulWorker);
-        /** @type {(value?: void|PromiseLike<void>) => void} */
-        let releaseSink = () => {};
-        const sinkGate = new Promise((resolve) => { releaseSink = resolve; });
-        let loadCount = 0;
+        /** @type {PromiseWithResolvers<void>} */
+        const firstSink = Promise.withResolvers();
+        /** @type {PromiseWithResolvers<void>} */
+        const secondSink = Promise.withResolvers();
+        const initialLead = 8;
+        const sourceOrder = Array.from({length: sourceCount}, (_, index) => index);
+        const readError = new DictionarySourceIntegrityError('Newly admitted ZIP read failed');
+        const emptyBank = textEncoder.encode('[]');
+        /** @type {number[]} */
+        const loadedSources = [];
+        let sinkIndex = 0;
+        let cancelled = false;
+        const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
+            sourceOrder.map((index) => async () => {
+                loadedSources.push(index);
+                if (outcome === 'read-error' && index === initialLead) { throw readError; }
+                return new Uint8Array(emptyBank);
+            }),
+            Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
+            3,
+            async (_chunk, progress) => {
+                sinkIndex = progress.chunkIndex;
+                if (sinkIndex === 1) { await firstSink.promise; }
+                if (sinkIndex === 2) { await secondSink.promise; }
+            },
+            {emitContentSlab: true},
+            () => cancelled,
+        );
+        void parsing.catch(() => {});
         try {
-            const sourceCount = 24;
-            const emptyBank = textEncoder.encode('[]');
-            const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
-                Array.from({length: sourceCount}, () => async () => {
-                    ++loadCount;
-                    return new Uint8Array(emptyBank);
-                }),
-                Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
-                3,
-                async (_chunk, progress) => {
-                    if (progress.chunkIndex === 1) { await sinkGate; }
-                },
-                {emitContentSlab: true},
-            );
-            await vi.waitFor(() => { expect(loadCount).toBeGreaterThan(0); });
-            await new Promise((resolve) => { setTimeout(resolve, 25); });
-            expect(loadCount).toBeLessThan(sourceCount);
-            expect(loadCount).toBeLessThanOrEqual(getParallelTermBankParserWorkerCount() * 4);
-            releaseSink();
-            await expect(parsing).resolves.toBe(true);
-            expect(loadCount).toBe(sourceCount);
+            await vi.waitFor(() => { expect(sinkIndex).toBe(1); });
+            expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead));
+
+            firstSink.resolve();
+            await vi.waitFor(() => { expect(sinkIndex).toBe(2); });
+            expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+
+            cancelled = outcome === 'cancel';
+            secondSink.resolve();
+            if (outcome === 'cancel') {
+                await expect(parsing).rejects.toThrow(/cancel/i);
+                expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+            } else if (outcome === 'read-error') {
+                await expect(parsing).rejects.toMatchObject({name: readError.name, message: readError.message});
+                expect(sinkIndex).toBeLessThanOrEqual(initialLead);
+            } else {
+                await expect(parsing).resolves.toBe(true);
+                expect(loadedSources).toEqual(sourceOrder);
+                expect(consumeLastTermBankWasmParseProfile()?.parallelGroupCount).toBe(sourceCount);
+            }
         } finally {
-            releaseSink();
+            cancelled = true;
+            firstSink.resolve();
+            secondSink.resolve();
+            await parsing.catch(() => {});
             await disposeParallelTermBankParser();
+            vi.stubGlobal('navigator', originalNavigator);
             vi.stubGlobal('Worker', void 0);
         }
     });
