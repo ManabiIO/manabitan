@@ -1699,7 +1699,12 @@ describe('term-bank WASM parser', () => {
         }
     });
 
-    maybeTest.each([false, true])('advances the lazy source window in order with cancellation=%s', async (cancel) => {
+    maybeTest.each([
+        {sourceCount: 31, outcome: 'complete'},
+        {sourceCount: 32, outcome: 'complete'},
+        {sourceCount: 33, outcome: 'cancel'},
+        {sourceCount: 33, outcome: 'read-error'},
+    ])('keeps lazy source activation bounded across $sourceCount groups on $outcome', async ({sourceCount, outcome}) => {
         /** @implements {WorkerMock} */
         class SuccessfulWorker {
             constructor() {
@@ -1745,8 +1750,8 @@ describe('term-bank WASM parser', () => {
         /** @type {PromiseWithResolvers<void>} */
         const secondSink = Promise.withResolvers();
         const initialLead = 8;
-        const sourceCount = 4 * initialLead + 1;
         const sourceOrder = Array.from({length: sourceCount}, (_, index) => index);
+        const readError = new DictionarySourceIntegrityError('Newly admitted ZIP read failed');
         const emptyBank = textEncoder.encode('[]');
         /** @type {number[]} */
         const loadedSources = [];
@@ -1755,6 +1760,7 @@ describe('term-bank WASM parser', () => {
         const parsing = parseTermBankWithWasmColumnChunksParallelLazy(
             sourceOrder.map((index) => async () => {
                 loadedSources.push(index);
+                if (outcome === 'read-error' && index === initialLead) { throw readError; }
                 return new Uint8Array(emptyBank);
             }),
             Array.from({length: sourceCount}, () => 24 * 1024 * 1024),
@@ -1776,14 +1782,18 @@ describe('term-bank WASM parser', () => {
             await vi.waitFor(() => { expect(sinkIndex).toBe(2); });
             expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
 
-            cancelled = cancel;
+            cancelled = outcome === 'cancel';
             secondSink.resolve();
-            if (cancel) {
+            if (outcome === 'cancel') {
                 await expect(parsing).rejects.toThrow(/cancel/i);
                 expect(loadedSources).toEqual(sourceOrder.slice(0, initialLead + 1));
+            } else if (outcome === 'read-error') {
+                await expect(parsing).rejects.toMatchObject({name: readError.name, message: readError.message});
+                expect(sinkIndex).toBeLessThanOrEqual(initialLead);
             } else {
                 await expect(parsing).resolves.toBe(true);
                 expect(loadedSources).toEqual(sourceOrder);
+                expect(consumeLastTermBankWasmParseProfile()?.parallelGroupCount).toBe(sourceCount);
             }
         } finally {
             cancelled = true;
