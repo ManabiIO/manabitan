@@ -1744,8 +1744,8 @@ describe('term-bank WASM parser', () => {
         const firstSink = Promise.withResolvers();
         /** @type {PromiseWithResolvers<void>} */
         const secondSink = Promise.withResolvers();
-        const sourceCount = 12;
         const initialLead = 8;
+        const sourceCount = 4 * initialLead + 1;
         const sourceOrder = Array.from({length: sourceCount}, (_, index) => index);
         const emptyBank = textEncoder.encode('[]');
         /** @type {number[]} */
