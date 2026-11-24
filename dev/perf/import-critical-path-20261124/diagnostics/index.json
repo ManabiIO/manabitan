@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "manifest": "baseline-profile-jmdict-45458402415.manifest.json",
+      "archive": {
+        "path": "baseline-profile-jmdict-45458402415.tar.xz",
+        "bytes": 424924,
+        "sha256": "a76d53c555886f76c9aa5140c45f777309b9178aeba35b0029a67f3e6b3e5f33"
+      },
+      "kind": "diagnostic-profile",
+      "dictionary": "jmdict",
+      "diagnosticOnly": true,
+      "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+      "studyCommit": "b64229bd743000c854762d109c7db3e8156e85a2",
+      "originalArtifact": {
+        "id": 14952320941,
+        "name": "critical-path-jmdict-45458402415",
+        "size_in_bytes": 600304,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952320941",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952320941/zip",
+        "expired": false,
+        "created_at": "2026-11-24T18:21:17Z",
+        "expires_at": "2026-12-24T18:21:17Z",
+        "updated_at": "2026-11-24T18:21:17Z",
+        "digest": "sha256:674ed7c30bbda6c2f7837a2505ea8f132ce15877fd5a1f22f7b0ebfd8ceb5165",
+        "workflow_run": {
+          "id": 45458402415,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-critical-path-20261124-ad5",
+          "head_sha": "b64229bd743000c854762d109c7db3e8156e85a2"
+        }
+      },
+      "originalZipSha256Verified": true
+    },
+    {
+      "manifest": "baseline-profile-jitendex-45458402415.manifest.json",
+      "archive": {
+        "path": "baseline-profile-jitendex-45458402415.tar.xz",
+        "bytes": 738972,
+        "sha256": "c289786cadf4ccbd0335a32d034b242a80153da96e284b163ea6264ad1b47765"
+      },
+      "kind": "diagnostic-profile",
+      "dictionary": "jitendex",
+      "diagnosticOnly": true,
+      "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+      "studyCommit": "b64229bd743000c854762d109c7db3e8156e85a2",
+      "originalArtifact": {
+        "id": 14951926449,
+        "name": "critical-path-jitendex-45458402415",
+        "size_in_bytes": 1038285,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14951926449",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14951926449/zip",
+        "expired": false,
+        "created_at": "2026-11-24T18:21:21Z",
+        "expires_at": "2026-12-24T18:21:20Z",
+        "updated_at": "2026-11-24T18:21:21Z",
+        "digest": "sha256:876aa915f1845fe9816def2a66341946bc3cf213723b0f5692b9dc3ff647be1e",
+        "workflow_run": {
+          "id": 45458402415,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-critical-path-20261124-ad5",
+          "head_sha": "b64229bd743000c854762d109c7db3e8156e85a2"
+        }
+      },
+      "originalZipSha256Verified": true
+    },
+    {
+      "manifest": "baseline-profile-vndb-45458402415.manifest.json",
+      "archive": {
+        "path": "baseline-profile-vndb-45458402415.tar.xz",
+        "bytes": 1871748,
+        "sha256": "66b66a5f631d0964190a3d0195e1bb9d2208370e9d6868f2991af2922a05c02d"
+      },
+      "kind": "diagnostic-profile",
+      "dictionary": "vndb",
+      "diagnosticOnly": true,
+      "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+      "studyCommit": "b64229bd743000c854762d109c7db3e8156e85a2",
+      "originalArtifact": {
+        "id": 14952310812,
+        "name": "critical-path-vndb-45458402415",
+        "size_in_bytes": 2630700,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952310812",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952310812/zip",
+        "expired": false,
+        "created_at": "2026-11-24T18:21:40Z",
+        "expires_at": "2026-12-24T18:21:39Z",
+        "updated_at": "2026-11-24T18:21:40Z",
+        "digest": "sha256:7500527e6bff5d32ad5ba136f766f16eb2598fbecbf8271868d79cb2b59bcd51",
+        "workflow_run": {
+          "id": 45458402415,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "perf/import-critical-path-20261124-ad5",
+          "head_sha": "b64229bd743000c854762d109c7db3e8156e85a2"
+        }
+      },
+      "originalZipSha256Verified": true
+    },
+    {
+      "manifest": "baseline-profile-analysis-45458402415.manifest.json",
+      "archive": {
+        "path": "baseline-profile-analysis-45458402415.tar.xz",
+        "bytes": 94040,
+        "sha256": "abf0f51cabef139b38f8195036ea6ca4d409dd51ecb1111da10b6ed68479eaf5"
+      },
+      "kind": "diagnostic-analysis",
+      "diagnosticOnly": true,
+      "run": 45458402415,
+      "note": "Derived tables are separate from the exact raw reports and traces."
+    },
+    {
+      "manifest": "local-sidecar-warmup-failure-20261124.manifest.json",
+      "archive": {
+        "path": "local-sidecar-warmup-failure-20261124.tar.xz",
+        "bytes": 40600,
+        "sha256": "215e7d878bd71c98dc3405a52d67ecef0355934846fa5f6744759a7bab3cb091"
+      },
+      "kind": "retained-local-failure",
+      "status": "failed",
+      "observations": 0,
+      "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+      "candidate": "8b8b45d87afe2dc86b4553fc18b915736bd6113c",
+      "studyCommit": "f0c450dec6cdcdf7c77a9d61a049e7ea468f5440",
+      "reason": "Chromium process-singleton AF_UNIX socket EPERM before first baseline import.",
+      "note": "All local failure files retained byte-for-byte; no timing observation was produced."
+    }
+  ]
+}

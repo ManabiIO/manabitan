@@ -1,0 +1,52 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> yomitan@0.0.0 test:unit
+> vitest run test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1
+
+(node:17) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/ad5d54ac9137/manabitan-sidecar
+
+(node:37) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/term-bank-crc.test.js (4 tests | 4 skipped) 180ms
+(node:55) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ test/term-bank-memory-page.test.js (17 tests | 17 skipped) 154ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-crc.test.js [ test/term-bank-crc.test.js ]
+Error: No supported wasm compiler found; set MANABITAN_CLANG or CLANG
+ ❯ findCompiler test/util/wasm-compiler.js:48:11
+     46|         } catch { /* Try the next repository-supported compiler. */ }
+     47|     }
+     48|     throw new Error('No supported wasm compiler found; set MANABITAN_C…
+       |           ^
+     49| }
+     50|
+ ❯ test/term-bank-crc.test.js:38:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/term-bank-memory-page.test.js [ test/term-bank-memory-page.test.js ]
+Error: No supported wasm compiler found; set MANABITAN_CLANG or CLANG
+ ❯ findCompiler test/util/wasm-compiler.js:48:11
+     46|         } catch { /* Try the next repository-supported compiler. */ }
+     47|     }
+     48|     throw new Error('No supported wasm compiler found; set MANABITAN_C…
+       |           ^
+     49| }
+     50|
+ ❯ test/term-bank-memory-page.test.js:22:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  21 skipped (21)
+   Start at  13:49:46
+   Duration  823ms (transform 63ms, setup 39ms, import 73ms, tests 334ms, environment 0ms)
+

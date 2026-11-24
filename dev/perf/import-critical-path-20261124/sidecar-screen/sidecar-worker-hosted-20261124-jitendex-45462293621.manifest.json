@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "sidecar-worker-hosted-20261124",
+  "dictionary": "jitendex",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+  "studyCommit": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+  "originalArtifact": {
+    "id": 14954471188,
+    "name": "import-screen-sidecar-worker-hosted-20261124-jitendex-45462293621-1",
+    "size_in_bytes": 1177135,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14954471188",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14954471188/zip",
+    "expired": false,
+    "created_at": "2026-11-24T18:46:18Z",
+    "expires_at": "2026-12-24T18:46:17Z",
+    "updated_at": "2026-11-24T18:46:18Z",
+    "digest": "sha256:05989d00b31364abecb1a0eefb4756280fcf6d9f420015bd6f4a481551bac2b4",
+    "workflow_run": {
+      "id": 45462293621,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45462293621",
+  "archive": {
+    "path": "sidecar-worker-hosted-20261124-jitendex-45462293621.tar.xz",
+    "bytes": 140936,
+    "sha256": "b688871eedad0091e0f20817cdbc64f215551af640f3de520f3124f60e2d7d5b"
+  },
+  "files": [
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-1-A/run-1.json",
+      "bytes": 151102,
+      "sha256": "3753d3d6aa20e76f12bbb7e8f1e03d27c4c4eca19f09bb9e1b2e785adbb8d03c"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-1-A/summary.json",
+      "bytes": 59423,
+      "sha256": "b101223013d0cbf7fa422e51e2046135a5a066b3bbf83a927c55b2da0eea05f8"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-1-B/run-1.json",
+      "bytes": 150693,
+      "sha256": "469c2611da575815640474d2ae588900458acc1be32da48d307aa041f0b4aae1"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-1-B/summary.json",
+      "bytes": 59218,
+      "sha256": "32017c5a244eccccd2b4dee47421546a7ae63dfd98645dc0616f6a4bbbefefd1"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-1-C/run-1.json",
+      "bytes": 150683,
+      "sha256": "dcb1d7d98c2d96347fc1a42e96ac71bd9b343d128e7840eeef9d0f9c2c8ebc8e"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-1-C/summary.json",
+      "bytes": 59171,
+      "sha256": "e7c4e5915db4f4916c03152f0cd3b910f383cf1af112b8414310f6ec6d6c7cbe"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-2-A/run-1.json",
+      "bytes": 150343,
+      "sha256": "2abc9e8ffbd697fe747ba7e6f471bfebf3b3b13935bdcdba251c2332ce4296f7"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-2-A/summary.json",
+      "bytes": 59100,
+      "sha256": "e6d3738c02160dd5737fc99635135eb8baaaa61797f1fc25a9dbdce70fe509fb"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-2-B/run-1.json",
+      "bytes": 150837,
+      "sha256": "116bf120d91ed1035df4ccff905a5903b08b5da2bd2c9891fa07c9f848d70a85"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-2-B/summary.json",
+      "bytes": 59326,
+      "sha256": "86b9cf6c9d3f8aaec9d4148cf91fa8b63edf898bcb5a49caf499d4e10fae5b09"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-2-C/run-1.json",
+      "bytes": 150714,
+      "sha256": "3f38bfe3b92ace053d2e2765e67df6b6daeeb6fdae3bf27dcc76a2442346a7f3"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-2-C/summary.json",
+      "bytes": 59197,
+      "sha256": "79ffcb7abcdbe4d214ca10c4cce666b8a5d9059024c0f592900b8d6dd3cbc641"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-3-A/run-1.json",
+      "bytes": 150704,
+      "sha256": "8f8defc2ca3a68cd52152042378fb3ab8dde103eb4e11b06911f6694733164e5"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-3-A/summary.json",
+      "bytes": 59178,
+      "sha256": "683090134616975332c75f09f6a8bbe35cfb6dbdf0ef68589e005d8ee24ba96b"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-3-B/run-1.json",
+      "bytes": 150124,
+      "sha256": "edaf73e76d69baee13ae66cf7e9a0ae10a774fe931bed3b5ecbec36947b48c8b"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-3-B/summary.json",
+      "bytes": 59057,
+      "sha256": "50c9233bf1d5cba9ba92bb36b077faf434ec87edf4f3f7d5a243ba2d2c194a2f"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-3-C/run-1.json",
+      "bytes": 150909,
+      "sha256": "ead9b43a283dca2ae19a6170af628a05ad6640b41d9bed71ad6f77db2ac1355c"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-3-C/summary.json",
+      "bytes": 59179,
+      "sha256": "dba7364b9b9d5e0a06f090678c02585bce975436c4ee5142149da3c6a08bb3df"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-4-A/run-1.json",
+      "bytes": 150931,
+      "sha256": "2440617e58ddfc4d99c92022558d035a02c521d0e4431143e9e42eb19151b6df"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-4-A/summary.json",
+      "bytes": 59290,
+      "sha256": "5d55562d0bde00829d9933f0e63edc26a277e9396b2baf80560a49c470ebf362"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-4-B/run-1.json",
+      "bytes": 150837,
+      "sha256": "0982834df400b9c19fde0b96771f4f1279f64b1a4c615fba3d41d48e60443164"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-4-B/summary.json",
+      "bytes": 59270,
+      "sha256": "a275f6d68cdda5ff366be7c6bf1b7d234bb121b568833c936856e03a3c760898"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-4-C/run-1.json",
+      "bytes": 150882,
+      "sha256": "18297a8b0c2f634d74b8c055c71fc2003a75d7f0110d558b7cf902628c832e3e"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-4-C/summary.json",
+      "bytes": 59218,
+      "sha256": "79dfa9b285a48dbaa09719cb190ef2673ed8e8ea7c8bdcc2f9376543e6537ff6"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-5-A/run-1.json",
+      "bytes": 151174,
+      "sha256": "5e289160667140cdc3b3710224e17b258940fbdb9f85670383095a17a6e9f0be"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-5-A/summary.json",
+      "bytes": 59234,
+      "sha256": "fa95f42e8739a8388c5434c804cf62c11242068deb21194c86513f6d5a7d3314"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-5-B/run-1.json",
+      "bytes": 150767,
+      "sha256": "84a3e6363703089f88e35eeb2fd3818c224bdeb97efb6925973f10705bddf4cd"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-5-B/summary.json",
+      "bytes": 58975,
+      "sha256": "83d46307f7dc85b6b1b331c72f8937aaba19210c1c44ed4e1edf285075eb4c18"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-5-C/run-1.json",
+      "bytes": 151227,
+      "sha256": "9d461dfef7336e28ff509114e50c3c87e90a3a065268fe1eafd6b180eeb88039"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-5-C/summary.json",
+      "bytes": 59036,
+      "sha256": "12d68ff37765fb2e35001cfdc2ce0f7490bf951abcfe0c313889e5ba766ad3eb"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-6-A/run-1.json",
+      "bytes": 150851,
+      "sha256": "1ce58855bf75c1f0b516ca3c2c4c4af8ff2a86987c49a37dec87ed46471b707f"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-6-A/summary.json",
+      "bytes": 59187,
+      "sha256": "8254322e45a59cc1a577a5b914e773ad2353f18bf83d0695f185e24e79ee46ed"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-6-B/run-1.json",
+      "bytes": 150629,
+      "sha256": "c6ed777b9006bc64be85c35d287f5d200beb84e709ff1d675afef17d310abdfb"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-6-B/summary.json",
+      "bytes": 59120,
+      "sha256": "38a2a62635251a029792cfae470d372815956f150bce50cc8993da6b9e5802f8"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-6-C/run-1.json",
+      "bytes": 150568,
+      "sha256": "f40ee4f0a67383e44d6989310ec47c326b39ccae9888980f8edee35d3419cb22"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/block-6-C/summary.json",
+      "bytes": 59151,
+      "sha256": "6211d181100d40aa52372ced745f3c2ab899d5b455e2e2e391377e4e9ac33255"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/diagnostic-A/run-1.json",
+      "bytes": 150835,
+      "sha256": "9365a06f785b0e4479897ee197876b39884f937bf5a3b064157fd3cb3fb7a1af"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/diagnostic-A/summary.json",
+      "bytes": 59184,
+      "sha256": "8fcd8be13011eb9960c638284271a59e9b17f2cf3533bd8db9a5bab865660732"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/diagnostic-B/run-1.json",
+      "bytes": 150423,
+      "sha256": "cf7a5a049a795f83ce2874ac4331b4d115096021dc1979e83d4254020e7e18e6"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/diagnostic-B/summary.json",
+      "bytes": 59081,
+      "sha256": "eeaa6cb8377eed48ae2b7ed5ad4692cfb4e3e0fe86cf0acc3662825234241532"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/expected-lookup-signature.json",
+      "bytes": 12351,
+      "sha256": "7a3c36aa8fe01644e2617f2bd3cec2dddfd1e9d4593bb3fb6f5b69b92bb4b586"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/protocol.json",
+      "bytes": 574,
+      "sha256": "71f8cdcf1cf28e1f5e2fa01c070a87e2fce4ec0178c032aee06cf2d0cefb2270"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/summary.json",
+      "bytes": 297879,
+      "sha256": "e4262dfea1d55c6c67e59cffe7248cf45de9e16ca3c3e288e48cfc577d3d1d98"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/warmup-A/run-1.json",
+      "bytes": 151289,
+      "sha256": "66b04a20ad6b4ab56e13ca0af8b53559bc514cc397d3112668ac586d1735cadb"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/warmup-A/summary.json",
+      "bytes": 59383,
+      "sha256": "6accdad644ce82988b324ee1d5c66b62dc80334768d697d19ab9debec15577f5"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/warmup-B/run-1.json",
+      "bytes": 150911,
+      "sha256": "54904a98c2ddc8e93ee91295fa18d2b1c88b0b19696c7712d4da9ed79691846c"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/warmup-B/summary.json",
+      "bytes": 59222,
+      "sha256": "28fe74897c1c7e30f20252943679b7e73db171972c881f42673fca0afb98bb78"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/warmup-C/run-1.json",
+      "bytes": 150840,
+      "sha256": "e48eb361fd3d37d819211cd980e183d1c339858eb4db3af90b0c4989bb4e9eee"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/warmup-C/summary.json",
+      "bytes": 59269,
+      "sha256": "6e0dae8982ccfba4cbb166c798f2dcd89f856ad49ee4889e872c3b19119d804c"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/jitendex/workflow.yml",
+      "bytes": 1891,
+      "sha256": "2a832ecf102ff35221c99149e27471e3530aad1232576870e15451f29222ae68"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

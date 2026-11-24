@@ -1,0 +1,12 @@
+[
+  {
+    "directory": "/workspace/scratch/ad5d54ac9137/recovered-evidence/media-vndb-45267017516/media-adjacent/vndb",
+    "validCompleteScreen": false,
+    "auditFailure": "CalledProcessError(128, ['git', 'show', '3d65e403c644b9a5a6be3128d72f9d30050b70e0:test/perf/dictionaries.lock.json'])"
+  },
+  {
+    "directory": "/workspace/scratch/ad5d54ac9137/recovered-evidence/native-vndb-45266391385/utf8-loop/vndb",
+    "validCompleteScreen": false,
+    "auditFailure": "CalledProcessError(128, ['git', 'show', '3d65e403c644b9a5a6be3128d72f9d30050b70e0:test/perf/dictionaries.lock.json'])"
+  }
+]

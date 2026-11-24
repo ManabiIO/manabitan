@@ -1,0 +1,246 @@
+{
+    "scope": "Native batch semantic image-path projection; local validation and unchanged-product maintenance receipt",
+    "createdAtUtc": "2026-11-24T19:12:27.869180+00:00",
+    "repository": "/workspace/scratch/ad5d54ac9137/native-media-projection",
+    "baseCommit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "originalLocalCommit": "09a63d6ffad74d991269b20fc2a802b5a1c78706",
+    "originalRemoteCommit": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae",
+    "originalTree": "5669adc07da2a15477615b4a7865b0c32354b340",
+    "finalLocalCommit": "56a524b79ee433e41e7797a30aaa6bbee003fcff",
+    "finalTree": "19b3eafb897e57a5d998d32e4142cb8b55681c7b",
+    "maintenanceFiles": [
+        "dev/perf/native-media-projection-20261124/README.md",
+        "dev/perf/native-media-projection-20261124/media-path-parity.json",
+        "dev/perf/native-media-projection-20261124/verify-paths.js",
+        "test/term-bank-memory-page.test.js"
+    ],
+    "oracleStructuredDataUnchanged": true,
+    "identicalProductTrees": {
+        "ext": {
+            "original": "e5188666379a7d957c517aac3b178fec35cb439d",
+            "final": "e5188666379a7d957c517aac3b178fec35cb439d",
+            "equal": true
+        },
+        "dev/data/dictionary-wasm": {
+            "original": "feac5c261939ffd55a804f247635de82125dca3a",
+            "final": "feac5c261939ffd55a804f247635de82125dca3a",
+            "equal": true
+        }
+    },
+    "runtimeSha256": {
+        "ext/js/dictionary/term-bank-media-projection.js": "1a43cbe61c554c88c66a32cc21de4a998357fe29ad3c366f49144262d72114c0",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "d6b7f12f7d77478b2f7787918cd04803ef96c3f2137c15bbcec08f421cf915e2",
+        "ext/js/dictionary/wasm/term-bank-media-projection.h": "d571dbfa5811d553e18d0df91b29d0ac871b0d0b1894e10749561f536f9ecf7c",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "bfaafa949b1d420f7b3536818c4d4708542a8383cf64df8a2ba1ed78f7ce20d0",
+        "dev/data/dictionary-wasm/manifest.json": "6b1cfa1e123e867deff7a993d380a467b1fc863b7d0e6da4c2468f5e6416399c",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "a094676b0bf219ec57c18bc1932d484c77ed4b96c29eab9656f1be142d6e77ff"
+    },
+    "runtime": {
+        "node": "22.22.0",
+        "clang": "21.1.8",
+        "lld": "21.1.8",
+        "vitest": "4.1.12"
+    },
+    "unitCoverageAcrossAttempts": {
+        "files": 645,
+        "passed": 14528,
+        "intentionalSkips": 47,
+        "unresolvedFailedFiles": 0,
+        "fullInvocationPassed": false
+    },
+    "browserTiming": "Owned by root; hosted study 6a04bbff4c5332d6c86f678455f36545a511abb5 on the original product tree. No local browser import completed because persistent Chromium sockets are denied by the executor.",
+    "attempts": [
+        {
+            "name": "Focused parser and glossary suites",
+            "log": "native-media-focused.log",
+            "logSha256": "47ec4982e46f1ef5ef782d98be690df55a7acc41b7caa00a95f9475fc6661642",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run test/term-bank-media-projection.test.js test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-source-crc-reuse.test.js test/dictionary-importer-glossary-types.test.js --maxWorkers=1",
+            "exitCode": 1,
+            "result": "Four files passed; one existing 95,000-row capacity test exceeded its 5-second timeout during concurrent corpus/gate work. 1,251 tests passed and one timed out. No timeout change was made."
+        },
+        {
+            "name": "Isolated capacity retry",
+            "log": "native-media-capacity-isolated.log",
+            "logSha256": "faa0afd62c11a4a2f553465c523c354fe7072e77f8aec9516947084fc1ebc17a",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run test/term-bank-wasm-parser.test.js --maxWorkers=1 -t \"grows past an unaligned metadata capacity without losing row fields or content\"",
+            "exitCode": 0,
+            "result": "The same test passed in 664 ms; 186 non-selected tests skipped."
+        },
+        {
+            "name": "Full serial unit gate",
+            "log": "native-media-full-unit.log",
+            "logSha256": "822a54f1669979b58877c07c9940fa7a5bf296e245623f1c921aab4b6fca6399",
+            "command": "LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang MANABITAN_WASM_LD=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin:$PATH /workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run --maxWorkers=1",
+            "exitCode": 1,
+            "result": "643 files passed; 2 suites failed during compiler setup because wasm-ld-21 was absent from PATH. Raw summary: 14,507 passed and 68 skipped. Of those skips, 21 were the tests in the two failed suites."
+        },
+        {
+            "name": "Native suites with corrected compiler PATH",
+            "log": "native-media-unit-compiler-retry.log",
+            "logSha256": "3313be4087f3c763fc84229ba39d4fe16af218732607046ddeec37d4703e496e",
+            "command": "LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang MANABITAN_WASM_LD=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin:$PATH /workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1",
+            "exitCode": 1,
+            "result": "CRC passed 4 tests. The allocator suite failed to compile its stdin wrapper because the new local header required an explicit include directory; its 17 tests were skipped."
+        },
+        {
+            "name": "Native suites after test-only include fix",
+            "log": "native-media-unit-include-retry.log",
+            "logSha256": "5aa8f58a0be2fba8596d8a4479328f0030420e266bd7d73af2cfb513358419ad",
+            "command": "LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang MANABITAN_WASM_LD=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin:$PATH /workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/vitest/vitest.mjs run test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1",
+            "exitCode": 0,
+            "result": "Both suites passed, 21 tests passed. Together with the full gate this resolves every failed suite: 14,528 unique tests passed, 47 intentional skips across 645 files. This is reconciled coverage across attempts, not a claim that the original full invocation passed."
+        },
+        {
+            "name": "Seven-target dry build",
+            "log": "native-media-dry-build.log",
+            "logSha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40",
+            "command": "LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang MANABITAN_WASM_LD=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin:$PATH /workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node dev/bin/build.js --dryRun --all",
+            "exitCode": 0,
+            "result": "chrome, chrome-dev, chrome-playwright, firefox, firefox-dev, firefox-android, edge all passed."
+        },
+        {
+            "name": "Pinned native artifact reproduction",
+            "log": "native-media-wasm-repro.log",
+            "logSha256": "eac6de28ca03b0dc0196cbf140cbd3b7bab6e33087dbbcca5304e4895cfe1964",
+            "command": "LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang MANABITAN_WASM_LD=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/wasm-ld PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin:$PATH /workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node dev/bin/build-dictionary-wasm.js --check",
+            "exitCode": 0,
+            "result": "Clang and LLD 21.1.8 reproduced both committed WASM artifacts exactly."
+        },
+        {
+            "name": "Initial harness JS lint",
+            "log": "native-media-lint.log",
+            "logSha256": "40b35927e94e5ce4927ebd628b9fa9ad612dbc5548fedd42bdcde55a61514e50",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/eslint/bin/eslint.js eslint.config.js ext/js/dictionary/term-bank-media-projection.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-media-projection.test.js dev/perf/native-media-projection-20261124/verify-paths.js",
+            "exitCode": 1,
+            "result": "One unsafe any assignment in the parity harness fs stream iterator was fixed before the original source freeze; no production-code issue."
+        },
+        {
+            "name": "Frozen source JS lint",
+            "log": "native-media-lint-final.log",
+            "logSha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/eslint/bin/eslint.js eslint.config.js ext/js/dictionary/term-bank-media-projection.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-media-projection.test.js dev/perf/native-media-projection-20261124/verify-paths.js",
+            "exitCode": 0,
+            "result": "Scoped JavaScript lint passed."
+        },
+        {
+            "name": "Initial JSON formatting",
+            "log": "native-media-json-format.log",
+            "logSha256": "a5c0e7e1fe91e5140c7e3afd0b3e43eba53e20841bc0807bf8a884e4740e7efc",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/eslint/bin/eslint.js dev/data/dictionary-wasm/manifest.json dev/perf/native-media-projection-20261124/media-path-parity.json",
+            "exitCode": 1,
+            "result": "Oracle JSON used two-space indentation instead of the repository four-space rule; native manifest passed. Evidence-only formatting fixed this."
+        },
+        {
+            "name": "Initial README formatting",
+            "log": "native-media-format.log",
+            "logSha256": "d5dea90a267be947334fcd6b8ee751b30cbba1bf8fdd3248710bfc24b29f23b2",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/prettier/bin/prettier.cjs dev/perf/native-media-projection-20261124/README.md --check",
+            "exitCode": 1,
+            "result": "README table formatting needed Prettier; whitespace/table separator decoration only."
+        },
+        {
+            "name": "Final scoped JavaScript and JSON lint",
+            "log": "native-media-lint-maintenance.log",
+            "logSha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/eslint/bin/eslint.js eslint.config.js ext/js/dictionary/term-bank-media-projection.js ext/js/dictionary/term-bank-wasm-parser.js test/term-bank-media-projection.test.js test/term-bank-memory-page.test.js dev/perf/native-media-projection-20261124/verify-paths.js dev/data/dictionary-wasm/manifest.json dev/perf/native-media-projection-20261124/media-path-parity.json",
+            "exitCode": 0,
+            "result": "All changed JavaScript, test compiler adjustment, native manifest, and oracle JSON passed."
+        },
+        {
+            "name": "Final README formatting",
+            "log": "native-media-format-final.log",
+            "logSha256": "97b81cae9f382872debd1a5c1b562432c3f8b5fb4fe569b0055bc19e0f401889",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/prettier/bin/prettier.cjs dev/perf/native-media-projection-20261124/README.md --check",
+            "exitCode": 0,
+            "result": "Passed."
+        },
+        {
+            "name": "Bench type check",
+            "log": "native-media-types-bench.log",
+            "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node node_modules/typescript/bin/tsc --noEmit --project benches/jsconfig.json",
+            "exitCode": 0,
+            "result": "Passed; subsequently included again in the final all-project type gate for one retained final receipt."
+        },
+        {
+            "name": "Final all-project type check",
+            "log": "native-media-types-final.log",
+            "logSha256": "b5ada234991d712e07f84ed3a88cb851dc15651d5ab7bc71c9d6a3b3da6d0f36",
+            "command": "PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH /workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/npm run test:ts",
+            "exitCode": 0,
+            "result": "Main, dev, test, and bench projects all passed."
+        },
+        {
+            "name": "Complete corpus semantic and ownership parity",
+            "log": "native-media-path-parity.log",
+            "logSha256": "d353c0a2d66f8437240eaef4d795f9531fe2d89f71ad6ce74fd205071f2c6044",
+            "command": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node dev/perf/native-media-projection-20261124/verify-paths.js /workspace/scratch/ad5d54ac9137/manabitan/builds/e2e-dictionary-cache /workspace/scratch/ad5d54ac9137/evidence-20261124/native-media-path-parity.json jitendex vndb jmdict",
+            "exitCode": 0,
+            "result": "All 7,613,164 source rows replayed. Exact complete copied chunk and ordered path equality, stable live source/content/key/lookup bytes, archive SHA and bank CRC checks passed. Native activation has zero fallback for every projected row in these fixtures. Functional evidence only, not timing data."
+        }
+    ],
+    "corpus": {
+        "scope": "Complete native projection versus original JSON collector; not a timing benchmark",
+        "reports": [
+            {
+                "id": "jitendex",
+                "fixtureSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+                "banks": 219,
+                "groups": 22,
+                "sourceBytes": 538927310,
+                "rows": 436555,
+                "mediaRows": 339,
+                "nativeGroups": 21,
+                "nativeRows": 339,
+                "fallbackRows": 0,
+                "orderedPaths": 336,
+                "uniquePaths": 236,
+                "orderedPathSha256": "3f0c4952d39c2e071ab23f0f22adf051901cfe29a6c4436bf412aea6bc4dbef3",
+                "completeChunkParity": true,
+                "liveBuffersUnchanged": true
+            },
+            {
+                "id": "vndb",
+                "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+                "banks": 665,
+                "groups": 170,
+                "sourceBytes": 4267992967,
+                "rows": 6648310,
+                "mediaRows": 146725,
+                "nativeGroups": 170,
+                "nativeRows": 146725,
+                "fallbackRows": 0,
+                "orderedPaths": 146725,
+                "uniquePaths": 146570,
+                "orderedPathSha256": "d4ad6b9a8fdbed4c43cd4887d42a283919886c6875bb86be3c627c8a07ceffde",
+                "completeChunkParity": true,
+                "liveBuffersUnchanged": true
+            },
+            {
+                "id": "jmdict",
+                "fixtureSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+                "banks": 53,
+                "groups": 12,
+                "sourceBytes": 171617523,
+                "rows": 528299,
+                "mediaRows": 17,
+                "nativeGroups": 7,
+                "nativeRows": 17,
+                "fallbackRows": 0,
+                "orderedPaths": 0,
+                "uniquePaths": 0,
+                "orderedPathSha256": "d9cbe0922cebf66fc1b402463465d592ab4a6ace06828774c4942f7ada965d57",
+                "completeChunkParity": true,
+                "liveBuffersUnchanged": true
+            }
+        ]
+    },
+    "caveats": [
+        "The complete corpus replay was run before the final evidence writer indentation adjustment and stream-value type assertion; projection/runtime bytes and oracle semantic values are unchanged.",
+        "The successful dry build ran before the evidence JSON indentation and writer indentation adjustments; these files are not packaged product members.",
+        "Product source and committed native-artifact equality are proven by identical Git subtree objects. Root will independently verify packaged extension member equality before carrying hosted qualification to the maintenance follow-up.",
+        "Original failing attempts are retained, not overwritten or represented as clean full invocations."
+    ],
+    "finalRemoteCommit": "4432e81ed21ba9dba57c85f665712f494af0f28a",
+    "finalRemoteParent": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae"
+}

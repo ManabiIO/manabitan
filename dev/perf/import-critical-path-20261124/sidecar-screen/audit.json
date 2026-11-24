@@ -1,0 +1,454 @@
+[
+  {
+    "directory": "sidecar-worker-hosted-20261124/jitendex",
+    "label": "sidecar-worker-hosted-20261124",
+    "dictionary": "jitendex",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+      "study": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+      "run": 45462293621
+    },
+    "fixture": {
+      "label": "Jitendex",
+      "cacheFile": "jitendex-yomitan.zip",
+      "release": "2026.10.03.0",
+      "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "expectedTitle": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "mediaBytes": 4992155,
+      "unreferencedMediaPaths": [
+        "jitendex/HanaMinA/05167.svg",
+        "jitendex/HanaMinA/05641.svg",
+        "jitendex/HanaMinA/0576b.svg",
+        "jitendex/HanaMinA/05bda.svg",
+        "jitendex/HanaMinA/06207.svg",
+        "jitendex/HanaMinA/07055.svg",
+        "jitendex/HanaMinA/07575.svg",
+        "jitendex/HanaMinA/076a5.svg",
+        "jitendex/HanaMinA/0793d.svg",
+        "jitendex/HanaMinA/080ed.svg",
+        "jitendex/HanaMinA/09093.svg",
+        "jitendex/HanaMinA/09c81.svg",
+        "jitendex/HanaMinA/20bb7.svg"
+      ]
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-lookup-index-checksum.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "aa60ed6449d54e89ddfd84004eeed1b60375307fd0662a89daf34ec741cae626",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 64,
+        "bytes": 1302012,
+        "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        1552.5,
+        1455.7000000000116,
+        1422.3999999999942,
+        1466.1000000000058,
+        1477.3999999999942,
+        1575.6999999999825
+      ],
+      "B": [
+        1998.199999999997,
+        1418.3999999999942,
+        1448.6000000000058,
+        1429.3999999999942,
+        1458.1000000000058,
+        1445.1000000000058
+      ],
+      "C": [
+        1427.1000000000058,
+        1474.8000000000175,
+        1419.6999999999825,
+        1472.7000000000116,
+        1427,
+        1420.5
+      ]
+    },
+    "medianByArmMs": {
+      "A": 1471.75,
+      "B": 1446.8500000000058,
+      "C": 1427.050000000003
+    },
+    "workerMedianByArmMs": {
+      "A": 1446.0999999999913,
+      "B": 1417.300000000003,
+      "C": 1399.0999999999913
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          28.70853462157792,
+          -2.562341141719937,
+          1.8419572553439068,
+          -2.503239888139386,
+          -1.3063489914707183,
+          -8.2883797677209
+        ],
+        "medianPairedPercentChange": -1.904794439805052,
+        "equalWorkPercentChange": 2.771011642718446,
+        "fasterPairs": 4,
+        "worstPercentChange": 28.70853462157792
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          40.01821876532752,
+          -3.824247355575172,
+          2.0356413326775735,
+          -2.940177904530261,
+          2.179397337071176,
+          1.7317845828937584
+        ],
+        "medianPairedPercentChange": 1.883712957785666,
+        "equalWorkPercentChange": 6.433844800851496,
+        "fasterPairs": 2,
+        "worstPercentChange": 40.01821876532752
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          -8.077294685989965,
+          1.3120835336955183,
+          -0.18982002249801067,
+          0.4501739308373054,
+          -3.4113984025987754,
+          -9.849590658119201
+        ],
+        "medianPairedPercentChange": -1.800609212548393,
+        "equalWorkPercentChange": -3.441417685311088,
+        "fasterPairs": 4,
+        "worstPercentChange": 1.3120835336955183
+      }
+    },
+    "outputDigestVariants": [
+      "4cd59b7bfc163d220f6e6a017fee6d2c2f3989cfde6a849233b1868aa85eb723"
+    ],
+    "storageByteVariants": [
+      67466332
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  },
+  {
+    "directory": "sidecar-worker-hosted-20261124/jmdict",
+    "label": "sidecar-worker-hosted-20261124",
+    "dictionary": "jmdict",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+      "study": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+      "run": 45462293621
+    },
+    "fixture": {
+      "label": "JMdict",
+      "cacheFile": "JMdict.zip",
+      "release": "2026-11-22",
+      "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "expectedTitle": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termRows": 528299,
+      "mediaFiles": 0,
+      "mediaBytes": 0
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-lookup-index-checksum.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "507474f79cc505c2e95f838350a6d13cd1cad6aefd091d013205e95f80211c24",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        847.2999999999884,
+        862.0999999999767,
+        851.6000000000058,
+        935.8999999999942,
+        877.7999999999884,
+        878.5999999999767
+      ],
+      "B": [
+        848.1000000000058,
+        873.7000000000116,
+        866.8999999999942,
+        869.7000000000116,
+        865.2999999999884,
+        880.2000000000116
+      ],
+      "C": [
+        850.1999999999825,
+        855.8000000000175,
+        881.4000000000233,
+        873.8999999999651,
+        879.3000000000466,
+        862.5999999999767
+      ]
+    },
+    "medianByArmMs": {
+      "A": 869.9499999999825,
+      "B": 868.3000000000029,
+      "C": 868.2499999999709
+    },
+    "workerMedianByArmMs": {
+      "A": 843.7499999999709,
+      "B": 841.6499999999942,
+      "C": 841.0500000000175
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          0.094417561668525,
+          1.3455515601479284,
+          1.7966181305763662,
+          -7.073405278339884,
+          -1.4240145819093386,
+          0.18210789893409185
+        ],
+        "medianPairedPercentChange": 0.13826273030130842,
+        "equalWorkPercentChange": -0.9403612967069708,
+        "fasterPairs": 2,
+        "worstPercentChange": 1.7966181305763662
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          -0.2470007057135737,
+          2.091610189295845,
+          -1.6451100521929551,
+          -0.4806041881169065,
+          -1.592175594229217,
+          2.040343148624557
+        ],
+        "medianPairedPercentChange": -0.3638024469152401,
+        "equalWorkPercentChange": 0.013453259532814066,
+        "fasterPairs": 4,
+        "worstPercentChange": 2.091610189295845
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          0.3422636610402652,
+          -0.7307736921423724,
+          3.4992954438723967,
+          -6.624639384552777,
+          0.17088174983574955,
+          -1.8210789893012058
+        ],
+        "medianPairedPercentChange": -0.27994597115331143,
+        "equalWorkPercentChange": -0.9536862543528701,
+        "fasterPairs": 3,
+        "worstPercentChange": 3.4992954438723967
+      }
+    },
+    "outputDigestVariants": [
+      "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d"
+    ],
+    "storageByteVariants": [
+      43520477
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  },
+  {
+    "directory": "sidecar-worker-hosted-20261124/vndb",
+    "label": "sidecar-worker-hosted-20261124",
+    "dictionary": "vndb",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+      "study": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+      "run": 45462293621
+    },
+    "fixture": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-lookup-index-checksum.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "85cd54d2f512839394648fa25ee4d436b1e2465f78c477fbabe04bcf0efb6463",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 64,
+        "bytes": 86256,
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        5370.399999999994,
+        5353.5,
+        5453.300000000047,
+        5207.299999999988,
+        5336.400000000023,
+        5394.099999999977
+      ],
+      "B": [
+        5317.099999999977,
+        5272.799999999988,
+        5400.899999999965,
+        5244.799999999988,
+        5374.899999999965,
+        5463.900000000023
+      ],
+      "C": [
+        5333.600000000006,
+        5349.399999999994,
+        5241.599999999977,
+        5370.899999999965,
+        5364.199999999953,
+        5272.79999999993
+      ]
+    },
+    "medianByArmMs": {
+      "A": 5361.949999999997,
+      "B": 5345.999999999971,
+      "C": 5341.5
+    },
+    "workerMedianByArmMs": {
+      "A": 5334.700000000012,
+      "B": 5319.300000000003,
+      "C": 5312.650000000009
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          -0.9924772828842854,
+          -1.5074250490335617,
+          -0.9608860689872434,
+          0.7201428763466744,
+          0.7214601604066617,
+          1.2940064144166152
+        ],
+        "medianPairedPercentChange": -0.12037159632028449,
+        "equalWorkPercentChange": -0.12642067569709203,
+        "fasterPairs": 3,
+        "worstPercentChange": 1.2940064144166152
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          -0.30935953202394506,
+          -1.431936291920699,
+          3.0391483516481355,
+          -2.3478374201712504,
+          0.19947056411042663,
+          3.6242603550314056
+        ],
+        "medianPairedPercentChange": -0.054944483956759216,
+        "equalWorkPercentChange": 0.4443748532062308,
+        "fasterPairs": 3,
+        "worstPercentChange": 3.6242603550314056
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          -0.6852375986888926,
+          -0.07658541141319919,
+          -3.882053068785285,
+          3.141743321874624,
+          0.5209504534879228,
+          -2.248753267459769
+        ],
+        "medianPairedPercentChange": -0.3809115050510459,
+        "equalWorkPercentChange": -0.5682702786866112,
+        "fasterPairs": 4,
+        "worstPercentChange": 3.141743321874624
+      }
+    },
+    "outputDigestVariants": [
+      "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094"
+    ],
+    "storageByteVariants": [
+      609553611
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  }
+]

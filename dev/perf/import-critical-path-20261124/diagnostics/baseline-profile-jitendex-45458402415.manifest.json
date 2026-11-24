@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "diagnostic-profile",
+  "dictionary": "jitendex",
+  "diagnosticOnly": true,
+  "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+  "studyCommit": "b64229bd743000c854762d109c7db3e8156e85a2",
+  "originalArtifact": {
+    "id": 14951926449,
+    "name": "critical-path-jitendex-45458402415",
+    "size_in_bytes": 1038285,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14951926449",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14951926449/zip",
+    "expired": false,
+    "created_at": "2026-11-24T18:21:21Z",
+    "expires_at": "2026-12-24T18:21:20Z",
+    "updated_at": "2026-11-24T18:21:21Z",
+    "digest": "sha256:876aa915f1845fe9816def2a66341946bc3cf213723b0f5692b9dc3ff647be1e",
+    "workflow_run": {
+      "id": 45458402415,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "b64229bd743000c854762d109c7db3e8156e85a2"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "archive": {
+    "path": "baseline-profile-jitendex-45458402415.tar.xz",
+    "bytes": 738972,
+    "sha256": "c289786cadf4ccbd0335a32d034b242a80153da96e284b163ea6264ad1b47765"
+  },
+  "files": [
+    {
+      "path": "diagnostics/jitendex/run-1.json",
+      "bytes": 151729,
+      "sha256": "1fb3667032dd005e4b9e82a22a3f8fe7acefe3512ca156c35af7cb82b4e3b8f8"
+    },
+    {
+      "path": "diagnostics/jitendex/run-1.trace.json",
+      "bytes": 10257608,
+      "sha256": "b6e0c1d135759892d420316302ac1f13caff47f9c6587406aea2314fb996a2aa"
+    },
+    {
+      "path": "diagnostics/jitendex/source.json",
+      "bytes": 267,
+      "sha256": "73631e1a37c6bf0415190d4d7d6f5e92d83c50ca1c5b5b6b5b603b4ed2217bb6"
+    },
+    {
+      "path": "diagnostics/jitendex/summary.json",
+      "bytes": 59307,
+      "sha256": "a204acea0ce8436c4c9b7b309de7deb5925fe47a55560cb948fba9162c6c0417"
+    }
+  ]
+}

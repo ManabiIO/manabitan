@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "bundles": [
+    {
+      "label": "sidecar-worker-hosted-20261124",
+      "dictionary": "jitendex",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+      "studyCommit": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45462293621",
+      "archive": {
+        "path": "sidecar-worker-hosted-20261124-jitendex-45462293621.tar.xz",
+        "bytes": 140936,
+        "sha256": "b688871eedad0091e0f20817cdbc64f215551af640f3de520f3124f60e2d7d5b"
+      },
+      "manifest": "sidecar-worker-hosted-20261124-jitendex-45462293621.manifest.json",
+      "artifactId": 14954471188,
+      "originalArtifactSha256": "sha256:05989d00b31364abecb1a0eefb4756280fcf6d9f420015bd6f4a481551bac2b4"
+    },
+    {
+      "label": "sidecar-worker-hosted-20261124",
+      "dictionary": "vndb",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+      "studyCommit": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45462293621",
+      "archive": {
+        "path": "sidecar-worker-hosted-20261124-vndb-45462293621.tar.xz",
+        "bytes": 142880,
+        "sha256": "ca6a6ebd611d214198b973bd7b381e892065bda16e305d0590f5473d86970c67"
+      },
+      "manifest": "sidecar-worker-hosted-20261124-vndb-45462293621.manifest.json",
+      "artifactId": 14954037981,
+      "originalArtifactSha256": "sha256:f1891e0ed8b1e1b026c57a394043203c636ce14e27cdf1f4ea3a489c402cd53e"
+    },
+    {
+      "label": "sidecar-worker-hosted-20261124",
+      "dictionary": "jmdict",
+      "status": "complete",
+      "observations": 23,
+      "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+      "studyCommit": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+      "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45462293621",
+      "archive": {
+        "path": "sidecar-worker-hosted-20261124-jmdict-45462293621.tar.xz",
+        "bytes": 137580,
+        "sha256": "616506105d1d2c5bcc303f7c6d57b9b9c2c7eaf7a5d18c34675ad0725203f916"
+      },
+      "manifest": "sidecar-worker-hosted-20261124-jmdict-45462293621.manifest.json",
+      "artifactId": 14953326478,
+      "originalArtifactSha256": "sha256:33bcbee8e13d8db3ad7fd569395e2485316b952bb5e42cb945168b30f410e7b4"
+    }
+  ]
+}

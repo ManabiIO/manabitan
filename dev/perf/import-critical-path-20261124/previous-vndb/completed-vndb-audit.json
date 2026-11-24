@@ -1,0 +1,290 @@
+[
+  {
+    "directory": "recovered-evidence/media-vndb-45267017516/media-adjacent/vndb",
+    "label": "media-adjacent",
+    "dictionary": "vndb",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "2c604d0f0a252a7a2e223773292507921b19feaf",
+      "study": "0fe2f82a54f5129cf0287a443d6b4918f875df3e",
+      "run": 45267017516
+    },
+    "fixture": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/term-bank-source-pipeline.js"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "85cd54d2f512839394648fa25ee4d436b1e2465f78c477fbabe04bcf0efb6463",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 64,
+        "bytes": 86256,
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        6454.3000000000175,
+        6728.900000000023,
+        6434.199999999953,
+        6364.799999999988,
+        6462.400000000023,
+        6678.900000000023
+      ],
+      "B": [
+        6435.100000000006,
+        6433.800000000047,
+        6373,
+        6490.700000000012,
+        6743.400000000023,
+        6457.400000000023
+      ],
+      "C": [
+        6498.899999999994,
+        6841.200000000012,
+        6393.200000000012,
+        6288.100000000035,
+        6386.300000000047,
+        6642.699999999953
+      ]
+    },
+    "medianByArmMs": {
+      "A": 6458.35000000002,
+      "B": 6446.250000000015,
+      "C": 6446.050000000003
+    },
+    "workerMedianByArmMs": {
+      "A": 6427.350000000006,
+      "B": 6416.550000000003,
+      "C": 6412.89999999998
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          -0.29747610120403056,
+          -4.385560790024757,
+          -0.9511672002728178,
+          1.9780668677731095,
+          4.3482297598415265,
+          -3.316414379613397
+        ],
+        "medianPairedPercentChange": -0.6243216507384242,
+        "equalWorkPercentChange": -0.48589722289651416,
+        "fasterPairs": 4,
+        "worstPercentChange": 4.3482297598415265
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          -0.9817045961622473,
+          -5.955095597263115,
+          -0.31596070825270495,
+          3.221958938311653,
+          5.591657141067197,
+          -2.7895283544331573
+        ],
+        "medianPairedPercentChange": -0.6488326522074761,
+        "equalWorkPercentChange": -0.2996128080632765,
+        "fasterPairs": 4,
+        "worstPercentChange": 5.591657141067197
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          0.69101219342107,
+          1.668920625956516,
+          -0.6372198563915021,
+          -1.2050653594763983,
+          -1.1775810844264711,
+          -0.5420054200552471
+        ],
+        "medianPairedPercentChange": -0.5896126382233746,
+        "equalWorkPercentChange": -0.18684422405964574,
+        "fasterPairs": 4,
+        "worstPercentChange": 1.668920625956516
+      }
+    },
+    "outputDigestVariants": [
+      "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094"
+    ],
+    "storageByteVariants": [
+      609553611
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  },
+  {
+    "directory": "recovered-evidence/native-vndb-45266391385/utf8-loop/vndb",
+    "label": "utf8-loop",
+    "dictionary": "vndb",
+    "status": "complete",
+    "observations": 23,
+    "validCompleteScreen": true,
+    "source": {
+      "baseline": "3d65e403c644b9a5a6be3128d72f9d30050b70e0",
+      "candidate": "cb9f241106ab1529fa21c112f1733849c188511c",
+      "study": "d977051ec6f3c0ee0ed2320d92c9683cffda56ff",
+      "run": 45266391385
+    },
+    "fixture": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true
+    },
+    "browserVersion": [
+      "153.0.8010.12"
+    ],
+    "packageChanges": [
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "controlMemberBytesEqual": true,
+    "controlZipBytesEqual": false,
+    "semanticSignatureSha256": "85cd54d2f512839394648fa25ee4d436b1e2465f78c477fbabe04bcf0efb6463",
+    "media": {
+      "sample": {
+        "mode": "sample",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 64,
+        "bytes": 86256,
+        "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+      },
+      "all": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      }
+    },
+    "allTimedSamplesMs": {
+      "A": [
+        4506,
+        4376.900000000023,
+        4342.400000000023,
+        4407.29999999993,
+        4456,
+        4565.800000000047
+      ],
+      "B": [
+        4528.700000000012,
+        4396.699999999953,
+        4403.099999999977,
+        4432.600000000093,
+        4486.20000000007,
+        4462.800000000047
+      ],
+      "C": [
+        4516.100000000093,
+        4430.099999999977,
+        4395.100000000093,
+        4426.599999999977,
+        4545.300000000047,
+        4350.5
+      ]
+    },
+    "medianByArmMs": {
+      "A": 4431.649999999965,
+      "B": 4447.70000000007,
+      "C": 4428.349999999977
+    },
+    "workerMedianByArmMs": {
+      "A": 4408.799999999988,
+      "B": 4423.599999999977,
+      "C": 4403.699999999953
+    },
+    "comparisons": {
+      "B/A": {
+        "pairedPercentChanges": [
+          0.5037727474481057,
+          0.4523749685834799,
+          1.3978445099473324,
+          0.5740476028444519,
+          0.6777378815096435,
+          -2.2559025800516608
+        ],
+        "medianPairedPercentChange": 0.5389101751462788,
+        "equalWorkPercentChange": 0.20897112671875995,
+        "fasterPairs": 1,
+        "worstPercentChange": 1.3978445099473324
+      },
+      "B/C": {
+        "pairedPercentChanges": [
+          0.2790017935811573,
+          -0.7539333197901454,
+          0.18202088689411866,
+          0.1355442100057891,
+          -1.300244208302559,
+          2.5813124928179887
+        ],
+        "medianPairedPercentChange": 0.15878254844995388,
+        "equalWorkPercentChange": 0.17401935965362103,
+        "fasterPairs": 2,
+        "worstPercentChange": 2.5813124928179887
+      },
+      "C/A": {
+        "pairedPercentChanges": [
+          0.2241455836683004,
+          1.215472137813367,
+          1.2136145910111917,
+          0.4379098314171159,
+          2.004039497308052,
+          -4.715493451312902
+        ],
+        "medianPairedPercentChange": 0.8257622112141538,
+        "equalWorkPercentChange": 0.034891049883567504,
+        "fasterPairs": 1,
+        "worstPercentChange": 2.004039497308052
+      }
+    },
+    "outputDigestVariants": [
+      "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094"
+    ],
+    "storageByteVariants": [
+      609553611,
+      609561803
+    ],
+    "limits": "Six-block exploratory single-runner screen; not promotion or cross-device qualification. Lexical content is sampled, media diagnostics are exhaustive. No peak-memory inference."
+  }
+]

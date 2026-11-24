@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "kind": "retained-local-failure",
+  "status": "failed",
+  "observations": 0,
+  "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+  "candidate": "8b8b45d87afe2dc86b4553fc18b915736bd6113c",
+  "studyCommit": "f0c450dec6cdcdf7c77a9d61a049e7ea468f5440",
+  "reason": "Chromium process-singleton AF_UNIX socket EPERM before first baseline import.",
+  "note": "All local failure files retained byte-for-byte; no timing observation was produced.",
+  "archive": {
+    "path": "local-sidecar-warmup-failure-20261124.tar.xz",
+    "bytes": 40600,
+    "sha256": "215e7d878bd71c98dc3405a52d67ecef0355934846fa5f6744759a7bab3cb091"
+  },
+  "files": [
+    {
+      "path": "local-failure/build-A.log",
+      "bytes": 2280,
+      "sha256": "742974aeaf483503ed947b6cf0c4ecb560353958307370ab4c0941a87b0a6f57"
+    },
+    {
+      "path": "local-failure/build-B.log",
+      "bytes": 2285,
+      "sha256": "6b53cfecfa103474caed79609a615b434c67eb9f48bb177994512edd9531c66e"
+    },
+    {
+      "path": "local-failure/build-C.log",
+      "bytes": 2285,
+      "sha256": "f32e4bc4200a86c56daf2aeab3bfd6050239b2262363c635a862ce227cb494f1"
+    },
+    {
+      "path": "local-failure/identities.json",
+      "bytes": 186683,
+      "sha256": "5d6cb191d97b354890ad82af71f0b12a8f4c64f53cf3b0178b94bf853c9e43b9"
+    },
+    {
+      "path": "local-failure/package-A-entries.json",
+      "bytes": 58955,
+      "sha256": "2d496f9e599b7a634e50c5ef8e916694653db58ef8f0c255fb451f97c542a26d"
+    },
+    {
+      "path": "local-failure/package-B-entries.json",
+      "bytes": 59079,
+      "sha256": "62fd29077fb1086320e4b8bca4f9be017000fd4aa135a998b7e6c80e3eeac74a"
+    },
+    {
+      "path": "local-failure/package-C-entries.json",
+      "bytes": 58955,
+      "sha256": "2d496f9e599b7a634e50c5ef8e916694653db58ef8f0c255fb451f97c542a26d"
+    },
+    {
+      "path": "local-failure/protocol.json",
+      "bytes": 563,
+      "sha256": "bbc19b6f9ed972971e56c71b07e1294befad57dfcacac1b49d633951c4e38f40"
+    },
+    {
+      "path": "local-failure/runner.py",
+      "bytes": 13234,
+      "sha256": "60943dfdf043473bac0664be319060c26044b19d176c8c57789f2d88eec9a96d"
+    },
+    {
+      "path": "local-failure/setup.log",
+      "bytes": 1426,
+      "sha256": "c6ec4826319c65f7c3f8a0b121ba7112aae98ef145944fc1c8965e3f13ea7ccd"
+    },
+    {
+      "path": "local-failure/summary.json",
+      "bytes": 205888,
+      "sha256": "bb2ca4313dbc00b7fb59bfdacd8824e5742c73f45879972f26233880dd0cd7b4"
+    },
+    {
+      "path": "local-failure/warmup-A.log",
+      "bytes": 14619,
+      "sha256": "59fb38966ae052878de11181c9142deb6ce529ffa7c3420f0cd8821d39b623f4"
+    },
+    {
+      "path": "local-failure/warmup-A/run-1.html",
+      "bytes": 40364,
+      "sha256": "bee5a80bf3dfe485ee2e934d24f5f71d73769f08a66321b9a7d24c8c87fbcc2d"
+    },
+    {
+      "path": "local-failure/warmup-A/run-1.json",
+      "bytes": 26793,
+      "sha256": "21c4349cacd06934ff40d6abfa84643cac8f1f2cc4bc4d5d95639f2e911bc9f9"
+    },
+    {
+      "path": "local-failure/workflow.yml",
+      "bytes": 3642,
+      "sha256": "caaaf95dbd44e7eba0b9d3bed51ca1364431406fdce8cd5f41dc1ffc2c792879"
+    }
+  ]
+}

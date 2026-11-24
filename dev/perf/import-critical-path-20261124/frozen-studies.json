@@ -1,0 +1,48 @@
+{
+  "sidecar-worker-hosted-20261124": {
+    "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+    "study": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+    "run": 45462293621,
+    "runner": "dev/perf/import-screen-20261124.py",
+    "browser": "153.0.8010.12",
+    "changed": [
+      "js/dictionary/term-record-import-index-worker-client.js",
+      "js/dictionary/term-record-import-index-worker.js",
+      "js/dictionary/term-record-import-index-writer.js",
+      "js/dictionary/term-record-lookup-index-checksum.js",
+      "js/dictionary/term-record-opfs-store.js"
+    ]
+  },
+  "native-media-hosted-20261124": {
+    "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "candidate": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae",
+    "study": "6a04bbff4c5332d6c86f678455f36545a511abb5",
+    "run": 45466141231,
+    "runner": "dev/perf/import-screen-20261124.py",
+    "browser": "153.0.8010.12",
+    "changed": [
+      "js/dictionary/term-bank-media-projection.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/wasm/term-bank-media-projection.h",
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ]
+  },
+  "native-batch-v-single-20261124": {
+    "baseline": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+    "candidate": "1737c500a0e5cbf0109f1a30b031b1e43cfa0dae",
+    "study": "6a04bbff4c5332d6c86f678455f36545a511abb5",
+    "run": 45466141231,
+    "runner": "dev/perf/import-screen-20261124.py",
+    "browser": "153.0.8010.12",
+    "changed": [
+      "js/dictionary/term-bank-media-projection.js",
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/wasm/term-bank-media-projection.h",
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "kind": "diagnostic-analysis",
+  "diagnosticOnly": true,
+  "run": 45458402415,
+  "note": "Derived tables are separate from the exact raw reports and traces.",
+  "archive": {
+    "path": "baseline-profile-analysis-45458402415.tar.xz",
+    "bytes": 94040,
+    "sha256": "abf0f51cabef139b38f8195036ea6ca4d409dd51ecb1111da10b6ed68479eaf5"
+  },
+  "files": [
+    {
+      "path": "analysis/README.md",
+      "bytes": 4911,
+      "sha256": "089cd056943f8ab0e253ee0ee5ef6e0b45a8358dd467e71b6b932c6f619a3faa"
+    },
+    {
+      "path": "analysis/analyze_traces.py",
+      "bytes": 6626,
+      "sha256": "814d91e746750e620c2e0c2a68e8e024fa40c9a5d07888f254806189a3d92fb2"
+    },
+    {
+      "path": "analysis/artifacts.json",
+      "bytes": 3221,
+      "sha256": "514f3792bf5a0e90101c84db6212b3d53cef40a30146dcb973b1b28511be4662"
+    },
+    {
+      "path": "analysis/jitendex-profile-analysis.json",
+      "bytes": 634866,
+      "sha256": "51c3c5ee9737311ed6c7488675461e1aca40bbef1621f523a767aaac3d23f816"
+    },
+    {
+      "path": "analysis/jmdict-profile-analysis.json",
+      "bytes": 526014,
+      "sha256": "854d6f49b78b3b12f86e15f87f17b25e995cbab04b6c784e2c666f33f20da08c"
+    },
+    {
+      "path": "analysis/runtime-verification.json",
+      "bytes": 430,
+      "sha256": "1676269ad6399b2815d9af0dc41b0644c8405f22d3ad7a140e6d454188c2ca24"
+    },
+    {
+      "path": "analysis/vndb-profile-analysis.json",
+      "bytes": 739487,
+      "sha256": "72ce5f1e759bbd152f48e14b28233478119d3e59e9ce40866255ed16dfb31cf3"
+    }
+  ]
+}

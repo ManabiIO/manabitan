@@ -1,0 +1,78 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/ad5d54ac9137/native-media-projection/dev/perf/native-media-projection-20261124/media-path-parity.json
+   2:1  error  Expected indentation of 4 spaces but found 2   jsonc/indent
+   3:1  error  Expected indentation of 4 spaces but found 2   jsonc/indent
+   4:1  error  Expected indentation of 8 spaces but found 4   jsonc/indent
+   5:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+   6:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+   7:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+   8:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+   9:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  10:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  11:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  12:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  13:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  14:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  15:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  16:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  17:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  18:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  19:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  20:1  error  Expected indentation of 8 spaces but found 4   jsonc/indent
+  21:1  error  Expected indentation of 8 spaces but found 4   jsonc/indent
+  22:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  23:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  24:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  25:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  26:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  27:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  28:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  29:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  30:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  31:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  32:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  33:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  34:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  35:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  36:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  37:1  error  Expected indentation of 8 spaces but found 4   jsonc/indent
+  38:1  error  Expected indentation of 8 spaces but found 4   jsonc/indent
+  39:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  40:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  41:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  42:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  43:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  44:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  45:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  46:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  47:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  48:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  49:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  50:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  51:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  52:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  53:1  error  Expected indentation of 12 spaces but found 6  jsonc/indent
+  54:1  error  Expected indentation of 8 spaces but found 4   jsonc/indent
+  55:1  error  Expected indentation of 4 spaces but found 2   jsonc/indent
+
+✖ 54 problems (54 errors, 0 warnings)
+  54 errors and 0 warnings potentially fixable with the `--fix` option.
+

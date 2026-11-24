@@ -1,0 +1,5 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Checking formatting...
+[warn] dev/perf/native-media-projection-20261124/README.md
+[warn] Code style issues found in the above file. Run Prettier with --write to fix.

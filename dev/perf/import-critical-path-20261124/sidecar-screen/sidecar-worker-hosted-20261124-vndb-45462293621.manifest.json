@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "label": "sidecar-worker-hosted-20261124",
+  "dictionary": "vndb",
+  "status": "complete",
+  "observations": 23,
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "3439c2b17cb4d5245a2cee1177dec33fad2a7829",
+  "studyCommit": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe",
+  "originalArtifact": {
+    "id": 14954037981,
+    "name": "import-screen-sidecar-worker-hosted-20261124-vndb-45462293621-1",
+    "size_in_bytes": 1194018,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14954037981",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14954037981/zip",
+    "expired": false,
+    "created_at": "2026-11-24T19:02:00Z",
+    "expires_at": "2026-12-24T19:01:59Z",
+    "updated_at": "2026-11-24T19:02:00Z",
+    "digest": "sha256:f1891e0ed8b1e1b026c57a394043203c636ce14e27cdf1f4ea3a489c402cd53e",
+    "workflow_run": {
+      "id": 45462293621,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "d6bcc194dbcbe97c1a7844f185db6faf0313bbfe"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "artifactRetentionDays": 30,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45462293621",
+  "archive": {
+    "path": "sidecar-worker-hosted-20261124-vndb-45462293621.tar.xz",
+    "bytes": 142880,
+    "sha256": "ca6a6ebd611d214198b973bd7b381e892065bda16e305d0590f5473d86970c67"
+  },
+  "files": [
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-1-A/run-1.json",
+      "bytes": 153452,
+      "sha256": "87dbccfc69c6c0dd95113f0f1b006f2b9501531e03aa77499674599517c84d8d"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-1-A/summary.json",
+      "bytes": 60140,
+      "sha256": "af2fd24f0dfe95bddd1b6fea2de103062acf9f8eb04bf2d5f8cc920271745f51"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-1-B/run-1.json",
+      "bytes": 152898,
+      "sha256": "a12515bc3f02510ff2ab519f6994843f956d721ebc9cad1fe05b13dddfdfea68"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-1-B/summary.json",
+      "bytes": 60074,
+      "sha256": "a2acf219ec959473f33a981b9ef6b6e021e45de4c46fb2271398a1fb4318e789"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-1-C/run-1.json",
+      "bytes": 152950,
+      "sha256": "28d23d4b3cbbdd74412d9727db99287753c9e3ce9981b116ff8b28805291e89b"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-1-C/summary.json",
+      "bytes": 60193,
+      "sha256": "290cc1777a12949f52ff732ff14f8d9edc519fea3a22696961700e5d48041d23"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-2-A/run-1.json",
+      "bytes": 152825,
+      "sha256": "cd4b7430f65b4913c2207dfad4e4424869f12ae7f703b1bd34f859b988902cf5"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-2-A/summary.json",
+      "bytes": 59996,
+      "sha256": "b10e6abfac7f15ae16474b7af309834ecb46db7d50140be8be7f148a74301958"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-2-B/run-1.json",
+      "bytes": 153262,
+      "sha256": "d1d018e35ad7990461d61a54a60a83207413b3d31e2cc73358b2a9bef3dbd79e"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-2-B/summary.json",
+      "bytes": 60262,
+      "sha256": "bf57387af4b4e50879544ab9468d310f164b4932965a175ee8dd6d1cf05abb36"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-2-C/run-1.json",
+      "bytes": 152966,
+      "sha256": "3bd85ba5ede517049463455365010ce0a4655d990e7e6018454ca026af9a76fd"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-2-C/summary.json",
+      "bytes": 60188,
+      "sha256": "d5e2fec067f8bec4174c35a1f7a595cd2b3a563d5ea0d6974b6f867c6ebc8932"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-3-A/run-1.json",
+      "bytes": 153044,
+      "sha256": "8d8630cb6d342215fe6a953271bc3ceb1eb92042a2be8b58fc3563232a26b04a"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-3-A/summary.json",
+      "bytes": 60152,
+      "sha256": "3d6de077f8e49c4947bcef12dcc0cfdfd5480717eb73dcb895a33447f6269ed0"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-3-B/run-1.json",
+      "bytes": 153001,
+      "sha256": "653e3993c34ab5e1187361744c1dd9cc4a61b5ffab06619ce123bc0913dcc3ea"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-3-B/summary.json",
+      "bytes": 60182,
+      "sha256": "12138e27cc8bd2bda621d3357639c74637e23c43ea3edcbe2b48122908e5a813"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-3-C/run-1.json",
+      "bytes": 153131,
+      "sha256": "b889e08ec052f907e46eb87b19493055d55d50706aa92a55aaa4109b19f81212"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-3-C/summary.json",
+      "bytes": 60276,
+      "sha256": "d99985d9bcf410ec4d01b6f9f1e6186a36c5b262a34a6e55263275398b52e7fe"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-4-A/run-1.json",
+      "bytes": 153031,
+      "sha256": "621f1015e41d0f0749f5c157c98e96dd964923ad10be78a7b05988e602e7562e"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-4-A/summary.json",
+      "bytes": 60201,
+      "sha256": "927192d3a4520e18acf7611c4daa365d9cdb34f11848c4862c04d71dad28fdae"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-4-B/run-1.json",
+      "bytes": 152933,
+      "sha256": "d7723303cedc085c4a5e6e630065374b48dc931622e0d16d032052948e8ff582"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-4-B/summary.json",
+      "bytes": 60117,
+      "sha256": "6000e60b9ae539cc578a5808101cd6291dc32db07dcc0fe884e457df78597378"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-4-C/run-1.json",
+      "bytes": 153122,
+      "sha256": "9cad7ee6aa72f70d449e95152a87beba44054e991b97c802cb7b851a7817e791"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-4-C/summary.json",
+      "bytes": 60177,
+      "sha256": "78ca7d5a0a513ea3b75230103a4628a99270267b6d44371fecbedd436fefc9ff"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-5-A/run-1.json",
+      "bytes": 153004,
+      "sha256": "ee17610612fc23b2525ef52bb4155b359313abcd2476a62d41f4108ad127bcbf"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-5-A/summary.json",
+      "bytes": 60156,
+      "sha256": "18f64b984b87e1d72f533cd8debe2faec3da42f2cc08a07258dc60d336a53fef"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-5-B/run-1.json",
+      "bytes": 153234,
+      "sha256": "d04f6054a370e140972fe3340a7cbb9d7930c407e197a19160fa976ceacb25ae"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-5-B/summary.json",
+      "bytes": 60039,
+      "sha256": "51b51ebd1b1790999d7c2b88a5e64136460adde8c20ce6c47f8bba611fade793"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-5-C/run-1.json",
+      "bytes": 152995,
+      "sha256": "7f96c2e87d52076de8b5394a09d01879373eee7697643c9afbb429fcdf1b4ead"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-5-C/summary.json",
+      "bytes": 60211,
+      "sha256": "f24ea485323634aad6364e2b1faf8fc74db85150417f482f45bb4c464c57cc31"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-6-A/run-1.json",
+      "bytes": 153162,
+      "sha256": "b765d462456ef6de94daf0e034fe03e55f28b49b38af9ee649c065e58f1b590d"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-6-A/summary.json",
+      "bytes": 60215,
+      "sha256": "59c1161fa701dd0f052de0cdb2b3615e65c62d25d5693d41ac1bf18c6a4ca34f"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-6-B/run-1.json",
+      "bytes": 152812,
+      "sha256": "1b3f57f738c94d3dece5d792546e6b0e2f10843f7e570bbd3622b2e18f31a522"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-6-B/summary.json",
+      "bytes": 60054,
+      "sha256": "b5ca453138e656d83e86559c0ee2fba4afb61ac8d5f680500edef91e60d63f24"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-6-C/run-1.json",
+      "bytes": 153610,
+      "sha256": "3608246974d01173f00e53d6e1942ab92f0c41a1517ba611ce2b6e039e1d2dab"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/block-6-C/summary.json",
+      "bytes": 60200,
+      "sha256": "cd5b3aa07f700c9ddcf333c39da290ae18854d245d3aec327d5afc3c064dc5b3"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/diagnostic-A/run-1.json",
+      "bytes": 153548,
+      "sha256": "b45bf79fd027b1ccdeb5ad88b3ed7315d4c0f00dff4d2a407c632e6f45528fcc"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/diagnostic-A/summary.json",
+      "bytes": 60196,
+      "sha256": "ebfeecf765ee1be7d35cfa9905abfa8adb97f3c3380715da3f68cfdec91dfcae"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/diagnostic-B/run-1.json",
+      "bytes": 153033,
+      "sha256": "3fe67eb8aa4502fb44a9d463e3437397d9201ccbd7c4d50af26fb8e2f1487a0d"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/diagnostic-B/summary.json",
+      "bytes": 60052,
+      "sha256": "7c73b75894a76b3abf24669c2c3c73d4a2fef824f2520d84fd8970921033ec9a"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/expected-lookup-signature.json",
+      "bytes": 12889,
+      "sha256": "8d17b25323c33afcb7521cb0bedaa112f470c3103f61181f59709c20258c39d7"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/protocol.json",
+      "bytes": 570,
+      "sha256": "749d790d986a745275f79da42e2306fafbc52406211bc3ef52abccfe8b027b71"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/runner.py",
+      "bytes": 13227,
+      "sha256": "b440adc906a217af6c64514d59d5484453e4642432c193eea616e054391841ff"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/summary.json",
+      "bytes": 297903,
+      "sha256": "a04f588fc58cfc70229af424d4b786ab27439f278af67ab757211aa325d1e70f"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/warmup-A/run-1.json",
+      "bytes": 153305,
+      "sha256": "e090cea8f25c5d28b7d6cbceabcf070343e4331ddf8b1f4904e197d4657c9ad3"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/warmup-A/summary.json",
+      "bytes": 60296,
+      "sha256": "b3b0ceb7759d30e719afda373b8d58674a8a05b0ec34f5aff5c4aa9da05eaf2a"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/warmup-B/run-1.json",
+      "bytes": 152754,
+      "sha256": "295804d8995588cd8fb82112d677030131b69a210881079b49375cb31fd285ac"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/warmup-B/summary.json",
+      "bytes": 60029,
+      "sha256": "e4155aecd94edd6ae37d23cdbf81ef69a8f840b4df742e5c80a31c157f0db968"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/warmup-C/run-1.json",
+      "bytes": 153202,
+      "sha256": "d14bcf35951372c058d50d766b6a84f92c5d51c46b9a39e067a3f6556de434a5"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/warmup-C/summary.json",
+      "bytes": 60139,
+      "sha256": "e41ad52b239bf6bfc0c9091a4ad41df696f21590f5be18066fe9d3fbd3394c9a"
+    },
+    {
+      "path": "sidecar-worker-hosted-20261124/vndb/workflow.yml",
+      "bytes": 1891,
+      "sha256": "2a832ecf102ff35221c99149e27471e3530aad1232576870e15451f29222ae68"
+    }
+  ],
+  "exclusions": "Redundant progress (when a final summary exists), separate identity/package maps already embedded in the final summary, HTML views, and console logs remain in the original GitHub ZIP. Every observation result and raw JSON phase report is retained byte-for-byte."
+}

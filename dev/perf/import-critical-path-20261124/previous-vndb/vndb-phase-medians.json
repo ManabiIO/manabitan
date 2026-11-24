@@ -1,0 +1,189 @@
+{
+  "scope": "Historical source3d65 component diagnostic interval medians. Many intervals overlap across3workers andordered sink; not CPU or additive criticalpath. Currentdevelophas additional mergedchanges.",
+  "studies": [
+    {
+      "label": "media-adjacent",
+      "arms": {
+        "A": {
+          "n": 6,
+          "totalImportMedianMs": 6458.35000000002,
+          "phaseMedianMs": {
+            "parserParseBankMs": 8204.0,
+            "parserBufferSetupMs": 8316.0,
+            "parserResultCopyMs": 2965.8000000003813,
+            "parserResultDeliveryMs": 3189.5,
+            "parserOrderedSinkWaitMs": 5113.450000000419,
+            "parserSourceInflateMs": 1273.149999999965,
+            "parserSourceCrcMs": 1752.6999999999825,
+            "parserLookupIndexEncodeMs": 623.7000000000407,
+            "contentAppendMs": 962.249999999709,
+            "dedupScanMs": 450.60000000018044,
+            "dedupCanonicalScanMs": 123.09999999978754,
+            "dedupExactCompareMs": 283.0500000003085,
+            "contentStoreMs": 441.69999999942956,
+            "contentPackMs": 111.89999999992142,
+            "contentCompressMs": 254.64999999989232,
+            "contentOpfsAppendMs": 17.050000000061118,
+            "contentMetadataMs": 40.20000000012806,
+            "termRecordBuildMs": 0.24999999997089617,
+            "termRecordEncodeMs": 753.1499999998487,
+            "termRecordWriteMs": 649.7000000000262,
+            "termRecordFieldEncodeMs": 573.1000000001222,
+            "termRecordValidationMs": 62.2499999996362,
+            "termLookupIndexEncodeMs": 823.1000000003551
+          }
+        },
+        "B": {
+          "n": 6,
+          "totalImportMedianMs": 6446.250000000015,
+          "phaseMedianMs": {
+            "parserParseBankMs": 8248.0,
+            "parserBufferSetupMs": 8357.0,
+            "parserResultCopyMs": 2863.7000000000407,
+            "parserResultDeliveryMs": 3179.0,
+            "parserOrderedSinkWaitMs": 5704.599999999889,
+            "parserSourceInflateMs": 1260.5000000001455,
+            "parserSourceCrcMs": 1767.5499999998865,
+            "parserLookupIndexEncodeMs": 645.5000000001746,
+            "contentAppendMs": 908.1999999999534,
+            "dedupScanMs": 430.34999999959837,
+            "dedupCanonicalScanMs": 118.55000000010477,
+            "dedupExactCompareMs": 281.49999999976717,
+            "contentStoreMs": 439.15000000078,
+            "contentPackMs": 113.00000000049477,
+            "contentCompressMs": 242.95000000030268,
+            "contentOpfsAppendMs": 17.700000000186265,
+            "contentMetadataMs": 41.54999999990105,
+            "termRecordBuildMs": 0.39999999999417923,
+            "termRecordEncodeMs": 763.7000000000407,
+            "termRecordWriteMs": 669.3999999996158,
+            "termRecordFieldEncodeMs": 558.099999999642,
+            "termRecordValidationMs": 59.65000000009604,
+            "termLookupIndexEncodeMs": 839.0500000003376
+          }
+        },
+        "C": {
+          "n": 6,
+          "totalImportMedianMs": 6446.050000000003,
+          "phaseMedianMs": {
+            "parserParseBankMs": 8084.0,
+            "parserBufferSetupMs": 8218.5,
+            "parserResultCopyMs": 2968.4499999998225,
+            "parserResultDeliveryMs": 3182.5,
+            "parserOrderedSinkWaitMs": 5601.099999999889,
+            "parserSourceInflateMs": 1246.7500000004075,
+            "parserSourceCrcMs": 1775.2500000001746,
+            "parserLookupIndexEncodeMs": 647.7999999998719,
+            "contentAppendMs": 930.3000000003376,
+            "dedupScanMs": 453.5999999999476,
+            "dedupCanonicalScanMs": 145.4499999996333,
+            "dedupExactCompareMs": 280.79999999998836,
+            "contentStoreMs": 426.7500000001746,
+            "contentPackMs": 104.55000000022119,
+            "contentCompressMs": 239.9000000001106,
+            "contentOpfsAppendMs": 19.29999999984284,
+            "contentMetadataMs": 36.59999999993306,
+            "termRecordBuildMs": 0.24999999994179234,
+            "termRecordEncodeMs": 764.8999999999942,
+            "termRecordWriteMs": 679.150000001071,
+            "termRecordFieldEncodeMs": 570.749999999869,
+            "termRecordValidationMs": 70.0999999998312,
+            "termLookupIndexEncodeMs": 830.3499999999476
+          }
+        }
+      }
+    },
+    {
+      "label": "utf8-loop",
+      "arms": {
+        "A": {
+          "n": 6,
+          "totalImportMedianMs": 4431.649999999965,
+          "phaseMedianMs": {
+            "parserParseBankMs": 5210.5,
+            "parserBufferSetupMs": 5261.5,
+            "parserResultCopyMs": 1824.749999999709,
+            "parserResultDeliveryMs": 2427.0,
+            "parserOrderedSinkWaitMs": 4839.750000000058,
+            "parserSourceInflateMs": 973.7000000004191,
+            "parserSourceCrcMs": 1106.1999999993714,
+            "parserLookupIndexEncodeMs": 373.75000000023283,
+            "contentAppendMs": 676.750000000291,
+            "dedupScanMs": 302.0499999996973,
+            "dedupCanonicalScanMs": 92.05000000086147,
+            "dedupExactCompareMs": 175.1499999994994,
+            "contentStoreMs": 334.5999999999185,
+            "contentPackMs": 78.14999999967404,
+            "contentCompressMs": 202.7500000000582,
+            "contentOpfsAppendMs": 11.64999999984866,
+            "contentMetadataMs": 30.949999999895226,
+            "termRecordBuildMs": 0.09999999997671694,
+            "termRecordEncodeMs": 531.7499999998545,
+            "termRecordWriteMs": 561.6999999997497,
+            "termRecordFieldEncodeMs": 389.45000000015716,
+            "termRecordValidationMs": 40.54999999975553,
+            "termLookupIndexEncodeMs": 498.75000000040745
+          }
+        },
+        "B": {
+          "n": 6,
+          "totalImportMedianMs": 4447.70000000007,
+          "phaseMedianMs": {
+            "parserParseBankMs": 5275.0,
+            "parserBufferSetupMs": 5335.5,
+            "parserResultCopyMs": 1832.6999999996042,
+            "parserResultDeliveryMs": 2492.5,
+            "parserOrderedSinkWaitMs": 4676.999999999825,
+            "parserSourceInflateMs": 963.7499999995343,
+            "parserSourceCrcMs": 1113.649999999092,
+            "parserLookupIndexEncodeMs": 374.3500000004715,
+            "contentAppendMs": 656.7999999999302,
+            "dedupScanMs": 293.500000001397,
+            "dedupCanonicalScanMs": 88.90000000054715,
+            "dedupExactCompareMs": 169.8000000003376,
+            "contentStoreMs": 343.6999999990803,
+            "contentPackMs": 87.8499999998603,
+            "contentCompressMs": 197.1000000005006,
+            "contentOpfsAppendMs": 13.64999999999418,
+            "contentMetadataMs": 30.099999999103602,
+            "termRecordBuildMs": 0.19999999995343387,
+            "termRecordEncodeMs": 524.8999999999069,
+            "termRecordWriteMs": 617.3499999999767,
+            "termRecordFieldEncodeMs": 391.8499999999767,
+            "termRecordValidationMs": 40.55000000025029,
+            "termLookupIndexEncodeMs": 513.9500000003609
+          }
+        },
+        "C": {
+          "n": 6,
+          "totalImportMedianMs": 4428.349999999977,
+          "phaseMedianMs": {
+            "parserParseBankMs": 5155.5,
+            "parserBufferSetupMs": 5218.0,
+            "parserResultCopyMs": 1827.8500000004424,
+            "parserResultDeliveryMs": 2458.0,
+            "parserOrderedSinkWaitMs": 5213.4999999993015,
+            "parserSourceInflateMs": 967.6999999994296,
+            "parserSourceCrcMs": 1091.5499999996973,
+            "parserLookupIndexEncodeMs": 391.10000000009313,
+            "contentAppendMs": 667.9000000000815,
+            "dedupScanMs": 298.2500000000582,
+            "dedupCanonicalScanMs": 101.20000000012806,
+            "dedupExactCompareMs": 173.8000000002212,
+            "contentStoreMs": 327.1499999999651,
+            "contentPackMs": 89.39999999990687,
+            "contentCompressMs": 189.20000000076834,
+            "contentOpfsAppendMs": 12.799999999639113,
+            "contentMetadataMs": 26.19999999983702,
+            "termRecordBuildMs": 0.04999999998835847,
+            "termRecordEncodeMs": 534.649999999674,
+            "termRecordWriteMs": 587.0499999998137,
+            "termRecordFieldEncodeMs": 387.5999999997439,
+            "termRecordValidationMs": 40.9499999997206,
+            "termLookupIndexEncodeMs": 523.499999999709
+          }
+        }
+      }
+    }
+  ]
+}

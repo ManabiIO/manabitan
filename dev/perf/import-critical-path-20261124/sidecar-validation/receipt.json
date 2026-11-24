@@ -1,0 +1,155 @@
+{
+  "candidate": {
+    "commit": "e0a0e73cc44e82a03474885d3bf4aee6765b317d",
+    "tree": "adf9df739aab4f1d641d77cb9eee3331e37d9100",
+    "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "branch": "perf/sidecar-worker-checksum-20261124",
+    "worktree": "/workspace/scratch/ad5d54ac9137/manabitan-sidecar",
+    "sourceMutatedAfterFreeze": false
+  },
+  "toolchain": {
+    "node": {
+      "path": "/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin/node",
+      "version": "v22.22.0"
+    },
+    "npm": "10.9.4",
+    "vitest": "4.1.12",
+    "clang": {
+      "path": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang",
+      "version": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)",
+      "requiredLinkerPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin",
+      "requiredLibraryPath": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu"
+    }
+  },
+  "setup": [
+    "node_modules is an uncommitted symlink to the main checkout dependencies.",
+    "Generated extension libraries and ext/legal-npm.html were copied from the same root setup; they are not source changes."
+  ],
+  "attempts": [
+    {
+      "log": "unit.log",
+      "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH npm run test:unit -- --maxWorkers=2",
+      "exitCode": 1,
+      "files": {
+        "passed": 641,
+        "failed": 3,
+        "total": 644
+      },
+      "tests": {
+        "passed": 14483,
+        "failed": 3,
+        "skipped": 68,
+        "total": 14554
+      },
+      "startedUtc": "2026-11-24T13:40:14Z",
+      "durationSeconds": 390.05,
+      "result": "Initial full run failed: two native suites had no configured supported compiler; three Android helper tests reached the unchanged 5-second timeout. No source or test timeout was changed.",
+      "logSha256": "5df4b15b5cb796007a08d4490a5d10c690933df9a4dcb6a9aff353797f3afabe",
+      "logBytes": 196116
+    },
+    {
+      "log": "unit-setup-retry.log",
+      "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/bin/clang npm run test:unit -- test/term-bank-crc.test.js test/term-bank-memory-page.test.js test/android/enable-firefox-remote-debugging.test.js --maxWorkers=1",
+      "exitCode": 1,
+      "files": {
+        "passed": 1,
+        "failed": 2,
+        "total": 3
+      },
+      "tests": {
+        "passed": 22,
+        "failed": 0,
+        "skipped": 21,
+        "total": 43
+      },
+      "startedUtc": "2026-11-24T13:48:29Z",
+      "durationSeconds": 43.02,
+      "result": "All 22 Android helper tests passed with one worker. Native suite setup still failed because the guessed compiler path did not exist.",
+      "logSha256": "c6bad23e481df9318dce55f465320bba51e5c8b631244f734633aa31c359bef1",
+      "logBytes": 61019
+    },
+    {
+      "log": "unit-native-retry.log",
+      "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang npm run test:unit -- test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1",
+      "exitCode": 1,
+      "files": {
+        "passed": 0,
+        "failed": 2,
+        "total": 2
+      },
+      "tests": {
+        "passed": 0,
+        "failed": 0,
+        "skipped": 21,
+        "total": 21
+      },
+      "startedUtc": "2026-11-24T13:49:46Z",
+      "durationSeconds": 0.823,
+      "result": "Native suite setup still failed. The compiler existed, but its wasm-ld-21 linker was not on PATH. The compiler diagnostic was posix_spawn failed: No such file or directory.",
+      "logSha256": "35b70733ef6e48bfea2f3765c0b9c6a3af4fe75fcdb003c31929f89d77714b29",
+      "logBytes": 2316
+    },
+    {
+      "log": "unit-native-pinned-toolchain.log",
+      "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin:$PATH LD_LIBRARY_PATH=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu MANABITAN_CLANG=/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin/clang npm run test:unit -- test/term-bank-crc.test.js test/term-bank-memory-page.test.js --maxWorkers=1",
+      "exitCode": 0,
+      "files": {
+        "passed": 2,
+        "failed": 0,
+        "total": 2
+      },
+      "tests": {
+        "passed": 21,
+        "failed": 0,
+        "skipped": 0,
+        "total": 21
+      },
+      "startedUtc": "2026-11-24T13:52:26Z",
+      "durationSeconds": 3.51,
+      "result": "Both previously blocked native suites passed with the pinned compiler and linker configured.",
+      "logSha256": "451499694211667a35e5033fddb45056a132e89ea66bab811d3c75145de49dda",
+      "logBytes": 1052
+    },
+    {
+      "log": "typescript.log",
+      "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH npm run test:ts",
+      "exitCode": 0,
+      "projects": [
+        "jsconfig.json",
+        "dev/jsconfig.json",
+        "test/jsconfig.typecheck.json",
+        "benches/jsconfig.json"
+      ],
+      "result": "All four TypeScript projects passed.",
+      "logSha256": "b5ada234991d712e07f84ed3a88cb851dc15651d5ab7bc71c9d6a3b3da6d0f36",
+      "logBytes": 2020
+    },
+    {
+      "log": "dry-build.log",
+      "command": "env PATH=/workspace/scratch/ad5d54ac9137/toolchains/node22/node-v22.22.0-linux-x64/bin:$PATH npm run test:build",
+      "exitCode": 0,
+      "expandedCommand": "node ./dev/bin/build.js --dryRun --all",
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "result": "All seven dry-build targets passed; the build restored the manifest.",
+      "logSha256": "8c1200402bef2f97c99d63aa925af6f82cd0f2cfc798a1e64be1c52193b18fbf",
+      "logBytes": 629
+    }
+  ],
+  "aggregateCoverage": {
+    "filesVerifiedAcrossAttempts": 644,
+    "distinctPassingTestsAcrossAttempts": 14507,
+    "remainingSkippedTests": 47,
+    "unresolvedTestFailures": 0,
+    "cleanFullSuitePassInOneInvocation": false,
+    "note": "The initial complete run failed and is retained unchanged. Targeted one-worker retries resolved the Android timeouts and native toolchain setup. This is combined coverage, not a clean full-suite invocation. Hosted CI remains the clean full-suite gate if the performance screen justifies publication."
+  },
+  "performance": "These logs establish correctness and build coverage only. They contain no performance qualification; local browser import was blocked before import and the parent is conducting hosted screens."
+}

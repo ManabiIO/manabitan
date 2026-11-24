@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "kind": "diagnostic-profile",
+  "dictionary": "jmdict",
+  "diagnosticOnly": true,
+  "baseline": "698d685c21618a8e8dbdab7a49a8dcf0d30680eb",
+  "studyCommit": "b64229bd743000c854762d109c7db3e8156e85a2",
+  "originalArtifact": {
+    "id": 14952320941,
+    "name": "critical-path-jmdict-45458402415",
+    "size_in_bytes": 600304,
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952320941",
+    "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14952320941/zip",
+    "expired": false,
+    "created_at": "2026-11-24T18:21:17Z",
+    "expires_at": "2026-12-24T18:21:17Z",
+    "updated_at": "2026-11-24T18:21:17Z",
+    "digest": "sha256:674ed7c30bbda6c2f7837a2505ea8f132ce15877fd5a1f22f7b0ebfd8ceb5165",
+    "workflow_run": {
+      "id": 45458402415,
+      "repository_id": 1165902460,
+      "head_repository_id": 1165902460,
+      "head_branch": "perf/import-critical-path-20261124-ad5",
+      "head_sha": "b64229bd743000c854762d109c7db3e8156e85a2"
+    }
+  },
+  "originalZipSha256Verified": true,
+  "archive": {
+    "path": "baseline-profile-jmdict-45458402415.tar.xz",
+    "bytes": 424924,
+    "sha256": "a76d53c555886f76c9aa5140c45f777309b9178aeba35b0029a67f3e6b3e5f33"
+  },
+  "files": [
+    {
+      "path": "diagnostics/jmdict/run-1.json",
+      "bytes": 151145,
+      "sha256": "1aba194eea4a04e946547a6d4c4f61bb0536546aaba2d5197da8f20adf7d45fb"
+    },
+    {
+      "path": "diagnostics/jmdict/run-1.trace.json",
+      "bytes": 5650143,
+      "sha256": "ab5c2af5e44e6d5fe09d0488da7bae0d45eff6bedda88f79228310101d4b9510"
+    },
+    {
+      "path": "diagnostics/jmdict/source.json",
+      "bytes": 265,
+      "sha256": "9da9cc92319db9ba1c784c7a2c2093457df126def1d56af6e75a884e744282a3"
+    },
+    {
+      "path": "diagnostics/jmdict/summary.json",
+      "bytes": 58837,
+      "sha256": "36a087d0836906ebf8570e9d5a7a787a37ee62268a1f25b0f83a294ccde93fc2"
+    }
+  ]
+}
