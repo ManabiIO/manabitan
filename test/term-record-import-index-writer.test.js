@@ -118,6 +118,50 @@ describe('fresh import index writer', () => {
         expect(timer).toHaveBeenCalled();
     });
 
+    test('does not charge idle time to the bounded writer work budget', async () => {
+        let clock = 0;
+        vi.spyOn(safePerformance, 'now').mockImplementation(() => clock);
+        const timer = vi.spyOn(globalThis, 'setTimeout');
+        const file = memoryFile();
+        const write = file.access.write;
+        file.access.write = (bytes, position) => {
+            clock += 1;
+            return write(bytes, position);
+        };
+        const writer = await writerFor(file);
+        clock += 1000;
+        await writer.write(new Uint8Array([1, 2]));
+        clock += 1000;
+        await writer.seek(0);
+        clock += 1000;
+        await writer.write(new Uint8Array([3]));
+        await writer.close();
+        expect(timer).not.toHaveBeenCalled();
+        expect([...file.bytes]).toEqual([3, 2]);
+        expect(file.calls.flushes).toBe(1);
+        expect(file.calls.closes).toBe(1);
+    });
+
+    test('accumulates short writes across queue drains without starving other tasks', async () => {
+        let clock = 0;
+        vi.spyOn(safePerformance, 'now').mockImplementation(() => clock);
+        const timer = vi.spyOn(globalThis, 'setTimeout');
+        const file = memoryFile();
+        const write = file.access.write;
+        file.access.write = (bytes, position) => {
+            clock += 2;
+            return write(bytes, position);
+        };
+        const writer = await writerFor(file);
+        for (let i = 0; i < 7; ++i) {
+            clock += 100;
+            await writer.write(new Uint8Array([i]));
+            expect(timer).toHaveBeenCalledTimes(Math.floor((i + 1) / 3));
+        }
+        await writer.close();
+        expect([...file.bytes]).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    });
+
     test('uses owned views for complete blocks and coalesces only crossing blocks', async () => {
         const blockBytes = 512 * 1024;
         const first = new Uint8Array(blockBytes + 3).fill(17);
