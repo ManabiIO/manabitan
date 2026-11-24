@@ -84,7 +84,9 @@ export class SyncImportIndexWriter {
         /** @type {Promise<void>|null} */
         this._closePromise = null;
         /** @type {number} */
-        this._workStartedAt = safePerformance.now();
+        this._workStartedAt = 0;
+        /** @type {number} */
+        this._workElapsedMs = 0;
     }
 
     /** @param {number} offset */
@@ -240,6 +242,11 @@ export class SyncImportIndexWriter {
         const promise = this._queue.then(async () => {
             if (this._failure !== null) { throw this._failure; }
             try {
+                // Charge only active writer work. Parser/compressor pauses and
+                // waits for the queue must not force a timer after a tiny write.
+                // Keep the accumulated budget across operations so a chain of
+                // short writes still yields instead of starving other tasks.
+                this._workStartedAt = safePerformance.now();
                 await operation();
                 await this._yieldIfNeeded();
             } catch (error) {
@@ -275,8 +282,12 @@ export class SyncImportIndexWriter {
 
     /** @returns {Promise<void>} */
     async _yieldIfNeeded() {
-        if (safePerformance.now() - this._workStartedAt < WRITE_TIME_BUDGET_MS) { return; }
+        const now = safePerformance.now();
+        this._workElapsedMs += now - this._workStartedAt;
+        this._workStartedAt = now;
+        if (this._workElapsedMs < WRITE_TIME_BUDGET_MS) { return; }
         await new Promise((resolve) => { setTimeout(resolve, 0); });
+        this._workElapsedMs = 0;
         this._workStartedAt = safePerformance.now();
     }
 }
