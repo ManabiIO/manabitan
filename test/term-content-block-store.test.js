@@ -23,6 +23,11 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', () => ({
         envelopeMs: 0,
         wrapped: false,
     })),
+    compressWrappedTermContentZstdBlocks: vi.fn(async (
+        /** @type {Uint32Array} */ lengths,
+        /** @type {(index: number) => Uint8Array} */ createBlock,
+        /** @type {string|null} */ dictName,
+    ) => compressWrappedTermContentZstdBatch(Array.from(lengths, (_, index) => createBlock(index)), dictName)),
     compressWrappedTermContentZstdSpansBatch: vi.fn(async (
         /** @type {Uint8Array} */ source,
         /** @type {Uint32Array} */ offsets,

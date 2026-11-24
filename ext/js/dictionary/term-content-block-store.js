@@ -36,7 +36,7 @@ import {
 } from './term-content-block-envelope.js';
 import {TermContentIntegrityError} from './term-content-opfs-store.js';
 import {hashTermEntryContentBytesPair} from './term-entry-content-hash.js';
-import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
+import {beginCompressWrappedTermContentZstdSpansBatch, compressTermContentZstd, compressWrappedTermContentZstdBatch, compressWrappedTermContentZstdBlocks, compressWrappedTermContentZstdSpansBatch, decompressTermContentZstd} from './zstd-term-content.js';
 import {isZstdResourceError} from './zstd-resource-error.js';
 
 export {wrapCompressedTermContentBlock} from './term-content-block-envelope.js';
@@ -720,6 +720,21 @@ export class TermContentBlockStore {
             sourceLengths,
             compressionDictName,
             force,
+            () => {
+                const plan = planContentSpansIntoSlabs(sourceLengths, this._blockTargetBytes);
+                return {
+                    ...plan,
+                    createBlock: (blockIndex) => packContentSpanBlock(
+                        sourceBytes,
+                        sourceOffsets,
+                        sourceLengths,
+                        plan.blockStartIndexes[blockIndex],
+                        plan.blockStartIndexes[blockIndex + 1],
+                        plan.packedChunkLengths[blockIndex],
+                        blockIndex,
+                    ),
+                };
+            },
         );
     }
 
@@ -1015,24 +1030,38 @@ export class TermContentBlockStore {
      * @param {Uint32Array} sourceLengths
      * @param {string|null} compressionDictName
      * @param {boolean} force
+     * @param {(() => {blockStartIndexes: Uint32Array, packedChunkLengths: Uint32Array, createBlock: (index: number) => Uint8Array})|null} [prepareBlocks]
      * @returns {Promise<{contentOffsets: Float64Array, contentLengths: Uint32Array, contentDictName: string, compressedBytes: number, uncompressedBytes: number, packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number}|null>}
      */
-    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force) {
+    async _tryAppendPacked(pack, sourceLengths, compressionDictName, force, prepareBlocks = null) {
         const compressionExperiments = this._compressionExperiments;
         let uncompressedBytes = 0;
         for (const length of sourceLengths) { uncompressedBytes += length; }
         if (uncompressedBytes === 0 || (!force && uncompressedBytes < this._minInputBytes)) { return null; }
 
         let phaseStart = safePerformance.now();
-        let packed = pack();
+        let packed = prepareBlocks === null ? pack() : prepareBlocks();
         let packMs = safePerformance.now() - phaseStart;
-        let packedChunkLengths = Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength);
+        let packedChunkLengths = 'packedChunks' in packed ?
+            Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength) :
+            packed.packedChunkLengths;
         /** @type {Uint8Array[]} */
         let compressedChunks;
         let envelopeMs = 0;
+        let compressionPackMs = 0;
         phaseStart = safePerformance.now();
         try {
-            const result = await compressWrappedTermContentZstdBatch(packed.packedChunks, compressionDictName, compressionExperiments);
+            const createBlock = 'createBlock' in packed ? packed.createBlock : null;
+            const result = 'packedChunks' in packed ?
+                await compressWrappedTermContentZstdBatch(packed.packedChunks, compressionDictName, compressionExperiments) :
+                await compressWrappedTermContentZstdBlocks(packedChunkLengths, (blockIndex) => {
+                    const packStart = safePerformance.now();
+                    const content = /** @type {(index: number) => Uint8Array} */ (createBlock)(blockIndex);
+                    const elapsed = safePerformance.now() - packStart;
+                    packMs += elapsed;
+                    compressionPackMs += elapsed;
+                    return content;
+                }, compressionDictName, compressionExperiments);
             compressedChunks = result.chunks;
             envelopeMs = result.envelopeMs;
             if (!result.wrapped) {
@@ -1040,7 +1069,7 @@ export class TermContentBlockStore {
                 compressedChunks = compressedChunks.map(wrapCompressedTermContentBlock);
                 envelopeMs += safePerformance.now() - envelopeStart;
             }
-            validateCompressedChunks(compressedChunks, packed.packedChunks.length);
+            validateCompressedChunks(compressedChunks, packedChunkLengths.length);
         } catch (_) {
             // Worker dispatch may detach packed slabs. Repack from stable source
             // bytes before using the synchronous fallback.
@@ -1048,6 +1077,7 @@ export class TermContentBlockStore {
             packed = pack();
             packMs += safePerformance.now() - retryPackStart;
             phaseStart = safePerformance.now();
+            compressionPackMs = 0;
             packedChunkLengths = Uint32Array.from(packed.packedChunks, ({byteLength}) => byteLength);
             compressedChunks = packed.packedChunks.map((content) => {
                 const compressed = compressTermContentZstd(content, compressionDictName);
@@ -1058,7 +1088,7 @@ export class TermContentBlockStore {
             });
             validateCompressedChunks(compressedChunks, packed.packedChunks.length);
         }
-        const compressMs = Math.max(0, safePerformance.now() - phaseStart - envelopeMs);
+        const compressMs = Math.max(0, safePerformance.now() - phaseStart - envelopeMs - compressionPackMs);
         return await this._appendCompressedBlocks(
             packed,
             packedChunkLengths,
@@ -1463,31 +1493,52 @@ function packPlannedContentSpansIntoSlabs(
     }
     const packedChunks = new Array(packedChunkLengths.length);
     for (let blockIndex = 0; blockIndex < packedChunks.length; ++blockIndex) {
-        const output = new Uint8Array(packedChunkLengths[blockIndex]);
-        const startIndex = blockStartIndexes[blockIndex];
-        const endIndex = blockStartIndexes[blockIndex + 1];
-        let outputOffset = 0;
-        let runStart = sourceOffsets[startIndex];
-        let runEnd = runStart;
-        let runOutputOffset = 0;
-        for (let i = startIndex; i < endIndex; ++i) {
-            const sourceOffset = sourceOffsets[i];
-            const length = sourceLengths[i];
-            if (sourceOffset !== runEnd) {
-                if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
-                runStart = sourceOffset;
-                runOutputOffset = outputOffset;
-            }
-            runEnd = sourceOffset + length;
-            outputOffset += length;
-        }
-        if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
-        if (outputOffset !== output.byteLength) {
-            throw new RangeError(`Packed term content fallback block ${blockIndex} has an invalid length`);
-        }
-        packedChunks[blockIndex] = output;
+        packedChunks[blockIndex] = packContentSpanBlock(
+            sourceBytes,
+            sourceOffsets,
+            sourceLengths,
+            blockStartIndexes[blockIndex],
+            blockStartIndexes[blockIndex + 1],
+            packedChunkLengths[blockIndex],
+            blockIndex,
+        );
     }
     return packedChunks;
+}
+
+/**
+ * @param {Uint8Array} sourceBytes
+ * @param {Uint32Array} sourceOffsets
+ * @param {Uint32Array} sourceLengths
+ * @param {number} startIndex
+ * @param {number} endIndex
+ * @param {number} packedLength
+ * @param {number} blockIndex
+ * @returns {Uint8Array}
+ * @throws {RangeError} If the preserved block length is inconsistent.
+ */
+function packContentSpanBlock(sourceBytes, sourceOffsets, sourceLengths, startIndex, endIndex, packedLength, blockIndex) {
+    const output = new Uint8Array(packedLength);
+    let outputOffset = 0;
+    let runStart = sourceOffsets[startIndex];
+    let runEnd = runStart;
+    let runOutputOffset = 0;
+    for (let i = startIndex; i < endIndex; ++i) {
+        const sourceOffset = sourceOffsets[i];
+        const length = sourceLengths[i];
+        if (sourceOffset !== runEnd) {
+            if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
+            runStart = sourceOffset;
+            runOutputOffset = outputOffset;
+        }
+        runEnd = sourceOffset + length;
+        outputOffset += length;
+    }
+    if (runEnd > runStart) { output.set(sourceBytes.subarray(runStart, runEnd), runOutputOffset); }
+    if (outputOffset !== output.byteLength) {
+        throw new RangeError(`Packed term content fallback block ${blockIndex} has an invalid length`);
+    }
+    return output;
 }
 
 /**
