@@ -2860,6 +2860,8 @@ class ParallelTermBankPipelineRun {
         /** @type {number} */
         this._nextWorkerGroupIndex = 0;
         /** @type {number} */
+        this._nextSourceActivationGroupIndex = 0;
+        /** @type {number} */
         this._maxLeadGroups = 1;
         /** @type {number} */
         this._ownedContentBytes = 0;
@@ -3127,11 +3129,17 @@ class ParallelTermBankPipelineRun {
             this._groups.length,
             this._nextSinkGroupIndex + this._maxLeadGroups,
         );
-        for (let groupIndex = this._nextSinkGroupIndex; groupIndex < end; ++groupIndex) {
+        // Long imports can rescan several complete windows of already observed
+        // source promises. Keep the established scheduling for shorter runs.
+        const start = this._groups.length >= this._maxLeadGroups * 4 ?
+            this._nextSourceActivationGroupIndex :
+            this._nextSinkGroupIndex;
+        for (let groupIndex = start; groupIndex < end; ++groupIndex) {
             for (const source of this._groups[groupIndex]) {
                 void loadParallelTermBankSource(source).catch(() => {});
             }
         }
+        this._nextSourceActivationGroupIndex = end;
     }
 }
 
