@@ -2761,7 +2761,7 @@ int32_t encode_term_lookup_index(
     uint32_t reading_posting_count = 0u;
     int32_t last_valid_sequence = -1;
     uint32_t last_valid_sequence_key = 0u;
-    memset(sequence_slots, 0, sequence_slots_count * sizeof(uint16_t));
+    int sequence_slots_ready = 0;
 
     for (uint32_t row = 0u; row < row_count; ++row) {
         const uint32_t expression_key = expression_indexes[row];
@@ -2783,19 +2783,38 @@ int32_t encode_term_lookup_index(
         if (sequence == last_valid_sequence) {
             key = last_valid_sequence_key;
         } else {
-            uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence) & sequence_slot_mask;
-            for (;;) {
-                const uint16_t entry = sequence_slots[slot];
-                if (entry == 0u) {
-                    if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
-                    key = sequence_key_count++;
-                    sequence_keys[key] = sequence;
-                    sequence_slots[slot] = (uint16_t)(key + 1u);
-                    break;
+            if (!sequence_slots_ready && sequence > last_valid_sequence) {
+                // Strict increases cannot repeat an earlier key. Equal values
+                // already use the cache above, even across absent sequences.
+                if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
+                key = sequence_key_count++;
+                sequence_keys[key] = sequence;
+            } else {
+                if (!sequence_slots_ready) {
+                    // The first decrease ends the ordered prefix. Backfill its
+                    // distinct keys once, preserving their first-seen indexes.
+                    memset(sequence_slots, 0, sequence_slots_count * sizeof(uint16_t));
+                    for (uint32_t prior_key = 0u; prior_key < sequence_key_count; ++prior_key) {
+                        uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence_keys[prior_key]) & sequence_slot_mask;
+                        while (sequence_slots[slot] != 0u) { slot = (slot + 1u) & sequence_slot_mask; }
+                        sequence_slots[slot] = (uint16_t)(prior_key + 1u);
+                    }
+                    sequence_slots_ready = 1;
                 }
-                key = (uint32_t)entry - 1u;
-                if (sequence_keys[key] == sequence) { break; }
-                slot = (slot + 1u) & sequence_slot_mask;
+                uint32_t slot = term_lookup_sequence_hash((uint32_t)sequence) & sequence_slot_mask;
+                for (;;) {
+                    const uint16_t entry = sequence_slots[slot];
+                    if (entry == 0u) {
+                        if (sequence_key_count >= TERM_LOOKUP_U16_NULL) { return -3; }
+                        key = sequence_key_count++;
+                        sequence_keys[key] = sequence;
+                        sequence_slots[slot] = (uint16_t)(key + 1u);
+                        break;
+                    }
+                    key = (uint32_t)entry - 1u;
+                    if (sequence_keys[key] == sequence) { break; }
+                    slot = (slot + 1u) & sequence_slot_mask;
+                }
             }
             last_valid_sequence = sequence;
             last_valid_sequence_key = key;
