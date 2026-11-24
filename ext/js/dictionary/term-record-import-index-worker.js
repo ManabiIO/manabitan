@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {serializeImportIndexWorkerError} from './term-record-import-index-worker-client.js';
+/* eslint-disable-next-line @stylistic/semi */
+import {completeTermRecordLookupChunkChecksums} from './term-record-lookup-index-checksum.js'
 
 /** @type {Map<number, import('./term-record-import-index-writer.js').SyncImportIndexWriter>} */
 const writers = new Map();
@@ -30,7 +32,7 @@ self.postMessage({type: 'ready'});
 
 /** @param {unknown} value */
 async function handleRequest(value) {
-    const data = /** @type {{id?: unknown, writerId?: unknown, action?: unknown, fileHandle?: unknown, chunks?: unknown, offset?: unknown, size?: unknown}} */ (value);
+    const data = /** @type {{id?: unknown, writerId?: unknown, action?: unknown, fileHandle?: unknown, chunks?: unknown, checksumChunkIndexes?: unknown, offset?: unknown, size?: unknown}} */ (value);
     const id = typeof data?.id === 'number' ? data.id : -1;
     try {
         const writerId = data.writerId;
@@ -60,9 +62,30 @@ async function handleRequest(value) {
             const writer = writers.get(writerId);
             if (typeof writer === 'undefined') { throw new Error('Import index writer is unavailable'); }
             switch (data.action) {
-                case 'writeChunks':
-                    await writer.writeChunks(/** @type {Uint8Array[]} */ (data.chunks));
+                /* eslint-disable @stylistic/semi */
+                case 'writeChunks': {
+                    const chunks = /** @type {Uint8Array[]} */ (data.chunks)
+                    const checksumChunkIndexes = /** @type {number[]|undefined} */ (data.checksumChunkIndexes)
+                    // Preparation belongs to the ordered writer operation, so
+                    // its failure is sticky and close/abort must join it.
+                    await writer.writeChunks(
+                        chunks,
+                        typeof checksumChunkIndexes === 'undefined' ?
+                            null :
+                            () => {
+                                let previousIndex = -1
+                                for (const index of checksumChunkIndexes) {
+                                    if (!Number.isInteger(index) || index <= previousIndex || index >= chunks.length) {
+                                        throw new RangeError('Invalid import index checksum chunk index')
+                                    }
+                                    completeTermRecordLookupChunkChecksums(chunks[index])
+                                    previousIndex = index
+                                }
+                            },
+                    )
                     break;
+                }
+                /* eslint-enable @stylistic/semi */
                 case 'seek':
                     await writer.seek(/** @type {number} */ (data.offset));
                     break;

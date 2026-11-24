@@ -11,7 +11,7 @@ import {
     serializeImportIndexWorkerError,
 } from '../ext/js/dictionary/term-record-import-index-worker-client.js'
 
-/** @typedef {{id: number, writerId: number, action: string, chunks?: Uint8Array[]}} Request */
+/** @typedef {{id: number, writerId: number, action: string, chunks?: Uint8Array[], checksumChunkIndexes?: number[]}} Request */
 /** @typedef {{data?: unknown, message?: string}} PortEvent */
 
 class Port {
@@ -92,6 +92,26 @@ afterEach(() => {
 })
 
 describe('import index worker client boundary', () => {
+    test('validates deferred checksum indices before transferring privately owned chunks', async () => {
+        const {port, writer} = await openedWriter()
+        const owned = Uint8Array.of(1, 2, 3)
+        for (const indexes of [[-1], [1], [0, 0], [0.5], [Number.NaN]]) {
+            await expect(writer.writeOwnedChunks([owned], indexes)).rejects.toBeInstanceOf(RangeError)
+        }
+        expect(owned.byteLength).toBe(3)
+        expect(port.requests).toHaveLength(1)
+        const indexes = [0]
+        const writing = writer.writeOwnedChunks([owned], indexes)
+        indexes[0] = 1
+        expect(owned.byteLength).toBe(0)
+        expect(port.requests[1].checksumChunkIndexes).toEqual([0])
+        port.reply(port.requests[1])
+        await writing
+        const closing = writer.close()
+        port.reply(port.requests[2])
+        await closing
+    })
+
     test('falls back before readiness without sending a file handle', async () => {
         /** @type {Port[]} */
         const created = []

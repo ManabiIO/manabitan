@@ -17,6 +17,8 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+/* eslint-disable-next-line @stylistic/semi */
+import {completeTermRecordLookupChunkChecksums, LOOKUP_INDEX_CHUNK_HEADER_BYTES} from './term-record-lookup-index-checksum.js'
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -90,7 +92,6 @@ const SHARD_LOAD_CONCURRENCY = 3;
 const LOOKUP_INDEX_MAGIC_TEXT = 'MBTIDX11';
 const LOOKUP_INDEX_MAGIC_BYTES = 8;
 const LOOKUP_INDEX_FILE_HEADER_BYTES = 40;
-const LOOKUP_INDEX_CHUNK_HEADER_BYTES = 40;
 const LOOKUP_INDEX_RECORD_FIELDS_BYTES = 12;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY = 1;
 const LOOKUP_INDEX_RECORD_FIELDS_FORMAT_COMPACT = 2;
@@ -862,6 +863,10 @@ export class TermRecordOpfsStore {
         this._importSessionActive = false;
         /** @type {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>|null} */
         this._importIndexWorkerPromise = null;
+        /* eslint-disable @stylistic/semi */
+        /** @type {WeakSet<Uint8Array>} */
+        this._deferredLookupIndexChecksumChunks = new WeakSet()
+        /* eslint-enable @stylistic/semi */
         /** @type {DenseIdRecordStore} */
         this._recordsById = new DenseIdRecordStore();
         /** @type {Map<string, number[]>} */
@@ -5815,6 +5820,9 @@ export class TermRecordOpfsStore {
                 lookupIndexBytes,
                 recordFields,
                 recordFieldsFormat,
+                this._importSessionActive &&
+                this._rawTermBankSourceBytes !== null &&
+                this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES,
             );
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
@@ -5899,6 +5907,7 @@ export class TermRecordOpfsStore {
      * @param {Uint8Array} payload
      * @param {Uint8Array|null} recordFields
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
+     * @param {boolean} [deferChecksums=false]
      * @returns {Uint8Array}
      * @throws {Error} If the authoritative fields do not match the declared record count.
      */
@@ -5909,6 +5918,7 @@ export class TermRecordOpfsStore {
         payload,
         recordFields,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+        deferChecksums = false,
     ) {
         if (!(recordFields instanceof Uint8Array)) {
             throw new Error('Invalid authoritative term-record fields');
@@ -5931,12 +5941,23 @@ export class TermRecordOpfsStore {
         writeSafeU64Le(view, 8, contentOffsetBase);
         view.setUint32(16, payload.byteLength, true);
         view.setUint32(20, base.byteLength, true);
-        view.setUint32(24, hashLookupIndexBytes(base), true);
-        view.setUint32(28, hashLookupIndexBytes(derived), true);
-        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        /* eslint-disable @stylistic/semi */
+        if (!deferChecksums) {
+            view.setUint32(24, hashLookupIndexBytes(base), true)
+            view.setUint32(28, hashLookupIndexBytes(derived), true)
+            view.setUint32(32, hashLookupIndexBytes(recordFields), true)
+        }
+        /* eslint-enable @stylistic/semi */
         view.setUint32(36, recordFieldsFormat, true);
         output.set(payload, LOOKUP_INDEX_CHUNK_HEADER_BYTES);
         output.set(recordFields, LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength);
+        /* eslint-disable @stylistic/semi */
+        if (deferChecksums) {
+            // Only the private snapshot can be marked. Parser views and caller
+            // inputs keep their established ownership and mutation semantics.
+            this._deferredLookupIndexChecksumChunks.add(output)
+        }
+        /* eslint-enable @stylistic/semi */
         return output;
     }
 
@@ -6029,6 +6050,15 @@ export class TermRecordOpfsStore {
             return;
         }
         const chunks = state.pendingLookupIndexChunks;
+        /* eslint-disable @stylistic/semi */
+        /** @type {number[]} */
+        const checksumChunkIndexes = []
+        for (let i = 0; i < chunks.length; ++i) {
+            if (this._deferredLookupIndexChecksumChunks.has(chunks[i])) {
+                checksumChunkIndexes.push(i)
+            }
+        }
+        /* eslint-enable @stylistic/semi */
         const recordCount = state.pendingLookupIndexRecordCount;
         const byteLength = state.pendingLookupIndexBytes;
         state.pendingLookupIndexChunks = [];
@@ -6052,16 +6082,23 @@ export class TermRecordOpfsStore {
                     state.lookupIndexWritable = await this._createLookupIndexWritable(state);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
+                /* eslint-disable @stylistic/semi */
                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
                     // _createLookupIndexChunk owns each complete buffer. The
                     // existing queue budget remains charged until this worker
                     // acknowledges the write, including any periodic flush.
-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
-                } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
-                    await state.lookupIndexWritable.writeChunks(chunks);
+                    await state.lookupIndexWritable.writeOwnedChunks(chunks, checksumChunkIndexes)
                 } else {
-                    await state.lookupIndexWritable.write(new Blob(chunks));
+                    for (const index of checksumChunkIndexes) {
+                        completeTermRecordLookupChunkChecksums(chunks[index])
+                    }
+                    await (
+                        state.lookupIndexWritable instanceof SyncImportIndexWriter ?
+                            state.lookupIndexWritable.writeChunks(chunks) :
+                            state.lookupIndexWritable.write(new Blob(chunks))
+                    )
                 }
+                /* eslint-enable @stylistic/semi */
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;
                 state.lookupIndexChunkCount += chunks.length;

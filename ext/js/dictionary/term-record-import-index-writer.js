@@ -113,8 +113,9 @@ export class SyncImportIndexWriter {
     /**
      * The caller retains the immutable chunk bytes until the write settles.
      * @param {Uint8Array[]} chunks
+     * @param {(() => void)|null} [prepare=null] Completes private bytes within the ordered write operation.
      */
-    async writeChunks(chunks) {
+    async writeChunks(chunks, prepare = null) {
         if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
         const ownedChunks = [...chunks];
         let total = 0;
@@ -125,6 +126,8 @@ export class SyncImportIndexWriter {
         }
         await this._enqueue(async () => {
             this._validateWriteLength(total);
+            /* eslint-disable-next-line @stylistic/semi */
+            if (prepare !== null) { prepare() }
             if (ownedChunks.length === 1) {
                 await this._writeBytes(ownedChunks[0]);
                 return;

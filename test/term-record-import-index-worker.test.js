@@ -95,11 +95,11 @@ function digest(bytes) { return createHash('sha256').update(bytes).digest('hex')
 /**
  * @param {ReturnType<typeof fixture>} file
  * @param {Uint8Array} bytes
+ * @param {TermRecordOpfsStore} [store]
  * @returns {{store: TermRecordOpfsStore, state: ReturnType<TermRecordOpfsStore['_createShardState']>}}
  */
-function storeWithPendingIndex(file, bytes) {
+function storeWithPendingIndex(file, bytes, store = new TermRecordOpfsStore()) {
     vi.stubGlobal('Worker', NodeWorker);
-    const store = new TermRecordOpfsStore();
     store.setRawTermBankSourceBytes(1024 * 1024 * 1024);
     const name = store._getShardSegmentFileName('Worker test', 'raw', 0);
     const state = store._createShardState(name, file.handle, 0);
@@ -113,10 +113,50 @@ function storeWithPendingIndex(file, bytes) {
     return {store, state};
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * @param {number} format
+ * @returns {Promise<{store: TermRecordOpfsStore, expected: Uint8Array, deferred: Uint8Array}>}
+ */
+async function lookupChecksumFixture(format) {
+    const store = new TermRecordOpfsStore()
+    const encoder = new TextEncoder()
+    const count = 256
+    const base = 0x100000000 + 128
+    const encoded = await store._encodeArtifactChunkRecords({
+        dictionary: 'Checksum worker test',
+        rowCount: count,
+        expressionBytesList: Array.from({length: count}, (_, i) => encoder.encode(`日本語-expression-${i}`)),
+        readingBytesList: Array.from({length: count}, (_, i) => encoder.encode(`にほんご-reading-${i}`)),
+        readingEqualsExpressionList: Uint8Array.from({length: count}, (_, i) => i % 2),
+        scoreList: format === 3 ? new Float64Array(count).fill(0.25) : new Int32Array(count).fill(-7),
+        sequenceList: format === 3 ?
+            Float64Array.from({length: count}, (_, i) => 0x100000000 + i) :
+            Int32Array.from({length: count}, (_, i) => i),
+    }, Float64Array.from({length: count}, (_, i) => base + i * 32), new Uint32Array(count).fill(format === 1 ? 65535 : 32))
+    expect(encoded.recordFieldsFormat).toBe(format)
+    const create = (/** @type {boolean} */ deferred) => store._createLookupIndexChunk(
+        1,
+        count,
+        encoded.contentOffsetBase,
+        encoded.lookupIndexBytes,
+        encoded.recordFields,
+        encoded.recordFieldsFormat,
+        deferred,
+    )
+    const expected = create(false)
+    const deferred = create(true)
+    // The serialized snapshots must no longer depend on parser or caller data.
+    encoded.lookupIndexBytes.fill(0)
+    encoded.recordFields.fill(0)
+    return {store, expected, deferred}
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * Native file-handle methods are not enumerable data in a worker message.
  * @param {ReturnType<typeof fixture>} file
- * @returns {{flush: import('vitest').Mock, close: import('vitest').Mock}}
+ * @returns {{write: import('vitest').Mock, flush: import('vitest').Mock, close: import('vitest').Mock}}
  */
 function localFallback(file) {
     const access = {
@@ -145,6 +185,102 @@ afterEach(async () => {
 });
 
 describe('production import index worker', () => {
+    /* eslint-disable @stylistic/semi */
+    test.each([1, 2, 3])('completes exact integrity bytes for record-field format %s inside the worker', async (format) => {
+        const file = fixture({shortWrite: 4093})
+        const {client, writer} = await openWorker(file)
+        const {expected, deferred} = await lookupChecksumFixture(format)
+        expect([...deferred.subarray(24, 36)]).toEqual([...new Uint8Array(12)])
+        const writing = writer.writeOwnedChunks([deferred], [0])
+        expect(deferred.byteLength).toBe(0)
+        await writing
+        await writer.close()
+        expect(digest(readFileSync(file.filePath))).toBe(digest(expected))
+        expect(Atomics.load(file.counters, 3)).toBe(1)
+        client.dispose()
+    })
+
+    test('retains checksum preparation failure across queued writes and close without publishing bytes', async () => {
+        const file = fixture()
+        const {client, writer} = await openWorker(file)
+        const invalid = new Uint8Array(40)
+        const writing = writer.writeOwnedChunks([invalid], [0])
+        const following = writer.write(Uint8Array.of(1)).catch((error) => error)
+        const failure = await writing.catch((error) => error)
+        expect(failure).toMatchObject({message: 'Invalid persisted term lookup index container'})
+        expect(await following).toBe(failure)
+        await expect(writer.close()).rejects.toBe(failure)
+        expect(Atomics.load(file.counters, 1)).toBe(0)
+        expect(Atomics.load(file.counters, 2)).toBe(0)
+        expect(Atomics.load(file.counters, 3)).toBe(1)
+        expect(readFileSync(file.filePath)).toHaveLength(0)
+        client.dispose()
+    })
+
+    test('completes deferred headers locally when a sidecar uses the synchronous fallback', async () => {
+        const file = fixture()
+        const local = localFallback(file)
+        const {store, expected, deferred} = await lookupChecksumFixture(2)
+        const {state} = storeWithPendingIndex(file, deferred, store)
+        await store._flushPendingLookupIndexChunks(state)
+        expect(state.lookupIndexWritable).toBeInstanceOf(SyncImportIndexWriter)
+        expect(deferred).toEqual(expected)
+        expect(local.write.mock.calls.at(-1)?.[0]).toEqual(expected)
+        await store.endImportSession()
+        expect(workers).toHaveLength(0)
+    })
+
+    test('checksums only marked chunks in a mixed store batch before its final header is published', async () => {
+        const file = fixture()
+        const {client, writer} = await openWorker(file)
+        const {store, expected, deferred} = await lookupChecksumFixture(2)
+        const first = new Uint8Array(expected)
+        const firstDigest = digest(first)
+        new DataView(expected.buffer).setUint32(0, 257, true)
+        new DataView(deferred.buffer).setUint32(0, 257, true)
+        const {state} = storeWithPendingIndex(file, deferred, store)
+        state.pendingLookupIndexChunks.unshift(first)
+        state.pendingLookupIndexBytes += first.byteLength
+        state.pendingLookupIndexRecordCount = 512
+        state.lookupIndexFileHandle = file.handle
+        state.lookupIndexWritable = writer
+        Reflect.set(store, '_importIndexWorkerPromise', Promise.resolve(client))
+        await writer.write(new Uint8Array(40))
+        await store.endImportSession()
+        const stored = readFileSync(file.filePath)
+        expect(digest(stored.subarray(40, 40 + expected.byteLength))).toBe(firstDigest)
+        expect(digest(stored.subarray(40 + expected.byteLength))).toBe(digest(expected))
+        const view = new DataView(stored.buffer, stored.byteOffset)
+        expect(view.getUint32(16, true)).toBe(2)
+        expect(view.getUint32(20, true)).toBe(512)
+        expect(deferred.byteLength).toBe(0)
+        expect(workers[0].terminated).toBe(true)
+    })
+
+    test('completes deferred headers before an asynchronous Blob fallback write', async () => {
+        const file = fixture()
+        /** @type {Uint8Array[]} */
+        const writes = []
+        const writable = {
+            write: vi.fn(async (/** @type {Uint8Array|Blob} */ data) => {
+                writes.push(data instanceof Blob ? new Uint8Array(await data.arrayBuffer()) : Uint8Array.from(data))
+            }),
+            seek: vi.fn(),
+            truncate: vi.fn(),
+            close: vi.fn(),
+        }
+        Object.defineProperty(file.handle, 'createWritable', {value: async () => writable})
+        const {store, expected, deferred} = await lookupChecksumFixture(2)
+        const {state} = storeWithPendingIndex(file, deferred, store)
+        await store._flushPendingLookupIndexChunks(state)
+        expect(state.lookupIndexWritable).toBe(writable)
+        expect(writes.at(-1)).toEqual(expected)
+        await store.endImportSession()
+        expect(writable.close).toHaveBeenCalledOnce()
+        expect(workers).toHaveLength(0)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('preserves positional byte parity across owned transfer, short writes and periodic/final flush', async () => {
         const file = fixture({shortWrite: 200_003});
         const {client, writer} = await openWorker(file);

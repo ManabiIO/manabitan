@@ -297,15 +297,26 @@ export class WorkerImportIndexWriter {
         await this.writeOwnedChunks(copies);
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * The store transfers only fresh complete index chunks produced by its
      * private encoder. Parser views and ordinary caller buffers never enter
      * this method. Its promise settles after the worker stops using the bytes.
      * @param {Uint8Array[]} chunks
+     * @param {number[]} [checksumChunkIndexes=[]] Private serialized lookup chunks requiring their integrity header.
      */
-    async writeOwnedChunks(chunks) {
+    async writeOwnedChunks(chunks, checksumChunkIndexes = []) {
         if (!Array.isArray(chunks)) { throw new TypeError('Import index chunks must be an array'); }
+        if (!Array.isArray(checksumChunkIndexes)) { throw new TypeError('Import index checksum chunks must be an array') }
         const owned = [...chunks];
+        const checksumIndexes = [...checksumChunkIndexes]
+        let previousIndex = -1
+        for (const index of checksumIndexes) {
+            if (!Number.isInteger(index) || index <= previousIndex || index >= owned.length) {
+                throw new RangeError('Invalid import index checksum chunk index')
+            }
+            previousIndex = index
+        }
         /** @type {Set<ArrayBuffer>} */
         const buffers = new Set();
         let length = 0;
@@ -321,8 +332,12 @@ export class WorkerImportIndexWriter {
             length += chunk.byteLength;
             if (!Number.isSafeInteger(length)) { throw new RangeError('Import index chunk length overflow'); }
         }
-        await this._enqueue('writeChunks', {chunks: owned}, [...buffers]);
+        await this._enqueue('writeChunks', {
+            chunks: owned,
+            ...(checksumIndexes.length === 0 ? {} : {checksumChunkIndexes: checksumIndexes}),
+        }, [...buffers])
     }
+    /* eslint-enable @stylistic/semi */
 
     /** @returns {Promise<void>} */
     async close() {
