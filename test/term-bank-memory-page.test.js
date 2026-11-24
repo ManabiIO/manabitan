@@ -54,6 +54,8 @@ uint32_t growth_pages(void) { return mock_growth_pages; }
         '-Wl,--export=growth_calls',
         '-Wl,--export=growth_pages',
         '-Wl,--strip-all',
+        '-I',
+        path.resolve('ext/js/dictionary/wasm'),
         '-x',
         'c',
         '-',

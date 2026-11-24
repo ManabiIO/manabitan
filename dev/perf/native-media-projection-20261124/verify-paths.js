@@ -176,7 +176,7 @@ for (const id of ids) {
         report.orderedPathSha256 = digest.digest('hex')
         reports.push(report)
         await mkdir(path.dirname(destination), {recursive: true})
-        await writeFile(destination, JSON.stringify({scope: 'Complete native projection versus original JSON collector; not a timing benchmark', reports}, null, 2) + '\n')
+        await writeFile(destination, JSON.stringify({scope: 'Complete native projection versus original JSON collector; not a timing benchmark', reports}, null, 4) + '\n')
     } finally { await reader.close() }
 }
 process.stdout.write(JSON.stringify({complete: true, reports}) + '\n')

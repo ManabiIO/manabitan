@@ -10,11 +10,11 @@ The private scratch lease is available only during a single complete chunk callb
 
 The [replay](verify-paths.js) verifies the locked archive size and SHA-256, checks each decoded bank's ZIP CRC, and mirrors the production lazy-source partitioning. It processes groups serially. For every chunk, a shallow clone without the private lease runs the unchanged full-glossary collector. Native output must match that reference for the complete copied chunk, every ordered image-path list, and hashes of all live glossary/content/key/lookup buffers before and after scratch reuse.
 
-| Fixture | Term rows | Banks / groups | Native projected rows | Fallback rows | Unique image paths |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| JMdict | 528,299 | 53 / 12 | 17 | 0 | 0 |
-| Jitendex | 436,555 | 219 / 22 | 339 | 0 | 236 |
-| VNDB | 6,648,310 | 665 / 170 | 146,725 | 0 | 146,570 |
+| Fixture  | Term rows | Banks / groups | Native projected rows | Fallback rows | Unique image paths |
+| -------- | --------: | -------------: | --------------------: | ------------: | -----------------: |
+| JMdict   |   528,299 |        53 / 12 |                    17 |             0 |                  0 |
+| Jitendex |   436,555 |       219 / 22 |                   339 |             0 |                236 |
+| VNDB     | 6,648,310 |      665 / 170 |               146,725 |             0 |            146,570 |
 
 All **7,613,164** rows pass. Some media hints contain no supported image; those rows correctly produce empty lists. Repeated references across parser-group boundaries account for VNDB's larger ordered-path count. The [machine-readable report](media-path-parity.json) retains fixture identities, activation counts, complete ordered-path digests, and parity results.
 
