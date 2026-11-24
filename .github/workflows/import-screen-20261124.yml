@@ -11,17 +11,29 @@ permissions:
 
 jobs:
   screen:
-    name: Frozen import screen (${{ matrix.dictionary }})
+    name: Frozen import screen (${{ matrix.label }}, ${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [jmdict, jitendex, vndb]
+        include:
+          - dictionary: jmdict
+            baseline: bbccabd520972cc351a65d9f545bd5369b6e9747
+            label: native-media-hosted-20261124
+          - dictionary: jitendex
+            baseline: bbccabd520972cc351a65d9f545bd5369b6e9747
+            label: native-media-hosted-20261124
+          - dictionary: vndb
+            baseline: bbccabd520972cc351a65d9f545bd5369b6e9747
+            label: native-media-hosted-20261124
+          - dictionary: vndb
+            baseline: fb71a03f4611bcfa71e135693bebd1fe778153bf
+            label: native-batch-v-single-20261124
     env:
-      PERF_BASELINE: bbccabd520972cc351a65d9f545bd5369b6e9747
-      PERF_CANDIDATE: 3439c2b17cb4d5245a2cee1177dec33fad2a7829
-      PERF_LABEL: sidecar-worker-hosted-20261124
+      PERF_BASELINE: ${{ matrix.baseline }}
+      PERF_CANDIDATE: 1737c500a0e5cbf0109f1a30b031b1e43cfa0dae
+      PERF_LABEL: ${{ matrix.label }}
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
