@@ -56,6 +56,8 @@ const MID_CAPABILITY_PARALLEL_SOURCE_WORKER_COUNT = 3;
 const LOW_MEMORY_DEVICE_GIB = 4;
 const PLAIN_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 4;
 const MEDIA_PARALLEL_SOURCE_PIPELINE_GROUPS_PER_WORKER = 3;
+// The cursor is qualified for long queues. Shorter queues keep their existing policy.
+const MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION = 4;
 const LAZY_PARALLEL_SOURCE_TARGET_GROUP_BYTES = 24 * 1024 * 1024;
 const PARALLEL_WORKER_READY_TIMEOUT_MS = 60_000;
 const PARALLEL_WORKER_PARSE_TIMEOUT_MS = 300_000;
@@ -2859,8 +2861,8 @@ class ParallelTermBankPipelineRun {
         this._nextSinkGroupIndex = 0;
         /** @type {number} */
         this._nextWorkerGroupIndex = 0;
-        /** @type {number} */
-        this._nextSourceActivationGroupIndex = 0;
+        /** @type {number|null} Null means each activation scans the whole read window. */
+        this._nextSourceActivationGroupIndex = null;
         /** @type {number} */
         this._maxLeadGroups = 1;
         /** @type {number} */
@@ -2896,6 +2898,9 @@ class ParallelTermBankPipelineRun {
     async _runPipeline(workers) {
         this._createSlots();
         this._maxLeadGroups = Math.max(1, workers.length * this._pipelineGroupsPerWorker);
+        if (this._groups.length >= this._maxLeadGroups * MIN_WINDOWS_FOR_INCREMENTAL_SOURCE_ACTIVATION) {
+            this._nextSourceActivationGroupIndex = 0;
+        }
         this._activateLeadSources();
         this._workerLoops = workers.map((worker) => this._runWorkerLoop(worker));
         try {
@@ -3129,17 +3134,15 @@ class ParallelTermBankPipelineRun {
             this._groups.length,
             this._nextSinkGroupIndex + this._maxLeadGroups,
         );
-        // Long imports can rescan several complete windows of already observed
-        // source promises. Keep the established scheduling for shorter runs.
-        const start = this._groups.length >= this._maxLeadGroups * 4 ?
-            this._nextSourceActivationGroupIndex :
-            this._nextSinkGroupIndex;
+        const start = this._nextSourceActivationGroupIndex ?? this._nextSinkGroupIndex;
         for (let groupIndex = start; groupIndex < end; ++groupIndex) {
             for (const source of this._groups[groupIndex]) {
                 void loadParallelTermBankSource(source).catch(() => {});
             }
         }
-        this._nextSourceActivationGroupIndex = end;
+        if (this._nextSourceActivationGroupIndex !== null) {
+            this._nextSourceActivationGroupIndex = end;
+        }
     }
 }
 
