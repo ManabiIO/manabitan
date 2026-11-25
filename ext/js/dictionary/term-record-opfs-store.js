@@ -3077,6 +3077,52 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * The index loader bounds and validates each window before publishing it.
+     * Yield between reads so other lookup work can run in this worker.
+     * @param {FileSystemFileHandle} fileHandle
+     * @param {File} file
+     * @returns {Promise<{read: (start: number, end: number) => Promise<Uint8Array>, close: () => void}|null>}
+     */
+    async _openRangedLookupIndexReader(fileHandle, file) {
+        const {scheduler} = /** @type {{scheduler?: {yield: () => Promise<void>}}} */ (globalThis);
+        if (typeof scheduler?.yield !== 'function' || typeof fileHandle.createSyncAccessHandle !== 'function') { return null; }
+        /** @type {FileSystemSyncAccessHandle|null} */
+        let access = null;
+        const close = () => {
+            const handle = access;
+            access = null;
+            try { handle?.close(); } catch (_) { /* Use the snapshot if direct reads are unavailable. */ }
+        };
+        try {
+            const readOnlyHandle = /** @type {{createSyncAccessHandle: (options: {mode: 'read-only'}) => Promise<FileSystemSyncAccessHandle>}} */ (fileHandle);
+            access = await readOnlyHandle.createSyncAccessHandle({mode: 'read-only'});
+            if (access.getSize() !== file.size) {
+                close();
+                return null;
+            }
+        } catch (_) {
+            close();
+            return null;
+        }
+        return {
+            read: async (start, end) => {
+                if (access !== null && end - start <= LOOKUP_INDEX_READ_AHEAD_BYTES) {
+                    await scheduler.yield();
+                    if (access !== null) {
+                        try {
+                            const bytes = new Uint8Array(end - start);
+                            if (access.read(bytes, {at: start}) === bytes.byteLength) { return bytes; }
+                        } catch (_) { /* Retry the range using the file snapshot. */ }
+                        close();
+                    }
+                }
+                return await this._readFileRange(file, start, end);
+            },
+            close,
+        };
+    }
+
+    /**
      * @param {number} id
      * @returns {PersistentRecordChunk|null}
      */
@@ -3845,8 +3891,12 @@ export class TermRecordOpfsStore {
         }
         /** @type {PersistentRecordChunk[]} */
         const recordChunks = [];
+        /** @type {Awaited<ReturnType<TermRecordOpfsStore['_openRangedLookupIndexReader']>>} */
+        let rangedReader = null;
         try {
             for (const state of states) {
+                rangedReader?.close();
+                rangedReader = null;
                 let indexFileHandle;
                 try {
                     indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
@@ -3883,10 +3933,14 @@ export class TermRecordOpfsStore {
                 // descriptor before prefetching a bounded window of chunks.
                 const shouldReadWholeIndex = indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES;
                 const initialReadLength = shouldReadWholeIndex ? indexFile.size : LOOKUP_INDEX_FILE_HEADER_BYTES;
+                if (!shouldReadWholeIndex) { rangedReader = await this._openRangedLookupIndexReader(indexFileHandle, indexFile); }
+                const readIndexBytes = (/** @type {number} */ start, /** @type {number} */ end) => {
+                    return rangedReader?.read(start, end) ?? this._readFileRange(indexFile, start, end);
+                };
                 const [indexRead, recordHeader] = await Promise.all([
                     shouldReadWholeIndex ?
                         this._readWholeLookupIndex(indexFileHandle, indexFile) :
-                        this._readFileRange(indexFile, 0, initialReadLength),
+                        readIndexBytes(0, initialReadLength),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
                 if (indexRead.byteLength !== initialReadLength) {
@@ -3900,7 +3954,7 @@ export class TermRecordOpfsStore {
                 const readIndexRange = async (/** @type {number} */ start, /** @type {number} */ end, /** @type {number} */ chunkStart) => {
                     if (start < windowStart || end > windowStart + window.byteLength) {
                         const readEnd = Math.min(indexFile.size, Math.max(chunkStart + LOOKUP_INDEX_READ_AHEAD_BYTES, end));
-                        const bytes = await this._readFileRange(indexFile, chunkStart, readEnd);
+                        const bytes = await readIndexBytes(chunkStart, readEnd);
                         if (bytes.byteLength !== readEnd - chunkStart) {
                             throw new PersistentLookupIndexError('transient', `Short lookup index read for ${state.fileName}`);
                         }
@@ -4108,6 +4162,8 @@ export class TermRecordOpfsStore {
                 );
             }
             return false;
+        } finally {
+            rangedReader?.close();
         }
         if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
         recordChunks.sort((a, b) => a.firstId - b.firstId);

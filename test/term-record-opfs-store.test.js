@@ -4343,6 +4343,47 @@ void 0,
         }
     });
 
+    test('reuses a read-only handle for bounded windows and closes it before snapshot fallback', async () => {
+        const store = new TermRecordOpfsStore();
+        const size = 33 * 1024 * 1024;
+        const file = /** @type {File} */ (/** @type {unknown} */ ({size}));
+        const scheduler = {yield: vi.fn(async () => {})};
+        const close = vi.fn();
+        const read = vi.fn((/** @type {Uint8Array} */ bytes) => {
+            bytes[0] = 17;
+            return bytes.byteLength;
+        });
+        const open = vi.fn(async () => ({getSize: () => size, read, close}));
+        const handle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({createSyncAccessHandle: open}));
+        const snapshot = new Uint8Array([42]);
+        const readSnapshot = vi.spyOn(store, '_readFileRange').mockResolvedValue(snapshot);
+
+        vi.stubGlobal('scheduler', scheduler);
+        try {
+            const reader = await store._openRangedLookupIndexReader(handle, file);
+            if (reader === null) { throw new Error('Expected the read-only reader'); }
+            const first = await reader.read(40, 44);
+            expect(first).toEqual(new Uint8Array([17, 0, 0, 0]));
+            expect(read).toHaveBeenCalledExactlyOnceWith(first, {at: 40});
+            expect(scheduler.yield).toHaveBeenCalledTimes(1);
+            expect(readSnapshot).not.toHaveBeenCalled();
+
+            expect(await reader.read(0, 17 * 1024 * 1024)).toBe(snapshot);
+            expect(close).not.toHaveBeenCalled();
+
+            read.mockReturnValueOnce(3);
+            expect(await reader.read(44, 48)).toBe(snapshot);
+            expect(await reader.read(48, 52)).toBe(snapshot);
+            reader.close();
+            expect(close).toHaveBeenCalledTimes(1);
+            expect(read).toHaveBeenCalledTimes(2);
+            expect(scheduler.yield).toHaveBeenCalledTimes(2);
+            expect(open).toHaveBeenCalledExactlyOnceWith({mode: 'read-only'});
+        } finally {
+            vi.unstubAllGlobals();
+        }
+    });
+
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Persistent metadata lookup';
