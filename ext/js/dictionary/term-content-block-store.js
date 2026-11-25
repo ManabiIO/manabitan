@@ -1348,6 +1348,12 @@ function createTermContentReferenceSlabs(
             if (contentIndex === nextBlockStart) {
                 ++blockIndex;
                 nextBlockStart = packed.blockStartIndexes[blockIndex + 1];
+                if (
+                    packed.blockStartIndexes[blockIndex] !== contentIndex ||
+                    !Number.isInteger(nextBlockStart) || nextBlockStart <= contentIndex || nextBlockStart > sourceLengths.length
+                ) {
+                    throw new RangeError('Invalid compact term-content block reference');
+                }
                 sourceOffset = 0;
                 blockUncompressedLength = packedChunkLengths[blockIndex];
                 // Validate the invariant fields once per compressed block.

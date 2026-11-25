@@ -381,6 +381,26 @@ describe('TermContentBlockStore', () => {
         expect(append).not.toHaveBeenCalled();
     });
 
+    test.each([
+        {name: 'empty', starts: []},
+        {name: 'missing first end', starts: [0]},
+        {name: 'nonzero first start', starts: [1, 2, 4]},
+        {name: 'repeated first start', starts: [0, 0, 4]},
+        {name: 'missing later end', starts: [0, 2]},
+        {name: 'backward later end', starts: [0, 2, 1]},
+        {name: 'repeated later end', starts: [0, 2, 2]},
+        {name: 'out-of-bounds later end', starts: [0, 2, 5]},
+    ])('rejects $name block boundaries before appending content', async ({starts}) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 20});
+        const append = vi.spyOn(contentStore, '_appendBatchInternal');
+        await expect(blockStore._tryAppendPacked(() => ({
+            packedChunks: [Uint8Array.of(1, 2), Uint8Array.of(3, 4)],
+            blockStartIndexes: Uint32Array.from(starts),
+        }), Uint32Array.of(1, 1, 1, 1), null, true)).rejects.toThrow(new RangeError('Invalid compact term-content block reference'));
+        expect(append).not.toHaveBeenCalled();
+    });
+
     test.each([-1, 0.5, Number.NaN, Number.MAX_SAFE_INTEGER - 2])('rejects an invalid later block prefix (%s)', async (laterOffset) => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 1, minInputBytes: 0});
