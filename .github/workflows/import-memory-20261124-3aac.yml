@@ -1,0 +1,65 @@
+name: Current native media memory qualification 20261125
+on:
+  push:
+    branches: [research/import-memory-20261125-2754]
+    paths:
+      - '.github/workflows/import-memory-20261124-3aac.yml'
+      - 'dev/perf/import-memory-20261124-3aac/**'
+permissions:
+  contents: read
+jobs:
+  memory:
+    name: Current media ${{ matrix.dictionary }} memory ${{ matrix.replication }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [vndb, jitendex]
+        replication: [1, 2]
+    env:
+      MEMORY_BASELINE: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+      MEMORY_BASELINE_TREE: 99d23f16e973c7ae9feba77ca3643d1c27dfb93d
+      MEMORY_CANDIDATE: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+      MEMORY_CANDIDATE_TREE: 093a0be94fcf336ab5a0113b80fae7481855935a
+      MEMORY_DICTIONARY: ${{ matrix.dictionary }}
+      MEMORY_REPLICATION: ${{ matrix.replication }}
+      MEMORY_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch exact source revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$MEMORY_BASELINE" "$MEMORY_CANDIDATE"
+          test "$(git rev-parse "${MEMORY_BASELINE}^{tree}")" = "$MEMORY_BASELINE_TREE"
+          test "$(git rev-parse "${MEMORY_CANDIDATE}^{tree}")" = "$MEMORY_CANDIDATE_TREE"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Validate frozen observer and protocol
+        run: python3 -m unittest discover -s dev/perf/import-memory-20261124-3aac -p 'test_*.py' -v
+      - name: Acquire every fixed observation once
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-memory-20261124-3aac/run_memory.py \
+            --baseline "$MEMORY_BASELINE" --candidate "$MEMORY_CANDIDATE" \
+            --dictionary "$MEMORY_DICTIONARY" --replication "$MEMORY_REPLICATION" \
+            --expected-differences "$MEMORY_DIFFERENCES" \
+            --output "$RUNNER_TEMP/import-memory-2754"
+      - name: Retain scans markers packages and failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: current-media-memory-${{ matrix.dictionary }}-rep${{ matrix.replication }}-2754
+          path: ${{ runner.temp }}/import-memory-2754
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
