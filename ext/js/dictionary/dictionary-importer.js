@@ -1992,17 +1992,17 @@ export class DictionaryImporter {
                             }
                             /** @type {import('dictionary-importer').ImportRequirement[]} */
                             const prefetchRequirements = [];
-                            // Source reads have now populated any reusable archive cache.
-                            // Drain its media after term sinks release borrowed WASM views.
-                            const deferCachedArchiveImages = rawZipPayloadReader?.supportsCachedBatchReads() === true;
+                            // Let the speculative packer handle images it already reads.
+                            // Drain reusable archive bytes after term sinks release borrowed views.
+                            const deferArchiveImages = sourceMediaPreparation !== null || rawZipPayloadReader?.supportsCachedBatchReads() === true;
                             for (const requirement of notAddedRequirements) {
-                                if (mediaPrefetchRemainingEntries === 0 && !deferCachedArchiveImages) {
+                                if (mediaPrefetchRemainingEntries === 0 && !deferArchiveImages) {
                                     deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
                                 const file = fileMap.get(requirement.source.path);
                                 if (
-                                    deferCachedArchiveImages &&
+                                    deferArchiveImages &&
                                     (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
