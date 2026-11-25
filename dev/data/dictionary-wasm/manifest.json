@@ -4,7 +4,7 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "795b2d9e7203fd253e6209ff00f2a16d9a0520b9807e33b4e841498b1eb489d6",
+    "sourceDigest": "1f39de8ae2f3b0a6857d8f7a1ee4625e068372ac359cda1661ddfe22d00b1619",
     "sourceFileCount": 14,
     "targets": [
         {
@@ -46,6 +46,7 @@
                 "-Wl,--export=wasm_get_last_metadata_reuse_count",
                 "-Wl,--export=wasm_get_last_metadata_reuse_bytes",
                 "-Wl,--export=inflate_and_join_term_banks",
+                "-Wl,--export=verify_term_bank_source_crcs",
                 "-Wl,--export=inflate_zip_media_batch",
                 "-Wl,--export=parse_term_bank",
                 "-Wl,--export=parse_term_bank_with_media_hints",
@@ -59,7 +60,7 @@
                 "-Wl,--export=encode_term_content_token_binary_dedup",
                 "-Wl,--strip-all"
             ],
-            "sha256": "d5a00ed71bb1ed0bffb2f158398a3acb93d5fa968981a53e1f199856a3e42a89"
+            "sha256": "d3ea9d7c95b433ea33412e0b62d544447fe68030818d8770d71dfbfaf2d50e47"
         }
     ]
 }

@@ -26,6 +26,7 @@ const MAX_PACKED_MEDIA_BYTES = 256 * 1024 * 1024;
 const ZIP_LOCAL_HEADER_BYTES = 30;
 const MAX_RELATIVE_RANGE_OVERHEAD = 1 / 8;
 
+/* eslint-disable @stylistic/semi */
 /**
  * Admit only a dense run of referenced, exact-name ZIP images. The output
  * keeps the request order and points into an immutable span of the original
@@ -38,17 +39,56 @@ const MAX_RELATIVE_RANGE_OVERHEAD = 1 / 8;
  * @returns {Promise<{blob: Blob, records: import('./dictionary-generation-media-store.js').SourceMediaRange[], readMs: number, validationMs: number, rangeReadCount: number, rangeReadBytes: number, compressedBytes: number, uncompressedBytes: number}|null>}
  */
 export async function preparePackedSourceZipMedia(archive, requirements, fileMap, reader, checkCancellation) {
-    if (requirements.length < MIN_SOURCE_ZIP_IMAGE_COUNT || archive.size <= MIN_ARCHIVE_BYTES || !reader.supportsBatchReads()) { return null; }
+    return await preparePackedSourceZipMediaFiles(archive, requirements, fileMap, reader, checkCancellation)
+}
+
+/**
+ * Pack entries already selected from the ZIP directory without constructing a
+ * second path map or a requirement/source wrapper pair for every image.
+ * The common packer still checks duplicate paths, metadata and every ZIP CRC.
+ * @param {Blob} archive
+ * @param {import('@zip.js/zip.js').Entry[]} files
+ * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
+ * @param {() => void} checkCancellation
+ * @returns {ReturnType<typeof preparePackedSourceZipMedia>}
+ */
+export async function preparePackedSourceZipMediaEntries(archive, files, reader, checkCancellation) {
+    return await preparePackedSourceZipMediaFiles(archive, files, null, reader, checkCancellation)
+}
+
+/* eslint-enable @stylistic/semi */
+
+/**
+ * @param {Blob} archive
+ * @param {Array<{type: string, source: {path: string}}>|import('@zip.js/zip.js').Entry[]} sources
+ * @param {import('dictionary-importer').ArchiveFileMap|null} fileMap
+ * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
+ * @param {() => void} checkCancellation
+ * @returns {Promise<{blob: Blob, records: import('./dictionary-generation-media-store.js').SourceMediaRange[], readMs: number, validationMs: number, rangeReadCount: number, rangeReadBytes: number, compressedBytes: number, uncompressedBytes: number}|null>}
+ */
+async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reader, checkCancellation) {
+    // eslint-disable-next-line @stylistic/semi
+    if (sources.length < MIN_SOURCE_ZIP_IMAGE_COUNT || archive.size <= MIN_ARCHIVE_BYTES || !reader.supportsBatchReads()) { return null }
 
     const records = [];
     const paths = new Set();
     let rangeStart = Infinity;
     let rangeEndLowerBound = 0;
     let compressedTotal = 0;
-    for (const requirement of requirements) {
-        if (requirement.type !== 'image' && requirement.type !== 'structured-content-image') { return null; }
-        const {path} = requirement.source;
-        const entry = fileMap.get(path);
+    for (const source of sources) {
+        /* eslint-disable @stylistic/semi */
+        let entry
+        let path
+        if (fileMap === null) {
+            entry = /** @type {import('@zip.js/zip.js').Entry} */ (source)
+            path = entry.filename
+        } else {
+            const requirement = /** @type {{type: string, source: {path: string}}} */ (source)
+            if (requirement.type !== 'image' && requirement.type !== 'structured-content-image' && requirement.type !== 'image-reference') { return null }
+            path = requirement.source.path
+            entry = fileMap.get(path)
+        }
+        /* eslint-enable @stylistic/semi */
         const mediaType = getImageMediaTypeFromFileName(path);
         if (
             mediaType === null ||

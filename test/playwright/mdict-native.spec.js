@@ -254,6 +254,52 @@ test('MDX audio-only resources survive import, reopening and a real media-link c
     await reopened.close();
 });
 
+test('MDX disabled audio elements omit audio resources but preserve audio fallback and video media', async ({page, context, extensionId}) => {
+    test.setTimeout(180_000);
+    const title = 'MDict disabled audio element regression';
+    const extensionBaseUrl = `chrome-extension://${extensionId}`;
+    const audioBytes = Buffer.from([1, 2, 3, 4]);
+    const videoBytes = Buffer.from([5, 6, 7, 8]);
+    const mdx = makeMdictFixture([{
+        key: 'Media',
+        value: '<div><audio src="audio/disabled.wav">audio fallback</audio><video src="video/clip.mp4">video fallback</video></div>',
+    }], {title});
+    const mdd = makeMdictFixture([
+        {key: '\\audio\\disabled.wav', value: audioBytes},
+        {key: '\\video\\clip.mp4', value: videoBytes},
+    ], {mdd: true, recordBlockSize: 11, keysPerBlock: 1});
+    await importFiles(page, extensionBaseUrl, [
+        {name: 'disabled-audio.mdx', mimeType: 'application/octet-stream', buffer: Buffer.from(mdx.bytes)},
+        {name: 'disabled-audio.mdd', mimeType: 'application/octet-stream', buffer: Buffer.from(mdd.bytes)},
+    ], title);
+
+    expect(await api(page, 'getMedia', {targets: [{dictionary: title, path: 'mdict-media/audio/disabled.wav'}]})).toStrictEqual([]);
+    await assertStoredMedia(page, title, 'mdict-media/video/clip.mp4', videoBytes);
+
+    const reopened = await context.newPage();
+    await page.close();
+    await reopened.goto(`${extensionBaseUrl}/search.html`);
+    await expect(reopened.locator('html')).toHaveAttribute('data-loaded', 'true', {timeout: 30_000});
+    await api(reopened, 'modifySettings', {
+        targets: [{
+            action: 'set',
+            path: 'general.enableWanakana',
+            value: false,
+            scope: 'profile',
+            optionsContext: {depth: 0, url: `${extensionBaseUrl}/search.html`},
+        }],
+        source: 'mdx-disabled-audio-element-test',
+    });
+    await reopened.locator('#search-textbox').fill('Media');
+    await reopened.locator('#search-button').click();
+    const audioFallback = reopened.locator('#dictionary-entries [data-sc-tag="audio"]');
+    const videoFallback = reopened.locator('#dictionary-entries [data-sc-tag="video"]');
+    await expect(audioFallback).toHaveText('audio fallback', {timeout: 30_000});
+    await expect(audioFallback).not.toHaveAttribute('href');
+    await expect(videoFallback).toHaveText('video fallback');
+    await reopened.close();
+});
+
 test('MDX stylesheet media preserves special filename identities after import and reopening', async ({page, context, extensionId}) => {
     test.setTimeout(180_000);
     const title = 'MDict CSS filename regression';

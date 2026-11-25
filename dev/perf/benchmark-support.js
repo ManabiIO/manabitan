@@ -139,10 +139,11 @@ function validateExperimentReceipts(debug, importFlags) {
  * @param {import('./dictionary-fixtures.js').DictionaryFixture} fixture
  * @param {boolean} traceEnabled
  * @param {unknown} importFlags
+ * @param {'all'|'sample'} [mediaCheck]
  * @returns {{totalImportMs: number, automationObservedImportMs: number, workerImportMs: number|null, stepTimingSummary: unknown, step4Breakdown: unknown, importDebug: Record<string, unknown>, validation: Record<string, unknown>}}
  * @throws {Error}
  */
-export function extractImportResult(value, dictionaryId, fixture, traceEnabled, importFlags) {
+export function extractImportResult(value, dictionaryId, fixture, traceEnabled, importFlags, mediaCheck = 'all') {
     const report = asRecord(value);
     if (report?.status !== 'success' || report.skippedVerification !== false) {
         throw new Error('Import report failed or skipped verification');
@@ -152,6 +153,7 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     benchmark.productionImportDefaults !== true || benchmark.traceEnabled !== traceEnabled ||
     benchmark.authoritativeTiming !== !traceEnabled ||
     benchmark.phaseProfiling !== false || benchmark.phaseScreenshots !== false || benchmark.processSampling !== false ||
+    (benchmark.mediaCheck ?? 'all') !== mediaCheck ||
     !isDeepStrictEqual(benchmark.importFlags, importFlags)) {
         throw new Error('Import report benchmark configuration does not match the requested run');
     }
@@ -188,10 +190,52 @@ export function extractImportResult(value, dictionaryId, fixture, traceEnabled, 
     }
     validateExperimentReceipts(debug, importFlags);
     const validation = asRecord(benchmark.validation);
+    const probeTerms = Array.isArray(validation?.probeTerms) ? validation.probeTerms : [];
+    const probeSet = new Set(probeTerms);
     if (validation?.title !== fixture.expectedTitle || validation.revision !== fixture.revision ||
     validation.termRows !== fixture.termRows || validation.contentReadable !== true ||
-    typeof validation.probeCount !== 'number' || validation.probeCount < 12) {
+    validation.probeCount !== 12 || probeTerms.length !== 12 || probeSet.size !== 12 ||
+    probeTerms.some((term) => typeof term !== 'string' || term.length === 0)) {
         throw new Error(`Missing or invalid post-import validation for ${fixture.expectedTitle}`);
+    }
+    const restart = asRecord(validation.restart);
+    if (restart?.title !== fixture.expectedTitle || restart.revision !== fixture.revision ||
+    restart.termRows !== fixture.termRows || restart.contentReadable !== true || restart.probeCount !== probeTerms.length) {
+        throw new Error(`Missing or invalid restart validation for ${fixture.expectedTitle}`);
+    }
+    const lookup = asRecord(validation.lookup);
+    const observations = Array.isArray(lookup?.observations) ? lookup.observations.map(asRecord) : [];
+    const observationKeys = new Set();
+    const invalidLookup = observations.length !== 72 || observations.some((row) => {
+        if (row === null || typeof row.pass !== 'number' || !Number.isSafeInteger(row.pass) || row.pass < 0 || row.pass >= 6 ||
+        typeof row.term !== 'string' || !probeSet.has(row.term) ||
+        row.originalTextLength !== row.term.length || row.hasExactHeadwordMatch !== true ||
+        optionalMetric(row.elapsedMs) === null || typeof row.results !== 'number' || !Number.isSafeInteger(row.results) || row.results <= 0 ||
+        typeof row.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(row.sha256)) { return true; }
+        const key = JSON.stringify([row.pass, row.term]);
+        if (observationKeys.has(key)) { return true; }
+        observationKeys.add(key);
+        return false;
+    });
+    if (invalidLookup) {
+        throw new Error(`Missing or invalid storage/lookup observations for ${fixture.expectedTitle}`);
+    }
+    if (typeof fixture.mediaFiles === 'number') {
+        const media = asRecord(validation.media);
+        const expectedFiles = mediaCheck === 'all' ? fixture.mediaFiles : Math.min(fixture.mediaFiles, 64);
+        if (media?.mode !== mediaCheck || media.totalFiles !== fixture.mediaFiles || media.totalBytes !== fixture.mediaBytes ||
+        media.files !== expectedFiles || restart?.mediaFiles !== fixture.mediaFiles ||
+        typeof media.bytes !== 'number' || !Number.isSafeInteger(media.bytes) || media.bytes < 0 || media.bytes > Number(fixture.mediaBytes) ||
+        (expectedFiles > 0 && media.bytes === 0) ||
+        (mediaCheck === 'all' && media.bytes !== fixture.mediaBytes) ||
+        typeof media.sha256 !== 'string' || !/^[a-f0-9]{64}$/.test(media.sha256) ||
+        (expectedFiles === 0 && (media.bytes !== 0 || media.sha256 !== createHash('sha256').digest('hex')))) {
+            throw new Error(`Missing or invalid persisted media validation for ${fixture.expectedTitle}`);
+        }
+        const storage = asRecord(validation.storage);
+        if (typeof storage?.bytes !== 'number' || !Number.isSafeInteger(storage.bytes) || storage.bytes <= 0) {
+            throw new Error(`Missing or invalid storage/lookup observations for ${fixture.expectedTitle}`);
+        }
     }
     const localPhases = Array.isArray(debug.localPhaseTimings) ? debug.localPhaseTimings.map(asRecord) : [];
     const workerPhases = localPhases.filter((entry) => entry?.phase === 'worker-import-dictionary');

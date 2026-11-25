@@ -19,6 +19,7 @@ import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
 
 const MAX_WRITE_BYTES = 512 * 1024;
+const MAX_UNFLUSHED_BYTES = 16 * 1024 * 1024;
 const WRITE_TIME_BUDGET_MS = 6;
 
 /**
@@ -34,9 +35,10 @@ const WRITE_TIME_BUDGET_MS = 6;
  * Unsupported acquisition permits the established asynchronous writer fallback.
  * Once acquired, every failure belongs to this writer and must fail import.
  * @param {{createSyncAccessHandle?: () => Promise<SyncAccessHandle>}} fileHandle
+ * @param {boolean} [periodicFlush=false] Only the dedicated I/O worker opts in.
  * @returns {Promise<SyncImportIndexWriter|null>}
  */
-export async function openSyncImportIndexWriter(fileHandle) {
+export async function openSyncImportIndexWriter(fileHandle, periodicFlush = false) {
     if (typeof fileHandle.createSyncAccessHandle !== 'function') {
         return null;
     }
@@ -53,17 +55,24 @@ export async function openSyncImportIndexWriter(fileHandle) {
         }
         throw error;
     }
-    return new SyncImportIndexWriter(access);
+    return new SyncImportIndexWriter(access, periodicFlush);
 }
 
 /** Ordered, bounded writes to an unpublished generation-bound index sidecar. */
 export class SyncImportIndexWriter {
-    /** @param {SyncAccessHandle} access */
-    constructor(access) {
+    /**
+     * @param {SyncAccessHandle} access
+     * @param {boolean} [periodicFlush=false]
+     */
+    constructor(access, periodicFlush = false) {
         /** @type {SyncAccessHandle} */
         this._access = access;
         /** @type {number} */
         this._position = 0;
+        /** @type {number} */
+        this._unflushedBytes = 0;
+        /** @type {boolean} */
+        this._periodicFlush = periodicFlush;
         /** @type {boolean} */
         this._closing = false;
         /** @type {boolean} */
@@ -75,7 +84,13 @@ export class SyncImportIndexWriter {
         /** @type {Promise<void>|null} */
         this._closePromise = null;
         /** @type {number} */
-        this._workStartedAt = safePerformance.now();
+        this._workStartedAt = 0;
+        /** @type {number} */
+        this._workElapsedMs = 0;
+        /** @type {MessageChannel|null} */
+        this._yieldChannel = null;
+        /** @type {(() => void)|null} */
+        this._pendingYield = null;
     }
 
     /** @param {number} offset */
@@ -182,6 +197,7 @@ export class SyncImportIndexWriter {
         this._aborted = abort;
         this._closePromise = (async () => {
             await this._queue;
+            this._closeYieldChannel();
             const errors = this._failure === null ? [] : [this._failure];
             if (!abort && errors.length === 0) {
                 try {
@@ -231,6 +247,11 @@ export class SyncImportIndexWriter {
         const promise = this._queue.then(async () => {
             if (this._failure !== null) { throw this._failure; }
             try {
+                // Charge only active writer work. Parser/compressor pauses and
+                // waits for the queue must not force a timer after a tiny write.
+                // Keep the accumulated budget across operations so a chain of
+                // short writes still yields instead of starving other tasks.
+                this._workStartedAt = safePerformance.now();
                 await operation();
                 await this._yieldIfNeeded();
             } catch (error) {
@@ -253,14 +274,64 @@ export class SyncImportIndexWriter {
             }
             offset += written;
             this._position += written;
+            this._unflushedBytes += written;
+            if (this._periodicFlush && !this._aborted && this._unflushedBytes >= MAX_UNFLUSHED_BYTES) {
+                // Persist bounded batches while parser workers can still make progress.
+                // Successful close must also flush the final index header and tail.
+                this._access.flush();
+                this._unflushedBytes = 0;
+            }
             if (offset < bytes.byteLength) { await this._yieldIfNeeded(); }
         }
     }
 
     /** @returns {Promise<void>} */
     async _yieldIfNeeded() {
-        if (safePerformance.now() - this._workStartedAt < WRITE_TIME_BUDGET_MS) { return; }
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
+        const now = safePerformance.now();
+        this._workElapsedMs += now - this._workStartedAt;
+        this._workStartedAt = now;
+        if (this._workElapsedMs < WRITE_TIME_BUDGET_MS) { return; }
+        await this._yieldToNextTask();
+        this._workElapsedMs = 0;
         this._workStartedAt = safePerformance.now();
+    }
+
+    /** @returns {Promise<void>} */
+    _yieldToNextTask() {
+        if (typeof MessageChannel !== 'function') {
+            return new Promise((resolve) => { setTimeout(resolve, 0); });
+        }
+        if (this._yieldChannel === null) {
+            try {
+                this._yieldChannel = new MessageChannel();
+                this._yieldChannel.port1.onmessage = () => {
+                    const resolve = this._pendingYield;
+                    this._pendingYield = null;
+                    resolve?.();
+                };
+            } catch {
+                this._yieldChannel = null;
+                return new Promise((resolve) => { setTimeout(resolve, 0); });
+            }
+        }
+        return new Promise((resolve) => {
+            this._pendingYield = resolve;
+            try {
+                this._yieldChannel?.port2.postMessage(0);
+            } catch {
+                this._pendingYield = null;
+                this._closeYieldChannel();
+                setTimeout(resolve, 0);
+            }
+        });
+    }
+
+    /** Closes the per-writer task-yield channel after queued writes settle. */
+    _closeYieldChannel() {
+        if (this._yieldChannel === null) { return; }
+        this._yieldChannel.port1.onmessage = null;
+        this._yieldChannel.port1.close();
+        this._yieldChannel.port2.close();
+        this._yieldChannel = null;
     }
 }
