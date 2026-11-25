@@ -1,0 +1,108 @@
+{
+  "implementationCommit": "82e75ca22da425d9b61ed8d8811a2b00bce32068",
+  "publishedEquivalentCommit": "8994b3ff5be56f1b7d972760c0d9684a262a7296",
+  "implementationTree": "509a77c356300268d464ecc1fb18d3d0d91a67a5",
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "pullRequest": "https://github.com/ManabiIO/manabitan/pull/908",
+  "sourcePullRequests": [
+    {
+      "number": 875,
+      "head": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "nativeBlockMatches": true,
+      "nativeBlockSha256": "8385342e3fc69f3c97549824999789fd690e860b978aaf3371cddefaadb54bf1"
+    },
+    {
+      "number": 850,
+      "head": "3597a103b0f35d076587e08196caa9f5d12f53ef"
+    }
+  ],
+  "node": "v22.22.0",
+  "checks": [
+    {
+      "name": "Focused unit tests",
+      "passedFiles": 5,
+      "passedTests": 409,
+      "runs": [
+        {
+          "log": "focused-initial.log",
+          "passedFiles": 4,
+          "passedTests": 222,
+          "failedToLoadFiles": 1,
+          "failure": "Generated ext/lib/sqlite/index.mjs was absent in the isolated worktree; copied baseline generated libraries, then restored candidate dictionary WASM."
+        },
+        {
+          "log": "parser-retry.log",
+          "passedFiles": 1,
+          "passedTests": 187,
+          "command": "node node_modules/vitest/vitest.mjs run test/term-bank-wasm-parser.test.js --maxWorkers=1 --no-file-parallelism --reporter=dot",
+          "exitCode": 0
+        }
+      ]
+    },
+    {
+      "name": "Main TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json",
+      "log": "typescript-main.log",
+      "exitCode": 0
+    },
+    {
+      "name": "Test TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json",
+      "log": "typescript-test.log",
+      "exitCode": 0
+    },
+    {
+      "name": "Changed JavaScript ESLint",
+      "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-importer.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js test/dictionary-importer-media-reference.test.js test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/term-bank-media-projection.test.js",
+      "log": "eslint.log",
+      "exitCode": 0
+    },
+    {
+      "name": "All-target dry build",
+      "command": "node dev/bin/build.js --dryRun --all",
+      "log": "build-all-dry.log",
+      "exitCode": 0
+    },
+    {
+      "name": "Pinned dictionary WASM reproducibility",
+      "command": "node dev/bin/build-dictionary-wasm.js --check",
+      "log": "wasm-check.log",
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8",
+      "exitCode": 0
+    },
+    {
+      "name": "Chrome release package",
+      "command": "node dev/bin/build.js --target chrome",
+      "log": "build-chrome.log",
+      "exitCode": 0
+    }
+  ],
+  "wasm": {
+    "baselineBytes": 63004,
+    "candidateBytes": 67550,
+    "deltaBytes": 4546,
+    "baselineSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+    "candidateSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "unchangedCanonicalScannerSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+  },
+  "chromeReleasePackage": {
+    "bytes": 17276254,
+    "sha256": "dfbe31deb6409f02bbea3cf79e5627be3f2489a52a3d9ffd803152753b352d6f"
+  },
+  "fullCorpusReceipts": [
+    "jmdict.json",
+    "jitendex.json",
+    "vndb.json"
+  ],
+  "failedCorpusAttempts": [
+    {
+      "dictionary": "vndb",
+      "passedGroupsBeforeFailure": 10,
+      "passedRowsBeforeFailure": 200000,
+      "failure": "ENOSPC was the recorded checkpoint-write error; no parity failure was recorded. The complete unchanged replay restarted from zero after shared scratch-space cleanup.",
+      "log": "vndb-first-attempt-enospc.log"
+    }
+  ],
+  "qualification": "Untimed bounded parser/copy/lookup output equivalence. This does not establish complete-import speed, browser peak memory, persisted OPFS equivalence, lookup latency, cancellation or restart behavior. Historical #875 memory-gate failure is not claimed repaired."
+}

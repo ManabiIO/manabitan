@@ -1,0 +1,17 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"dictionary":"vndb","completeGroups":10,"rows":200000,"mediaRows":4075}
+node:internal/fs/promises:741
+      (await PromisePrototypeThen(
+       ^
+
+Error: ENOSPC: no space left on device, write
+    at async write (node:internal/fs/promises:741:8)
+    at async writeFileHandle (node:internal/fs/promises:498:7)
+    at async file:///workspace/scratch/0a404b135545/vndb/builds/perf/native-media-composition-20261125/replay.mjs:311:5 {
+  errno: -28,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+
+Node.js v22.22.0

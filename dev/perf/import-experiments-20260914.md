@@ -231,3 +231,47 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-25: native media projection with compact diagnostics
+
+[PR #908](https://github.com/ManabiIO/manabitan/pull/908) composes the native single-image glossary projection from [PR #875](https://github.com/ManabiIO/manabitan/pull/875), original head `fb71a03f4611bcfa71e135693bebd1fe778153bf`, with compact projected-media transport from [PR #850](https://github.com/ManabiIO/manabitan/pull/850), original head `3597a103b0f35d076587e08196caa9f5d12f53ef`. Neither original branch nor PR is modified. The comparison parent is `7d1643e6147a10cb2165e9744cf0e63b59e46632`. The tested local implementation is `82e75ca22da425d9b61ed8d8811a2b00bce32068`, published as the equivalent product tree in `8994b3ff5be56f1b7d972760c0d9684a262a7296`; the implementation tree is `509a77c356300268d464ecc1fb18d3d0d91a67a5`.
+
+The native helper returns the single image path token without rebuilding the full glossary. Successful projection transfers only the four consumed diagnostic fields; unsupported and unprojected media retain the complete row. The integration preserves current borrowed-content ownership from #881 and exact lookup routing: `prepareLookupRoute` remains argument 4, and the preloaded native source is argument 5. A real worker regression combines native projection, compact diagnostics, borrowed content, lookup-route filters and worker reuse. The native C block exactly matches #875, with SHA-256 `8385342e3fc69f3c97549824999789fd690e860b978aaf3371cddefaadb54bf1`.
+
+Pinned LLVM/LLD 21.1.8 rebuild and `--check` pass. Parser WASM increases from 63,004 to 67,550 bytes (+4,546); its candidate SHA-256 is `b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa`. The canonical scanner remains unchanged. The Chrome release package is 17,276,254 bytes with SHA-256 `dfbe31deb6409f02bbea3cf79e5627be3f2489a52a3d9ffd803152753b352d6f`.
+
+### Complete locked term-corpus equivalence
+
+The [bounded replay](../../builds/perf/native-media-composition-20261125/replay.mjs) verifies every locked archive hash, then compares every parser output field and typed byte across all 7,613,164 lexical rows. Each baseline and candidate group runs in a separate fresh process, with one WASM instance and at most two term banks. This is fixed component grouping, not a production planner change. ZIP inflation retains per-bank CRC validation. The replay includes canonical content, dedup metadata, term columns and keys, completed lookup indexes and route filters, media paths and diagnostic keys. Only the lookup-encode duration is omitted; baseline projected media rows normalize to their four consumed diagnostic fields, while fallback rows remain complete. Every normalized output field and complete output has matching SHA-256 digests.
+
+| Dictionary |      Rows | Groups | Projected media rows | Full fallback media rows | Receipt                                                                            |
+| ---------- | --------: | -----: | -------------------: | -----------------------: | ---------------------------------------------------------------------------------- |
+| JMdict     |   528,299 |     27 |                    0 |                        0 | [jmdict.json](../../builds/perf/native-media-composition-20261125/jmdict.json)     |
+| Jitendex   |   436,555 |    110 |                  324 |                       15 | [jitendex.json](../../builds/perf/native-media-composition-20261125/jitendex.json) |
+| VNDB       | 6,648,310 |    333 |              146,876 |                        0 | [vndb.json](../../builds/perf/native-media-composition-20261125/vndb.json)         |
+
+Media-row counts reflect deduplication within these two-bank groups, so they are not archive image-file counts: VNDB has 146,876 projected rows here and 146,570 image assets in the locked archive. Effective experimental flags and all source/WASM/fixture/runner identities are recorded in each receipt. Both arms use the current default snapshot, including the existing large projected-import escaped-key admission for Jitendex and VNDB.
+
+| Copy-stage work or representation | Jitendex baseline → candidate | VNDB baseline → candidate |
+| --------------------------------- | ----------------------------: | ------------------------: |
+| Native single-image spans         |                       0 → 312 |               0 → 146,876 |
+| `JSON.parse` calls                |                      339 → 27 |               146,876 → 0 |
+| Bytes passed to `TextDecoder`     |              818,519 → 93,898 |    84,486,340 → 2,393,628 |
+| V8-serialized media-row bytes     |             211,980 → 134,210 |   56,717,700 → 21,813,052 |
+
+These are untimed component counts. V8 serialization measures a Node representation, not Chrome wire bytes. The replay uses privately copied output for comparison; actual borrowed-content transport is covered by the worker regression and still requires browser qualification. No complete-import speed, peak browser memory, persisted OPFS equality or lookup-latency result is claimed. The historical #875 memory-gate failure is not claimed repaired. Multiple-path, unsupported and deeply nested media can still take a native scan followed by the general collector; their complete-import cost remains part of qualification.
+
+Reproduce with both source roots prepared at the pinned commits, their own generated libraries/WASM, Node 22.22.0, and the shared hash-locked dictionary cache:
+
+```sh
+for dictionary in jmdict jitendex vndb; do
+  node builds/perf/native-media-composition-20261125/replay.mjs "$dictionary" \
+    /absolute/parent-root /absolute/candidate-root /absolute/dictionary-cache
+done
+```
+
+### Validation and remaining gates
+
+[validation.json](../../builds/perf/native-media-composition-20261125/validation.json) records 409 passing focused tests across five files, main/test TypeScript, changed-JavaScript ESLint, all-target dry build, Chrome release build, and pinned WASM reproducibility. The initial focused run loaded four suites successfully (222 tests) but lacked the generated SQLite library for the parser suite; after restoring generated dependencies and the candidate WASM, that suite passed all 187 tests. The first VNDB replay passed ten groups/200,000 rows before an `ENOSPC` checkpoint-write failure. Its [original failure log](../../builds/perf/native-media-composition-20261125/vndb-first-attempt-enospc.log) is retained; the entire unchanged replay passed after shared scratch-space cleanup.
+
+Decision: **hold for fresh whole-import qualification**. Product source stays frozen for the source CI and separate hosted browser comparisons. Full timing cohorts, browser/process-tree memory, persisted storage, lookup latency, cancellation, restart and recovery remain independent gates. Historical measurements from either original PR do not qualify this composition.
