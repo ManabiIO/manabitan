@@ -42,6 +42,7 @@
         {"path": "dev/perf/direct-media-entries-20261123/media-verification.json", "ignore": true},
         {"path": "dev/perf/direct-media-entries-20261123/node-worker-setup-attempt.json", "ignore": true},
         {"path": "dev/perf/direct-media-entries-20261123/validation.json", "ignore": true},
+        {"path": "dev/perf/import-qualification-ef009.json", "ignore": true},
 
         {
             "path": "test/perf/dictionaries.lock.json",
