@@ -599,7 +599,7 @@ function requestWorker(worker, request) {
 }
 
 describe('actual parser worker flag propagation', () => {
-    test('projects a compressed media source without reconstructing its complete glossary', async () => {
+    test.each([false, true])('projects a compressed media source with lookup routing=%s without reconstructing its glossary', async (prepareLookupRoute) => {
         const glossary = JSON.stringify([{type: 'structured-content', content: {tag: 'div', content: ['text'.repeat(1024), {tag: 'img', path: 'img/猫.webp'}]}}])
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'
@@ -634,14 +634,18 @@ describe('actual parser worker flag propagation', () => {
                         validateGlossaryTypes: true,
                         ownContentBytes: true,
                         prepareLookupIndexes: true,
-                        prepareLookupRoute: true}})
+                        prepareLookupRoute}})
                 expect(reply.type, JSON.stringify(reply.error)).toBe('result')
                 expect(reply.chunk?.mediaRows[0].imagePaths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
                 expect(reply.borrowsWorkerMemory).toBe(current === glossary)
                 if (!reply.chunk) { throw new Error('Missing projected worker result') }
                 expect(reply.chunk.preparedLookupIndexes?.size).toBeGreaterThan(0)
                 for (const index of reply.chunk.preparedLookupIndexes?.values() ?? []) {
-                    expect(index.routeFilter).toBeInstanceOf(Uint32Array)
+                    if (prepareLookupRoute) {
+                        expect(index.routeFilter).toBeInstanceOf(Uint32Array)
+                    } else {
+                        expect(index.routeFilter).toBeUndefined()
+                    }
                 }
                 if (prior) { expect(prior).toEqual(snapshot) }
                 // The large source follows the current borrowed-content lease.

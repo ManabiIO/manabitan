@@ -186,16 +186,16 @@ describe('compressed worker-source media projection', () => {
     })
     /* eslint-enable @stylistic/semi */
 
-    test('removes full glossary parsing and decoding while preserving all columns and owned paths', async () => {
+    test.each([false, true])('preserves columns and owned paths with lookup routing=%s', async (prepareLookupRoute) => {
         let retained;
         let snapshot;
         const glossary = JSON.stringify([{type: 'structured-content', content: {tag: 'div', content: ['text'.repeat(1024), {tag: 'img', path: 'img/日本.webp'}]}}]);
         await parseCompressedGlossary(glossary, (chunk, source) => {
-            const expected = copyWasmBackedColumnChunk(chunk, false, true);
+            const expected = copyWasmBackedColumnChunk(chunk, false, true, prepareLookupRoute);
             const sourceBefore = Uint8Array.from(new Uint8Array(source.wasm.memory.buffer, source.jsonPtr, source.jsonLength));
             const parse = vi.spyOn(JSON, 'parse');
             const decode = vi.spyOn(TextDecoder.prototype, 'decode');
-            const actual = copyWasmBackedColumnChunk(chunk, false, true, false, source);
+            const actual = copyWasmBackedColumnChunk(chunk, false, true, prepareLookupRoute, source);
             expect(parse).not.toHaveBeenCalled();
             expect(decode).toHaveBeenCalledTimes(1);
             expect(decode.mock.calls[0][0]?.byteLength).toBe(encoder.encode('img/日本.webp').length);
