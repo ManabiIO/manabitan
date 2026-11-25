@@ -26,7 +26,7 @@ import {
 import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
-import {shouldOwnTermContentBytes} from './term-content-ownership.js';
+import {shouldBorrowProjectedTermContent, shouldOwnTermContentBytes} from './term-content-ownership.js';
 
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
@@ -131,7 +131,7 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                // Compact cacheable slabs and large projected imports transfer
+                // Compact cacheable slabs and small projected slabs transfer
                 // ownership so the next parse can overlap the ordered sink.
                 const ownCacheableContent = options.ownContentBytes !== true && typeof SharedArrayBuffer === 'function' && shouldOwnTermContentBytes(
                     chunk.contentBytesLength,
@@ -139,7 +139,24 @@ async function parse(data) {
                     chunk.contentDedupPlan?.sourceRowCount,
                     chunk.rowCount,
                 );
-                const shareContentBytes = options.ownContentBytes !== true;
+                /* eslint-disable @stylistic/semi */
+                // Reuse the existing borrowed-result lease for byte-heavy
+                // projected groups. Never create a shared buffer for this path;
+                // nonshared sources retain the original private transfer.
+                const borrowProjectedContent = (
+                    options.ownContentBytes === true &&
+                    options.projectImagePaths === true &&
+                    typeof SharedArrayBuffer === 'function' &&
+                    chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                    shouldBorrowProjectedTermContent(
+                        chunk.contentBytesLength,
+                        chunk.contentDedupPlan?.uniqueCount,
+                        chunk.contentDedupPlan?.sourceRowCount,
+                        chunk.rowCount,
+                    )
+                )
+                const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
+                /* eslint-enable @stylistic/semi */
                 resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
