@@ -1,0 +1,24 @@
+{
+    "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "interpretation": {
+        "target": "vndb",
+        "minimumTargetMedianReductionPercent": 5,
+        "minimumTargetFasterPairs": 10,
+        "requireTargetUpperDescriptiveIntervalBelowZero": true,
+        "maximumNonTargetMedianRegressionPercent": 3,
+        "requireControlIntervalContainsZero": true,
+        "requireBothIndependentHosts": true,
+        "memoryQualification": "Not measured; timing alone cannot qualify promotion"
+    },
+    "candidates": [
+        {
+            "name": "direct-media-index",
+            "sha": "477353ff8e4d99fafd9224392bb0b26055745378",
+            "changedPackageMembers": [
+                "js/dictionary/dictionary-generation-media-store.js",
+                "js/dictionary/source-zip-media-pack.js",
+                "js/dictionary/source-zip-media-preparation-worker.js"
+            ]
+        }
+    ]
+}

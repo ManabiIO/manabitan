@@ -1,0 +1,120 @@
+name: Frozen import source screen
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/import-source-screen.yml'
+      - 'dev/perf/import-source-screen.py'
+      - 'dev/perf/import-source-screen-plan.json'
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    if: github.head_ref == 'perf/import-qualification-20261125-97b7'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - id: plan
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          plan = json.loads(Path('dev/perf/import-source-screen-plan.json').read_text())
+          assert re.fullmatch('[a-f0-9]{40}', plan['baseline'])
+          cells = []
+          for candidate in plan['candidates']:
+              assert re.fullmatch('[a-f0-9]{40}', candidate['sha'])
+              for dictionary in ['jmdict', 'jitendex', 'vndb']:
+                  for replica in [0, 1]:
+                      cells.append({'candidate': candidate['name'], 'sha': candidate['sha'],
+                                    'baseline': plan['baseline'], 'dictionary': dictionary,
+                                    'replica': replica, 'order': 'AB' if replica == 0 else 'BA'})
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write('matrix=' + json.dumps({'include': cells}, separators=(',', ':')) + '\n')
+          PY
+
+  compare:
+    needs: plan
+    name: ${{ matrix.candidate }} / ${{ matrix.dictionary }} / ${{ matrix.replica }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      SOURCE_BASELINE_SHA: ${{ matrix.baseline }}
+      SOURCE_CANDIDATE_SHA: ${{ matrix.sha }}
+      SOURCE_CANDIDATE_NAME: ${{ matrix.candidate }}
+      SOURCE_DICTIONARY: ${{ matrix.dictionary }}
+      SOURCE_INITIAL_ORDER: ${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-source-20261125-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Build frozen source packages before acquisition
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "$SOURCE_BASELINE_SHA" "$SOURCE_CANDIDATE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/import-baseline" "$SOURCE_BASELINE_SHA"
+          git worktree add --detach "$RUNNER_TEMP/import-candidate" "$SOURCE_CANDIDATE_SHA"
+          node dev/perf/prepare-dictionaries.js --all
+          for source_root in "$RUNNER_TEMP/import-baseline" "$RUNNER_TEMP/import-candidate"; do
+            cmp package-lock.json "$source_root/package-lock.json"
+            cmp test/perf/dictionaries.lock.json "$source_root/test/perf/dictionaries.lock.json"
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$source_root/node_modules"
+            mkdir -p "$source_root/builds"
+            ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$source_root/builds/e2e-dictionary-cache"
+            (
+              cd "$source_root"
+              npm run build:libs
+              npm run license-report:html
+              npm run build -- --target chrome
+            )
+          done
+      - name: Run fixed adjacent pairs and identical-package controls
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          plan = json.loads(Path('dev/perf/import-source-screen-plan.json').read_text())
+          candidate = next(item for item in plan['candidates'] if item['name'] == os.environ['SOURCE_CANDIDATE_NAME'])
+          temporary = Path(os.environ['RUNNER_TEMP'])
+          command = ['python3', 'dev/perf/import-source-screen.py',
+                     '--baseline-root', str(temporary / 'import-baseline'),
+                     '--candidate-root', str(temporary / 'import-candidate'),
+                     '--baseline-sha', os.environ['SOURCE_BASELINE_SHA'],
+                     '--candidate-sha', os.environ['SOURCE_CANDIDATE_SHA'],
+                     '--dictionary', os.environ['SOURCE_DICTIONARY'],
+                     '--initial-order', os.environ['SOURCE_INITIAL_ORDER'],
+                     '--output', str(temporary / 'import-evidence')]
+          for member in candidate['changedPackageMembers']:
+              command.extend(['--allowed-member', member])
+          subprocess.run(command, check=True)
+          PY
+      - name: Retain every observation including failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-${{ matrix.candidate }}-${{ matrix.dictionary }}-${{ matrix.replica }}
+          path: ${{ runner.temp }}/import-evidence
+          if-no-files-found: warn
+          retention-days: 14
