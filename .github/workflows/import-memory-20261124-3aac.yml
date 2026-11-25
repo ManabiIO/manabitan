@@ -1,7 +1,7 @@
-name: Current native media memory qualification 20261125
+name: Native publication preflight memory qualification 20261125
 on:
   push:
-    branches: [research/import-memory-20261125-2754]
+    branches: [research/metadata-import-memory-20261125-2754]
     paths:
       - '.github/workflows/import-memory-20261124-3aac.yml'
       - 'dev/perf/import-memory-20261124-3aac/**'
@@ -9,22 +9,22 @@ permissions:
   contents: read
 jobs:
   memory:
-    name: Current media ${{ matrix.dictionary }} memory ${{ matrix.replication }}
+    name: Native publication preflight ${{ matrix.dictionary }} memory ${{ matrix.replication }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [vndb, jitendex]
+        dictionary: [jmdict, jitendex, vndb]
         replication: [1, 2]
     env:
       MEMORY_BASELINE: 7d1643e6147a10cb2165e9744cf0e63b59e46632
       MEMORY_BASELINE_TREE: 99d23f16e973c7ae9feba77ca3643d1c27dfb93d
-      MEMORY_CANDIDATE: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
-      MEMORY_CANDIDATE_TREE: 093a0be94fcf336ab5a0113b80fae7481855935a
+      MEMORY_CANDIDATE: b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b
+      MEMORY_CANDIDATE_TREE: be5b6a8d9c24915516d6edd8167a071e0449d793
       MEMORY_DICTIONARY: ${{ matrix.dictionary }}
       MEMORY_REPLICATION: ${{ matrix.replication }}
-      MEMORY_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+      MEMORY_DIFFERENCES: '["js/dictionary/dictionary-database.js","js/dictionary/term-content-canonical-scan.js","js/dictionary/wasm/term-content-canonical-scan-v1.c","lib/term-content-canonical-scan-v1.wasm"]'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
@@ -57,7 +57,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: current-media-memory-${{ matrix.dictionary }}-rep${{ matrix.replication }}-2754
+          name: publication-preflight-memory-${{ matrix.dictionary }}-rep${{ matrix.replication }}-2754
           path: ${{ runner.temp }}/import-memory-2754
           include-hidden-files: true
           if-no-files-found: error
