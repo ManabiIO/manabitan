@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "id": "smoke-jmdict-a-root",
+  "arm": "A",
+  "sourceArm": "A",
+  "dictionary": "jmdict",
+  "purpose": "functional-smoke",
+  "includedInTimingCohort": false,
+  "identitySha256": "13cd79ce6c1bb0e49a7da935338e1307180c538404ada55b12238b264cdbf915",
+  "startedAt": "2026-11-25T15:39:25.390305+00:00",
+  "command": [
+    "/tmp/manabitan-8ca6-runtime/runtime/node/bin/node",
+    "dev/perf/import-benchmark.js",
+    "jmdict",
+    "--runs",
+    "1",
+    "--no-build",
+    "--build-target",
+    "chrome",
+    "--media-check",
+    "all",
+    "--output",
+    "/tmp/manabitan-8ca6-vndb-qualification/results/smoke-jmdict-a-root"
+  ],
+  "cwd": "/tmp/manabitan-8ca6-vndb-qualification/baseline",
+  "tmpdir": "/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root",
+  "runtimeEnvironment": {
+    "PLAYWRIGHT_BROWSERS_PATH": "/tmp/manabitan-8ca6-runtime/runtime/ms-playwright",
+    "PATH": "/tmp/manabitan-8ca6-runtime/runtime/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/override:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin:/opt/codex/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/agent/.local/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/bin/fallback",
+    "TMPDIR": "/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root",
+    "GIT_OPTIONAL_LOCKS": "0"
+  },
+  "status": "failed",
+  "sampling": "none; snapshots outside the harness only",
+  "beforeIdentity": {
+    "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+    "aggregateTrackedSha256": "e35988ac107deaadbaddf38a41adbb6c509859432aa9952606e5e4b0d0dcd3ce",
+    "packageSha256": "14cc534ee70f381b2c07a20bd05cdc16480e3dacd0c20e3f824be357c77e4de5",
+    "verifiedAt": "2026-11-25T15:39:25.837664+00:00"
+  },
+  "beforeHost": {
+    "utc": "2026-11-25T15:39:25.837689+00:00",
+    "loadAverage": [
+      2.57421875,
+      3.578125,
+      6.09619140625
+    ],
+    "tmpDisk": {
+      "total": 5225713664,
+      "used": 3378966528,
+      "free": 1846747136
+    },
+    "/proc/pressure/cpu": null,
+    "/proc/pressure/memory": null,
+    "/proc/pressure/io": null,
+    "/sys/fs/cgroup/cpu.stat": null,
+    "/sys/fs/cgroup/memory.current": null,
+    "/sys/fs/cgroup/memory.max": null
+  },
+  "harnessPid": 11,
+  "harnessExitCode": 1,
+  "harnessWallMs": 1781.5871419998075,
+  "afterHost": {
+    "utc": "2026-11-25T15:39:27.622617+00:00",
+    "loadAverage": [
+      2.6083984375,
+      3.568359375,
+      6.0791015625
+    ],
+    "tmpDisk": {
+      "total": 5225713664,
+      "used": 3379138560,
+      "free": 1846575104
+    },
+    "/proc/pressure/cpu": null,
+    "/proc/pressure/memory": null,
+    "/proc/pressure/io": null,
+    "/sys/fs/cgroup/cpu.stat": null,
+    "/sys/fs/cgroup/memory.current": null,
+    "/sys/fs/cgroup/memory.max": null
+  },
+  "error": "RuntimeError('Harness exited 1')",
+  "traceback": "Traceback (most recent call last):\n  File \"/tmp/manabitan-8ca6-vndb-qualification/run-observation.py\", line 186, in main\n    require(receipt['harnessExitCode'] == 0, f'Harness exited {receipt[\"harnessExitCode\"]}')\n  File \"/tmp/manabitan-8ca6-vndb-qualification/run-observation.py\", line 40, in require\n    raise RuntimeError(message)\nRuntimeError: Harness exited 1\n",
+  "cleanup": {
+    "remainingTempEntries": [],
+    "tempDirectoryRemoved": true
+  },
+  "endedAt": "2026-11-25T15:39:27.622808+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "node": "v24.22.3",
+  "cases": [
+    {
+      "name": "byte-heavy shared chunks wait for sink settlement",
+      "passed": true
+    },
+    {
+      "name": "repeated content retains private lookahead",
+      "passed": true
+    },
+    {
+      "name": "compact cacheable content retains owned shared lookahead",
+      "passed": true
+    },
+    {
+      "name": "unavailable shared-buffer support retains private lookahead",
+      "passed": true
+    },
+    {
+      "name": "forced ownership without image projection stays private",
+      "passed": true
+    },
+    {
+      "name": "cancelled borrowed sinks cannot admit another group",
+      "passed": true
+    },
+    {
+      "name": "failed borrowed sinks preserve the original failure",
+      "passed": true
+    },
+    {
+      "name": "peer parser failure releases waits without reusing active content",
+      "passed": true
+    }
+  ],
+  "unhandled": [],
+  "passed": 8,
+  "failed": 0
+}

@@ -1,0 +1,88 @@
+{
+  "sourceManifestSha256": "d757080d4e627b7873299978cf636313c27a32731149a8a1ec0dce4b87dd787a",
+  "pathsRelativeTo": "this file",
+  "omittedDuplicateFiles": {
+    "initial-package-identity.json": {
+      "bytes": 195060,
+      "sha256": "c0d45c58692d19472704bc37060f50256fca8a8bc87fee472131dc6920d95113"
+    },
+    "observations/smoke-jmdict-a/run-1.html": {
+      "bytes": 38621,
+      "sha256": "679281a46ba172aef4a0cc82ad4613a1e43e1fb7cf6fdba565ca5631dc071423"
+    },
+    "observations/smoke-jmdict-a-root/run-1.html": {
+      "bytes": 38711,
+      "sha256": "7898658e1b7e18fa9252e4f41e88e0946d6745511236d5bc9126102254f68795"
+    }
+  },
+  "files": {
+    "README.txt": {
+      "bytes": 1720,
+      "sha256": "cd7544227cf2115eacbd94ab8104125a32caaeec4555da7114fd73bf927c81a5"
+    },
+    "blocked-qualification.json": {
+      "bytes": 8263,
+      "sha256": "1b0345545d770f862f8aaa3a715f4339e0e1633fa70820f85e2a26df9efe2537"
+    },
+    "candidate-build.log": {
+      "bytes": 63,
+      "sha256": "26b4dc36a3605dc5f8eae59b677e40a88c00b1c982c12a760f820f4ad6e31a8c"
+    },
+    "candidate-fixed-libraries-build.log": {
+      "bytes": 41,
+      "sha256": "a76f2c916951f9bb8f701e15a818e58827ffc0a0183b5f38bfd0afa2c76b42db"
+    },
+    "cpu-slot-released.json": {
+      "bytes": 272,
+      "sha256": "45ad9ccf398fc9c5907cf1e1f4b59cc504a7504501a31f91bbe029b6d3f4c59b"
+    },
+    "identity-summary.json": {
+      "bytes": 3225,
+      "sha256": "37f2e2aec735e2fc93ec1f5cd7df522c190771c34e5fc5ab1c38640087d28e7e"
+    },
+    "identity.json": {
+      "bytes": 603129,
+      "sha256": "13cd79ce6c1bb0e49a7da935338e1307180c538404ada55b12238b264cdbf915"
+    },
+    "initial-package-delta.json": {
+      "bytes": 7241,
+      "sha256": "bfc12561a35469aaad4d224de7117939f09f0b0c3edccb4971297a4df5eec64c"
+    },
+    "observations/smoke-jmdict-a/harness.log": {
+      "bytes": 13282,
+      "sha256": "c5c818f081a70b73502cd541a3f9f5c5c858a4cda07f50afafd0a27e87c49161"
+    },
+    "observations/smoke-jmdict-a/observation.json": {
+      "bytes": 3548,
+      "sha256": "256127a7c2d38273b3f65b71d47b73c0187269040c8498a8b40fa9082e1fc23a"
+    },
+    "observations/smoke-jmdict-a/run-1.json": {
+      "bytes": 25629,
+      "sha256": "1e2c3dc3a1511457008ff71ce4699cb8e343e1eb412267f1b8b5f5e97b7c59b0"
+    },
+    "observations/smoke-jmdict-a-root/harness.log": {
+      "bytes": 13322,
+      "sha256": "74b8fff1e781d9e9729097680c00a8a6be842e7e2e65394701dd0a64f0ee669f"
+    },
+    "observations/smoke-jmdict-a-root/observation.json": {
+      "bytes": 3558,
+      "sha256": "c1baee1a6b9b9409bf4b35e36680707206fd745367f92fe1e4857fd642c66221"
+    },
+    "observations/smoke-jmdict-a-root/run-1.json": {
+      "bytes": 25689,
+      "sha256": "a45535588c5d6feffb7171752e6b025b7295816a4abffc97c7e7444877e60766"
+    },
+    "package-candidate.mjs": {
+      "bytes": 680,
+      "sha256": "121e3b2226baa73bc3d9206ce8b80bc9918365aa95f45eb337fd9b0ff8fadc8b"
+    },
+    "prepare-identity.py": {
+      "bytes": 4842,
+      "sha256": "a8d43e5e238b6fa610cd06c0fa3c470b8a7f27eddf04f2270804ab1fc2ff754f"
+    },
+    "run-observation.py": {
+      "bytes": 11984,
+      "sha256": "c534565830f751e385e6d42df5fbc2e0da6db6e1887c6d86c81d4996327d69a2"
+    }
+  }
+}
