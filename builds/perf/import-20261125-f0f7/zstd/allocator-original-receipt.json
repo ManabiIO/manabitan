@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-11-25",
+  "provenance": "Transcribed from the original successful three-case allocator probe. This receipt preserves those observations; staging the receipt did not rerun the probe.",
+  "runtime": {
+    "node": "v24.22.3",
+    "platform": "linux"
+  },
+  "associatedChange": {
+    "repository": "ManabiIO/manabitan",
+    "pullRequest": "https://github.com/ManabiIO/manabitan/pull/891",
+    "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "finalPublishedCommit": "b9cf94b4cc088cb4e06a4ae5cae6b29a7ae59241",
+    "finalLocalCommit": "d22d618300e9f5c83c6c51fb79d4cd2250d4ddc0",
+    "finalSourceTree": "b4e35f00c7219a071f8871f1c3e39ebf017831b1",
+    "sourceSnapshotNote": "Final source hashes identify the reviewed change. The original allocation probe directly instantiated the unchanged pinned native module and did not execute these application source files."
+  },
+  "inputs": {
+    "module": {
+      "path": "dev/lib/zstd-simd-module.js",
+      "bytes": 9046,
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48"
+    },
+    "wasm": {
+      "path": "dev/data/zstd-simd.wasm",
+      "bytes": 433631,
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc"
+    },
+    "dictionary": {
+      "path": "dev/data/zstd-dicts/jmdict.zdict",
+      "bytes": 16384,
+      "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb"
+    },
+    "wrapper": {
+      "path": "dev/lib/zstd-wasm.js",
+      "bytes": 20561,
+      "sha256": "67bfbc665b0c25bcb19b4b660e68d81995f39c273292de7a934cd0bf6136d86c"
+    },
+    "codec": {
+      "path": "ext/js/dictionary/zstd-term-content.js",
+      "bytes": 40984,
+      "sha256": "f28eaf9425fad2031423518170b0888c4ad0f607d62b349ea57a2438fe4b17ed"
+    },
+    "worker": {
+      "path": "ext/js/dictionary/zstd-term-content-compression-worker.js",
+      "bytes": 4055,
+      "sha256": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247"
+    },
+    "regressionTest": {
+      "path": "test/zstd-compression-worker-context.test.js",
+      "bytes": 8797,
+      "sha256": "7713e4a38b1c659d9546f9f2a8e40a687da4f17bf3874dae64ba185d0cf6b6b8"
+    }
+  },
+  "method": {
+    "sequence": ["none", "CCtx", "DCtx"],
+    "freshModulePerCase": true,
+    "steps": [
+      "Instantiate dev/lib/zstd-simd-module.js with dev/data/zstd-simd.wasm bytes.",
+      "Allocate a one-byte before marker with _malloc(1).",
+      "For CCtx or DCtx, invoke the corresponding native context constructor.",
+      "Allocate a one-byte after marker with _malloc(1).",
+      "Record pointers, after-minus-before spacing, and HEAPU8.byteLength.",
+      "Free the native context, then the before and after markers."
+    ],
+    "dictionaryLoaded": false,
+    "compressionPerformed": false,
+    "reproduction": "node reproduce-allocator-spacing.mjs /path/to/manabitan > reproduced-allocator-receipt.json"
+  },
+  "observations": [
+    {"kind": "none", "before": 76904, "ptr": 0, "after": 76920, "gap": 16, "heapBytes": 16908288},
+    {"kind": "CCtx", "before": 76904, "ptr": 76920, "after": 80728, "gap": 3824, "heapBytes": 16908288},
+    {"kind": "DCtx", "before": 76904, "ptr": 76920, "after": 172736, "gap": 95832, "heapBytes": 16908288}
+  ],
+  "derived": {
+    "baselineMarkerSpacingBytes": 16,
+    "compressionContextSpacingBytes": 3808,
+    "decompressionContextSpacingBytes": 95816,
+    "fourOmittedDecoderContextsSpacingBytes": 383264,
+    "initialWasmBufferBytesPerModule": 16908288,
+    "initialWasmBufferChangeBytes": 0
+  },
+  "scope": "Allocator address spacing, including allocator overhead; the blank marker spacing is subtracted from each context case.",
+  "limitations": [
+    "The four-worker number is arithmetic applied to one-context spacing, not a measured concurrent worker pool.",
+    "Omitting the native decoder does not reduce the initial WASM reservation in this probe.",
+    "No process RSS/PSS, peak-memory reduction, complete-import speedup, or complete-import memory qualification is claimed.",
+    "The dictionary hash is contextual provenance; the allocation-only probe does not load it."
+  ]
+}

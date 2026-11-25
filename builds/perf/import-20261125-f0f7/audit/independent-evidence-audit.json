@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "auditedDate": "2026-11-25",
+  "reviewer": "jitendex subagent, independent of VNDB and JMdict implementations",
+  "method": "Read retained scripts, raw observations, summaries, parity receipts, source snapshots, failure receipts, and PR 901 wording; recompute hashes, medians, paired differences, and row/copy arithmetic. Read JMdict ZIP central metadata to verify exact planner groups. No performance, encoder, media-validation, or WASM reruns.",
+  "result": "No material numerical or source-identity mismatch found. Scope qualifications below are required when presenting the results.",
+  "vndb": {
+    "publishedPullRequest": "https://github.com/ManabiIO/manabitan/pull/901",
+    "sourceHead": "ea176867e66515d12f7a75c044d1082624ce76cd",
+    "remoteTreeVerified": "e6674d7451bfa720f288ce2bec723167e0ec1d1b",
+    "baselineSourceSha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+    "lazyCandidateSourceSha256": "21dc3fdcb93c1fc724dc92fde2582364f2534c98a8e755c24f4d12640b1f7e81",
+    "combinedCandidateSourceSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+    "manifestValidation": {
+      "lazyEntriesChecked": 15,
+      "combinedEntriesChecked": 20,
+      "byteCountOrHashMismatches": 0,
+      "snapshotsEqualRecordedGitBlobs": true,
+      "rawObservationSourceHashesMatchTheirArms": true,
+      "allRawChildExitStatuses": 0,
+      "rawStdoutMatchesParsedObservations": true,
+      "allSummaryAndPairedStatisticsRecomputed": true
+    },
+    "studyDesignPerCandidate": {
+      "counterbalancedBlocks": 6,
+      "orders": ["ABC", "BCA", "CAB", "ACB", "CBA", "BAC"],
+      "measuredFreshProcesses": 18,
+      "candidateSamples": 6,
+      "identicalBaselineControls": 12,
+      "candidateControlComparisons": 12,
+      "warmupCatalogsPerProcess": 2,
+      "qualification": "Each of six candidate samples is compared with both A and C in its block. Twelve comparisons do not mean twelve independent candidate samples."
+    },
+    "combinedRetainedMemory": {
+      "metric": "Forced-GC retained heapUsed plus external bytes; arrayBuffers is already included in external and is not added again.",
+      "baselineMedianBytes": 40750180,
+      "candidateMedianBytes": 29752304,
+      "pairedMedianReductionBytes": 10997876,
+      "percentReductionAgainstBaselineMedian": 26.988533547581877,
+      "pairedReductionRangeBytes": [10996700, 10997876],
+      "rangeWidthBytes": 1176,
+      "candidateExtraDecodedStringBackingIncluded": true,
+      "browserOrProcessPeakMemoryMeasured": false
+    },
+    "historicalLazyRetainedMemory": {
+      "candidateMedianBytes": 27794092,
+      "pairedMedianReductionBytes": 12956088,
+      "pairedReductionRangeBytes": [12955976, 12956144],
+      "qualification": "A distinct prior source candidate. Its lower retained-memory result must not be attributed to the final combined source."
+    },
+    "timing": {
+      "conclusion": "Inconclusive; do not claim catalog or complete-import latency improvement.",
+      "combinedUnchangedControlPercentRange": [-48.7462257808589, 95.87364576177184],
+      "combinedUnchangedControlPairedMedianPercent": 25.713431409499787,
+      "historicalLazyUnchangedControlPercentRange": [-64.29251556572365, 503.12201575862724]
+    },
+    "correctnessScope": {
+      "catalogEntries": 147237,
+      "imagesValidated": 146570,
+      "sourceSpanBytes": 195649882,
+      "generationIndexBytes": 3912816,
+      "boundedReads": 144,
+      "decodedImageBytesChecked": 188131284,
+      "baselineAndCandidateRecordedDigestsAgree": true,
+      "validationPathAudited": "The executed runner compares complete catalog metadata and raw names, invokes production source-media preparation, compares record/source-span/index digests, and reaches CRC and decoded-length validation for every image.",
+      "approvedDescription": "Complete catalog/raw-name digests plus complete source span/index digests and every-image CRC validation.",
+      "notEstablished": ["Complete VNDB term encoder output parity", "Persisted database parity", "Browser OPFS persistence parity", "Whole-import performance"]
+    }
+  },
+  "jmdict": {
+    "publishedPullRequest": "https://github.com/ManabiIO/manabitan/pull/897",
+    "sourceHead": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+    "remoteTreeVerified": "59959442e3d7ec9290d9da5d1177a7df28b58ed1",
+    "receipt": "record-split-jmdict-replay.json",
+    "complete": true,
+    "stagedManifestEntriesChecked": 10,
+    "stagedManifestHashMismatches": 0,
+    "stagedRunnersAndReceiptsEqualOriginals": true,
+    "portableWrapperReviewed": "Python syntax parses; strict runner/source hash checks and exact-count replacements change only root constants and cache location. Wrapper was not executed.",
+    "readmeScopeReviewed": "Accurately distinguishes complete scoped encoder parity, two-worker activation, zero three/five-worker activation, and unsuccessful VNDB attempts.",
+    "hostedCiReceipt": {"successfulWorkflows": 7, "successfulApplicableJobs": 15, "conditionalJobsSkipped": 4},
+    "executedRunner": "record-split-replay-eager-archive.mjs",
+    "executedRunnerSha256": "570d8899609ecec70378ae1a39a6cc2078ea7fe9c41310abdc9f3db1bdb5ee8a",
+    "executedRunnerProvenance": "Confirmed by the owning JMdict agent; original source preserved separately from the later file-backed attempt.",
+    "candidateSourceSha256": "de10461786cedfbea211fd2acc96a6d2da62c7a51903a5bb9b06221aeb3699a7",
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "parserWasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+    "sourceLockAndWasmHashesRecomputed": true,
+    "archiveHashMatchesLockedIdentity": true,
+    "bankCountVerifiedFromZipMetadata": 53,
+    "sourceBytesVerifiedFromZipMetadata": 171617523,
+    "rowsPerConfiguration": 528299,
+    "configurations": [
+      {"workerPolicy": 2, "groups": 8, "segments": 18, "splitGroups": 5, "splitRows": 348299, "avoidedStagingCopyBytes": 2089794, "envelopeBytes": 23705324},
+      {"workerPolicy": 3, "groups": 12, "segments": 12, "splitGroups": 0, "splitRows": 0, "avoidedStagingCopyBytes": 0, "envelopeBytes": 23748912},
+      {"workerPolicy": 5, "groups": 20, "segments": 20, "splitGroups": 0, "splitRows": 0, "avoidedStagingCopyBytes": 0, "envelopeBytes": 23761324}
+    ],
+    "verified": [
+      "Replayed grouping algorithm matches the checked production planner; every group boundary independently matches ZIP central metadata.",
+      "Each configuration covers all 53 banks and sums to the locked 528299 rows; segment and split-row sums agree.",
+      "The two-worker reduction equals 348299 affected rows multiplied by six bytes per row; all group and total copy deltas agree.",
+      "The executed script asserts deep equality of every baseline/candidate output envelope before adding it to the completed report."
+    ],
+    "scope": "Production record encoding and checksummed envelopes for sequentially replayed planner groups with deterministic source-content references. Not a concurrent-worker benchmark, persisted database comparison, complete content-deduplication/compression import, or timing/peak-memory result.",
+    "qualification": "Do not generalize the two-worker copy saving to three- or five-worker policies; those complete receipts show zero avoided copies."
+  },
+  "incompleteVndbEncoderAttempts": {
+    "eager": {"exitCode": 137, "completedObservations": 0, "causeEstablished": false},
+    "fileBacked": {
+      "exitCode": null,
+      "completedObservations": 0,
+      "logBytesObserved": 0,
+      "completeReportExists": false,
+      "recordedScriptSha256Matches": true,
+      "scriptSha256": "b8b9e5dc7ee1a320fb5ab2ffe6b034af261fdf616446354a1848de111aec88c1"
+    },
+    "qualification": "No VNDB encoder count, byte-parity, timing, or memory result can be inferred. Keep exit 137 separate from the unknown-exit file-backed attempt; do not label either as a successful replay or infer an unobserved failure cause."
+  },
+  "reviewLimitations": [
+    "Large fixture contents were not rehashed or decompressed in this audit; their recorded verification and locked identities were reviewed, and JMdict central metadata was independently read.",
+    "Retained byte/envelope data was not regenerated. Claims are supported by inspected executed assertions, recorded complete receipts, and recomputed arithmetic.",
+    "The portable scripts are post-run path-parameterized reproductions, not additional observed runs.",
+    "Historical lazy-view validation and source identities remain distinct from the final combined candidate."
+  ]
+}

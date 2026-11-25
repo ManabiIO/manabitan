@@ -1,0 +1,19 @@
+{
+  "checkout": "jmdict",
+  "path": "/workspace/scratch/f0f7782e255e/jmdict",
+  "head": "bee1b5e9e8fcaa0a9109dd83b1da9c396d8f87c3",
+  "command": [
+    "npm",
+    "run",
+    "build",
+    "--",
+    "--target",
+    "chrome"
+  ],
+  "status": "success",
+  "exitCode": 0,
+  "log": "jmdict-build.log",
+  "trackedStatusBefore": "",
+  "trackedStatusAfter": "",
+  "trackedDiffAfter": ""
+}

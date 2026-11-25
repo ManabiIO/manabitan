@@ -1,0 +1,10 @@
+{
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "previousCandidateCommit": "20bf48435b4f93f5cdb61ce4bdeca621e36a21df",
+  "baselineSourceSha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+  "previousCandidateSourceSha256": "21dc3fdcb93c1fc724dc92fde2582364f2534c98a8e755c24f4d12640b1f7e81",
+  "candidateSourceSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+  "source": "ext/js/dictionary/dense-zip-directory.js",
+  "runtime": "Node 24.22.3",
+  "scope": "Combined lazy raw-name views plus one proven-ASCII decode. Catalog retained memory and complete source-media parity; no whole-import performance claim"
+}

@@ -1,0 +1,85 @@
+{
+  "arms": {
+    "A": {
+      "samples": 6,
+      "durationMs": 45.69483649999998,
+      "retainedHeap": 38349600,
+      "retainedExternal": 2400580,
+      "retainedArrayBuffers": 2400540,
+      "retainedHeapPlusExternal": 40750180
+    },
+    "B": {
+      "samples": 6,
+      "durationMs": 69.2313575,
+      "retainedHeap": 25393512,
+      "retainedExternal": 2400580,
+      "retainedArrayBuffers": 2400540,
+      "retainedHeapPlusExternal": 27794092
+    },
+    "C": {
+      "samples": 6,
+      "durationMs": 49.478260000000006,
+      "retainedHeap": 38349600,
+      "retainedExternal": 2400580,
+      "retainedArrayBuffers": 2400540,
+      "retainedHeapPlusExternal": 40750180
+    }
+  },
+  "pairs": [
+    {
+      "block": 0,
+      "baTime": 24.241030471236023,
+      "bcTime": 48.32993251049984,
+      "caTime": -16.240081574606414,
+      "baRetainedBytes": -12956088,
+      "bcRetainedBytes": -12956088
+    },
+    {
+      "block": 1,
+      "baTime": 33.608393780000576,
+      "bcTime": -77.8472033371318,
+      "caTime": 503.12201575862724,
+      "baRetainedBytes": -12956088,
+      "bcRetainedBytes": -12956032
+    },
+    {
+      "block": 2,
+      "baTime": 104.45497655886533,
+      "bcTime": 72.41658136964577,
+      "caTime": 18.581968703191066,
+      "baRetainedBytes": -12956088,
+      "bcRetainedBytes": -12956088
+    },
+    {
+      "block": 3,
+      "baTime": 30.936074086081188,
+      "bcTime": -32.00529721479981,
+      "caTime": 92.56805121969134,
+      "baRetainedBytes": -12956088,
+      "bcRetainedBytes": -12956088
+    },
+    {
+      "block": 4,
+      "baTime": -63.30744803959142,
+      "bcTime": 2.758714431270981,
+      "caTime": -64.29251556572365,
+      "baRetainedBytes": -12955976,
+      "bcRetainedBytes": -12956032
+    },
+    {
+      "block": 5,
+      "baTime": 121.16162743203107,
+      "bcTime": 70.65807208111114,
+      "caTime": 29.593417255362155,
+      "baRetainedBytes": -12956088,
+      "bcRetainedBytes": -12956144
+    }
+  ],
+  "pairedMedians": {
+    "baTime": 32.27223393304088,
+    "bcTime": 25.54432347088541,
+    "caTime": 24.08769297927661,
+    "baRetainedBytes": -12956088,
+    "bcRetainedBytes": -12956088
+  }
+}

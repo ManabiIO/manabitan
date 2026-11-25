@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "check-executed.mjs",
+      "bytes": 4391,
+      "sha256": "8918bcf256c0d8c484142bc6f539d51de82416fa2c6643793aafcee31fcac67b"
+    },
+    {
+      "path": "eslint-initial.log",
+      "bytes": 1525,
+      "sha256": "1fc3a6a546c5a46addb2188fe945667860e4926a593a5b16324d0b59c3e93798"
+    },
+    {
+      "path": "measure-executed.mjs",
+      "bytes": 4797,
+      "sha256": "9b65cd6870449db30054fc2b76c62d6f3f6b6f3a201abb64cf7b3e73eb5e6903"
+    },
+    {
+      "path": "measure-raw.json",
+      "bytes": 56300,
+      "sha256": "6d5e83029501f900f45e95b5b3694884b4aa173946f09065886139b159ed2f8d"
+    },
+    {
+      "path": "measure-summary.json",
+      "bytes": 2155,
+      "sha256": "ed9703697c8f15ea9ebb64b9cbdac5617ceaeb05c982559e6098f0468baf6533"
+    },
+    {
+      "path": "parity.json",
+      "bytes": 3127,
+      "sha256": "371348fad380a35ddf595674cb5f396cd94778866da14d357adbc714b9cb14f5"
+    },
+    {
+      "path": "provenance.json",
+      "bytes": 980,
+      "sha256": "2ed1fd8a4951870e0b01a83ba033bcaca3b5543aca44a89b90e50323b2786822"
+    },
+    {
+      "path": "reproduce-check.mjs",
+      "bytes": 4769,
+      "sha256": "946152026e4ab057ba080cc27b9845cca8141158447d732b6cb6bfe24330d1d8"
+    },
+    {
+      "path": "reproduce-measure.mjs",
+      "bytes": 5705,
+      "sha256": "407d1460537fc8a49104023ab8f39a815490b5e7dd17ec519d76fd45ec83a751"
+    },
+    {
+      "path": "retry-focused.log",
+      "bytes": 236,
+      "sha256": "4a32bb200ba15754b76e35eb4c6b4e359406b37b92fd45936c6cf2d6e16e8be0"
+    },
+    {
+      "path": "source-baseline.js",
+      "bytes": 7022,
+      "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b"
+    },
+    {
+      "path": "source-candidate.js",
+      "bytes": 8987,
+      "sha256": "21dc3fdcb93c1fc724dc92fde2582364f2534c98a8e755c24f4d12640b1f7e81"
+    },
+    {
+      "path": "source-identities.json",
+      "bytes": 539,
+      "sha256": "cc5f44863507c9ff0c9a5bf0ca68b5b93531dd8fff4686b568fb53f894e40ac6"
+    },
+    {
+      "path": "source.patch",
+      "bytes": 3671,
+      "sha256": "d8778cc3b7ebd75bbbeba1a087748a5fafecca7a5c786301ae207a07e01e8e98"
+    },
+    {
+      "path": "validation.json",
+      "bytes": 1339,
+      "sha256": "02c8d7d8c202f10fbddd7f73f0cfc2af2f936bee49602c6cae1f31981e0c5b41"
+    }
+  ]
+}

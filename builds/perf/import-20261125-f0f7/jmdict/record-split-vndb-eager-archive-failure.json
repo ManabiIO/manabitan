@@ -1,0 +1,7 @@
+{
+  "command": "node record-split-replay-eager-archive.mjs vndb 5",
+  "exitCode": 137,
+  "observations": 0,
+  "output": "",
+  "context": "Terminated before any completed configuration under host memory pressure. Exact signal cause was not independently established. The next runner streams archive hashing and uses file-backed BlobReader, removing eager archive retention; no source candidate or parity decision rule changed."
+}

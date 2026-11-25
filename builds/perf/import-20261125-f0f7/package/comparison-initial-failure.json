@@ -1,0 +1,9 @@
+{
+  "command": "python3 evidence-staging/package/compare-packages.py",
+  "exitCode": 1,
+  "outcome": "ENOSPC while writing the first per-entry manifest",
+  "exception": "OSError: [Errno 28] No space left on device",
+  "location": "manifest_path.write_text in compare-packages.py",
+  "buildsAffected": false,
+  "recovery": "No package rebuilt. Streamed hashes and sizes plus complete per-entry hashes saved to /tmp snapshots, then only this audit's four newly generated ZIPs removed after hashing, permitting compact evidence writes."
+}

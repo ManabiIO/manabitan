@@ -1,0 +1,18 @@
+{
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "candidateCommit": "20bf48435b4f93f5cdb61ce4bdeca621e36a21df",
+  "candidateTree": "874b0c2276dfcc585437b297c34f0fb934b0e681",
+  "sourcePath": "ext/js/dictionary/dense-zip-directory.js",
+  "candidateSourceSha256": "21dc3fdcb93c1fc724dc92fde2582364f2534c98a8e755c24f4d12640b1f7e81",
+  "patchBase": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "executedScripts": [
+    "check-executed.mjs",
+    "measure-executed.mjs"
+  ],
+  "portableScripts": [
+    "reproduce-check.mjs",
+    "reproduce-measure.mjs"
+  ],
+  "historicalCheckout": "/workspace/scratch/f0f7782e255e/vndb",
+  "note": "Executed scripts and reports preserve historical absolute paths. The historical /vndb checkout subsequently fast-forwarded from20bf484 to51a21635; use the recorded commit in an isolated checkout to reproduce the original candidate. Portable wrappers accept all paths explicitly; no new runs were made after path parameterization."
+}

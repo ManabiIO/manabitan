@@ -1,0 +1,468 @@
+{
+  "dictionary": "jmdict",
+  "scope": "Exact byte-balanced lazy-planner groups, parsed sequentially; production record encoder and checksummed envelopes with deterministic source-content span references. No compression, global content deduplication, browser OPFS, UI, elapsed-time or peak-memory claim.",
+  "base": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "candidateSourceSha256": "de10461786cedfbea211fd2acc96a6d2da62c7a51903a5bb9b06221aeb3699a7",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "parserWasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+  "bankCount": 53,
+  "sourceBytes": 171617523,
+  "configurations": [
+    {
+      "workerCount": 2,
+      "groupCount": 8,
+      "rows": 528299,
+      "segments": 18,
+      "splitGroups": 5,
+      "splitRows": 348299,
+      "baselineStagingCopyBytes": 3146392,
+      "candidateStagingCopyBytes": 1056598,
+      "avoidedStagingCopyBytes": 2089794,
+      "envelopeBytes": 23705324,
+      "groups": [
+        {
+          "group": 0,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_7.json",
+          "rows": 70000,
+          "segments": [
+            30000,
+            30000,
+            10000
+          ],
+          "avoidedStagingCopyBytes": 420000
+        },
+        {
+          "group": 1,
+          "firstBank": "term_bank_8.json",
+          "lastBank": "term_bank_13.json",
+          "rows": 60000,
+          "segments": [
+            60000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 2,
+          "firstBank": "term_bank_14.json",
+          "lastBank": "term_bank_19.json",
+          "rows": 60000,
+          "segments": [
+            60000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 3,
+          "firstBank": "term_bank_20.json",
+          "lastBank": "term_bank_26.json",
+          "rows": 70000,
+          "segments": [
+            30000,
+            30000,
+            10000
+          ],
+          "avoidedStagingCopyBytes": 420000
+        },
+        {
+          "group": 4,
+          "firstBank": "term_bank_27.json",
+          "lastBank": "term_bank_33.json",
+          "rows": 70000,
+          "segments": [
+            30000,
+            30000,
+            10000
+          ],
+          "avoidedStagingCopyBytes": 420000
+        },
+        {
+          "group": 5,
+          "firstBank": "term_bank_34.json",
+          "lastBank": "term_bank_40.json",
+          "rows": 70000,
+          "segments": [
+            30000,
+            30000,
+            10000
+          ],
+          "avoidedStagingCopyBytes": 420000
+        },
+        {
+          "group": 6,
+          "firstBank": "term_bank_41.json",
+          "lastBank": "term_bank_46.json",
+          "rows": 60000,
+          "segments": [
+            60000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 7,
+          "firstBank": "term_bank_47.json",
+          "lastBank": "term_bank_53.json",
+          "rows": 68299,
+          "segments": [
+            30000,
+            30000,
+            8299
+          ],
+          "avoidedStagingCopyBytes": 409794
+        }
+      ],
+      "envelopeSha256": "daa9400777866a9880637196e115e911314d9c3280cb38188ac57217065546cb"
+    },
+    {
+      "workerCount": 3,
+      "groupCount": 12,
+      "rows": 528299,
+      "segments": 12,
+      "splitGroups": 0,
+      "splitRows": 0,
+      "baselineStagingCopyBytes": 1056598,
+      "candidateStagingCopyBytes": 1056598,
+      "avoidedStagingCopyBytes": 0,
+      "envelopeBytes": 23748912,
+      "groups": [
+        {
+          "group": 0,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_5.json",
+          "rows": 50000,
+          "segments": [
+            50000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 1,
+          "firstBank": "term_bank_6.json",
+          "lastBank": "term_bank_9.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 2,
+          "firstBank": "term_bank_10.json",
+          "lastBank": "term_bank_13.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 3,
+          "firstBank": "term_bank_14.json",
+          "lastBank": "term_bank_17.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 4,
+          "firstBank": "term_bank_18.json",
+          "lastBank": "term_bank_22.json",
+          "rows": 50000,
+          "segments": [
+            50000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 5,
+          "firstBank": "term_bank_23.json",
+          "lastBank": "term_bank_27.json",
+          "rows": 50000,
+          "segments": [
+            50000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 6,
+          "firstBank": "term_bank_28.json",
+          "lastBank": "term_bank_31.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 7,
+          "firstBank": "term_bank_32.json",
+          "lastBank": "term_bank_36.json",
+          "rows": 50000,
+          "segments": [
+            50000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 8,
+          "firstBank": "term_bank_37.json",
+          "lastBank": "term_bank_40.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 9,
+          "firstBank": "term_bank_41.json",
+          "lastBank": "term_bank_44.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 10,
+          "firstBank": "term_bank_45.json",
+          "lastBank": "term_bank_48.json",
+          "rows": 40000,
+          "segments": [
+            40000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 11,
+          "firstBank": "term_bank_49.json",
+          "lastBank": "term_bank_53.json",
+          "rows": 48299,
+          "segments": [
+            48299
+          ],
+          "avoidedStagingCopyBytes": 0
+        }
+      ],
+      "envelopeSha256": "bd92388a1430ddd1f353cdadf47aeb8f748403baf276202511fc18d07f74492e"
+    },
+    {
+      "workerCount": 5,
+      "groupCount": 20,
+      "rows": 528299,
+      "segments": 20,
+      "splitGroups": 0,
+      "splitRows": 0,
+      "baselineStagingCopyBytes": 1056598,
+      "candidateStagingCopyBytes": 1056598,
+      "avoidedStagingCopyBytes": 0,
+      "envelopeBytes": 23761324,
+      "groups": [
+        {
+          "group": 0,
+          "firstBank": "term_bank_1.json",
+          "lastBank": "term_bank_3.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 1,
+          "firstBank": "term_bank_4.json",
+          "lastBank": "term_bank_6.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 2,
+          "firstBank": "term_bank_7.json",
+          "lastBank": "term_bank_9.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 3,
+          "firstBank": "term_bank_10.json",
+          "lastBank": "term_bank_12.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 4,
+          "firstBank": "term_bank_13.json",
+          "lastBank": "term_bank_14.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 5,
+          "firstBank": "term_bank_15.json",
+          "lastBank": "term_bank_16.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 6,
+          "firstBank": "term_bank_17.json",
+          "lastBank": "term_bank_19.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 7,
+          "firstBank": "term_bank_20.json",
+          "lastBank": "term_bank_22.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 8,
+          "firstBank": "term_bank_23.json",
+          "lastBank": "term_bank_25.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 9,
+          "firstBank": "term_bank_26.json",
+          "lastBank": "term_bank_27.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 10,
+          "firstBank": "term_bank_28.json",
+          "lastBank": "term_bank_29.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 11,
+          "firstBank": "term_bank_30.json",
+          "lastBank": "term_bank_32.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 12,
+          "firstBank": "term_bank_33.json",
+          "lastBank": "term_bank_35.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 13,
+          "firstBank": "term_bank_36.json",
+          "lastBank": "term_bank_37.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 14,
+          "firstBank": "term_bank_38.json",
+          "lastBank": "term_bank_40.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 15,
+          "firstBank": "term_bank_41.json",
+          "lastBank": "term_bank_43.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 16,
+          "firstBank": "term_bank_44.json",
+          "lastBank": "term_bank_45.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 17,
+          "firstBank": "term_bank_46.json",
+          "lastBank": "term_bank_47.json",
+          "rows": 20000,
+          "segments": [
+            20000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 18,
+          "firstBank": "term_bank_48.json",
+          "lastBank": "term_bank_50.json",
+          "rows": 30000,
+          "segments": [
+            30000
+          ],
+          "avoidedStagingCopyBytes": 0
+        },
+        {
+          "group": 19,
+          "firstBank": "term_bank_51.json",
+          "lastBank": "term_bank_53.json",
+          "rows": 28299,
+          "segments": [
+            28299
+          ],
+          "avoidedStagingCopyBytes": 0
+        }
+      ],
+      "envelopeSha256": "600f5159119993f97a28eda89549b26b7e01d116dcebdf03226538c82d59c382"
+    }
+  ]
+}

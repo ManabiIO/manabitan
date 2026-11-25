@@ -1,0 +1,393 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-25",
+  "repository": "ManabiIO/manabitan",
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "sourcePullRequests": {
+    "891": {
+      "commit": "b9cf94b4cc088cb4e06a4ae5cae6b29a7ae59241",
+      "tree": "b4e35f00c7219a071f8871f1c3e39ebf017831b1"
+    },
+    "897": {
+      "commit": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+      "tree": "59959442e3d7ec9290d9da5d1177a7df28b58ed1"
+    },
+    "901": {
+      "commit": "ea176867e66515d12f7a75c044d1082624ce76cd",
+      "tree": "e6674d7451bfa720f288ce2bec723167e0ec1d1b"
+    }
+  },
+  "scope": "Original component observations and failures, frozen source identities, portable reproduction helpers, source-head hosted CI, and complete Chrome package comparison. No whole-import timing or process-memory claim. This manifest excludes itself.",
+  "files": [
+    {
+      "path": "audit/handoff-package-review.json",
+      "bytes": 1006,
+      "sha256": "d0e04bb07deeaafeff92ee338031e8d36199969919df34c117dd1f3f5f96228d"
+    },
+    {
+      "path": "audit/independent-evidence-audit.json",
+      "bytes": 8618,
+      "sha256": "eda1f0ac94b1677fb8d697bfd754f6593a7800ad912c517eeb1a7f485b26abf0"
+    },
+    {
+      "path": "jmdict/README.md",
+      "bytes": 4958,
+      "sha256": "ec5b47c506e2b9b1455939ae1d805273fb36fa310b9369cd35696ce630a2a83a"
+    },
+    {
+      "path": "jmdict/executed-eager-archive.mjs",
+      "bytes": 9570,
+      "sha256": "570d8899609ecec70378ae1a39a6cc2078ea7fe9c41310abdc9f3db1bdb5ee8a"
+    },
+    {
+      "path": "jmdict/file-backed-archive.mjs",
+      "bytes": 9696,
+      "sha256": "b8b9e5dc7ee1a320fb5ab2ffe6b034af261fdf616446354a1848de111aec88c1"
+    },
+    {
+      "path": "jmdict/hosted-ci.json",
+      "bytes": 6466,
+      "sha256": "36092434c174a112b572e573d26a8d885353237840545cdb9a4a6e444a2fcece"
+    },
+    {
+      "path": "jmdict/record-split-jmdict-replay.json",
+      "bytes": 12245,
+      "sha256": "0208f2d00cbd0bb5fa905ab140a329de1b2c5b34b8aa9299065e9c259ceb1ff6"
+    },
+    {
+      "path": "jmdict/record-split-vndb-eager-archive-failure.json",
+      "bytes": 429,
+      "sha256": "171a2925f1185efdf8d85ad3346ba7d3af968e9c89aba49e9ea6d94544e915cb"
+    },
+    {
+      "path": "jmdict/record-split-vndb-file-backed-incomplete.json",
+      "bytes": 897,
+      "sha256": "dec5404351a1a1cf367ca101986944dec8f5751a584af10a0eb1853c73019d4b"
+    },
+    {
+      "path": "jmdict/record-split-vndb-file-backed.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "jmdict/reproduce-jmdict.py",
+      "bytes": 2917,
+      "sha256": "4cc258b0e8f3f4a82eab8d217faa9cc47c430a6b0dd85c4ea7e05c6dc8a4e742"
+    },
+    {
+      "path": "jmdict/source-and-evidence-hashes.json",
+      "bytes": 2359,
+      "sha256": "7b5e7b0d901987850ed99857ae9cea792fe30e5c2d2f3a666f3708618c4a9f00"
+    },
+    {
+      "path": "jmdict/source-only.patch",
+      "bytes": 13682,
+      "sha256": "de76fc8d3ae5d4552160a58d4b8f08633c8a61a8bb70167eba73f70dc18b3a08"
+    },
+    {
+      "path": "package/README.md",
+      "bytes": 3539,
+      "sha256": "1abde4bc35752da62ab72a6a62b51bf6d52675a50b728ddaa537ad676cbae395"
+    },
+    {
+      "path": "package/build-one.py",
+      "bytes": 1732,
+      "sha256": "c2052b8a7897616b47710d5620683bf8dcafaa69946386fef21fece9ce9d2df2"
+    },
+    {
+      "path": "package/compare-packages.py",
+      "bytes": 6766,
+      "sha256": "fc6f111143f56e53e38f4370a947c0d0236e0c23093d650850a3556c0a24cea9"
+    },
+    {
+      "path": "package/comparison-initial-failure.json",
+      "bytes": 536,
+      "sha256": "20d453d6c83e2147a7d2629b9b4b7edebd909febe5c2185c931c149dae0394ff"
+    },
+    {
+      "path": "package/evidence-hashes.json",
+      "bytes": 1666,
+      "sha256": "58e950a3bde73d9c232efe83a3d0d468aef546911d213717c371e7d27c749bf5"
+    },
+    {
+      "path": "package/jitendex-build.json",
+      "bytes": 385,
+      "sha256": "9db6fb7ff241c4a34c662b6b2d7aa018bb0b240d08681fdd3350f9484e1f09a2"
+    },
+    {
+      "path": "package/jitendex-build.log",
+      "bytes": 279,
+      "sha256": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba"
+    },
+    {
+      "path": "package/jitendex-entries.json",
+      "bytes": 101935,
+      "sha256": "5b2b02e777a9faf3110f1baef65c1434d7303c0207dd36edbb3a229d784fe9a3"
+    },
+    {
+      "path": "package/jmdict-build.json",
+      "bytes": 379,
+      "sha256": "af91a13b9a3b5f53a812cec25e7baa26527859aaf77c1510bd737547cd063bd0"
+    },
+    {
+      "path": "package/jmdict-build.log",
+      "bytes": 279,
+      "sha256": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba"
+    },
+    {
+      "path": "package/jmdict-entries.json",
+      "bytes": 101935,
+      "sha256": "caef7eee5c56dbc37cd5b6a2ed4f62346e6dbf166f1041610b15a1f5cbb6728b"
+    },
+    {
+      "path": "package/manabitan-base-build.json",
+      "bytes": 403,
+      "sha256": "83d3a93dcd3134d204fd0f1efea50bb0cd880ec8f0bd25090da62884e236c237"
+    },
+    {
+      "path": "package/manabitan-base-build.log",
+      "bytes": 279,
+      "sha256": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba"
+    },
+    {
+      "path": "package/manabitan-base-entries.json",
+      "bytes": 101935,
+      "sha256": "5d2fc47780aa9950844ddbbc0526f726556eddf13149619e6dcea7a042e47a37"
+    },
+    {
+      "path": "package/package-audit.json",
+      "bytes": 12720,
+      "sha256": "7a855f3e87e628422079c2d04ecd49433806d8165fba1cbf36c4a26efe450691"
+    },
+    {
+      "path": "package/state.json",
+      "bytes": 1231,
+      "sha256": "f9c8b132502d91e19dc6c94a3208419383608db549d3e278c8066f1a0b782f72"
+    },
+    {
+      "path": "package/vndb-build.json",
+      "bytes": 373,
+      "sha256": "e1790a804abf2277571329881b2becd8c6e6c531b4730d7a398c4e226952f2a3"
+    },
+    {
+      "path": "package/vndb-build.log",
+      "bytes": 279,
+      "sha256": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba"
+    },
+    {
+      "path": "package/vndb-entries.json",
+      "bytes": 101935,
+      "sha256": "ca297a7926d2eb807ef60055f67be07f6bb3247e611bf711626ab0a66465c73e"
+    },
+    {
+      "path": "verify-integrity.py",
+      "bytes": 1229,
+      "sha256": "6769921c2aafa4c8039e83689739a2908162ac31974cc43e2881ba5e0f7cfc50"
+    },
+    {
+      "path": "vndb-combined/check-executed.mjs",
+      "bytes": 4391,
+      "sha256": "8918bcf256c0d8c484142bc6f539d51de82416fa2c6643793aafcee31fcac67b"
+    },
+    {
+      "path": "vndb-combined/eslint-initial.log",
+      "bytes": 964,
+      "sha256": "770eb26f08d0ac7d0e31a4894b792ba1160a68e8a44e6dc2ca4fcc9920f50893"
+    },
+    {
+      "path": "vndb-combined/eslint.log",
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    {
+      "path": "vndb-combined/focused.log",
+      "bytes": 237,
+      "sha256": "1acc05d181fb7503bc2862618d1b1b479104896d35a4da3016599c1b1c644be2"
+    },
+    {
+      "path": "vndb-combined/hosted-ci-source.json",
+      "bytes": 17557,
+      "sha256": "f9a063a922fe09e89db9be3fade6655332b40a3c2acfed8d7526b19af4cc822a"
+    },
+    {
+      "path": "vndb-combined/manifest.json",
+      "bytes": 3223,
+      "sha256": "4525e42db84fb653a34719c132d2ed38e4041ebb1b0e07d05b75ad7f47b0e8d6"
+    },
+    {
+      "path": "vndb-combined/measure-executed.mjs",
+      "bytes": 4797,
+      "sha256": "9b65cd6870449db30054fc2b76c62d6f3f6b6f3a201abb64cf7b3e73eb5e6903"
+    },
+    {
+      "path": "vndb-combined/measure-raw.json",
+      "bytes": 56278,
+      "sha256": "f24eed2a305b98d5ea63334acfccb89794e8799fec87e9c4fa7083d4ec041330"
+    },
+    {
+      "path": "vndb-combined/measure-summary.json",
+      "bytes": 2169,
+      "sha256": "8628cd682353e8d8488a5605a3d55049a3745c68bcb2a48f7f6d95be95798013"
+    },
+    {
+      "path": "vndb-combined/measure.log",
+      "bytes": 1592,
+      "sha256": "59c6de234b58a319c47ac8c608dfeb83e284f6d52b1169a2e197287ea8e888c7"
+    },
+    {
+      "path": "vndb-combined/parity.json",
+      "bytes": 3154,
+      "sha256": "c643232017a0ca1a474b90b79448d6d836200b48f7c42c4d6c9e40a886efdeec"
+    },
+    {
+      "path": "vndb-combined/parity.log",
+      "bytes": 2432,
+      "sha256": "b09691171b2326f049e12ba1e2b8dc352bfc17aac6e07cdfce18b6c0d67fbf28"
+    },
+    {
+      "path": "vndb-combined/provenance.json",
+      "bytes": 989,
+      "sha256": "639e54f35216573f7fa8da8e6d766288ff659566d2a2f501758b3cc89baf4b2b"
+    },
+    {
+      "path": "vndb-combined/reproduce-check.mjs",
+      "bytes": 4769,
+      "sha256": "946152026e4ab057ba080cc27b9845cca8141158447d732b6cb6bfe24330d1d8"
+    },
+    {
+      "path": "vndb-combined/reproduce-measure.mjs",
+      "bytes": 5705,
+      "sha256": "407d1460537fc8a49104023ab8f39a815490b5e7dd17ec519d76fd45ec83a751"
+    },
+    {
+      "path": "vndb-combined/source-baseline.js",
+      "bytes": 7022,
+      "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b"
+    },
+    {
+      "path": "vndb-combined/source-candidate.js",
+      "bytes": 9414,
+      "sha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63"
+    },
+    {
+      "path": "vndb-combined/source-from-baseline.patch",
+      "bytes": 4958,
+      "sha256": "48ebbb9f02a90f098084f25f90128508a30f79cccba6700b473759f188b33281"
+    },
+    {
+      "path": "vndb-combined/source-identities.json",
+      "bytes": 682,
+      "sha256": "9ac50aa644401564a8f1f3e3c741efd67570589dce0592182316344b7beeb730"
+    },
+    {
+      "path": "vndb-combined/source-parent.js",
+      "bytes": 8987,
+      "sha256": "21dc3fdcb93c1fc724dc92fde2582364f2534c98a8e755c24f4d12640b1f7e81"
+    },
+    {
+      "path": "vndb-combined/source.patch",
+      "bytes": 2475,
+      "sha256": "c8271d47602cf1668d48a9ec3b61d2f8ef756ff26f25e47d25272cb9c4f0d7c6"
+    },
+    {
+      "path": "vndb-combined/validation.json",
+      "bytes": 1307,
+      "sha256": "99758c9d84105e60033ce5c44772a6914c70b19a85cd8e61a08d5e2c4022dcff"
+    },
+    {
+      "path": "vndb-lazy/check-executed.mjs",
+      "bytes": 4391,
+      "sha256": "8918bcf256c0d8c484142bc6f539d51de82416fa2c6643793aafcee31fcac67b"
+    },
+    {
+      "path": "vndb-lazy/eslint-initial.log",
+      "bytes": 1525,
+      "sha256": "1fc3a6a546c5a46addb2188fe945667860e4926a593a5b16324d0b59c3e93798"
+    },
+    {
+      "path": "vndb-lazy/manifest.json",
+      "bytes": 2326,
+      "sha256": "d7e66b29a21cf5fc270eadb8fa1cb08459276bdfe74431b1007a5dd27e206d5f"
+    },
+    {
+      "path": "vndb-lazy/measure-executed.mjs",
+      "bytes": 4797,
+      "sha256": "9b65cd6870449db30054fc2b76c62d6f3f6b6f3a201abb64cf7b3e73eb5e6903"
+    },
+    {
+      "path": "vndb-lazy/measure-raw.json",
+      "bytes": 56300,
+      "sha256": "6d5e83029501f900f45e95b5b3694884b4aa173946f09065886139b159ed2f8d"
+    },
+    {
+      "path": "vndb-lazy/measure-summary.json",
+      "bytes": 2155,
+      "sha256": "ed9703697c8f15ea9ebb64b9cbdac5617ceaeb05c982559e6098f0468baf6533"
+    },
+    {
+      "path": "vndb-lazy/parity.json",
+      "bytes": 3127,
+      "sha256": "371348fad380a35ddf595674cb5f396cd94778866da14d357adbc714b9cb14f5"
+    },
+    {
+      "path": "vndb-lazy/provenance.json",
+      "bytes": 980,
+      "sha256": "2ed1fd8a4951870e0b01a83ba033bcaca3b5543aca44a89b90e50323b2786822"
+    },
+    {
+      "path": "vndb-lazy/reproduce-check.mjs",
+      "bytes": 4769,
+      "sha256": "946152026e4ab057ba080cc27b9845cca8141158447d732b6cb6bfe24330d1d8"
+    },
+    {
+      "path": "vndb-lazy/reproduce-measure.mjs",
+      "bytes": 5705,
+      "sha256": "407d1460537fc8a49104023ab8f39a815490b5e7dd17ec519d76fd45ec83a751"
+    },
+    {
+      "path": "vndb-lazy/retry-focused.log",
+      "bytes": 236,
+      "sha256": "4a32bb200ba15754b76e35eb4c6b4e359406b37b92fd45936c6cf2d6e16e8be0"
+    },
+    {
+      "path": "vndb-lazy/source-baseline.js",
+      "bytes": 7022,
+      "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b"
+    },
+    {
+      "path": "vndb-lazy/source-candidate.js",
+      "bytes": 8987,
+      "sha256": "21dc3fdcb93c1fc724dc92fde2582364f2534c98a8e755c24f4d12640b1f7e81"
+    },
+    {
+      "path": "vndb-lazy/source-identities.json",
+      "bytes": 539,
+      "sha256": "cc5f44863507c9ff0c9a5bf0ca68b5b93531dd8fff4686b568fb53f894e40ac6"
+    },
+    {
+      "path": "vndb-lazy/source.patch",
+      "bytes": 3671,
+      "sha256": "d8778cc3b7ebd75bbbeba1a087748a5fafecca7a5c786301ae207a07e01e8e98"
+    },
+    {
+      "path": "vndb-lazy/validation.json",
+      "bytes": 1339,
+      "sha256": "02c8d7d8c202f10fbddd7f73f0cfc2af2f936bee49602c6cae1f31981e0c5b41"
+    },
+    {
+      "path": "zstd/allocator-original-receipt.json",
+      "bytes": 4154,
+      "sha256": "32390add9e62378cd6abfc561578fa8f5d47b5dfd9c527ee8f2a24f5899c5392"
+    },
+    {
+      "path": "zstd/final-head-ci-receipt.json",
+      "bytes": 4227,
+      "sha256": "fc831380036b711f24d385906a628f3553e69a4262f314baefcdec5975ea533f"
+    },
+    {
+      "path": "zstd/reproduce-allocator-spacing.mjs",
+      "bytes": 4404,
+      "sha256": "d28af1f380b7c24224320d4319defbb8a256c5b4c386022c983f6495afdb913d"
+    }
+  ]
+}

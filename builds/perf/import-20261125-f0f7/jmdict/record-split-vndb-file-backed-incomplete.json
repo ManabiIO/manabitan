@@ -1,0 +1,18 @@
+{
+  "dictionary": "vndb",
+  "attempt": "streaming SHA verification and file-backed BlobReader",
+  "command": "node --max-old-space-size=768 /workspace/scratch/f0f7782e255e/record-split-replay.mjs vndb 5 > /workspace/scratch/f0f7782e255e/record-split-vndb-file-backed.log 2>&1",
+  "startedAt": "2026-11-25T15:05:49Z",
+  "observedAt": "2026-11-25T15:10:41.570075+00:00",
+  "outcome": "incomplete",
+  "exitCode": null,
+  "completedObservations": 0,
+  "logBytes": 0,
+  "finalReportExists": false,
+  "scriptSha256": "b8b9e5dc7ee1a320fb5ab2ffe6b034af261fdf616446354a1848de111aec88c1",
+  "notes": [
+    "The execution response was truncated during context compaction. The session ID and final exit status are unavailable.",
+    "No final validated report has been observed. No exit code, performance result, parity result, or cause is inferred.",
+    "The attempted replay has not been restarted."
+  ]
+}

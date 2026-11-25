@@ -1,0 +1,51 @@
+diff --git a/ext/js/dictionary/dense-zip-directory.js b/ext/js/dictionary/dense-zip-directory.js
+index c8acf9bac..44209e176 100644
+--- a/ext/js/dictionary/dense-zip-directory.js
++++ b/ext/js/dictionary/dense-zip-directory.js
+@@ -82,6 +82,13 @@ class DenseZipCatalogEntry {
+     get rawFilename() {
+         return this.#filenameBytes.subarray(this.#filenameOffset, this.#filenameOffset + this.#filenameLength)
+     }
++
++    /**
++     * @param {string} filenames Validated printable ASCII, so string and byte offsets agree.
++     */
++    assignFilename(filenames) {
++        this.filename = filenames.slice(this.#filenameOffset, this.#filenameOffset + this.#filenameLength)
++    }
+ }
+ /* eslint-enable @stylistic/semi */
+ 
+@@ -156,7 +163,7 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
+     // This narrow directory has no extra fields or comments. Filename views
+     // retain a compact arena so catalog entries can release central headers.
+     const filenameBytes = new Uint8Array(length - count * DIRECTORY_HEADER_BYTES)
+-    /** @type {DenseZipEntry[]} */
++    /** @type {DenseZipCatalogEntry[]} */
+     const entries = [];
+     let position = 0;
+     let localEnd = 0;
+@@ -190,9 +197,8 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
+             if (value < 0x20 || value > 0x7e) { return null; }
+             filenameBytes[filenamePosition + i] = value
+         }
+-        const rawFilename = filenameBytes.subarray(filenamePosition, filenamePosition + filenameLength)
+         entries.push(new DenseZipCatalogEntry(
+-            decoder.decode(rawFilename),
++            '',
+             filenameBytes,
+             filenamePosition,
+             filenameLength,
+@@ -206,6 +212,11 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
+         localEnd = localOffset + LOCAL_HEADER_BYTES + filenameLength + compressedSize;
+         filenamePosition += filenameLength
+     }
++    if (position !== length || localEnd !== offset) { return null }
++    // Decode only after the complete directory has proved the arena is plain
++    // ASCII. Finish names without allocating a temporary byte view per entry.
++    const filenames = decoder.decode(filenameBytes)
++    for (const entry of entries) { entry.assignFilename(filenames) }
++    return entries
+     /* eslint-enable @stylistic/semi */
+-    return position === length && localEnd === offset ? entries : null;
+ }

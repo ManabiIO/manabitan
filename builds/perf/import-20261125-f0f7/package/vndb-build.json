@@ -1,0 +1,19 @@
+{
+  "checkout": "vndb",
+  "path": "/workspace/scratch/f0f7782e255e/vndb",
+  "head": "51a21635194dadd57aa31c2aab3b7dd7dc448630",
+  "command": [
+    "npm",
+    "run",
+    "build",
+    "--",
+    "--target",
+    "chrome"
+  ],
+  "status": "success",
+  "exitCode": 0,
+  "log": "vndb-build.log",
+  "trackedStatusBefore": "",
+  "trackedStatusAfter": "",
+  "trackedDiffAfter": ""
+}

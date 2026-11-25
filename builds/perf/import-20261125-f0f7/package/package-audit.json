@@ -1,0 +1,351 @@
+{
+  "scope": "Four sequential npm Chrome package builds and complete decompressed-entry SHA256 comparison; no import or timing measurement.",
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "node": "v24.22.3",
+  "npm": "11.19.1",
+  "packages": {
+    "manabitan-base": {
+      "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--",
+        "--target",
+        "chrome"
+      ],
+      "exitCode": 0,
+      "trackedStatusBefore": "",
+      "trackedStatusAfter": "",
+      "archive": "/workspace/scratch/f0f7782e255e/manabitan-base/builds/manabitan-chrome.zip",
+      "archiveSha256": "91b7f4d720a015ff4794f954d454e97e6e3705c2e1e705eff820449ee9e490c8",
+      "packageBytes": 17273796,
+      "generatedArchiveRemovedAfterHashing": true,
+      "entryCount": 616,
+      "fileCount": 551,
+      "uncompressedBytes": 42495603,
+      "manifestVersion": "0.0.0.0",
+      "entriesManifest": "manabitan-base-entries.json",
+      "entriesManifestSha256": "5d2fc47780aa9950844ddbbc0526f726556eddf13149619e6dcea7a042e47a37",
+      "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "wasm": {
+        "lib/resvg.wasm": {
+          "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+          "bytes": 2478606,
+          "compressedBytes": 947424,
+          "directory": false
+        },
+        "lib/term-bank-parser.wasm": {
+          "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+          "bytes": 63004,
+          "compressedBytes": 23872,
+          "directory": false
+        },
+        "lib/term-content-canonical-scan-v1.wasm": {
+          "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+          "bytes": 1624,
+          "compressedBytes": 955,
+          "directory": false
+        },
+        "lib/zstd.wasm": {
+          "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+          "bytes": 433631,
+          "compressedBytes": 113023,
+          "directory": false
+        },
+        "lib/sqlite/sqlite3.wasm": {
+          "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+          "bytes": 859730,
+          "compressedBytes": 396658,
+          "directory": false
+        }
+      }
+    },
+    "jmdict": {
+      "head": "bee1b5e9e8fcaa0a9109dd83b1da9c396d8f87c3",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--",
+        "--target",
+        "chrome"
+      ],
+      "exitCode": 0,
+      "trackedStatusBefore": "",
+      "trackedStatusAfter": "",
+      "archive": "/workspace/scratch/f0f7782e255e/jmdict/builds/manabitan-chrome.zip",
+      "archiveSha256": "689b50f796cc3545f230518e66c0293d575309bb89c90f59acdb8fe7e387c99f",
+      "packageBytes": 17274263,
+      "generatedArchiveRemovedAfterHashing": true,
+      "entryCount": 616,
+      "fileCount": 551,
+      "uncompressedBytes": 42497615,
+      "manifestVersion": "0.0.0.0",
+      "entriesManifest": "jmdict-entries.json",
+      "entriesManifestSha256": "caef7eee5c56dbc37cd5b6a2ed4f62346e6dbf166f1041610b15a1f5cbb6728b",
+      "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "wasm": {
+        "lib/resvg.wasm": {
+          "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+          "bytes": 2478606,
+          "compressedBytes": 947424,
+          "directory": false
+        },
+        "lib/term-bank-parser.wasm": {
+          "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+          "bytes": 63004,
+          "compressedBytes": 23872,
+          "directory": false
+        },
+        "lib/term-content-canonical-scan-v1.wasm": {
+          "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+          "bytes": 1624,
+          "compressedBytes": 955,
+          "directory": false
+        },
+        "lib/zstd.wasm": {
+          "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+          "bytes": 433631,
+          "compressedBytes": 113023,
+          "directory": false
+        },
+        "lib/sqlite/sqlite3.wasm": {
+          "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+          "bytes": 859730,
+          "compressedBytes": 396658,
+          "directory": false
+        }
+      }
+    },
+    "jitendex": {
+      "head": "d22d618300e9f5c83c6c51fb79d4cd2250d4ddc0",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--",
+        "--target",
+        "chrome"
+      ],
+      "exitCode": 0,
+      "trackedStatusBefore": "",
+      "trackedStatusAfter": "",
+      "archive": "/workspace/scratch/f0f7782e255e/jitendex/builds/manabitan-chrome.zip",
+      "archiveSha256": "32de50347115f6f94698e49a26d6bed75e95b4d266c24e5015502d559ea4523c",
+      "packageBytes": 17273972,
+      "generatedArchiveRemovedAfterHashing": true,
+      "entryCount": 616,
+      "fileCount": 551,
+      "uncompressedBytes": 42496374,
+      "manifestVersion": "0.0.0.0",
+      "entriesManifest": "jitendex-entries.json",
+      "entriesManifestSha256": "5b2b02e777a9faf3110f1baef65c1434d7303c0207dd36edbb3a229d784fe9a3",
+      "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "wasm": {
+        "lib/resvg.wasm": {
+          "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+          "bytes": 2478606,
+          "compressedBytes": 947424,
+          "directory": false
+        },
+        "lib/term-bank-parser.wasm": {
+          "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+          "bytes": 63004,
+          "compressedBytes": 23872,
+          "directory": false
+        },
+        "lib/term-content-canonical-scan-v1.wasm": {
+          "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+          "bytes": 1624,
+          "compressedBytes": 955,
+          "directory": false
+        },
+        "lib/zstd.wasm": {
+          "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+          "bytes": 433631,
+          "compressedBytes": 113023,
+          "directory": false
+        },
+        "lib/sqlite/sqlite3.wasm": {
+          "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+          "bytes": 859730,
+          "compressedBytes": 396658,
+          "directory": false
+        }
+      }
+    },
+    "vndb": {
+      "head": "51a21635194dadd57aa31c2aab3b7dd7dc448630",
+      "command": [
+        "npm",
+        "run",
+        "build",
+        "--",
+        "--target",
+        "chrome"
+      ],
+      "exitCode": 0,
+      "trackedStatusBefore": "",
+      "trackedStatusAfter": "",
+      "archive": "/workspace/scratch/f0f7782e255e/vndb/builds/manabitan-chrome.zip",
+      "archiveSha256": "6141aae728964b7bd0b77118502acf34b8f51be79d092d22aebc35b283eeae29",
+      "packageBytes": 17274350,
+      "generatedArchiveRemovedAfterHashing": true,
+      "entryCount": 616,
+      "fileCount": 551,
+      "uncompressedBytes": 42497995,
+      "manifestVersion": "0.0.0.0",
+      "entriesManifest": "vndb-entries.json",
+      "entriesManifestSha256": "ca297a7926d2eb807ef60055f67be07f6bb3247e611bf711626ab0a66465c73e",
+      "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "wasm": {
+        "lib/resvg.wasm": {
+          "sha256": "22bf6e9f9a100d972da0411a69c5ba504367fc1fa87b3b64e3f35e53926d2d70",
+          "bytes": 2478606,
+          "compressedBytes": 947424,
+          "directory": false
+        },
+        "lib/term-bank-parser.wasm": {
+          "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+          "bytes": 63004,
+          "compressedBytes": 23872,
+          "directory": false
+        },
+        "lib/term-content-canonical-scan-v1.wasm": {
+          "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+          "bytes": 1624,
+          "compressedBytes": 955,
+          "directory": false
+        },
+        "lib/zstd.wasm": {
+          "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+          "bytes": 433631,
+          "compressedBytes": 113023,
+          "directory": false
+        },
+        "lib/sqlite/sqlite3.wasm": {
+          "sha256": "2d8049756d9d3765f3afac6eb4766457152fb5f417d2febe2836ee3c2223b3e2",
+          "bytes": 859730,
+          "compressedBytes": 396658,
+          "directory": false
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "jmdict": {
+      "packageByteDelta": 467,
+      "uncompressedByteDelta": 2012,
+      "addedEntries": [],
+      "removedEntries": [],
+      "changedEntries": {
+        "js/dictionary/term-record-opfs-store.js": {
+          "baseline": {
+            "sha256": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+            "bytes": 363245,
+            "compressedBytes": 58471,
+            "directory": false
+          },
+          "candidate": {
+            "sha256": "de10461786cedfbea211fd2acc96a6d2da62c7a51903a5bb9b06221aeb3699a7",
+            "bytes": 365257,
+            "compressedBytes": 58938,
+            "directory": false
+          }
+        }
+      },
+      "unchangedEntryCount": 615,
+      "expectedRuntimeChanges": [
+        "js/dictionary/term-record-opfs-store.js"
+      ],
+      "unexpectedChangedEntries": [],
+      "expectedButUnchangedEntries": [],
+      "changedJavaScriptUncompressedBytes": {
+        "baseline": 363245,
+        "candidate": 365257,
+        "delta": 2012
+      },
+      "wasmNamesIdentical": true,
+      "allWasmHashesMatch": true
+    },
+    "jitendex": {
+      "packageByteDelta": 176,
+      "uncompressedByteDelta": 771,
+      "addedEntries": [],
+      "removedEntries": [],
+      "changedEntries": {
+        "js/dictionary/zstd-term-content.js": {
+          "baseline": {
+            "sha256": "6b4ccd44191ecc84d29eb5641ed1da087c8497373ee64229824ca54727a99ae9",
+            "bytes": 40213,
+            "compressedBytes": 7968,
+            "directory": false
+          },
+          "candidate": {
+            "sha256": "f28eaf9425fad2031423518170b0888c4ad0f607d62b349ea57a2438fe4b17ed",
+            "bytes": 40984,
+            "compressedBytes": 8144,
+            "directory": false
+          }
+        }
+      },
+      "unchangedEntryCount": 615,
+      "expectedRuntimeChanges": [
+        "js/dictionary/zstd-term-content.js"
+      ],
+      "unexpectedChangedEntries": [],
+      "expectedButUnchangedEntries": [],
+      "changedJavaScriptUncompressedBytes": {
+        "baseline": 40213,
+        "candidate": 40984,
+        "delta": 771
+      },
+      "wasmNamesIdentical": true,
+      "allWasmHashesMatch": true
+    },
+    "vndb": {
+      "packageByteDelta": 554,
+      "uncompressedByteDelta": 2392,
+      "addedEntries": [],
+      "removedEntries": [],
+      "changedEntries": {
+        "js/dictionary/dense-zip-directory.js": {
+          "baseline": {
+            "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+            "bytes": 7022,
+            "compressedBytes": 2154,
+            "directory": false
+          },
+          "candidate": {
+            "sha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+            "bytes": 9414,
+            "compressedBytes": 2708,
+            "directory": false
+          }
+        }
+      },
+      "unchangedEntryCount": 615,
+      "expectedRuntimeChanges": [
+        "js/dictionary/dense-zip-directory.js"
+      ],
+      "unexpectedChangedEntries": [],
+      "expectedButUnchangedEntries": [],
+      "changedJavaScriptUncompressedBytes": {
+        "baseline": 7022,
+        "candidate": 9414,
+        "delta": 2392
+      },
+      "wasmNamesIdentical": true,
+      "allWasmHashesMatch": true
+    }
+  },
+  "recoverySnapshotDirectory": "/tmp/manabitan-package-audit-lthgiw5z",
+  "notes": [
+    "npm run build invokes buildLibs internally; no separate duplicate library build was run.",
+    "Packages use the requested chrome target and default manifest version 0.0.0.0.",
+    "ZIP container hashes may differ due to entry metadata; content parity is determined by complete per-entry decompressed SHA256 hashes.",
+    "Archive reads verify ZIP CRCs. No source was edited by this audit; tracked status before and after each build is retained.",
+    "The first comparison could not write its first manifest because the workspace reported ENOSPC. The recovery hashed every package and entry, preserved a compact snapshot in /tmp, then removed only these four newly built ZIPs to free workspace space. No package was rebuilt."
+  ]
+}

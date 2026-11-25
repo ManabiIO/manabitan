@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/f0f7782e255e/vndb-combined
+
+
+ Test Files  4 passed (4)
+      Tests  140 passed (140)
+   Start at  10:03:25
+   Duration  12.90s (transform 1.65s, setup 235ms, import 2.62s, tests 8.89s, environment 0ms)
+

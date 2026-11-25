@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-11-25",
+  "repository": "ManabiIO/manabitan",
+  "pullRequest": "https://github.com/ManabiIO/manabitan/pull/891",
+  "headCommit": "b9cf94b4cc088cb4e06a4ae5cae6b29a7ae59241",
+  "sourceTree": "b4e35f00c7219a071f8871f1c3e39ebf017831b1",
+  "runtimeNode": "22.22.0",
+  "provenance": "Final-head workflow metadata and successful job logs fetched through the GitHub connector. Counts are copied from final-head log summaries; overlapping suites are not summed.",
+  "workflows": [
+    {"name": "CI", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640482102"},
+    {"name": "ManabiTan static web acceptance", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481632"},
+    {"name": "Chromium Restart Interruption", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481785"},
+    {"name": "CodeQL", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640482099"},
+    {"name": "Dependency Review", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481649"},
+    {"name": "Lint GitHub Actions workflows", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481755"},
+    {"name": "Auto-Approve Safe PRs", "conclusion": "success", "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481662"}
+  ],
+  "jobs": [
+    {
+      "name": "Unit Tests",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640482102/job/139297388801",
+      "testFilesPassed": 647,
+      "testsPassed": 14556,
+      "testsSkipped": 47,
+      "testsTotal": 14603
+    },
+    {
+      "name": "Unit Tests (options)",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640482102/job/139297389200",
+      "testFilesPassed": 1,
+      "testsPassed": 32
+    },
+    {
+      "name": "Full Extension E2E (Chromium)",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640482102/job/139297388912",
+      "observed": "Actual PASS: Two-dictionary import profiling and verification completed; exercised import/update, restart persistence, lookup, multi-file import, hover, Reader bridge, and deletion scenarios."
+    },
+    {
+      "name": "Full Extension E2E (Firefox)",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640482102/job/139297388657",
+      "reportStatus": "success",
+      "phases": 62,
+      "unsupportedRuntimeSkip": false
+    },
+    {
+      "name": "Static web acceptance (chromium)",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481632/job/139297386328",
+      "prerequisiteTestFilesPassed": 4,
+      "prerequisiteTestsPassed": 78
+    },
+    {
+      "name": "Restart and interruption recovery (Chromium)",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640481785/job/139297386620",
+      "processTreeTestFilesPassed": 1,
+      "processTreeTestsPassed": 5
+    }
+  ],
+  "otherSuccessfulCiJobs": [
+    "Test Build",
+    "TypeScript (dev)",
+    "TypeScript (bench)",
+    "TypeScript (main)",
+    "TypeScript (test)",
+    "Anki Deduplication Matrix (Chromium)",
+    "HTML",
+    "JavaScript",
+    "CSS",
+    "Markdown",
+    "JSON"
+  ],
+  "conditionalCiJobsSkipped": [
+    "Published release upgrade and reimport",
+    "Full Extension E2E (Edge)",
+    "Firefox Android Gecko RDP Capability Probe (manual)",
+    "Firefox Android Installation Smoke (blocking)"
+  ],
+  "earlierHeadCorrection": {
+    "oldHead": "d16298b9bc1f65a50c0c45a743e16163b503fa4d",
+    "failure": "Test TypeScript TS2306 classified a literal dynamic import of the production worker script as not a module; static web failed on that same prerequisite.",
+    "fix": "The test now imports a fixed repository-owned file URL. No runtime source changed in this correction.",
+    "localFixCommit": "d22d618300e9f5c83c6c51fb79d4cd2250d4ddc0",
+    "finalHeadTestTypeScript": "success",
+    "rerunsRequestedByThisTask": 0
+  }
+}

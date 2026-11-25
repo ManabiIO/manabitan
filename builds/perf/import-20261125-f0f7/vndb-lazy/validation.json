@@ -1,0 +1,40 @@
+{
+  "initialFocused": {
+    "files": 4,
+    "testsPassed": 132,
+    "testsFailed": 3,
+    "failureKind": "default 5000ms wall timeout; no assertion mismatch",
+    "cases": [
+      "raw-zip-range-reader: keeps media batches with local extras on one original range read",
+      "source-zip-media-entry-pack: declines duplicate names before payload I/O (requirements)",
+      "source-zip-media-entry-pack: keeps an earlier CRC failure ahead of a later malformed header (requirements)"
+    ],
+    "allChangedCatalogTestsPassed": true,
+    "durationSeconds": 47.6
+  },
+  "targetedRepeatCandidate": {
+    "files": 2,
+    "testsPassed": 5,
+    "skipped": 86,
+    "testTimeoutMs": 30000,
+    "durationSeconds": 5.78,
+    "log": "retry-focused.log"
+  },
+  "targetedRepeatBaseline": {
+    "files": 2,
+    "testsPassed": 5,
+    "skipped": 86,
+    "testTimeoutMs": 30000,
+    "durationSeconds": 4.94
+  },
+  "eslint": {
+    "initial": "Missing constructor field JSDoc comments; fixed",
+    "final": "Passed; existing pako CommonJS warning only"
+  },
+  "corpusParity": "parity.json",
+  "retainedMemory": "measure-raw.json",
+  "rejectedPrototype": {
+    "description": "Decode compact filename arena once and slice strings",
+    "reason": "Added approximately 1.96MB net retained heap+external memory per VNDB catalog; discarded before final code"
+  }
+}

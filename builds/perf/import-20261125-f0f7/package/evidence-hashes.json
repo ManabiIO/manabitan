@@ -1,0 +1,20 @@
+{
+  "package-audit.json": "7a855f3e87e628422079c2d04ecd49433806d8165fba1cbf36c4a26efe450691",
+  "compare-packages.py": "fc6f111143f56e53e38f4370a947c0d0236e0c23093d650850a3556c0a24cea9",
+  "manabitan-base-entries.json": "5d2fc47780aa9950844ddbbc0526f726556eddf13149619e6dcea7a042e47a37",
+  "vndb-build.json": "e1790a804abf2277571329881b2becd8c6e6c531b4730d7a398c4e226952f2a3",
+  "jitendex-entries.json": "5b2b02e777a9faf3110f1baef65c1434d7303c0207dd36edbb3a229d784fe9a3",
+  "state.json": "f9c8b132502d91e19dc6c94a3208419383608db549d3e278c8066f1a0b782f72",
+  "jitendex-build.log": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba",
+  "comparison-initial-failure.json": "20d453d6c83e2147a7d2629b9b4b7edebd909febe5c2185c931c149dae0394ff",
+  "jitendex-build.json": "9db6fb7ff241c4a34c662b6b2d7aa018bb0b240d08681fdd3350f9484e1f09a2",
+  "jmdict-build.log": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba",
+  "vndb-build.log": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba",
+  "jmdict-entries.json": "caef7eee5c56dbc37cd5b6a2ed4f62346e6dbf166f1041610b15a1f5cbb6728b",
+  "build-one.py": "c2052b8a7897616b47710d5620683bf8dcafaa69946386fef21fece9ce9d2df2",
+  "manabitan-base-build.json": "83d3a93dcd3134d204fd0f1efea50bb0cd880ec8f0bd25090da62884e236c237",
+  "README.md": "1abde4bc35752da62ab72a6a62b51bf6d52675a50b728ddaa537ad676cbae395",
+  "manabitan-base-build.log": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba",
+  "vndb-entries.json": "ca297a7926d2eb807ef60055f67be07f6bb3247e611bf711626ab0a66465c73e",
+  "jmdict-build.json": "af91a13b9a3b5f53a812cec25e7baa26527859aaf77c1510bd737547cd063bd0"
+}

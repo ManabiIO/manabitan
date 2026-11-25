@@ -1,0 +1,19 @@
+{
+  "checkout": "jitendex",
+  "path": "/workspace/scratch/f0f7782e255e/jitendex",
+  "head": "d22d618300e9f5c83c6c51fb79d4cd2250d4ddc0",
+  "command": [
+    "npm",
+    "run",
+    "build",
+    "--",
+    "--target",
+    "chrome"
+  ],
+  "status": "success",
+  "exitCode": 0,
+  "log": "jitendex-build.log",
+  "trackedStatusBefore": "",
+  "trackedStatusAfter": "",
+  "trackedDiffAfter": ""
+}

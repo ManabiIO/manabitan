@@ -1,0 +1,34 @@
+{
+  "focused": {
+    "files": 4,
+    "testsPassed": 140,
+    "testsFailed": 0,
+    "testTimeoutMs": 30000,
+    "durationSeconds": 12.9,
+    "log": "focused.log"
+  },
+  "eslint": {
+    "initial": "unicorn/prefer-switch in new late-malformation test; fixed without runtime changes",
+    "final": "Passed; existing pako CommonJS warning only",
+    "log": "eslint.log"
+  },
+  "corpusParity": "parity.json",
+  "retainedMemory": {
+    "raw": "measure-raw.json",
+    "summary": "measure-summary.json",
+    "beforeBytes": 40750180,
+    "afterBytes": 29752304,
+    "savedBytes": 10997876,
+    "percentSaved": 26.988533547581877,
+    "scope": "Forced-GC retained heapUsed+external; arrayBuffers is included in external and not double-counted",
+    "observations": 18,
+    "candidateControlPairs": 12,
+    "decoderCalls": {
+      "before": 147237,
+      "after": 1
+    }
+  },
+  "timing": "Inconclusive because unchanged A/C controls drift materially; retain every observation and claim no import or catalog latency percentage. This changed candidate addresses original20bf construction work rather than rerunning the same candidate.",
+  "previousCandidate": "../vndb/builds/perf/lazy-filename-20261125",
+  "deferred": "Main/test TypeScript and full-unit/build to root CI; complete browser benchmark not run locally"
+}

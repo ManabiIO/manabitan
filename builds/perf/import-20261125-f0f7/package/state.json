@@ -1,0 +1,33 @@
+{
+  "scope": "Sequential Chrome release-package build audit only; no import/timing measurement",
+  "checkouts": {
+    "manabitan-base": {
+      "path": "/workspace/scratch/f0f7782e255e/manabitan-base",
+      "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "trackedStatusBefore": "",
+      "buildScript": "node ./dev/bin/build.js",
+      "buildLibsScript": "node ./dev/bin/build-libs.js"
+    },
+    "jmdict": {
+      "path": "/workspace/scratch/f0f7782e255e/jmdict",
+      "head": "bee1b5e9e8fcaa0a9109dd83b1da9c396d8f87c3",
+      "trackedStatusBefore": "",
+      "buildScript": "node ./dev/bin/build.js",
+      "buildLibsScript": "node ./dev/bin/build-libs.js"
+    },
+    "jitendex": {
+      "path": "/workspace/scratch/f0f7782e255e/jitendex",
+      "head": "d22d618300e9f5c83c6c51fb79d4cd2250d4ddc0",
+      "trackedStatusBefore": "",
+      "buildScript": "node ./dev/bin/build.js",
+      "buildLibsScript": "node ./dev/bin/build-libs.js"
+    },
+    "vndb": {
+      "path": "/workspace/scratch/f0f7782e255e/vndb",
+      "head": "51a21635194dadd57aa31c2aab3b7dd7dc448630",
+      "trackedStatusBefore": "",
+      "buildScript": "node ./dev/bin/build.js",
+      "buildLibsScript": "node ./dev/bin/build-libs.js"
+    }
+  }
+}

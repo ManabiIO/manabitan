@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/f0f7782e255e/vndb
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed | 86 skipped (91)
+   Start at  09:56:30
+   Duration  5.78s (transform 1.15s, setup 83ms, import 1.53s, tests 3.59s, environment 0ms)
+

@@ -1,0 +1,19 @@
+{
+  "checkout": "manabitan-base",
+  "path": "/workspace/scratch/f0f7782e255e/manabitan-base",
+  "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "command": [
+    "npm",
+    "run",
+    "build",
+    "--",
+    "--target",
+    "chrome"
+  ],
+  "status": "success",
+  "exitCode": 0,
+  "log": "manabitan-base-build.log",
+  "trackedStatusBefore": "",
+  "trackedStatusAfter": "",
+  "trackedDiffAfter": ""
+}

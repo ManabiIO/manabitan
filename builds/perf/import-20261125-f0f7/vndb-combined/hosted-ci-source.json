@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-25 15:22:51 UTC",
+  "repository": "ManabiIO/manabitan",
+  "pullRequest": 901,
+  "pullRequestUrl": "https://github.com/ManabiIO/manabitan/pull/901",
+  "scope": {
+    "sourceHead": "ea176867e66515d12f7a75c044d1082624ce76cd",
+    "baseHead": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "testedPullRequestMerge": "7868832e9bf92635e0066fdd186a6beec6d43a1d",
+    "sourceTree": "e6674d7451bfa720f288ce2bec723167e0ec1d1b",
+    "localCandidateCommit": "51a21635194dadd57aa31c2aab3b7dd7dc448630",
+    "treeIdentityVerified": true,
+    "identityNote": "Git commit metadata verified that the source head, local candidate and tested pull-request merge have the same tree. This receipt applies to the source-only head; later documentation/evidence heads require separate identity verification.",
+    "performanceQualification": false,
+    "performanceNote": "These hosted runs verify functional behavior. They are not complete-import latency or browser peak-memory qualification, and do not establish a full locked VNDB browser import result."
+  },
+  "status": "success",
+  "workflowRuns": [
+    {
+      "id": 45642152288,
+      "name": "Lint GitHub Actions workflows",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642152288"
+    },
+    {
+      "id": 45642151569,
+      "name": "Dependency Review",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151569"
+    },
+    {
+      "id": 45642151647,
+      "name": "ManabiTan static web acceptance",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151647"
+    },
+    {
+      "id": 45642151829,
+      "name": "Auto-Approve Safe PRs",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151829"
+    },
+    {
+      "id": 45642151722,
+      "name": "Chromium Restart Interruption",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151722"
+    },
+    {
+      "id": 45642151728,
+      "name": "CodeQL",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151728"
+    },
+    {
+      "id": 45642151404,
+      "name": "CI",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404"
+    }
+  ],
+  "ciJobs": [
+    {
+      "id": 139303382425,
+      "name": "Anki Deduplication Matrix (Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303382425"
+    },
+    {
+      "id": 139303382888,
+      "name": "Full Extension E2E (Firefox)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303382888"
+    },
+    {
+      "id": 139303383100,
+      "name": "Full Extension E2E (Chromium)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383100"
+    },
+    {
+      "id": 139303383152,
+      "name": "JavaScript",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383152"
+    },
+    {
+      "id": 139303383177,
+      "name": "Test Build",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383177"
+    },
+    {
+      "id": 139303383533,
+      "name": "Unit Tests",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383533"
+    },
+    {
+      "id": 139303383651,
+      "name": "TypeScript (dev)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383651"
+    },
+    {
+      "id": 139303383691,
+      "name": "CSS",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383691"
+    },
+    {
+      "id": 139303383699,
+      "name": "JSON",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383699"
+    },
+    {
+      "id": 139303383728,
+      "name": "TypeScript (bench)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383728"
+    },
+    {
+      "id": 139303383737,
+      "name": "Markdown",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383737"
+    },
+    {
+      "id": 139303383932,
+      "name": "HTML",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383932"
+    },
+    {
+      "id": 139303383946,
+      "name": "Unit Tests (options)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383946"
+    },
+    {
+      "id": 139303384080,
+      "name": "TypeScript (test)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303384080"
+    },
+    {
+      "id": 139303384371,
+      "name": "TypeScript (main)",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303384371"
+    },
+    {
+      "id": 139303385378,
+      "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303385378"
+    },
+    {
+      "id": 139303385513,
+      "name": "Published release upgrade and reimport",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303385513"
+    },
+    {
+      "id": 139303385561,
+      "name": "Full Extension E2E (Edge)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303385561"
+    },
+    {
+      "id": 139303479947,
+      "name": "Firefox Android Installation Smoke (blocking)",
+      "status": "completed",
+      "conclusion": "skipped",
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303479947"
+    }
+  ],
+  "checks": {
+    "units": {
+      "jobId": 139303383533,
+      "nodeVersion": "22.22.0",
+      "filesPassed": 646,
+      "testsPassed": 14559,
+      "testsSkipped": 47,
+      "testsTotal": 14606,
+      "evidence": [
+        "2026-11-25T15:22:30.8143764Z  Test Files  646 passed (646)",
+        "2026-11-25T15:22:30.8233186Z       Tests  14559 passed | 47 skipped (14606)"
+      ]
+    },
+    "options": {
+      "jobId": 139303383946,
+      "filesPassed": 1,
+      "testsPassed": 32,
+      "testsSkipped": 0,
+      "evidence": [
+        "2026-11-25T15:20:44.1010431Z  Test Files  1 passed (1)",
+        "2026-11-25T15:20:44.1011122Z       Tests  32 passed (32)"
+      ]
+    },
+    "types": {
+      "main": "success",
+      "test": "success",
+      "dev": "success",
+      "bench": "success"
+    },
+    "build": {
+      "jobId": 139303383177,
+      "status": "success",
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "dictionaryWasmRebuildCheck": "success",
+      "toolchain": "clang/lld 21.1.8",
+      "evidence": [
+        "2026-11-25T15:11:02.9909603Z clang-21 is already the newest version (1:21.1.8-6ubuntu1).",
+        "2026-11-25T15:11:02.9912618Z lld-21 is already the newest version (1:21.1.8-6ubuntu1).",
+        "2026-11-25T15:11:03.1882209Z > node ./dev/bin/build-dictionary-wasm.js --check",
+        "2026-11-25T15:11:08.6024161Z Building chrome...",
+        "2026-11-25T15:11:10.7044510Z Building chrome-dev...",
+        "2026-11-25T15:11:12.4554309Z Building chrome-playwright...",
+        "2026-11-25T15:11:14.2047119Z Building firefox...",
+        "2026-11-25T15:11:15.9686030Z Building firefox-dev...",
+        "2026-11-25T15:11:17.8390085Z Building firefox-android...",
+        "2026-11-25T15:11:18.5132220Z Building edge..."
+      ]
+    },
+    "chromium": {
+      "jobId": 139303383100,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303383100",
+      "status": "success",
+      "nodeVersion": "22.22.0",
+      "actualPhaseCount": 90,
+      "runtimeSkipObserved": false,
+      "reportEnforcementStep": "success",
+      "evidence": [
+        "2026-11-25T15:17:23.4257691Z [chromium-e2e] phase: Configure functional import mode (61.0 ms)",
+        "2026-11-25T15:17:24.8811839Z [chromium-e2e] phase: JMdict: total import (1307.9 ms)",
+        "2026-11-25T15:17:26.7074200Z [chromium-e2e] phase: Verify JMdict backend content integrity after import (92.9 ms)",
+        "2026-11-25T15:17:32.7148975Z [chromium-e2e] phase: Jitendex: total import (2582.9 ms)",
+        "2026-11-25T15:17:33.0649122Z [chromium-e2e] phase: Verify Jitendex backend content integrity after import (260.9 ms)",
+        "2026-11-25T15:18:20.8340673Z [chromium-e2e] phase: Verify restart persistence after update (4378.2 ms)",
+        "2026-11-25T15:18:45.6783216Z [chromium-e2e] phase: Verify restart persistence after multi-file import (5612.8 ms)",
+        "2026-11-25T15:19:26.4667944Z [chromium-e2e] phase: Post-delete backend verification (lookup + metadata) (232.3 ms)",
+        "2026-11-25T15:19:26.5264807Z [chromium-e2e] PASS: Two-dictionary import profiling and verification completed."
+      ],
+      "scopeNote": "Real Chromium extension execution, including the harness's functional import mode. The report gate rejects skippedVerification."
+    },
+    "firefox": {
+      "jobId": 139303382888,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303382888",
+      "status": "success",
+      "nodeVersion": "22.22.0",
+      "actualPhaseCount": 62,
+      "runtimeSkipObserved": false,
+      "reportEnforcementStep": "success",
+      "evidence": [
+        "2026-11-25T15:11:49.7486504Z [firefox-e2e] phase: Verify Jitendex backend content integrity after import (23.2 ms)",
+        "2026-11-25T15:11:58.1661780Z [firefox-e2e] phase: Verify JMdict backend content integrity after import (56.4 ms)",
+        "2026-11-25T15:12:04.5518928Z [firefox-e2e] phase: Verify Jitendex backend content integrity after update (79.7 ms)",
+        "2026-11-25T15:12:47.8064874Z [firefox-e2e] phase: Verify search remains responsive after hover stress (576.3 ms)",
+        "2026-11-25T15:12:47.8223896Z [firefox-e2e] PASS: Recommended dictionary imports installed Jitendex and JMdict.",
+        "2026-11-25T15:12:47.8224985Z [firefox-e2e] heartbeat: status=success phases=62 active=repeated hover stress (native motion) lastPhase=Verify search remains responsive after hover stress lastPhaseAgeMs=16.132370999999694 reason=finalize"
+      ],
+      "scopeNote": "Actual Firefox Developer Edition extension execution and successful final heartbeat; this run did not take the workflow's unsupported-runtime skip branch."
+    },
+    "anki": {
+      "jobId": 139303382425,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151404/job/139303382425",
+      "status": "success",
+      "scenariosPassed": 10,
+      "evidence": [
+        "2026-11-25T15:11:58.0986871Z Chromium Anki matrix passed all 10 scenarios."
+      ]
+    },
+    "restartInterruption": {
+      "runId": 45642151722,
+      "jobId": 139303382924,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151722/job/139303382924",
+      "status": "success",
+      "nodeVersion": "22.22.0",
+      "processTreeUnitTestsPassed": 5,
+      "campaignStep": {
+        "name": "Run witnessed interruption recovery campaign",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      "reportEnforcementStep": {
+        "name": "Enforce recovery report",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      "gateRequirements": [
+        "Completed import baseline",
+        "Observed controlled authoritative term-container payload interruption boundary",
+        "Process-tree hard kill",
+        "Previous committed generation lookup oracle after restart",
+        "Large update interrupt and recovery",
+        "Runtime identity and OPFS without fallback storage",
+        "Source, package, harness and fixture identity hashes"
+      ],
+      "artifactId": 15036975286,
+      "evidence": [
+        "2026-11-25T15:15:47.0839700Z > node ./test/chromium/restart-interruption.e2e.js",
+        "2026-11-25T15:16:06.8808797Z Artifact chromium-restart-interruption-evidence.zip successfully finalized. Artifact ID 15036975286",
+        "2026-11-25T15:16:06.8810136Z Artifact chromium-restart-interruption-evidence has been successfully uploaded! Final size is 34470027 bytes. Artifact ID is 15036975286"
+      ],
+      "evidenceLimit": "The campaign and strict report-enforcement steps completed successfully and the JSON/evidence artifact uploaded. This receipt uses the workflow job and log evidence, not a separate artifact download."
+    },
+    "staticWeb": {
+      "runId": 45642151647,
+      "jobId": 139303382672,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642151647/job/139303382672",
+      "status": "success",
+      "nodeVersion": "24.21.0",
+      "focusedTestFilesPassed": 4,
+      "focusedTestsPassed": 78,
+      "actualBrowserPassChecks": 24,
+      "evidence": [
+        "2026-11-25T15:12:11.6487538Z PASS no-extension host and persistent OPFS initialize without cross-origin isolation",
+        "2026-11-25T15:12:12.4070549Z PASS full official JMdict imports via a real file input using the shared importer",
+        "2026-11-25T15:12:12.4716890Z PASS real core translation 猫",
+        "2026-11-25T15:12:12.4965511Z PASS real core translation 学校",
+        "2026-11-25T15:12:12.5316741Z PASS real core translation 食べました",
+        "2026-11-25T15:12:12.6369421Z PASS real ManabiTan scanner renders the requested headword",
+        "2026-11-25T15:12:12.9243479Z PASS popup dismissal permits rescanning the same word and never enables a stopped scanner",
+        "2026-11-25T15:12:16.3167428Z PASS second independent tab cannot open the same SQLite pool",
+        "2026-11-25T15:12:16.5328696Z PASS frequency dictionary uses the same importer and appears in results",
+        "2026-11-25T15:12:16.5541150Z PASS failed custom ZIP does not erase the committed dictionary",
+        "2026-11-25T15:12:23.5936909Z PASS search RPC returns bounded previews for kana, romaji and inflected words",
+        "2026-11-25T15:12:23.7296491Z PASS English definition search is indexed, bounded and lower priority than Japanese lookup",
+        "2026-11-25T15:12:23.7387930Z PASS recommendations reuse the existing ManabiTan Japanese catalog",
+        "2026-11-25T15:12:23.7399418Z PASS pre-aborted import is rejected without changing storage",
+        "2026-11-25T15:12:24.1758122Z PASS in-flight custom import cancellation rolls back and allows retry",
+        "2026-11-25T15:12:25.2907708Z PASS abrupt tab death during import recovers both SQL and sidecar storage",
+        "2026-11-25T15:12:25.5003745Z PASS real structured-content media remains image-only and links are constrained",
+        "2026-11-25T15:12:25.5042906Z PASS default archive size mismatch fails before import",
+        "2026-11-25T15:12:35.4722991Z PASS full Jitendex static archive is checksum-verified and imported locally",
+        "2026-11-25T15:12:35.8354562Z PASS disable and re-enable persists explicit choice without reimport",
+        "2026-11-25T15:12:36.6699255Z PASS default choice, dictionary and lookup survive full browser restart",
+        "2026-11-25T15:12:36.6991684Z PASS already-open worker performs dictionary lookup while offline",
+        "2026-11-25T15:12:36.9744307Z PASS deletion removes dictionary and retains its no-reinstall choice across restart",
+        "2026-11-25T15:12:36.9747657Z PASS no uncaught browser exceptions"
+      ]
+    }
+  },
+  "intentionallyUnexecutedJobs": [
+    {
+      "id": 139303385378,
+      "name": "Firefox Android Gecko RDP Capability Probe (manual)"
+    },
+    {
+      "id": 139303385513,
+      "name": "Published release upgrade and reimport"
+    },
+    {
+      "id": 139303385561,
+      "name": "Full Extension E2E (Edge)"
+    },
+    {
+      "id": 139303479947,
+      "name": "Firefox Android Installation Smoke (blocking)"
+    }
+  ],
+  "skipNote": "The four listed CI jobs were skipped in this pull-request run. No Edge, Android or published-release-upgrade execution is claimed. Unit tests separately report 47 skipped cases.",
+  "sourceFixesRequiredByHostedCi": false
+}

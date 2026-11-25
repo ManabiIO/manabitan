@@ -1,0 +1,33 @@
+{
+  "pr": 897,
+  "url": "https://github.com/ManabiIO/manabitan/pull/897",
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "validatedLocalCommit": "bee1b5e9e8fcaa0a9109dd83b1da9c396d8f87c3",
+  "publishedCommit": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+  "publishedTree": "59959442e3d7ec9290d9da5d1177a7df28b58ed1",
+  "baselineSourceSha256": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+  "candidateSourceSha256": "de10461786cedfbea211fd2acc96a6d2da62c7a51903a5bb9b06221aeb3699a7",
+  "candidateTestSha256": "95e78c6b71de167f91437cfbd65004eee91440c8d5602e57caf3c49791ea85d1",
+  "completedJmdictRunner": "executed-eager-archive.mjs",
+  "eagerVndbOutcome": "exit137, zero observations; exact signal cause not independently established",
+  "fileBackedVndbOutcome": "incomplete, no observations; session/exit status unavailable after context truncation; not restarted",
+  "localFocusedValidation": {
+    "command": "node_modules/.bin/vitest run test/term-record-split-reference-origin.test.js test/term-record-reference-origin.test.js test/term-record-direct-field-columns.test.js test/term-record-validation-runs.test.js test/term-record-authoritative-encoder.test.js --maxWorkers=1",
+    "files": 5,
+    "tests": 78,
+    "outcome": "pass",
+    "durationSeconds": 12.24
+  },
+  "filesSha256": {
+    "executed-eager-archive.mjs": "570d8899609ecec70378ae1a39a6cc2078ea7fe9c41310abdc9f3db1bdb5ee8a",
+    "reproduce-jmdict.py": "4cc258b0e8f3f4a82eab8d217faa9cc47c430a6b0dd85c4ea7e05c6dc8a4e742",
+    "record-split-vndb-eager-archive-failure.json": "171a2925f1185efdf8d85ad3346ba7d3af968e9c89aba49e9ea6d94544e915cb",
+    "record-split-vndb-file-backed-incomplete.json": "dec5404351a1a1cf367ca101986944dec8f5751a584af10a0eb1853c73019d4b",
+    "hosted-ci.json": "36092434c174a112b572e573d26a8d885353237840545cdb9a4a6e444a2fcece",
+    "record-split-vndb-file-backed.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-only.patch": "de76fc8d3ae5d4552160a58d4b8f08633c8a61a8bb70167eba73f70dc18b3a08",
+    "file-backed-archive.mjs": "b8b9e5dc7ee1a320fb5ab2ffe6b034af261fdf616446354a1848de111aec88c1",
+    "README.md": "ec5b47c506e2b9b1455939ae1d805273fb36fa310b9369cd35696ce630a2a83a",
+    "record-split-jmdict-replay.json": "0208f2d00cbd0bb5fa905ab140a329de1b2c5b34b8aa9299065e9c259ceb1ff6"
+  }
+}

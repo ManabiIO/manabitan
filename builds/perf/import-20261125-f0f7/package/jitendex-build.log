@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> yomitan@0.0.0 build
+> node ./dev/bin/build.js --target chrome
+
+Version: 0.0.0.0...
+Building chrome...
+
+
+Restoring manifest...

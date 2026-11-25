@@ -1,0 +1,31 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/f0f7782e255e/vndb/ext/js/dictionary/dense-zip-directory.js
+  57:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  58:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  59:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  60:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  61:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  62:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  63:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  64:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  65:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  66:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+  67:9  error  Missing JSDoc comment  jsdoc/require-jsdoc
+
+✖ 11 problems (11 errors, 0 warnings)
+  11 errors and 0 warnings potentially fixable with the `--fix` option.
+

@@ -231,3 +231,115 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## November 25, 2026: compression contexts, record splits, and dense ZIP names
+
+This round starts from `develop` commit `7d1643e6147a10cb2165e9744cf0e63b59e46632`, tree `99d23f16e973c7ae9feba77ca3643d1c27dfb93d`. Three independent draft PRs remove allocation or decoding work from existing paths. Their component results do not establish complete-import latency or browser process-memory improvements. No worker-count policy, cache budget, compression setting, persistent format, or experimental default was changed.
+
+| PR                                                     | Published source commit                    | Validated source tree                      | Scope                                                                                      |
+| ------------------------------------------------------ | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| [#891](https://github.com/ManabiIO/manabitan/pull/891) | `b9cf94b4cc088cb4e06a4ae5cae6b29a7ae59241` | `b4e35f00c7219a071f8871f1c3e39ebf017831b1` | Avoid an unused decoder context in compression workers, including the Jitendex import path |
+| [#897](https://github.com/ManabiIO/manabitan/pull/897) | `475d351ff07c1b5cfc5651d7f59c624629e4fdc5` | `59959442e3d7ec9290d9da5d1177a7df28b58ed1` | Preserve the existing direct record-field encoder through trusted internal splits          |
+| [#901](https://github.com/ManabiIO/manabitan/pull/901) | `ea176867e66515d12f7a75c044d1082624ce76cd` | `e6674d7451bfa720f288ce2bec723167e0ec1d1b` | Borrow raw-name views on demand and decode validated ASCII ZIP names once                  |
+
+The source commit for #901 precedes this documentation/evidence-only addition. Local commits have different commit metadata but identical trees; their identities are preserved in the receipts. These PRs were tested separately, not as a combined runtime branch.
+
+### Frozen inputs and retained evidence
+
+The [evidence archive](../../builds/perf/import-20261125-f0f7/) includes original executed runners, raw observations, unsuccessful attempts, source snapshots/patches, portable reproduction wrappers, CI receipts, package comparisons, and an independent arithmetic/source audit. `manifest.json` hashes every archived file except itself. The wrappers were parameterized after the observations and syntax-checked; they were not used to generate the original reports. Historical absolute paths identify the original execution environment, while portable wrappers accept new checkout paths explicitly.
+
+The lock file for this round has SHA256 `60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89`. The following counts describe this locked revision and supersede earlier historical counts for this round only:
+
+| Fixture  | Archive bytes | Term rows | Archive SHA256                                                     |
+| -------- | ------------: | --------: | ------------------------------------------------------------------ |
+| JMdict   |    15,645,766 |   528,299 | `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f` |
+| Jitendex |    38,831,822 |   436,555 | `e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356` |
+| VNDB     |   291,705,969 | 6,648,310 | `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` |
+
+Local component work used Node 24.22.3 on a shared Linux host. Hosted browser CI used the repository-pinned Node 22.22.0. Dependencies, native binaries, and dictionary fixtures were not upgraded. Heavy local work was serialized; interference from other host activity remained visible in timing controls.
+
+### Compression workers: avoid an unused decoder context
+
+PR #891 uses the existing compression-worker realm marker to omit eager native decoder construction in that realm. Normal initialization retains its eager decoder and cleanup behavior. A compression worker that later needs dictionary decompression allocates and reuses its decoder lazily, with retryable initialization failure. Compression bytes and the normal generic decoder path remain unchanged.
+
+The pinned native allocator probe observed **95,816 bytes of additional allocator spacing per decoder context**, after subtracting the 16-byte blank-marker spacing. Four omitted contexts therefore correspond to **383,264 bytes of allocation spacing**. This four-worker value is arithmetic from the single-context probe, not a measured concurrent pool. The initial WASM buffer remained **16,908,288 bytes per module** in every probe case. No RSS/PSS, process peak, or complete-import memory reduction is claimed.
+
+The native WASM SHA256 is `ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc`. The [original receipt](../../builds/perf/import-20261125-f0f7/zstd/allocator-original-receipt.json) records every pointer, module/source hash, and boundary. Thirty focused tests cover the real checked WASM and production worker, owned/shared exact compression bytes, later decoding, and failure/retry behavior.
+
+### Record splits: retain the existing direct encoder
+
+PR #897 carries the factory-origin proof into fresh internal split chunks only after checking the current parent, exact private index subview, and unchanged reference columns. External, proxy, accessor-backed, shared, subclassed, replaced, or unrelated views retain the generic validation path. Existing value checks still run after awaited appends. Segment boundaries and encoded bytes remain unchanged.
+
+The [completed JMdict replay](../../builds/perf/import-20261125-f0f7/jmdict/record-split-jmdict-replay.json) parses **all 528,299 rows for each policy** using the current byte-balanced planner and actual record/envelope encoders. Baseline and candidate complete checksummed envelopes compare byte-for-byte within every group. Deterministic valid source-content spans stand in for resolved content references; compression, global deduplication, browser OPFS, and UI are outside this boundary.
+
+| Existing worker policy | Groups | Split groups | Output segments | Rows benefiting | Offset/length staging allocation and copying avoided |
+| ---------------------- | -----: | -----------: | --------------: | --------------: | ---------------------------------------------------: |
+| 2                      |      8 |            5 |              18 |         348,299 |                                      2,089,794 bytes |
+| 3                      |     12 |            0 |              12 |               0 |                                                    0 |
+| 5                      |     20 |            0 |              20 |               0 |                                                    0 |
+
+The reduction is six temporary bytes per affected row, supported by the source allocation path and observed typed-column copy counts. Common score-column copying remains. This is cumulative allocation/copy work, not peak live memory. The three- and five-worker policies show zero benefit and must remain visible in any summary. Seventy-eight focused tests across five files include sixteen new split, fallback, mutation, and asynchronous revalidation cases.
+
+Neither attempted VNDB record replay completed. The eager archive attempt exited 137 with zero observations; the exact signal cause was not independently established. The file-backed follow-up produced an empty log and no report; its session/exit status was lost during context compaction and remains unknown. Both receipts and both distinct runner versions are retained. Neither attempt supports VNDB term counts, parity, memory, or timing results for this encoder change.
+
+### Dense ZIP names: retained memory and complete media preparation
+
+PR #901 keeps the compact filename-byte arena and original per-entry geometry, with borrowed `rawFilename` views created on demand. A logical filename mutation cannot change original raw-name geometry; mutations through the borrowed bytes still share the underlying arena. After complete directory validation, one ASCII decode and exact string slices replace per-entry decoding. The pinned VNDB archive therefore goes from **147,237 decoder calls to one** without changing directory admission, local-header/CRC checks, cancellation, or bounded read budgets.
+
+The chosen candidate's fixed six-block A/B/C study contains **six candidate observations and twelve unchanged-control observations** in eighteen fresh Node processes. Its twelve candidate/control comparisons reuse those six candidate observations. Forced-GC retained `heapUsed + external` changed from **40,750,180 to 29,752,304 bytes**, a median reduction of **10,997,876 bytes (26.99%)**. All paired reductions lie between 10,996,700 and 10,997,876 bytes. The extra decoded-string backing is included; `arrayBuffers` is already part of `external` and is not added again.
+
+This is retained catalog memory in Node, not total browser/process peak memory. Catalog timing is inconclusive: paired candidate/control medians were -13.60% against A and -21.42% against C, while identical-code C/A drift was +25.71%, with individual controls ranging from -48.75% to +95.87%. These observations support no latency percentage. The archive retains the entire earlier lazy-view-only cohort as well: 27,794,092 retained bytes, but noisy/slower construction observations and one unchanged-control drift of +503%. Neither cohort was filtered to favorable samples. A preliminary decode-only idea was rejected because it increased retained memory by about 1.96 MB; the chosen combination includes that cost and still reduces total retained catalog memory.
+
+The complete catalog metadata/raw-name digest covers all 147,237 entries. Production media batching validates **every one of the 146,570 images**, including every-image CRC, with identical full digests for the **195,649,882-byte source span** and **3,912,816-byte generation index**. Both arms use 144 bounded reads and decode 188,131,284 image bytes. This establishes complete source-media preparation parity by full digests and per-image CRC, not exhaustive term encoder or persisted database equality. The [parity receipt](../../builds/perf/import-20261125-f0f7/vndb-combined/parity.json) retains complete byte counts and hashes.
+
+All 140 focused catalog, raw-reader, packing, and alias tests pass. Three unchanged generic media tests initially hit the five-second deadline; those failures remain recorded. Targeted baseline/candidate reruns and the full combined suite passed with an explicit thirty-second cap. The original five-second failure was not reproduced on the baseline and is not labeled an established baseline failure.
+
+### Validation and release-package accounting
+
+Changed-file lint, source review, and diff whitespace checks passed. PR #891's [final-source CI](https://github.com/ManabiIO/manabitan/actions/runs/45640482102) passed all applicable jobs: 647 unit-test files, 14,556 passed tests and 47 skipped tests, all four TypeScript projects, lint, build/native reproduction, actual Chromium E2E, and actual Firefox execution with 62 phases. Its first test-only TypeScript import error was fixed before this final run; the earlier failure is retained in the receipt. PR #897's [source CI](https://github.com/ManabiIO/manabitan/actions/runs/45641123182) also passed all fifteen applicable jobs, with four conditional jobs skipped. Both PRs passed all seven associated workflows, including static web acceptance and restart/interruption recovery.
+
+PR #901's [source CI](https://github.com/ManabiIO/manabitan/actions/runs/45642151404) passed all applicable jobs and all seven associated workflows. Actual Chromium E2E completed 90 logged phases with its final PASS; Firefox completed 62 phases with status success, without an unsupported-runtime skip. Static web acceptance completed 24 browser checks, and the restart/interruption workflow passed its strict report-enforcement gate. The build lane passed all seven targets and reproduced the pinned native binaries. The archived receipt identifies the source head and merge tree; subsequent evidence-only commits retain these runtime files unchanged.
+
+Four sequential `npm run build -- --target chrome` builds succeeded without tracked generated changes. Each package contains 616 entries / 551 files. Complete decompressed-entry SHA256 comparison found exactly the intended runtime JavaScript change in each candidate, no added/removed/unexpected entries, and identical hashes for all five WASM assets. Against the 17,273,796-byte baseline ZIP, #891 adds 176 bytes, #897 adds 467 bytes, and #901 adds 554 bytes; corresponding uncompressed JavaScript increases are 771, 2,012, and 2,392 bytes. These are measured package costs, not zero-size-change claims. The [package audit](../../builds/perf/import-20261125-f0f7/package/package-audit.json) includes all per-entry manifests and build logs. Its first manifest write hit ENOSPC after successful builds; complete hashes/sizes were preserved before removing only the four audit-created ZIPs, and the comparison completed without rebuilding.
+
+Local broad checks that were interrupted or killed under resource pressure are not counted as passes. A stopped baseline full-unit attempt and unsuccessful local browser provisioning are also excluded. Hosted browser execution supplies the functional coverage; it does not replace the controlled complete-import performance protocol above.
+
+### Reproduction and decision
+
+Prepare isolated checkouts at the baseline and published source commits in the table, using the same dependency lock and each checkout's own generated libraries. Fetch the PR heads if the commits are not yet local, then run `npm ci` and `npm run build:libs` in each checkout. Use the archives selected by that baseline's `test/perf/dictionaries.lock.json`; `node dev/perf/prepare-dictionaries.js` prepares the repository's pinned cache. The runners verify the relevant fixture/source identities. Run sequentially on a quiet host, writing new output to a separate directory.
+
+From the archived evidence directory:
+
+```sh
+python3 verify-integrity.py
+mkdir -p /path/to/new-output
+
+# Original native allocator sequence, with fresh modules per case.
+node zstd/reproduce-allocator-spacing.mjs /path/to/baseline \
+  > /path/to/new-output/allocator.json
+
+# Complete pinned JMdict encoder replay; default worker policies are 2,3,5.
+python3 jmdict/reproduce-jmdict.py \
+  --baseline /path/to/baseline \
+  --candidate /path/to/pr-897 \
+  --cache /path/to/dictionary-cache \
+  --output /path/to/new-output/jmdict
+
+# Complete catalog and source-media preparation parity.
+node vndb-combined/reproduce-check.mjs \
+  --baseline-root=/path/to/baseline \
+  --candidate-root=/path/to/pr-901 \
+  --fixture=/path/to/dictionary-cache/vndb_characters_by_bee.zip \
+  --out-dir=/path/to/new-output/vndb-parity
+
+# Fixed eighteen-process retained-memory/control cohort.
+node vndb-combined/reproduce-measure.mjs \
+  --baseline-root=/path/to/baseline \
+  --candidate-root=/path/to/pr-901 \
+  --fixture=/path/to/dictionary-cache/vndb_characters_by_bee.zip \
+  --out-dir=/path/to/new-output/vndb-memory
+```
+
+The earlier VNDB candidate can be reconstructed by applying `vndb-lazy/source.patch` to the frozen baseline; its corresponding wrappers accept the same explicit path arguments. `jmdict/source-only.patch` preserves the complete JMdict source/test delta. `vndb-combined/source-from-baseline.patch` preserves the final VNDB runtime source delta; its tests remain available in the published source commit.
+
+**Decision: retain all three as draft PRs for qualification.** The measured reductions justify review, but promotion still requires controlled complete-import latency, concurrent browser/process memory, persisted output/storage comparisons, and lookup/recovery nonregression at the complete workload boundary. The VNDB component proof does not substitute for a complete VNDB term import. Do not combine these different allocation/retention measurements into one memory-saving total or present them as an end-to-end speedup.
