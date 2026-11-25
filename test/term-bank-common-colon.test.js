@@ -19,10 +19,11 @@
 import {readFile} from 'node:fs/promises'
 import {beforeAll, describe, expect, test} from 'vitest'
 
-/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number) => number}} ParserExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_alloc: (length: number) => number, wasm_reset_heap: () => void, parse_term_bank: (input: number, length: number, output: number, capacity: number, spans: number, spanCount: number, validateTypes: number) => number, parse_term_bank_with_media_hints: (input: number, length: number, output: number, capacity: number, spans: number, spanCount: number, validateTypes: number) => number}} ParserExports */
 /** @type {ParserExports} */
 let parser
 const encoder = new TextEncoder()
+const commonKeys = ['content', 'tag', 'data', 'class', 'title', 'href', 'code', 'lang', 'style']
 
 beforeAll(async () => {
     const bytes = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))
@@ -33,20 +34,21 @@ beforeAll(async () => {
 /**
  * @param {string} glossary
  * @param {boolean} [hints]
+ * @param {boolean} [validateTypes]
  * @returns {{count: number, metadata: number[]}}
  */
-function parseGlossary(glossary, hints = true) {
+function parseGlossary(glossary, hints = true, validateTypes = false) {
     const bytes = encoder.encode(`[["entry","","","",0,${glossary},1,""]]`)
     parser.wasm_reset_heap()
     const input = parser.wasm_alloc(bytes.length)
     const output = parser.wasm_alloc(17 * 4)
     new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
-    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1)
+    const count = (hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank)(input, bytes.length, output, 1, 0, 0, validateTypes ? 1 : 0)
     return {count, metadata: [...new Uint32Array(parser.memory.buffer, output, 17)]}
 }
 
 describe('adjacent common-key colons', () => {
-    test.each(['content', 'tag'])('accepts every JSON value after %s', (key) => {
+    test.each(commonKeys)('accepts every JSON value after %s', (key) => {
         for (const value of ['null', 'true', 'false', '0', '-1.25e2', '""', '"text"', '[]', '{}', '["a",{}]', '{"type":"text","text":"value"}']) {
             const glossary = '[{"' + key + '":' + value + ',"after":["next"]}]'
             expect(parseGlossary(glossary).count).toBe(1)
@@ -54,17 +56,19 @@ describe('adjacent common-key colons', () => {
         }
     })
 
-    test.each(['content', 'tag'])('preserves whitespace and escaped %s fallbacks', (key) => {
+    test.each(commonKeys)('preserves whitespace and escaped %s fallbacks', (key) => {
         for (const ws of [' ', '\t', '\n', '\r']) {
             const glossary = '[{"' + key + '"' + ws + ':' + ws + '"image"}]'
             const result = parseGlossary(glossary)
             expect(result.count).toBe(1)
             expect(result.metadata.slice(14)).toEqual([1, 1, 0])
         }
-        const escapedKey = key === 'content' ? 'cont\\u0065nt' : 't\\u0061g'
-        const result = parseGlossary('[{"' + escapedKey + '":"image"}]')
-        expect(result.count).toBe(1)
-        expect(result.metadata.slice(14)).toEqual([1, 0, 0])
+        for (const index of [0, key.length - 1]) {
+            const escapedKey = `${key.slice(0, index)}\\u${key.charCodeAt(index).toString(16).padStart(4, '0')}${key.slice(index + 1)}`
+            const result = parseGlossary('[{"' + escapedKey + '":"image"}]')
+            expect(result.count).toBe(1)
+            expect(result.metadata.slice(14)).toEqual([1, 0, 0])
+        }
     })
 
     test.each([
@@ -98,7 +102,7 @@ describe('adjacent common-key colons', () => {
         expect(result.metadata.slice(14)).toEqual([1, 1, 1])
     })
 
-    test.each(['content', 'tag'])('bounds %s and its colon to the logical bank end', (key) => {
+    test.each(commonKeys)('bounds %s and its colon to the logical bank end', (key) => {
         const bank = '[["word","","","",0,[{"' + key + '":"image"}],1,""]]'
         const bytes = encoder.encode(bank)
         const keyStart = bank.indexOf('"' + key + '"')
@@ -109,8 +113,42 @@ describe('adjacent common-key colons', () => {
             new Uint8Array(parser.memory.buffer, input, bytes.length).set(bytes)
             // The remaining valid source bytes are physically accessible but
             // cannot complete a token or colon outside this logical bank.
-            expect(parser.parse_term_bank_with_media_hints(input, length, output, 1)).toBeLessThan(0)
-            expect(parser.parse_term_bank(input, length, output, 1)).toBeLessThan(0)
+            expect(parser.parse_term_bank_with_media_hints(input, length, output, 1, 0, 0, 0)).toBeLessThan(0)
+            expect(parser.parse_term_bank(input, length, output, 1, 0, 0, 0)).toBeLessThan(0)
         }
+    })
+
+    test.each(commonKeys)('requires the complete %s literal and a valid separator', (key) => {
+        for (const invalid of [
+            `[{"${key}"x:0}]`,
+            `[{"${key}:0}]`,
+            `[{"${key}\\":0}]`,
+            `[{"${key}"::0}]`,
+            `[{"${key}":,}]`,
+            `[{"${key}":0 "next":0}]`,
+            `[{"${key}":0,}]`,
+        ]) {
+            expect(parseGlossary(invalid).count).toBeLessThan(0)
+            expect(parseGlossary(invalid, false).count).toBeLessThan(0)
+        }
+        for (const nearMatch of [key.slice(0, -1), `${key}x`, `${key}\\u0061`, `${key.slice(0, -1)}x`]) {
+            const result = parseGlossary(`[{"${nearMatch}":"image"}]`)
+            expect(result.count).toBe(1)
+            expect(result.metadata.slice(14)).toEqual([1, 0, 0])
+        }
+    })
+
+    test.each(['data', 'class', 'title', 'href', 'code', 'lang', 'style'])('keeps %s distinct from required glossary fields', (key) => {
+        for (const value of ['null', '0', 'true', '"text"', '[]', '{"tag":"img"}']) {
+            for (const hints of [false, true]) {
+                expect(parseGlossary(`[{"type":"image","path":"image.png","${key}":${value}}]`, hints, true).count).toBe(1)
+                expect(parseGlossary(`[{"type":"image","${key}":${value}}]`, hints, true).count).toBeLessThan(0)
+                expect(parseGlossary(`[{"type":"text","${key}":${value}}]`, hints, true).count).toBeLessThan(0)
+                expect(parseGlossary(`[{"type":"structured-content","${key}":${value}}]`, hints, true).count).toBeLessThan(0)
+            }
+        }
+        const result = parseGlossary(`[{"type":"structured-content","content":{"${key}":[{"tag":"img"},{"type":"text","text":"value"}]}}]`, true, true)
+        expect(result.count).toBe(1)
+        expect(result.metadata.slice(14)).toEqual([1, 1, 1])
     })
 })
