@@ -117,3 +117,56 @@ describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns
         await expect(parse(`[${row}]`, true, columns)).rejects.toThrow()
     })
 })
+
+describe('strict fused integer projection', () => {
+    test.each([
+        ['0', 'null', 0, -1, 0],
+        ['-2147483648', '-1', -2147483648, -1, 0],
+        ['2147483647', '2147483647', 2147483647, 2147483647, 0],
+        ['0', '-0', 0, 0, 0],
+        ['\t37 \r\n', '\r\n1234567\t ', 37, 1234567, 0],
+        ['-0', 'null', -0, -1, 1],
+        ['2147483648', '3', 2147483648, 3, 1],
+        ['-2147483649', '3', -2147483649, 3, 1],
+        ['0', '2147483648', 0, 2147483648, 1],
+        ['0', '9007199254740991', 0, 9007199254740991, 1],
+        ['0.0', '3', 0, 3, 1],
+        ['1.5', '3', 1.5, 3, 1],
+        ['1e3', '1.0', 1000, 1, 1],
+        ['1e-400', '1E+6', 0, 1000000, 1],
+    ])('preserves score %s and sequence %s', async (score, sequence, expectedScore, expectedSequence, fallbacks) => {
+        const source = `[["first","","","",1,["first"],1,""],["key","",null,"",${score},["meaning"],${sequence},""]]`
+        const actual = await parse(source, true, true)
+        expect(actual.rows).toStrictEqual((await parse(source, false, true)).rows)
+        expect(actual.rows[1]).toMatchObject({score: expectedScore, sequence: expectedSequence})
+        expect(actual.profile?.fusedParseAttempts).toBe(1)
+        expect(actual.profile?.fusedParseFallbacks).toBe(fallbacks)
+    })
+
+    test.each([
+        '',
+        '-',
+        '+1',
+        '--1',
+        '01',
+        '-01',
+        '00',
+        '-00',
+        '123x',
+        '123.',
+        '123e',
+        '123e+',
+        '0x10',
+        '1_2',
+        '21474836480x',
+        'nullx',
+        'null0',
+        '12\v',
+    ])('rejects malformed numeric token %j in either column', async (token) => {
+        const first = '["valid","","","",1,["first"],1,""]'
+        for (const [score, sequence] of [[token, '1'], ['1', token]]) {
+            const source = `[${first},["key","",null,"",${score},["meaning"],${sequence},""]]`
+            await expect(parse(source, true, true)).rejects.toThrow()
+        }
+    })
+})
