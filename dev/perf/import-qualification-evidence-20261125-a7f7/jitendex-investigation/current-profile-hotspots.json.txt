@@ -1,0 +1,422 @@
+[
+  {
+    "sampledMs": 11560.87,
+    "samples": 49118,
+    "function": "(idle)",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 2522.53,
+    "samples": 10700,
+    "function": "f",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/sqlite/sqlite3-opfs-async-proxy.js",
+    "line": 453
+  },
+  {
+    "sampledMs": 865.43,
+    "samples": 3591,
+    "function": "wasm-function[40]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 816.25,
+    "samples": 1650,
+    "function": "postMessage",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 636.11,
+    "samples": 2440,
+    "function": "wasm-function[2]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 582.65,
+    "samples": 1444,
+    "function": "wasm-function[101]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 544.1,
+    "samples": 1945,
+    "function": "wasm-function[46]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 426.57,
+    "samples": 1085,
+    "function": "wasm-function[106]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 358.5,
+    "samples": 1266,
+    "function": "wasm-function[149]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 229.67,
+    "samples": 979,
+    "function": "(program)",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 224.3,
+    "samples": 939,
+    "function": "wasm-function[33]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 190.61,
+    "samples": 1,
+    "function": "getApiMapHandler",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/core/api-map.js",
+    "line": 72
+  },
+  {
+    "sampledMs": 183.73,
+    "samples": 811,
+    "function": "wasm-function[19]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 136.26,
+    "samples": 600,
+    "function": "wasm-function[22]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 130.55,
+    "samples": 432,
+    "function": "wasm-function[5]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 125.01,
+    "samples": 8,
+    "function": "_onMessage",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/background/offscreen-dictionary-worker.js",
+    "line": 106
+  },
+  {
+    "sampledMs": 106.83,
+    "samples": 342,
+    "function": "wasm-function[39]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 100.5,
+    "samples": 1,
+    "function": "_onMessageWrapper",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/background/backend.js",
+    "line": 1258
+  },
+  {
+    "sampledMs": 94.31,
+    "samples": 442,
+    "function": "wasm-function[13]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 93.84,
+    "samples": 545,
+    "function": "prepareSpanCompression",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd-wasm.js",
+    "line": 554
+  },
+  {
+    "sampledMs": 87.21,
+    "samples": 191,
+    "function": "wasm-function[104]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 85.85,
+    "samples": 270,
+    "function": "(garbage collector)",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 72.43,
+    "samples": 279,
+    "function": "wasm-function[4]",
+    "source": "wasm://wasm/34e657a2",
+    "line": 0
+  },
+  {
+    "sampledMs": 67.04,
+    "samples": 237,
+    "function": "finishPreparedSpanCompression",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd-wasm.js",
+    "line": 626
+  },
+  {
+    "sampledMs": 56.13,
+    "samples": 82,
+    "function": "_encodeAndAppendArtifactChunkForState",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-record-opfs-store.js",
+    "line": 2422
+  },
+  {
+    "sampledMs": 53.62,
+    "samples": 128,
+    "function": "wasm-function[52]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 52.13,
+    "samples": 141,
+    "function": "copyWasmBackedColumnChunk",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-bank-wasm-parser.js",
+    "line": 4014
+  },
+  {
+    "sampledMs": 48.91,
+    "samples": 146,
+    "function": "wasm-function[8]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 41.52,
+    "samples": 121,
+    "function": "round",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-key-hash.js",
+    "line": 39
+  },
+  {
+    "sampledMs": 39.35,
+    "samples": 91,
+    "function": "_encodeArtifactRecordFields",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-record-opfs-store.js",
+    "line": 5804
+  },
+  {
+    "sampledMs": 38.65,
+    "samples": 124,
+    "function": null,
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 37.36,
+    "samples": 125,
+    "function": "_createLookupIndexChunk",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-record-opfs-store.js",
+    "line": 6208
+  },
+  {
+    "sampledMs": 33.19,
+    "samples": 480,
+    "function": "setTimeout",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 32.14,
+    "samples": 120,
+    "function": "_resizeTermContentMetadataArena",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/dictionary-database.js",
+    "line": 7214
+  },
+  {
+    "sampledMs": 31.9,
+    "samples": 508,
+    "function": "clearTimeout",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 31.52,
+    "samples": 41,
+    "function": "_tryPublishContiguousArtifactTermContentMetadata",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/dictionary-database.js",
+    "line": 9723
+  },
+  {
+    "sampledMs": 30.66,
+    "samples": 85,
+    "function": "buildTermLookupFilter",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-lookup-route.js",
+    "line": 53
+  },
+  {
+    "sampledMs": 30.45,
+    "samples": 114,
+    "function": "read",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-bank-source-pipeline.js",
+    "line": 107
+  },
+  {
+    "sampledMs": 30.34,
+    "samples": 156,
+    "function": "hashLargeTermKeyByteRange",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-key-hash.js",
+    "line": 124
+  },
+  {
+    "sampledMs": 30.27,
+    "samples": 75,
+    "function": "wasm-function[179]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 30.24,
+    "samples": 95,
+    "function": "wasm-function[31]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 29.92,
+    "samples": 121,
+    "function": "write",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 29.63,
+    "samples": 101,
+    "function": "parseTermBankWithWasmColumnChunks",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-bank-wasm-parser.js",
+    "line": 2057
+  },
+  {
+    "sampledMs": 29.27,
+    "samples": 153,
+    "function": "Blob",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 27.56,
+    "samples": 125,
+    "function": "wasm-function[30]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 26.72,
+    "samples": 67,
+    "function": "slice",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 26.03,
+    "samples": 58,
+    "function": "inflateCompressedTermBankSourcesWasm",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-bank-wasm-parser.js",
+    "line": 220
+  },
+  {
+    "sampledMs": 25.46,
+    "samples": 45,
+    "function": "hasCompletePreparedTermRecordPreinternedPlan",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-record-preinterned-plan.js",
+    "line": 568
+  },
+  {
+    "sampledMs": 22.76,
+    "samples": 102,
+    "function": "wasm-function[113]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 21.54,
+    "samples": 77,
+    "function": "wasm-function[42]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 20.42,
+    "samples": 81,
+    "function": "encodeNativeTermLookupIndex",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-bank-wasm-parser.js",
+    "line": 1542
+  },
+  {
+    "sampledMs": 19.7,
+    "samples": 65,
+    "function": "hashContentXxh32Pair",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-entry-content-hash.js",
+    "line": 84
+  },
+  {
+    "sampledMs": 19.59,
+    "samples": 77,
+    "function": "decompressUsingContext",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd-wasm.js",
+    "line": 670
+  },
+  {
+    "sampledMs": 18.65,
+    "samples": 90,
+    "function": "querySelector",
+    "source": "",
+    "line": null
+  },
+  {
+    "sampledMs": 18.61,
+    "samples": 66,
+    "function": "wasm-function[27]",
+    "source": "wasm://wasm/0003d872",
+    "line": 0
+  },
+  {
+    "sampledMs": 18.1,
+    "samples": 54,
+    "function": "wasm-function[94]",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/lib/zstd.wasm",
+    "line": 0
+  },
+  {
+    "sampledMs": 17.34,
+    "samples": 62,
+    "function": "parseTermBankWasmBuffersUnchecked",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-bank-wasm-parser.js",
+    "line": 820
+  },
+  {
+    "sampledMs": 16.73,
+    "samples": 95,
+    "function": "createTermContentReferenceSlabs",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/dictionary/term-content-block-store.js",
+    "line": 1322
+  },
+  {
+    "sampledMs": 16.62,
+    "samples": 58,
+    "function": "parseJson",
+    "source": "chrome-extension://ajojbnldejkjkifofddjhcdoaldkhjbb/js/core/json.js",
+    "line": 26
+  },
+  {
+    "sampledMs": 15.31,
+    "samples": 49,
+    "function": "setInterval",
+    "source": "",
+    "line": null
+  }
+]

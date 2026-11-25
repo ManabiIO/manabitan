@@ -1,0 +1,1112 @@
+{
+  "complete": true,
+  "error": null,
+  "node": "v22.22.0",
+  "dictionary": "jitendex",
+  "hardwareConcurrency": 4,
+  "deviceMemory": 8,
+  "fixture": {
+    "label": "Jitendex",
+    "cacheFile": "jitendex-yomitan.zip",
+    "release": "2026.10.03.0",
+    "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822,
+    "expectedTitle": "Jitendex.org [2026-10-03]",
+    "revision": "2026.10.03.0",
+    "termRows": 436555,
+    "mediaFiles": 236,
+    "mediaBytes": 4992155,
+    "unreferencedMediaPaths": [
+      "jitendex/HanaMinA/05167.svg",
+      "jitendex/HanaMinA/05641.svg",
+      "jitendex/HanaMinA/0576b.svg",
+      "jitendex/HanaMinA/05bda.svg",
+      "jitendex/HanaMinA/06207.svg",
+      "jitendex/HanaMinA/07055.svg",
+      "jitendex/HanaMinA/07575.svg",
+      "jitendex/HanaMinA/076a5.svg",
+      "jitendex/HanaMinA/0793d.svg",
+      "jitendex/HanaMinA/080ed.svg",
+      "jitendex/HanaMinA/09093.svg",
+      "jitendex/HanaMinA/09c81.svg",
+      "jitendex/HanaMinA/20bb7.svg"
+    ]
+  },
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "parserWasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+  "parentSourceSha256": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+  "candidateSourceSha256": "536e3c75ea1c28e55935d77179c2b938fd618482adb27fc2be00db1feaf8a2b0",
+  "scope": "Actual source planner and native worker output through record encoders, with deterministic native-content spans and intercepted persistence. No elapsed-time or full-database parity claim.",
+  "summary": {
+    "rows": 436555,
+    "runs": 22,
+    "parentCopyBytes": 873110,
+    "candidateCopyBytes": 873110,
+    "copyBytesAvoided": 0
+  },
+  "encodedByteSha256": "26bdae49a35c014df04c109fc1f8ada4d8897872998871c9b7d16efa4e99e778",
+  "groups": [
+    {
+      "rows": 16000,
+      "prepared": [
+        "0:16000"
+      ],
+      "runRows": [
+        16000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 32000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 32000
+      }
+    },
+    {
+      "rows": 18000,
+      "prepared": [
+        "0:18000"
+      ],
+      "runRows": [
+        18000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 36000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 36000
+      }
+    },
+    {
+      "rows": 16000,
+      "prepared": [
+        "0:16000"
+      ],
+      "runRows": [
+        16000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 32000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 32000
+      }
+    },
+    {
+      "rows": 16000,
+      "prepared": [
+        "0:16000"
+      ],
+      "runRows": [
+        16000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 32000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 32000
+      }
+    },
+    {
+      "rows": 16000,
+      "prepared": [
+        "0:16000"
+      ],
+      "runRows": [
+        16000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 32000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 32000
+      }
+    },
+    {
+      "rows": 18000,
+      "prepared": [
+        "0:18000"
+      ],
+      "runRows": [
+        18000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 36000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 36000
+      }
+    },
+    {
+      "rows": 12000,
+      "prepared": [
+        "0:12000"
+      ],
+      "runRows": [
+        12000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 24000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 24000
+      }
+    },
+    {
+      "rows": 16000,
+      "prepared": [
+        "0:16000"
+      ],
+      "runRows": [
+        16000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 32000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 32000
+      }
+    },
+    {
+      "rows": 24000,
+      "prepared": [
+        "0:24000"
+      ],
+      "runRows": [
+        24000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 48000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 48000
+      }
+    },
+    {
+      "rows": 24000,
+      "prepared": [
+        "0:24000"
+      ],
+      "runRows": [
+        24000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 48000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 48000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 20000,
+      "prepared": [
+        "0:20000"
+      ],
+      "runRows": [
+        20000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 40000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 40000
+      }
+    },
+    {
+      "rows": 20000,
+      "prepared": [
+        "0:20000"
+      ],
+      "runRows": [
+        20000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 40000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 40000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 24000,
+      "prepared": [
+        "0:24000"
+      ],
+      "runRows": [
+        24000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 48000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 48000
+      }
+    },
+    {
+      "rows": 20000,
+      "prepared": [
+        "0:20000"
+      ],
+      "runRows": [
+        20000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 40000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 40000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 22000,
+      "prepared": [
+        "0:22000"
+      ],
+      "runRows": [
+        22000
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 44000
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 44000
+      }
+    },
+    {
+      "rows": 22555,
+      "prepared": [
+        "0:22555"
+      ],
+      "runRows": [
+        22555
+      ],
+      "parentCopies": {
+        "u32": 0,
+        "u16": 45110
+      },
+      "candidateCopies": {
+        "u32": 0,
+        "u16": 45110
+      }
+    }
+  ],
+  "sourceGroups": [
+    {
+      "id": 1,
+      "files": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json",
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json"
+      ],
+      "bytes": [
+        268074,
+        205664,
+        131072,
+        146220,
+        140198,
+        148271,
+        156947,
+        148785
+      ]
+    },
+    {
+      "id": 2,
+      "files": [
+        "term_bank_9.json",
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json",
+        "term_bank_13.json",
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json",
+        "term_bank_17.json"
+      ],
+      "bytes": [
+        147163,
+        147826,
+        147258,
+        154331,
+        192129,
+        189988,
+        165110,
+        172959,
+        190599
+      ]
+    },
+    {
+      "id": 3,
+      "files": [
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json",
+        "term_bank_21.json",
+        "term_bank_22.json",
+        "term_bank_23.json",
+        "term_bank_24.json",
+        "term_bank_25.json"
+      ],
+      "bytes": [
+        193585,
+        190899,
+        186362,
+        189583,
+        171738,
+        198092,
+        193019,
+        186642
+      ]
+    },
+    {
+      "id": 4,
+      "files": [
+        "term_bank_26.json",
+        "term_bank_27.json",
+        "term_bank_28.json",
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json",
+        "term_bank_33.json"
+      ],
+      "bytes": [
+        190791,
+        183298,
+        197385,
+        182242,
+        192823,
+        195024,
+        208275,
+        184711
+      ]
+    },
+    {
+      "id": 5,
+      "files": [
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json",
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json",
+        "term_bank_41.json"
+      ],
+      "bytes": [
+        198667,
+        187035,
+        177511,
+        192342,
+        198310,
+        206435,
+        199798,
+        195477
+      ]
+    },
+    {
+      "id": 6,
+      "files": [
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json",
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json",
+        "term_bank_49.json",
+        "term_bank_50.json"
+      ],
+      "bytes": [
+        162957,
+        202123,
+        185429,
+        190463,
+        191137,
+        180874,
+        187463,
+        211199,
+        178030
+      ]
+    },
+    {
+      "id": 7,
+      "files": [
+        "term_bank_51.json",
+        "term_bank_52.json",
+        "term_bank_53.json",
+        "term_bank_54.json",
+        "term_bank_55.json",
+        "term_bank_56.json"
+      ],
+      "bytes": [
+        197142,
+        177614,
+        187975,
+        216389,
+        194952,
+        185661
+      ]
+    },
+    {
+      "id": 8,
+      "files": [
+        "term_bank_57.json",
+        "term_bank_58.json",
+        "term_bank_59.json",
+        "term_bank_60.json",
+        "term_bank_61.json",
+        "term_bank_62.json",
+        "term_bank_63.json",
+        "term_bank_64.json"
+      ],
+      "bytes": [
+        185430,
+        184270,
+        196955,
+        170923,
+        189642,
+        163997,
+        155731,
+        155691
+      ]
+    },
+    {
+      "id": 9,
+      "files": [
+        "term_bank_65.json",
+        "term_bank_66.json",
+        "term_bank_67.json",
+        "term_bank_68.json",
+        "term_bank_69.json",
+        "term_bank_70.json",
+        "term_bank_71.json",
+        "term_bank_72.json",
+        "term_bank_73.json",
+        "term_bank_74.json",
+        "term_bank_75.json",
+        "term_bank_76.json"
+      ],
+      "bytes": [
+        130411,
+        127368,
+        135660,
+        124545,
+        125948,
+        134214,
+        141027,
+        129843,
+        130349,
+        128259,
+        127074,
+        123386
+      ]
+    },
+    {
+      "id": 10,
+      "files": [
+        "term_bank_77.json",
+        "term_bank_78.json",
+        "term_bank_79.json",
+        "term_bank_80.json",
+        "term_bank_81.json",
+        "term_bank_82.json",
+        "term_bank_83.json",
+        "term_bank_84.json",
+        "term_bank_85.json",
+        "term_bank_86.json",
+        "term_bank_87.json",
+        "term_bank_88.json"
+      ],
+      "bytes": [
+        136620,
+        129283,
+        134013,
+        125559,
+        124917,
+        133595,
+        139655,
+        142503,
+        136195,
+        146001,
+        141427,
+        144189
+      ]
+    },
+    {
+      "id": 11,
+      "files": [
+        "term_bank_89.json",
+        "term_bank_90.json",
+        "term_bank_91.json",
+        "term_bank_92.json",
+        "term_bank_93.json",
+        "term_bank_94.json",
+        "term_bank_95.json",
+        "term_bank_96.json",
+        "term_bank_97.json",
+        "term_bank_98.json",
+        "term_bank_99.json"
+      ],
+      "bytes": [
+        139536,
+        141309,
+        156779,
+        115052,
+        142867,
+        122884,
+        129127,
+        216356,
+        176461,
+        182108,
+        157735
+      ]
+    },
+    {
+      "id": 12,
+      "files": [
+        "term_bank_100.json",
+        "term_bank_101.json",
+        "term_bank_102.json",
+        "term_bank_103.json",
+        "term_bank_104.json",
+        "term_bank_105.json",
+        "term_bank_106.json",
+        "term_bank_107.json",
+        "term_bank_108.json",
+        "term_bank_109.json"
+      ],
+      "bytes": [
+        146037,
+        164099,
+        165972,
+        206006,
+        163251,
+        170503,
+        171211,
+        169794,
+        159890,
+        174952
+      ]
+    },
+    {
+      "id": 13,
+      "files": [
+        "term_bank_110.json",
+        "term_bank_111.json",
+        "term_bank_112.json",
+        "term_bank_113.json",
+        "term_bank_114.json",
+        "term_bank_115.json",
+        "term_bank_116.json",
+        "term_bank_117.json",
+        "term_bank_118.json",
+        "term_bank_119.json"
+      ],
+      "bytes": [
+        166121,
+        135418,
+        137560,
+        156673,
+        141754,
+        154911,
+        167263,
+        138833,
+        160769,
+        147977
+      ]
+    },
+    {
+      "id": 14,
+      "files": [
+        "term_bank_120.json",
+        "term_bank_121.json",
+        "term_bank_122.json",
+        "term_bank_123.json",
+        "term_bank_124.json",
+        "term_bank_125.json",
+        "term_bank_126.json",
+        "term_bank_127.json",
+        "term_bank_128.json",
+        "term_bank_129.json",
+        "term_bank_130.json"
+      ],
+      "bytes": [
+        138496,
+        185041,
+        171337,
+        154423,
+        94739,
+        92641,
+        92277,
+        90904,
+        94127,
+        102793,
+        98293
+      ]
+    },
+    {
+      "id": 15,
+      "files": [
+        "term_bank_131.json",
+        "term_bank_132.json",
+        "term_bank_133.json",
+        "term_bank_134.json",
+        "term_bank_135.json",
+        "term_bank_136.json",
+        "term_bank_137.json",
+        "term_bank_138.json",
+        "term_bank_139.json",
+        "term_bank_140.json",
+        "term_bank_141.json",
+        "term_bank_142.json"
+      ],
+      "bytes": [
+        97652,
+        102643,
+        182638,
+        154888,
+        149833,
+        147629,
+        125695,
+        120882,
+        127106,
+        99135,
+        84445,
+        93267
+      ]
+    },
+    {
+      "id": 16,
+      "files": [
+        "term_bank_143.json",
+        "term_bank_144.json",
+        "term_bank_145.json",
+        "term_bank_146.json",
+        "term_bank_147.json",
+        "term_bank_148.json",
+        "term_bank_149.json",
+        "term_bank_150.json",
+        "term_bank_151.json",
+        "term_bank_152.json"
+      ],
+      "bytes": [
+        127026,
+        140537,
+        151018,
+        127902,
+        137849,
+        165782,
+        164752,
+        152802,
+        146363,
+        134089
+      ]
+    },
+    {
+      "id": 17,
+      "files": [
+        "term_bank_153.json",
+        "term_bank_154.json",
+        "term_bank_155.json",
+        "term_bank_156.json",
+        "term_bank_157.json",
+        "term_bank_158.json",
+        "term_bank_159.json",
+        "term_bank_160.json",
+        "term_bank_161.json",
+        "term_bank_162.json",
+        "term_bank_163.json"
+      ],
+      "bytes": [
+        148735,
+        136496,
+        125876,
+        139410,
+        146556,
+        142972,
+        131839,
+        142552,
+        134775,
+        141812,
+        151728
+      ]
+    },
+    {
+      "id": 18,
+      "files": [
+        "term_bank_164.json",
+        "term_bank_165.json",
+        "term_bank_166.json",
+        "term_bank_167.json",
+        "term_bank_168.json",
+        "term_bank_169.json",
+        "term_bank_170.json",
+        "term_bank_171.json",
+        "term_bank_172.json",
+        "term_bank_173.json",
+        "term_bank_174.json"
+      ],
+      "bytes": [
+        155899,
+        143575,
+        147277,
+        155336,
+        151833,
+        146715,
+        154394,
+        150844,
+        137438,
+        148513,
+        151200
+      ]
+    },
+    {
+      "id": 19,
+      "files": [
+        "term_bank_175.json",
+        "term_bank_176.json",
+        "term_bank_177.json",
+        "term_bank_178.json",
+        "term_bank_179.json",
+        "term_bank_180.json",
+        "term_bank_181.json",
+        "term_bank_182.json",
+        "term_bank_183.json",
+        "term_bank_184.json",
+        "term_bank_185.json"
+      ],
+      "bytes": [
+        155032,
+        140556,
+        146175,
+        148447,
+        147066,
+        148832,
+        149115,
+        161482,
+        153710,
+        155104,
+        138517
+      ]
+    },
+    {
+      "id": 20,
+      "files": [
+        "term_bank_186.json",
+        "term_bank_187.json",
+        "term_bank_188.json",
+        "term_bank_189.json",
+        "term_bank_190.json",
+        "term_bank_191.json",
+        "term_bank_192.json",
+        "term_bank_193.json",
+        "term_bank_194.json",
+        "term_bank_195.json",
+        "term_bank_196.json"
+      ],
+      "bytes": [
+        138339,
+        146745,
+        158697,
+        155757,
+        161273,
+        156501,
+        157557,
+        155805,
+        152404,
+        156431,
+        156743
+      ]
+    },
+    {
+      "id": 21,
+      "files": [
+        "term_bank_197.json",
+        "term_bank_198.json",
+        "term_bank_199.json",
+        "term_bank_200.json",
+        "term_bank_201.json",
+        "term_bank_202.json",
+        "term_bank_203.json",
+        "term_bank_204.json",
+        "term_bank_205.json",
+        "term_bank_206.json",
+        "term_bank_207.json"
+      ],
+      "bytes": [
+        150799,
+        139879,
+        126488,
+        142559,
+        154027,
+        148554,
+        148847,
+        151668,
+        152985,
+        147491,
+        143472
+      ]
+    },
+    {
+      "id": 22,
+      "files": [
+        "term_bank_208.json",
+        "term_bank_209.json",
+        "term_bank_210.json",
+        "term_bank_211.json",
+        "term_bank_212.json",
+        "term_bank_213.json",
+        "term_bank_214.json",
+        "term_bank_215.json",
+        "term_bank_216.json",
+        "term_bank_217.json",
+        "term_bank_218.json",
+        "term_bank_219.json"
+      ],
+      "bytes": [
+        143539,
+        154295,
+        146875,
+        136437,
+        142645,
+        142348,
+        150742,
+        143174,
+        134919,
+        161353,
+        171006,
+        44511
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "experiments": {
+        "experimentalGenericSpanCompression": true,
+        "experimentalParserWorkers3": true,
+        "experimentalSkipFusedParse": false,
+        "experimentalLookupScratchReuse": true,
+        "experimentalNativeSegmentedLookup": true,
+        "experimentalDirectLookupArena": false,
+        "experimentalSinglePassLookupCompaction": false,
+        "experimentalTermBankSpans": false,
+        "experimentalNativeEscapedKeys": true,
+        "experimentalValidatedGlossaryReuse": true,
+        "experimentalFusedSingleBank": false,
+        "experimentalGlobalExactContentReuse": false,
+        "experimentalFastGlossaryNormalization": false
+      },
+      "fusedParseAttempts": 22,
+      "fusedParseFallbacks": 0,
+      "discardedFusedParseMs": 0,
+      "discardedFusedRows": 0,
+      "bankSpanCount": 219,
+      "escapedKeyDecodeCount": 0,
+      "validatedGlossaryReuseCount": 85996,
+      "globalExactContentReuseCount": 0,
+      "fastGlossaryNormalizationCount": 0,
+      "fastGlossaryNormalizationFallbackCount": 0,
+      "fusedSingleBankGroups": 0,
+      "maxWasmHeapBytes": 76087296,
+      "bufferSetupMs": 8066,
+      "allocationMs": 2,
+      "nativeStringPlanAllocationMs": 0,
+      "copyJsonMs": 0,
+      "parseBankMs": 7802,
+      "encodeContentMs": 0,
+      "recentContentDedupHitCount": 73242,
+      "rowDecodeMs": 80,
+      "nativeStringPlanMs": 0,
+      "nativeStringPlanChunkCount": 22,
+      "nativeStringPlanFallbackChunkCount": 0,
+      "chunkDispatchMs": 1099,
+      "sourcePreparationMs": 28.577347000001737,
+      "sourceDeliveryMs": 103,
+      "sourceTransferredBytes": 33829614,
+      "sourceInflateMs": 2340.4048589999984,
+      "sourceCrcMs": 0,
+      "sourceCrcScannedBytes": 0,
+      "sourceCrcReusedBytes": 0,
+      "sourceCrcReusedGlossaryCount": 0,
+      "sourceCompressedBytes": 33829614,
+      "sourceUncompressedBytes": 538927310,
+      "resultCopyMs": 1098.8760589999993,
+      "resultDeliveryMs": 68,
+      "orderedSinkWaitMs": 3915.5647839999983,
+      "borrowedContentResultCount": 22,
+      "nativeLookupScratchReusedBytes": 28790800,
+      "compactContentMetadataGroups": 0,
+      "compactContentMetadataBytesAvoided": 0,
+      "nativeLookupScratchReuseGroups": 22,
+      "nativeLookupScratchReuseMisses": 0,
+      "nativeSegmentedLookupSegments": 0,
+      "nativeSegmentedLookupFallbacks": 0,
+      "directLookupArenaSegments": 0,
+      "directLookupArenaCopiedBytesAvoided": 0,
+      "lookupCompactionSourceValidationPasses": 0,
+      "lookupIndexPrepareMs": 134.49401499999794,
+      "lookupIndexCompactMs": 0,
+      "lookupIndexEncodeMs": 134.49401499999794,
+      "rowCount": 436555,
+      "metaCapacity": 637500,
+      "metaAllocatedBytes": 43350000,
+      "encodedContentBytes": 389707807,
+      "contentCapacity": 481920000,
+      "initialContentBytesPerRow": 48,
+      "chunkCount": 22,
+      "chunkSize": 0,
+      "maxPendingChunks": 1,
+      "minimalDecode": true,
+      "includeContentMetadata": true,
+      "copyContentBytes": false,
+      "reuseExpressionForReadingDecode": true,
+      "skipTagRuleDecode": true,
+      "lazyGlossaryDecode": true,
+      "mediaHintFastScan": false,
+      "parallelWorkerCount": 3,
+      "parallelPipelineGroupsPerWorker": 3,
+      "parallelGroupCount": 22,
+      "parallelWorkerWallMs": 8112.718141,
+      "parallelSourceReadWallMs": 7095.906054,
+      "parallelOwnedContentBytes": 0,
+      "parallelPeakQueuedOwnedContentBytes": 0
+    }
+  ]
+}

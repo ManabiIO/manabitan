@@ -1,0 +1,312 @@
+#!/usr/bin/env python3
+"""Independently reconcile the existing current-source #875 timing screens.
+
+This script reads retained evidence only. It launches no browser or import and
+does not replace the registered storage policy with a retrospective allowance.
+"""
+
+from copy import deepcopy
+import hashlib
+import io
+import json
+import math
+from pathlib import Path
+import random
+import statistics
+import subprocess
+import sys
+import zipfile
+
+ROOT = Path(__file__).resolve().parent
+SOURCE_ROOT = ROOT.parent / 'manabitan'
+VALIDATOR_ROOT = ROOT.parent / 'qualification/dev/perf/import-memory-20261125-a7f7'
+sys.path.insert(0, str(VALIDATOR_ROOT))
+from qualification_receipts import validate_import_summary, require_matching_receipts, SQLITE_PATH
+
+BASELINE = '7d1643e6147a10cb2165e9744cf0e63b59e46632'
+CANDIDATE = '7a8b25a44a3fe165107ed816377cc72bb0fac67d'
+TOOLING = 'ae85fc50a77ce5d13cb9001ad376f741f915ec7a'
+RUN = '45642169759'
+ORDERS = ['ABC', 'CBA', 'BAC', 'CAB', 'BCA', 'ACB']
+PACKAGE_DIFFERENCES = [
+    'js/dictionary/term-bank-wasm-parser-worker.js',
+    'js/dictionary/term-bank-wasm-parser.js',
+    'js/dictionary/wasm/term-bank-parser.c',
+    'lib/term-bank-parser.wasm',
+]
+SOURCE_PACKAGE_PATHS = {
+    PACKAGE_DIFFERENCES[0]: 'ext/' + PACKAGE_DIFFERENCES[0],
+    PACKAGE_DIFFERENCES[1]: 'ext/' + PACKAGE_DIFFERENCES[1],
+    PACKAGE_DIFFERENCES[2]: 'ext/' + PACKAGE_DIFFERENCES[2],
+    PACKAGE_DIFFERENCES[3]: 'dev/data/dictionary-wasm/term-bank-parser.wasm',
+}
+
+
+def digest(path):
+    with path.open('rb') as data:
+        return hashlib.file_digest(data, 'sha256').hexdigest()
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def git(*args):
+    return subprocess.check_output(['git', *args], cwd=SOURCE_ROOT)
+
+
+def require(value, description):
+    if not value:
+        raise ValueError(description)
+
+
+def reconcile(actual, expected, label):
+    if type(expected) is float:
+        require(type(actual) in (int, float) and math.isclose(actual, expected, rel_tol=1e-12, abs_tol=1e-10), label)
+    elif type(expected) is dict:
+        require(type(actual) is dict and actual.keys() == expected.keys(), label + ' fields')
+        for key in expected:
+            reconcile(actual[key], expected[key], label + '.' + key)
+    elif type(expected) is list:
+        require(type(actual) is list and len(actual) == len(expected), label + ' length')
+        for index, (left, right) in enumerate(zip(actual, expected, strict=True)):
+            reconcile(left, right, label + f'[{index}]')
+    else:
+        require(type(actual) is type(expected) and actual == expected, label)
+
+
+def paired(base, candidate):
+    changes = [100 * (right / left - 1) for left, right in zip(base, candidate, strict=True)]
+    rng = random.Random(20261124)
+    distribution = sorted(statistics.median(rng.choices(changes, k=len(changes))) for _ in range(10000))
+    return {
+        'pairs': len(changes), 'fasterPairs': sum(value < 0 for value in changes),
+        'worstPairPercent': max(changes), 'bestPairPercent': min(changes),
+        'pairedChangesPercent': changes, 'pairedMedianPercent': statistics.median(changes),
+        'pairedMedianBootstrap95Percent': [distribution[249], distribution[9749]],
+        'intervalMethod': 'Descriptive percentile bootstrap; 10000 block-paired resamples, seed 20261124; no multiple-comparison correction',
+        'equalWorkPercent': 100 * (sum(candidate) / sum(base) - 1),
+        'baselineMedianMs': statistics.median(base), 'candidateMedianMs': statistics.median(candidate),
+    }
+
+
+def storage_receipt(raw, canonical, dictionary):
+    sizes = [item['bytes'] for item in canonical['files'] if item['path'] == SQLITE_PATH]
+    product = [item for item in canonical['files'] if item['path'] != SQLITE_PATH]
+    active = next(size for size in sizes if size != 4096)
+    return {
+        'policyVersion': 'pinned-import-storage-20261124-v1', 'dictionary': dictionary,
+        'rawStorageBytes': raw['bytes'], 'rawFiles': sorted(raw['files'], key=lambda row: row['path']),
+        'nonSahFiles': product, 'nonSahBytes': sum(row['bytes'] for row in product),
+        'sahPool': {'fileCount': len(sizes), 'emptyFileCount': sizes.count(4096),
+                    'emptyFileBytes': 4096, 'allocationUnitBytes': 4096,
+                    'sortedFileBytes': sorted(sizes), 'activeFileBytes': active,
+                    'activeAllocationUnits': active // 4096, 'totalBytes': sum(sizes)},
+    }
+
+
+def declared_storage_key(receipt):
+    active_rule = ({'mode': 'bounded-allocation', 'minimumUnits': 129, 'maximumUnits': 131,
+                    'allocationUnitBytes': 4096} if receipt['dictionary'] == 'vndb' else
+                   {'mode': 'exact-allocation', 'activeFileBytes': receipt['sahPool']['activeFileBytes']})
+    return {'policyVersion': receipt['policyVersion'], 'dictionary': receipt['dictionary'],
+            'nonSahFiles': receipt['nonSahFiles'], 'sahFileCount': 8,
+            'sahEmptyFileCount': 7, 'sahEmptyFileBytes': 4096,
+            'sahActiveAllocationRule': active_rule}
+
+
+def expected_schedule():
+    result = [{'name': f'warmup-{arm}', 'arm': arm, 'cohort': 'excluded-warmup', 'block': None, 'position': None, 'mediaCheck': 'sample'} for arm in 'ABC']
+    result += [{'name': f'block-{block:02d}-{position}-{arm}', 'arm': arm, 'cohort': 'timed', 'block': block,
+                'position': position, 'mediaCheck': 'sample'}
+               for block, order in enumerate(ORDERS, 1) for position, arm in enumerate(order, 1)]
+    result += [{'name': f'diagnostic-{arm}', 'arm': arm, 'cohort': 'exhaustive-diagnostic', 'block': None, 'position': None, 'mediaCheck': 'all'} for arm in 'AB']
+    return result
+
+
+def archived_product_witness():
+    archive = ROOT / 'current-media-memory-jitendex-rep1-2754.zip'
+    result = {'artifact': archive.name, 'artifactSha256': digest(archive), 'arms': {}}
+    with zipfile.ZipFile(archive) as outer:
+        plan = json.loads(outer.read('plan.json'))
+        for arm, expected_sha in [('A', BASELINE), ('B', CANDIDATE)]:
+            require(plan['sourceIdentities'][arm]['commit'] == expected_sha, 'Retained product witness source differs')
+            data = outer.read(f'{arm}-product.zip')
+            with zipfile.ZipFile(io.BytesIO(data)) as package:
+                names = [item.filename for item in package.infolist() if not item.is_dir()]
+                require(len(names) == len(set(names)), 'Retained product witness contains duplicate entries')
+                entries = {name: hashlib.sha256(package.read(name)).hexdigest() for name in names}
+            result['arms'][arm] = {'archiveSha256': hashlib.sha256(data).hexdigest(), 'entries': entries}
+    return result
+
+
+def audit(dictionary, product_witness):
+    artifact = ROOT / f'current-media-screen-{dictionary}-2754'
+    cohort = artifact / 'cohort'
+    protocol = read(cohort / 'protocol.json')
+    observations = read(cohort / 'observations.json')
+    analysis = read(cohort / 'analysis.json')
+    expected = expected_schedule()
+    require(protocol['dictionary'] == dictionary and protocol['stage'] == 'screen', 'Wrong study scope')
+    require(protocol['github']['GITHUB_RUN_ID'] == RUN and protocol['toolingCommit'] == TOOLING, 'Wrong workflow identity')
+    require(protocol['orders'] == ORDERS and protocol['plannedBlocks'] == 6 and protocol['warmupsExcluded'] == 3 and protocol['reversedSchedule'] is False, 'Changed fixed schedule')
+    require(protocol['diagnosticArms'] == ['A', 'B'] and protocol['timingMediaCheck'] == 'sample' and protocol['diagnosticMediaCheck'] == 'all', 'Changed media schedule')
+    require(protocol['harnessOverlay'] is None and protocol['nodeVersion'] == 'v22.22.0', 'Unexpected source overlay/runtime')
+    require(protocol['expectedPackageDifferences'] == PACKAGE_DIFFERENCES, 'Changed package allowlist')
+    require(protocol['storagePolicyVersion'] == 'pinned-import-storage-20261124-v1', 'Unknown registered storage policy')
+    require(digest(artifact / 'runner.py') == protocol['runnerSha256'], 'Archived runner hash differs')
+    for name, expected_hash in protocol['storagePolicySha256'].items():
+        require(digest(artifact / 'storage-policy' / name) == expected_hash, 'Archived storage policy differs')
+    for local, source_path in [('runner.py', 'dev/perf/import-runtime-20261124-3aac.py'), ('workflow.yml', '.github/workflows/import-studies-20261124-3aac.yml')]:
+        require((artifact / local).read_bytes() == git('show', f'{TOOLING}:{source_path}'), 'Tooling snapshot differs from Git commit')
+    require(git('rev-parse', 'HEAD').decode().strip() == BASELINE, 'Local harness witness is not frozen baseline')
+    for name, expected_hash in protocol['unchangedHarnessSha256'].items():
+        require(digest(SOURCE_ROOT / name) == expected_hash, f'Frozen harness witness differs: {name}')
+    source_changes = git('diff', '--name-only', BASELINE, CANDIDATE).decode().splitlines()
+    require(not set(source_changes).intersection(protocol['unchangedHarnessSha256']), 'Candidate changed harness inputs')
+    packages = {arm: read(cohort / f'package-{arm}.json') for arm in 'ABC'}
+    for arm, source_sha in [('A', BASELINE), ('B', CANDIDATE), ('C', BASELINE)]:
+        identity = {'commit': source_sha, 'tree': git('rev-parse', source_sha + '^{tree}').decode().strip()}
+        require(protocol['sourceIdentities'][arm] == identity and packages[arm]['source'] == identity, 'Source tree/commit mismatch')
+        witness = product_witness['arms']['B' if arm == 'B' else 'A']
+        require(packages[arm]['entries'] == witness['entries'], 'Timing package entries differ from retained product bytes')
+        if arm != 'C':
+            require((cohort / f'source-status-{arm}.txt').read_text().strip() == '', 'Build source was dirty')
+            for name, source_path in SOURCE_PACKAGE_PATHS.items():
+                require(hashlib.sha256(git('show', f'{source_sha}:{source_path}')).hexdigest() == packages[arm]['entries'][name], 'Packaged changed runtime bytes differ from source')
+    require(packages['C']['archiveSha256'] == packages['A']['archiveSha256'] and packages['C']['entries'] == packages['A']['entries'] and packages['C']['identicalArchiveFromArm'] == 'A', 'A/C are not identical controls')
+    changed_entries = sorted(name for name in packages['A']['entries'].keys() | packages['B']['entries'].keys()
+                             if packages['A']['entries'].get(name) != packages['B']['entries'].get(name))
+    require(changed_entries == PACKAGE_DIFFERENCES == read(cohort / 'package-differences.json'), 'Actual package differences differ from plan')
+    fixture_record = read(cohort / 'fixture.json')
+    require(fixture_record['fixture'] == protocol['fixture'], 'Fixture metadata differs')
+    fixture_path = SOURCE_ROOT / 'builds/e2e-dictionary-cache' / protocol['fixture']['cacheFile']
+    require(fixture_path.stat().st_size == fixture_record['sizeBytes'] == protocol['fixture']['sizeBytes'] and digest(fixture_path) == fixture_record['sha256'] == protocol['fixture']['sha256'], 'Pinned fixture byte witness differs')
+    require(len(observations) == 23 and len({row['name'] for row in observations}) == 23, 'Incomplete or duplicate observations')
+    actual_outputs = {path.parent.name for path in cohort.glob('*/summary.json')}
+    require(actual_outputs == {row['name'] for row in expected}, 'Missing or extra benchmark outputs')
+    reference = None
+    declared_reference = None
+    media_references = {}
+    old_expected = {}
+    exact_storage_failures = []
+    reconciled = []
+    storage_allocations = []
+    values = {arm: [] for arm in 'ABC'}
+    host_models = set()
+    previous_start = ''
+    for row, planned in zip(observations, expected, strict=True):
+        require({key: row.get(key) for key in planned} == planned, 'Observation order or cohort changed')
+        require(row['status'] == 'success' and row['source'] == protocol['sourceIdentities'][row['arm']], 'Observation identity/status differs')
+        output = cohort / row['name']
+        summary, report = read(output / 'summary.json'), read(output / 'run-1.json')
+        require(report['startedAtIso'] > previous_start, 'Observed start order is not monotonic')
+        previous_start = report['startedAtIso']
+        hashes = {name: value for name, value in protocol['unchangedHarnessSha256'].items() if name in summary['source']['sha256']}
+        receipt = validate_import_summary(summary, report, dictionary=dictionary, fixture=protocol['fixture'],
+                                         source_sha=protocol['sourceIdentities'][row['arm']]['commit'],
+                                         package_sha256=packages[row['arm']]['archiveSha256'], browser_version=analysis['browserVersion'],
+                                         source_hashes=hashes, media_check=row['mediaCheck'])
+        raw_storage = summary['runs'][0]['validation']['storage']
+        storage = storage_receipt(raw_storage, receipt['common']['validation']['storage'], dictionary)
+        require(storage == read(output / 'storage-receipt.json'), 'Retained storage receipt does not reconcile')
+        policy_receipt = deepcopy(receipt)
+        policy_receipt['common']['validation']['storage'] = declared_storage_key(storage)
+        if reference is None:
+            reference, declared_reference = receipt, policy_receipt
+        else:
+            require_matching_receipts(declared_reference, policy_receipt, compare_media=False)
+            try:
+                require_matching_receipts(reference, receipt, compare_media=False)
+            except ValueError:
+                changed = deepcopy(receipt)
+                changed['common']['validation']['storage'] = reference['common']['validation']['storage']
+                require_matching_receipts(reference, changed, compare_media=False)
+                exact_storage_failures.append(row['name'])
+        mode = row['mediaCheck']
+        if mode in media_references:
+            require_matching_receipts(media_references[mode], policy_receipt)
+        else:
+            media_references[mode] = policy_receipt
+        raw_run = summary['runs'][0]
+        phase = next(phase for phase in report['phases'] if phase['name'] == protocol['fixture']['label'] + ': total import')
+        timing = phase['data']['browserTiming']
+        duration = timing['completedAtMs'] - timing['startedAtMs']
+        require(duration == raw_run['totalImportMs'] == row['totalImportMs'], 'Timing summaries do not match raw browser timing')
+        if row['cohort'] == 'timed':
+            values[row['arm']].append(duration)
+        phase_counters = [{'phase': phase['phase'], 'elapsedMs': phase.get('elapsedMs'), 'details': phase.get('details')}
+                          for phase in raw_run['importDebug'].get('importerPhaseTimings', [])
+                          if phase.get('phase') in ('import-data-banks', 'bulk-finalization') or str(phase.get('phase', '')).startswith('term-file-fast-path:')]
+        require(phase_counters == read(output / 'phase-counters.json'), 'Phase counters differ from raw import receipt')
+        require(row['summary'] == f'{row["name"]}/summary.json' and row['phaseCounters'] == f'{row["name"]}/phase-counters.json', 'Observation paths differ')
+        require(row['storageBytes'] == storage['rawStorageBytes'] and row['activeSahFileBytes'] == storage['sahPool']['activeFileBytes'] and row['nonSahBytes'] == storage['nonSahBytes'], 'Observation storage metrics differ')
+        for name in ('host-before.json', 'host-after.json'):
+            host = read(output / name)
+            require(host['nodeVersion'] == 'v22.22.0' and host['platform'] == 'linux' and host['logicalCpuCount'] == 4, 'Host workload/runtime differs')
+            host_models.add(host['cpuModel'])
+        old_expected['lookup'] = sorted([value['pass'], value['term'], value['results'], value['sha256']] for value in raw_run['validation']['lookup']['observations'])
+        old_expected['storageInvariant'] = declared_storage_key(storage)
+        old_expected['media-' + mode] = receipt['media']
+        storage_allocations.append({key: row[key] for key in ('name', 'arm', 'cohort', 'storageBytes', 'activeSahFileBytes', 'nonSahBytes')})
+        reconciled.append({**planned, 'totalImportMsFromRawReport': duration,
+                           'storageBytes': storage['rawStorageBytes'], 'activeSahFileBytes': storage['sahPool']['activeFileBytes'],
+                           'strictIndividualReceiptValidation': 'passed'})
+    require(len(host_models) == 1, 'Host CPU model changed within cohort')
+    require(read(cohort / 'correctness.json') == {'status': 'passed', 'identicalReceipts': old_expected}, 'Published correctness receipt differs')
+    require(read(cohort / 'storage-allocations.json') == {'policyVersion': protocol['storagePolicyVersion'], 'observations': storage_allocations, 'allRawReceiptsRetained': True}, 'Storage allocation record differs')
+    recomputed = {'candidate': paired(values['A'], values['B']),
+                  'candidateVsSecondBaseline': paired(values['C'], values['B']),
+                  'identicalProductControl': paired(values['A'], values['C'])}
+    for key, value in recomputed.items():
+        reconcile(analysis[key], value, 'reported ' + key)
+    require(analysis['allTimingsMs'] == values and analysis['status'] == 'complete' and analysis['screeningOnly'] is True and analysis['independentQualificationRequired'] is True, 'Published analysis scope/values differ')
+    state = read(cohort / 'state.json')
+    require(state['status'] == 'success' and state['attemptedObservations'] == 23 and state['timedObservations'] == 18 and state['exhaustiveDiagnostics'] == 2, 'Study state differs from completed schedule')
+    hashes = {str(path.relative_to(ROOT)): digest(path) for path in sorted(artifact.rglob('*'))
+              if path.is_file() and '__pycache__' not in path.parts and path.suffix in ('.json', '.py', '.yml', '.txt', '.log')}
+    artifact_zip = ROOT / (artifact.name + '.zip')
+    if artifact_zip.exists():
+        hashes[artifact_zip.name] = digest(artifact_zip)
+    return {
+        'dictionary': dictionary, 'status': 'passed', 'workflowRun': RUN,
+        'sourceIdentities': protocol['sourceIdentities'], 'hostCpuModel': next(iter(host_models)),
+        'browserVersion': analysis['browserVersion'], 'observationsReconciled': len(reconciled),
+        'warmupsExcluded': 3, 'timedObservations': 18, 'pairedBlocks': 6, 'exhaustiveMediaDiagnostics': 2,
+        'observations': reconciled, 'timingRecomputed': recomputed, 'allTimingsMs': values,
+        'declaredStoragePolicy': protocol['storagePolicyVersion'],
+        'declaredStoragePolicyPassed': True, 'strictExactStorageEqualityPassed': not exact_storage_failures,
+        'exactStorageMismatchObservations': exact_storage_failures,
+        'storageBytesObserved': sorted({row['storageBytes'] for row in reconciled}),
+        'activeSahFileBytesObserved': sorted({row['activeSahFileBytes'] for row in reconciled}),
+        'sampleMediaReceipt': media_references['sample']['media'], 'exhaustiveMediaReceipt': media_references['all']['media'],
+        'packageEntriesIndependentlyMatched': len(packages['A']['entries']), 'packageDifferences': changed_entries,
+        'timingArchiveSha256Reported': {arm: packages[arm]['archiveSha256'] for arm in 'ABC'},
+        'packageVerificationScope': 'Every timing-manifest entry equals bytes in independently retained current-source memory packages, and changed runtime entries equal Git source blobs. A/C share the same reported timing archive hash. Timing ZIP containers were not retained, so their archive hashes are reconciled with reports rather than recomputed from those missing containers.',
+        'inputFilesSha256': hashes,
+    }
+
+
+def main():
+    witness = archived_product_witness()
+    results = [audit(dictionary, witness) for dictionary in ('jmdict', 'jitendex', 'vndb')]
+    output = {'schemaVersion': 1, 'status': 'passed', 'scope': 'Independent audit of existing current-source #875 exploratory timing screens; no new acquisitions',
+              'workflowRun': RUN, 'observationsReconciled': sum(result['observationsReconciled'] for result in results),
+              'cohortsKeptSeparate': True, 'allDescriptiveStatisticsRecomputed': True,
+              'timingDoesNotReplaceMemoryQualification': True,
+              'limits': ['Six-block screens are exploratory and require independent qualification.',
+                         'Canonical lexical readback is sampled; exhaustive media does not imply exhaustive lexical or SQLite byte equality.',
+                         'The existing memory cohort and all earlier failures remain separate; this timing audit cannot promote a memory-failed candidate.'],
+              'auditorSha256': digest(Path(__file__)),
+              'strictValidatorSha256': digest(VALIDATOR_ROOT / 'qualification_receipts.py'),
+              'retainedProductWitness': {**witness, 'arms': {arm: {'archiveSha256': value['archiveSha256'], 'entryCount': len(value['entries'])} for arm, value in witness['arms'].items()}},
+              'cohorts': results}
+    destination = ROOT / 'independent-timing-audit.json'
+    destination.write_text(json.dumps(output, indent=2, sort_keys=True) + '\n')
+    print(json.dumps({'status': output['status'], 'observationsReconciled': output['observationsReconciled'],
+                      'cohorts': [{'dictionary': result['dictionary'], 'strictExactStorageEqualityPassed': result['strictExactStorageEqualityPassed'],
+                                  'timingRecomputed': result['timingRecomputed']} for result in results]}, indent=2))
+
+
+if __name__ == '__main__':
+    main()

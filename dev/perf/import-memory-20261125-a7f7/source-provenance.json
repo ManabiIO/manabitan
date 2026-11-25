@@ -1,37 +1,37 @@
 {
-  "sourceDirectory": "dev/perf/import-memory-20261124-3aac",
-  "observerProvenance": "f2f08c8ee74cdea548c5c1b494ec15bf10360b46",
-  "unchangedFiles": {
-    "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
-    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
-    "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6"
-  },
-  "adaptedFiles": {
-    "test_import_window.py": "Only helper import changed from run_memory to protocol",
-    "protocol.py": "Exact original function bodies for memory_overlay, schedule, and memory_comparison; unrelated storage/source/build code omitted",
-    "test_protocol.py": "Exact test_fixed_pairing_gates_each_metric_and_preserves_invalid_pairs method retained; unrelated source/storage fixtures omitted"
-  },
-  "functions": {
-    "memory_overlay": {
-      "source": "run_memory.py",
-      "sha256": "d329d875ca3971281bc467be60279141608b3a97ecc20eaf6b924fc39ea62902"
+    "sourceDirectory": "dev/perf/import-memory-20261124-3aac",
+    "observerProvenance": "f2f08c8ee74cdea548c5c1b494ec15bf10360b46",
+    "unchangedFiles": {
+        "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6"
     },
-    "schedule": {
-      "source": "run_memory.py",
-      "sha256": "a0ba94bab06f457bbcceb1c5f71ce8362cb415f61a4a849012b07d8fe16da09c"
+    "adaptedFiles": {
+        "test_import_window.py": "Only helper import changed from run_memory to protocol",
+        "protocol.py": "Exact original function bodies for memory_overlay, schedule, and memory_comparison; unrelated storage/source/build code omitted",
+        "test_protocol.py": "Exact test_fixed_pairing_gates_each_metric_and_preserves_invalid_pairs method retained; unrelated source/storage fixtures omitted"
     },
-    "memory_comparison": {
-      "source": "protocol.py",
-      "sha256": "b58dfcee62daebfd99ad62d18ccd49a62717eace32ce716c17ce0cdcefc6fcd5"
+    "functions": {
+        "memory_overlay": {
+            "source": "run_memory.py",
+            "sha256": "d329d875ca3971281bc467be60279141608b3a97ecc20eaf6b924fc39ea62902"
+        },
+        "schedule": {
+            "source": "run_memory.py",
+            "sha256": "a0ba94bab06f457bbcceb1c5f71ce8362cb415f61a4a849012b07d8fe16da09c"
+        },
+        "memory_comparison": {
+            "source": "protocol.py",
+            "sha256": "b58dfcee62daebfd99ad62d18ccd49a62717eace32ce716c17ce0cdcefc6fcd5"
+        }
+    },
+    "sourceSha256": {
+        "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249"
     }
-  },
-  "sourceSha256": {
-    "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
-    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
-    "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
-    "test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
-    "test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
-    "protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
-    "run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249"
-  }
 }

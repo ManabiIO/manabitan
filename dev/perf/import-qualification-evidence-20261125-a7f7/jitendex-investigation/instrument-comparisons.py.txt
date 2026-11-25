@@ -1,0 +1,59 @@
+from pathlib import Path
+import json,os,subprocess
+root=Path('/workspace/scratch/a7f76505d50d/jitendex')
+evidence=root.parent/'jitendex-evidence'
+source=(root/'ext/js/dictionary/wasm/term-bank-parser.c').read_text()
+start=source.index('static int raw_term_content_tokens_equal(')
+end=source.index('\nstatic uint32_t raw_term_content_quick_signature',start)
+replacement=r'''static uint64_t raw_comparison_stats[6];
+__attribute__((visibility("default")))
+uint64_t raw_comparison_stat(uint32_t index) {
+    return index < 6u ? raw_comparison_stats[index] : 0u;
+}
+static int raw_counted_comparison(const uint8_t* src, uint32_t a, uint32_t b, uint32_t n, uint64_t* compared) {
+    uint32_t offset = 0u;
+    while (n - offset >= 32u) {
+        *compared += 32u;
+        if (!content_bytes_equal_between(src, a + offset, src, b + offset, 32u)) { return 0; }
+        offset += 32u;
+    }
+    while (n - offset >= 8u) {
+        *compared += 8u;
+        if (!content_bytes_equal_between(src, a + offset, src, b + offset, 8u)) { return 0; }
+        offset += 8u;
+    }
+    while (offset < n) {
+        *compared += 1u;
+        if (src[a + offset] != src[b + offset]) { return 0; }
+        ++offset;
+    }
+    return 1;
+}
+static int raw_term_content_tokens_equal(const uint8_t* src, const TermRowMeta* first, const TermRowMeta* second, int glossary_equal) {
+    ++raw_comparison_stats[0];
+    if (first->glossary_length != second->glossary_length) { return 0; }
+    uint64_t glossary_work = 0u;
+    uint64_t field_work = 0u;
+    const int glossary_same = glossary_equal || raw_counted_comparison(src, first->glossary_start, second->glossary_start, first->glossary_length, &glossary_work);
+    const int fields_same =
+        first->rules_length == second->rules_length && raw_counted_comparison(src, first->rules_start, second->rules_start, first->rules_length, &field_work) &&
+        first->definition_tags_length == second->definition_tags_length && raw_counted_comparison(src, first->definition_tags_start, second->definition_tags_start, first->definition_tags_length, &field_work) &&
+        first->term_tags_length == second->term_tags_length && raw_counted_comparison(src, first->term_tags_start, second->term_tags_start, first->term_tags_length, &field_work);
+    raw_comparison_stats[1] += glossary_work;
+    if (!fields_same) {
+        raw_comparison_stats[2] += glossary_work;
+        if (glossary_work > 0u) { ++raw_comparison_stats[3]; }
+    }
+    if (!glossary_same) { raw_comparison_stats[4] += field_work; }
+    if (glossary_equal) { ++raw_comparison_stats[5]; }
+    return fields_same && glossary_same;
+}
+'''
+source=source[:start]+replacement+source[end:]
+source=source.replace('#include "vendor/', '#include "'+str(root/'ext/js/dictionary/wasm/vendor')+'/')
+(evidence/'instrumented-parser.c').write_text(source)
+manifest=json.loads((root/'dev/data/dictionary-wasm/manifest.json').read_text())
+target=next(t for t in manifest['targets'] if t['name']=='term-bank-parser.wasm')
+binroot=Path('/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin')
+env=os.environ.copy();env['LD_LIBRARY_PATH']='/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/x86_64-linux-gnu'
+subprocess.run([str(binroot/'clang'),'-fuse-ld='+str(binroot/'wasm-ld'),*target['arguments'],'-Wl,--export=raw_comparison_stat','-o',str(evidence/'instrumented-parser.wasm'),str(evidence/'instrumented-parser.c'),str(root/'ext/js/dictionary/wasm/term-bank-inflate.c')],check=True,env=env)

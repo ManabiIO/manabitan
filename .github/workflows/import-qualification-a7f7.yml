@@ -3,10 +3,10 @@ name: Import qualification 20261125 a7f7
 on:
   push:
     branches: ['perf/import-qualification-20261125-a7f7']
+    # Evidence and formatting commits must not reacquire an unchanged cohort.
     paths:
-      - '.github/workflows/import-qualification-a7f7.yml'
       - 'dev/perf/import-qualification-20261125-a7f7.py'
-      - 'dev/perf/import-memory-20261125-a7f7/**'
+      - 'dev/perf/import-memory-20261125-a7f7/*.py'
 
 permissions:
   contents: read

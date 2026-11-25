@@ -1,0 +1,19 @@
+
+<--- Last few GCs --->
+
+[5:0x30d5f000]    17058 ms: Scavenge 695.2 (713.5) -> 694.8 (718.5) MB, pooled: 0 MB, 11.27 / 0.00 ms  (average mu = 0.327, current mu = 0.206) allocation failure; 
+[5:0x30d5f000]    17358 ms: Mark-Compact (reduce) 697.9 (718.7) -> 696.5 (714.0) MB, pooled: 0 MB, 256.59 / 0.00 ms  (+ 0.4 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 298 ms) (average mu = 0.322, current mu 
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0xe40d24 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 2: 0x1216be0 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 3: 0x1216eb7 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 4: 0x1444875  [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 5: 0x145e109 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 6: 0x13afec8 v8::internal::StackGuard::HandleInterrupts(v8::internal::StackGuard::InterruptLevel) [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 7: 0x186ce7f v8::internal::Runtime_StackGuard(int, unsigned long*, v8::internal::Isolate*) [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]
+ 8: 0x1dcb476  [/home/agent/.npm/_npx/6d82ddbdd7da268b/node_modules/node/bin/node]

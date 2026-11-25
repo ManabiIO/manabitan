@@ -1,0 +1,37 @@
+[
+  {
+    "file": "dev/data/dictionary-wasm/manifest.json",
+    "independentBytes": 2588,
+    "independentSha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd",
+    "otherSha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd",
+    "identical": true
+  },
+  {
+    "file": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+    "independentBytes": 67550,
+    "independentSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "otherSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "identical": true
+  },
+  {
+    "file": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+    "independentBytes": 16935,
+    "independentSha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+    "otherSha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+    "identical": true
+  },
+  {
+    "file": "ext/js/dictionary/term-bank-wasm-parser.js",
+    "independentBytes": 206273,
+    "independentSha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c",
+    "otherSha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c",
+    "identical": true
+  },
+  {
+    "file": "ext/js/dictionary/wasm/term-bank-parser.c",
+    "independentBytes": 156075,
+    "independentSha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+    "otherSha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+    "identical": true
+  }
+]

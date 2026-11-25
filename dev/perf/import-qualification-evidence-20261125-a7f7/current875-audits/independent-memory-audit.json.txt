@@ -1,0 +1,1301 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "workflowRun": "45642179064",
+  "workflowAttempt": 1,
+  "scope": "Independent offline audit of every fixed observation and original raw scan. No new browser acquisition, replacement observation, pooling, threshold change or timing inference.",
+  "auditScriptSha256": "aebb1282c1a375c45a5250d8a4995e4cb744b22802dd38e39ade409409ee41f7",
+  "unchangedAuditorSha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+  "unchangedObserverSha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+  "sourceIdentities": {
+    "A": {
+      "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    },
+    "B": {
+      "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+    }
+  },
+  "reviewedIntegrationCommitWithSameCandidateTree": "98731a11d81161c929f7822516610e3018aa9dab",
+  "changedPackageEntryAllowlist": [
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "rawScanCount": 1504,
+  "observationCount": 16,
+  "all16CorrectnessReceiptsIndependentlyVerified": true,
+  "qualifiedObservationCount": 12,
+  "qualifiedPairCount": 5,
+  "fixedFailures": [
+    {
+      "dictionary": "vndb",
+      "replication": 1,
+      "observation": "A2",
+      "arm": "A",
+      "failure": "covered-import-scan-gap-over-250ms",
+      "maximumCoveredSampleGapMs": 350.425804,
+      "fixedLimitMs": 250
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": "B1",
+      "arm": "B",
+      "failure": "covered-import-scan-gap-over-250ms",
+      "maximumCoveredSampleGapMs": 324.494085,
+      "fixedLimitMs": 250
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": "A1",
+      "arm": "A",
+      "failure": "covered-import-scan-gap-over-250ms",
+      "maximumCoveredSampleGapMs": 258.866332,
+      "fixedLimitMs": 250
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "observation": "B2",
+      "arm": "B",
+      "failure": "covered-import-scan-gap-over-250ms",
+      "maximumCoveredSampleGapMs": 275.215655,
+      "fixedLimitMs": 250
+    }
+  ],
+  "qualifiedPairsExceedingIndividualMemoryBound": [],
+  "cells": [
+    {
+      "cell": "current-media-memory-jitendex-rep1-2754",
+      "dictionary": "jitendex",
+      "replication": 1,
+      "artifactSha256": "d60df0b581f6278b14e8afb6e199e41c77a2c891e470f662cff08d614dc57e6b",
+      "inputSha256": {
+        "A-identity.json": "81239356e188c73c5c217faced8e8ddbdcad981e2d7414be128026348acf3751",
+        "A-package-entries.json": "b0f179e344d05f9d0ced112b4bf92d844059f0ff5d396548883b07cb199f2d91",
+        "A1/acquisition.json": "4fa4f30336c92f6c206b3afe96b0c8011f1526a06c209626268a492d974511b8",
+        "A1/correctness.json": "f986495b7da99835c2f32480abea41aa2bbedcdb1e36ff1f4ff601d743c80725",
+        "A1/host-after.json": "f4ce6c09688b19bb3e312c7ef1916c86752cc94dde11f29634a06651f297928f",
+        "A1/host-before.json": "b85d5423fa0cf17641638a15aa016cf54a212cedc74d039b927e59aaacbad361",
+        "A1/markers.jsonl": "7a9d3060adb712f671a810857b48638083999aebfb09b65f943e9fe8a5932f7d",
+        "A1/memory.json": "7e5a2687e919f247e1be563908bdca132178397d71e7042e055315381698b0fc",
+        "A1/run-1.json": "100acda1c20643ff68aaeb3563cb525d219a9e92f30ca7295af47449bede7b0f",
+        "A1/summary.json": "faf0e9f18ea4357c6edf1a28c403ded0e7be4e21c96d49cb65ae5201de37b313",
+        "A2/acquisition.json": "7fab17e6af8087adc024d24cb552d886e059f09710614d698558184046687cd5",
+        "A2/correctness.json": "ea2c472feb032d369d6a803f595e17801c0a4ab37945dcd9c53290454a91b5c8",
+        "A2/host-after.json": "c328e539c2cdfe3e764471589bf2fe372bf6052aaeb885413a6981c44d34a6b1",
+        "A2/host-before.json": "722f8822341a45d428a1e67897bedd0bc503dfc00b24196fe4a927d0a47ee7c8",
+        "A2/markers.jsonl": "a8976717f60ee96bfa328a59f35bccd9269291edf6922afa04329b3b9e083f50",
+        "A2/memory.json": "34f984921aa9acc3792298f86bdfce400597385290ac8ecd31656ad66524e56e",
+        "A2/run-1.json": "b219a3361469cf3040a50705d11123afdc272eb9d6fefabf321f59dba87b47f6",
+        "A2/summary.json": "dda026fdcedc389caafd9eaf13e340f2330428b9b9d0945264352c9ae4913283",
+        "B-identity.json": "c39f5ecd49865530d08921088a7d743a162e5852ad6c7bdc686b48116382bea6",
+        "B-package-entries.json": "33b1faacf7afa0c03311104a4df52f2e86c02a8e22a67713d00f5b73295dc6d3",
+        "B1/acquisition.json": "224dea6eb808758be76f845b6a8e814fdc1aabe9b1fcc54532cc9f5d049c6be9",
+        "B1/correctness.json": "fdd514c4598aa50e1f84ce9c4971d862749d3b8d281bdbec262ff204ec5a9551",
+        "B1/host-after.json": "6b0fdd85e5293bb589ec73a786b7e78331f54c4bd572fa324f3210c50e33d660",
+        "B1/host-before.json": "c39e13a4883746df7e53d965e58939cea26ebc703735f48e45c7174a37355bba",
+        "B1/markers.jsonl": "8e11c80b78b976565302aca3e94918c18128b71d98d89ce450ac607d7d6be889",
+        "B1/memory.json": "643b020e62d05a4a117830224b90b52a9764aa7e7473520df63d79cab099ab3f",
+        "B1/run-1.json": "4c5f4f16d0049521176a0db0d34adf547f780fd79cb20985803a4e7567344153",
+        "B1/summary.json": "5b9c9c125bb811684de28bc84dfadb2afaea6f9d406d16907c2051aec62f8bfb",
+        "B2/acquisition.json": "5de86959fcc6bbb0bd5efb62eeca125b5f74644bfb0fcd352f8bfe93dab165dd",
+        "B2/correctness.json": "c3339619b00a7da3ffa75af7a56f472752bb9bcaa0db8a95433a6ddf6e8242b6",
+        "B2/host-after.json": "77ebfcddcabe9d410974a7c5f5ea1eb1bfd6acc1cf15c48ec70a95dc13771781",
+        "B2/host-before.json": "1707089aa75e072e7fdd3afacf454ed377dd05caa7224032dc1d00643070cac7",
+        "B2/markers.jsonl": "e8d0631342cea28784df04e135d35128c15a5951c5854cadb85f25e6c875306a",
+        "B2/memory.json": "5b1985e97ccfc877831cc515b746f1b6de4bf3be64e495f48d66eaf2e1308d96",
+        "B2/run-1.json": "1ba5d39be7735aa3033132d505ff3b4655645fcee689e52a2b1fb7a095a586eb",
+        "B2/summary.json": "d46679330dbf46e3da25607ac1e811b5d0d44c663a806cd7d1a3411c7c114f61",
+        "correctness.json": "88f3136691413745cd77c449a03af2aec338918e470d69dd18a0458202702a9f",
+        "memory-audit.json": "2c311e6c6cbf48b8906f326069777c0c1ec320f38932b37b947d14bbb3b4e6a8",
+        "memory-comparison.json": "8f62854e852415877f49334e1f9de99024e63be958424b70256ed14aa68ac44d",
+        "memory-harness.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+        "observations.json": "88a35bed8bd977f6a2cd0e4f44a831524457b1e23b882c91fc60c38b84281a34",
+        "original-harness.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "package-differences.json": "30cab62b26617200110d4a0ff8f5b14285c18e6926047d7c06139216d4a7be53",
+        "plan.json": "27e079ae095d3ad87f817f4acd3ef21c27c9500e0fef9d119b969ce706c950d8",
+        "qualification.json": "3561550b134394506c4bcf8c58c166c25a29db56835483754a10c57eba0ec293",
+        "receipt-audit.json": "cad82e727639515e8a8212a73abd3460d5fc8a2d5632915446228f465c1845f7",
+        "setup-fixtures.json": "40f6828e78f0e9a619c655749c494d1f346d3d0cfccd51389b35a0859b685ead",
+        "source/.github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        "source/.github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "source/dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "source/dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "source/dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "source/dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "source/dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "source/dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "source/dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "source/dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "source/dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "source/dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "source/dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "source/dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "source/dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "source/package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "source/package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+        "storage-allocation-summary.json": "e75f6888a546af86eb5d9e7655360cee1dc764b78f9f469b06c280b79a2272f2"
+      },
+      "sourceFilesVerified": {
+        ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        ".github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc"
+      },
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+        }
+      },
+      "toolingCommit": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+      "frozenCoverage": {
+        "betweenScanWaitMs": 25,
+        "maximumBracketGapMs": 250,
+        "maximumCoveredGapMs": 250,
+        "minimumFullyCoveredImportScans": 5
+      },
+      "promotionCriteria": {
+        "bothIndependentReplicationsRequired": true,
+        "everyObservationQualified": true,
+        "maximumIndividualPairedIncreasePercent": 10,
+        "maximumMedianPairedIncreasePercent": 5
+      },
+      "schedule": [
+        {
+          "arm": "A",
+          "index": 1,
+          "name": "A1",
+          "pair": 1
+        },
+        {
+          "arm": "B",
+          "index": 2,
+          "name": "B1",
+          "pair": 1
+        },
+        {
+          "arm": "B",
+          "index": 3,
+          "name": "B2",
+          "pair": 2
+        },
+        {
+          "arm": "A",
+          "index": 4,
+          "name": "A2",
+          "pair": 2
+        }
+      ],
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 326,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -2.5578422069145734,
+            "maximumPairedChangePercent": -1.6808402211945905
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -3.1031468470621713,
+            "maximumPairedChangePercent": -2.166315228192639
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "packages": {
+        "A": {
+          "sha256": "7cb9b2b606890ac7d7de4ddd6a80328d80e2cfbe1a68528ffe1ea41eb289f8fb",
+          "sizeBytes": 16790986,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        },
+        "B": {
+          "sha256": "3993fb3a68f682369af47255cd851ca45e684434e37bc044fabeba2a5f267ade",
+          "sizeBytes": 16793833,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "observations": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "index": 1,
+          "pair": 1,
+          "allObservedSampleCount": 87,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 164.904016,
+          "preImportBracketGapMs": 6.78941,
+          "postImportBracketGapMs": 97.26525,
+          "fullyContainedImportSampleCount": 17,
+          "stableFullyReadImportSampleCount": 17,
+          "maxSampledPssKiB": 1055722,
+          "maxSampledPrivateKiB": 825180,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "index": 2,
+          "pair": 1,
+          "allObservedSampleCount": 81,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 146.021474,
+          "preImportBracketGapMs": 32.304457,
+          "postImportBracketGapMs": 75.858044,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1037977,
+          "maxSampledPrivateKiB": 807304,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "index": 3,
+          "pair": 2,
+          "allObservedSampleCount": 77,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 148.569258,
+          "preImportBracketGapMs": 22.081853,
+          "postImportBracketGapMs": 75.508088,
+          "fullyContainedImportSampleCount": 14,
+          "stableFullyReadImportSampleCount": 14,
+          "maxSampledPssKiB": 1049895,
+          "maxSampledPrivateKiB": 819940,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "index": 4,
+          "pair": 2,
+          "allObservedSampleCount": 81,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 170.196895,
+          "preImportBracketGapMs": 7.859645,
+          "postImportBracketGapMs": 87.025083,
+          "fullyContainedImportSampleCount": 14,
+          "stableFullyReadImportSampleCount": 14,
+          "maxSampledPssKiB": 1087240,
+          "maxSampledPrivateKiB": 854460,
+          "benchmarkExitCode": 0
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 825180,
+            "candidate": 807304,
+            "changePercent": -2.166315228192639
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1055722,
+            "candidate": 1037977,
+            "changePercent": -1.6808402211945905
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 854460,
+            "candidate": 819940,
+            "changePercent": -4.0399784659317035
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1087240,
+            "candidate": 1049895,
+            "changePercent": -3.4348441926345563
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ]
+    },
+    {
+      "cell": "current-media-memory-jitendex-rep2-2754",
+      "dictionary": "jitendex",
+      "replication": 2,
+      "artifactSha256": "a4cd351a062953176543dcb442c7b2a1e11641efdeb0992a358588d68b8769ea",
+      "inputSha256": {
+        "A-identity.json": "b4ed3172b30bbbd4fddd0610848b2f7588b35b2563f7aa9db7d172dd2d8f0134",
+        "A-package-entries.json": "b0f179e344d05f9d0ced112b4bf92d844059f0ff5d396548883b07cb199f2d91",
+        "A1/acquisition.json": "12698918fa275319f781d0f9285e7407d9bfc847888e3ff862587490b5f16917",
+        "A1/correctness.json": "dc816ed2c09fd39dfa80730bd3bc4dade2c7d3971e875e7a83c86b8e4c67beb3",
+        "A1/host-after.json": "b2025bacd45d162c6e2a149509ec1c7ed302b4358070f73d3a1364efea5bcfc1",
+        "A1/host-before.json": "1e416feb100232e7c69f8013b4283726a3136369d6b7d2f974046b9e4117bc63",
+        "A1/markers.jsonl": "48a1b599662cbac4eead0b3918592c1a19867aea64ddfc0bff8a75cfb98609b3",
+        "A1/memory.json": "2a867f739acacdce3fad8554e81f84fdeb31d73ecbfefd7a349a2e4079553f20",
+        "A1/run-1.json": "dcbd9f65ebc09053ddb690b7cdb2cc825033559612bbbc14dfad059160b3a18e",
+        "A1/summary.json": "894a248c221050a45cecc67f19420bb900f5e14d40776d763060f0afe1427d2a",
+        "A2/acquisition.json": "f92ccbad8302f21d07b68955816ee8c0b6fe46549d7eb7d3d404484b6d7ce4cf",
+        "A2/correctness.json": "b15156ef3979a628c86a8a386561ded7ef6d997fe7a37d006dba68f8486ab881",
+        "A2/host-after.json": "99cf0da55a6bcc2f88bd2b9e0e9fca96746ec980b609e2bd547aa8469e3b325e",
+        "A2/host-before.json": "58b7e385de14ebf8373f2d8ee32b146a4ef3f34e5de552fc4cefd44a92b342d6",
+        "A2/markers.jsonl": "19dc0bc96e6918ba5866606f54f3bd8c0565f1d2598e2fd439fab77619be70a4",
+        "A2/memory.json": "f94a4255df7cd97686272c7533a19631cc7c3636663e6dedd89dcd736386afe9",
+        "A2/run-1.json": "594fd7bfd512902dd540fef2f893253e1976644acb025ea2a4b650522d775be9",
+        "A2/summary.json": "76709d2942f4584fb95c91c7a2502e2e1500f216b09f915b081672bae26800f4",
+        "B-identity.json": "ce795f60b5daeb6fc322cb03781307c15d252cb3d9113523ffbe970dfb36ea8e",
+        "B-package-entries.json": "33b1faacf7afa0c03311104a4df52f2e86c02a8e22a67713d00f5b73295dc6d3",
+        "B1/acquisition.json": "2bbf4e59d5b297b550729dd3bb68924cb045961bb6a2063f4e5df192e3095a14",
+        "B1/correctness.json": "e4c2f5251e805f2784a5345f6069730dce535543d1762ac31c888359a827f548",
+        "B1/host-after.json": "588eb2ce8b029d6e1a8c3bc1b7d2fd1013aefbab28defc7a9a0aa55615da815f",
+        "B1/host-before.json": "d5331456420646cda81f043c79489cdad1ee0cce54361471132686b221623d4f",
+        "B1/markers.jsonl": "769e332a425f7a3a16573fb8aa54c538c1c410c848091c9fc31323d2c3381e5e",
+        "B1/memory.json": "bd7a6bab2a1d67f7010d4118b62e16c7580ec048d5de2bd0744ec8b8ea4a70d2",
+        "B1/run-1.json": "b394c58de66626aed652007c95b56db373f225a294381c96226feef5061a75fc",
+        "B1/summary.json": "3d35fc4fc7da3a866d58d545a6ca7ccfb54976988627d40ee694db45da4ab79e",
+        "B2/acquisition.json": "7969d5e29fafbafbbeb978d7c93cd2826aa071a6c33c33eafabb56a5adbab4d4",
+        "B2/correctness.json": "ace6e79c62b736580380289245f88e4d9b8c59f628b9265b6c7b32ccd48ce63a",
+        "B2/host-after.json": "02b9230c6ee6d41088c0283d6bb50b6b209f20525e59aeb9718a81bc74d71019",
+        "B2/host-before.json": "f9f1a7bcfbb4a59710b687009dd0a5644283a8cab20fe9c9e4950d5c2ead7e7e",
+        "B2/markers.jsonl": "acad92ffc77c469ec19ab8929ef40563882189e3ab3ad5c1a880caeed005a2ec",
+        "B2/memory.json": "27adbd390606b0b5a7bcda576fff012f734769c683c80c2d5bff04b27f5bc011",
+        "B2/run-1.json": "995a23896dbff56a5fcb191e73ea2e24fc5330f4c60fd4843c232cfc6644dc04",
+        "B2/summary.json": "217dce2201ea87ade56f15285669dbeb2233b6d456bf2b9eb920b4bca6038085",
+        "correctness.json": "e235184b3c02a5ba0bf49659f9e3618f9112c440439043e8a38446866840907a",
+        "memory-audit.json": "e262826aeabe7bc1d42915cbbdf26abdeb87786ec403019219c04f7305646750",
+        "memory-comparison.json": "23396cfb629838d176585744781a77114d818ca20d423410d102fe68a59d761a",
+        "memory-harness.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+        "observations.json": "7a502b219b7b7ed65fb2c96b25042104910111b4bee815d809c7951663a39610",
+        "original-harness.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "package-differences.json": "30cab62b26617200110d4a0ff8f5b14285c18e6926047d7c06139216d4a7be53",
+        "plan.json": "93d34bbdd3da5e6f53e1c7975cfc81c1faa70d85e49c1810772c1efe8f72aa6d",
+        "qualification.json": "3561550b134394506c4bcf8c58c166c25a29db56835483754a10c57eba0ec293",
+        "receipt-audit.json": "cad82e727639515e8a8212a73abd3460d5fc8a2d5632915446228f465c1845f7",
+        "setup-fixtures.json": "40f6828e78f0e9a619c655749c494d1f346d3d0cfccd51389b35a0859b685ead",
+        "source/.github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        "source/.github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "source/dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "source/dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "source/dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "source/dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "source/dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "source/dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "source/dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "source/dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "source/dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "source/dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "source/dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "source/dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "source/dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "source/package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "source/package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+        "storage-allocation-summary.json": "a43325d3be5d573dad8ccb67cacb674cace73f8f95a9096579effb5ac89e1159"
+      },
+      "sourceFilesVerified": {
+        ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        ".github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc"
+      },
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+        }
+      },
+      "toolingCommit": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+      "frozenCoverage": {
+        "betweenScanWaitMs": 25,
+        "maximumBracketGapMs": 250,
+        "maximumCoveredGapMs": 250,
+        "minimumFullyCoveredImportScans": 5
+      },
+      "promotionCriteria": {
+        "bothIndependentReplicationsRequired": true,
+        "everyObservationQualified": true,
+        "maximumIndividualPairedIncreasePercent": 10,
+        "maximumMedianPairedIncreasePercent": 5
+      },
+      "schedule": [
+        {
+          "arm": "B",
+          "index": 1,
+          "name": "B1",
+          "pair": 1
+        },
+        {
+          "arm": "A",
+          "index": 2,
+          "name": "A1",
+          "pair": 1
+        },
+        {
+          "arm": "A",
+          "index": 3,
+          "name": "A2",
+          "pair": 2
+        },
+        {
+          "arm": "B",
+          "index": 4,
+          "name": "B2",
+          "pair": 2
+        }
+      ],
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 283,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.8317085650236042,
+            "maximumPairedChangePercent": 2.3784330864424774
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.5667507097236197,
+            "maximumPairedChangePercent": 3.315591533356077
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "packages": {
+        "A": {
+          "sha256": "bfb5bb75a599ce911d251a2738922f4076b89c5b078814000fc53a229d5ff49f",
+          "sizeBytes": 16790986,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        },
+        "B": {
+          "sha256": "309441eae8f5def6b48b9f30c57d2275acc2b5dead8f836239b951ab8bd22d8a",
+          "sizeBytes": 16793833,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "observations": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "index": 1,
+          "pair": 1,
+          "allObservedSampleCount": 72,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 163.251545,
+          "preImportBracketGapMs": 76.655329,
+          "postImportBracketGapMs": 19.44065,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1068192,
+          "maxSampledPrivateKiB": 836224,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "index": 2,
+          "pair": 1,
+          "allObservedSampleCount": 73,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 224.244401,
+          "preImportBracketGapMs": 83.277281,
+          "postImportBracketGapMs": 88.948808,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maxSampledPssKiB": 1043376,
+          "maxSampledPrivateKiB": 809388,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "index": 3,
+          "pair": 2,
+          "allObservedSampleCount": 70,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 187.527807,
+          "preImportBracketGapMs": 57.769019,
+          "postImportBracketGapMs": 91.490809,
+          "fullyContainedImportSampleCount": 11,
+          "stableFullyReadImportSampleCount": 11,
+          "maxSampledPssKiB": 1062270,
+          "maxSampledPrivateKiB": 829084,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "index": 4,
+          "pair": 2,
+          "allObservedSampleCount": 68,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 202.698431,
+          "preImportBracketGapMs": 19.465785,
+          "postImportBracketGapMs": 112.944032,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maxSampledPssKiB": 1075920,
+          "maxSampledPrivateKiB": 844156,
+          "benchmarkExitCode": 0
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 809388,
+            "candidate": 836224,
+            "changePercent": 3.315591533356077
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1043376,
+            "candidate": 1068192,
+            "changePercent": 2.3784330864424774
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 829084,
+            "candidate": 844156,
+            "changePercent": 1.8179098860911624
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1062270,
+            "candidate": 1075920,
+            "changePercent": 1.284984043604731
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ]
+    },
+    {
+      "cell": "current-media-memory-vndb-rep1-2754",
+      "dictionary": "vndb",
+      "replication": 1,
+      "artifactSha256": "61d4ded17022539714c6892a2954d49a485a08dbbd58047f065277ed5cd21795",
+      "inputSha256": {
+        "A-identity.json": "dd3b4fc79c3c3bd80314810bb982c1b6b4df6edb1152868dc9516ece27e2d61d",
+        "A-package-entries.json": "b0f179e344d05f9d0ced112b4bf92d844059f0ff5d396548883b07cb199f2d91",
+        "A1/acquisition.json": "0fe3269f6a438b0f7cdd2f3089c5f648bec149652dacd25fd2694e661c83703b",
+        "A1/correctness.json": "a6f83db84db5a983bc3dfcdb95849468796ca3dbd629ca2ac8a491f8fe786a01",
+        "A1/host-after.json": "d3119666c78802d176765e06e7f73da8beaa98bc28544385a05d8d460c622b76",
+        "A1/host-before.json": "4cbeb6b9e4bc25ba2f4615d624f91ebe9cc763f5cc7f3300b62ada1dc3432c64",
+        "A1/markers.jsonl": "22b83247fdd0f70f6cd1e60030167e79fe0bc852c71953d5c88fb0177ade4176",
+        "A1/memory.json": "167c712a3a9a6d7b6b3ee2e59a1c6d2a8a97b5ca96994b260d8e58a6b91ef8b3",
+        "A1/run-1.json": "9d89a45ff59a6df5941b61bef3a433b759ab8db1edf1394f9d8b93de335922c5",
+        "A1/summary.json": "57db618123ef1c25c247ec0724e7072596cd1a78c99d30cc5646a32e735c1044",
+        "A2/acquisition.json": "c07673567936e31aaa9cdbb9a8caa705f12136431d9fdeb37d0a48bf2a00e6cc",
+        "A2/correctness.json": "4d08bcbf2f22e9096aa5065acb0cb77bcc3f4d79f397bf2e906de285ef8702a0",
+        "A2/host-after.json": "15ba4c4368cb00d636d253b49ad71c1399ffee03644621ce7a1a222f2b80dafc",
+        "A2/host-before.json": "dc9a69e991877d117f7aed7d7f2f4b87c1d8f5864c208ab6de8618d16d84e198",
+        "A2/markers.jsonl": "75afb84ada045387f8e69a2b572d96494321cb305985f96e556bf1ae776dd20c",
+        "A2/memory.json": "702f3d97152de24c711fadbec6e1a0a431df91ede884f7d032de510bb263a5a7",
+        "A2/run-1.json": "7b4ac7853d71739c8f14364f3d20291c4c3c24f6aa739e002d95e12057d7bf78",
+        "A2/summary.json": "d6ed810873c0eb99ec906ffc701f5a2e3265110f6fe301c816487483a067d804",
+        "B-identity.json": "d5f9542147f030385984d7bf8863abd22151f8bec1e7683117506fdc6c53d1f8",
+        "B-package-entries.json": "33b1faacf7afa0c03311104a4df52f2e86c02a8e22a67713d00f5b73295dc6d3",
+        "B1/acquisition.json": "d619cd2a456c6363c54c0cf44d8fe045f6c5ea7ed100864634f2e70e57db84ee",
+        "B1/correctness.json": "a695a95b385eac7f6bebd6ceb9870a7dea2ed26d082b2bcaf0e0b2f70c67f66a",
+        "B1/host-after.json": "db881eeb71be855d1fca351ddb1b987c25e7f88b5ab96f005ff5a3395a16195b",
+        "B1/host-before.json": "d574d47c5036b8e7c97e45a8ce583d24786f838c0f3c7c7bd18bdb44bbe279c7",
+        "B1/markers.jsonl": "178bc7d1483faaa0e8f91a889c99e90acfdfb750712c96afdd66807594c5ee9a",
+        "B1/memory.json": "7fff294b6b33a025d159417ac55561baf10ed9f0b40b2aaf90d83633ee7e6ba3",
+        "B1/run-1.json": "b74e39bbb8618509750065d03b3416aa04242107e40c8c13d8115b8a4b6e3e33",
+        "B1/summary.json": "7eacdcdfd2abfb1b77844693c7e4ecba7c459378f214de80d69a1dc0c8844c68",
+        "B2/acquisition.json": "ca284fa541c9374e81011fdef9c9d2c24fb7458656a6ecdea1266123b8bafda3",
+        "B2/correctness.json": "acaf6d7ee94e3d9bb7e4b4666b9eb3692f64cf22b6c1c7526cf66dcedfe4d281",
+        "B2/host-after.json": "8a998a2c637ee4d258ada0ae4f8bbb20d1e5421a4bd893f5be7f994db5b46b83",
+        "B2/host-before.json": "33d11d79704c6c2d3306af7829fe7c4821e563650b1ca08436bfbc8cdf93c20e",
+        "B2/markers.jsonl": "5b813326d8a3a32467130b1cc78a0a1b6e897ae878f8a78bf4009b16e94e7a07",
+        "B2/memory.json": "64ac130398ece1f321e397479cfd08a03b238a55b46ccf512554dce11c6056b1",
+        "B2/run-1.json": "4093f4961ac6d79a0261e55afb43e639d074c6c5c24f875f2fc73c0680ef95f2",
+        "B2/summary.json": "34f09a8b2de895d3ab06e75c336b8007ef20524e1415c3e6e8673babf92dba6c",
+        "correctness.json": "209efc1e6150c60c9057ed1ab29bfee47dddbf2150c714dacb3d4b73dfea0c30",
+        "memory-audit.json": "c9e583a0e5beb26556a71f8c49a4e60c6c032073d09edad6162b5945983dfadc",
+        "memory-comparison.json": "01fda7afabb167052ee638d8c09def0dcc85ec9fe787686d5809eea129787dd5",
+        "memory-harness.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+        "observations.json": "e81cac717f3549d170dc3d0bddfc356e4aa99495253c967b1cdd9c2e6f22e536",
+        "original-harness.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "package-differences.json": "30cab62b26617200110d4a0ff8f5b14285c18e6926047d7c06139216d4a7be53",
+        "plan.json": "4a05a09117ffc29cc7914d3e2d331871032343c7815140b6f4a79fb494533dee",
+        "qualification.json": "639bd5250037b1eaf5b677e2a320ddb4e2f06b3f10b8f331d8ebb8f3cf5f15b0",
+        "receipt-audit.json": "cad82e727639515e8a8212a73abd3460d5fc8a2d5632915446228f465c1845f7",
+        "setup-fixtures.json": "0d354f7de14e0559b0332a02163c10fe9817c9c2463beb26357c7b6b54ca0b21",
+        "source/.github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        "source/.github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "source/dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "source/dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "source/dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "source/dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "source/dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "source/dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "source/dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "source/dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "source/dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "source/dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "source/dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "source/dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "source/dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "source/package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "source/package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+        "storage-allocation-summary.json": "47e493ad71bb458c3198c75ff7f5a91cfabc5ada7007d74dfb2c15102561e36a"
+      },
+      "sourceFilesVerified": {
+        ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        ".github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc"
+      },
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+        }
+      },
+      "toolingCommit": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+      "frozenCoverage": {
+        "betweenScanWaitMs": 25,
+        "maximumBracketGapMs": 250,
+        "maximumCoveredGapMs": 250,
+        "minimumFullyCoveredImportScans": 5
+      },
+      "promotionCriteria": {
+        "bothIndependentReplicationsRequired": true,
+        "everyObservationQualified": true,
+        "maximumIndividualPairedIncreasePercent": 10,
+        "maximumMedianPairedIncreasePercent": 5
+      },
+      "schedule": [
+        {
+          "arm": "A",
+          "index": 1,
+          "name": "A1",
+          "pair": 1
+        },
+        {
+          "arm": "B",
+          "index": 2,
+          "name": "B1",
+          "pair": 1
+        },
+        {
+          "arm": "B",
+          "index": 3,
+          "name": "B2",
+          "pair": 2
+        },
+        {
+          "arm": "A",
+          "index": 4,
+          "name": "A2",
+          "pair": 2
+        }
+      ],
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 466,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "packages": {
+        "A": {
+          "sha256": "fad3ccd14c56f9f50c38ed2d4f17ca64c731f38e1b006a9091671fd75441740d",
+          "sizeBytes": 16790986,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        },
+        "B": {
+          "sha256": "d8de6a50f3f555a01ecc67937c185e87f14b679c6827970b218ad0ae945146f6",
+          "sizeBytes": 16793833,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "observations": [
+        {
+          "name": "A1",
+          "arm": "A",
+          "index": 1,
+          "pair": 1,
+          "allObservedSampleCount": 143,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 161.775619,
+          "preImportBracketGapMs": 47.906649,
+          "postImportBracketGapMs": 81.060505,
+          "fullyContainedImportSampleCount": 48,
+          "stableFullyReadImportSampleCount": 48,
+          "maxSampledPssKiB": 1421061,
+          "maxSampledPrivateKiB": 1188860,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "B1",
+          "arm": "B",
+          "index": 2,
+          "pair": 1,
+          "allObservedSampleCount": 109,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 171.575019,
+          "preImportBracketGapMs": 29.259166,
+          "postImportBracketGapMs": 83.732689,
+          "fullyContainedImportSampleCount": 45,
+          "stableFullyReadImportSampleCount": 45,
+          "maxSampledPssKiB": 1411740,
+          "maxSampledPrivateKiB": 1179096,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "index": 3,
+          "pair": 2,
+          "allObservedSampleCount": 104,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 173.296953,
+          "preImportBracketGapMs": 51.447005,
+          "postImportBracketGapMs": 6.440892,
+          "fullyContainedImportSampleCount": 42,
+          "stableFullyReadImportSampleCount": 42,
+          "maxSampledPssKiB": 1427052,
+          "maxSampledPrivateKiB": 1193948,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "index": 4,
+          "pair": 2,
+          "allObservedSampleCount": 110,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 350.425804,
+          "preImportBracketGapMs": 6.15912,
+          "postImportBracketGapMs": 30.810581,
+          "fullyContainedImportSampleCount": 46,
+          "stableFullyReadImportSampleCount": 46,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "benchmarkExitCode": 0
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1188860,
+            "candidate": 1179096,
+            "changePercent": -0.8212909846407435
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1421061,
+            "candidate": 1411740,
+            "changePercent": -0.6559183595918783
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": 1193948,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": 1427052,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ]
+    },
+    {
+      "cell": "current-media-memory-vndb-rep2-2754",
+      "dictionary": "vndb",
+      "replication": 2,
+      "artifactSha256": "79daf7b337b181b56146adbd71404c32184cc8e73b26b404f89e7ac55b506ae7",
+      "inputSha256": {
+        "A-identity.json": "631598253549dfdc62bc17761115d7c382275ebb485aa593d0bb5b44874f3fb1",
+        "A-package-entries.json": "b0f179e344d05f9d0ced112b4bf92d844059f0ff5d396548883b07cb199f2d91",
+        "A1/acquisition.json": "142c517faccc962d85ab62b400babb843700f51c887a2b48efe452acc746146d",
+        "A1/correctness.json": "b0f14067f550de249847dadb5af4e022b95e54f8d6c11adb51da7d20ba1a6d8d",
+        "A1/host-after.json": "489147ab911a497443f26e733350cf38f5635fc2e2d96ebd5c7f93230079f847",
+        "A1/host-before.json": "72d2d112095545333ef74104e5dcd45d8bad63a957d1c4cbd19231dc857e1d94",
+        "A1/markers.jsonl": "342d8bd976bbca2b9a1a2cdbca37ef3f7726fcb011b34d4a50f015a1d3aa090b",
+        "A1/memory.json": "37a266e620cd1b580dc8d363e0fd069049d0efaff2f55a2b81745ac374a6ea63",
+        "A1/run-1.json": "8e4a7a9e00ef600f96ecdd054f120c01ae93b55089c1fa04a7b70dcf86555685",
+        "A1/summary.json": "7c4ca1e9c96a3d1a481892df278a18366d884fd13877e7c36379c184091da6ca",
+        "A2/acquisition.json": "1e82b4e93532f2d107c836ef043c70e56be604f63f380c3ed6c6a460c0586b4d",
+        "A2/correctness.json": "9b463d61c47e665707d0fe324f3163e4993444c6ba1e2ad75bd264cb276e4bd4",
+        "A2/host-after.json": "faa5293ad61930b029e495a8dee889e4651c23e5bb535f6dbfea15a57ec97bb9",
+        "A2/host-before.json": "bed56d8df8752025a1262a9e3688be7ad958453c42495d6615f6ce2ce86c7d1c",
+        "A2/markers.jsonl": "803854b17d030829df5d75716ebbdf031d159f49ccd03cac377b99e2bf25f613",
+        "A2/memory.json": "5d5ecd5bd866336195cf99b86b33e889d651dfe2ce239baea3262c1a77bc9f2d",
+        "A2/run-1.json": "0d52df9e5bff88b26f7b75157c2bd4c3d70dae0e6e225eb5df05e2459e6a7665",
+        "A2/summary.json": "a01d8862a9dda23630d55ac9e568fe3217e874189d0023a1e72c5f4a4135225b",
+        "B-identity.json": "7fbaf24ac553f411c42fd45b0db1d7764533dcfbfaee86d34bb6b7c91821c05a",
+        "B-package-entries.json": "33b1faacf7afa0c03311104a4df52f2e86c02a8e22a67713d00f5b73295dc6d3",
+        "B1/acquisition.json": "1d6e5f8f776a76f63821ffec4dc424c0af7d205429fc0788ad39957be93b765b",
+        "B1/correctness.json": "cc6210cb05b2a3a49b8c54b3904df2bb5584c33e5a2f866b1923c4788fc244e4",
+        "B1/host-after.json": "6f147632c3b8129580c775e0f8fa8fdd1752856755235c0749c1a3e83eaf6ace",
+        "B1/host-before.json": "cee5097d3dd5ec152907fcc29eca2780320f551e4c275d9ef07124d0e75315aa",
+        "B1/markers.jsonl": "589242fbc28542043f410677a54037c1912c250fe5ddad51ef09ccc65ccdcf37",
+        "B1/memory.json": "e20ca383223e3d2cbcbdef8d1ddca1a4cc76aff9e0d226ba51c7cfc02d162a92",
+        "B1/run-1.json": "1b5d3fd5e4ade4b0a5120fc1ffed23afeb1b9da2857335f6990c095cf03a28c8",
+        "B1/summary.json": "0acca7752044c400ceec048870d9d426c44bd4401c27732dc31de524f849f602",
+        "B2/acquisition.json": "2cebeeaca08063ba57f0f7e8dbb3ce15ef110f0ec3a8d0041d55c9d5c9d1c9a0",
+        "B2/correctness.json": "9dcede5e71c3bd065bf78b877cac2e88c1d175fee4f31b7e6105483ef2b33ab5",
+        "B2/host-after.json": "aba434dba43acdf2d7fc0cb63b337a23da40d75bff24ab2aebab80dc5880b090",
+        "B2/host-before.json": "cb26facd145eaa8db62bd0b83af63098d780eb98ccc61acd63f1b9456f636fed",
+        "B2/markers.jsonl": "4112984c81a961ab274d36120348bf77518559701091202ba77ca1d6601896ec",
+        "B2/memory.json": "98d47f42dc6162cede4c098869af052474049e3a26eab0fa7b13347a5679b75b",
+        "B2/run-1.json": "235822c92b057daeff7026547754075ed693096290fbaabcc28115e01adc1466",
+        "B2/summary.json": "a2ff894c14acc122ca76dbd47375ab390bd7f9bb7b9a453f363295d2474c390c",
+        "correctness.json": "739471472093dd76190c8e08bb6e87b52887c9905fd825adc4253b88f14cfd72",
+        "memory-audit.json": "3726a3e85d3af58f060af38831add168f751330b4a788197183a4e15c52b5cfa",
+        "memory-comparison.json": "710a31ed6b5cf9ce2ec7c108a1e7b9a6b0db1bf20a611a478df41b17e1fa7748",
+        "memory-harness.e2e.js": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb",
+        "observations.json": "44b5380a36de185a266f936bf12ce1da154de910e90f76b2b307d2ecc54ab0da",
+        "original-harness.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+        "package-differences.json": "30cab62b26617200110d4a0ff8f5b14285c18e6926047d7c06139216d4a7be53",
+        "plan.json": "aeb743bbe9c90749276b2295a1138d6c591d164aeb1dbf643ebcd4abc2c27ad9",
+        "qualification.json": "639bd5250037b1eaf5b677e2a320ddb4e2f06b3f10b8f331d8ebb8f3cf5f15b0",
+        "receipt-audit.json": "cad82e727639515e8a8212a73abd3460d5fc8a2d5632915446228f465c1845f7",
+        "setup-fixtures.json": "0d354f7de14e0559b0332a02163c10fe9817c9c2463beb26357c7b6b54ca0b21",
+        "source/.github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        "source/.github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "source/dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "source/dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "source/dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "source/dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "source/dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "source/dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "source/dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "source/dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "source/dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "source/dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "source/dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "source/dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "source/dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "source/package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "source/package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+        "storage-allocation-summary.json": "82e7f6449464df01f9feb52781e09dde64bc2b09d7f3ca305b9a0352286cef91"
+      },
+      "sourceFilesVerified": {
+        ".github/actions/setup/action.yml": "2a0871259ad5586bbeae887d7b4901caed86d80d93f9031f0c2eed232c9af8f6",
+        ".github/workflows/import-memory-20261124-3aac.yml": "9f4a750c9601bb4a449a92f920fd99305825053bc1d7de9006a937ecf00e5334",
+        "dev/perf/import-memory-20261124-3aac/README.md": "aba481270f4e33f5c7727e0ed8d2d9c828f1ae529817379384891c9327b412e8",
+        "dev/perf/import-memory-20261124-3aac/STORAGE-POLICY.md": "0b1181c2d4ed6780426d9fe3deec81983e4d2d24da9eacf977384781d788af37",
+        "dev/perf/import-memory-20261124-3aac/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "dev/perf/import-memory-20261124-3aac/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "dev/perf/import-memory-20261124-3aac/protocol.py": "5e7249ce644dc0d702b922afc15dbc6d36032fe9c106085dfccd5799efd62030",
+        "dev/perf/import-memory-20261124-3aac/run_memory.py": "f62afe966bbe680730d662858e7504c9ba8975b237da97bf18438d4d536fc249",
+        "dev/perf/import-memory-20261124-3aac/storage_receipts.py": "4469e1c0a463819b5f75ff79ebd011860c7077edecb727ff6ddcb4f05a96ca02",
+        "dev/perf/import-memory-20261124-3aac/test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "dev/perf/import-memory-20261124-3aac/test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+        "dev/perf/import-memory-20261124-3aac/test_protocol.py": "4669c7c730c899cb1a508211133a3eefa111dfa2e1a34e80bfe4d16bb2b0c449",
+        "dev/perf/import-memory-20261124-3aac/test_receipts.py": "1e1ca4e3a7e386d0238375611bd9019c6612762a89b0817644d556503fdcf6e9",
+        "dev/perf/import-memory-20261124-3aac/test_storage_receipts.py": "8ddaa802ae0ae1d83e76e0d5614ca41bdf1fca58e1c7d1a7c9e09742cafc2a69",
+        "dev/perf/import-memory-20261124-3aac/verify_receipts.py": "34801654c412f88293fe140d453b398f8cd02c9a00f03067796394faf81e7e28",
+        "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+        "package.json": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc"
+      },
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+        }
+      },
+      "toolingCommit": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+      "frozenCoverage": {
+        "betweenScanWaitMs": 25,
+        "maximumBracketGapMs": 250,
+        "maximumCoveredGapMs": 250,
+        "minimumFullyCoveredImportScans": 5
+      },
+      "promotionCriteria": {
+        "bothIndependentReplicationsRequired": true,
+        "everyObservationQualified": true,
+        "maximumIndividualPairedIncreasePercent": 10,
+        "maximumMedianPairedIncreasePercent": 5
+      },
+      "schedule": [
+        {
+          "arm": "B",
+          "index": 1,
+          "name": "B1",
+          "pair": 1
+        },
+        {
+          "arm": "A",
+          "index": 2,
+          "name": "A1",
+          "pair": 1
+        },
+        {
+          "arm": "A",
+          "index": 3,
+          "name": "A2",
+          "pair": 2
+        },
+        {
+          "arm": "B",
+          "index": 4,
+          "name": "B2",
+          "pair": 2
+        }
+      ],
+      "memoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 429,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "packages": {
+        "A": {
+          "sha256": "108b50dd14a4c8952b658d6f33ce099431cace75cc552ab20b68e6b6ff10e691",
+          "sizeBytes": 16790986,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        },
+        "B": {
+          "sha256": "869b47f11b18ed03164c797a418ccf5f41fe6f782ea4745a3b353811ebdc335e",
+          "sizeBytes": 16793833,
+          "fileCount": 551,
+          "allFileBytesMatchIndependentLocalBuild": true
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "observations": [
+        {
+          "name": "B1",
+          "arm": "B",
+          "index": 1,
+          "pair": 1,
+          "allObservedSampleCount": 112,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 324.494085,
+          "preImportBracketGapMs": 116.675495,
+          "postImportBracketGapMs": 49.009626,
+          "fullyContainedImportSampleCount": 42,
+          "stableFullyReadImportSampleCount": 42,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "A1",
+          "arm": "A",
+          "index": 2,
+          "pair": 1,
+          "allObservedSampleCount": 106,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 258.866332,
+          "preImportBracketGapMs": 104.368673,
+          "postImportBracketGapMs": 36.558205,
+          "fullyContainedImportSampleCount": 41,
+          "stableFullyReadImportSampleCount": 41,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "A2",
+          "arm": "A",
+          "index": 3,
+          "pair": 2,
+          "allObservedSampleCount": 107,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "maximumCoveredSampleGapMs": 244.012203,
+          "preImportBracketGapMs": 117.94574,
+          "postImportBracketGapMs": 129.901225,
+          "fullyContainedImportSampleCount": 45,
+          "stableFullyReadImportSampleCount": 45,
+          "maxSampledPssKiB": 1383326,
+          "maxSampledPrivateKiB": 1152024,
+          "benchmarkExitCode": 0
+        },
+        {
+          "name": "B2",
+          "arm": "B",
+          "index": 4,
+          "pair": 2,
+          "allObservedSampleCount": 104,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "maximumCoveredSampleGapMs": 275.215655,
+          "preImportBracketGapMs": 105.866841,
+          "postImportBracketGapMs": 69.250356,
+          "fullyContainedImportSampleCount": 40,
+          "stableFullyReadImportSampleCount": 40,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "benchmarkExitCode": 0
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 1,
+          "qualified": false
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1152024,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1383326,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ]
+    }
+  ],
+  "conclusion": {
+    "jitendex": "Both current-source replications pass the frozen memory screen.",
+    "vndb": "Neither current-source replication qualifies because of fixed sampling coverage failures. Only rep1 pair1 qualifies; remaining pairs and replication aggregates remain null.",
+    "promotion": "Blocked by unqualified VNDB memory coverage. No current qualified pair exceeds the frozen memory-increase bound.",
+    "historical": "The original frozen-baseline PR875 memory failure is separate and remains preserved. These results do not replace its observations."
+  },
+  "limitations": [
+    "Sampled PSS/private maxima are not exact peaks.",
+    "The memory harness uses an external observer and its timing labels are not authoritative.",
+    "Correctness receipts include sampled media; exhaustive media verification belongs to the separate timing/diagnostic cohort.",
+    "Cohort results are bound to candidate7a8b25a44a3fe165107ed816377cc72bb0fac67d, not an unverified subsequent remote head."
+  ]
+}

@@ -1,0 +1,19 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "mode": "check",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "targets": [
+    {
+      "name": "term-content-canonical-scan-v1.wasm",
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    {
+      "name": "term-bank-parser.wasm",
+      "sha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+    }
+  ]
+}
