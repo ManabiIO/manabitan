@@ -73,7 +73,10 @@ const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
-/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
+/** @typedef {Pick<ParsedTermBankRow, 'expression'|'reading'|'expressionBytes'|'readingBytes'>} ProjectedMediaDiagnosticRow */
+/** @typedef {{index: number, row: ParsedTermBankRow, imagePaths?: undefined}|{index: number, row: ProjectedMediaDiagnosticRow, imagePaths: string[]}} TermBankMediaRow */
+/** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: TermBankMediaRow[]}} TermBankColumnChunk */
+/** @typedef {Omit<TermBankColumnChunk, 'mediaRows'> & {mediaRows: Array<{index: number, row: ParsedTermBankRow, imagePaths?: undefined}>}} UnprojectedTermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
@@ -2050,7 +2053,7 @@ export async function parseTermBankWithWasmChunks(contentBytes, version, onChunk
  * Only rows which may contain media receive a compatibility row object.
  * @param {Uint8Array|Uint8Array[]} contentBytes
  * @param {number} version
- * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
+ * @param {(chunk: UnprojectedTermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
  * @param {number} [chunkSize]
  * @param {TermBankColumnParserOptions & {preloadedSource?: PreloadedTermBankSource}} [options]
  * @returns {Promise<void>}
@@ -2461,7 +2464,7 @@ null :
             } else {
                 termRecordPreinternedPlan = nativeStringPlan;
             }
-            /** @type {TermBankColumnChunk} */
+            /** @type {UnprojectedTermBankColumnChunk} */
             const chunk = {
                 rowCount: count,
                 contentRowStart: start,
@@ -4005,7 +4008,21 @@ function copyProjectedMediaKeyBytes(bytes, index, offsets, lengths, ownedStrings
 }
 
 /**
- * @param {TermBankColumnChunk} chunk
+ * @overload
+ * @param {UnprojectedTermBankColumnChunk} chunk
+ * @param {boolean} [shareContentBytes]
+ * @param {false} [projectImagePaths]
+ * @returns {UnprojectedTermBankColumnChunk}
+ */
+/**
+ * @overload
+ * @param {UnprojectedTermBankColumnChunk} chunk
+ * @param {boolean} shareContentBytes
+ * @param {boolean} projectImagePaths
+ * @returns {TermBankColumnChunk}
+ */
+/**
+ * @param {UnprojectedTermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
  * @param {boolean} [prepareLookupRoute=false]
@@ -4048,6 +4065,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         throw new Error('Term record string offsets are unavailable');
     }
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
+    /** @type {TermBankMediaRow[]} */
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
             tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
@@ -4056,20 +4074,29 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     row.glossaryJsonBytes :
                     new Uint8Array(row.glossaryJsonBytes))) :
             [];
-        const useProjectedPaths = imagePaths.length > 0;
+        if (imagePaths.length > 0) {
+            // Paths replace presentation materialization. Only diagnostic keys
+            // are read from this row after worker transfer; stored term fields
+            // already live in the chunk's columns and content slab.
+            return {
+                index,
+                imagePaths,
+                row: {
+                    expression: row.expression,
+                    reading: row.reading,
+                    expressionBytes: copyProjectedMediaKeyBytes(row.expressionBytes, plan.expressionIndexes[index], stringOffsets, plan.stringLengths, ownedStrings),
+                    readingBytes: copyProjectedMediaKeyBytes(row.readingBytes, plan.readingIndexes[index], stringOffsets, plan.stringLengths, ownedStrings),
+                },
+            };
+        }
         return {
             index,
-            ...(useProjectedPaths ? {imagePaths} : {}),
             row: {
                 ...row,
-                expressionBytes: useProjectedPaths ?
-                    copyProjectedMediaKeyBytes(row.expressionBytes, plan.expressionIndexes[index], stringOffsets, plan.stringLengths, ownedStrings) :
-                    (row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0),
-                readingBytes: useProjectedPaths ?
-                    copyProjectedMediaKeyBytes(row.readingBytes, plan.readingIndexes[index], stringOffsets, plan.stringLengths, ownedStrings) :
-                    (row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0),
-                glossaryJsonBytes: !useProjectedPaths && row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
-                termEntryContentBytes: useProjectedPaths ? EMPTY_UINT8_ARRAY : new Uint8Array(row.termEntryContentBytes),
+                expressionBytes: row.expressionBytes instanceof Uint8Array ? new Uint8Array(row.expressionBytes) : void 0,
+                readingBytes: row.readingBytes instanceof Uint8Array ? new Uint8Array(row.readingBytes) : void 0,
+                glossaryJsonBytes: row.glossaryJsonBytes instanceof Uint8Array ? new Uint8Array(row.glossaryJsonBytes) : void 0,
+                termEntryContentBytes: new Uint8Array(row.termEntryContentBytes),
             },
         };
     });
