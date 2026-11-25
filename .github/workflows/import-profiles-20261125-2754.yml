@@ -1,0 +1,39 @@
+name: Import profiles 20261125
+on:
+  push:
+    branches:
+      - research/import-profiles-20261125-2754
+permissions:
+  contents: read
+jobs:
+  profile:
+    name: Profile ${{ matrix.dictionary }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Prepare pinned source archive
+        run: node dev/perf/prepare-dictionaries.js "${{ matrix.dictionary }}"
+      - name: Build release extension
+        run: node dev/bin/build.js --target chrome
+      - name: Capture current import profile
+        run: node dev/perf/import-benchmark.js "${{ matrix.dictionary }}" --trace --runs 1 --no-build --build-target chrome --media-check sample --output "builds/perf/current-${{ matrix.dictionary }}"
+      - name: Preserve evidence including failures
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: import-profile-${{ matrix.dictionary }}-2754
+          path: builds/perf
+          if-no-files-found: error
+          retention-days: 14
