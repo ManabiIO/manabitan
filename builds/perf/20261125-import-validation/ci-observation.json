@@ -1,0 +1,695 @@
+{
+  "schemaVersion": 1,
+  "observedAtUtc": "2026-11-25T15:47:28Z",
+  "repository": "ManabiIO/manabitan",
+  "scope": "Read-only observations of completed or queued CI; no workflow dispatch/retry. Functional correctness evidence only, not a controlled import performance comparison.",
+  "runs": [
+    {
+      "id": 45643618491,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45643618491",
+      "headSha": "449a421f7ac66e474dd16e5efd491dfa2e3e3155",
+      "status": "completed",
+      "conclusion": "success",
+      "createdAt": "2026-11-25T15:18:12Z",
+      "updatedAt": "2026-11-25T15:42:24Z",
+      "jobs": [
+        {
+          "id": 139308674303,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674783,
+          "name": "TypeScript (test)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674795,
+          "name": "JavaScript",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674810,
+          "name": "JSON",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674899,
+          "name": "Full Extension E2E (Chromium)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674914,
+          "name": "Unit Tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674934,
+          "name": "TypeScript (bench)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308674967,
+          "name": "Full Extension E2E (Firefox)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675047,
+          "name": "Test Build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675143,
+          "name": "TypeScript (main)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675155,
+          "name": "CSS",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675200,
+          "name": "HTML",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675201,
+          "name": "Markdown",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675233,
+          "name": "TypeScript (dev)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308675375,
+          "name": "Unit Tests (options)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139308677183,
+          "name": "Published release upgrade and reimport",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139308677258,
+          "name": "Full Extension E2E (Edge)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139308749641,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139308752345,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 45643618497,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45643618497",
+      "headSha": "449a421f7ac66e474dd16e5efd491dfa2e3e3155",
+      "status": "completed",
+      "conclusion": "success",
+      "createdAt": "2026-11-25T15:18:12Z",
+      "updatedAt": "2026-11-25T15:27:01Z",
+      "jobs": [
+        {
+          "id": 139308572426,
+          "name": "Restart and interruption recovery (Chromium)",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 45643394151,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45643394151",
+      "headSha": "2a0b9243540bf54932165fd9ab4da17709e3b390",
+      "status": "completed",
+      "conclusion": "failure",
+      "createdAt": "2026-11-25T15:16:59Z",
+      "updatedAt": "2026-11-25T15:31:40Z",
+      "jobs": [
+        {
+          "id": 139307772428,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307772882,
+          "name": "Full Extension E2E (Chromium)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307772917,
+          "name": "Test Build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773011,
+          "name": "TypeScript (test)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773147,
+          "name": "Full Extension E2E (Firefox)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773195,
+          "name": "TypeScript (bench)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773319,
+          "name": "Markdown",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773328,
+          "name": "JavaScript",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773506,
+          "name": "CSS",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773540,
+          "name": "Unit Tests",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 139307773576,
+          "name": "HTML",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773595,
+          "name": "TypeScript (main)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307773723,
+          "name": "TypeScript (dev)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307774057,
+          "name": "JSON",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307774170,
+          "name": "Unit Tests (options)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 139307775182,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139307775537,
+          "name": "Full Extension E2E (Edge)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139307775641,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139307776041,
+          "name": "Published release upgrade and reimport",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "id": 45647167415,
+      "url": "https://github.com/ManabiIO/manabitan/actions/runs/45647167415",
+      "headSha": "07b041f60df8782f35bb81008b08a6c5650e5c74",
+      "status": "queued",
+      "conclusion": null,
+      "createdAt": "2026-11-25T15:36:58Z",
+      "updatedAt": "2026-11-25T15:36:58Z",
+      "jobs": [
+        {
+          "id": 139321149136,
+          "name": "Test Build",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149589,
+          "name": "Full Extension E2E (Firefox)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149823,
+          "name": "Full Extension E2E (Chromium)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149839,
+          "name": "Anki Deduplication Matrix (Chromium)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149861,
+          "name": "Unit Tests",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149919,
+          "name": "TypeScript (main)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149948,
+          "name": "TypeScript (dev)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321149975,
+          "name": "CSS",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150012,
+          "name": "TypeScript (bench)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150049,
+          "name": "TypeScript (test)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150094,
+          "name": "HTML",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150133,
+          "name": "JavaScript",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150153,
+          "name": "Markdown",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150414,
+          "name": "JSON",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321150590,
+          "name": "Unit Tests (options)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 139321152137,
+          "name": "Firefox Android Installation Smoke (blocking)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139321152996,
+          "name": "Published release upgrade and reimport",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139321153123,
+          "name": "Full Extension E2E (Edge)",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 139321214005,
+          "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    }
+  ],
+  "headIdentity": {
+    "pr898": {
+      "headSha": "449a421f7ac66e474dd16e5efd491dfa2e3e3155",
+      "testedMergeSha": "f5aef1c4a3a7e19ee657704e872fa198266231aa",
+      "ciRunId": 45643618491,
+      "restartRunId": 45643618497
+    },
+    "pr907Prior": {
+      "headSha": "2a0b9243540bf54932165fd9ab4da17709e3b390",
+      "testedMergeSha": "321b9927a92b5513564508824bc9561646ca146c",
+      "ciRunId": 45643394151
+    },
+    "pr907Newer": {
+      "headSha": "07b041f60df8782f35bb81008b08a6c5650e5c74",
+      "ciRunId": 45647167415,
+      "observedStatus": "queued",
+      "note": "Includes test-only borrowed-content fixture correction; prior run is not verification of this exact newer head."
+    },
+    "method": "Run-level head_sha from GitHub API; tested merge SHA from each E2E job's git log -1 --format=%H. Nested pull_requests.head.sha can update after a run and was not used."
+  },
+  "previousVndbUnitFailure": {
+    "runId": 45643394151,
+    "jobId": 139307773540,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/45643394151/job/139307773540",
+    "testFile": "test/term-content-borrowed-worker.test.js",
+    "testName": "projected content workers retain borrowed bytes through sink settlement",
+    "failure": "Child command test/fixtures/parser-settlement/borrowed-content.mjs failed; test duration 30338 ms. This is the stale borrowed-content fixture addressed by the newer test-only correction.",
+    "failedTests": 1,
+    "passedTests": 14561,
+    "skippedTests": 47,
+    "failedTestFiles": 1,
+    "passedTestFiles": 645,
+    "durationSeconds": 244.77,
+    "nodeVersion": "v22.22.0",
+    "otherFailuresInFinalSummary": false
+  },
+  "restartCampaign": {
+    "runId": 45643618497,
+    "jobId": 139308572426,
+    "status": "success",
+    "headSha": "449a421f7ac66e474dd16e5efd491dfa2e3e3155",
+    "testedMergeSha": "f5aef1c4a3a7e19ee657704e872fa198266231aa",
+    "source": "Downloaded job log and successful verification step; raw 34 MB campaign artifact was listed but not downloaded.",
+    "fixture": "Synthetic Restart Campaign Fixture; completed large update has 350001 terms and revision revision-two-c92a.",
+    "checks": [
+      "Initial and recovery launches must use opfs-sahpool, installed SAH-pool VFS, dedicated-worker SyncAccessHandle, and usesFallbackStorage=false.",
+      "Controlled authoritative payload-write interruption; captured browser process tree killed and all captured processes exited.",
+      "Recovery generation oracle: exact content/expression, absent opposite expression, missCount=0, noTransientRows=true, strictOpfs=true.",
+      "Completed large update publishes a distinct generation with exactly 350001 terms and strictOpfs=true.",
+      "Source/package/harness/fixture hashes and runtime identity present; Node v22.22.0 required."
+    ],
+    "artifactId": 15037702096,
+    "artifactSha256": "3e3b8328c37a57db468fce8f5b24cf6cdecd3ef8c94f73f1b4a81ca09627e537",
+    "limitation": "Synthetic durability/recovery campaign; not full JMdict/Jitendex/VNDB performance or exhaustive real-corpus content/media verification."
+  },
+  "limits": [
+    "Newer PR907 CI was queued at observation; completed prior-head results must not be attributed to the newer head.",
+    "These E2Es use cached recommended-feed JMdict/Jitendex/JMnedict fixtures, not the current locked three-corpus benchmark fixture set, and do not import VNDB.",
+    "Chromium functional E2E sets manabitanImportUseSession=false and reports benchmark=null and quickImportBenchmarkMode=false.",
+    "No exhaustive source-ZIP-to-persisted-media byte comparison is shown by these reports. verifyBenchmarkMedia is only in the Chromium quick-benchmark branch, which these runs did not execute.",
+    "Reports contain sampled functional lookup/content checks; Firefox integrity helper can succeed through visible lookup results without a debug row sample. Do not describe this as exhaustive corpus byte parity.",
+    "No controlled paired same-host default-settings whole-import speed, peak-memory, or persisted-size qualification is established by these CI runs."
+  ],
+  "e2eArtifactObservations": [
+    {
+      "runId": 45643618491,
+      "jobId": 139308674899,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45643618491/job/139308674899",
+      "artifactId": 15037512366,
+      "artifactApiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037512366",
+      "artifactZipBytes": 160088,
+      "artifactZipSha256": "077668ef882ac25ab48950a911c140d5ec487ecd621ed61728ce26297c3d8b2a",
+      "reportFilename": "chromium-e2e-import-report.json",
+      "reportSha256": "04ea31e376570e3cfbe1eb4cda54ed118f9548ccc0eb634f7dc6ce20abf0025a",
+      "browserFlavor": "chromium",
+      "status": "success",
+      "skippedVerification": false,
+      "phaseCount": 91,
+      "browserVersion": "153.0.8010.12",
+      "buildTarget": "chrome-dev",
+      "packageSha256": "d8c2aa06a2a1b52122334cf6d1881e71e6fa3b6313ec464fcdd2630809ec1cfd",
+      "benchmark": null,
+      "fixtureSource": "Cached archives from recommended feed, served locally",
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-09-20]",
+          "revision": "JMdict.2026-09-20",
+          "terms": 527112,
+          "media": 0
+        },
+        {
+          "title": "JMnedict [2026-09-20]",
+          "revision": "JMnedict.2026-09-20",
+          "terms": 667987,
+          "media": 0
+        },
+        {
+          "title": "Jitendex.org [2026-08-11]",
+          "revision": "2026.08.11.0",
+          "terms": 435448,
+          "media": 236
+        }
+      ],
+      "storage": {
+        "openStorageMode": "opfs-sahpool",
+        "hasOpfsSahpoolVfs": true,
+        "opfsSahpoolInstallResult": "installed",
+        "workerIsDedicated": true,
+        "workerHasStorageGetDirectory": true,
+        "workerHasCreateSyncAccessHandle": true,
+        "startupDictionaryUsesFallbackStorage": false,
+        "allObservedFallbackBooleans": [
+          false
+        ]
+      },
+      "restartPhases": [
+        "Restore concurrent lookup tab after orderly update-trigger restart",
+        "Verify persistence after orderly restart following JMdict update trigger",
+        "Configure restart profile matrix",
+        "Verify restart persistence after update",
+        "Anki saves retain their destination across changes and restart",
+        "Verify restart persistence after multi-file import"
+      ],
+      "fullMediaByteVerificationObserved": false
+    },
+    {
+      "runId": 45643618491,
+      "jobId": 139308674967,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45643618491/job/139308674967",
+      "artifactId": 15038586498,
+      "artifactApiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038586498",
+      "artifactZipBytes": 42928,
+      "artifactZipSha256": "69d5cf11c6cd06f6d6b99f88e9e0c4f8eea67c221e7d2281e1802f9675151924",
+      "reportFilename": "firefox-e2e-import-report.json",
+      "reportSha256": "406ef1347e4155a9296c8959020c4dcf61c6d456e8d56c55747bbc906964f0a5",
+      "browserFlavor": "firefox",
+      "status": "success",
+      "skippedVerification": false,
+      "phaseCount": 63,
+      "browserVersion": "Mozilla/5.0 (X11; Linux x86_64; rv:162.0) Gecko/20100101 Firefox/162.0",
+      "buildTarget": null,
+      "packageSha256": null,
+      "benchmark": null,
+      "fixtureSource": "Cached archives from recommended feed, served locally",
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-09-20]",
+          "revision": "JMdict.2026-09-20",
+          "terms": 527112,
+          "media": 0
+        },
+        {
+          "title": "JMnedict [2026-09-20]",
+          "revision": "JMnedict.2026-09-20",
+          "terms": 667987,
+          "media": 0
+        },
+        {
+          "title": "Jitendex.org [2026-08-11]",
+          "revision": "2026.08.11.0",
+          "terms": 435448,
+          "media": 236
+        }
+      ],
+      "storage": {
+        "openStorageMode": "opfs-sahpool",
+        "hasOpfsSahpoolVfs": true,
+        "opfsSahpoolInstallResult": "installed",
+        "workerIsDedicated": true,
+        "workerHasStorageGetDirectory": true,
+        "workerHasCreateSyncAccessHandle": true,
+        "startupDictionaryUsesFallbackStorage": false,
+        "allObservedFallbackBooleans": [
+          false
+        ]
+      },
+      "restartPhases": [],
+      "fullMediaByteVerificationObserved": false
+    },
+    {
+      "runId": 45643394151,
+      "jobId": 139307772882,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45643394151/job/139307772882",
+      "artifactId": 15037262472,
+      "artifactApiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037262472",
+      "artifactZipBytes": 159267,
+      "artifactZipSha256": "27f27a667a9fa89a000265100214c0dc76afd288ac152818403e2fe9c991e11d",
+      "reportFilename": "chromium-e2e-import-report.json",
+      "reportSha256": "8c6eeea5397cd95a2326a77959d5f542e33eb5e48d501d9a55c14614be2b5d4e",
+      "browserFlavor": "chromium",
+      "status": "success",
+      "skippedVerification": false,
+      "phaseCount": 89,
+      "browserVersion": "153.0.8010.12",
+      "buildTarget": "chrome-dev",
+      "packageSha256": "75183e6e384cade369a6df0d6134efd83e0175cb1f0e70586cc9165e47ac885d",
+      "benchmark": null,
+      "fixtureSource": "Cached archives from recommended feed, served locally",
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-09-20]",
+          "revision": "JMdict.2026-09-20",
+          "terms": 527112,
+          "media": 0
+        },
+        {
+          "title": "JMnedict [2026-09-20]",
+          "revision": "JMnedict.2026-09-20",
+          "terms": 667987,
+          "media": 0
+        },
+        {
+          "title": "Jitendex.org [2026-08-11]",
+          "revision": "2026.08.11.0",
+          "terms": 435448,
+          "media": 236
+        }
+      ],
+      "storage": {
+        "openStorageMode": "opfs-sahpool",
+        "hasOpfsSahpoolVfs": true,
+        "opfsSahpoolInstallResult": "installed",
+        "workerIsDedicated": true,
+        "workerHasStorageGetDirectory": true,
+        "workerHasCreateSyncAccessHandle": true,
+        "startupDictionaryUsesFallbackStorage": false,
+        "allObservedFallbackBooleans": [
+          false
+        ]
+      },
+      "restartPhases": [
+        "Restore concurrent lookup tab after orderly update-trigger restart",
+        "Verify persistence after orderly restart following JMdict update trigger",
+        "Configure restart profile matrix",
+        "Verify restart persistence after update",
+        "Anki saves retain their destination across changes and restart",
+        "Verify restart persistence after multi-file import"
+      ],
+      "fullMediaByteVerificationObserved": false
+    },
+    {
+      "runId": 45643394151,
+      "jobId": 139307773147,
+      "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45643394151/job/139307773147",
+      "artifactId": 15036143935,
+      "artifactApiUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15036143935",
+      "artifactZipBytes": 42881,
+      "artifactZipSha256": "7d39b50ce7095e2eff384e7973b9564c4c34654235923e02042251cc14231705",
+      "reportFilename": "firefox-e2e-import-report.json",
+      "reportSha256": "fad71e714d1a49148c77a15c3b9ada9a7df3d3d11237a82d240221a4e1aef9b9",
+      "browserFlavor": "firefox",
+      "status": "success",
+      "skippedVerification": false,
+      "phaseCount": 61,
+      "browserVersion": "Mozilla/5.0 (X11; Linux x86_64; rv:162.0) Gecko/20100101 Firefox/162.0",
+      "buildTarget": null,
+      "packageSha256": null,
+      "benchmark": null,
+      "fixtureSource": "Cached archives from recommended feed, served locally",
+      "dictionaries": [
+        {
+          "title": "JMdict [2026-09-20]",
+          "revision": "JMdict.2026-09-20",
+          "terms": 527112,
+          "media": 0
+        },
+        {
+          "title": "JMnedict [2026-09-20]",
+          "revision": "JMnedict.2026-09-20",
+          "terms": 667987,
+          "media": 0
+        },
+        {
+          "title": "Jitendex.org [2026-08-11]",
+          "revision": "2026.08.11.0",
+          "terms": 435448,
+          "media": 236
+        }
+      ],
+      "storage": {
+        "openStorageMode": "opfs-sahpool",
+        "hasOpfsSahpoolVfs": true,
+        "opfsSahpoolInstallResult": "installed",
+        "workerIsDedicated": true,
+        "workerHasStorageGetDirectory": true,
+        "workerHasCreateSyncAccessHandle": true,
+        "startupDictionaryUsesFallbackStorage": false,
+        "allObservedFallbackBooleans": [
+          false
+        ]
+      },
+      "restartPhases": [],
+      "fullMediaByteVerificationObserved": false
+    }
+  ]
+}

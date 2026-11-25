@@ -1,0 +1,97 @@
+[perf-import] JMdict run 1/1
+[chromium-e2e] Wrote report: /tmp/manabitan-8ca6-vndb-qualification/results/smoke-jmdict-a-root/run-1.html
+[chromium-e2e] Wrote report json: /tmp/manabitan-8ca6-vndb-qualification/results/smoke-jmdict-a-root/run-1.json
+[chromium-e2e] Wrote combined report: /tmp/manabitan-8ca6-vndb-qualification/baseline/builds/extension-e2e-report.html
+file:///tmp/manabitan-8ca6-vndb-qualification/baseline/test/chromium/extension-two-dictionary-import.e2e.js:5979
+            runError = new Error(withE2ETag(failureReason));
+                       ^
+
+Error: [chromium-e2e] browserType.launchPersistentContext: Target page, context or browser has been closed
+Browser logs:
+
+<launching> /tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --disable-features=MacAppCodeSignClone --disable-extensions-except=/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root/manabitan-chromium-ext-E1VLn7 --load-extension=/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root/manabitan-chromium-ext-E1VLn7 --user-data-dir=/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root/manabitan-chromium-profile-8TBVKI --remote-debugging-pipe about:blank
+<launched> pid=39
+[pid=39][err] [39:39:1125/103927.522629:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)
+[pid=39][err] [1125/103927.522949:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)
+[pid=39][err] Received signal 6
+[pid=39][err] #0 0x5591a293cbc3 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6a9abc2)
+[pid=39][err] #1 0x5591a7602494 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb760493)
+[pid=39][err] #2 0x7fad4ec14d70 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x3fd6f)
+[pid=39][err] #3 0x5591a75b914d (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb71714c)
+[pid=39][err] #4 0x5591a75b90de (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7170dd)
+[pid=39][err] #5 0x5591a2703603 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6861602)
+[pid=39][err] #6 0x55919fb66eb9 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3cc4eb8)
+[pid=39][err] #7 0x5591a75b92c0 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7172bf)
+[pid=39][err] #8 0x55919fc53829 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3db1828)
+[pid=39][err] #9 0x5591a1bd7488 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d35487)
+[pid=39][err] #10 0x5591a1bd6737 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34736)
+[pid=39][err] #11 0x5591a1bd659f (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d3459e)
+[pid=39][err] #12 0x5591a1bd6564 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34563)
+[pid=39][err] #13 0x5591a0cb673b (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e1473a)
+[pid=39][err] #14 0x5591a0cb5953 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e13952)
+[pid=39][err] #15 0x5591a1e71106 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcf105)
+[pid=39][err] #16 0x5591a1e707a9 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fce7a8)
+[pid=39][err] #17 0x5591a1e6fb00 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcdaff)
+[pid=39][err] #18 0x7fad4ebfeca8 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x29ca7)
+[pid=39][err]   r8: 000004e00007062b  r9: 0000000000000001 r10: 000004e00007062b r11: 0000000000000246
+[pid=39][err]  r12: 00007ffddcbe9ca8 r13: 0000000000000006 r14: 000000000000008b r15: 000004e0000e8500
+[pid=39][err]   di: 0000000000000027  si: 0000000000000027  bp: 00007ffddcbe9c40  bx: 0000000000000027
+[pid=39][err]   dx: 0000000000000006  ax: 0000000000000000  cx: 00007fad4ec6969c  sp: 00007ffddcbe9b30
+[pid=39][err]   ip: 00007fad4ec6969c efl: 0000000000000246 cgf: 002b000000000033 erf: 0000000000000000
+[pid=39][err]  trp: 0000000000000000 msk: 0000000000000000 cr2: 0000000000000000
+[pid=39][err] [end of stack trace]
+Call log:
+[2m  - <launching> /tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --disable-features=MacAppCodeSignClone --disable-extensions-except=/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root/manabitan-chromium-ext-E1VLn7 --load-extension=/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root/manabitan-chromium-ext-E1VLn7 --user-data-dir=/tmp/manabitan-8ca6-vndb-qualification/tmp/smoke-jmdict-a-root/manabitan-chromium-profile-8TBVKI --remote-debugging-pipe about:blank[22m
+[2m  - <launched> pid=39[22m
+[2m  - [pid=39][err] [39:39:1125/103927.522629:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)[22m
+[2m  - [pid=39][err] [1125/103927.522949:ERROR:third_party/crashpad/crashpad/util/linux/scoped_ptrace_attach.cc:27] ptrace: Operation not permitted (1)[22m
+[2m  - [pid=39][err] Received signal 6[22m
+[2m  - [pid=39][err] #0 0x5591a293cbc3 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6a9abc2)[22m
+[2m  - [pid=39][err] #1 0x5591a7602494 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb760493)[22m
+[2m  - [pid=39][err] #2 0x7fad4ec14d70 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x3fd6f)[22m
+[2m  - [pid=39][err] #3 0x5591a75b914d (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb71714c)[22m
+[2m  - [pid=39][err] #4 0x5591a75b90de (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7170dd)[22m
+[2m  - [pid=39][err] #5 0x5591a2703603 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x6861602)[22m
+[2m  - [pid=39][err] #6 0x55919fb66eb9 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3cc4eb8)[22m
+[2m  - [pid=39][err] #7 0x5591a75b92c0 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0xb7172bf)[22m
+[2m  - [pid=39][err] #8 0x55919fc53829 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x3db1828)[22m
+[2m  - [pid=39][err] #9 0x5591a1bd7488 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d35487)[22m
+[2m  - [pid=39][err] #10 0x5591a1bd6737 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34736)[22m
+[2m  - [pid=39][err] #11 0x5591a1bd659f (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d3459e)[22m
+[2m  - [pid=39][err] #12 0x5591a1bd6564 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5d34563)[22m
+[2m  - [pid=39][err] #13 0x5591a0cb673b (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e1473a)[22m
+[2m  - [pid=39][err] #14 0x5591a0cb5953 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x4e13952)[22m
+[2m  - [pid=39][err] #15 0x5591a1e71106 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcf105)[22m
+[2m  - [pid=39][err] #16 0x5591a1e707a9 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fce7a8)[22m
+[2m  - [pid=39][err] #17 0x5591a1e6fb00 (/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome+0x5fcdaff)[22m
+[2m  - [pid=39][err] #18 0x7fad4ebfeca8 (/usr/lib/x86_64-linux-gnu/libc.so.6+0x29ca7)[22m
+[2m  - [pid=39][err]   r8: 000004e00007062b  r9: 0000000000000001 r10: 000004e00007062b r11: 0000000000000246[22m
+[2m  - [pid=39][err]  r12: 00007ffddcbe9ca8 r13: 0000000000000006 r14: 000000000000008b r15: 000004e0000e8500[22m
+[2m  - [pid=39][err]   di: 0000000000000027  si: 0000000000000027  bp: 00007ffddcbe9c40  bx: 0000000000000027[22m
+[2m  - [pid=39][err]   dx: 0000000000000006  ax: 0000000000000000  cx: 00007fad4ec6969c  sp: 00007ffddcbe9b30[22m
+[2m  - [pid=39][err]   ip: 00007fad4ec6969c efl: 0000000000000246 cgf: 002b000000000033 erf: 0000000000000000[22m
+[2m  - [pid=39][err]  trp: 0000000000000000 msk: 0000000000000000 cr2: 0000000000000000[22m
+[2m  - [pid=39][err] [end of stack trace][22m
+[2m  - [pid=39] <gracefully close start>[22m
+[2m  - [pid=39] <kill>[22m
+[2m  - [pid=39] <will force kill>[22m
+[2m  - [pid=39] <process did exit: exitCode=null, signal=SIGABRT>[22m
+[2m  - [pid=39] starting temporary directories cleanup[22m
+[2m  - [pid=39] finished temporary directories cleanup[22m
+[2m  - [pid=39] <gracefully close end>[22m
+
+    at main (file:///tmp/manabitan-8ca6-vndb-qualification/baseline/test/chromium/extension-two-dictionary-import.e2e.js:5979:24)
+    at async file:///tmp/manabitan-8ca6-vndb-qualification/baseline/test/chromium/extension-two-dictionary-import.e2e.js:6028:1
+
+Node.js v24.20.0
+file:///tmp/manabitan-8ca6-vndb-qualification/baseline/dev/perf/import-benchmark.js:119
+                reject(new Error(`Command failed code=${String(code)} signal=${String(signal)}: ${command} ${args.join(' ')}`));
+                       ^
+
+Error: Command failed code=1 signal=null: /tmp/manabitan-8ca6-runtime/runtime/node/bin/node /tmp/manabitan-8ca6-vndb-qualification/baseline/test/chromium/extension-two-dictionary-import.e2e.js
+    at ChildProcess.<anonymous> (file:///tmp/manabitan-8ca6-vndb-qualification/baseline/dev/perf/import-benchmark.js:119:24)
+    at ChildProcess.emit (node:events:514:28)
+    at maybeClose (node:internal/child_process:1141:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:306:5)
+
+Node.js v24.20.0

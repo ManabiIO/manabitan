@@ -1,0 +1,52 @@
+{
+  "node": "v24.22.3",
+  "cases": [
+    {
+      "name": "byte-heavy shared chunks wait for sink settlement",
+      "passed": false,
+      "error": "Error: Borrowed worker schedule timed out",
+      "stack": "Error: Borrowed worker schedule timed out\n    at Timeout.<anonymous> (file:///workspace/scratch/8ca6d2070ae4/combined/test/fixtures/parser-settlement/borrowed-content.mjs:77:45)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+    },
+    {
+      "name": "repeated content retains private lookahead",
+      "passed": false,
+      "error": "Error: Borrowed worker schedule timed out",
+      "stack": "Error: Borrowed worker schedule timed out\n    at Timeout.<anonymous> (file:///workspace/scratch/8ca6d2070ae4/combined/test/fixtures/parser-settlement/borrowed-content.mjs:77:45)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+    },
+    {
+      "name": "compact cacheable content retains owned shared lookahead",
+      "passed": false,
+      "error": "Error: Borrowed worker schedule timed out",
+      "stack": "Error: Borrowed worker schedule timed out\n    at Timeout.<anonymous> (file:///workspace/scratch/8ca6d2070ae4/combined/test/fixtures/parser-settlement/borrowed-content.mjs:77:45)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+    },
+    {
+      "name": "unavailable shared-buffer support retains private lookahead",
+      "passed": false,
+      "error": "Error: Borrowed worker schedule timed out",
+      "stack": "Error: Borrowed worker schedule timed out\n    at Timeout.<anonymous> (file:///workspace/scratch/8ca6d2070ae4/combined/test/fixtures/parser-settlement/borrowed-content.mjs:77:45)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+    },
+    {
+      "name": "forced ownership without image projection stays private",
+      "passed": true
+    },
+    {
+      "name": "cancelled borrowed sinks cannot admit another group",
+      "passed": false,
+      "error": "Error: Borrowed worker schedule timed out",
+      "stack": "Error: Borrowed worker schedule timed out\n    at Timeout.<anonymous> (file:///workspace/scratch/8ca6d2070ae4/combined/test/fixtures/parser-settlement/borrowed-content.mjs:77:45)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+    },
+    {
+      "name": "failed borrowed sinks preserve the original failure",
+      "passed": false,
+      "error": "Error: Borrowed worker schedule timed out",
+      "stack": "Error: Borrowed worker schedule timed out\n    at Timeout.<anonymous> (file:///workspace/scratch/8ca6d2070ae4/combined/test/fixtures/parser-settlement/borrowed-content.mjs:77:45)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+    },
+    {
+      "name": "peer parser failure releases waits without reusing active content",
+      "passed": true
+    }
+  ],
+  "unhandled": [],
+  "passed": 2,
+  "failed": 6
+}

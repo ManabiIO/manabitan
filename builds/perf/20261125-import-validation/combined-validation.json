@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-11-25T15:39:27.209319+00:00",
+  "repository": "ManabiIO/manabitan",
+  "scope": "Combined guarded Jitendex reference emission and VNDB columnar media transport. The separate JMdict candidate is not included in this combined branch.",
+  "sourceHeads": {
+    "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "combinedFullSuiteAndTypes": "25e9886fbf7dd9f80bcb8657d922a3bcb6a78860",
+    "combinedAfterFixtureCorrection": "f066d1571263951113e9d712614b69cf80fd447d",
+    "jitendexBranch": "900358b15f49c4ac1d70f0c4b2ae678002d728db",
+    "vndbBranch": "d61020e7ec486dfb1636865702d25c266bda1382",
+    "vndbPublishedFixtureFollowup": "07b041f60df8782f35bb81008b08a6c5650e5c74",
+    "vndbPublishedAndLocalTree": "f776b8a4608c4318755f9d983d9fe8b8b7332f1e",
+    "jmdictBranchExcludedFromCombined": "e943dd60f084d9e1e80870f62a80867fbc946998"
+  },
+  "runtime": {
+    "node": "v24.22.3",
+    "vitest": "4.1.12"
+  },
+  "fullUnitSuite": {
+    "status": "failed",
+    "command": "npm run test:unit -- --maxWorkers=1 --no-file-parallelism --reporter=dot",
+    "sourceHead": "25e9886fbf7dd9f80bcb8657d922a3bcb6a78860",
+    "files": {
+      "passed": 642,
+      "failed": 4,
+      "total": 646
+    },
+    "tests": {
+      "passed": 14550,
+      "failed": 5,
+      "skipped": 68,
+      "total": 14623
+    },
+    "durationSeconds": 818.94,
+    "evidence": {
+      "path": "logs/full-unit.log",
+      "sha256": "11f42b7c7a2cfec9d365d18bf1a968c688185d575340afe554e57042523c2cd8"
+    },
+    "failures": [
+      {
+        "files": [
+          "test/term-bank-crc.test.js",
+          "test/term-bank-memory-page.test.js"
+        ],
+        "kind": "suite setup",
+        "message": "No supported wasm compiler found; set MANABITAN_CLANG or CLANG",
+        "recovery": "nativeCompilerConfigured"
+      },
+      {
+        "files": [
+          "test/term-content-borrowed-worker.test.js"
+        ],
+        "kind": "one failed test",
+        "message": "Legacy projected mediaRows assertions failed before firstSink resolved; six fixture scenarios reported schedule timeouts.",
+        "originalFixtureReport": {
+          "path": "fixtures/borrowed-original-report.json",
+          "sha256": "2eecc00a644e3171a48a997c31cb0981a1f2125a68182357cedb92fc8a1c84fd"
+        },
+        "recovery": "projectedMediaFixtureCorrected"
+      },
+      {
+        "files": [
+          "test/android/enable-firefox-remote-debugging.test.js"
+        ],
+        "kind": "four failed tests",
+        "message": "Four existing cases exceeded their unchanged 5000 ms timeout.",
+        "recovery": "fenixIsolatedComparisons"
+      }
+    ]
+  },
+  "targetedRecoveries": {
+    "nativeCompilerConfigured": {
+      "status": "passed",
+      "sourceHead": "25e9886fbf7dd9f80bcb8657d922a3bcb6a78860",
+      "files": 2,
+      "testsPassed": 21,
+      "durationSeconds": 3.87,
+      "configuration": "Root configured the pinned wasm-capable compiler; no source change.",
+      "evidence": {
+        "path": "logs/native-suites-pinned.log",
+        "sha256": "26e31c777b508eb995d76db81f3837a6d6ce30e6ce0d1183f66e5c7db36dfa8b"
+      }
+    },
+    "projectedMediaFixtureCorrected": {
+      "status": "passed",
+      "sourceHead": "f066d1571263951113e9d712614b69cf80fd447d",
+      "sourceCommit": "d61020e7ec486dfb1636865702d25c266bda1382",
+      "combinedCherryPick": "f066d1571263951113e9d712614b69cf80fd447d",
+      "changedFile": "test/fixtures/parser-settlement/borrowed-content.mjs",
+      "command": "node node_modules/vitest/vitest.mjs run test/term-content-borrowed-worker.test.js --maxWorkers=1",
+      "files": 1,
+      "testsPassed": 1,
+      "durationSeconds": 1.56,
+      "fixtureScenariosPassed": 8,
+      "fixtureScenariosFailed": 0,
+      "unhandledRejections": [],
+      "evidence": {
+        "path": "fixtures/borrowed-fixed-report.json",
+        "sha256": "46447cc6ff35b56b1579cbccb07fec7a0c3969098bb22e0f269a6b505611e03d"
+      }
+    },
+    "fenixIsolatedComparisons": {
+      "status": "passed in both isolated runs",
+      "command": "node node_modules/vitest/vitest.mjs run test/android/enable-firefox-remote-debugging.test.js --maxWorkers=1 --no-file-parallelism --reporter=verbose",
+      "timeoutsChanged": false,
+      "baseline": {
+        "sourceHead": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "testsPassed": 22,
+        "durationSeconds": 48.6,
+        "evidence": {
+          "path": "logs/fenix-baseline.log",
+          "sha256": "68f90726717015797136e3c4e66e338834c1e240ec4af745b50cee1431819249"
+        }
+      },
+      "combined": {
+        "sourceHeadAtStart": "25e9886fbf7dd9f80bcb8657d922a3bcb6a78860",
+        "sourceHeadAfterConcurrentFixtureCherryPick": "f066d1571263951113e9d712614b69cf80fd447d",
+        "fenixInputsUnchanged": true,
+        "testsPassed": 22,
+        "durationSeconds": 47.35,
+        "previouslyTimedOutCaseDurationsMs": [
+          2262,
+          3135,
+          2904,
+          2666
+        ],
+        "evidence": {
+          "path": "logs/fenix-combined.log",
+          "sha256": "5ef8c74002e854ba9002c2c0274896967e5088a6f65c6f645c30686c0a223c88"
+        }
+      },
+      "interpretation": "The four timeouts did not reproduce in either isolated run. This is consistent with full-run contention, but the cause is not proven."
+    }
+  },
+  "typeChecks": {
+    "status": "passed",
+    "sourceHead": "25e9886fbf7dd9f80bcb8657d922a3bcb6a78860",
+    "command": "npm run test:ts",
+    "checks": [
+      "test:ts:main",
+      "test:ts:dev",
+      "test:ts:test",
+      "test:ts:bench"
+    ],
+    "exitCode": 0,
+    "evidence": {
+      "path": "logs/types.log",
+      "sha256": "2e0234b6862446c799a60fb08ea3ff92ab32776abf30b8c019b3f01fb0759657"
+    },
+    "rerunAfterFixtureOnlyChange": false
+  },
+  "interpretation": "The original broad run was not uninterrupted green. Its four failing files have targeted successful recovery checks; the full suite was not rerun after the fixture-only correction.",
+  "pendingAtRecordTime": [
+    "Full local three-corpus browser functional qualification: blocked before startup.",
+    "Balanced whole-import latency with identical-code controls: no cohort started.",
+    "Process-tree memory qualification: not measured."
+  ],
+  "updatedAtUtc": "2026-11-25T15:50:41.251703+00:00",
+  "portableReceipt": {
+    "sourceReceiptSha256": "1b9c95901cd60dd1cb44b2cb65389d4d2da53f57a9470990b059912d47733bea",
+    "evidencePathsRelativeTo": "this file",
+    "rawLogsPreservedVerbatim": true,
+    "combinedBorrowedWrapperLog": "No separate stdout log was retained; duration/counts were captured in the tool result and the complete child fixture report is included."
+  },
+  "chromePackageBuild": {
+    "status": "passed",
+    "sourceHead": "f066d1571263951113e9d712614b69cf80fd447d",
+    "command": "npm run build -- --target chrome",
+    "exitCode": 0,
+    "artifact": {
+      "fileName": "manabitan-chrome.zip",
+      "bytes": 17275784,
+      "sha256": "4201d3a9722ea5538bd56ea8de10bda9bcf853ad71fa3b7029c65ad5958f8cc8",
+      "manifestVersion": 3,
+      "extensionVersion": "0.0.0.0",
+      "binaryIncluded": false
+    },
+    "evidence": {
+      "path": "logs/combined-chrome-build.log",
+      "sha256": "7a59192d5ddfb345ff734d7c4c52e6b705ecc08c8689ebb6a8fec18d67c5f1ba"
+    }
+  },
+  "browserQualification": {
+    "status": "blocked-before-browser-startup",
+    "scope": "Separate frozen VNDB candidate, not the combined branch.",
+    "baselineHead": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "candidateHead": "0d7b5a70213e2324a2166cbb584847189e9cd2ff",
+    "baselineStartupAttempts": 2,
+    "completedImports": 0,
+    "candidateObservations": 0,
+    "authoritativeImportTimings": 0,
+    "failure": "Chrome AF_UNIX socket creation returned EPERM before extension startup. Sandbox exception was automatically rejected before process creation.",
+    "evidence": {
+      "path": "browser/blocked-qualification.json",
+      "sha256": "1b0345545d770f862f8aaa3a715f4339e0e1633fa70820f85e2a26df9efe2537"
+    }
+  },
+  "jmdictExperimentDisposition": {
+    "sourceHead": "e943dd60f084d9e1e80870f62a80867fbc946998",
+    "status": "held unpublished",
+    "lockedDefaultNativeGroups": 12,
+    "lockedDefaultJavaScriptFallbackGroups": 0,
+    "reason": "The forced-JavaScript sequence-hash component gain does not establish a default JMdict import benefit.",
+    "publishedSharedChange": "https://github.com/ManabiIO/manabitan/pull/898"
+  },
+  "ciObservation": {
+    "status": "Exact-head CI and restart passed for PR 898; prior-runtime-equivalent PR 907 browser jobs passed, with newer fixture-corrected CI queued at observation.",
+    "evidence": {
+      "path": "ci-observation.json",
+      "sha256": "53f059b9ff8fe3278ed37028ae46aa10926707fafaa0825a17e84c20443abfe3"
+    },
+    "qualificationLimit": "Cached recommended-feed JMdict/Jitendex/JMnedict functional checks; no current locked three-corpus performance or exhaustive VNDB/media-byte qualification."
+  }
+}

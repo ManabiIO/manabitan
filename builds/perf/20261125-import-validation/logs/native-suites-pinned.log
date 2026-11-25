@@ -1,0 +1,30 @@
+
+ RUN  v4.1.12 /workspace/scratch/8ca6d2070ae4/combined
+
+ ✓ test/term-bank-crc.test.js > term bank CRC32 > combines exact source spans with the independent zlib CRC 16ms
+ ✓ test/term-bank-crc.test.js > term bank CRC32 > matches published, short, alignment, threshold, and large-buffer vectors 68ms
+ ✓ test/term-bank-crc.test.js > term bank CRC32 > rejects a corrupted 'small' bank CRC after DEFLATE decoding 2ms
+ ✓ test/term-bank-crc.test.js > term bank CRC32 > rejects a corrupted 'large braided' bank CRC after DEFLATE decoding 1ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=+0, existing pages=+0 1ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=1, existing pages=+0 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=65535, existing pages=1 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=65536, existing pages=1 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=65537, existing pages=1 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=131072, existing pages=1 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=131073, existing pages=1 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=4294901759, existing pages=65535 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=4294901760, existing pages=65535 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=4294901761, existing pages=65535 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=4294967295, existing pages=65535 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=4294967295, existing pages=+0 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=1, existing pages=65536 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=65537, existing pages=65536 0ms
+ ✓ test/term-bank-memory-page.test.js > uses page counts at required=4294967295, existing pages=65536 0ms
+ ✓ test/term-bank-memory-page.test.js > reports real growth failure without changing the required page count 0ms
+ ✓ test/term-bank-memory-page.test.js > allocations within a full wasm32 heap never ask the maxed memory to grow 0ms
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  10:33:29
+   Duration  3.87s (transform 40ms, setup 34ms, import 48ms, tests 2.96s, environment 1ms)
+

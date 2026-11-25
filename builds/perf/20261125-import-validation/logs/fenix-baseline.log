@@ -1,0 +1,45 @@
+
+ RUN  v4.1.12 /workspace/scratch/8ca6d2070ae4/manabitan
+
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > quiesces Firefox before writing preferences, updates pending backup, and defers launch verification until after ACK 2400ms
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: invalid XML: no element found: line 1, column 0.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > waits through empty and incomplete startup snapshots, then preserves initialized user preferences 2334ms
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: invalid XML: no element found: line 1, column 27.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > fails closed on permanently invalid empty preferences without writes or PackageManager changes 3489ms
+Fenix did not produce a valid map in /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml within 30 seconds after launch; last snapshot: unexpected XML root 'preferences'; expected 'map'.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > fails closed on permanently invalid malformed preferences without writes or PackageManager changes 3853ms
+Unexpected ownership or mode for /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: 10002 10001 600; expected app UID 10001.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > fails closed on permanently invalid wrong root preferences without writes or PackageManager changes 4954ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > fails closed on unexpected preference ownership and restores package enabled state 1533ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > restores the exact prior package state when disable reports failure after changing it (enabled=0) 939ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > restores the exact prior package state when disable reports failure after changing it (enabled=1) 1130ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > keeps original preference bytes and restores package state when atomic replacement chown fails 1787ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > keeps original preference bytes and restores package state when atomic replacement chmod fails 1883ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > keeps original preference bytes and restores package state when atomic replacement chcon fails 2108ms
+Failed to restore org.mozilla.firefox to its default enabled state.
+Failed to restore org.mozilla.firefox to its default enabled state.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > keeps original preference bytes and restores package state when atomic replacement mv fails 2148ms
+Unexpected ownership or mode for /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: 10002 10001 600; expected app UID 10001.
+Failed to restore org.mozilla.firefox to its default enabled state.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > fails setup when package state restoration fails and does not report success 2438ms
+Firefox process remained alive after disabling org.mozilla.firefox; refusing to edit cached preferences.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > preserves the original setup failure when EXIT restoration also fails 1401ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > refuses to edit when Firefox remains alive after package disable 2758ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > recovers an empty quiesced primary from the authoritative backup without losing preferences 2353ms
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: no element found: line 1, column 0
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > uses the backup that Android would restore when primary and backup disagree 2517ms
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: no element found: line 1, column 13
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > refuses invalid authoritative backup "" before any preference write 1615ms
+Unexpected authoritative Fenix preferences XML root at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml.bak: 'preferences'
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > refuses invalid authoritative backup "<map><string>" before any preference write 1657ms
+Invalid authoritative Fenix preferences XML at /data/data/org.mozilla.firefox/shared_prefs/fenix_preferences.xml: no element found: line 1, column 0
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > refuses invalid authoritative backup "<preferences/>" before any preference write 1732ms
+Fenix did not retain pref_key_remote_debugging=true after the Firefox Android install ACK.
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > refuses an empty quiesced primary without a backup instead of restoring a stale running snapshot 1427ms
+ ✓ test/android/enable-firefox-remote-debugging.test.js > Firefox Android remote debugging preference helper > rejects a false preference after the install ACK 1852ms
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  10:31:21
+   Duration  48.60s (transform 40ms, setup 25ms, import 35ms, tests 48.31s, environment 0ms)
+

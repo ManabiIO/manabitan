@@ -1,0 +1,78 @@
+{
+  "runtimeCommit": "96954def",
+  "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "runtimeSourceUnchangedAfterCorpusVerification": true,
+  "validation": [
+    {
+      "command": "npx vitest run test/dictionary-importer-media-reference.test.js test/term-bank-experiments.test.js test/term-bank-wasm-parser.test.js test/dictionary-importer-buffer-ownership.test.js test/dictionary-importer-media-batch.test.js test/dictionary-importer-media-keys.test.js --maxWorkers=1",
+      "exitCode": 0,
+      "testFiles": 6,
+      "passed": 380,
+      "log": "focused-tests.log"
+    },
+    {
+      "command": "npx eslint ext/js/dictionary/dictionary-media-diagnostics.js ext/js/dictionary/term-bank-wasm-parser.js ext/js/dictionary/term-bank-wasm-parser-worker.js ext/js/dictionary/dictionary-importer.js test/dictionary-importer-media-reference.test.js test/term-bank-experiments.test.js eslint.config.js",
+      "exitCode": 0,
+      "log": "lint.log"
+    },
+    {
+      "command": "npm run test:ts:main",
+      "exitCode": 0,
+      "receipt": "Parent-shared tool transcript; runtime changes since this check are semicolon/style corrections only."
+    },
+    {
+      "command": "npm run test:ts:test",
+      "exitCode": 0,
+      "log": "test-types.log"
+    },
+    {
+      "command": "npm run test:build",
+      "exitCode": 0,
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "log": "build.log"
+    },
+    {
+      "command": "node --expose-gc builds/perf/20261125-columnar-media/verify-corpus.mjs ../manabitan . /workspace/scratch/2754d3e3fa09/manabitan/builds/e2e-dictionary-cache builds/perf/20261125-columnar-media/corpus-parity.json",
+      "exitCode": 0,
+      "log": "corpus-parity.log",
+      "report": "corpus-parity.json"
+    }
+  ],
+  "scope": {
+    "fixtureRows": 7613164,
+    "fixtureBanks": 937,
+    "groups": 236,
+    "grouping": "Fixed groups of four consecutive term banks, not a claim to reproduce production browser source scheduling.",
+    "parity": "Every term content/key/lookup column and normalized projected/fallback media output, including exact diagnostic bytes/spans/decoded strings, matches baseline.",
+    "serialization": "Node V8 serialize() lengths of the media portion of each result, summed across groups; not browser wire bytes, latency, total import time, or process memory.",
+    "objectCounts": "Unique object, array, typed-array-view, and Map instances reachable from each media payload, summed across groups. Excludes strings and underlying backing-buffer objects; does not count all temporary allocations.",
+    "runtimeSourceBytesDelta": 5258,
+    "nativeChanges": false,
+    "browserLatencyMeasured": false,
+    "processMemoryMeasured": false,
+    "fullUnitSuiteRunByThisSubtask": false
+  },
+  "setupAndDevelopmentFailures": [
+    "An initial type command referenced nonexistent tsconfig.json; the repository uses jsconfig.json.",
+    "Initial lint found header/ternary style and test object-layout issues, corrected before the final passing check.",
+    "An eslint --fix process was killed with exit 137; final scoped lint completed successfully.",
+    "An initial expanded test tuple inferred string | boolean; a const tuple annotation corrected it before the final passing test type check."
+  ],
+  "evidenceSha256": {
+    "verify-corpus.mjs": "d40031dbdb34a675f8d973c67ab2896cd4a8c89a06058a0a5193a94ed97eee1b",
+    "corpus-parity.json": "975622a6e124341cafef73fe0ceb18e6258139376de3fc5b5579f9b4bdd74574",
+    "corpus-parity.log": "c098cdb5176ae94f467d5f46e6fe706c1de8eb5c1fcecf8d8080b91d7ade3cdd",
+    "focused-tests.log": "459988782cd8a8a4c15f96b092dc9fe57eeae0f9558e50c658fd62221ced6079",
+    "lint.log": "853d7f1e8691e32065d337eb12bb3165171be621079956cbd14456d3bb2a4a6a",
+    "test-types.log": "ed71f28b791089e878edaa1187542d01f6ac111563e12116acb4bbbca78df10a",
+    "build.log": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+  }
+}

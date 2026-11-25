@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-25T15:41:49.582072+00:00",
+  "status": "blocked-before-browser-startup",
+  "scope": "Standalone columnar projected-media transport, PR #907, versus frozen develop baseline; local Linux browser qualification only.",
+  "identityFile": "identity.json",
+  "identitySha256": "13cd79ce6c1bb0e49a7da935338e1307180c538404ada55b12238b264cdbf915",
+  "sources": {
+    "A": {
+      "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+      "aggregateTrackedSha256": "e35988ac107deaadbaddf38a41adbb6c509859432aa9952606e5e4b0d0dcd3ce"
+    },
+    "B": {
+      "head": "0d7b5a70213e2324a2166cbb584847189e9cd2ff",
+      "tree": "3d96be43e92a77ccc8885f6e9acbb55f5c97bd0e",
+      "aggregateTrackedSha256": "dd8ea9247f68b5d6fa614c19ea0217bf06e5294c357021770eebe94c83d8b400"
+    }
+  },
+  "candidateRemote": {
+    "pr": "https://github.com/ManabiIO/manabitan/pull/907",
+    "head": "2a0b9243540bf54932165fd9ab4da17709e3b390",
+    "tree": "3d96be43e92a77ccc8885f6e9acbb55f5c97bd0e",
+    "equivalence": "Root verified remote tree equals local candidate tree."
+  },
+  "packages": {
+    "A": {
+      "bytes": 17272721,
+      "sha256": "14cc534ee70f381b2c07a20bd05cdc16480e3dacd0c20e3f824be357c77e4de5"
+    },
+    "B": {
+      "bytes": 17274517,
+      "sha256": "0095008a8feac70c14c3c8d5d30723eab0da4b17c39862254054a0beb4e23710"
+    }
+  },
+  "packageDelta": [
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/dictionary-media-diagnostics.js",
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js"
+  ],
+  "libraryControl": "Candidate normal build retained as candidate-original-build.zip; qualification candidate repackaged with identical baseline generated libraries using unmodified exported build(). Lockfile, library source, and all noncandidate package entries match.",
+  "runtime": {
+    "artifactId": 15033782559,
+    "workflowRun": 45639583911,
+    "node": {
+      "path": "/tmp/manabitan-8ca6-runtime/runtime/node/bin/node",
+      "version": "v24.20.0",
+      "versions": {
+        "node": "24.20.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.3",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "137",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "3.5.7",
+        "simdjson": "4.6.6",
+        "simdutf": "6.4.0",
+        "sqlite": "3.53.4",
+        "tz": "2026c",
+        "undici": "7.29.0",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "13.6.233.17-node.53",
+        "zlib": "1.3.2.1-motley-42c2f19",
+        "zstd": "1.5.7"
+      },
+      "sha256": "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+    },
+    "chromium": {
+      "path": "/tmp/manabitan-8ca6-runtime/runtime/ms-playwright/chromium-1243/chrome-linux64/chrome",
+      "version": "153.0.8010.12",
+      "versionCommandOutput": "Google Chrome for Testing 153.0.8010.12",
+      "sha256": "8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e"
+    },
+    "playwrightBrowsersPath": "/tmp/manabitan-8ca6-runtime/runtime/ms-playwright",
+    "dependencies": {
+      "@playwright/test": {
+        "path": "/tmp/manabitan-8ca6-deps/node_modules/@playwright/test/package.json",
+        "version": "1.63.0",
+        "packageJsonSha256": "5587f932b8979b6889654b60e3c28aeb7ca0abbac00eec8c176c939a16149536"
+      },
+      "playwright": {
+        "path": "/tmp/manabitan-8ca6-deps/node_modules/playwright/package.json",
+        "version": "1.63.0",
+        "packageJsonSha256": "8bc2ddebe8d9b051b9ecb87d62c6c63877e59d08617f32c3215681ca8bb70998"
+      },
+      "playwright-core": {
+        "path": "/tmp/manabitan-8ca6-deps/node_modules/playwright-core/package.json",
+        "version": "1.63.0",
+        "packageJsonSha256": "f061c58427e47e843e26d201f0a57076c734e57c734ecbbd87d4a23b7a20db9b"
+      }
+    }
+  },
+  "harness": "Unmodified dev/perf/import-benchmark.js <dictionary> --runs 1 --no-build --build-target chrome --media-check all",
+  "configuration": {
+    "productionImportDefaults": true,
+    "trace": false,
+    "phaseProfiler": false,
+    "phaseScreenshots": false,
+    "processSampling": false,
+    "mediaCheck": "all",
+    "freshProfileEachObservation": true,
+    "tmpFilesystem": "task-owned /tmp tmpfs"
+  },
+  "observations": [
+    {
+      "id": "smoke-jmdict-a",
+      "arm": "A",
+      "dictionary": "jmdict",
+      "purpose": "excluded-functional-smoke",
+      "status": "prestartup-failure",
+      "harnessWallMs": 1574.1028359998381,
+      "totalImportMs": null,
+      "reportStatus": "failure",
+      "browserVersionReported": "",
+      "runtimeDiagnostics": null,
+      "skippedVerification": false,
+      "cleanup": {
+        "remainingTempEntries": [],
+        "tempDirectoryRemoved": true
+      },
+      "receipt": "observations/smoke-jmdict-a/observation.json",
+      "log": "observations/smoke-jmdict-a/harness.log",
+      "rawReport": "observations/smoke-jmdict-a/run-1.json"
+    },
+    {
+      "id": "smoke-jmdict-a-root",
+      "arm": "A",
+      "dictionary": "jmdict",
+      "purpose": "excluded-functional-smoke",
+      "status": "prestartup-failure",
+      "harnessWallMs": 1781.5871419998075,
+      "totalImportMs": null,
+      "reportStatus": "failure",
+      "browserVersionReported": "",
+      "runtimeDiagnostics": null,
+      "skippedVerification": false,
+      "cleanup": {
+        "remainingTempEntries": [],
+        "tempDirectoryRemoved": true
+      },
+      "receipt": "observations/smoke-jmdict-a-root/observation.json",
+      "log": "observations/smoke-jmdict-a-root/harness.log",
+      "rawReport": "observations/smoke-jmdict-a-root/run-1.json"
+    }
+  ],
+  "runtimeFailure": {
+    "stage": "launchPersistentContext, before extension startup/import",
+    "file": "chrome/browser/process_singleton_posix.cc:297",
+    "message": "Check failed: . socket() failed: Operation not permitted (1)",
+    "signal": "SIGABRT",
+    "childSocketProbe": {
+      "AF_UNIX_STREAM": "EPERM",
+      "AF_INET_STREAM": "available"
+    },
+    "scope": "Default exec_command failed in child and root contexts. Neither failure is an import/performance result."
+  },
+  "approvalAttempt": {
+    "actor": "root agent",
+    "outcome": "automatically rejected before process creation",
+    "reason": "Granular approval policy has sandbox_approval:false and request_permissions:false",
+    "evidence": "Root coordination message; the rejection created no process and produced no browser observation."
+  },
+  "decision": "Stop local browser attempts. No launch-flag changes, runtime modifications, source/harness edits, or permission workaround.",
+  "timingConclusion": {
+    "completedImports": 0,
+    "candidateObservations": 0,
+    "authoritativeImportTimings": 0,
+    "comparisonScheduleFrozen": false,
+    "performanceClaim": null,
+    "note": "Recorded harness wall times are failed setup durations only. No candidate outcome was observed and no comparative cohort was started."
+  },
+  "missingGates": [
+    "Baseline browser functional smoke for JMdict, Jitendex and VNDB.",
+    "Candidate full browser correctness for all three corpora, including actual OPFS SAH pool install/use, zero fallback, exact fixture counts/revisions, browser restart, 12 content probes, 72 lookup observations and exhaustive source-versus-persisted image bytes.",
+    "Balanced complete-import latency comparison with same-code baseline controls and all observations retained.",
+    "Separate process-tree memory qualification; the built-in browser-PID-only sampler cannot supply this gate.",
+    "Cross-host or cross-browser promotion qualification."
+  ],
+  "cleanup": "Both attempted harnesses closed/aborted before import and removed their per-observation profile/extraction directories. No other task data was deleted.",
+  "excludedFromPortableEvidence": [
+    "Source clones",
+    "Extension ZIP packages",
+    "node_modules",
+    "Node runtime",
+    "Browser cache",
+    "Dictionary archives"
+  ]
+}

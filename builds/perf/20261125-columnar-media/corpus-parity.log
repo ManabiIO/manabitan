@@ -1,0 +1,17 @@
+jmdict: 528299 rows; 0 projected media rows; complete parity
+jitendex: 128000 rows / 16 groups match
+jitendex: 256000 rows / 32 groups match
+jitendex: 384000 rows / 48 groups match
+jitendex: 436555 rows; 324 projected media rows; complete parity
+vndb: 640000 rows / 16 groups match
+vndb: 1280000 rows / 32 groups match
+vndb: 1920000 rows / 48 groups match
+vndb: 2560000 rows / 64 groups match
+vndb: 3200000 rows / 80 groups match
+vndb: 3840000 rows / 96 groups match
+vndb: 4480000 rows / 112 groups match
+vndb: 5120000 rows / 128 groups match
+vndb: 5760000 rows / 144 groups match
+vndb: 6400000 rows / 160 groups match
+vndb: 6648310 rows; 146722 projected media rows; complete parity
+builds/perf/20261125-columnar-media/corpus-parity.json

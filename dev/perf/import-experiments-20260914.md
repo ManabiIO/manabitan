@@ -231,3 +231,43 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-25: columnar projected media transport
+
+Baseline: `7d1643e6147a10cb2165e9744cf0e63b59e46632`. Runtime candidate: `96954defb982e9d9258612514260df2b6cb160a2`. Successful parser-worker image projections now use row/path columns, flat path strings and one owned diagnostic-key arena. Fallback rows keep their existing shape and merge in original source order. The importer uses the transferred diagnostics directly. Sequential callers retain the prior media-row representation.
+
+This is a deeper alternative to PR #850's compact row objects. It removes projected row objects rather than reducing their fields. It does not change native parsing, image-path semantics, source groups, concurrency, persistent formats or compression.
+
+The [complete verifier](../../builds/perf/20261125-columnar-media/verify-corpus.mjs), [per-group results](../../builds/perf/20261125-columnar-media/corpus-parity.json), and [validation receipt](../../builds/perf/20261125-columnar-media/validation.json) retain all source/fixture hashes. Across 7,613,164 rows, 937 banks and 236 fixed four-bank groups, every content/key/lookup column and normalized projected/fallback media output matched baseline. Fixed component grouping is not production browser scheduling.
+
+| Corpus   |      Rows | Baseline media payload | Candidate media payload |
+| -------- | --------: | ---------------------: | ----------------------: |
+| JMdict   |   528,299 |           17,158 bytes |            17,158 bytes |
+| Jitendex |   436,555 |          212,489 bytes |           114,441 bytes |
+| VNDB     | 6,648,310 |       56,687,937 bytes |        10,437,627 bytes |
+
+The payload sizes are sums from Node's V8 serializer, not browser wire bytes or total import memory. VNDB retains 146,722 projected references and all 146,570 unique image paths. Reachable media objects, arrays, typed-array views and maps summed across groups fall from 734,060 to 1,526; this does not count every temporary allocation or strings. No total-import latency or process-memory claim is made.
+
+```sh
+node --expose-gc builds/perf/20261125-columnar-media/verify-corpus.mjs \
+  /absolute/path/to/baseline /absolute/path/to/candidate \
+  /absolute/path/to/pinned-cache /absolute/path/to/result.json
+```
+
+Both revisions need their own generated libraries and unchanged locked fixtures. Local validation passed 380 focused tests, main/test types, changed-file lint and seven dry-build targets. Actual-worker tests cover inflated/compressed sources, unique transfers, sender detachment and reuse. Unicode, BOMs, lone surrogates, expression/reading aliases, duplicates and mixed fallback order retain the original diagnostics. Independent source review found no blocker. The runtime JavaScript grows by 5,258 uncompressed bytes; native assets are unchanged. Full suite and complete browser timing/memory remain separate gates; keep the candidate draft until qualified.
+
+## 2026-11-25: integration validation and blocked browser qualification
+
+The [combined validation receipt](../../builds/perf/20261125-import-validation/combined-validation.json) and its accompanying original logs record the guarded Jitendex reference emitter together with VNDB columnar media transport. The combined full-suite/type-check head was `25e9886fbf7dd9f80bcb8657d922a3bcb6a78860`; the fixture-corrected head was `f066d1571263951113e9d712614b69cf80fd447d`. The separate JMdict candidate is excluded from this combined branch.
+
+The dedicated JMdict lazy sequence-hash experiment `e943dd60f084d9e1e80870f62a80867fbc946998` remains unpublished: the full locked default census used 12 native groups and zero JavaScript fallbacks, so its forced-JavaScript component gain cannot support a default JMdict import claim. Published shared reference-writer [PR #898](https://github.com/ManabiIO/manabitan/pull/898) also applies to JMdict imports.
+
+The original unit run failed: 642 files passed and four failed; 14,550 tests passed, five failed and 68 were skipped. Two suites lacked a configured wasm compiler; their pinned-compiler retry passed all 21 tests. The borrowed-worker fixture still required legacy projected rows; test-only correction `d61020e7ec486dfb1636865702d25c266bda1382` now checks exact projected columns while preserving the forced nonprojected path, lease, cancellation and failure checks. Its combined retry passed all eight fixture scenarios with no unhandled rejections. The four existing Fenix helper timeout cases did not reproduce in isolated baseline or combined runs: both passed all 22 tests with unchanged timeouts. This is consistent with contention during the broad run, but does not establish the cause. The full suite was not rerun after these narrow recoveries.
+
+All four type-check projects passed on the original combined head. The fixture-corrected combined head also passed `npm run build -- --target chrome`, producing a 17,275,784-byte MV3 package with SHA-256 `4201d3a9722ea5538bd56ea8de10bda9bcf853ad71fa3b7029c65ad5958f8cc8`. The receipt records package identity; the binary is not included in the evidence directory. Evidence references are relative, raw logs retain their original bytes and hashes, and the original/fixed borrowed fixture reports are both retained.
+
+The [blocked browser receipt](../../builds/perf/20261125-import-validation/browser/blocked-qualification.json) covers a separate frozen VNDB candidate `0d7b5a70213e2324a2166cbb584847189e9cd2ff` against baseline `7d1643e6147a10cb2165e9744cf0e63b59e46632`. Both baseline JMdict attempts stopped before extension startup because Chromium could not create an AF_UNIX socket (`EPERM`). A requested sandbox exception was automatically rejected before process creation. There were zero completed imports, zero candidate observations and zero authoritative import timings. The reported harness durations are failed setup durations. The later borrowed-fixture correction does not change the frozen package runtime.
+
+The [CI snapshot](../../builds/perf/20261125-import-validation/ci-observation.json) records successful CI and restart workflows for PR #898 head `449a421f`, plus successful Chromium/Firefox functional jobs on the earlier runtime-equivalent VNDB head `2a0b9243`. That older VNDB CI run had one unit failure, the stale borrowed-worker fixture; the corrected `07b041f6` run was queued when captured. The receipt preserves both PR head and actual merge-checkout identities. These browser jobs used cached recommended-feed JMdict, Jitendex and JMnedict releases rather than the current locked fixtures, and did not import VNDB or exhaustively compare image bytes. The successful restart campaign used a synthetic 350,001-row dictionary. These are functional checks, not a controlled three-corpus import performance comparison.
+
+Local complete-browser correctness, balanced whole-import timing and process-tree memory qualification remain blocked. The evidence includes the observation driver, package/runtime/source identities, original startup logs and raw reports, without packages, source checkouts, runtimes or dictionary archives. Keep the optimization drafts pending those qualification gates; component and functional results do not establish complete-import speed or memory improvement.
