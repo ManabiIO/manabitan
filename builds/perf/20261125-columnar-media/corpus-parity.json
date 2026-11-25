@@ -1,0 +1,2743 @@
+{
+  "scope": "Complete fixed-four-bank parser-copy/media-transport parity; not a browser import or latency benchmark",
+  "node": "v24.22.3",
+  "runnerSha256": "d40031dbdb34a675f8d973c67ab2896cd4a8c89a06058a0a5193a94ed97eee1b",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sources": [
+    {
+      "root": "/workspace/scratch/8ca6d2070ae4/manabitan",
+      "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "hashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "99afad5ad98cb1264d1acc8f15ab8f5c51246bbca25722eed6b89f8677301884",
+        "ext/js/dictionary/dictionary-importer.js": "56622a9140a2162db2bca1026ffc66a67e3667f00ec733d52d5dc7446d15f189",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+      }
+    },
+    {
+      "root": "/workspace/scratch/8ca6d2070ae4/vndb",
+      "head": "96954defb982e9d9258612514260df2b6cb160a2",
+      "hashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "cd7aaff8c1e3ae6e7c12c8af6b1f4d2d9070b1e621c9eb17041cd288609ede46",
+        "ext/js/dictionary/term-bank-wasm-parser-worker.js": "ca011ce43e95840084b7a8de071d80babd6c010521451531a2cf989a53155653",
+        "ext/js/dictionary/dictionary-importer.js": "d1a8e63550a17f23479162be7a84c58e614e0250ae17b498d0dab9b28a4cc40a",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+        "ext/js/dictionary/dictionary-media-diagnostics.js": "b7ed1e769319d79555f449ce95cf37e1487896a296ce92615e39b6706f322a94"
+      }
+    }
+  ],
+  "options": {
+    "singleChunk": true,
+    "emitTermByteLists": false,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "mediaHintFastScan": true,
+    "validateGlossaryTypes": true,
+    "prepareLookupIndexes": true,
+    "experimentalNativeEscapedKeys": true,
+    "compactContentMetadata": true
+  },
+  "filesPerGroup": 4,
+  "skippedTimingKeys": [
+    "preparedLookupIndexEncodeMs"
+  ],
+  "serializationScope": "Sum of Node v8.serialize media payload lengths before transfer; not Chrome wire size or peak memory",
+  "corpora": [
+    {
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": 53,
+      "rows": 528299,
+      "groups": [
+        {
+          "start": "term_bank_1.json",
+          "end": "term_bank_4.json",
+          "rows": 40000,
+          "digest": "ce1f724ac96530f9bfc821669f684a2fdb64e87f26f548f4523a5bc062576148",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_5.json",
+          "end": "term_bank_8.json",
+          "rows": 40000,
+          "digest": "a04f85b8b3715af9f37522df51cd3821eb8c9d28ade6e2872dd78bacddc63e87",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 4
+          }
+        },
+        {
+          "start": "term_bank_9.json",
+          "end": "term_bank_12.json",
+          "rows": 40000,
+          "digest": "18388ac9bb5711159f14191b3747b1f2ec4092758db5fc71d4c52229e75defce",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 4
+          }
+        },
+        {
+          "start": "term_bank_13.json",
+          "end": "term_bank_16.json",
+          "rows": 40000,
+          "digest": "82b164da4678ce9c68bfcfa3e4c11a726498a45798410448aa90718a90ddf336",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 2
+          }
+        },
+        {
+          "start": "term_bank_17.json",
+          "end": "term_bank_20.json",
+          "rows": 40000,
+          "digest": "a8703709a7fd550ef0914b9f2bad13b5df0551c67429c6016ef1637e24a6e529",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_21.json",
+          "end": "term_bank_24.json",
+          "rows": 40000,
+          "digest": "8758904abafbb3f9b2f326cefde1a4eba328786683d6d7f8b7071facadc5369a",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 2
+          }
+        },
+        {
+          "start": "term_bank_25.json",
+          "end": "term_bank_28.json",
+          "rows": 40000,
+          "digest": "0ae3a71d3a38e24bb3b35b5fe59564081282244867c530c60c32d01ec7938366",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_29.json",
+          "end": "term_bank_32.json",
+          "rows": 40000,
+          "digest": "f73eb18e37008ef4f940edc193496cbb657971686ceb5424fefd7c043761db48",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_33.json",
+          "end": "term_bank_36.json",
+          "rows": 40000,
+          "digest": "40cc1beb876695eca8fd37de5a4d74f35a045ad8b855a2b9826036e37e3f8588",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 2
+          }
+        },
+        {
+          "start": "term_bank_37.json",
+          "end": "term_bank_40.json",
+          "rows": 40000,
+          "digest": "1e33d1685c37a19483f1c419f6bcc341c882c0c2bfc236eed5fa0fcda1e629e1",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_41.json",
+          "end": "term_bank_44.json",
+          "rows": 40000,
+          "digest": "8c212e0d65c93b7f62d13f7de407d152a0e709bca84964630f3d58b3e6833687",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_45.json",
+          "end": "term_bank_48.json",
+          "rows": 40000,
+          "digest": "65efaccaea6abc750836f521de0475abc792a349e305387045c8a3edf335509d",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_49.json",
+          "end": "term_bank_52.json",
+          "rows": 40000,
+          "digest": "fecb70f7708bfa86673967d138afdec8d2becb91b9971b65c019d300c908df08",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_53.json",
+          "end": "term_bank_53.json",
+          "rows": 8299,
+          "digest": "a97bae8efbbaf5c6fe7fc1b668136bc6afb0de37286525e7666075d2bef956c3",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        }
+      ],
+      "projectedRows": 0,
+      "projectedPaths": 0,
+      "uniqueProjectedPaths": 0,
+      "fallbackMediaRows": 17,
+      "mediaSerializedBytes": [
+        17158,
+        17158
+      ],
+      "mediaObjects": [
+        {
+          "objects": 48,
+          "arrays": 14,
+          "views": 68,
+          "maps": 0
+        },
+        {
+          "objects": 48,
+          "arrays": 14,
+          "views": 68,
+          "maps": 0
+        }
+      ],
+      "digest": "21001bc321461bee70bc87797fc775eeecb26999c612ff003f78912141e1acd4",
+      "complete": true
+    },
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "rows": 436555,
+      "groups": [
+        {
+          "start": "term_bank_1.json",
+          "end": "term_bank_4.json",
+          "rows": 8000,
+          "digest": "536e37643be65745b957fb45ca3d045ad0581d3b2b700ebae1e298fb5cfdc047",
+          "mediaStats": {
+            "projectedRows": 10,
+            "projectedPaths": 10,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_5.json",
+          "end": "term_bank_8.json",
+          "rows": 8000,
+          "digest": "e8ca2d1647b4c4ad92376f743f6cf5382df3f02876142d3a2c6d7c1e957409b6",
+          "mediaStats": {
+            "projectedRows": 1,
+            "projectedPaths": 1,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_9.json",
+          "end": "term_bank_12.json",
+          "rows": 8000,
+          "digest": "bc394cd4a34ec00768aa4962f176bea7b29703e9098f75069346474410182238",
+          "mediaStats": {
+            "projectedRows": 8,
+            "projectedPaths": 8,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_13.json",
+          "end": "term_bank_16.json",
+          "rows": 8000,
+          "digest": "c9cacf7e866822ee877a2d34d3935ec69e9740331c7fdcb8bf5cabd86ec19280",
+          "mediaStats": {
+            "projectedRows": 14,
+            "projectedPaths": 15,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_17.json",
+          "end": "term_bank_20.json",
+          "rows": 8000,
+          "digest": "08176a065bd55ba72b7d2887fe6cb1b446a59133899348b1eb8da2e6702ede5e",
+          "mediaStats": {
+            "projectedRows": 11,
+            "projectedPaths": 11,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_21.json",
+          "end": "term_bank_24.json",
+          "rows": 8000,
+          "digest": "4a50610324a4e2238c472c56d67a9ff67527c85075b921cefd979d5c62e8ce97",
+          "mediaStats": {
+            "projectedRows": 11,
+            "projectedPaths": 12,
+            "fallbackRows": 2
+          }
+        },
+        {
+          "start": "term_bank_25.json",
+          "end": "term_bank_28.json",
+          "rows": 8000,
+          "digest": "0acfdb5c77da59b040907de695b906b41cdaa536d7cb1bf93bc503e38d89e46f",
+          "mediaStats": {
+            "projectedRows": 14,
+            "projectedPaths": 14,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_29.json",
+          "end": "term_bank_32.json",
+          "rows": 8000,
+          "digest": "bd6d1af8c8e75b39d243436aa2f278bf89366b03498e06a2f9ae9e30921945cb",
+          "mediaStats": {
+            "projectedRows": 6,
+            "projectedPaths": 8,
+            "fallbackRows": 2
+          }
+        },
+        {
+          "start": "term_bank_33.json",
+          "end": "term_bank_36.json",
+          "rows": 8000,
+          "digest": "439022030532247b602a5e6e1ace82dc29407ed568dd8fbcb1b2b1503787eea1",
+          "mediaStats": {
+            "projectedRows": 12,
+            "projectedPaths": 12,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_37.json",
+          "end": "term_bank_40.json",
+          "rows": 8000,
+          "digest": "4f59e4ee88d68c1bf3a0e665ae66fa1fbe48a1c081a16ab0eca552591787d128",
+          "mediaStats": {
+            "projectedRows": 10,
+            "projectedPaths": 10,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_41.json",
+          "end": "term_bank_44.json",
+          "rows": 8000,
+          "digest": "6d674610ca7dcd8d3251dd547fa742d0189eb9fa7737c92604bd5ab4eba3c506",
+          "mediaStats": {
+            "projectedRows": 17,
+            "projectedPaths": 17,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_45.json",
+          "end": "term_bank_48.json",
+          "rows": 8000,
+          "digest": "2d27794195cd6db6b338696c40d91cfd085134edb2734dd024816aadf2088f7d",
+          "mediaStats": {
+            "projectedRows": 9,
+            "projectedPaths": 9,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_49.json",
+          "end": "term_bank_52.json",
+          "rows": 8000,
+          "digest": "aa7e5d9f8fc47376d6d8ff2f0ede8486e4f9abed44de234b329ef3893472bcf1",
+          "mediaStats": {
+            "projectedRows": 4,
+            "projectedPaths": 4,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_53.json",
+          "end": "term_bank_56.json",
+          "rows": 8000,
+          "digest": "0da37b983905d90d934c040a96c87f50aac57a0ea16454b38f3d08b732f8f1a1",
+          "mediaStats": {
+            "projectedRows": 17,
+            "projectedPaths": 17,
+            "fallbackRows": 2
+          }
+        },
+        {
+          "start": "term_bank_57.json",
+          "end": "term_bank_60.json",
+          "rows": 8000,
+          "digest": "3bdd37f13e4d95ff05455b80d34ee67da48a08e0010cd11ff0244376743841bd",
+          "mediaStats": {
+            "projectedRows": 1,
+            "projectedPaths": 1,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_61.json",
+          "end": "term_bank_64.json",
+          "rows": 8000,
+          "digest": "edf43d6767be9d3d0085ebe478b5f702702a81785db1b528e7211b92a3bd0291",
+          "mediaStats": {
+            "projectedRows": 7,
+            "projectedPaths": 7,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_65.json",
+          "end": "term_bank_68.json",
+          "rows": 8000,
+          "digest": "0d4c20e527564595c9e06b1550783f34cf265599ee9e2c81b6964b109541cb1b",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_69.json",
+          "end": "term_bank_72.json",
+          "rows": 8000,
+          "digest": "98b3899ad02e20459e29a0e83ec04d7f1297545c31053c4defef8f44b8ef8348",
+          "mediaStats": {
+            "projectedRows": 5,
+            "projectedPaths": 6,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_73.json",
+          "end": "term_bank_76.json",
+          "rows": 8000,
+          "digest": "282876ecaef051282b4a9d0abfbf186cb08f792b438c11454f43a7c7d3506630",
+          "mediaStats": {
+            "projectedRows": 14,
+            "projectedPaths": 14,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_77.json",
+          "end": "term_bank_80.json",
+          "rows": 8000,
+          "digest": "ad31e5b422cff5f5e03d32992cd1ef4b751b780d0de186a3a95ce5f20537e20e",
+          "mediaStats": {
+            "projectedRows": 11,
+            "projectedPaths": 13,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_81.json",
+          "end": "term_bank_84.json",
+          "rows": 8000,
+          "digest": "e1e5b75de077e18ff3f24feb4ad78371073e0f2cf78546edf39582f207c34833",
+          "mediaStats": {
+            "projectedRows": 3,
+            "projectedPaths": 3,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_85.json",
+          "end": "term_bank_88.json",
+          "rows": 8000,
+          "digest": "41cb3097a56fb3a630815e780684bc7703a70be421809b1c26de6ab73a3ebb01",
+          "mediaStats": {
+            "projectedRows": 1,
+            "projectedPaths": 1,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_89.json",
+          "end": "term_bank_92.json",
+          "rows": 8000,
+          "digest": "f5e0053f41614d9825ae7339119174f9c16abf525f1754d5dc6886f2fc3abfbf",
+          "mediaStats": {
+            "projectedRows": 3,
+            "projectedPaths": 3,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_93.json",
+          "end": "term_bank_96.json",
+          "rows": 8000,
+          "digest": "4f3f5fde31783ef97df3969b4c6d51be4e01007232f1162de9ae96f376c323a5",
+          "mediaStats": {
+            "projectedRows": 1,
+            "projectedPaths": 1,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_97.json",
+          "end": "term_bank_100.json",
+          "rows": 8000,
+          "digest": "46925ecd320e84b82c3bda9aea81fd97ea1acf0b024fb70914a803221cd3d9dd",
+          "mediaStats": {
+            "projectedRows": 7,
+            "projectedPaths": 7,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_101.json",
+          "end": "term_bank_104.json",
+          "rows": 8000,
+          "digest": "15122cf67bcd9b9e7e710a1f1328cfe7d707be6e9519f5bf4932988da93a96e2",
+          "mediaStats": {
+            "projectedRows": 5,
+            "projectedPaths": 5,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_105.json",
+          "end": "term_bank_108.json",
+          "rows": 8000,
+          "digest": "4ca4f2d17d421f3705c4b8dbb0274bae4dd9e846493d638cfc67c85ace3d5bfb",
+          "mediaStats": {
+            "projectedRows": 8,
+            "projectedPaths": 10,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_109.json",
+          "end": "term_bank_112.json",
+          "rows": 8000,
+          "digest": "013f4a695538e99d8d7e372bd28377a7ecd704ca69ef8b07a135e47c2880efca",
+          "mediaStats": {
+            "projectedRows": 4,
+            "projectedPaths": 4,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_113.json",
+          "end": "term_bank_116.json",
+          "rows": 8000,
+          "digest": "75735615483744c2261348ea117f04a714789349617483dcfd754092e5f195ff",
+          "mediaStats": {
+            "projectedRows": 8,
+            "projectedPaths": 8,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_117.json",
+          "end": "term_bank_120.json",
+          "rows": 8000,
+          "digest": "f7ecf2acff18dd5cd78caecd938f8198c019080c84907ac1bb74c572d88fa093",
+          "mediaStats": {
+            "projectedRows": 1,
+            "projectedPaths": 1,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_121.json",
+          "end": "term_bank_124.json",
+          "rows": 8000,
+          "digest": "648b004497deeae082368ca0ed65b0a5c8e755c1356b9c617f51daba9e15c322",
+          "mediaStats": {
+            "projectedRows": 9,
+            "projectedPaths": 9,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_125.json",
+          "end": "term_bank_128.json",
+          "rows": 8000,
+          "digest": "359f4756536efd6d5ef512c9625bcd1f30f243c8bed635412212f1686b484575",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_129.json",
+          "end": "term_bank_132.json",
+          "rows": 8000,
+          "digest": "560d39d6c6f91ccc1903eac8196dd798b312b2a374f9317c221760ce744489a9",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_133.json",
+          "end": "term_bank_136.json",
+          "rows": 8000,
+          "digest": "ea9b0110075c866f0a26c4bdcea7f14dbc87a0dd34cfa95f60d0e3a9acecd5a1",
+          "mediaStats": {
+            "projectedRows": 8,
+            "projectedPaths": 10,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_137.json",
+          "end": "term_bank_140.json",
+          "rows": 8000,
+          "digest": "d3a37a6e6186827eab26cadb9fc38acc3aea946977885a02eb447997a2fa5ded",
+          "mediaStats": {
+            "projectedRows": 11,
+            "projectedPaths": 11,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_141.json",
+          "end": "term_bank_144.json",
+          "rows": 8000,
+          "digest": "5d4741de3ba15972822c359200889bdedf1d1426648e912dfbd3dae219304510",
+          "mediaStats": {
+            "projectedRows": 4,
+            "projectedPaths": 4,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_145.json",
+          "end": "term_bank_148.json",
+          "rows": 8000,
+          "digest": "6ea45873e53a596e8bb5880c49f496faf657789621fb7d49f42cd131abcd51a4",
+          "mediaStats": {
+            "projectedRows": 5,
+            "projectedPaths": 5,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_149.json",
+          "end": "term_bank_152.json",
+          "rows": 8000,
+          "digest": "2bf87417b40bfa1df6b6a4c9b4c9590b29689650c0c8ec34654476a768a973e3",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_153.json",
+          "end": "term_bank_156.json",
+          "rows": 8000,
+          "digest": "566272f68a892021508feaff44c0534f984617d15a1d115abcf3697fab264962",
+          "mediaStats": {
+            "projectedRows": 3,
+            "projectedPaths": 3,
+            "fallbackRows": 1
+          }
+        },
+        {
+          "start": "term_bank_157.json",
+          "end": "term_bank_160.json",
+          "rows": 8000,
+          "digest": "e7af5fad3bb0ffaf71e0a435543cef1285e94df562f8177fd7b2c48884d325ad",
+          "mediaStats": {
+            "projectedRows": 4,
+            "projectedPaths": 4,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_161.json",
+          "end": "term_bank_164.json",
+          "rows": 8000,
+          "digest": "515d2146cbb0a128308683fbdb96c8d3498e02a046a28ffecaf3dbbc25a26c46",
+          "mediaStats": {
+            "projectedRows": 7,
+            "projectedPaths": 8,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_165.json",
+          "end": "term_bank_168.json",
+          "rows": 8000,
+          "digest": "7e1e147b2e700e42af377ba027651585efd4826741924943aa81d9304436fa44",
+          "mediaStats": {
+            "projectedRows": 4,
+            "projectedPaths": 4,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_169.json",
+          "end": "term_bank_172.json",
+          "rows": 8000,
+          "digest": "5175f283219d9ecf61eeec9f82046b57e4fe6791f71627a8ed51bc0b2f4bbddf",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_173.json",
+          "end": "term_bank_176.json",
+          "rows": 8000,
+          "digest": "5f43d76fb3d527cb471ebe545d583da2e921b46c1b581a6f8fe48cbe42988c0b",
+          "mediaStats": {
+            "projectedRows": 6,
+            "projectedPaths": 6,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_177.json",
+          "end": "term_bank_180.json",
+          "rows": 8000,
+          "digest": "aebde0f7078e12689b10ec05442e4ea32f394b0f24488251c873d289f218b1c2",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_181.json",
+          "end": "term_bank_184.json",
+          "rows": 8000,
+          "digest": "3702d8f51726010881e8724e38ac9adaff08c0c64f7dbb131079aca563e7f777",
+          "mediaStats": {
+            "projectedRows": 7,
+            "projectedPaths": 7,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_185.json",
+          "end": "term_bank_188.json",
+          "rows": 8000,
+          "digest": "cbdcd62c33491ea4dd24ab66a7927eb2a67ab4155984f509e6b0b775dd3d4c91",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_189.json",
+          "end": "term_bank_192.json",
+          "rows": 8000,
+          "digest": "6129a6a117ea407bb00f2c8866c86ab93f025b17f9d4b6ce024d4820b0a6021c",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_193.json",
+          "end": "term_bank_196.json",
+          "rows": 8000,
+          "digest": "d2c433a3b29fbfbde5efa7bead53891d7bd1e2f8ba1ee65a362dea695ba5851c",
+          "mediaStats": {
+            "projectedRows": 1,
+            "projectedPaths": 1,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_197.json",
+          "end": "term_bank_200.json",
+          "rows": 8000,
+          "digest": "390ddfecdb5f23104365833a81beee48e6759befa40666c8738552e0d81267b5",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_201.json",
+          "end": "term_bank_204.json",
+          "rows": 8000,
+          "digest": "6ec9bf24fc1730df43fdac6feb51215791607597da9cd2941feb194234378560",
+          "mediaStats": {
+            "projectedRows": 2,
+            "projectedPaths": 2,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_205.json",
+          "end": "term_bank_208.json",
+          "rows": 8000,
+          "digest": "7ab96aac61e8fd13daddd9dd7f94447c00b9e91971eee2630805611e40016ca6",
+          "mediaStats": {
+            "projectedRows": 18,
+            "projectedPaths": 18,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_209.json",
+          "end": "term_bank_212.json",
+          "rows": 8000,
+          "digest": "3c4a2336d2899ac7c6d9bcc03aaafc31ecdbe3a90b056fe2050cd66539773632",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_213.json",
+          "end": "term_bank_216.json",
+          "rows": 8000,
+          "digest": "b7af7270cbb83c2e275faf8104ef4e26e77cab25f1d8a758fbbaeb46d00bbcc2",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_217.json",
+          "end": "term_bank_219.json",
+          "rows": 4555,
+          "digest": "8b5a6f579a94fb15abb2aa95576287586c7bcbca9c4cbff6e8b38d0cc53f54e0",
+          "mediaStats": {
+            "projectedRows": 0,
+            "projectedPaths": 0,
+            "fallbackRows": 0
+          }
+        }
+      ],
+      "projectedRows": 324,
+      "projectedPaths": 336,
+      "uniqueProjectedPaths": 236,
+      "fallbackMediaRows": 15,
+      "mediaSerializedBytes": [
+        212489,
+        114441
+      ],
+      "mediaObjects": [
+        {
+          "objects": 733,
+          "arrays": 379,
+          "views": 757,
+          "maps": 0
+        },
+        {
+          "objects": 183,
+          "arrays": 104,
+          "views": 256,
+          "maps": 0
+        }
+      ],
+      "digest": "96a4cf8534f5bab585860fd9b0ae9b217f5c53463546bb8ca288890c7ebcb8d2",
+      "complete": true
+    },
+    {
+      "dictionary": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "banks": 665,
+      "rows": 6648310,
+      "groups": [
+        {
+          "start": "term_bank_1.json",
+          "end": "term_bank_4.json",
+          "rows": 40000,
+          "digest": "e37146f5cf881a49cddaf78f413215798de4a43ccf816c93b1c935e2b9f13cf6",
+          "mediaStats": {
+            "projectedRows": 805,
+            "projectedPaths": 805,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_5.json",
+          "end": "term_bank_8.json",
+          "rows": 40000,
+          "digest": "3bd6c7d73709553bb15d237ba3234e98a8cdc9cdec5b64f16222469c7e63af6a",
+          "mediaStats": {
+            "projectedRows": 844,
+            "projectedPaths": 844,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_9.json",
+          "end": "term_bank_12.json",
+          "rows": 40000,
+          "digest": "9b2ec38adf6a6d860177e5d94de181cd98d45542b8352c2714070e2f74ab4b6b",
+          "mediaStats": {
+            "projectedRows": 810,
+            "projectedPaths": 810,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_13.json",
+          "end": "term_bank_16.json",
+          "rows": 40000,
+          "digest": "99052e9aa05b00e5347142fcd1dcc5318ead0ba0280ce98e739b7817616a0d99",
+          "mediaStats": {
+            "projectedRows": 792,
+            "projectedPaths": 792,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_17.json",
+          "end": "term_bank_20.json",
+          "rows": 40000,
+          "digest": "442f6c54b5afca05310050588e4ffb0ae3ff257e24bb0b608cc2f1482401c555",
+          "mediaStats": {
+            "projectedRows": 819,
+            "projectedPaths": 819,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_21.json",
+          "end": "term_bank_24.json",
+          "rows": 40000,
+          "digest": "7ba443e736da0e50264813fef82ea93879b4a7986bfd63cdc024a01d5e58ef64",
+          "mediaStats": {
+            "projectedRows": 873,
+            "projectedPaths": 873,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_25.json",
+          "end": "term_bank_28.json",
+          "rows": 40000,
+          "digest": "25d235bba244489f50db5beceea680063c0e7c376516786db704eef9fd230ceb",
+          "mediaStats": {
+            "projectedRows": 941,
+            "projectedPaths": 941,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_29.json",
+          "end": "term_bank_32.json",
+          "rows": 40000,
+          "digest": "4f2d56dcf5b0c06f28d5d859603b0f7bb679220c141871c6479c30108c7312e6",
+          "mediaStats": {
+            "projectedRows": 785,
+            "projectedPaths": 785,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_33.json",
+          "end": "term_bank_36.json",
+          "rows": 40000,
+          "digest": "449e70b540a8693cf582449a60bafce3f745575bd491ca33986eae9512f3edac",
+          "mediaStats": {
+            "projectedRows": 823,
+            "projectedPaths": 823,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_37.json",
+          "end": "term_bank_40.json",
+          "rows": 40000,
+          "digest": "192e339c5e0a87fbd07704118738271a8a36629dd2a9a74682f17c9133fbfe57",
+          "mediaStats": {
+            "projectedRows": 844,
+            "projectedPaths": 844,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_41.json",
+          "end": "term_bank_44.json",
+          "rows": 40000,
+          "digest": "83cad077041c3e269b212b253606949ed1a749ca2d00321138a2f8cfea6e7913",
+          "mediaStats": {
+            "projectedRows": 863,
+            "projectedPaths": 863,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_45.json",
+          "end": "term_bank_48.json",
+          "rows": 40000,
+          "digest": "6e35cda3ea802dc631aedf4a712f29ba67eddf7f01c7a29209044c9648c880f9",
+          "mediaStats": {
+            "projectedRows": 876,
+            "projectedPaths": 876,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_49.json",
+          "end": "term_bank_52.json",
+          "rows": 40000,
+          "digest": "7cd9d27f4ef225fe38a80943ebcc9a7fc69d6b1121faff104483c90939807acf",
+          "mediaStats": {
+            "projectedRows": 813,
+            "projectedPaths": 813,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_53.json",
+          "end": "term_bank_56.json",
+          "rows": 40000,
+          "digest": "94c2e8bf2bcf9d9062fa2587202e8d5b85451d8b52071b21528a746bb6fd076a",
+          "mediaStats": {
+            "projectedRows": 839,
+            "projectedPaths": 839,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_57.json",
+          "end": "term_bank_60.json",
+          "rows": 40000,
+          "digest": "ab8ff514af993b156a24ec509f734f63ff022ff226811fffc0f442b688e1fde2",
+          "mediaStats": {
+            "projectedRows": 930,
+            "projectedPaths": 930,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_61.json",
+          "end": "term_bank_64.json",
+          "rows": 40000,
+          "digest": "3f1e51099a047bccaa69b1f52a893c5960b3f48579e6464460fe8828e4281cb8",
+          "mediaStats": {
+            "projectedRows": 873,
+            "projectedPaths": 873,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_65.json",
+          "end": "term_bank_68.json",
+          "rows": 40000,
+          "digest": "2382575c3e07680390f97b9980b102993fa8563640e7e97250afe0817f3bea43",
+          "mediaStats": {
+            "projectedRows": 810,
+            "projectedPaths": 810,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_69.json",
+          "end": "term_bank_72.json",
+          "rows": 40000,
+          "digest": "024315fc21ef65feca16bddd6169714d06d48cebb328aeee4932f8c613c7f798",
+          "mediaStats": {
+            "projectedRows": 1053,
+            "projectedPaths": 1053,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_73.json",
+          "end": "term_bank_76.json",
+          "rows": 40000,
+          "digest": "44c9d7b6042d2f793c71fb7daecfad2b4704f4abe3b2d0a070fc2c4dccc514d8",
+          "mediaStats": {
+            "projectedRows": 938,
+            "projectedPaths": 938,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_77.json",
+          "end": "term_bank_80.json",
+          "rows": 40000,
+          "digest": "001856e788919035e0119f6a8be44887dcf825294d663deeddb1ba3a9a5e4146",
+          "mediaStats": {
+            "projectedRows": 900,
+            "projectedPaths": 900,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_81.json",
+          "end": "term_bank_84.json",
+          "rows": 40000,
+          "digest": "2cab9795234f28e936d8e41f5473ff42765822d3d6bee3d52c81ab97160174d8",
+          "mediaStats": {
+            "projectedRows": 884,
+            "projectedPaths": 884,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_85.json",
+          "end": "term_bank_88.json",
+          "rows": 40000,
+          "digest": "cb332575080f6715bd74491daba50e82dfd3a71b317f122153c7ec859411bea7",
+          "mediaStats": {
+            "projectedRows": 840,
+            "projectedPaths": 840,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_89.json",
+          "end": "term_bank_92.json",
+          "rows": 40000,
+          "digest": "fdc3ec53bbb3b9877bf0e56da9d606c77256ef4e0c13f5e061f5fe3c263af84a",
+          "mediaStats": {
+            "projectedRows": 797,
+            "projectedPaths": 797,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_93.json",
+          "end": "term_bank_96.json",
+          "rows": 40000,
+          "digest": "6d336bbc8cb559b6cb2791598f2f5403202c0dc9177d4c4b4f23570a40fc05dc",
+          "mediaStats": {
+            "projectedRows": 871,
+            "projectedPaths": 871,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_97.json",
+          "end": "term_bank_100.json",
+          "rows": 40000,
+          "digest": "09c77b6bfbb807e0d3eb7ce9b1b2156e4c973d21025440455d313fc134d538b2",
+          "mediaStats": {
+            "projectedRows": 803,
+            "projectedPaths": 803,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_101.json",
+          "end": "term_bank_104.json",
+          "rows": 40000,
+          "digest": "47130463a1f41a51ee8e1ad7b16a18309e292e7a4afcc52c417b31e8154024c3",
+          "mediaStats": {
+            "projectedRows": 802,
+            "projectedPaths": 802,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_105.json",
+          "end": "term_bank_108.json",
+          "rows": 40000,
+          "digest": "ac23331524705edfa60d6b3480a2d2f999f2963195d4f4734a0399bfe95c0d00",
+          "mediaStats": {
+            "projectedRows": 782,
+            "projectedPaths": 782,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_109.json",
+          "end": "term_bank_112.json",
+          "rows": 40000,
+          "digest": "7aabb91fad3401c1e2e4041f606c20bb2ef09d7dfc8c1347a8062d61fc8b8cdd",
+          "mediaStats": {
+            "projectedRows": 722,
+            "projectedPaths": 722,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_113.json",
+          "end": "term_bank_116.json",
+          "rows": 40000,
+          "digest": "94e021e3717d5f7125b9d61a833c4e982bc193185c8a56e2f70368794624bcfa",
+          "mediaStats": {
+            "projectedRows": 802,
+            "projectedPaths": 802,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_117.json",
+          "end": "term_bank_120.json",
+          "rows": 40000,
+          "digest": "abf26e944bc4ad9bc8805d3b11e4439879b6a76f713059f392985bece63e29ce",
+          "mediaStats": {
+            "projectedRows": 944,
+            "projectedPaths": 944,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_121.json",
+          "end": "term_bank_124.json",
+          "rows": 40000,
+          "digest": "80a8696046321580854b161958291be4fb17ac08f6eb28fda50a5f5b76a78270",
+          "mediaStats": {
+            "projectedRows": 885,
+            "projectedPaths": 885,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_125.json",
+          "end": "term_bank_128.json",
+          "rows": 40000,
+          "digest": "db36511d83d650aced4e174fa6cc3c0f9d33116f1b0ceaad8a4d9f5b8c1bce21",
+          "mediaStats": {
+            "projectedRows": 805,
+            "projectedPaths": 805,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_129.json",
+          "end": "term_bank_132.json",
+          "rows": 40000,
+          "digest": "7b38b3f8f289e25bae818cbe7d0033fb44d802d07273d112c91a0be47b9eeeeb",
+          "mediaStats": {
+            "projectedRows": 850,
+            "projectedPaths": 850,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_133.json",
+          "end": "term_bank_136.json",
+          "rows": 40000,
+          "digest": "bd1d1188b50f016eb1dfb9bbde22dd850c24486ddb310e60e603aad52844cdae",
+          "mediaStats": {
+            "projectedRows": 809,
+            "projectedPaths": 809,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_137.json",
+          "end": "term_bank_140.json",
+          "rows": 40000,
+          "digest": "c07742d2a0819ae8170665b522055d0aa2a5335afdad72f330c7066306790449",
+          "mediaStats": {
+            "projectedRows": 949,
+            "projectedPaths": 949,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_141.json",
+          "end": "term_bank_144.json",
+          "rows": 40000,
+          "digest": "76192756998d3fcb301331bcedd6fbfdc523af519f00e654b9515eab774acb55",
+          "mediaStats": {
+            "projectedRows": 873,
+            "projectedPaths": 873,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_145.json",
+          "end": "term_bank_148.json",
+          "rows": 40000,
+          "digest": "2b32cb3c3242f604c73143e99c247f60b15e25f764f1ae3c06b39bfe46cb0fd7",
+          "mediaStats": {
+            "projectedRows": 870,
+            "projectedPaths": 870,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_149.json",
+          "end": "term_bank_152.json",
+          "rows": 40000,
+          "digest": "3f98fd4003f56892573911669b540b3d181731559728eab100c9f11d94dd9d0e",
+          "mediaStats": {
+            "projectedRows": 844,
+            "projectedPaths": 844,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_153.json",
+          "end": "term_bank_156.json",
+          "rows": 40000,
+          "digest": "d0266a87017f245caee63741e15dfbdd99df090c978c0a2367e0afe21f46f9ab",
+          "mediaStats": {
+            "projectedRows": 812,
+            "projectedPaths": 812,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_157.json",
+          "end": "term_bank_160.json",
+          "rows": 40000,
+          "digest": "ec41d830838e09540f4bb87fe552e1d1dceb91619649bec8aadd4bc563c88cd2",
+          "mediaStats": {
+            "projectedRows": 841,
+            "projectedPaths": 841,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_161.json",
+          "end": "term_bank_164.json",
+          "rows": 40000,
+          "digest": "64610d1ac94982a2746e90d36e3755913edef14acc5584e298eab1900b2bbf2f",
+          "mediaStats": {
+            "projectedRows": 847,
+            "projectedPaths": 847,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_165.json",
+          "end": "term_bank_168.json",
+          "rows": 40000,
+          "digest": "b0f8b194ae2af9fef4b353c031d12b77a8e3c2caab15ff70bd1c53e7f33f6741",
+          "mediaStats": {
+            "projectedRows": 846,
+            "projectedPaths": 846,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_169.json",
+          "end": "term_bank_172.json",
+          "rows": 40000,
+          "digest": "b72880f27579cc441cd3136a38c23ee4186e1d95c1c12ec347f66d333dbf35df",
+          "mediaStats": {
+            "projectedRows": 845,
+            "projectedPaths": 845,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_173.json",
+          "end": "term_bank_176.json",
+          "rows": 40000,
+          "digest": "e219e1920acb3fbcd6c5ab2bb193ef1f89e339745992b27084c77d39ab978cba",
+          "mediaStats": {
+            "projectedRows": 891,
+            "projectedPaths": 891,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_177.json",
+          "end": "term_bank_180.json",
+          "rows": 40000,
+          "digest": "787757ae2e2ac4bacbd34214a8d868ac83ae3ef9691ae68a13a8c1b29caac372",
+          "mediaStats": {
+            "projectedRows": 825,
+            "projectedPaths": 825,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_181.json",
+          "end": "term_bank_184.json",
+          "rows": 40000,
+          "digest": "2ec6bf73fc7a6f23583c5cb869593bc8eee604a260fdbacdf6164662130aa87b",
+          "mediaStats": {
+            "projectedRows": 953,
+            "projectedPaths": 953,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_185.json",
+          "end": "term_bank_188.json",
+          "rows": 40000,
+          "digest": "766dcf80160bd8f4d4bd0b7e69d8e19b9a715bcb9e7002ea704daa86b9528ada",
+          "mediaStats": {
+            "projectedRows": 801,
+            "projectedPaths": 801,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_189.json",
+          "end": "term_bank_192.json",
+          "rows": 40000,
+          "digest": "2ef84a85f2d948ccea1fa2d289eff50d1ff8117165fab9200ec0158ab3d72221",
+          "mediaStats": {
+            "projectedRows": 864,
+            "projectedPaths": 864,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_193.json",
+          "end": "term_bank_196.json",
+          "rows": 40000,
+          "digest": "4e6c2c3b5fbde48ffb30715e61c2c3bcd69a8b4a669f0988c91b6c23ac4a43e1",
+          "mediaStats": {
+            "projectedRows": 832,
+            "projectedPaths": 832,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_197.json",
+          "end": "term_bank_200.json",
+          "rows": 40000,
+          "digest": "7e33d089ff6ff62da078b55b6e9e198f8be73fa90dbd01e401cec55453db004f",
+          "mediaStats": {
+            "projectedRows": 890,
+            "projectedPaths": 890,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_201.json",
+          "end": "term_bank_204.json",
+          "rows": 40000,
+          "digest": "991993aa62408fbf8cce5a9139ea9474d98579b46676ba1c6127039beccdf61b",
+          "mediaStats": {
+            "projectedRows": 882,
+            "projectedPaths": 882,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_205.json",
+          "end": "term_bank_208.json",
+          "rows": 40000,
+          "digest": "d416d268d91685cc33fe3e2945b3dbe939eed0e8b749e063f17d59b607d58927",
+          "mediaStats": {
+            "projectedRows": 890,
+            "projectedPaths": 890,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_209.json",
+          "end": "term_bank_212.json",
+          "rows": 40000,
+          "digest": "93f46c1ed5a47631417d468662348ccb7e098870bb7782510959849b4bb4e732",
+          "mediaStats": {
+            "projectedRows": 795,
+            "projectedPaths": 795,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_213.json",
+          "end": "term_bank_216.json",
+          "rows": 40000,
+          "digest": "0623ad91c2c13f86c9c279b48e71d43d231a53ca359138194a3dd41f2d0f7c3a",
+          "mediaStats": {
+            "projectedRows": 786,
+            "projectedPaths": 786,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_217.json",
+          "end": "term_bank_220.json",
+          "rows": 40000,
+          "digest": "99e2feed42c711c7e335bd2fd32b1d27f37fee084c276db8e35fe6075c33b0fc",
+          "mediaStats": {
+            "projectedRows": 795,
+            "projectedPaths": 795,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_221.json",
+          "end": "term_bank_224.json",
+          "rows": 40000,
+          "digest": "73b6fb584c568c7b6f916f31aebfc43e7b58fcc9b7d659d34f0ce21bb9c70b2b",
+          "mediaStats": {
+            "projectedRows": 774,
+            "projectedPaths": 774,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_225.json",
+          "end": "term_bank_228.json",
+          "rows": 40000,
+          "digest": "74b01c50b8e19f6b6c66d370bdcc5bed8c67eb9a3b72934c16ff355dfd73dd26",
+          "mediaStats": {
+            "projectedRows": 812,
+            "projectedPaths": 812,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_229.json",
+          "end": "term_bank_232.json",
+          "rows": 40000,
+          "digest": "c26795dd510ce018b7efa8100eac94c8a11f56b0cb55cbfbbb5d85c24dd4dc63",
+          "mediaStats": {
+            "projectedRows": 824,
+            "projectedPaths": 824,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_233.json",
+          "end": "term_bank_236.json",
+          "rows": 40000,
+          "digest": "cdadf0a4c05e8736091b130b5b3f48af1823a46aa2eb1dbff6e4e8ef3071e831",
+          "mediaStats": {
+            "projectedRows": 886,
+            "projectedPaths": 886,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_237.json",
+          "end": "term_bank_240.json",
+          "rows": 40000,
+          "digest": "040f5c4cd3d6b3fb4b2f2cbaf70ba8aae1143d8a3ce62033cd5d811cd4ecac7b",
+          "mediaStats": {
+            "projectedRows": 898,
+            "projectedPaths": 898,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_241.json",
+          "end": "term_bank_244.json",
+          "rows": 40000,
+          "digest": "238f742881fcee267dc0c01c1b014d0c44539b6a4a395c9775a5fb519d066c84",
+          "mediaStats": {
+            "projectedRows": 914,
+            "projectedPaths": 914,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_245.json",
+          "end": "term_bank_248.json",
+          "rows": 40000,
+          "digest": "9d9cfa68d0ca51e26143e61c2f6363778609fa4f25e9c42759c9bf96047ec1a3",
+          "mediaStats": {
+            "projectedRows": 830,
+            "projectedPaths": 830,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_249.json",
+          "end": "term_bank_252.json",
+          "rows": 40000,
+          "digest": "d3c544a55ecfac1555b2a22221f273a9b6b06989b9f89b376859aac3a1a7ae97",
+          "mediaStats": {
+            "projectedRows": 857,
+            "projectedPaths": 857,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_253.json",
+          "end": "term_bank_256.json",
+          "rows": 40000,
+          "digest": "cd16e4367e1881d2a5a73171afb8ceb4da5f2bfd775ed70ae772182b04bb8e7f",
+          "mediaStats": {
+            "projectedRows": 786,
+            "projectedPaths": 786,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_257.json",
+          "end": "term_bank_260.json",
+          "rows": 40000,
+          "digest": "deabd67c905f4720bbf7a12dcdb92a7a18a243f463dd7dcfb36ee3e71f0859b1",
+          "mediaStats": {
+            "projectedRows": 839,
+            "projectedPaths": 839,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_261.json",
+          "end": "term_bank_264.json",
+          "rows": 40000,
+          "digest": "a0ea328357ad5f4017d4c9b58a3f72c63fe339c73a8cf4c845e6e651862da170",
+          "mediaStats": {
+            "projectedRows": 815,
+            "projectedPaths": 815,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_265.json",
+          "end": "term_bank_268.json",
+          "rows": 40000,
+          "digest": "edf9099e7f2b37b95f5f68c1aafd4cd19e08921ecd142b21862aa16624fe7bcc",
+          "mediaStats": {
+            "projectedRows": 827,
+            "projectedPaths": 827,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_269.json",
+          "end": "term_bank_272.json",
+          "rows": 40000,
+          "digest": "4377ba30aa70bd1021d41f9b85b6739e0bec5bcb7a297688f44ac4aac99ebe36",
+          "mediaStats": {
+            "projectedRows": 818,
+            "projectedPaths": 818,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_273.json",
+          "end": "term_bank_276.json",
+          "rows": 40000,
+          "digest": "e8ccc9d06e128745f9694753e3d048af44bac0402f26548caabaf2093c8276be",
+          "mediaStats": {
+            "projectedRows": 854,
+            "projectedPaths": 854,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_277.json",
+          "end": "term_bank_280.json",
+          "rows": 40000,
+          "digest": "400c38947be6208444a520b465c9544fd315f3d785ba8820a85f1cb48448b3d2",
+          "mediaStats": {
+            "projectedRows": 775,
+            "projectedPaths": 775,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_281.json",
+          "end": "term_bank_284.json",
+          "rows": 40000,
+          "digest": "33ad242c142b47138f329e08382fccf2e1d23290e1fdb958c23437302de86efa",
+          "mediaStats": {
+            "projectedRows": 888,
+            "projectedPaths": 888,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_285.json",
+          "end": "term_bank_288.json",
+          "rows": 40000,
+          "digest": "720be4b2265e7f1f929ec39a30f275ab2c44023524ee474b00ecd0e8b4918eca",
+          "mediaStats": {
+            "projectedRows": 770,
+            "projectedPaths": 770,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_289.json",
+          "end": "term_bank_292.json",
+          "rows": 40000,
+          "digest": "d65201479a78d4c25b0b93e6215ef5c72dd11832786225ced77217e50c01cd6f",
+          "mediaStats": {
+            "projectedRows": 792,
+            "projectedPaths": 792,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_293.json",
+          "end": "term_bank_296.json",
+          "rows": 40000,
+          "digest": "192044b5f3f44e5172fb864bcc06c050fac64cec6e22d705d4b3827e1f7abbda",
+          "mediaStats": {
+            "projectedRows": 814,
+            "projectedPaths": 814,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_297.json",
+          "end": "term_bank_300.json",
+          "rows": 40000,
+          "digest": "db40453910dbf845c932f688b1f9c72fab37dafa8d66e119d0c4b4d87ae71d5b",
+          "mediaStats": {
+            "projectedRows": 805,
+            "projectedPaths": 805,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_301.json",
+          "end": "term_bank_304.json",
+          "rows": 40000,
+          "digest": "bcedfcc01396f4ed11966f76bab47c4d647134a68086ea1649d5278a2b406a5d",
+          "mediaStats": {
+            "projectedRows": 780,
+            "projectedPaths": 780,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_305.json",
+          "end": "term_bank_308.json",
+          "rows": 40000,
+          "digest": "dc80d78eb47e3fa67b5d98291e2d693f636a8d1ccb1fb606c311b59991c76d78",
+          "mediaStats": {
+            "projectedRows": 841,
+            "projectedPaths": 841,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_309.json",
+          "end": "term_bank_312.json",
+          "rows": 40000,
+          "digest": "806d9e9cb6d9fe9b6391001d0283dc2e8bd501b0ce326fa4325bfa4f68ed4d2a",
+          "mediaStats": {
+            "projectedRows": 758,
+            "projectedPaths": 758,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_313.json",
+          "end": "term_bank_316.json",
+          "rows": 40000,
+          "digest": "5bdf11f703e7be6b824493194d07c5150b9fc04a35a4ad96e4e617c1ce3f72de",
+          "mediaStats": {
+            "projectedRows": 904,
+            "projectedPaths": 904,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_317.json",
+          "end": "term_bank_320.json",
+          "rows": 40000,
+          "digest": "5a10edc6d63e6229e442d9f08dcf7721f39ed064b0e1511ff932efd74bdccac6",
+          "mediaStats": {
+            "projectedRows": 855,
+            "projectedPaths": 855,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_321.json",
+          "end": "term_bank_324.json",
+          "rows": 40000,
+          "digest": "17e67705bcc470a2b739effb87aa4696ab0b060cd8297402c421abf832d1c506",
+          "mediaStats": {
+            "projectedRows": 815,
+            "projectedPaths": 815,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_325.json",
+          "end": "term_bank_328.json",
+          "rows": 40000,
+          "digest": "f34702fd48d4c6c9cb78b876824f3cb155389b96d5daaefe3b11f634f8c70af6",
+          "mediaStats": {
+            "projectedRows": 867,
+            "projectedPaths": 867,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_329.json",
+          "end": "term_bank_332.json",
+          "rows": 40000,
+          "digest": "aba0adbc5cff4e1028c01c7f78c7e70bea8c667f54fa07c487d17c029e81e190",
+          "mediaStats": {
+            "projectedRows": 853,
+            "projectedPaths": 853,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_333.json",
+          "end": "term_bank_336.json",
+          "rows": 40000,
+          "digest": "3472d1585a3b8e96afe7cbc6077bce5804017c5bdf51e27354d342b613ac8a4a",
+          "mediaStats": {
+            "projectedRows": 941,
+            "projectedPaths": 941,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_337.json",
+          "end": "term_bank_340.json",
+          "rows": 40000,
+          "digest": "0ff49616bb696f837de401edca638554a2553cf59e6d01cba68fb19c57bbfbb4",
+          "mediaStats": {
+            "projectedRows": 810,
+            "projectedPaths": 810,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_341.json",
+          "end": "term_bank_344.json",
+          "rows": 40000,
+          "digest": "1ade9cbb0616f57c1b7907686274d238f281dd077d2009c16e3af60d2fed63bc",
+          "mediaStats": {
+            "projectedRows": 830,
+            "projectedPaths": 830,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_345.json",
+          "end": "term_bank_348.json",
+          "rows": 40000,
+          "digest": "5e0bbfa30452bd01f30c63ac51ceb0317f9a0a67c7743a8018dd0041620a1a2e",
+          "mediaStats": {
+            "projectedRows": 791,
+            "projectedPaths": 791,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_349.json",
+          "end": "term_bank_352.json",
+          "rows": 40000,
+          "digest": "0ed6247e4d7796b4443e972ab2d758642a3eb0f17baf83534d07174cab382185",
+          "mediaStats": {
+            "projectedRows": 823,
+            "projectedPaths": 823,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_353.json",
+          "end": "term_bank_356.json",
+          "rows": 40000,
+          "digest": "fec427a4ce264a39b8961bc007bf6b3bf9b87c4fc4100be96c07453254e6355c",
+          "mediaStats": {
+            "projectedRows": 904,
+            "projectedPaths": 904,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_357.json",
+          "end": "term_bank_360.json",
+          "rows": 40000,
+          "digest": "c4d97d15b5e20f4d4ef1c2f4365dac7cadf640fc88d77cad49b72415b734c86d",
+          "mediaStats": {
+            "projectedRows": 959,
+            "projectedPaths": 959,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_361.json",
+          "end": "term_bank_364.json",
+          "rows": 40000,
+          "digest": "1c6a8bc7461cc0c814d3d951e4abbc02072f9b08002131563f584240932758ea",
+          "mediaStats": {
+            "projectedRows": 837,
+            "projectedPaths": 837,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_365.json",
+          "end": "term_bank_368.json",
+          "rows": 40000,
+          "digest": "022bbff66c7ef99ccba04caa17fe9a42b9b78447e4d5c483c91c6ec792986fa2",
+          "mediaStats": {
+            "projectedRows": 913,
+            "projectedPaths": 913,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_369.json",
+          "end": "term_bank_372.json",
+          "rows": 40000,
+          "digest": "93b8ed2c05753764ef480f47837f0115c8b807ea1e607a5c4c905aa1751f9fa6",
+          "mediaStats": {
+            "projectedRows": 913,
+            "projectedPaths": 913,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_373.json",
+          "end": "term_bank_376.json",
+          "rows": 40000,
+          "digest": "14bea27d3e1188f33cb481e17b7699601c2324af74905270547d5b8c5c598bba",
+          "mediaStats": {
+            "projectedRows": 900,
+            "projectedPaths": 900,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_377.json",
+          "end": "term_bank_380.json",
+          "rows": 40000,
+          "digest": "beaafd9a1e78de0343b1bd0be50bf5a8769b71aaa4d2fe614f47a2c809432070",
+          "mediaStats": {
+            "projectedRows": 816,
+            "projectedPaths": 816,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_381.json",
+          "end": "term_bank_384.json",
+          "rows": 40000,
+          "digest": "793ba8cfba99dacca9dd840e38a857c8e8f6505ed8ca6aae7aad37710e8567b4",
+          "mediaStats": {
+            "projectedRows": 840,
+            "projectedPaths": 840,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_385.json",
+          "end": "term_bank_388.json",
+          "rows": 40000,
+          "digest": "440994fb6e66540e809a4d2994edad2c55bd51b466db7503272d7f5e03d28625",
+          "mediaStats": {
+            "projectedRows": 833,
+            "projectedPaths": 833,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_389.json",
+          "end": "term_bank_392.json",
+          "rows": 40000,
+          "digest": "c4ff8979ed6cfd7b676f1aa41060f6fbeba73557fd4ac1e2792a78db8c541931",
+          "mediaStats": {
+            "projectedRows": 882,
+            "projectedPaths": 882,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_393.json",
+          "end": "term_bank_396.json",
+          "rows": 40000,
+          "digest": "8db1a80323e3791d4cc6ba263c25a79591f78b32fd57d3f45eb86739109873f7",
+          "mediaStats": {
+            "projectedRows": 1040,
+            "projectedPaths": 1040,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_397.json",
+          "end": "term_bank_400.json",
+          "rows": 40000,
+          "digest": "7a279155acef2303d576c7105e010a8a33845b63af377b802fd412cde25c4316",
+          "mediaStats": {
+            "projectedRows": 879,
+            "projectedPaths": 879,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_401.json",
+          "end": "term_bank_404.json",
+          "rows": 40000,
+          "digest": "55fd0b174e0d3790c0bd0103faf738341beaa01ae7e3169c8077a97003dcdb6a",
+          "mediaStats": {
+            "projectedRows": 856,
+            "projectedPaths": 856,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_405.json",
+          "end": "term_bank_408.json",
+          "rows": 40000,
+          "digest": "27a882767030dd388f2aa7799776cc4ede4e4d2c89c0a7f6bcad05bd9780de7b",
+          "mediaStats": {
+            "projectedRows": 850,
+            "projectedPaths": 850,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_409.json",
+          "end": "term_bank_412.json",
+          "rows": 40000,
+          "digest": "a4da52f3fd06c20b1b71120520fda903a21e904ab0e1c687fd267fc7ab16a04c",
+          "mediaStats": {
+            "projectedRows": 874,
+            "projectedPaths": 874,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_413.json",
+          "end": "term_bank_416.json",
+          "rows": 40000,
+          "digest": "2a93e6bf1f2b96b2c5e7e930397ed62f8c742f542fe5c0880abce6a177ea8a41",
+          "mediaStats": {
+            "projectedRows": 974,
+            "projectedPaths": 974,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_417.json",
+          "end": "term_bank_420.json",
+          "rows": 40000,
+          "digest": "2ff5c534ff320a0d6fccde1fdc294147ab229a5e8768d8ccf92fb183fa4dbdd7",
+          "mediaStats": {
+            "projectedRows": 926,
+            "projectedPaths": 926,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_421.json",
+          "end": "term_bank_424.json",
+          "rows": 40000,
+          "digest": "b6e37a1e1fab007c593f8e58f3050eb74c50f8f3cebe33c2741fff63a4ee69e7",
+          "mediaStats": {
+            "projectedRows": 967,
+            "projectedPaths": 967,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_425.json",
+          "end": "term_bank_428.json",
+          "rows": 40000,
+          "digest": "df1f73a0361f2b496db41ed9a5d4d36ce78dcb66d6d17f637c7980b2c9db6011",
+          "mediaStats": {
+            "projectedRows": 1039,
+            "projectedPaths": 1039,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_429.json",
+          "end": "term_bank_432.json",
+          "rows": 40000,
+          "digest": "a40fc81872511b6b66aebedcb4b7812ff7b86a0c20dbe3d402c19ae15ba6bb8c",
+          "mediaStats": {
+            "projectedRows": 1022,
+            "projectedPaths": 1022,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_433.json",
+          "end": "term_bank_436.json",
+          "rows": 40000,
+          "digest": "79f52c318fb6931819b8568563994f327b8e1be9a3e3e1dd622ab585acae1266",
+          "mediaStats": {
+            "projectedRows": 950,
+            "projectedPaths": 950,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_437.json",
+          "end": "term_bank_440.json",
+          "rows": 40000,
+          "digest": "0678c6c3e552add81a8ddb4ff53edcd3caa2d619556f10279de9b905442fc46c",
+          "mediaStats": {
+            "projectedRows": 905,
+            "projectedPaths": 905,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_441.json",
+          "end": "term_bank_444.json",
+          "rows": 40000,
+          "digest": "7b190b185e1e85486c56f9b7eb899e3b97b273fa1ce181e018e2cf8b2bce79d2",
+          "mediaStats": {
+            "projectedRows": 810,
+            "projectedPaths": 810,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_445.json",
+          "end": "term_bank_448.json",
+          "rows": 40000,
+          "digest": "d71b8b95be21787a63b828c19c33699f64c0b1dcde794d9f30f13146a5ff2de0",
+          "mediaStats": {
+            "projectedRows": 969,
+            "projectedPaths": 969,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_449.json",
+          "end": "term_bank_452.json",
+          "rows": 40000,
+          "digest": "e2e130644bda4cdba0c42700368c8967cdd0f6c7f88939d807998e080565b1b7",
+          "mediaStats": {
+            "projectedRows": 811,
+            "projectedPaths": 811,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_453.json",
+          "end": "term_bank_456.json",
+          "rows": 40000,
+          "digest": "d4705398fc5d7c66aa6e9270f9a2b577a2fd777878867071c134b5e4bbbca99d",
+          "mediaStats": {
+            "projectedRows": 1002,
+            "projectedPaths": 1002,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_457.json",
+          "end": "term_bank_460.json",
+          "rows": 40000,
+          "digest": "466b6c3f41c89d6982568a6441f6340be4da204a23b3adcc1258a5f5008bd4e8",
+          "mediaStats": {
+            "projectedRows": 889,
+            "projectedPaths": 889,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_461.json",
+          "end": "term_bank_464.json",
+          "rows": 40000,
+          "digest": "229ddcc95705225bb47695a495c17c18d5d8aae7b96a51e122d46cf92ea58ed1",
+          "mediaStats": {
+            "projectedRows": 914,
+            "projectedPaths": 914,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_465.json",
+          "end": "term_bank_468.json",
+          "rows": 40000,
+          "digest": "33e3d5388d8a19612a2e15cfef2858f1b512cca8b791d6b2fbf32024482b9606",
+          "mediaStats": {
+            "projectedRows": 828,
+            "projectedPaths": 828,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_469.json",
+          "end": "term_bank_472.json",
+          "rows": 40000,
+          "digest": "ef19290bb30c7348d28f0c7327a608283672f9d1a7c79045a9d042c59e08eba5",
+          "mediaStats": {
+            "projectedRows": 833,
+            "projectedPaths": 833,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_473.json",
+          "end": "term_bank_476.json",
+          "rows": 40000,
+          "digest": "32760cb7f124fd9c55422d961c31a0f83ac811f9836939adc0f302d6772c379a",
+          "mediaStats": {
+            "projectedRows": 916,
+            "projectedPaths": 916,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_477.json",
+          "end": "term_bank_480.json",
+          "rows": 40000,
+          "digest": "1ab3aa731076c40d63d4a480789d3d81da09adc4893fbb773f04061a9075224a",
+          "mediaStats": {
+            "projectedRows": 847,
+            "projectedPaths": 847,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_481.json",
+          "end": "term_bank_484.json",
+          "rows": 40000,
+          "digest": "523ebc76f0331caced4555fb2c1bdb0516461569cbae6adbea49c8487066e58a",
+          "mediaStats": {
+            "projectedRows": 879,
+            "projectedPaths": 879,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_485.json",
+          "end": "term_bank_488.json",
+          "rows": 40000,
+          "digest": "439d72fd75d47950f5cb61137995cb19cd0e3aa267650b6778cd973db8dae56d",
+          "mediaStats": {
+            "projectedRows": 740,
+            "projectedPaths": 740,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_489.json",
+          "end": "term_bank_492.json",
+          "rows": 40000,
+          "digest": "af9b0f2671fa51574d7839f89c0249aa1f5f3caf2b4b71f91af2dafeeb10232f",
+          "mediaStats": {
+            "projectedRows": 1078,
+            "projectedPaths": 1078,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_493.json",
+          "end": "term_bank_496.json",
+          "rows": 40000,
+          "digest": "a5ba60b567dfc11861ec6fc1ff7d3cd4a1c5161754db74a8fb2648525f24e8f9",
+          "mediaStats": {
+            "projectedRows": 764,
+            "projectedPaths": 764,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_497.json",
+          "end": "term_bank_500.json",
+          "rows": 40000,
+          "digest": "c753984328c7650ffa3ea81adb7d6a57c43759e075e1be87baccf822ff891efb",
+          "mediaStats": {
+            "projectedRows": 648,
+            "projectedPaths": 648,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_501.json",
+          "end": "term_bank_504.json",
+          "rows": 40000,
+          "digest": "fa7b0e25a9d44a6fc3913022609b1628c9f48948197c275a7fee44ff610e8d5b",
+          "mediaStats": {
+            "projectedRows": 741,
+            "projectedPaths": 741,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_505.json",
+          "end": "term_bank_508.json",
+          "rows": 40000,
+          "digest": "1224ead762625169e5b6f65983530eb38186792f4e68ebc716141b6149b7e5b8",
+          "mediaStats": {
+            "projectedRows": 719,
+            "projectedPaths": 719,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_509.json",
+          "end": "term_bank_512.json",
+          "rows": 40000,
+          "digest": "a37c5b6173b99c68ee88342be8ea67f79f8f9073ab118886b58802a71f38e160",
+          "mediaStats": {
+            "projectedRows": 727,
+            "projectedPaths": 727,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_513.json",
+          "end": "term_bank_516.json",
+          "rows": 40000,
+          "digest": "84bb73aac51c758da0e122d9e2bbc2ec45f23f4f6bdd089936f6806db8948eda",
+          "mediaStats": {
+            "projectedRows": 754,
+            "projectedPaths": 754,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_517.json",
+          "end": "term_bank_520.json",
+          "rows": 40000,
+          "digest": "585628f95c01732f64a06f9111a295ffd60ee15c62b95c9d03ec5569bd506105",
+          "mediaStats": {
+            "projectedRows": 858,
+            "projectedPaths": 858,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_521.json",
+          "end": "term_bank_524.json",
+          "rows": 40000,
+          "digest": "b81ce9631d2ee93b99dd90b763b2ca31d497fc7ddee3cff157fb4194767c72f4",
+          "mediaStats": {
+            "projectedRows": 763,
+            "projectedPaths": 763,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_525.json",
+          "end": "term_bank_528.json",
+          "rows": 40000,
+          "digest": "e666c6be439cd16592f40e46340bc768b5aeddec6a1f201dbe5f4b75d157608c",
+          "mediaStats": {
+            "projectedRows": 799,
+            "projectedPaths": 799,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_529.json",
+          "end": "term_bank_532.json",
+          "rows": 40000,
+          "digest": "61fe18e59aed59550660502ac0fed13cb4c90253ded5b53e9767a7f6361db6e5",
+          "mediaStats": {
+            "projectedRows": 798,
+            "projectedPaths": 798,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_533.json",
+          "end": "term_bank_536.json",
+          "rows": 40000,
+          "digest": "74e7250762796dce7fd9eeea2bd53b77cbc8e992fba0036bcb6775c24bd09071",
+          "mediaStats": {
+            "projectedRows": 902,
+            "projectedPaths": 902,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_537.json",
+          "end": "term_bank_540.json",
+          "rows": 40000,
+          "digest": "3e900c4620f744e7748e762be8277b5437806a1f9c8ec8e0f8878b7daebcc87f",
+          "mediaStats": {
+            "projectedRows": 847,
+            "projectedPaths": 847,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_541.json",
+          "end": "term_bank_544.json",
+          "rows": 40000,
+          "digest": "91c2052e68325b810183326f40becb8d2863d1d1ae78fd86dc103fbf4d7d061c",
+          "mediaStats": {
+            "projectedRows": 932,
+            "projectedPaths": 932,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_545.json",
+          "end": "term_bank_548.json",
+          "rows": 40000,
+          "digest": "65f3dd87da5fec3120825851766f1ec2e65ca2cf73af6e7275a2856bac79e988",
+          "mediaStats": {
+            "projectedRows": 945,
+            "projectedPaths": 945,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_549.json",
+          "end": "term_bank_552.json",
+          "rows": 40000,
+          "digest": "6fd6d2d31d118780c14ad460925d352262ce8f901d995357bd84255e3a860857",
+          "mediaStats": {
+            "projectedRows": 999,
+            "projectedPaths": 999,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_553.json",
+          "end": "term_bank_556.json",
+          "rows": 40000,
+          "digest": "94e94fb313f528437249000faf31d04ed9cd2916c1f92253ca54c63690d35602",
+          "mediaStats": {
+            "projectedRows": 872,
+            "projectedPaths": 872,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_557.json",
+          "end": "term_bank_560.json",
+          "rows": 40000,
+          "digest": "c5f64de5f0251ec1aecd0c80613b5bd15cac3f4e0ba4bc5a4bb58dd033fc8c4f",
+          "mediaStats": {
+            "projectedRows": 998,
+            "projectedPaths": 998,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_561.json",
+          "end": "term_bank_564.json",
+          "rows": 40000,
+          "digest": "855217f836d026d945cbccab655be1243adf41242dc1536bdf383da3731acbf6",
+          "mediaStats": {
+            "projectedRows": 764,
+            "projectedPaths": 764,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_565.json",
+          "end": "term_bank_568.json",
+          "rows": 40000,
+          "digest": "55f3f0ce18e627e26e5f24133a351bd349fa9cd0d485430773836cf9ffc12784",
+          "mediaStats": {
+            "projectedRows": 1013,
+            "projectedPaths": 1013,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_569.json",
+          "end": "term_bank_572.json",
+          "rows": 40000,
+          "digest": "09811b507db8880f7d13b229ea3da1e6c8c8f4a7953f0c6b0cd579d7d84bfb70",
+          "mediaStats": {
+            "projectedRows": 1088,
+            "projectedPaths": 1088,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_573.json",
+          "end": "term_bank_576.json",
+          "rows": 40000,
+          "digest": "c8401c2e3f85f68db2c4151457620393eda5d95c21cc75a4e527016c82b2af03",
+          "mediaStats": {
+            "projectedRows": 1048,
+            "projectedPaths": 1048,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_577.json",
+          "end": "term_bank_580.json",
+          "rows": 40000,
+          "digest": "1e4c37c7a4f247261c3c536544880f1b760d4cd7c80c5dee99355df8afec856e",
+          "mediaStats": {
+            "projectedRows": 1057,
+            "projectedPaths": 1057,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_581.json",
+          "end": "term_bank_584.json",
+          "rows": 40000,
+          "digest": "e0e4c9c9f7601152ad79e500e01807f8fddfb60b46881a9e5efac70a6f8625fa",
+          "mediaStats": {
+            "projectedRows": 1022,
+            "projectedPaths": 1022,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_585.json",
+          "end": "term_bank_588.json",
+          "rows": 40000,
+          "digest": "6434e29faaf213c47ee89ca08481a86bd810bd3ee8e1f950c9923e6f6c6d0d70",
+          "mediaStats": {
+            "projectedRows": 1116,
+            "projectedPaths": 1116,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_589.json",
+          "end": "term_bank_592.json",
+          "rows": 40000,
+          "digest": "dd589caa01d174ec7c26828429106043e3a92d64bd3f3714e4d6286635baa2e7",
+          "mediaStats": {
+            "projectedRows": 1005,
+            "projectedPaths": 1005,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_593.json",
+          "end": "term_bank_596.json",
+          "rows": 40000,
+          "digest": "8a7a4604e527f4a38ff4eee5b4480729d3857e5acad1bcb60a6d31e9d7501aba",
+          "mediaStats": {
+            "projectedRows": 986,
+            "projectedPaths": 986,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_597.json",
+          "end": "term_bank_600.json",
+          "rows": 40000,
+          "digest": "a9701297073938a7667e830f8a4955c9f906777f1df08ff53d164f0fd25c807d",
+          "mediaStats": {
+            "projectedRows": 954,
+            "projectedPaths": 954,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_601.json",
+          "end": "term_bank_604.json",
+          "rows": 40000,
+          "digest": "d96193b0d643d15474e3f14eddcff3e9c6759d2c7ac2222dde0f75eea3d3b827",
+          "mediaStats": {
+            "projectedRows": 889,
+            "projectedPaths": 889,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_605.json",
+          "end": "term_bank_608.json",
+          "rows": 40000,
+          "digest": "9240258bba62cadc812a747aa406ce035b63a45b8b6cab54d9dc239e1f87ba04",
+          "mediaStats": {
+            "projectedRows": 922,
+            "projectedPaths": 922,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_609.json",
+          "end": "term_bank_612.json",
+          "rows": 40000,
+          "digest": "49c8883b6cfb7b56319d553c217a53dd75c1b8612e9549ff2433b73b7b9674b3",
+          "mediaStats": {
+            "projectedRows": 1033,
+            "projectedPaths": 1033,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_613.json",
+          "end": "term_bank_616.json",
+          "rows": 40000,
+          "digest": "a87a4998d85fedf564fe86d3f98cd97f57a8a3b779ab1eadedac30c6787114dd",
+          "mediaStats": {
+            "projectedRows": 1107,
+            "projectedPaths": 1107,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_617.json",
+          "end": "term_bank_620.json",
+          "rows": 40000,
+          "digest": "df2c558773bee0a8780ba500737f79442d4d16de9285764ec4d7904bcb8aac27",
+          "mediaStats": {
+            "projectedRows": 1101,
+            "projectedPaths": 1101,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_621.json",
+          "end": "term_bank_624.json",
+          "rows": 40000,
+          "digest": "0135b562e02d28aef67dee0466e792aec045af365420edd95604346e5f89412e",
+          "mediaStats": {
+            "projectedRows": 990,
+            "projectedPaths": 990,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_625.json",
+          "end": "term_bank_628.json",
+          "rows": 40000,
+          "digest": "9b93379d8dae57c585b062b41107e51c5cc5b7273e66831a2cdfb853cd8c2a5c",
+          "mediaStats": {
+            "projectedRows": 962,
+            "projectedPaths": 962,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_629.json",
+          "end": "term_bank_632.json",
+          "rows": 40000,
+          "digest": "83b09503f707fc934c0e6b5f75cafd4f991da7f14fba87ac147ac1b8cf430e96",
+          "mediaStats": {
+            "projectedRows": 1062,
+            "projectedPaths": 1062,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_633.json",
+          "end": "term_bank_636.json",
+          "rows": 40000,
+          "digest": "31a2161fe8df204963c9c96f4b72991b958d3dea2582365e837e280e7a259a70",
+          "mediaStats": {
+            "projectedRows": 1183,
+            "projectedPaths": 1183,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_637.json",
+          "end": "term_bank_640.json",
+          "rows": 40000,
+          "digest": "30080da16cba6d57cefcf6b6beb08b65d23639eb35e99f17d44a5b07d1fd5eed",
+          "mediaStats": {
+            "projectedRows": 979,
+            "projectedPaths": 979,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_641.json",
+          "end": "term_bank_644.json",
+          "rows": 40000,
+          "digest": "06069cc3eb93d906181658879336ecd8a34b23402651bbcc76b510de13e2f699",
+          "mediaStats": {
+            "projectedRows": 1017,
+            "projectedPaths": 1017,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_645.json",
+          "end": "term_bank_648.json",
+          "rows": 40000,
+          "digest": "f86da68453b02d26155c91ba6ce9fde67358e28dbab36a5988bb61ba9aecce17",
+          "mediaStats": {
+            "projectedRows": 1093,
+            "projectedPaths": 1093,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_649.json",
+          "end": "term_bank_652.json",
+          "rows": 40000,
+          "digest": "8cfe5b585ba19c927ce23fb663ff579bb6de7d102907dd7fb4c5f8fa3569ff06",
+          "mediaStats": {
+            "projectedRows": 1108,
+            "projectedPaths": 1108,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_653.json",
+          "end": "term_bank_656.json",
+          "rows": 40000,
+          "digest": "b1f528222f1d6a130beba1bccd1d31bb4a02b2d4103bdc110cb8f66cc24cd404",
+          "mediaStats": {
+            "projectedRows": 1072,
+            "projectedPaths": 1072,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_657.json",
+          "end": "term_bank_660.json",
+          "rows": 40000,
+          "digest": "446e719267998dd3b5e876956858b1ac8818d9d92a6d1d8dbf18fea88e1c0108",
+          "mediaStats": {
+            "projectedRows": 984,
+            "projectedPaths": 984,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_661.json",
+          "end": "term_bank_664.json",
+          "rows": 40000,
+          "digest": "2e8b7a01a588da1141877d94372a2595ef8eb1296649d3f870ec54a45ef903cb",
+          "mediaStats": {
+            "projectedRows": 1023,
+            "projectedPaths": 1023,
+            "fallbackRows": 0
+          }
+        },
+        {
+          "start": "term_bank_665.json",
+          "end": "term_bank_665.json",
+          "rows": 8310,
+          "digest": "7faced0a63397a63ab04f2f99746733bb4e20cdf542f14deb2eacbff4ed9344e",
+          "mediaStats": {
+            "projectedRows": 279,
+            "projectedPaths": 279,
+            "fallbackRows": 0
+          }
+        }
+      ],
+      "projectedRows": 146722,
+      "projectedPaths": 146722,
+      "uniqueProjectedPaths": 146570,
+      "fallbackMediaRows": 0,
+      "mediaSerializedBytes": [
+        56687937,
+        10437627
+      ],
+      "mediaObjects": [
+        {
+          "objects": 293611,
+          "arrays": 146889,
+          "views": 293560,
+          "maps": 0
+        },
+        {
+          "objects": 501,
+          "arrays": 334,
+          "views": 668,
+          "maps": 23
+        }
+      ],
+      "digest": "c2edfa1bf38dfc5b916fa986aeb0a81ff331c953f1327b39d2090b6cdeed2b47",
+      "complete": true
+    }
+  ],
+  "complete": true
+}

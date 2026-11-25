@@ -1,0 +1,10 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ RUN  v4.1.12 /workspace/scratch/8ca6d2070ae4/vndb
+
+
+ Test Files  6 passed (6)
+      Tests  380 passed (380)
+   Start at  10:03:31
+   Duration  13.85s (transform 2.78s, setup 73ms, import 4.40s, tests 8.17s, environment 1ms)
+

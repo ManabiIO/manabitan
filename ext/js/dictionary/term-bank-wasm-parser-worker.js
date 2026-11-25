@@ -158,7 +158,7 @@ async function parse(data) {
                 )
                 const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
                 /* eslint-enable @stylistic/semi */
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true);
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, true);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
@@ -270,6 +270,13 @@ function collectChunkTransferables(chunk) {
         addView(row.readingBytes);
         addView(row.glossaryJsonBytes);
         addView(row.termEntryContentBytes);
+    }
+    if (typeof chunk.projectedMedia !== 'undefined') {
+        const {rowIndexes, pathEnds, diagnosticKeys} = chunk.projectedMedia;
+        addView(rowIndexes);
+        addView(pathEnds);
+        addView(diagnosticKeys.bytes);
+        addView(diagnosticKeys.spans);
     }
     const plan = chunk.termRecordPreinternedPlan;
     addView(plan.stringLengths);

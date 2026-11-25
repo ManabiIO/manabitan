@@ -231,3 +231,27 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-25: columnar projected media transport
+
+Baseline: `7d1643e6147a10cb2165e9744cf0e63b59e46632`. Runtime candidate: `96954defb982e9d9258612514260df2b6cb160a2`. Successful parser-worker image projections now use row/path columns, flat path strings and one owned diagnostic-key arena. Fallback rows keep their existing shape and merge in original source order. The importer uses the transferred diagnostics directly. Sequential callers retain the prior media-row representation.
+
+This is a deeper alternative to PR #850's compact row objects. It removes projected row objects rather than reducing their fields. It does not change native parsing, image-path semantics, source groups, concurrency, persistent formats or compression.
+
+The [complete verifier](../../builds/perf/20261125-columnar-media/verify-corpus.mjs), [per-group results](../../builds/perf/20261125-columnar-media/corpus-parity.json), and [validation receipt](../../builds/perf/20261125-columnar-media/validation.json) retain all source/fixture hashes. Across 7,613,164 rows, 937 banks and 236 fixed four-bank groups, every content/key/lookup column and normalized projected/fallback media output matched baseline. Fixed component grouping is not production browser scheduling.
+
+| Corpus   |      Rows | Baseline media payload | Candidate media payload |
+| -------- | --------: | ---------------------: | ----------------------: |
+| JMdict   |   528,299 |           17,158 bytes |            17,158 bytes |
+| Jitendex |   436,555 |          212,489 bytes |           114,441 bytes |
+| VNDB     | 6,648,310 |       56,687,937 bytes |        10,437,627 bytes |
+
+The payload sizes are sums from Node's V8 serializer, not browser wire bytes or total import memory. VNDB retains 146,722 projected references and all 146,570 unique image paths. Reachable media objects, arrays, typed-array views and maps summed across groups fall from 734,060 to 1,526; this does not count every temporary allocation or strings. No total-import latency or process-memory claim is made.
+
+```sh
+node --expose-gc builds/perf/20261125-columnar-media/verify-corpus.mjs \
+  /absolute/path/to/baseline /absolute/path/to/candidate \
+  /absolute/path/to/pinned-cache /absolute/path/to/result.json
+```
+
+Both revisions need their own generated libraries and unchanged locked fixtures. Local validation passed 380 focused tests, main/test types, changed-file lint and seven dry-build targets. Actual-worker tests cover inflated/compressed sources, unique transfers, sender detachment and reuse. Unicode, BOMs, lone surrogates, expression/reading aliases, duplicates and mixed fallback order retain the original diagnostics. Independent source review found no blocker. The runtime JavaScript grows by 5,258 uncompressed bytes; native assets are unchanged. Full suite and complete browser timing/memory remain separate gates; keep the candidate draft until qualified.
