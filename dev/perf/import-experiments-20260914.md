@@ -231,3 +231,19 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-25: compact content reference emission
+
+Baseline: `7d1643e6147a10cb2165e9744cf0e63b59e46632`. Runtime candidate: `f8931d6c86f7472c6f28ab4de186a52c98fba61b`. The shared reference emitter now repeats each compressed block's validated 20-byte template in place and writes each entry's offset, removing four invariant DataView writes per entry. Block layout, little-endian storage bytes, length validation, source grouping, worker counts and compression settings are unchanged.
+
+The [runner](../../builds/perf/20261125-reference-emission/jitendex-reference-screen.mjs) and [all observations](../../builds/perf/20261125-reference-emission/jitendex-reference-screen.json) retain the locked archive, native parser, source and script hashes. The replay parses all 436,555 locked Jitendex rows in ten-bank groups, then checks every emitted reference byte for 363,273 within-group unique definitions and 382 planned blocks. All 7,265,460 output bytes match the scalar baseline. Global persisted deduplication is not included; compressed sizes and valid 64-bit storage offsets are synthetic inputs to the exact production emitter.
+
+Twelve balanced A/B/C triples with five excluded warmup passes and an identical-code C control gave median emitter-only durations of A 2.912 ms, B 1.654 ms and C 2.652 ms. Median paired B/A was -38.82% and B/C -35.69%, with B faster in all twelve comparisons against each control. The absolute reduction is approximately 1 ms in this isolated stage. This is **not a complete-import speedup** or a browser memory measurement. Output backing-buffer sizes are unchanged; the implementation adds one Uint8Array view of the existing prefix buffer.
+
+```sh
+node --expose-gc builds/perf/20261125-reference-emission/jitendex-reference-screen.mjs   "$PWD" "$PWD/builds/e2e-dictionary-cache"   "$PWD/builds/perf/20261125-reference-emission/reproduced.json"
+node node_modules/vitest/vitest.mjs run test/term-content-block-store.test.js --maxWorkers=1
+node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-content-block-store.js test/term-content-block-store.test.js
+```
+
+The 67 focused block-store tests pass, including scalar-oracle comparisons across block/slab boundaries, empty and oversized entries, and offsets above 4 GiB. Changed-file lint and whitespace checks pass. The local browser executable is absent and the matching Playwright download was denied with HTTP 403. Complete browser timing, process-tree memory and normal CI remain separate qualifications. Keep this candidate draft until those results justify promotion.

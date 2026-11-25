@@ -469,6 +469,86 @@ describe('TermContentBlockStore', () => {
         expect(append).not.toHaveBeenCalled();
     });
 
+    test.each([1, 2, 3, 255, 257, 2048])('preserves scalar references across %i-entry slabs and long block runs', async (entriesPerSlab) => {
+        const compress = vi.mocked(compressWrappedTermContentZstdSpansBatch);
+        compress.mockClear();
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 511,
+            referencePackTargetBytes: entriesPerSlab * 20 + 7,
+            minInputBytes: 0,
+        });
+        const lengths = Uint32Array.from({length: 1031}, (_, index) => (
+            index % 17 === 0 || index === 1030 ? 0 : (index === 517 ? 800 : 3)
+        ));
+        const offsets = new Uint32Array(lengths.length);
+        let sourceBytes = 0;
+        for (let i = 0; i < lengths.length; ++i) {
+            offsets[i] = sourceBytes;
+            sourceBytes += lengths[i];
+        }
+        const source = new Uint8Array(new SharedArrayBuffer(sourceBytes));
+        source.fill(7);
+        /** @type {number[]} */
+        let blockOffsets = [];
+        /** @type {number[]} */
+        let storedLengths = [];
+        /** @type {Uint8Array[]} */
+        let references = [];
+        vi.spyOn(contentStore, 'appendBatchWithDerivedChunks').mockImplementation(async (primary, createDerived) => {
+            let position = 2 ** 32 + 37;
+            storedLengths = primary.map(({byteLength}) => byteLength);
+            blockOffsets = primary.map(({byteLength}) => {
+                const offset = position;
+                position += byteLength;
+                return offset;
+            });
+            references = await createDerived(blockOffsets, storedLengths);
+            const derivedOffsets = references.map(({byteLength}) => {
+                const offset = position;
+                position += byteLength;
+                return offset;
+            });
+            return {
+                primaryOffsets: blockOffsets,
+                primaryLengths: storedLengths,
+                derivedOffsets,
+                derivedLengths: references.map(({byteLength}) => byteLength),
+            };
+        });
+
+        const result = await blockStore.tryAppendSpans(source, offsets, lengths, 'jmdict', true);
+
+        if (result === null) { throw new Error('Expected compressed content'); }
+        expect(compress).toHaveBeenCalledOnce();
+        const blockStarts = compress.mock.calls[0][3];
+        const blockLengths = compress.mock.calls[0][4];
+        const actual = new Uint8Array(lengths.length * 20);
+        let outputOffset = 0;
+        for (const bytes of references) {
+            expect(bytes.byteLength).toBeLessThanOrEqual(entriesPerSlab * 20);
+            actual.set(bytes, outputOffset);
+            outputOffset += bytes.byteLength;
+        }
+        expect(outputOffset).toBe(actual.byteLength);
+        for (let blockIndex = 0; blockIndex < blockLengths.length; ++blockIndex) {
+            let entryOffset = 0;
+            for (let index = blockStarts[blockIndex]; index < blockStarts[blockIndex + 1]; ++index) {
+                expect(actual.subarray(index * 20, (index + 1) * 20)).toStrictEqual(
+                    encodeRawTermContentCompactBlockReference(
+                        blockOffsets[blockIndex],
+                        storedLengths[blockIndex],
+                        blockLengths[blockIndex],
+                        entryOffset === blockLengths[blockIndex] ? 0 : entryOffset,
+                    ),
+                );
+                entryOffset += lengths[index];
+            }
+            expect(entryOffset).toBe(blockLengths[blockIndex]);
+        }
+        expect(result.contentLengths).toStrictEqual(lengths);
+    });
+
     test('compresses shared parser spans without a main-thread packing copy', async () => {
         vi.mocked(compressWrappedTermContentZstdSpansBatch).mockClear();
         const contentStore = new TermContentOpfsStore();

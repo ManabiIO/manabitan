@@ -1,0 +1,212 @@
+{
+  "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "node": "v24.22.3",
+  "dictionarySha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+  "wasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+  "beforeSourceSha256": "cfc5bd1877325515cb904a2f23e4d1e297279a2f13857b474188bb9c399f1fd0",
+  "afterSourceSha256": "39a16d7434d2c93adb7ae6759ddb21b014a3c3ba76a7fc68561c76851a589a8c",
+  "runnerSha256": "a07adc264245a02f4f97539935e3e63e47f2a1998907a49bde0eac46fc4b0026",
+  "scope": "Exact production reference-emission helpers on native unique lengths from all Jitendex banks grouped by 10. Excludes global content deduplication, ZIP/parser time, compression, actual OPFS, and UI. Synthetic valid 64-bit storage offsets and compressed sizes. Explicit GC before timing; five complete emissions per sample. Identical baseline C retained.",
+  "rows": 436555,
+  "unique": 363273,
+  "groups": 22,
+  "blocks": 382,
+  "uncompressedBytes": 389702339,
+  "outputBytes": 7265460,
+  "outputSha256": "26c8036d07c4183068bc87b0efbc6a082453fea19905dafe3d9626dc0861f1f4",
+  "allReferenceBytesEqual": true,
+  "observations": [
+    {
+      "pair": 0,
+      "order": "ABC",
+      "A": {
+        "elapsedMs": 3.9936093999998774,
+        "cpuMs": 4.0304
+      },
+      "B": {
+        "elapsedMs": 1.8360122000000048,
+        "cpuMs": 2.2566
+      },
+      "C": {
+        "elapsedMs": 3.8432858000000123,
+        "cpuMs": 6.9562
+      }
+    },
+    {
+      "pair": 1,
+      "order": "BCA",
+      "B": {
+        "elapsedMs": 2.3056550000001153,
+        "cpuMs": 2.675
+      },
+      "C": {
+        "elapsedMs": 2.8138495999999575,
+        "cpuMs": 3.1536
+      },
+      "A": {
+        "elapsedMs": 3.638031799999953,
+        "cpuMs": 4.0632
+      }
+    },
+    {
+      "pair": 2,
+      "order": "CAB",
+      "C": {
+        "elapsedMs": 3.9099817999998776,
+        "cpuMs": 4.3264
+      },
+      "A": {
+        "elapsedMs": 3.6717844000000697,
+        "cpuMs": 4.2046
+      },
+      "B": {
+        "elapsedMs": 2.4356057999999394,
+        "cpuMs": 2.8822
+      }
+    },
+    {
+      "pair": 3,
+      "order": "ACB",
+      "A": {
+        "elapsedMs": 3.7735771999999996,
+        "cpuMs": 4.1042
+      },
+      "C": {
+        "elapsedMs": 2.685927399999855,
+        "cpuMs": 3.6356
+      },
+      "B": {
+        "elapsedMs": 1.523257199999898,
+        "cpuMs": 1.9328
+      }
+    },
+    {
+      "pair": 4,
+      "order": "CBA",
+      "C": {
+        "elapsedMs": 2.238931000000048,
+        "cpuMs": 2.6254
+      },
+      "B": {
+        "elapsedMs": 1.8299702000000253,
+        "cpuMs": 2.2568
+      },
+      "A": {
+        "elapsedMs": 2.48580720000009,
+        "cpuMs": 2.8888
+      }
+    },
+    {
+      "pair": 5,
+      "order": "BAC",
+      "B": {
+        "elapsedMs": 1.6783139999999548,
+        "cpuMs": 2.0172
+      },
+      "A": {
+        "elapsedMs": 3.030912999999964,
+        "cpuMs": 3.4164
+      },
+      "C": {
+        "elapsedMs": 2.6170219999999973,
+        "cpuMs": 3.0134
+      }
+    },
+    {
+      "pair": 6,
+      "order": "ABC",
+      "A": {
+        "elapsedMs": 2.6705324000000474,
+        "cpuMs": 3.073
+      },
+      "B": {
+        "elapsedMs": 1.6288538000000699,
+        "cpuMs": 2.1824
+      },
+      "C": {
+        "elapsedMs": 2.5253928000000085,
+        "cpuMs": 3.028
+      }
+    },
+    {
+      "pair": 7,
+      "order": "BCA",
+      "B": {
+        "elapsedMs": 1.515679799999998,
+        "cpuMs": 2.0588
+      },
+      "C": {
+        "elapsedMs": 3.057617199999913,
+        "cpuMs": 3.5294
+      },
+      "A": {
+        "elapsedMs": 2.590544200000113,
+        "cpuMs": 3.1234
+      }
+    },
+    {
+      "pair": 8,
+      "order": "CAB",
+      "C": {
+        "elapsedMs": 2.522071800000049,
+        "cpuMs": 3.1154
+      },
+      "A": {
+        "elapsedMs": 2.971556000000055,
+        "cpuMs": 3.4822
+      },
+      "B": {
+        "elapsedMs": 1.9331481999999596,
+        "cpuMs": 2.4558
+      }
+    },
+    {
+      "pair": 9,
+      "order": "ACB",
+      "A": {
+        "elapsedMs": 2.8515718000000563,
+        "cpuMs": 3.4092
+      },
+      "C": {
+        "elapsedMs": 3.9241211999998997,
+        "cpuMs": 4.5406
+      },
+      "B": {
+        "elapsedMs": 1.4684552000000621,
+        "cpuMs": 1.9132
+      }
+    },
+    {
+      "pair": 10,
+      "order": "CBA",
+      "C": {
+        "elapsedMs": 2.2681226000000607,
+        "cpuMs": 2.7756
+      },
+      "B": {
+        "elapsedMs": 1.5195878000002268,
+        "cpuMs": 1.9946
+      },
+      "A": {
+        "elapsedMs": 2.476002399999925,
+        "cpuMs": 2.9674
+      }
+    },
+    {
+      "pair": 11,
+      "order": "BAC",
+      "B": {
+        "elapsedMs": 1.5384581999998772,
+        "cpuMs": 2.0038
+      },
+      "A": {
+        "elapsedMs": 2.2955055999998875,
+        "cpuMs": 2.9676
+      },
+      "C": {
+        "elapsedMs": 2.375122999999803,
+        "cpuMs": 2.887
+      }
+    }
+  ]
+}
