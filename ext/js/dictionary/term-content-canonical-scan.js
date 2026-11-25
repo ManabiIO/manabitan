@@ -24,8 +24,10 @@ import {CANONICAL_SCAN_ABI_VERSION, CANONICAL_SCAN_LAYOUT as layout} from './ter
 const {MAX, PREFIX, META, IDENT, ROWS, SIGS, FLAGS, OUT, JOURNAL, EXACT} = layout;
 /** @type {Promise<WebAssembly.Module>|null} */
 let modulePromise = null;
-/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number}>} */
+/** @type {WeakMap<WebAssembly.Memory, {module: WebAssembly.Module, scan: () => number, validateReservedMetadata: (() => number)|null}>} */
 const instances = new WeakMap();
+/** @type {WeakMap<WebAssembly.Memory, number>} */
+const activeScratch = new WeakMap();
 
 /** @returns {Promise<WebAssembly.Module>} */
 export function compileCanonicalScanModule() {
@@ -140,9 +142,15 @@ export class NativeCanonicalScanner {
      */
     async scan(db, ctx, metrics) {
         const before = {...this.stats};
+        /** @type {{memory: WebAssembly.Memory|null}} */
+        const scratchOwner = {memory: null};
         try {
-            return await this._scan(db, ctx);
+            return await this._scan(db, ctx, scratchOwner);
         } finally {
+            const {memory} = scratchOwner;
+            if (memory !== null) {
+                activeScratch.set(memory, /** @type {number} */ (activeScratch.get(memory)) - 1);
+            }
             for (const [counter, key] of Object.entries(CANONICAL_SCAN_METRICS)) {
                 const name = /** @type {keyof typeof CANONICAL_SCAN_METRICS} */ (counter);
                 metrics[key] = this.stats[name] - before[name];
@@ -150,13 +158,76 @@ export class NativeCanonicalScanner {
         }
     }
 
+    /* eslint-disable @stylistic/semi */
+
+    /**
+     * Uses the existing canonical scratch only between native scans. Inputs are
+     * ordinary external typed columns; no borrowed arena view can be overwritten
+     * while copying the next column. The result is consumed synchronously before
+     * the publisher performs any authoritative write.
+     * @param {Arena} arena
+     * @param {Int32Array} indexes
+     * @param {Uint32Array} hash1s
+     * @param {Uint32Array} hash2s
+     * @param {Uint32Array} lengths
+     * @param {number} firstIndex
+     * @param {number} count
+     * @returns {boolean|null} Null means the existing JavaScript check is needed.
+     */
+    validateReservedMetadata(arena, indexes, hash1s, hash2s, lengths, firstIndex, count) {
+        const validate = instances.get(arena.memory)?.validateReservedMetadata
+        const buffer = arena.memory.buffer
+        if (
+            typeof validate !== 'function' ||
+            (activeScratch.get(arena.memory) ?? 0) !== 0 ||
+            count > MAX ||
+            indexes.buffer === buffer || hash1s.buffer === buffer ||
+            hash2s.buffer === buffer || lengths.buffer === buffer
+        ) {
+            return null
+        }
+        // Check the constructor's reserved-prefix invariant before copying,
+        // since even a read-only native rejection would follow those writes.
+        for (const table of [
+            arena.slots,
+            arena.hash1,
+            arena.hash2,
+            arena.state,
+            arena.length,
+            arena.signaturePresent,
+            arena.signature1,
+            arena.signature2,
+            arena.signature3,
+        ]) {
+            if (table.buffer !== buffer || table.byteOffset < PREFIX) { return null }
+        }
+        // Dense columns avoid touching unused gaps in the reserved scratch.
+        new Uint32Array(buffer, META, count).set(indexes)
+        new Uint32Array(buffer, META + count * 4, count).set(new Uint32Array(hash1s.buffer, hash1s.byteOffset, count))
+        new Uint32Array(buffer, META + count * 8, count).set(new Uint32Array(hash2s.buffer, hash2s.byteOffset, count))
+        new Uint32Array(buffer, META + count * 12, count).set(new Uint32Array(lengths.buffer, lengths.byteOffset, count))
+        new Uint32Array(buffer, 1088, 7).set([
+            arena.hash1.byteOffset,
+            arena.hash2.byteOffset,
+            arena.state.byteOffset,
+            arena.length.byteOffset,
+            arena.state.length,
+            firstIndex,
+            count,
+        ])
+        return validate() === 0
+    }
+
+    /* eslint-enable @stylistic/semi */
+
     /**
      * @param {ScanOwner} db
      * @param {ScanContext} ctx
+     * @param {{memory: WebAssembly.Memory|null}} scratchOwner
      * @returns {Promise<number|null>}
      * @throws {Error} Native or exact failures after mutation must reach outer rollback.
      */
-    async _scan(db, ctx) {
+    async _scan(db, ctx, scratchOwner) {
         const stats = this.stats;
         const {
             chunk,
@@ -255,7 +326,13 @@ export class NativeCanonicalScanner {
                     ) {
                         throw new Error('Canonical scan WASM ABI/layout mismatch');
                     }
-                    cached = {module, scan: /** @type {() => number} */ (exports.scan_canonical)};
+                    cached = {
+                        module,
+                        scan: /** @type {() => number} */ (exports.scan_canonical),
+                        validateReservedMetadata: typeof exports.validate_reserved_metadata === 'function' ?
+                            /** @type {() => number} */ (exports.validate_reserved_metadata) :
+                            null,
+                    };
                     instances.set(a.memory, cached);
                     ++stats.instances;
                 }
@@ -268,6 +345,14 @@ export class NativeCanonicalScanner {
                 ++stats.fallbackUnsupported;
                 stats.fallbackReason = 'unsupported-or-abi';
                 return null;
+            }
+            if (scratchOwner.memory !== a.memory) {
+                const previous = scratchOwner.memory;
+                if (previous !== null) {
+                    activeScratch.set(previous, /** @type {number} */ (activeScratch.get(previous)) - 1);
+                }
+                scratchOwner.memory = a.memory;
+                activeScratch.set(a.memory, (activeScratch.get(a.memory) ?? 0) + 1);
             }
             const buffer = a.memory.buffer;
             if (inputArena !== a) {

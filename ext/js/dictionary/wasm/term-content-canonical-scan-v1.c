@@ -52,6 +52,39 @@ uint32_t canonical_max_rows(void) { return MAX_ROWS; }
 __attribute__((export_name("canonical_prefix_bytes")))
 uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 
+// Read-only publication preflight. Config at 1088: hash1, hash2, state,
+// length, capacity, first, count. Four count-sized columns at META hold
+// reservation IDs, hashes and lengths. Publication remains with the JS owner;
+// a malformed row or memory layout cannot partially change metadata state.
+__attribute__((export_name("validate_reserved_metadata")))
+int32_t validate_reserved_metadata(void) {
+    const uint32_t *c = U32(1088u);
+    const uint64_t bytes = (uint64_t)__builtin_wasm_memory_size(0) * 65536u;
+    if (bytes < PREFIX || c[6] > MAX_ROWS || (uint64_t)c[5] + c[6] > c[4]) {
+        return -1;
+    }
+    const uint32_t widths[4] = {4, 4, 1, 4};
+    for (uint32_t k = 0; k < 4; ++k) {
+        if (c[k] < PREFIX || c[k] % widths[k] ||
+            (uint64_t)c[k] + (uint64_t)c[4] * widths[k] > bytes) {
+            return -1;
+        }
+    }
+    const uint32_t *hash1 = U32(c[0]), *hash2 = U32(c[1]), *length = U32(c[3]);
+    const uint8_t *state = U8(c[2]);
+    const uint32_t *input = U32(META);
+    for (uint32_t i = 0; i < c[6]; ++i) {
+        const uint32_t index = c[5] + i;
+        if (input[i] != index || state[index] != 2 ||
+            hash1[index] != input[c[6] + i] ||
+            hash2[index] != input[2u * c[6] + i] ||
+            length[index] != input[3u * c[6] + i]) {
+            return -2;
+        }
+    }
+    return 0;
+}
+
 // Header at 1024: journal progress, next cursor, pending count, exact count,
 // resolved count, dense count, reserved. The journal count is volatile so a
 // trap cannot hide an insertion from the synchronous JS rollback owner.

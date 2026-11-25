@@ -9798,7 +9798,27 @@ null :
                 if (otherStart < targetEnd && targetStart < otherEnd) { return false }
             }
         }
-        for (let i = 0; i < count; ++i) {
+        const arena = this._termContentMetadataArena
+        // Native scratch is disjoint from every authoritative metadata column.
+        // Private callers which retarget columns keep the JavaScript preflight.
+        const nativeValidation = metadataValidated && arena !== null &&
+        offsets.buffer !== arena.memory.buffer &&
+        this._termEntryContentMetaIdTable.buffer !== arena.memory.buffer &&
+        this._termEntryContentMetaOffsetTable.buffer !== arena.memory.buffer &&
+        this._termEntryContentMetaDictNameIdTable.buffer !== arena.memory.buffer &&
+        this._termEntryContentMetaRecentSourceBatchIdTable.buffer !== arena.memory.buffer &&
+        this._termEntryContentMetaRecentSourceOffsetTable.buffer !== arena.memory.buffer &&
+        arena.slots === this._termEntryContentMetaHashPairTable &&
+        arena.signaturePresent === this._termEntryContentMetaSignaturePresentTable &&
+        arena.signature1 === this._termEntryContentMetaSignature1Table &&
+        arena.signature2 === this._termEntryContentMetaSignature2Table &&
+        arena.signature3 === this._termEntryContentMetaSignature3Table &&
+        arena.state === stateTable && arena.hash1 === hash1Table &&
+        arena.hash2 === hash2Table && arena.length === lengthTable ?
+            this._nativeCanonicalScanner.validateReservedMetadata(arena, indexes, hash1s, hash2s, lengths, firstIndex, count) :
+            null
+        if (nativeValidation === false) { return false }
+        for (let i = nativeValidation === true ? count : 0; i < count; ++i) {
             const index = firstIndex + i
             const offset = offsets[i]
             const length = lengths[i]

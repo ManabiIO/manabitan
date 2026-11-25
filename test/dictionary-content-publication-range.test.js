@@ -16,12 +16,100 @@
  */
 
 /* eslint @stylistic/semi: ["error", "never"] */
+/* eslint-disable unicorn/prefer-spread -- Byte snapshots must retain typed storage for bounded memory comparisons. */
 
-import {describe, expect, test, vi} from 'vitest'
+import {readFile} from 'node:fs/promises'
+import {Buffer} from 'node:buffer'
+import {beforeAll, describe, expect, test, vi} from 'vitest'
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js'
+import {NativeCanonicalScanner} from '../ext/js/dictionary/term-content-canonical-scan.js'
+import {CANONICAL_SCAN_LAYOUT as layout} from '../ext/js/dictionary/term-content-canonical-layout.js'
 
 /** @typedef {Parameters<DictionaryDatabase['_publishArtifactTermContentMetadata']>[0]} PublicationState */
 /** @typedef {{database: DictionaryDatabase, state: PublicationState, staged: NonNullable<PublicationState['stagedContentMetadata']>}} Harness */
+/** @type {WebAssembly.Module} */
+let canonicalModule
+
+beforeAll(async () => {
+    canonicalModule = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url)))
+})
+
+/**
+ * Runs one already resolved row to load the native module without changing any
+ * reservation. The callback also exercises publication during a scan's await.
+ * @param {Harness} harness
+ * @param {() => Promise<void>} [resolveExactCandidates]
+ * @returns {{scanner: NativeCanonicalScanner, run: () => Promise<number|null>}}
+ */
+function scannerHarness({database}, resolveExactCandidates = async () => {}) {
+    const scanner = new NativeCanonicalScanner({loadModule: async () => canonicalModule})
+    Reflect.set(database, '_nativeCanonicalScanner', scanner)
+    /** @type {Parameters<NativeCanonicalScanner['scan']>[1]} */
+    const context = {
+        chunk: {
+            rowCount: 1,
+            contentRowStart: 0,
+            contentBytesList: [],
+            contentHash1List: new Uint32Array(0),
+            contentHash2List: new Uint32Array(0),
+            contentBytesBuffer: new Uint8Array(0),
+            contentBytesBaseOffset: 0,
+            contentMetaList: new Uint32Array(4),
+            contentDictNameList: null,
+            uniformContentDictName: 'raw',
+        },
+        contentDedupPlan: {
+            resolvedFlags: new Uint8Array([1]),
+            resolvedOffsets: new Float64Array(1),
+            resolvedLengths: new Uint32Array(1),
+            resolvedDictNames: null,
+            pendingEpochs: null,
+            pendingIndexes: null,
+            nextEpoch: 1,
+        },
+        uniqueIndexList: new Uint32Array(1),
+        uniqueRowIndexes: new Uint32Array(1),
+        uniqueSignatures: new Uint32Array(3),
+        firstUniqueIndex: 0,
+        lastUniqueIndex: 1,
+        persistedLookupRequired: false,
+        reserveMetadata: false,
+        adoptPendingColumns: (_batch, complete) => complete(),
+        getPendingCount: () => 0,
+        exactCandidates: [],
+        resolveExactCandidates,
+    }
+    return {scanner, run: async () => await scanner.scan(database, context, {})}
+}
+
+/**
+ * @param {DictionaryDatabase} database
+ * @returns {import('../ext/js/dictionary/term-content-metadata-arena.js').TermContentMetadataArena}
+ * @throws {Error} If the fixture has not allocated metadata storage.
+ */
+function getArena(database) {
+    const arena = Reflect.get(database, '_termContentMetadataArena')
+    if (arena === null) { throw new Error('Expected a fixture metadata arena') }
+    return arena
+}
+
+/**
+ * @param {Harness} harness
+ * @param {NativeCanonicalScanner} scanner
+ * @returns {boolean|null}
+ */
+function validateNative({database, state, staged}, scanner) {
+    const arena = getArena(database)
+    return scanner.validateReservedMetadata(
+        arena,
+        staged.indexes,
+        /** @type {Uint32Array} */ (state.pendingContentHash1s),
+        /** @type {Uint32Array} */ (state.pendingContentHash2s),
+        /** @type {Uint32Array} */ (state.pendingLengths),
+        staged.indexes[0],
+        state.pendingOffsets.length,
+    )
+}
 
 /**
  * @param {boolean} [collision]
@@ -61,6 +149,7 @@ function createHarness(collision = false) {
  */
 function snapshot({database, state, staged}) {
     const names = [
+        '_termEntryContentMetaHashPairTable',
         '_termEntryContentMetaHash1Table',
         '_termEntryContentMetaHash2Table',
         '_termEntryContentMetaStateTable',
@@ -304,3 +393,196 @@ describe('contiguous content metadata publication', () => {
         expect(Reflect.get(candidate.database, '_recentTermContentSourceBatchBytes')).toBe(0)
     })
 })
+
+describe('native publication preflight', () => {
+    /** @type {Array<{name: string, expectedNative: boolean, change: (harness: Harness) => void}>} */
+    const cases = [
+        {name: 'valid reservations', expectedNative: true, change: () => {}},
+        {name: 'late hash mismatch', expectedNative: false, change: ({state}) => { state.pendingContentHash1s[2] = 99 }},
+        {name: 'late length mismatch', expectedNative: false, change: ({state}) => { state.pendingLengths[2] = 5 }},
+        {name: 'late nonconsecutive ID', expectedNative: false, change: ({staged}) => { staged.indexes[2] = staged.indexes[1] }},
+        {name: 'late published state',
+            expectedNative: false,
+            change: ({database, staged}) => {
+                Reflect.get(database, '_termEntryContentMetaStateTable')[staged.indexes[2]] = 1
+            }},
+    ]
+
+    test.each(cases)('preserves publication, rollback and retry for $name', async (fixture) => {
+        const scalar = createHarness()
+        const candidate = createHarness()
+        const {scanner, run} = scannerHarness(candidate)
+        await run()
+        scalar.state.metadataValidated = candidate.state.metadataValidated = true
+        fixture.change(scalar)
+        fixture.change(candidate)
+        const before = snapshot(candidate)
+        expect(validateNative(candidate, scanner)).toBe(fixture.expectedNative)
+        expect(snapshot(candidate)).toEqual(before)
+        vi.spyOn(scalar.database, '_tryPublishContiguousArtifactTermContentMetadata').mockReturnValue(false)
+        const native = vi.spyOn(scanner, 'validateReservedMetadata')
+        expect(publish(candidate)).toEqual(publish(scalar))
+        expect(native).toHaveReturnedWith(fixture.expectedNative)
+        expect(snapshot(candidate)).toEqual(snapshot(scalar))
+        candidate.database._rollbackStagedArtifactTermContentMetadata(candidate.staged)
+        scalar.database._rollbackStagedArtifactTermContentMetadata(scalar.staged)
+        expect(snapshot(candidate)).toEqual(snapshot(scalar))
+        for (const harness of [candidate, scalar]) {
+            const staged = harness.database._stageArtifactTermContentMetadata(
+                new Uint32Array([31, 32, 33]),
+                new Uint32Array([41, 42, 43]),
+                [],
+                harness.state.pendingContentSpans,
+            )
+            harness.staged = staged
+            harness.state.stagedContentMetadata = staged
+            harness.state.pendingContentHash1s = new Uint32Array([31, 32, 33])
+            harness.state.pendingContentHash2s = new Uint32Array([41, 42, 43])
+            harness.state.pendingLengths = new Uint32Array([4, 4, 4])
+        }
+        expect(publish(candidate)).toEqual(publish(scalar))
+        expect(snapshot(candidate)).toEqual(snapshot(scalar))
+    })
+
+    test.each([
+        'indexes',
+        'hash1',
+        'hash2',
+        'lengths',
+        'offsets',
+        'Id',
+        'Offset',
+        'DictNameId',
+        'HashPair',
+        'Hash1',
+        'Hash2',
+        'State',
+        'Length',
+        'SignaturePresent',
+        'Signature1',
+        'Signature2',
+        'Signature3',
+        'RecentSourceBatchId',
+        'RecentSourceOffset',
+    ])('keeps borrowed arena %s outside native scratch writes', async (column) => {
+        const scalar = createHarness()
+        const candidate = createHarness()
+        const {scanner, run} = scannerHarness(candidate)
+        await run()
+        const native = vi.spyOn(scanner, 'validateReservedMetadata')
+        for (const harness of [scalar, candidate]) {
+            harness.state.metadataValidated = true
+            const arena = getArena(harness.database)
+            const buffer = arena.memory.buffer
+            const {state, staged} = harness
+            if (column === 'indexes') {
+                const values = staged.indexes
+                staged.indexes = new Int32Array(buffer, layout.META, values.length)
+                staged.indexes.set(values)
+            } else if (column === 'hash1' || column === 'hash2' || column === 'lengths' || column === 'offsets') {
+                let key = /** @type {'pendingContentHash1s'|'pendingContentHash2s'|'pendingLengths'|'pendingOffsets'} */ ('pendingOffsets')
+                if (column === 'hash1') { key = 'pendingContentHash1s' }
+                if (column === 'hash2') { key = 'pendingContentHash2s' }
+                if (column === 'lengths') { key = 'pendingLengths' }
+                const values = state[key]
+                const copy = column === 'offsets' ?
+                    new Float64Array(buffer, layout.META, values.length) :
+                    new Uint32Array(buffer, layout.META, values.length)
+                copy.set(values)
+                Reflect.set(state, key, copy)
+            } else {
+                const key = `_termEntryContentMeta${column}Table`
+                const values = Reflect.get(harness.database, key)
+                let copy
+                if (column === 'Id' || column === 'Offset') {
+                    copy = new Float64Array(buffer, layout.META, values.length)
+                } else if (column === 'State' || column === 'SignaturePresent') {
+                    copy = new Uint8Array(buffer, layout.META, values.length)
+                } else {
+                    copy = new Uint32Array(buffer, layout.META, values.length)
+                }
+                copy.set(values)
+                Reflect.set(harness.database, key, copy)
+                const arenaColumn = /** @type {Record<string, string>} */ ({
+                    HashPair: 'slots',
+                    Hash1: 'hash1',
+                    Hash2: 'hash2',
+                    State: 'state',
+                    Length: 'length',
+                    SignaturePresent: 'signaturePresent',
+                    Signature1: 'signature1',
+                    Signature2: 'signature2',
+                    Signature3: 'signature3',
+                })[column]
+                if (typeof arenaColumn === 'string') { Reflect.set(arena, arenaColumn, copy) }
+            }
+        }
+        expect(publish(candidate)).toEqual(publish(scalar))
+        expect(snapshot(candidate)).toEqual(snapshot(scalar))
+        expect(native.mock.results.every((result) => result.type === 'return' && result.value === null)).toBe(true)
+    })
+
+    test.each([false, true])('releases scratch after an awaited scan, rejection=%s', async (reject) => {
+        const harness = createHarness()
+        harness.state.metadataValidated = true
+        const expectedError = new Error('Exact callback rejected')
+        const {scanner, run} = scannerHarness(harness, async () => {
+            const arena = getArena(harness.database)
+            const prefix = new Uint8Array(arena.memory.buffer, 0, layout.PREFIX).slice()
+            expect(validateNative(harness, scanner)).toBeNull()
+            expect(Buffer.compare(new Uint8Array(arena.memory.buffer, 0, layout.PREFIX), prefix)).toBe(0)
+            if (reject) { throw expectedError }
+        })
+        await (reject ? expect(run()).rejects.toBe(expectedError) : expect(run()).resolves.toBe(1))
+        expect(validateNative(harness, scanner)).toBe(true)
+        expect(publish(harness).error).toBeNull()
+    })
+
+    test('uses the JavaScript check after an awaited arena replacement', async () => {
+        const harness = createHarness()
+        const {scanner, run} = scannerHarness(harness, async () => {
+            const current = getArena(harness.database)
+            harness.database._ensureTermEntryContentMetaHashPairCapacity(100)
+            expect(getArena(harness.database)).not.toBe(current)
+            expect(validateNative(harness, scanner)).toBeNull()
+        })
+        await run()
+        expect(validateNative(harness, scanner)).toBeNull()
+        const next = scannerHarness(harness)
+        await next.run()
+        expect(validateNative(harness, next.scanner)).toBe(true)
+    })
+
+    test('rejects malformed raw memory layouts without changing authoritative bytes', async () => {
+        const harness = createHarness()
+        const {scanner, run} = scannerHarness(harness)
+        await run()
+        expect(validateNative(harness, scanner)).toBe(true)
+        const arena = getArena(harness.database)
+        const buffer = arena.memory.buffer
+        const config = new Uint32Array(buffer, 1088, 7)
+        const validConfig = config.slice()
+        const before = new Uint8Array(buffer, layout.PREFIX).slice()
+        const {validate_reserved_metadata: validate} = new WebAssembly.Instance(canonicalModule, {env: {memory: arena.memory}}).exports
+        if (typeof validate !== 'function') { throw new Error('Expected native publication validator') }
+        const cases = [
+            [0, layout.META], // Authoritative column overlaps input scratch.
+            [0, arena.hash1.byteOffset + 1], // Misaligned column.
+            [0, buffer.byteLength - 4], // Full column exceeds memory.
+            [4, 0xffffffff], // Capacity multiplication must not wrap.
+            [5, 0xffffffff], // First + count must not wrap.
+            [6, layout.MAX + 1], // Fixed scratch column capacity.
+        ]
+        for (const [word, value] of cases) {
+            config.set(validConfig)
+            config[word] = value
+            expect(validate()).toBe(-1)
+            expect(Buffer.compare(new Uint8Array(buffer, layout.PREFIX), before)).toBe(0)
+        }
+        config.set(validConfig)
+        expect(validate()).toBe(0)
+        expect(Buffer.compare(new Uint8Array(buffer, layout.PREFIX), before)).toBe(0)
+    })
+})
+
+/* eslint-enable unicorn/prefer-spread */
