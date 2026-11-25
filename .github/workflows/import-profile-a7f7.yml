@@ -1,0 +1,55 @@
+name: Import profile 20261125 a7f7
+
+on:
+  push:
+    branches: ['perf/import-profile-20261125-a7f7']
+
+permissions:
+  contents: read
+
+jobs:
+  profile:
+    name: Current import profile (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare pinned source and release build
+        run: |
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
+          npm run build -- --target chrome
+          mkdir -p builds/perf/current-profile
+          git rev-parse HEAD 'HEAD^{tree}' > builds/perf/current-profile/source.txt
+          sha256sum package-lock.json test/perf/dictionaries.lock.json builds/manabitan-chrome.zip > builds/perf/current-profile/identity.txt
+          node dev/perf/host-environment.js > builds/perf/current-profile/host.json
+      - name: Capture ordinary complete import
+        run: |
+          set -o pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --output builds/perf/current-profile/ordinary 2>&1 | tee builds/perf/current-profile/ordinary.log
+      - name: Capture separate diagnostic trace
+        run: |
+          set -o pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --trace --output builds/perf/current-profile/trace 2>&1 | tee builds/perf/current-profile/trace.log
+      - name: Retain every observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: current-profile-${{ matrix.dictionary }}
+          path: builds/perf/current-profile
+          if-no-files-found: error
+          retention-days: 14
