@@ -1289,7 +1289,7 @@ describe('term-bank WASM parser', () => {
             const stalePrewarm = prewarmParallelTermBankParser();
             let disposalSettled = false;
             const disposal = disposeParallelTermBankParser().then(() => { disposalSettled = true; });
-            const nextPrewarm = prewarmParallelTermBankParser();
+            const duringDisposalPrewarm = prewarmParallelTermBankParser();
             await Promise.resolve();
             expect(disposalSettled).toBe(false);
             expect(terminateCount).toBe(0);
@@ -1298,9 +1298,10 @@ describe('term-bank WASM parser', () => {
             await expect(parsing).resolves.toBe(true);
             await expect(stalePrewarm).resolves.toBe(false);
             await disposal;
-            await expect(nextPrewarm).resolves.toBe(true);
+            await expect(duringDisposalPrewarm).resolves.toBe(false);
             expect(disposalSettled).toBe(true);
             expect(terminateCount).toBe(workerCount);
+            await expect(prewarmParallelTermBankParser()).resolves.toBe(true);
             await disposeParallelTermBankParser();
             expect(terminateCount).toBe(workerCount * 2);
         } finally {

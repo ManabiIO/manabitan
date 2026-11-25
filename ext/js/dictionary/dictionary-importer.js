@@ -1562,7 +1562,6 @@ export class DictionaryImporter {
         };
 
         try {
-            this._throwIfCancelled();
             // The session owns parser cleanup before startup begins. Overlap
             // worker initialization with the required journal and OPFS setup.
             if (
@@ -1578,6 +1577,7 @@ export class DictionaryImporter {
                     !this._archiveHasImageMediaFiles(fileMap)
                 ))
             ) {
+                this._throwIfCancelled();
                 void prewarmParallelTermBankParser(this._termBankExperiments);
             }
             // Start the bounded first read before transaction and media setup so
