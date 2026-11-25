@@ -1,0 +1,56 @@
+{
+  "scope": "Saved-evidence replay only; no browser acquisition or observation replacement",
+  "candidate": "c2cf7647c67b02474301ed48e54a53205be0f027",
+  "archive": {
+    "bytes": 7299991,
+    "path": "crc-hosted-20261125-2754.text.tar.gz",
+    "sha256": "a68429f3674bc1f19946f5a2adf35acbc351d1812d151fb54c2188284d2c1404"
+  },
+  "commands": [
+    {
+      "kind": "timing",
+      "command": [
+        "python3",
+        "/tmp/manabitan-2754-evidence-tree/builds/perf/import-20261125-2754/tools/audit_timing.py",
+        "--auditor",
+        "/tmp/manabitan-2754-evidence-tree/builds/perf/import-20261125-2754/tools/audit_cohort_original.py",
+        "--repository",
+        "/tmp/manabitan-2754-evidence-tree",
+        "--node",
+        "/workspace/scratch/2754d3e3fa09/runtime/node_modules/node/bin/node",
+        "--candidate",
+        "c2cf7647c67b02474301ed48e54a53205be0f027",
+        "--recorded-audit",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/independent-audit/timing-jmdict-audit.json",
+        "--recorded-audit",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/independent-audit/timing-jitendex-audit.json",
+        "--recorded-audit",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/independent-audit/timing-vndb-audit.json",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/timing/15036814976/cohort",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/timing/15038541229/cohort",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/timing/15038993452/cohort"
+      ],
+      "exitCode": 0,
+      "resultRows": 3,
+      "outputSha256": "3110ae8c0208ea13faf39b616271a1433740f7ea6d2a002aeb414f1f6a8837e7"
+    },
+    {
+      "kind": "memory",
+      "command": [
+        "python3",
+        "/tmp/manabitan-2754-evidence-tree/builds/perf/import-20261125-2754/tools/audit_memory_saved.py",
+        "--candidate",
+        "c2cf7647c67b02474301ed48e54a53205be0f027",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/memory/15037132938",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/memory/15037468972",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/memory/15037852350",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/memory/15038726730",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/memory/15039215938",
+        "/workspace/scratch/2754d3e3fa09/evidence/replay-crc-final/artifacts/memory/15039581472"
+      ],
+      "exitCode": 0,
+      "resultRows": 6,
+      "outputSha256": "1281e74c371aac753b58861f9422f92a337e5c49b4c5b79fe2414f3bcba8df33"
+    }
+  ]
+}

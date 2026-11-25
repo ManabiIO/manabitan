@@ -1,0 +1,37 @@
+{
+  "scope": "Archival syntax and whitespace checks; not performance qualification",
+  "jsonPythonAndJsonlSyntaxChecked": true,
+  "gitDiffCheckExitCode": 2,
+  "gitDiffCheckFindingsLimitedToOriginalBytes": true,
+  "preservedWhitespace": [
+    {
+      "path": "builds/perf/import-20261125-2754/crc-hosted/workflow-memory.yml",
+      "original": "/workspace/scratch/2754d3e3fa09/evidence/crc-hosted/workflow-memory.yml",
+      "sha256": "e5f10b3916c6193099d1e0197c81d2136aea9d01605da20d82b50e3473eec110",
+      "bytes": 2801,
+      "reason": "Original workflow trailing blank line retained verbatim"
+    },
+    {
+      "path": "builds/perf/import-20261125-2754/crc-hosted/workflow-timing.yml",
+      "original": "/workspace/scratch/2754d3e3fa09/evidence/crc-hosted/workflow-timing.yml",
+      "sha256": "091c6deb1452c858b5cb1fdeb7beb9766d29331195597bb9e898a7f739b56835",
+      "bytes": 2769,
+      "reason": "Original workflow trailing blank line retained verbatim"
+    },
+    {
+      "path": "builds/perf/import-20261125-2754/metadata-hosted/all-memory-observations.csv",
+      "original": "/tmp/manabitan-2754-metadata-audit/all-memory-observations.csv",
+      "sha256": "34a424f2bb2100ca218d57b93e66e24599c8d0f7bb91188a7bcc3d16d42232de",
+      "bytes": 1988,
+      "reason": "Original CSV CRLF bytes retained verbatim"
+    },
+    {
+      "path": "builds/perf/import-20261125-2754/metadata-hosted/all-timing-observations.csv",
+      "original": "/tmp/manabitan-2754-metadata-audit/all-timing-observations.csv",
+      "sha256": "8e385d228d8920cad74d33080a63f3841e9a6ee4466bfcfbbea985f448042cc6",
+      "bytes": 4684,
+      "reason": "Original CSV CRLF bytes retained verbatim"
+    }
+  ],
+  "noOtherWhitespaceFindings": true
+}
