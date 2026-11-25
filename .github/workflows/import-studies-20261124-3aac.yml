@@ -1,7 +1,7 @@
-name: Current native media import source screen 20261125
+name: Exact witness CRC import source screen 20261125
 on:
   push:
-    branches: [research/import-studies-20261125-2754]
+    branches: [research/crc-import-screen-20261125-2754]
     paths:
       - '.github/workflows/import-studies-20261124-3aac.yml'
       - 'dev/perf/import-runtime-20261124-3aac.py'
@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   compare:
-    name: Current native media screen (${{ matrix.dictionary }})
+    name: Exact witness CRC screen (${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 75
     strategy:
@@ -19,8 +19,8 @@ jobs:
         dictionary: [jmdict, jitendex, vndb]
     env:
       PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
-      PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
-      PERF_EXPECTED_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+      PERF_CANDIDATE_SHA: c2cf7647c67b02474301ed48e54a53205be0f027
+      PERF_EXPECTED_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
       PERF_DICTIONARY: ${{ matrix.dictionary }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
@@ -53,7 +53,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: current-media-screen-${{ matrix.dictionary }}-2754
+          name: exact-crc-screen-${{ matrix.dictionary }}-2754
           path: ${{ runner.temp }}/import-study-evidence
           if-no-files-found: error
           retention-days: 14
