@@ -492,31 +492,49 @@ export function consumeLastParallelParserSkipReason() {
     return value;
 }
 
+/* eslint-disable @stylistic/semi */
 /**
  * @param {Uint32Array} rowToUniqueIndex
  * @param {number} uniqueCount
+ * @param {{metas: Uint32Array, project: (rowIndex: number) => void}|null} [media]
  * @returns {Uint32Array}
  * @throws {Error} If the native dedupe projection is incomplete or unordered.
  */
-function buildContentUniqueRowIndexes(rowToUniqueIndex, uniqueCount) {
-    const uniqueRowIndexes = new Uint32Array(uniqueCount);
-    let nextUniqueIndex = 0;
+function buildContentUniqueRowIndexes(rowToUniqueIndex, uniqueCount, media = null) {
+    const uniqueRowIndexes = new Uint32Array(uniqueCount)
+    const seenMediaContent = media === null ? null : new Uint8Array(uniqueCount)
+    /** @type {number[]} */
+    const mediaRowIndexes = []
+    let nextUniqueIndex = 0
     for (let rowIndex = 0; rowIndex < rowToUniqueIndex.length; ++rowIndex) {
-        const uniqueIndex = rowToUniqueIndex[rowIndex];
+        const uniqueIndex = rowToUniqueIndex[rowIndex]
         if (uniqueIndex === nextUniqueIndex && uniqueIndex < uniqueCount) {
-            uniqueRowIndexes[nextUniqueIndex++] = rowIndex;
+            uniqueRowIndexes[nextUniqueIndex++] = rowIndex
         } else if (uniqueIndex >= nextUniqueIndex) {
             if (uniqueIndex >= uniqueCount) {
-                throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`);
+                throw new RangeError(`Native term content unique index is invalid at row ${rowIndex}`)
             }
-            throw new Error(`Native term content unique index ${uniqueIndex} is out of order`);
+            throw new Error(`Native term content unique index ${uniqueIndex} is out of order`)
+        }
+        if (media !== null && seenMediaContent !== null && media.metas[rowIndex * META_U32_FIELDS + 14] === 1 && seenMediaContent[uniqueIndex] === 0) {
+            // Canonical equality need not preserve raw media hints. Select the
+            // first hinted row, even when an earlier unhinted row normalized
+            // to the same content (for example, overwritten object fields).
+            seenMediaContent[uniqueIndex] = 1
+            mediaRowIndexes.push(rowIndex)
         }
     }
     if (nextUniqueIndex !== uniqueCount) {
-        throw new Error(`Native term content unique rows are incomplete: ${nextUniqueIndex}/${uniqueCount}`);
+        throw new Error(`Native term content unique rows are incomplete: ${nextUniqueIndex}/${uniqueCount}`)
     }
-    return uniqueRowIndexes;
+    // Preserve ID-validation error precedence: decoding must not run until
+    // the complete native mapping has passed its existing checks.
+    if (media !== null) {
+        for (const rowIndex of mediaRowIndexes) { media.project(rowIndex) }
+    }
+    return uniqueRowIndexes
 }
+/* eslint-enable @stylistic/semi */
 
 /**
  * @param {Uint8Array} bytes
@@ -2227,11 +2245,40 @@ null :
     const contentUniqueIndexes = parsed.contentUniqueIndexesPtr === 0 || parsed.wasm === null ?
         parsed.contentUniqueIndexes :
         new Uint32Array(parsed.wasm.memory.buffer, parsed.contentUniqueIndexesPtr, rowCount);
-    const contentDedupPlan = contentUniqueIndexes.length === rowCount && contentUniqueCount > 0 ?
+    /* eslint-disable @stylistic/semi */
+    // A complete fused chunk already has every term column. Collect its first
+    // hinted rows during the required ID validation, avoiding a second row
+    // traversal to inspect strided metadata. Chunked/fallback callers retain
+    // their existing projection and dispatch lifetimes.
+    const hasContentDedupPlan = contentUniqueIndexes.length === rowCount && contentUniqueCount > 0
+    const collectFusedMedia = (
+        hasContentDedupPlan && fusedStringPlan !== null &&
+        !emitTermByteLists && emitContentSlab && mediaHintFastScan && normalizedChunkSize >= rowCount
+    )
+    /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>|null} */
+    const fusedMediaRows = collectFusedMedia ? [] : null
+    /** @type {Parameters<typeof buildContentUniqueRowIndexes>[2]} */
+    let mediaProjection = null
+    if (fusedMediaRows !== null) {
+        mediaProjection = {
+            metas,
+            project(rowIndex) {
+                fusedMediaRows.push({
+                    index: rowIndex,
+                    row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, rowIndex, false, true, true, true, true),
+                })
+            },
+        }
+    }
+    const fusedMediaProjectionStart = fusedMediaRows === null ? 0 : Date.now()
+    const uniqueRowIndexes = hasContentDedupPlan ? buildContentUniqueRowIndexes(contentUniqueIndexes, contentUniqueCount, mediaProjection) : null
+    let rowDecodeMs = fusedMediaRows === null ? 0 : Math.max(0, Date.now() - fusedMediaProjectionStart)
+    /* eslint-enable @stylistic/semi */
+    const contentDedupPlan = uniqueRowIndexes !== null ?
         {
             uniqueCount: contentUniqueCount,
             sourceRowCount: rowCount,
-            uniqueRowIndexes: buildContentUniqueRowIndexes(contentUniqueIndexes, contentUniqueCount),
+            uniqueRowIndexes,
             uniqueSignatures: parsed.contentUniqueSignatures,
             resolvedFlags: new Uint8Array(contentUniqueCount),
             resolvedOffsets: new Float64Array(contentUniqueCount),
@@ -2250,10 +2297,9 @@ null :
     // Exact canonical-content IDs already include glossary, rules and tags.
     // A media requirement needs one representative of that content, while all
     // term rows and their individual expression/reading/score remain intact.
-    const seenMediaContent = mediaHintFastScan && contentDedupPlan !== null ?
+    const seenMediaContent = fusedMediaRows === null && mediaHintFastScan && contentDedupPlan !== null ?
         new Uint8Array(contentDedupPlan.uniqueCount) :
         null;
-    let rowDecodeMs = 0;
     let nativeStringPlanMs = 0;
     let nativeStringPlanChunkCount = 0;
     let nativeStringPlanFallbackChunkCount = 0;
@@ -2331,10 +2377,10 @@ null :
             /** @type {ReturnType<typeof createTermRecordPreinternedPlanBuilder>|null} */
             const planBuilder = nativeStringPlan === null ? createTermRecordPreinternedPlanBuilder(count * 2) : null;
             /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>} */
-            const mediaRows = [];
+            const mediaRows = fusedMediaRows ?? [];
 
             const projectMediaHintsOnly = fusedStringPlan !== null && !emitTermByteLists && emitContentSlab;
-            const needsRowProjection = !projectMediaHintsOnly || mediaHintFastScan;
+            const needsRowProjection = fusedMediaRows === null && (!projectMediaHintsOnly || mediaHintFastScan);
             const tRowDecodeStart = needsRowProjection ? Date.now() : 0;
             for (let sourceIndex = start, i = 0; needsRowProjection && sourceIndex < end; ++sourceIndex, ++i) {
                 const o = sourceIndex * META_U32_FIELDS;
