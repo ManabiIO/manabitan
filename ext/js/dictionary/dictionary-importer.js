@@ -1975,13 +1975,16 @@ export class DictionaryImporter {
                             }
                             /** @type {import('dictionary-importer').ImportRequirement[]} */
                             const prefetchRequirements = [];
-                            // Source reads have now populated any reusable archive cache.
-                            // Drain its media after term sinks release borrowed WASM views.
-                            const deferCachedArchiveImages = rawZipPayloadReader?.supportsCachedBatchReads() === true;
+                            // The speculative packer already reads and verifies these
+                            // payloads. Keep all references for its selected index instead
+                            // of duplicating the first batch as decoded SQLite media.
+                            // Cached archives also drain after borrowed term views expire.
+                            // eslint-disable-next-line @stylistic/semi
+                            const deferArchiveImages = sourceMediaPreparation !== null || rawZipPayloadReader?.supportsCachedBatchReads() === true
                             for (const requirement of notAddedRequirements) {
                                 const file = fileMap.get(requirement.source.path);
                                 if (
-                                    deferCachedArchiveImages &&
+                                    deferArchiveImages &&
                                     (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
