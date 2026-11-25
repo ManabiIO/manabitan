@@ -1207,6 +1207,41 @@ static int parse_int32_token(
     return 1;
 }
 
+typedef struct {
+    int32_t score;
+    int32_t sequence;
+    int available;
+} TermRowNumbers;
+
+/* The fused strict parser consumes the common integer columns while finding
+ * their token boundaries. Other JSON number spellings retain the ordinary
+ * grammar validator and number-preserving projection fallback. */
+static int parse_int32_span(
+    const uint8_t* src,
+    uint32_t len,
+    uint32_t start,
+    uint32_t* out_end,
+    int32_t* out_value
+) {
+    uint32_t i = start;
+    const int negative = i < len && src[i] == '-';
+    if (negative) { ++i; }
+    const uint32_t digits_start = i;
+    if (i >= len || src[i] < '0' || src[i] > '9') { return 0; }
+    uint32_t value = 0u;
+    do {
+        const uint32_t digit = (uint32_t)(src[i] - '0');
+        if (value > 214748364u || (value == 214748364u && digit > (negative ? 8u : 7u))) { return 0; }
+        value = value * 10u + digit;
+        ++i;
+    } while (i < len && src[i] >= '0' && src[i] <= '9');
+    if (i - digits_start > 1u && src[digits_start] == '0') { return 0; }
+    if (i < len && src[i] != ',' && src[i] != ']' && src[i] != '}' && !is_ws(src[i])) { return 0; }
+    *out_end = i;
+    *out_value = negative ? (int32_t)(0u - value) : (int32_t)value;
+    return 1;
+}
+
 static int set_field(const uint8_t* src, TermRowMeta* meta, uint32_t field_index, uint32_t start, uint32_t end) {
     uint32_t length = end > start ? (end - start) : 0u;
     const int string_token = length >= 2u && src[start] == '"' && src[end - 1u] == '"';
@@ -1357,7 +1392,8 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    TermRowNumbers* numbers
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     uint32_t i = skip_ws(src, len, row_start + 1u);
@@ -1395,7 +1431,16 @@ static int parse_format3_row(
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
-    if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) { return 0; }
+    if (numbers != 0) {
+        numbers->available = parse_int32_span(src, len, i, &end, &numbers->score);
+        if (numbers->available) {
+            if (numbers->score == 0 && src[i] == '-') { numbers->available = 0; }
+        } else if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) {
+            return 0;
+        }
+    } else if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) {
+        return 0;
+    }
     meta->score_start = i;
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
@@ -1420,12 +1465,16 @@ static int parse_format3_row(
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
-    if (!scan_scalar_span(src, len, i, &end)) { return 0; }
-    if (is_null_token(src, i, end - i)) {
-        meta->sequence_start = 0xffffffffu;
-    } else {
-        if (!is_valid_json_number(src, i, end)) { return 0; }
+    if (numbers != 0 && numbers->available && parse_int32_span(src, len, i, &end, &numbers->sequence)) {
         meta->sequence_start = i;
+    } else if (len - i >= 4u && is_null_token(src, i, 4u)) {
+        end = i + 4u;
+        meta->sequence_start = 0xffffffffu;
+        if (numbers != 0) { numbers->sequence = -1; }
+    } else {
+        if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) { return 0; }
+        meta->sequence_start = i;
+        if (numbers != 0) { numbers->available = 0; }
     }
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
@@ -1451,12 +1500,13 @@ static int parse_row_single_pass(
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
     int validate_glossary_types,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    TermRowNumbers* numbers
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask, numbers
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -2097,7 +2147,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0)) {
             return -1;
         }
         ++row_count;
@@ -2135,7 +2185,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0)) {
             return -1;
         }
         ++row_count;
@@ -3221,9 +3271,15 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         }
         uint32_t key_escape_mask;
+        TermRowNumbers numbers = {0, -1, 0};
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask,
+                validate_glossary_types != 0u ? &numbers : 0)) {
             return -1;
+        }
+        if (validate_glossary_types != 0u && !numbers.available) {
+            *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+            return -5;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
         if (glossary_witness != 0xffffffffu && experiment_stats != 0) { ++experiment_stats[1]; }
@@ -3354,32 +3410,32 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         expression_indexes[row_count] = string_indexes[0];
         reading_indexes[row_count] = string_indexes[1];
         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
-        // The row parser already validated the JSON grammar of both numbers.
-        uint32_t score_end = 0u;
-        int32_t score = 0;
-        if (
-            !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
-            // Integer storage cannot preserve a negative zero score. Use the
-            // ordinary number-preserving path, even in otherwise integer banks.
-            (score == 0 && src[parsed_row->score_start] == '-')
-        ) {
-            *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
-            return -5;
-        }
-        scores[row_count] = score;
-        int32_t sequence = -1;
-        if (parsed_row->sequence_start != 0xffffffffu) {
-            uint32_t sequence_end = 0u;
+        // The strict source path already projected both integer columns while
+        // validating the row. Generic parser callers retain their existing
+        // separate numeric projection and fallback behavior.
+        if (!numbers.available) {
+            uint32_t score_end = 0u;
             if (
-                !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
-                !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)
+                !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
+                !parse_int32_token(src, parsed_row->score_start, score_end, 0, &numbers.score) ||
+                (numbers.score == 0 && src[parsed_row->score_start] == '-')
             ) {
                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
                 return -5;
             }
+            if (parsed_row->sequence_start != 0xffffffffu) {
+                uint32_t sequence_end = 0u;
+                if (
+                    !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
+                    !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &numbers.sequence)
+                ) {
+                    *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
+                    return -5;
+                }
+            }
         }
-        sequences[row_count] = sequence;
+        scores[row_count] = numbers.score;
+        sequences[row_count] = numbers.sequence;
 
         const uint32_t row_offset = row_count * 4u;
         uint32_t recent_match = 0xffffffffu;
