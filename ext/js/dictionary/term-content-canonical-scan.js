@@ -142,12 +142,13 @@ export class NativeCanonicalScanner {
      */
     async scan(db, ctx, metrics) {
         const before = {...this.stats};
-        /** @type {Set<WebAssembly.Memory>} */
-        const scratchMemories = new Set();
+        /** @type {{memory: WebAssembly.Memory|null}} */
+        const scratchOwner = {memory: null};
         try {
-            return await this._scan(db, ctx, scratchMemories);
+            return await this._scan(db, ctx, scratchOwner);
         } finally {
-            for (const memory of scratchMemories) {
+            const {memory} = scratchOwner;
+            if (memory !== null) {
                 activeScratch.set(memory, /** @type {number} */ (activeScratch.get(memory)) - 1);
             }
             for (const [counter, key] of Object.entries(CANONICAL_SCAN_METRICS)) {
@@ -191,10 +192,11 @@ export class NativeCanonicalScanner {
             arena.signaturePresent, arena.signature1, arena.signature2, arena.signature3]) {
             if (table.buffer !== buffer || table.byteOffset < PREFIX) { return null }
         }
+        // Dense columns avoid touching unused gaps in the reserved scratch.
         new Uint32Array(buffer, META, count).set(indexes)
-        new Uint32Array(buffer, META + MAX * 4, count).set(new Uint32Array(hash1s.buffer, hash1s.byteOffset, count))
-        new Uint32Array(buffer, META + MAX * 8, count).set(new Uint32Array(hash2s.buffer, hash2s.byteOffset, count))
-        new Uint32Array(buffer, META + MAX * 12, count).set(new Uint32Array(lengths.buffer, lengths.byteOffset, count))
+        new Uint32Array(buffer, META + count * 4, count).set(new Uint32Array(hash1s.buffer, hash1s.byteOffset, count))
+        new Uint32Array(buffer, META + count * 8, count).set(new Uint32Array(hash2s.buffer, hash2s.byteOffset, count))
+        new Uint32Array(buffer, META + count * 12, count).set(new Uint32Array(lengths.buffer, lengths.byteOffset, count))
         new Uint32Array(buffer, 1088, 7).set([
             arena.hash1.byteOffset,
             arena.hash2.byteOffset,
@@ -212,11 +214,11 @@ export class NativeCanonicalScanner {
     /**
      * @param {ScanOwner} db
      * @param {ScanContext} ctx
-     * @param {Set<WebAssembly.Memory>} scratchMemories
+     * @param {{memory: WebAssembly.Memory|null}} scratchOwner
      * @returns {Promise<number|null>}
      * @throws {Error} Native or exact failures after mutation must reach outer rollback.
      */
-    async _scan(db, ctx, scratchMemories) {
+    async _scan(db, ctx, scratchOwner) {
         const stats = this.stats;
         const {
             chunk,
@@ -335,8 +337,12 @@ export class NativeCanonicalScanner {
                 stats.fallbackReason = 'unsupported-or-abi';
                 return null;
             }
-            if (!scratchMemories.has(a.memory)) {
-                scratchMemories.add(a.memory);
+            if (scratchOwner.memory !== a.memory) {
+                const previous = scratchOwner.memory;
+                if (previous !== null) {
+                    activeScratch.set(previous, /** @type {number} */ (activeScratch.get(previous)) - 1);
+                }
+                scratchOwner.memory = a.memory;
                 activeScratch.set(a.memory, (activeScratch.get(a.memory) ?? 0) + 1);
             }
             const buffer = a.memory.buffer;

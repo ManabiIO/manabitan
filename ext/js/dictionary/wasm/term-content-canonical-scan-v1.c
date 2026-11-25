@@ -53,8 +53,8 @@ __attribute__((export_name("canonical_prefix_bytes")))
 uint32_t canonical_prefix_bytes(void) { return PREFIX; }
 
 // Read-only publication preflight. Config at 1088: hash1, hash2, state,
-// length, capacity, first, count. Four input columns at META hold reservation
-// IDs, hashes and lengths. Publication remains with the synchronous JS owner;
+// length, capacity, first, count. Four count-sized columns at META hold
+// reservation IDs, hashes and lengths. Publication remains with the JS owner;
 // a malformed row or memory layout cannot partially change metadata state.
 __attribute__((export_name("validate_reserved_metadata")))
 int32_t validate_reserved_metadata(void) {
@@ -76,9 +76,9 @@ int32_t validate_reserved_metadata(void) {
     for (uint32_t i = 0; i < c[6]; ++i) {
         const uint32_t index = c[5] + i;
         if (input[i] != index || state[index] != 2 ||
-            hash1[index] != input[MAX_ROWS + i] ||
-            hash2[index] != input[2u * MAX_ROWS + i] ||
-            length[index] != input[3u * MAX_ROWS + i]) {
+            hash1[index] != input[c[6] + i] ||
+            hash2[index] != input[2u * c[6] + i] ||
+            length[index] != input[3u * c[6] + i]) {
             return -2;
         }
     }
