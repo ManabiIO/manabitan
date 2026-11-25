@@ -1562,6 +1562,24 @@ export class DictionaryImporter {
         };
 
         try {
+            this._throwIfCancelled();
+            // The session owns parser cleanup before startup begins. Overlap
+            // worker initialization with the required journal and OPFS setup.
+            if (
+                version === 3 &&
+                !this._disableTermBankWasmFastPath &&
+                !useTermArtifactFiles &&
+                !usePackedTermArtifact &&
+                enableTermEntryContentDedup &&
+                effectiveTermContentStorageMode === 'raw-bytes' &&
+                activeTermFiles.length >= 4 &&
+                (this._skipMediaImport || (
+                    termArtifactManifest?.includesMediaFiles !== true &&
+                    !this._archiveHasImageMediaFiles(fileMap)
+                ))
+            ) {
+                void prewarmParallelTermBankParser(this._termBankExperiments);
+            }
             // Start the bounded first read before transaction and media setup so
             // ZIP worker startup is not paid on the term-processing critical path.
             if (compressedImportRunPlan === null) {
@@ -2107,18 +2125,6 @@ export class DictionaryImporter {
             if (useExternalPackedMediaStorage && this._skipImageMetadata) {
                 packedMediaArtifactBytes = null;
                 packedMediaArtifactBlob = null;
-            }
-            if (
-                version === 3 &&
-                !this._disableTermBankWasmFastPath &&
-                !useTermArtifactFiles &&
-                !usePackedTermArtifact &&
-                !useTermMediaRequirements &&
-                enableTermEntryContentDedup &&
-                effectiveTermContentStorageMode === 'raw-bytes' &&
-                activeTermFiles.length >= 4
-            ) {
-                void prewarmParallelTermBankParser(this._termBankExperiments);
             }
             let importWideSourceRunEnabled = true;
             for (let termFileIndex = 0; termFileIndex < activeTermFiles.length; ++termFileIndex) {

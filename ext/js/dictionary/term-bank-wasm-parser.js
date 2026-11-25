@@ -2660,12 +2660,12 @@ class ParallelTermBankParserPool {
      * @returns {Promise<boolean>}
      */
     async prewarm(options = {}) {
+        // Speculative startup cannot reconfigure or retire an active owner's pool.
+        if (this._activeRun !== null) { return false; }
         const disposalGeneration = this._disposalGeneration;
         const workerCount = getParallelTermBankParserWorkerCount(options);
         try {
             if (this._disposalRequested) {
-                const activeRun = this._activeRun;
-                if (activeRun !== null) { await activeRun.done; }
                 await this._disposeIdleWorkers();
             }
             if (disposalGeneration !== this._disposalGeneration) { return false; }
