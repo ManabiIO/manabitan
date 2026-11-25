@@ -68,7 +68,6 @@ const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
 const CRC_REUSE_MIN_SOURCE_BYTES = 4 * 1024 * 1024;
-const CRC_REUSE_MIN_COMPRESSION_RATIO = 32;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
@@ -248,13 +247,12 @@ export async function inflateCompressedTermBankSourcesWasm(sources, options = {}
     }
 
     const wasm = await getWasm();
-    // Reuse is profitable only for highly repetitive source groups. Every other
-    // caller keeps immediate whole-bank CRC validation, including standalone
-    // inflation and source groups without the fused glossary witness proof.
+    // Only a private fused parser transaction may defer source validation.
+    // Unique glossary runs retain a contiguous scan; full-equality witnesses
+    // let the verifier avoid scanning repeated raw source bytes.
     const deferCrc = reuseGlossaryCrc && sources.length > 1 &&
     experiments.experimentalValidatedGlossaryReuse && !experiments.experimentalSkipFusedParse &&
     uncompressedBytes >= CRC_REUSE_MIN_SOURCE_BYTES &&
-    compressedBytes <= Math.floor(uncompressedBytes / CRC_REUSE_MIN_COMPRESSION_RATIO) &&
     typeof wasm.verify_term_bank_source_crcs === 'function';
     wasm.wasm_reset_heap();
     const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'compressed term-bank input');

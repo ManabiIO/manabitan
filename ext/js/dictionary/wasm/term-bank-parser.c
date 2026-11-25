@@ -123,7 +123,7 @@ static inline uint32_t crc32_word8(uint64_t word, uint32_t table[8][256]) {
         table[0][word >> 56u];
 }
 
-static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
+static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length, uint32_t previous_crc) {
     const uint32_t step = CRC32_BRAIDS * 8u;
     if (crc32_braid_initialized == 0u) {
         for (uint32_t i = 0u; i < 8u; ++i) {
@@ -137,7 +137,7 @@ static uint32_t crc32_bytes_braided(const uint8_t* data, uint32_t length) {
         }
         crc32_braid_initialized = 1u;
     }
-    uint32_t state[CRC32_BRAIDS] = {0xffffffffu};
+    uint32_t state[CRC32_BRAIDS] = {~previous_crc};
     const uint32_t final_group = (length / step - 1u) * step;
     for (uint32_t offset = 0u; offset < final_group; offset += step) {
         for (uint32_t i = 0u; i < CRC32_BRAIDS; ++i) {
@@ -180,7 +180,7 @@ static uint32_t crc32_bytes(const uint8_t* data, uint32_t length) {
         return crc32_bytes_serial(data, length);
     }
 
-    return crc32_bytes_braided(data, length);
+    return crc32_bytes_braided(data, length, 0u);
 }
 
 #if defined(TERM_BANK_CRC_TEST)
@@ -425,12 +425,20 @@ typedef struct {
     uint32_t table[8][16];
 } Crc32Shift;
 
+static uint32_t crc32_shift_powers[32];
+static uint32_t crc32_shift_powers_initialized;
+
 static void crc32_prepare_shift(Crc32Shift* shift, uint32_t length) {
-    uint32_t power = 0x00800000u; /* x^8: advance one byte. */
+    if (crc32_shift_powers_initialized == 0u) {
+        crc32_shift_powers[0] = 0x00800000u; /* x^8: advance one byte. */
+        for (uint32_t i = 1u; i < 32u; ++i) {
+            crc32_shift_powers[i] = crc32_multiply_mod(crc32_shift_powers[i - 1u], crc32_shift_powers[i - 1u]);
+        }
+        crc32_shift_powers_initialized = 1u;
+    }
     uint32_t factor = 0x80000000u;
-    for (uint32_t remaining = length; remaining != 0u; remaining >>= 1u) {
-        if ((remaining & 1u) != 0u) { factor = crc32_multiply_mod(factor, power); }
-        power = crc32_multiply_mod(power, power);
+    for (uint32_t remaining = length, bit = 0u; remaining != 0u; remaining >>= 1u, ++bit) {
+        if ((remaining & 1u) != 0u) { factor = crc32_multiply_mod(factor, crc32_shift_powers[bit]); }
     }
     uint32_t basis[32];
     basis[31] = factor;
@@ -456,9 +464,12 @@ static uint32_t crc32_shift(const Crc32Shift* shift, uint32_t crc) {
         shift->table[6][(crc >> 24u) & 15u] ^ shift->table[7][crc >> 28u];
 }
 
-/* These gaps are usually short row fields, separators, or array wrappers.
+/* Gaps include unreferenced glossary runs as well as row fields and wrappers.
  * Both the initial and returned state use the ordinary complemented CRC. */
 static uint32_t crc32_update_gap(uint32_t crc, const uint8_t* data, uint32_t length) {
+    if (length >= CRC32_BRAID_THRESHOLD) {
+        return crc32_bytes_braided(data, length, crc);
+    }
     crc = ~crc;
     uint32_t offset = 0u;
     while (length - offset >= 16u) {
@@ -482,8 +493,9 @@ uint32_t term_bank_crc32_combine_test(uint32_t first, uint32_t second, uint32_t 
 
 /* The witness array comes only from reuse_validated_glossary: each ID proves
  * full raw-byte equality with a previously parsed glossary in this invocation.
- * Canonical content IDs MUST NOT be used here. Consume the IDs in source order,
- * replacing them with CRCs; no content-dependent cache survives this call.
+ * Canonical content IDs MUST NOT be used here. Flatten the IDs, then replace
+ * their roots with CRCs in source order. No content-dependent cache survives
+ * this call.
  * Passing no rows performs the ordinary whole-bank verification for failures
  * and non-fused fallback paths. */
 __attribute__((visibility("default")))
@@ -506,6 +518,22 @@ int32_t verify_term_bank_source_crcs(
     const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
     uint32_t* witnesses = (uint32_t*)(uintptr_t)glossary_witnesses_ptr;
     uint32_t* stats = (uint32_t*)(uintptr_t)stats_ptr;
+    /* Flatten the exact-equality witnesses before consuming them. Only roots
+     * that are actually reused need a separate CRC; other rows remain inside
+     * one contiguous source scan. The marker exceeds every possible metadata
+     * row ID in a wasm32 heap, and is replaced with the root's CRC in source
+     * order before a later witness can read it. */
+    const uint32_t needed_root = 0xfffffffeu;
+    for (uint32_t row = 0u; row < row_count; ++row) {
+        const uint32_t witness = witnesses[row];
+        if (witness == 0xffffffffu) { continue; }
+        if (witness >= row || rows[witness].glossary_length != rows[row].glossary_length) { return -1; }
+        const uint32_t prior = witnesses[witness];
+        const uint32_t root = prior >= needed_root ? witness : prior;
+        if (root > witness || rows[root].glossary_length != rows[row].glossary_length) { return -1; }
+        witnesses[row] = root;
+        witnesses[root] = needed_root;
+    }
     uint32_t next_row = 0u;
     uint32_t bank_end = 0u;
     uint32_t reused_bytes = 0u;
@@ -524,15 +552,21 @@ int32_t verify_term_bank_source_crcs(
             crc = crc32_bytes(src + start, length);
         } else {
             uint32_t cursor = start;
+            uint32_t validated_end = start;
             crc = 0u;
             while (next_row < row_count && rows[next_row].glossary_start < bank_end) {
                 const uint32_t glossary_start = rows[next_row].glossary_start;
                 const uint32_t glossary_length = rows[next_row].glossary_length;
-                if (glossary_start < cursor || glossary_length == 0u || glossary_length > bank_end - glossary_start) { return -1; }
-                crc = crc32_update_gap(crc, src + cursor, glossary_start - cursor);
+                if (glossary_start < validated_end || glossary_length == 0u || glossary_length > bank_end - glossary_start) { return -1; }
+                validated_end = glossary_start + glossary_length;
                 const uint32_t witness = witnesses[next_row];
-                uint32_t glossary_crc;
                 if (witness == 0xffffffffu) {
+                    ++next_row;
+                    continue;
+                }
+                crc = crc32_update_gap(crc, src + cursor, glossary_start - cursor);
+                uint32_t glossary_crc;
+                if (witness == needed_root) {
                     glossary_crc = crc32_bytes(src + glossary_start, glossary_length);
                 } else {
                     if (witness >= next_row || rows[witness].glossary_length != glossary_length) { return -1; }
@@ -540,7 +574,7 @@ int32_t verify_term_bank_source_crcs(
                     reused_bytes += glossary_length;
                     ++reused_glossaries;
                 }
-                witnesses[next_row] = glossary_crc;
+                if (witness == needed_root) { witnesses[next_row] = glossary_crc; }
                 if (shift.length != glossary_length) { crc32_prepare_shift(&shift, glossary_length); }
                 crc = crc32_shift(&shift, crc) ^ glossary_crc;
                 cursor = glossary_start + glossary_length;
