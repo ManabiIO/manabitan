@@ -1,0 +1,666 @@
+{
+  "schema": 1,
+  "complete": true,
+  "boundary": "Actual production media-preparation worker handler through posted packed Blob/index; includes dense ZIP reads, entry selection, planning, all payload reads and CRC checks, and index creation. Worker startup, module imports, WASM compilation, file opening and oracle hashing are outside timing. Each invocation uses a fresh Node process running the unchanged worker handler; no Blob crosses a Node worker lifetime. No browser import or peak-memory claim.",
+  "node": "v22.22.0",
+  "v8": "12.4.254.21-node.33",
+  "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+  "sourceIdentity": {
+    "A": {
+      "root": "/workspace/scratch/21ba6d4042b8/live",
+      "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "files": {
+        "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+        "ext/js/dictionary/source-zip-media-pack.js": "8c0587b49630f66db5f4f2cf96f1638a423c78e3503d0401f5f8c328a4622d6d",
+        "ext/js/dictionary/dense-zip-directory.js": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+        "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+        "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+      }
+    },
+    "B": {
+      "root": "/workspace/scratch/21ba6d4042b8/vndb",
+      "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "files": {
+        "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+        "ext/js/dictionary/source-zip-media-pack.js": "79a62643742ca02b31932345c412c1dd132669b75e691cb0b7196bacda31988c",
+        "ext/js/dictionary/dense-zip-directory.js": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "9f7800433cdc61a1b7cfb439703f1fe726a84dbf2f6c4c42820d969c16a1d94f",
+        "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+        "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+      }
+    }
+  },
+  "runnerSha256": "d4d758fbf2dfbec04912f505957b20b217dab62bd8306db78018c7fcb6eb756c",
+  "workerShimSha256": "4fa04a206720599e648fe7e619fb90116313eabe09ee0da8a67db7abf9e56895",
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "protocol": {
+    "warmups": "AB",
+    "measured": "ABBAABBA"
+  },
+  "hostBefore": {
+    "at": "2026-11-25T14:54:14.457Z",
+    "load": [
+      14.69,
+      16.08,
+      8.33
+    ],
+    "freeMemory": 3321249792
+  },
+  "oracle": [
+    {
+      "arm": "A",
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "blobIdentity": {
+        "sha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+        "bytes": 195649882
+      },
+      "metrics": {
+        "readMs": 1021,
+        "validationMs": 269,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "measurement": {
+        "elapsedMs": 2183.6236550000003,
+        "cpuUserMs": 1523.128,
+        "cpuSystemMs": 252.362
+      }
+    },
+    {
+      "arm": "B",
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "blobIdentity": {
+        "sha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+        "bytes": 195649882
+      },
+      "metrics": {
+        "readMs": 1075,
+        "validationMs": 426,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "measurement": {
+        "elapsedMs": 2228.313094,
+        "cpuUserMs": 1650.13,
+        "cpuSystemMs": 242.449
+      }
+    }
+  ],
+  "observations": [
+    {
+      "stage": "warmup",
+      "pair": 0,
+      "arm": "A",
+      "elapsedMs": 1969.9883129999998,
+      "cpuUserMs": 1134.898,
+      "cpuSystemMs": 296.666,
+      "cpuMs": 1431.5639999999999,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 855,
+        "validationMs": 322,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:21.334Z",
+        "load": [
+          14.42,
+          15.97,
+          8.38
+        ],
+        "freeMemory": 2848841728
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:23.512Z",
+        "load": [
+          14.42,
+          15.97,
+          8.38
+        ],
+        "freeMemory": 3156602880
+      }
+    },
+    {
+      "stage": "warmup",
+      "pair": 0,
+      "arm": "B",
+      "elapsedMs": 1975.5730210000002,
+      "cpuUserMs": 1383.336,
+      "cpuSystemMs": 163.153,
+      "cpuMs": 1546.489,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 662,
+        "validationMs": 305,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:23.514Z",
+        "load": [
+          14.42,
+          15.97,
+          8.38
+        ],
+        "freeMemory": 3156602880
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:25.694Z",
+        "load": [
+          14.55,
+          15.97,
+          8.42
+        ],
+        "freeMemory": 3161821184
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 0,
+      "arm": "A",
+      "elapsedMs": 1602.820281,
+      "cpuUserMs": 1167.318,
+      "cpuSystemMs": 323.985,
+      "cpuMs": 1491.3029999999999,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 522,
+        "validationMs": 383,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:25.695Z",
+        "load": [
+          14.55,
+          15.97,
+          8.42
+        ],
+        "freeMemory": 3161821184
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:27.531Z",
+        "load": [
+          14.55,
+          15.97,
+          8.42
+        ],
+        "freeMemory": 2777722880
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 0,
+      "arm": "B",
+      "elapsedMs": 3026.6231740000003,
+      "cpuUserMs": 1148.472,
+      "cpuSystemMs": 220.319,
+      "cpuMs": 1368.791,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 1402,
+        "validationMs": 361,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:27.532Z",
+        "load": [
+          14.55,
+          15.97,
+          8.42
+        ],
+        "freeMemory": 2777956352
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:30.933Z",
+        "load": [
+          14.75,
+          15.99,
+          8.47
+        ],
+        "freeMemory": 1900986368
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 1,
+      "arm": "B",
+      "elapsedMs": 2596.1206300000003,
+      "cpuUserMs": 1437.612,
+      "cpuSystemMs": 296.902,
+      "cpuMs": 1734.5140000000001,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 1038,
+        "validationMs": 344,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:30.936Z",
+        "load": [
+          14.75,
+          15.99,
+          8.47
+        ],
+        "freeMemory": 1900986368
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:33.943Z",
+        "load": [
+          14.75,
+          15.99,
+          8.47
+        ],
+        "freeMemory": 2358796288
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 1,
+      "arm": "A",
+      "elapsedMs": 1584.970325,
+      "cpuUserMs": 1073.887,
+      "cpuSystemMs": 222.842,
+      "cpuMs": 1296.729,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 582,
+        "validationMs": 266,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:33.947Z",
+        "load": [
+          14.75,
+          15.99,
+          8.47
+        ],
+        "freeMemory": 2391015424
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:35.722Z",
+        "load": [
+          14.77,
+          15.97,
+          8.5
+        ],
+        "freeMemory": 1702678528
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 2,
+      "arm": "A",
+      "elapsedMs": 1886.57971,
+      "cpuUserMs": 1138.64,
+      "cpuSystemMs": 410.661,
+      "cpuMs": 1549.3010000000002,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 889,
+        "validationMs": 277,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:35.722Z",
+        "load": [
+          14.77,
+          15.97,
+          8.5
+        ],
+        "freeMemory": 1702678528
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:37.848Z",
+        "load": [
+          14.77,
+          15.97,
+          8.5
+        ],
+        "freeMemory": 1542270976
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 2,
+      "arm": "B",
+      "elapsedMs": 1662.1912249999998,
+      "cpuUserMs": 1012.671,
+      "cpuSystemMs": 339.341,
+      "cpuMs": 1352.0120000000002,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 640,
+        "validationMs": 261,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:37.849Z",
+        "load": [
+          14.77,
+          15.97,
+          8.5
+        ],
+        "freeMemory": 1542270976
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:40.204Z",
+        "load": [
+          14.77,
+          15.97,
+          8.5
+        ],
+        "freeMemory": 1818755072
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 3,
+      "arm": "B",
+      "elapsedMs": 3309.780035,
+      "cpuUserMs": 1401.82,
+      "cpuSystemMs": 475.445,
+      "cpuMs": 1877.2649999999999,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 1857,
+        "validationMs": 271,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:40.205Z",
+        "load": [
+          14.77,
+          15.97,
+          8.5
+        ],
+        "freeMemory": 1818755072
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:43.736Z",
+        "load": [
+          14.95,
+          15.99,
+          8.55
+        ],
+        "freeMemory": 1670250496
+      }
+    },
+    {
+      "stage": "timed",
+      "pair": 3,
+      "arm": "A",
+      "elapsedMs": 3452.1161620000003,
+      "cpuUserMs": 1091.198,
+      "cpuSystemMs": 510.859,
+      "cpuMs": 1602.057,
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "blobBytes": 195649882,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "metrics": {
+        "readMs": 2254,
+        "validationMs": 272,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      },
+      "hostBefore": {
+        "at": "2026-11-25T14:54:43.739Z",
+        "load": [
+          14.95,
+          15.99,
+          8.55
+        ],
+        "freeMemory": 1670483968
+      },
+      "hostAfter": {
+        "at": "2026-11-25T14:54:47.484Z",
+        "load": [
+          15.11,
+          16.01,
+          8.59
+        ],
+        "freeMemory": 1849958400
+      }
+    }
+  ],
+  "comparisons": {
+    "elapsedMs": {
+      "pairs": [
+        {
+          "pair": 0,
+          "A": 1602.820281,
+          "B": 3026.6231740000003,
+          "ratio": 1.8883110039708815
+        },
+        {
+          "pair": 1,
+          "A": 1584.970325,
+          "B": 2596.1206300000003,
+          "ratio": 1.6379616634147396
+        },
+        {
+          "pair": 2,
+          "A": 1886.57971,
+          "B": 1662.1912249999998,
+          "ratio": 0.8810606921029591
+        },
+        {
+          "pair": 3,
+          "A": 3452.1161620000003,
+          "B": 3309.780035,
+          "ratio": 0.9587684422190658
+        }
+      ],
+      "medianPairedPercent": 29.83650528169026,
+      "equalWorkPercent": 24.256516342768307
+    },
+    "cpuMs": {
+      "pairs": [
+        {
+          "pair": 0,
+          "A": 1491.3029999999999,
+          "B": 1368.791,
+          "ratio": 0.9178490219626729
+        },
+        {
+          "pair": 1,
+          "A": 1296.729,
+          "B": 1734.5140000000001,
+          "ratio": 1.3376071638715568
+        },
+        {
+          "pair": 2,
+          "A": 1549.3010000000002,
+          "B": 1352.0120000000002,
+          "ratio": 0.8726593476671093
+        },
+        {
+          "pair": 3,
+          "A": 1602.057,
+          "B": 1877.2649999999999,
+          "ratio": 1.1717841500021533
+        }
+      ],
+      "medianPairedPercent": 4.481658598241323,
+      "equalWorkPercent": 6.620073778620372
+    }
+  },
+  "hostAfter": {
+    "at": "2026-11-25T14:54:47.514Z",
+    "load": [
+      15.11,
+      16.01,
+      8.59
+    ],
+    "freeMemory": 1852526592
+  }
+}

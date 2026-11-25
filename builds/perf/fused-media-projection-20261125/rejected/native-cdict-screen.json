@@ -1,0 +1,335 @@
+{
+    "decision": "Rejected for implementation in this round: mixed exploratory native-only timings do not justify a new WASM export/toolchain integration.",
+    "boundary": "Native libzstd 1.5.7 compression plus per-block output hashing; excludes parser work, worker startup, WASM execution, storage and UI. This is not a compression-only or import benchmark.",
+    "sample": "Canonical unique-content blocks from Jitendex term-bank groups starting at bank indexes 0,100,210, up to ten banks each; 56,555 source rows.",
+    "fixtureSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "dictionarySha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+    "rawReportSha256": "4c4b24d4a209176bf6f1e3e5bf63ece01749594abd94337dc962d8e1449ffc4f",
+    "captureScriptSha256": "00543d392dad6fecb706d61badf5f07813d096ab7258f0f078f0860465224819",
+    "comparisonScriptSha256": "95f54895ba4545cc1a13740377567c339d6092ea9839fa6011baec038790963d",
+    "nativeVersion": "1.5.7",
+    "compressionLevel": -1,
+    "blocks": 50,
+    "sourceBytes": 51564333,
+    "cdictBytes": 47680,
+    "contextBytesPerArm": 549920,
+    "compressedBytes": 4203636,
+    "armNames": {
+        "0": "ZSTD_compress_usingDict",
+        "1": "ZSTD_compress_usingCDict"
+    },
+    "roundZeroTreatedAsWarmup": true,
+    "observations": [
+        {
+            "round": 0,
+            "arm": 0,
+            "ms": 59.711885,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 0,
+            "arm": 1,
+            "ms": 50.598328,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 1,
+            "arm": 1,
+            "ms": 57.177644,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 1,
+            "arm": 0,
+            "ms": 54.064876,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 2,
+            "arm": 0,
+            "ms": 68.028046,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 2,
+            "arm": 1,
+            "ms": 51.82022,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 3,
+            "arm": 1,
+            "ms": 50.596716,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 3,
+            "arm": 0,
+            "ms": 50.574111,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 4,
+            "arm": 0,
+            "ms": 50.968203,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 4,
+            "arm": 1,
+            "ms": 56.483193,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 5,
+            "arm": 1,
+            "ms": 50.198989,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 5,
+            "arm": 0,
+            "ms": 51.402364,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 6,
+            "arm": 0,
+            "ms": 51.663906,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        },
+        {
+            "round": 6,
+            "arm": 1,
+            "ms": 50.525399,
+            "bytes": 4203636,
+            "ctxBytes": 549920
+        }
+    ],
+    "allBlockOutputsIdenticalAcrossAllObservations": true,
+    "sharedBlockOutputOracles": [
+        [
+            78810,
+            "d7cb7ae77022417f8819f3e9ac246585244ecdb63ad0d79c36debf8e01da8c9b"
+        ],
+        [
+            78773,
+            "54b0fa959140d0d5c41065bf747068e64043d65147f83f08c7afe33a71627e97"
+        ],
+        [
+            79919,
+            "2705e7597eea20c75ca7855decf80ef03c4ef349341f71ced5dab68b14fe0b2e"
+        ],
+        [
+            85917,
+            "cb2bf19f70bb8bf63d7e415c2b17e2a507a17705dab22dfaca4d514be31d625f"
+        ],
+        [
+            81893,
+            "fe4eff71778e9b35b2be7db82c025bb2d057243c88f3c1b6ee4571df37078cd1"
+        ],
+        [
+            76890,
+            "45119b4bcb430e2fcc3801012c07d367f78d3fbefc35f16c9066bf91a3cff347"
+        ],
+        [
+            71122,
+            "1036d6c0823528843515531619678edeb8dfb6ef02b4ce9d0cd255805666a4cc"
+        ],
+        [
+            71328,
+            "c9770599ca393c1d42cdb93a47d206a1b17b8eb5818e82b1bc512fac5c4cfd63"
+        ],
+        [
+            74939,
+            "360a35bab73b59ded432a70e6cd9b638103b3080129fbe9869b4a7073c16e293"
+        ],
+        [
+            74759,
+            "80efe20ee6f14f782b8515b811e1407518a75e86b2e1c365e1e4e83942d042a6"
+        ],
+        [
+            76098,
+            "f84c04ac8d071410fc4220abd2aaac3ffb39adcb8ce37577cb76c9244c6ce42d"
+        ],
+        [
+            77497,
+            "956f701c82d65afe685dcd4baf3ece3ca6b14380170284704dfcec2aaeb704ff"
+        ],
+        [
+            82710,
+            "085e379155938e5a1f4ae56b1c8bbe597706c6e0be2cfe8cbbc00d860c37595f"
+        ],
+        [
+            76394,
+            "049564b296223d3211490059ac7f59e58b82e9bbe1694da3e183b5221a623c45"
+        ],
+        [
+            75623,
+            "db8131c425c27bf8801822e1e5d5bb2ddb87a01c29be28f9fc6f32e9c81b271e"
+        ],
+        [
+            78963,
+            "9779101378ea8ed5c6dfbc03f7cecc4164128bead518546e48417db594b9cc24"
+        ],
+        [
+            77657,
+            "402cd0542ac71773f22bf3b72601b4ef5e4ee6f1ac4dfca29d700c6558f0429b"
+        ],
+        [
+            76968,
+            "fb1e538a21b7b2f075f6568505077effd231aba574a20c28494283fa1f98bd48"
+        ],
+        [
+            76888,
+            "fa39bf9b15da448d70e4262aadbd7a0e4852fb54dc5425090874f5a2aaca5955"
+        ],
+        [
+            55873,
+            "bffc7c6d023bfd0718c32fcdd2b161a2b69ddeba46a038ad9547fe5fe8a2edd2"
+        ],
+        [
+            95421,
+            "69630769c26dd259ab93f157b7c658807de5ce46168f99a3d36d7f385ea598ea"
+        ],
+        [
+            91470,
+            "099da6f5629f6866bbd3cd98f7c096937cd5ce9ef10f2bc8946579a961ae6d50"
+        ],
+        [
+            95996,
+            "48cbaae2f1a103da9cb3aa30cda23a4fc86181a77c64d2bc2831191bf87ffb2f"
+        ],
+        [
+            99795,
+            "79d9d07da601f5fa929184972abd950fab111c55d08904c81c977d744f45dcf6"
+        ],
+        [
+            105869,
+            "b9a1efe32a450254caffde695d1a9487f019b8318d1f3cd3a7ba05c5d7015f54"
+        ],
+        [
+            102225,
+            "f82452a6325b727efdcc171767150da343c53f1456a667be345a4938aff706af"
+        ],
+        [
+            81555,
+            "735f7cf421e3fc0479f9c6478cd7f914c945005edbb6b1bcad4ff9830c8c527b"
+        ],
+        [
+            87202,
+            "b4ab6b667766e3129059fe86220b55cc8d9ea2845369a06f53395acfc2965f22"
+        ],
+        [
+            99247,
+            "ff4128b44dc541a6ecbdc830545900632cf62730540d48711375e11bf5a9a33d"
+        ],
+        [
+            93357,
+            "523c535d2ac3e31cb499444490382825bd00114484a038da69fd3d1ec77f5f30"
+        ],
+        [
+            93166,
+            "5a0f592fcf46597d149aba531234beb63a59c9b01ee2d4279f41f7c4bd97a321"
+        ],
+        [
+            95319,
+            "ec20149fe82a7a9f78756fe44a133ba6c7023cc5921925cd88e6fbf71c27ddac"
+        ],
+        [
+            91516,
+            "09013b0d06fed79dd42b3aac1285a0474d6559103026df94ed8db8f6a8a1369e"
+        ],
+        [
+            92756,
+            "aa2f642fabd33841186a55c27ca177e18cbefb7cc69354f7ce0a92cfa7b46a67"
+        ],
+        [
+            94105,
+            "9c3d7a5110780f33ad50c099211eff62bcb0d4f9de2a34add4266cec1804e166"
+        ],
+        [
+            89820,
+            "b87436b1dff702b0cc34ba93e2310d2e9a02bd6459c598b30ea13a7995fc90c5"
+        ],
+        [
+            62848,
+            "c32380613b650f527800f02d5d0ad25d85fc04fb14cfd8cf92137808f023c519"
+        ],
+        [
+            86401,
+            "a93442a5c7fc3ccbc495d3e0d4def085ae04c2f14124ddb8c05917dae35f649b"
+        ],
+        [
+            81890,
+            "0feb36e3f4f80ac3dd2af0ba809b203b36b94f7994aad6a80ca2a41a9ab1bc4f"
+        ],
+        [
+            83987,
+            "e9cbd94e597446a5eaa77651d1f3cedf8a7366c2f7314bc5e677e62f6011dac2"
+        ],
+        [
+            83315,
+            "b3cb99ea790009d60abb67598a7e2799158f6ab245f38db57ef6a3f3a7a9b875"
+        ],
+        [
+            83038,
+            "4701b7aeca5c4e0d1851a963a5e9c96bfc11aacbe0b9fd80fb913df1682e5540"
+        ],
+        [
+            88023,
+            "9a6bd9ea03fd78a67ca12f435284842f1100990b193dbfff4fc0391c94ef7ec7"
+        ],
+        [
+            85652,
+            "b8b66669c2b8a37d5db7465b97acd449ff78963f8d8f74946ac3090e8853d40c"
+        ],
+        [
+            61945,
+            "c329e12d8398753daba02f5944b58fb512af4fdf97b0d0c4708b84e9900dea13"
+        ],
+        [
+            82969,
+            "d60f137f826694ebd3ae6a943df4c8c0f25a087b845985d2304120929c6e56fa"
+        ],
+        [
+            94532,
+            "f3a7634a79b786882591a4f66ea516c7898144c7cd4e60b3975647f82e0ca705"
+        ],
+        [
+            95572,
+            "c6bf4c41734c3ca94e415d2f9db1ed93e24946ea0440f0a73135d2deea51ef06"
+        ],
+        [
+            94509,
+            "728f794733347ecb67720b4cebfde95fd0679f84c5f85807b0c3e04fc597fc4a"
+        ],
+        [
+            81115,
+            "97740419b3677b85745496a787184dcbe290b295bc0610f9bb03142d0c89620b"
+        ]
+    ],
+    "medianPairedChangePercentExcludingRoundZero": -1.0794914506731867,
+    "pairedChangePercentExcludingRoundZero": [
+        5.7574681203375055,
+        -23.82521173693568,
+        0.04469678171901137,
+        10.82045211599867,
+        -2.3410888261870655,
+        -2.203679683065385
+    ],
+    "qualification": "Exploratory native-only sample with hashing in timing and no A/A control. No elapsed-time benefit is claimed. Repeated identical block oracles are stored once; all observations retained. The large reproducible input capture is not committed."
+}

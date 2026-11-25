@@ -1,0 +1,46 @@
+{
+    "decision": "VNDB range-copy variants and native CDict proposal are rejected for implementation in this round; they are not product changes.",
+    "vndbVariants": {
+        "separateGeometryPass": {
+            "parserSha256": "9f7800433cdc61a1b7cfb439703f1fe726a84dbf2f6c4c42820d969c16a1d94f",
+            "observations": "vndb-range-results.json",
+            "qualification": "Four AB/BA pairs overlapped local lint/types work; timings invalid for qualification. Full packed/index/image oracle passed on this variant only."
+        },
+        "fusedGeometryPass": {
+            "parserSha256": "9f9ecd7dee8e0e524dda902fb6abec4246adbea3fdf440329527f0b29291826f",
+            "observations": "vndb-resident-results.json",
+            "patch": "vndb-fused-range-prototype.patch.gz",
+            "qualification": "Eight original ZIP payload batches, 32 repeats, six balanced ABC blocks after ABC warmup. A/C are the same baseline instance. Validation outputs passed; full corpus media oracle not repeated. Large A/A variation and host load prevent a benefit claim."
+        }
+    },
+    "files": {
+        "native-cdict-screen.json": {
+            "sha256": "988427defb37eeafabed7df736c2d34aa9a30ae50309fadff293f684f998b5bb",
+            "sizeBytes": 10162
+        },
+        "vndb-copy-baseline.json": {
+            "sha256": "e4a9806da3df3a9d9219f634fd438d2314f1040cc4af4fc7635007e31fa08db6",
+            "sizeBytes": 147
+        },
+        "vndb-copy-candidate.json": {
+            "sha256": "dd4b08e5f001217d1616f5900e9a22b077d1f1852002a9cd401feaff93b60365",
+            "sizeBytes": 151
+        },
+        "vndb-fused-range-prototype.patch.gz": {
+            "sha256": "202d869aed1f3f8cf4caadcc679e19aa09f475cf6cf479d8502955642899ae25",
+            "sizeBytes": 4170
+        },
+        "vndb-range-results.json": {
+            "sha256": "e1251f511cbaafb2dc7537eda05b08bceb04dbf96ca26825368810e2c8b9f939",
+            "sizeBytes": 18520
+        },
+        "vndb-resident-results.json": {
+            "sha256": "16fb7003a89e0932978c823f97792dfe806359da1ed95cbefa87795370bd19d2",
+            "sizeBytes": 12720
+        },
+        "vndb-separate-range-media-verification.json": {
+            "sha256": "d10b56a487e22630ae851ed73d908a09d118f0ba198fbaeda29e870fcb5b2ae0",
+            "sizeBytes": 576
+        }
+    }
+}

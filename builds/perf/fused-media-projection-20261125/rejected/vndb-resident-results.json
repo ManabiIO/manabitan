@@ -1,0 +1,511 @@
+{
+  "complete": true,
+  "boundary": "Resident original ZIP payloads through complete public media validation; includes metadata admission, range proof, native input copies, native CRC/DEFLATE, and all native scratch allocation. Excludes ZIP reads, worker/module startup and compilation, media index construction, persistence, and UI. A and C use the identical baseline parser instance. No import-time claim.",
+  "sources": {
+    "A": {
+      "root": "/workspace/scratch/21ba6d4042b8/live",
+      "parserSha256": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98"
+    },
+    "B": {
+      "root": "/workspace/scratch/21ba6d4042b8/vndb",
+      "parserSha256": "9f9ecd7dee8e0e524dda902fb6abec4246adbea3fdf440329527f0b29291826f"
+    },
+    "wasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+  },
+  "node": "v22.22.0",
+  "protocol": {
+    "repetitions": 32,
+    "warmups": [
+      "ABC"
+    ],
+    "measured": [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ]
+  },
+  "batches": [
+    {
+      "batchIndex": 0,
+      "count": 1024,
+      "sourceBytes": 1350336,
+      "rangeBytes": 1395292,
+      "sha256": "8fd006c046a0bd5a08da57b178ae72ac71191d83562b018b2b628fe14b550d29"
+    },
+    {
+      "batchIndex": 20,
+      "count": 1024,
+      "sourceBytes": 1286852,
+      "rangeBytes": 1333910,
+      "sha256": "e53b2efadbee762d5ad8181884eec04d86b9da0eb29041ca73d5956e22b01b57"
+    },
+    {
+      "batchIndex": 40,
+      "count": 1024,
+      "sourceBytes": 1344146,
+      "rangeBytes": 1391204,
+      "sha256": "92ecc960966e92826eda2a993f5ee5242e9dcae3946fbc9cb9193e2867d31261"
+    },
+    {
+      "batchIndex": 61,
+      "count": 1024,
+      "sourceBytes": 1379626,
+      "rangeBytes": 1426684,
+      "sha256": "48fef5fd72cb5becf28a7df9586717e976dac74b74a5dcd1886bc482e480addb"
+    },
+    {
+      "batchIndex": 81,
+      "count": 1024,
+      "sourceBytes": 1333866,
+      "rangeBytes": 1380924,
+      "sha256": "eaf96bcfeefd5bd43120507f5772eaa86223e2ed44ddbd1f75b46f7f337b2422"
+    },
+    {
+      "batchIndex": 102,
+      "count": 1024,
+      "sourceBytes": 1268396,
+      "rangeBytes": 1316477,
+      "sha256": "2e5955b950c20b8d24226633b44643d4a2c86b0e6838b90602e7cad0b61f5195"
+    },
+    {
+      "batchIndex": 122,
+      "count": 1024,
+      "sourceBytes": 1211036,
+      "rangeBytes": 1259117,
+      "sha256": "183d5afd44ed74538d42a8806c55e354ac51d412c7b23504fcf2deeb9460a77f"
+    },
+    {
+      "batchIndex": 143,
+      "count": 138,
+      "sourceBytes": 150966,
+      "rangeBytes": 157405,
+      "sha256": "d9cc2d7757a0b49631b32df5897b8c4ae367fbdd273c813fc62599b32df16acf"
+    }
+  ],
+  "hostBefore": {
+    "load": [
+      20.37,
+      15.28,
+      10.95
+    ],
+    "freeMemory": 2625765376
+  },
+  "observations": [
+    {
+      "stage": "warmup",
+      "block": 0,
+      "arm": "A",
+      "elapsedMs": 797.8017039999995,
+      "cpuMs": 328.361
+    },
+    {
+      "stage": "warmup",
+      "block": 0,
+      "arm": "B",
+      "elapsedMs": 1145.2393979999997,
+      "cpuMs": 445.533
+    },
+    {
+      "stage": "warmup",
+      "block": 0,
+      "arm": "C",
+      "elapsedMs": 660.1071359999996,
+      "cpuMs": 233.988
+    },
+    {
+      "stage": "timed",
+      "block": 0,
+      "arm": "A",
+      "elapsedMs": 1142.4217900000003,
+      "cpuMs": 365.994
+    },
+    {
+      "stage": "timed",
+      "block": 0,
+      "arm": "B",
+      "elapsedMs": 729.7514729999984,
+      "cpuMs": 366.516
+    },
+    {
+      "stage": "timed",
+      "block": 0,
+      "arm": "C",
+      "elapsedMs": 1022.2189589999998,
+      "cpuMs": 311.551
+    },
+    {
+      "stage": "timed",
+      "block": 1,
+      "arm": "B",
+      "elapsedMs": 1188.8668820000003,
+      "cpuMs": 468.55
+    },
+    {
+      "stage": "timed",
+      "block": 1,
+      "arm": "C",
+      "elapsedMs": 473.57044099999985,
+      "cpuMs": 271.888
+    },
+    {
+      "stage": "timed",
+      "block": 1,
+      "arm": "A",
+      "elapsedMs": 633.8726000000006,
+      "cpuMs": 319.054
+    },
+    {
+      "stage": "timed",
+      "block": 2,
+      "arm": "C",
+      "elapsedMs": 445.70568699999967,
+      "cpuMs": 284.253
+    },
+    {
+      "stage": "timed",
+      "block": 2,
+      "arm": "A",
+      "elapsedMs": 357.06675899999937,
+      "cpuMs": 260.093
+    },
+    {
+      "stage": "timed",
+      "block": 2,
+      "arm": "B",
+      "elapsedMs": 358.96312899999975,
+      "cpuMs": 272.113
+    },
+    {
+      "stage": "timed",
+      "block": 3,
+      "arm": "A",
+      "elapsedMs": 309.5302040000006,
+      "cpuMs": 255.026
+    },
+    {
+      "stage": "timed",
+      "block": 3,
+      "arm": "C",
+      "elapsedMs": 450.19333499999993,
+      "cpuMs": 310.397
+    },
+    {
+      "stage": "timed",
+      "block": 3,
+      "arm": "B",
+      "elapsedMs": 560.8727839999992,
+      "cpuMs": 448.679
+    },
+    {
+      "stage": "timed",
+      "block": 4,
+      "arm": "C",
+      "elapsedMs": 1063.8840020000007,
+      "cpuMs": 549.522
+    },
+    {
+      "stage": "timed",
+      "block": 4,
+      "arm": "B",
+      "elapsedMs": 480.8914229999973,
+      "cpuMs": 365.105
+    },
+    {
+      "stage": "timed",
+      "block": 4,
+      "arm": "A",
+      "elapsedMs": 347.748008999999,
+      "cpuMs": 280.022
+    },
+    {
+      "stage": "timed",
+      "block": 5,
+      "arm": "B",
+      "elapsedMs": 570.2321400000001,
+      "cpuMs": 275.828
+    },
+    {
+      "stage": "timed",
+      "block": 5,
+      "arm": "A",
+      "elapsedMs": 447.52704500000254,
+      "cpuMs": 248.925
+    },
+    {
+      "stage": "timed",
+      "block": 5,
+      "arm": "C",
+      "elapsedMs": 679.2693919999983,
+      "cpuMs": 517.948
+    }
+  ],
+  "comparisons": {
+    "elapsedMs": {
+      "B/A": {
+        "pairs": [
+          {
+            "block": 0,
+            "candidate": 729.7514729999984,
+            "control": 1142.4217900000003,
+            "percent": -36.12241298373709
+          },
+          {
+            "block": 1,
+            "candidate": 1188.8668820000003,
+            "control": 633.8726000000006,
+            "percent": 87.55612436947095
+          },
+          {
+            "block": 2,
+            "candidate": 358.96312899999975,
+            "control": 357.06675899999937,
+            "percent": 0.5310967633367358
+          },
+          {
+            "block": 3,
+            "candidate": 560.8727839999992,
+            "control": 309.5302040000006,
+            "percent": 81.20130984050853
+          },
+          {
+            "block": 4,
+            "candidate": 480.8914229999973,
+            "control": 347.748008999999,
+            "percent": 38.287326039010814
+          },
+          {
+            "block": 5,
+            "candidate": 570.2321400000001,
+            "control": 447.52704500000254,
+            "percent": 27.41847590462312
+          }
+        ],
+        "medianPairedPercent": 32.852900971816965,
+        "equalWorkPercent": 20.116675368870006
+      },
+      "B/C": {
+        "pairs": [
+          {
+            "block": 0,
+            "candidate": 729.7514729999984,
+            "control": 1022.2189589999998,
+            "percent": -28.611041051920203
+          },
+          {
+            "block": 1,
+            "candidate": 1188.8668820000003,
+            "control": 473.57044099999985,
+            "percent": 151.0433040308782
+          },
+          {
+            "block": 2,
+            "candidate": 358.96312899999975,
+            "control": 445.70568699999967,
+            "percent": -19.46184680385287
+          },
+          {
+            "block": 3,
+            "candidate": 560.8727839999992,
+            "control": 450.19333499999993,
+            "percent": 24.584870631192103
+          },
+          {
+            "block": 4,
+            "candidate": 480.8914229999973,
+            "control": 1063.8840020000007,
+            "percent": -54.798509790920136
+          },
+          {
+            "block": 5,
+            "candidate": 570.2321400000001,
+            "control": 679.2693919999983,
+            "percent": -16.05213679346802
+          }
+        ],
+        "medianPairedPercent": -17.756991798660444,
+        "equalWorkPercent": -5.931641303687618
+      },
+      "C/A": {
+        "pairs": [
+          {
+            "block": 0,
+            "candidate": 1022.2189589999998,
+            "control": 1142.4217900000003,
+            "percent": -10.521755804395195
+          },
+          {
+            "block": 1,
+            "candidate": 473.57044099999985,
+            "control": 633.8726000000006,
+            "percent": -25.289334008127284
+          },
+          {
+            "block": 2,
+            "candidate": 445.70568699999967,
+            "control": 357.06675899999937,
+            "percent": 24.824189249159566
+          },
+          {
+            "block": 3,
+            "candidate": 450.19333499999993,
+            "control": 309.5302040000006,
+            "percent": 45.444072721251814
+          },
+          {
+            "block": 4,
+            "candidate": 1063.8840020000007,
+            "control": 347.748008999999,
+            "percent": 205.93532513941835
+          },
+          {
+            "block": 5,
+            "candidate": 679.2693919999983,
+            "control": 447.52704500000254,
+            "percent": 51.78286979281766
+          }
+        ],
+        "medianPairedPercent": 35.13413098520569,
+        "equalWorkPercent": 27.690837847667016
+      }
+    },
+    "cpuMs": {
+      "B/A": {
+        "pairs": [
+          {
+            "block": 0,
+            "candidate": 366.516,
+            "control": 365.994,
+            "percent": 0.1426252889391577
+          },
+          {
+            "block": 1,
+            "candidate": 468.55,
+            "control": 319.054,
+            "percent": 46.85601810351854
+          },
+          {
+            "block": 2,
+            "candidate": 272.113,
+            "control": 260.093,
+            "percent": 4.62142387530613
+          },
+          {
+            "block": 3,
+            "candidate": 448.679,
+            "control": 255.026,
+            "percent": 75.93461058872425
+          },
+          {
+            "block": 4,
+            "candidate": 365.105,
+            "control": 280.022,
+            "percent": 30.384398368699618
+          },
+          {
+            "block": 5,
+            "candidate": 275.828,
+            "control": 248.925,
+            "percent": 10.807672993873641
+          }
+        ],
+        "medianPairedPercent": 20.59603568128663,
+        "equalWorkPercent": 27.047204522084733
+      },
+      "B/C": {
+        "pairs": [
+          {
+            "block": 0,
+            "candidate": 366.516,
+            "control": 311.551,
+            "percent": 17.642376368556036
+          },
+          {
+            "block": 1,
+            "candidate": 468.55,
+            "control": 271.888,
+            "percent": 72.3319896427941
+          },
+          {
+            "block": 2,
+            "candidate": 272.113,
+            "control": 284.253,
+            "percent": -4.270843227688004
+          },
+          {
+            "block": 3,
+            "candidate": 448.679,
+            "control": 310.397,
+            "percent": 44.55004397594049
+          },
+          {
+            "block": 4,
+            "candidate": 365.105,
+            "control": 549.522,
+            "percent": -33.55952991872937
+          },
+          {
+            "block": 5,
+            "candidate": 275.828,
+            "control": 517.948,
+            "percent": -46.74600539050252
+          }
+        ],
+        "medianPairedPercent": 6.685766570434016,
+        "equalWorkPercent": -2.171753224920814
+      },
+      "C/A": {
+        "pairs": [
+          {
+            "block": 0,
+            "candidate": 311.551,
+            "control": 365.994,
+            "percent": -14.875380470718113
+          },
+          {
+            "block": 1,
+            "candidate": 271.888,
+            "control": 319.054,
+            "percent": -14.783077472778904
+          },
+          {
+            "block": 2,
+            "candidate": 284.253,
+            "control": 260.093,
+            "percent": 9.288985093793368
+          },
+          {
+            "block": 3,
+            "candidate": 310.397,
+            "control": 255.026,
+            "percent": 21.711903884309834
+          },
+          {
+            "block": 4,
+            "candidate": 549.522,
+            "control": 280.022,
+            "percent": 96.24243809414976
+          },
+          {
+            "block": 5,
+            "candidate": 517.948,
+            "control": 248.925,
+            "percent": 108.07391784674097
+          }
+        ],
+        "medianPairedPercent": 15.5004444890516,
+        "equalWorkPercent": 29.867608497762422
+      }
+    }
+  },
+  "hostAfter": {
+    "load": [
+      20.7,
+      15.62,
+      11.13
+    ],
+    "freeMemory": 2468995072
+  }
+}

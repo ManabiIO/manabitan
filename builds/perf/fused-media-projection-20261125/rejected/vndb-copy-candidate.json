@@ -1,0 +1,7 @@
+{
+  "calls": 144,
+  "bytes": 195643218,
+  "minCopyBytes": 157405,
+  "maxCopyBytes": 1537894,
+  "callerMatched": "processCompressedZipMediaBatchWasm"
+}
