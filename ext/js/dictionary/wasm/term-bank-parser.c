@@ -3134,7 +3134,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t raw_content_hash_table_size,
     uint32_t raw_content_hashes_ptr,
     uint32_t validate_glossary_types,
-    uint32_t glossary_witnesses_ptr
+    uint32_t glossary_witnesses_ptr,
+    uint32_t media_hint_present_ptr
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -3188,6 +3189,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t strings_cursor = 0u;
     uint32_t row_count = 0u;
     uint32_t recent_content_hits = 0u;
+    // Without hint detection, absence has not been established.
+    uint32_t media_hint_present = media_hints == 0u ? 1u : 0u;
     const int validated_glossary_reuse_enabled = (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u;
     uint32_t glossary_reuse_probe_budget = 0u;
     uint32_t recent_content_match_streak = 0u;
@@ -3236,6 +3239,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
 
         const TermRowMeta* parsed_row = &rows[row_count];
+        media_hint_present |= parsed_row->glossary_may_contain_media;
         const uint32_t token_starts[2] = {
             parsed_row->expression_start,
             parsed_row->reading_start,
@@ -3526,6 +3530,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
     *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
     *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
+    // Publish only after every bank has passed validation. Older callers omit
+    // this optional output pointer and retain their per-row hint scan.
+    if (media_hint_present_ptr != 0u) {
+        *(uint32_t*)(uintptr_t)media_hint_present_ptr = media_hint_present;
+    }
     return (int32_t)cursor;
 }
 
