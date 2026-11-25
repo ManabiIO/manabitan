@@ -1042,6 +1042,12 @@ static int parse_composite_span_impl(
                 return 1;
             }
             state = parents[depth - 1u];
+            // A closed child completes its parent's value. Consume an
+            // adjacent comma here, keeping the required next-token state.
+            if (i < len && src[i] == ',') {
+                state = state == OBJECT_AFTER_VALUE ? OBJECT_KEY : ARRAY_VALUE;
+                i = advance_glossary_delimiter(src, len, i, normalization_hint);
+            }
             continue;
         }
         if (c == ',') {
