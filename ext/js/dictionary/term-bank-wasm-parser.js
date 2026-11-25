@@ -20,6 +20,8 @@ import {DictionarySourceIntegrityError} from './dictionary-source-integrity-erro
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
 import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
+// eslint-disable-next-line @stylistic/semi
+import {ValidatedImagePathProjector} from './validated-image-path-projector.js'
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -4048,14 +4050,22 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
         throw new Error('Term record string offsets are unavailable');
     }
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
+    // eslint-disable-next-line @stylistic/semi
+    const imageProjector = projectImagePaths ? new ValidatedImagePathProjector() : null
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
+        /* eslint-disable @stylistic/semi */
+        const projected = imageProjector !== null && row.termEntryContentBytes.length > 0 &&
+        row.glossaryJson.length === 0 && row.glossaryJsonBytes instanceof Uint8Array ?
+            imageProjector.project(row.glossaryJsonBytes) :
+            null
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
-            tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
+            projected ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
                     new Uint8Array(row.glossaryJsonBytes))) :
-            [];
+            []
+        /* eslint-enable @stylistic/semi */
         const useProjectedPaths = imagePaths.length > 0;
         return {
             index,
