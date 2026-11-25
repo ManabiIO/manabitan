@@ -1,0 +1,1062 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": "45642179064",
+  "sourceIdentities": {
+    "A": {
+      "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    },
+    "B": {
+      "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+    }
+  },
+  "scope": "Independent read-only raw-scan, package, source and correctness audit; no new acquisition or retries",
+  "frozenObserver": {
+    "chromium_memory.py": {
+      "unchanged": true,
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7"
+    },
+    "audit_memory.py": {
+      "unchanged": true,
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c"
+    }
+  },
+  "artifacts": [
+    {
+      "artifactId": 15035921814,
+      "dictionary": "jitendex",
+      "replication": 1,
+      "schedule": [
+        "A1",
+        "B1",
+        "B2",
+        "A2"
+      ],
+      "archiveSha256": "d60df0b581f6278b14e8afb6e199e41c77a2c891e470f662cff08d614dc57e6b",
+      "sourceAndAuditToolHashesMatch": true,
+      "rawScanAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 326,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -2.5578422069145734,
+            "maximumPairedChangePercent": -1.6808402211945905
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -3.1031468470621713,
+            "maximumPairedChangePercent": -2.166315228192639
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "auditReconciliation": "passed",
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 825180,
+            "candidate": 807304,
+            "changePercent": -2.166315228192639
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1055722,
+            "candidate": 1037977,
+            "changePercent": -1.6808402211945905
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 854460,
+            "candidate": 819940,
+            "changePercent": -4.0399784659317035
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1087240,
+            "candidate": 1049895,
+            "changePercent": -3.4348441926345563
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -2.166315228192639,
+          "medianPairedChangePercent": -3.1031468470621713
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": -1.6808402211945905,
+          "medianPairedChangePercent": -2.5578422069145734
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "observations": [
+        {
+          "arm": "A",
+          "index": 1,
+          "name": "A1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 87,
+          "fullyContainedImportSampleCount": 17,
+          "stableFullyReadImportSampleCount": 17,
+          "maximumCoveredSampleGapMs": 164.904016,
+          "preImportBracketGapMs": 6.78941,
+          "postImportBracketGapMs": 97.26525,
+          "maxSampledPssKiB": 1055722,
+          "maxSampledPrivateKiB": 825180,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        },
+        {
+          "arm": "B",
+          "index": 2,
+          "name": "B1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 81,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maximumCoveredSampleGapMs": 146.021474,
+          "preImportBracketGapMs": 32.304457,
+          "postImportBracketGapMs": 75.858044,
+          "maxSampledPssKiB": 1037977,
+          "maxSampledPrivateKiB": 807304,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        },
+        {
+          "arm": "B",
+          "index": 3,
+          "name": "B2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 77,
+          "fullyContainedImportSampleCount": 14,
+          "stableFullyReadImportSampleCount": 14,
+          "maximumCoveredSampleGapMs": 148.569258,
+          "preImportBracketGapMs": 22.081853,
+          "postImportBracketGapMs": 75.508088,
+          "maxSampledPssKiB": 1049895,
+          "maxSampledPrivateKiB": 819940,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        },
+        {
+          "arm": "A",
+          "index": 4,
+          "name": "A2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 81,
+          "fullyContainedImportSampleCount": 14,
+          "stableFullyReadImportSampleCount": 14,
+          "maximumCoveredSampleGapMs": 170.196895,
+          "preImportBracketGapMs": 7.859645,
+          "postImportBracketGapMs": 87.025083,
+          "maxSampledPssKiB": 1087240,
+          "maxSampledPrivateKiB": 854460,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        }
+      ],
+      "packages": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "7cb9b2b606890ac7d7de4ddd6a80328d80e2cfbe1a68528ffe1ea41eb289f8fb"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+          "packageSha256": "3993fb3a68f682369af47255cd851ca45e684434e37bc044fabeba2a5f267ade"
+        }
+      },
+      "host": {
+        "capturedAtIso": "2026-11-25T15:12:50.021Z",
+        "loadAverage": [
+          2.33,
+          0.7,
+          0.25
+        ],
+        "freeMemoryBytes": 15346860032,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759427072,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "retainedFailure": null
+    },
+    {
+      "artifactId": 15036925291,
+      "dictionary": "jitendex",
+      "replication": 2,
+      "schedule": [
+        "B1",
+        "A1",
+        "A2",
+        "B2"
+      ],
+      "archiveSha256": "a4cd351a062953176543dcb442c7b2a1e11641efdeb0992a358588d68b8769ea",
+      "sourceAndAuditToolHashesMatch": true,
+      "rawScanAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 283,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 1.8317085650236042,
+            "maximumPairedChangePercent": 2.3784330864424774
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 2.5667507097236197,
+            "maximumPairedChangePercent": 3.315591533356077
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "auditReconciliation": "passed",
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 809388,
+            "candidate": 836224,
+            "changePercent": 3.315591533356077
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1043376,
+            "candidate": 1068192,
+            "changePercent": 2.3784330864424774
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 829084,
+            "candidate": 844156,
+            "changePercent": 1.8179098860911624
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1062270,
+            "candidate": 1075920,
+            "changePercent": 1.284984043604731
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 3.315591533356077,
+          "medianPairedChangePercent": 2.5667507097236197
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 2.3784330864424774,
+          "medianPairedChangePercent": 1.8317085650236042
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "observations": [
+        {
+          "arm": "B",
+          "index": 1,
+          "name": "B1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 72,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maximumCoveredSampleGapMs": 163.251545,
+          "preImportBracketGapMs": 76.655329,
+          "postImportBracketGapMs": 19.44065,
+          "maxSampledPssKiB": 1068192,
+          "maxSampledPrivateKiB": 836224,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        },
+        {
+          "arm": "A",
+          "index": 2,
+          "name": "A1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 73,
+          "fullyContainedImportSampleCount": 13,
+          "stableFullyReadImportSampleCount": 13,
+          "maximumCoveredSampleGapMs": 224.244401,
+          "preImportBracketGapMs": 83.277281,
+          "postImportBracketGapMs": 88.948808,
+          "maxSampledPssKiB": 1043376,
+          "maxSampledPrivateKiB": 809388,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        },
+        {
+          "arm": "A",
+          "index": 3,
+          "name": "A2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 70,
+          "fullyContainedImportSampleCount": 11,
+          "stableFullyReadImportSampleCount": 11,
+          "maximumCoveredSampleGapMs": 187.527807,
+          "preImportBracketGapMs": 57.769019,
+          "postImportBracketGapMs": 91.490809,
+          "maxSampledPssKiB": 1062270,
+          "maxSampledPrivateKiB": 829084,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        },
+        {
+          "arm": "B",
+          "index": 4,
+          "name": "B2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 68,
+          "fullyContainedImportSampleCount": 12,
+          "stableFullyReadImportSampleCount": 12,
+          "maximumCoveredSampleGapMs": 202.698431,
+          "preImportBracketGapMs": 19.465785,
+          "postImportBracketGapMs": 112.944032,
+          "maxSampledPssKiB": 1075920,
+          "maxSampledPrivateKiB": 844156,
+          "samplesWithUnavailableSmaps": 5,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 1,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 5459968,
+          "rawStorageBytes": 67466332,
+          "nonSahBytes": 61977692
+        }
+      ],
+      "packages": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "bfb5bb75a599ce911d251a2738922f4076b89c5b078814000fc53a229d5ff49f"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+          "packageSha256": "309441eae8f5def6b48b9f30c57d2275acc2b5dead8f836239b951ab8bd22d8a"
+        }
+      },
+      "host": {
+        "capturedAtIso": "2026-11-25T15:14:57.945Z",
+        "loadAverage": [
+          1.76,
+          0.51,
+          0.18
+        ],
+        "freeMemoryBytes": 15287554048,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759431168,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "retainedFailure": null
+    },
+    {
+      "artifactId": 15036831091,
+      "dictionary": "vndb",
+      "replication": 1,
+      "schedule": [
+        "A1",
+        "B1",
+        "B2",
+        "A2"
+      ],
+      "archiveSha256": "61d4ded17022539714c6892a2954d49a485a08dbbd58047f065277ed5cd21795",
+      "sourceAndAuditToolHashesMatch": true,
+      "rawScanAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 466,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "auditReconciliation": "passed",
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1188860,
+            "candidate": 1179096,
+            "changePercent": -0.8212909846407435
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1421061,
+            "candidate": 1411740,
+            "changePercent": -0.6559183595918783
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": 1193948,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": 1427052,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ],
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "observations": [
+        {
+          "arm": "A",
+          "index": 1,
+          "name": "A1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 143,
+          "fullyContainedImportSampleCount": 48,
+          "stableFullyReadImportSampleCount": 48,
+          "maximumCoveredSampleGapMs": 161.775619,
+          "preImportBracketGapMs": 47.906649,
+          "postImportBracketGapMs": 81.060505,
+          "maxSampledPssKiB": 1421061,
+          "maxSampledPrivateKiB": 1188860,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        },
+        {
+          "arm": "B",
+          "index": 2,
+          "name": "B1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 109,
+          "fullyContainedImportSampleCount": 45,
+          "stableFullyReadImportSampleCount": 45,
+          "maximumCoveredSampleGapMs": 171.575019,
+          "preImportBracketGapMs": 29.259166,
+          "postImportBracketGapMs": 83.732689,
+          "maxSampledPssKiB": 1411740,
+          "maxSampledPrivateKiB": 1179096,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        },
+        {
+          "arm": "B",
+          "index": 3,
+          "name": "B2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 104,
+          "fullyContainedImportSampleCount": 42,
+          "stableFullyReadImportSampleCount": 42,
+          "maximumCoveredSampleGapMs": 173.296953,
+          "preImportBracketGapMs": 51.447005,
+          "postImportBracketGapMs": 6.440892,
+          "maxSampledPssKiB": 1427052,
+          "maxSampledPrivateKiB": 1193948,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        },
+        {
+          "arm": "A",
+          "index": 4,
+          "name": "A2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 110,
+          "fullyContainedImportSampleCount": 46,
+          "stableFullyReadImportSampleCount": 46,
+          "maximumCoveredSampleGapMs": 350.425804,
+          "preImportBracketGapMs": 6.15912,
+          "postImportBracketGapMs": 30.810581,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        }
+      ],
+      "packages": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "fad3ccd14c56f9f50c38ed2d4f17ca64c731f38e1b006a9091671fd75441740d"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+          "packageSha256": "d8de6a50f3f555a01ecc67937c185e87f14b679c6827970b218ad0ae945146f6"
+        }
+      },
+      "host": {
+        "capturedAtIso": "2026-11-25T15:14:44.660Z",
+        "loadAverage": [
+          1.64,
+          0.47,
+          0.16
+        ],
+        "freeMemoryBytes": 15066853376,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759431168,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "retainedFailure": {
+        "message": "Memory coverage/gates or correctness failed; every scheduled observation is retained without replacement",
+        "recordedAtEpochSeconds": 1795619762.7938943,
+        "retried": false,
+        "type": "RuntimeError"
+      }
+    },
+    {
+      "artifactId": 15035433747,
+      "dictionary": "vndb",
+      "replication": 2,
+      "schedule": [
+        "B1",
+        "A1",
+        "A2",
+        "B2"
+      ],
+      "archiveSha256": "79daf7b337b181b56146adbd71404c32184cc8e73b26b404f89e7ac55b506ae7",
+      "sourceAndAuditToolHashesMatch": true,
+      "rawScanAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 429,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "receiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+          }
+        }
+      },
+      "auditReconciliation": "passed",
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 1,
+          "qualified": false
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1152024,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1383326,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ],
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "observations": [
+        {
+          "arm": "B",
+          "index": 1,
+          "name": "B1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 112,
+          "fullyContainedImportSampleCount": 42,
+          "stableFullyReadImportSampleCount": 42,
+          "maximumCoveredSampleGapMs": 324.494085,
+          "preImportBracketGapMs": 116.675495,
+          "postImportBracketGapMs": 49.009626,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        },
+        {
+          "arm": "A",
+          "index": 2,
+          "name": "A1",
+          "pair": 1,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 106,
+          "fullyContainedImportSampleCount": 41,
+          "stableFullyReadImportSampleCount": 41,
+          "maximumCoveredSampleGapMs": 258.866332,
+          "preImportBracketGapMs": 104.368673,
+          "postImportBracketGapMs": 36.558205,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        },
+        {
+          "arm": "A",
+          "index": 3,
+          "name": "A2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": true,
+          "qualificationFailures": [],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 107,
+          "fullyContainedImportSampleCount": 45,
+          "stableFullyReadImportSampleCount": 45,
+          "maximumCoveredSampleGapMs": 244.012203,
+          "preImportBracketGapMs": 117.94574,
+          "postImportBracketGapMs": 129.901225,
+          "maxSampledPssKiB": 1383326,
+          "maxSampledPrivateKiB": 1152024,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        },
+        {
+          "arm": "B",
+          "index": 4,
+          "name": "B2",
+          "pair": 2,
+          "qualifiedForWholeTreePss": false,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "benchmarkExitCode": 0,
+          "allObservedSampleCount": 104,
+          "fullyContainedImportSampleCount": 40,
+          "stableFullyReadImportSampleCount": 40,
+          "maximumCoveredSampleGapMs": 275.215655,
+          "preImportBracketGapMs": 105.866841,
+          "postImportBracketGapMs": 69.250356,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "correctnessStatus": "passed",
+          "activeSahFileBytes": 528384,
+          "rawStorageBytes": 609553611,
+          "nonSahBytes": 608996555
+        }
+      ],
+      "packages": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "108b50dd14a4c8952b658d6f33ce099431cace75cc552ab20b68e6b6ff10e691"
+        },
+        "B": {
+          "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "tree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+          "packageSha256": "869b47f11b18ed03164c797a418ccf5f41fe6f782ea4745a3b353811ebdc335e"
+        }
+      },
+      "host": {
+        "capturedAtIso": "2026-11-25T15:13:17.888Z",
+        "loadAverage": [
+          2.89,
+          1.15,
+          0.43
+        ],
+        "freeMemoryBytes": 14926151680,
+        "nodeVersion": "v22.22.0",
+        "v8Version": "12.4.254.21-node.33",
+        "platform": "linux",
+        "arch": "x64",
+        "cpuModel": "AMD EPYC 7763 64-Core Processor",
+        "logicalCpuCount": 4,
+        "availableParallelism": 4,
+        "totalMemoryBytes": 16759422976,
+        "cgroupCpuMax": null,
+        "cgroupCpuQuotaCores": null,
+        "cgroupMemoryMaxBytes": null,
+        "cgroupMemoryCurrentBytes": null
+      },
+      "retainedFailure": {
+        "message": "Memory coverage/gates or correctness failed; every scheduled observation is retained without replacement",
+        "recordedAtEpochSeconds": 1795619689.5780852,
+        "retried": false,
+        "type": "RuntimeError"
+      }
+    }
+  ],
+  "crossReplicationReceiptEquality": {
+    "jitendex": {
+      "observations": 8,
+      "allEqual": true,
+      "browserVersion": "153.0.8010.12"
+    },
+    "vndb": {
+      "observations": 8,
+      "allEqual": true,
+      "browserVersion": "153.0.8010.12"
+    }
+  },
+  "allAuditReconciliationsPassed": true,
+  "allCorrectnessPassed": true,
+  "promotionMemoryPass": false,
+  "totalRawScans": 1504,
+  "crossArtifactPackagedMemberEquality": {
+    "baseline": true,
+    "candidate": true,
+    "memberCount": 551
+  }
+}
