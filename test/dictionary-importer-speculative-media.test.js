@@ -57,10 +57,10 @@ function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?
     const storedMedia = []
     /** @type {MediaIndex[]} */
     const selectedPlans = []
-    const readImage = vi.fn((/** @type {number} */ index) => {
+    const readImage = vi.fn(/** @type {(index: number) => Uint8Array<ArrayBuffer>} */ ((index) => {
         state.events.push('image-read')
         return Uint8Array.from(images[index])
-    })
+    }))
     const rows = []
     for (let index = 0; index < IMAGE_COUNT; ++index) {
         const path = `img/card${index + 1}.webp`
@@ -129,7 +129,7 @@ function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?
         bulkAdd: vi.fn(async (/** @type {string} */ store, /** @type {unknown[]} */ entries, /** @type {number} */ start, /** @type {number} */ count) => {
             state.events.push(store)
             if (store === 'terms') { onTerms() }
-            if (store === 'media') { storedMedia.push(...(entries.slice(start, start + count))) }
+            if (store === 'media') { storedMedia.push(...(/** @type {MediaRow[]} */ (entries.slice(start, start + count)))) }
         }),
     }
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader(), void 0, () => state.cancelled)
