@@ -129,6 +129,32 @@ describe('adjacent JSON delimiter state transitions', () => {
         }
     })
 
+    test('agrees on every ASCII character immediately after a closed child', () => {
+        for (let byte = 0; byte < 128; ++byte) {
+            const separator = String.fromCharCode(byte)
+            for (const child of ['[]', '{}', '[{"content":["leaf"]}]']) {
+                check(`[${child}${separator},"last"]`, byte % 16)
+                check(`{"content":${child}${separator},"next":"last"}`, byte % 16)
+            }
+        }
+    })
+
+    test('requires a value or key after a comma following a closed child', () => {
+        for (const json of [
+            '[[],]',
+            '[{},]',
+            '[[],,0]',
+            '[{}"last"]',
+            '{"content":[],}',
+            '{"content":{},}',
+            '{"content":[],,"next":0}',
+            '{"content":{},true:0}',
+            '[{"content":[{}],},"last"]',
+        ]) {
+            check(json, 7)
+        }
+    })
+
     test('keeps delimiter lookahead inside logical and physical source bounds', () => {
         for (const text of ['{"key":"value","next":["",{"x":"y"}]}', '["",{"type":"text","text":"日🙂"}]']) {
             const source = bank(text)
@@ -154,6 +180,10 @@ describe('adjacent JSON delimiter state transitions', () => {
             ['[ {"tag": "span", "content": "plain"} ]', [0, 1, 0]],
             ['[{"nested":{"type":"text","text":"x"},"tag":"img"}]', [1, 1, 1]],
             ['[{"x":"ordinary","y":["","last"]}]', [0, 0, 0]],
+            ['[{"content":[],"tag":"img"}]', [1, 0, 0]],
+            ['[{"content":[], "tag":"img"}]', [1, 1, 0]],
+            ['[{"content":{},"type":"text","text":"value"}]', [0, 1, 1]],
+            ['[[],{},"image"]', [1, 0, 0]],
         ])) {
             const result = parse([bank(text)])
             expect(result.count).toBe(1)
