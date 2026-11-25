@@ -6,6 +6,15 @@ This measurement-only branch freezes independent complete-import comparisons for
 Production candidates remain in their existing PRs. This branch is not intended
 to merge.
 
+## Results
+
+[Complete results and retained evidence](results/README.md) cover all 312 browser
+imports. Every content validation passes. The metadata-witness candidate is slower
+on both Jitendex hosts and should not be promoted. Native media projection makes
+VNDB faster, but the complete frozen timing and memory qualifications still fail.
+The metadata candidate remains a draft. Native projection was independently merged
+while the comparison was running; its failed screens remain part of this record.
+
 ## Frozen acquisition
 
 [Protocol](../import-qualification-ca365.json) pins baseline and candidate commit
@@ -40,6 +49,6 @@ The media replay accepts a repository checkout as an argument. The metadata
 scripts retain their original sibling-worktree paths for provenance; reproduce
 that layout using the exact source commits documented in the parity record.
 
-These checks establish parser correctness and package identity. They do not
-establish whole-import latency or browser-memory behavior. Hosted results will
-be recorded separately with their exact workflow and candidate identities.
+These local checks establish parser correctness and package identity. The separate
+[hosted results](results/README.md) record complete-import latency and sampled
+memory outcomes with exact workflow and candidate identities.

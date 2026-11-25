@@ -13,7 +13,9 @@ concurrency:
 
 jobs:
   memory:
-    if: github.head_ref == 'diagnostic/import-qualification-20261125-ca365' && github.event.pull_request.head.repo.full_name == github.repository
+    # Keep every original observation attached to its frozen acquisition commit;
+    # archiving results must not start another memory campaign.
+    if: github.head_ref == 'diagnostic/import-qualification-20261125-ca365' && github.event.pull_request.head.sha == '7b021ebe3e7625a56ab9dde346ae72f3cd39b770' && github.event.pull_request.head.repo.full_name == github.repository
     name: ${{ matrix.candidate }} memory ${{ matrix.dictionary }} host ${{ matrix.replication }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
