@@ -41,6 +41,8 @@ const U8_COMMA = 0x2c;
 
 const CONTENT_META_U32_FIELDS = 4;
 const CONTENT_SIGNATURE_U32_FIELDS = 3;
+// v7 lookup container header (16 bytes), then the base header (32 bytes).
+const NATIVE_LOOKUP_KEY_BYTES_OFFSET = 48;
 const DEFAULT_ROW_CHUNK_SIZE = 2048;
 const INITIAL_META_ROWS_PER_SOURCE = 10_000;
 const SPARSE_STRUCTURED_BANK_ROWS_PER_SOURCE = 2500;
@@ -1595,10 +1597,11 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
  * @param {number} keys
  * @param {number} sourceKeys
  * @param {number} bytes
+ * @param {number} indexOutputPtr
  * @param {((size: number, label: string) => number)|null} [allocator=null]
  * @returns {{remap: number, lengths: number, offsets: number, hashes: number, expressions: number, readings: number, strings: number, stringCapacity: number, keyCapacity: number, info: number}}
  */
-function createNativeLookupCompactionScratch(wasm, rows, keys, sourceKeys, bytes, allocator = null) {
+function createNativeLookupCompactionScratch(wasm, rows, keys, sourceKeys, bytes, indexOutputPtr, allocator = null) {
     const alloc = (/** @type {number} */ n) => (allocator === null ?
         allocateWasmBuffer(wasm, n, 'segmented lookup compaction') :
 allocator(n, 'segmented lookup compaction'));
@@ -1608,7 +1611,9 @@ allocator(n, 'segmented lookup compaction'));
         hashes: alloc(keys * 4),
         expressions: alloc(rows * 4),
         readings: alloc(rows * 4),
-        strings: alloc(bytes),
+        // The encoder preserves this slice. Compact directly into the final
+        // output instead of staging and copying the same native key bytes.
+        strings: indexOutputPtr + NATIVE_LOOKUP_KEY_BYTES_OFFSET,
         stringCapacity: bytes,
         keyCapacity: keys,
         info: alloc(4)};
@@ -1679,8 +1684,7 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
         const ownedPlan = {stringLengths: new Uint16Array(runPlan.stringLengths),
             stringOffsets: new Uint32Array(runPlan.stringOffsets),
             stringHashes: new Uint32Array(runPlan.stringHashes),
-            // v7: 16-byte container header, then the 32-byte base header.
-            stringsBuffer: bytes.subarray(48, 48 + length),
+            stringsBuffer: bytes.subarray(NATIVE_LOOKUP_KEY_BYTES_OFFSET, NATIVE_LOOKUP_KEY_BYTES_OFFSET + length),
             expressionIndexes: new Uint32Array(runPlan.expressionIndexes),
             readingIndexes: new Uint32Array(runPlan.readingIndexes)};
         indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan});
@@ -2190,6 +2194,7 @@ null :
                     nativeLookupKeyCapacity,
                     fusedPlanLayout.stringLengthsLength,
                     maxNativeChunkStringBytes,
+                    nativeLookupIndexScratch.outputPtr,
                     allocator,
                 );
             }
