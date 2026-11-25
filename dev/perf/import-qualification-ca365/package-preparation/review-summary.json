@@ -1,0 +1,40 @@
+{
+    "scope": "Local package member validation only, not protocol acquisition or timing",
+    "nodeVersion": "v24.22.3",
+    "protocolSha256": "3d42832a4ddc4036ee844acabfad9515bc282fe0f816a320896b36897d7d0686",
+    "runnerSha256": "000fda1e769038a6afcad18b6048d88108f024c445e4a95cd719bbb0aaf86077",
+    "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "baselinePackageSha256": "14de0e7722eb48329a646c9dd2e3b856f02edfed8388d08ac8a6443e3f2e16e1",
+    "candidates": {
+        "metadata-witness": {
+            "commit": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+            "tree": "49ea808e09b3d9ce26c27614c1b49ff9f0466c70",
+            "packageSha256": "92d54fde6c369a54d9b5a9c268c05fbebd07b53e15e54cc74d8b03ac34aabe4d",
+            "memberCount": 551,
+            "sourceHarnessGuardPassed": true,
+            "harnessSha256MatchesBase": true,
+            "actualPackagedDelta": [
+                "js/dictionary/dictionary-importer.js",
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ],
+            "exactAllowlistMatch": true
+        },
+        "native-projection": {
+            "commit": "5afd2e97ec2707b150acfde61115aee688547a78",
+            "tree": "a6981459853d7ea102afd801c1e447e49311db1e",
+            "packageSha256": "f10f1909a3e21aafdc4e50ef7b1fb33a9f15ebafdb110cf65317db8c424a696f",
+            "memberCount": 551,
+            "sourceHarnessGuardPassed": true,
+            "harnessSha256MatchesBase": true,
+            "actualPackagedDelta": [
+                "js/dictionary/term-bank-wasm-parser-worker.js",
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ],
+            "exactAllowlistMatch": true
+        }
+    }
+}

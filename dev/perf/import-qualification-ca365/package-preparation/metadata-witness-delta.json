@@ -1,0 +1,6 @@
+[
+    "js/dictionary/dictionary-importer.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+]
