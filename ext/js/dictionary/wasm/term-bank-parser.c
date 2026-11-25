@@ -32,6 +32,10 @@
 #define VALIDATED_GLOSSARY_REUSE_PROBE_BUDGET 4u
 #define VALIDATED_GLOSSARY_REUSE_ADMISSION_MATCHES 4u
 #define VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES 512u
+#define METADATA_WITNESS_MIN_BYTES 16u
+#define METADATA_WITNESS_MAX_BYTES 512u
+#define METADATA_WITNESS_SETS 8u
+#define METADATA_WITNESS_WAYS 4u
 /* Key lengths use every uint16 value; the null sentinel applies to IDs only. */
 #define MAX_INTERNED_KEY_BYTES 0xffffu
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
@@ -43,6 +47,24 @@ extern unsigned char __heap_base;
 static uint32_t heap_ptr = 0u;
 static uint32_t last_parse_capacity = 0u;
 static uint32_t last_content_capacity = 0u;
+static uint32_t last_metadata_reuse_count = 0u;
+static uint32_t last_metadata_reuse_bytes = 0u;
+
+typedef struct {
+    uint64_t prefix[2];
+    uint32_t start;
+    uint32_t length;
+    uint32_t hints;
+} MetadataWitness;
+
+typedef struct {
+    MetadataWitness entries[METADATA_WITNESS_SETS][METADATA_WITNESS_WAYS];
+    uint8_t next[METADATA_WITNESS_SETS];
+    uint32_t reuse_count;
+    uint32_t reuse_bytes;
+} MetadataWitnessCache;
+
+_Static_assert(sizeof(MetadataWitnessCache) == 1040u, "Metadata witness stack storage must remain bounded");
 
 void* memset(void* dest, int value, unsigned long count) {
     __builtin_memset(dest, value, count);
@@ -604,6 +626,8 @@ static uint32_t read_content_signature(
 __attribute__((visibility("default")))
 void wasm_reset_heap(void) {
     heap_ptr = (uint32_t)(uintptr_t)&__heap_base;
+    last_metadata_reuse_count = 0u;
+    last_metadata_reuse_bytes = 0u;
 }
 
 __attribute__((visibility("default")))
@@ -635,6 +659,16 @@ uint32_t wasm_get_last_parse_capacity(void) {
 __attribute__((visibility("default")))
 uint32_t wasm_get_last_content_capacity(void) {
     return last_content_capacity;
+}
+
+__attribute__((visibility("default")))
+uint32_t wasm_get_last_metadata_reuse_count(void) {
+    return last_metadata_reuse_count;
+}
+
+__attribute__((visibility("default")))
+uint32_t wasm_get_last_metadata_reuse_bytes(void) {
+    return last_metadata_reuse_bytes;
 }
 
 static int grow_term_row_buffer(
@@ -838,6 +872,115 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 }
 
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
+static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
+
+enum {
+    METADATA_MEDIA_HINT = 1u,
+    METADATA_NORMALIZATION_HINT = 2u,
+    METADATA_TEXT_NORMALIZATION_HINT = 4u
+};
+
+/* A complete flat object has exactly one nesting frame. Learn only bounded
+ * primitive metadata after validating its closing brace, and keep its hints
+ * independent of the enclosing row's already-set hints. Failed probes leave
+ * the ordinary parser responsible for grammar and error precedence. */
+static int parse_flat_metadata_object(
+    const uint8_t* src, uint32_t len, uint32_t start,
+    uint32_t* out_end, uint32_t* out_hints
+) {
+    uint32_t i = start + 1u;
+    uint32_t hints = 0u;
+    for (;;) {
+        uint32_t next = skip_ws(src, len, i);
+        if (next != i) { hints |= METADATA_NORMALIZATION_HINT; }
+        i = next;
+        if (i >= len || src[i] != '"') { return 0; }
+        if (!parse_string_span(src, len, i, &next)) { return 0; }
+        if (is_media_marker_at(src, next, i)) { hints |= METADATA_MEDIA_HINT; }
+        if (type_text_pair_at(src, len, i, next)) {
+            hints |= METADATA_NORMALIZATION_HINT | METADATA_TEXT_NORMALIZATION_HINT;
+        }
+        i = skip_ws(src, len, next);
+        if (i != next) { hints |= METADATA_NORMALIZATION_HINT; }
+        if (i >= len || src[i] != ':') { return 0; }
+        next = i + 1u;
+        i = skip_ws(src, len, next);
+        if (i != next) { hints |= METADATA_NORMALIZATION_HINT; }
+        if (i >= len) { return 0; }
+        if (src[i] == '"') {
+            if (!parse_string_span(src, len, i, &next)) { return 0; }
+            if (is_media_marker_at(src, next, i)) { hints |= METADATA_MEDIA_HINT; }
+        } else {
+            if (src[i] == '[' || src[i] == '{' || !parse_scalar_span(src, len, i, &next)) { return 0; }
+        }
+        i = skip_ws(src, len, next);
+        if (i != next) { hints |= METADATA_NORMALIZATION_HINT; }
+        if (i >= len) { return 0; }
+        if (src[i] == '}') {
+            *out_end = i + 1u;
+            *out_hints = hints;
+            return 1;
+        }
+        if (src[i] != ',') { return 0; }
+        ++i;
+    }
+}
+
+/* Eight sets of four witnesses bound both retention and probes. The first
+ * sixteen raw bytes only select/reject candidates; every hit still compares
+ * the complete object against a successfully validated span of this call. */
+static int reuse_or_parse_metadata_object(
+    const uint8_t* src, uint32_t len, uint32_t start,
+    MetadataWitnessCache* cache, uint32_t* out_end, uint32_t* out_hints
+) {
+    if (len - start < METADATA_WITNESS_MIN_BYTES) { return 0; }
+    uint64_t prefix[2];
+    __builtin_memcpy(prefix, src + start, sizeof(prefix));
+    uint32_t hash = (uint32_t)prefix[0] ^ (uint32_t)(prefix[0] >> 32u) ^
+        (uint32_t)prefix[1] ^ (uint32_t)(prefix[1] >> 32u);
+    hash *= UINT32_C(0x9e3779b1);
+    hash ^= hash >> 16u;
+    const uint32_t set = hash & (METADATA_WITNESS_SETS - 1u);
+    for (uint32_t way = 0u; way < METADATA_WITNESS_WAYS; ++way) {
+        const MetadataWitness* entry = &cache->entries[set][way];
+        if (entry->length == 0u || entry->length > len - start ||
+            entry->prefix[0] != prefix[0] || entry->prefix[1] != prefix[1] ||
+            !content_bytes_equal_between(src, start, src, entry->start, entry->length)) { continue; }
+        *out_end = start + entry->length;
+        *out_hints = entry->hints;
+        if (cache->reuse_count != UINT32_MAX) { ++cache->reuse_count; }
+        cache->reuse_bytes = cache->reuse_bytes > UINT32_MAX - entry->length ?
+            UINT32_MAX : cache->reuse_bytes + entry->length;
+        return 1;
+    }
+    const uint32_t limit = len - start > METADATA_WITNESS_MAX_BYTES ? start + METADATA_WITNESS_MAX_BYTES : len;
+    uint32_t end;
+    uint32_t hints;
+    if (!parse_flat_metadata_object(src, limit, start, &end, &hints) ||
+        end - start < METADATA_WITNESS_MIN_BYTES) { return 0; }
+    const uint32_t way = cache->next[set];
+    MetadataWitness* entry = &cache->entries[set][way];
+    entry->prefix[0] = prefix[0];
+    entry->prefix[1] = prefix[1];
+    entry->start = start;
+    entry->length = end - start;
+    entry->hints = hints;
+    cache->next[set] = (uint8_t)((way + 1u) & (METADATA_WITNESS_WAYS - 1u));
+    *out_end = end;
+    *out_hints = hints;
+    return 1;
+}
+
+/* Only the two complete literal parent keys admit metadata. Escaped keys and
+ * every other object retain the ordinary composite parser's dispatch. */
+static inline int is_metadata_key(const uint8_t* src, uint32_t start, uint32_t end) {
+    const uint32_t length = end - start;
+    if (length != 6u && length != 7u) { return 0; }
+    uint32_t prefix;
+    __builtin_memcpy(&prefix, src + start, sizeof(prefix));
+    return (length == 6u && prefix == UINT32_C(0x74616422) && src[start + 4u] == 'a' && src[start + 5u] == '"') ||
+        (length == 7u && prefix == UINT32_C(0x79747322) && src[start + 4u] == 'l' && src[start + 5u] == 'e' && src[start + 6u] == '"');
+}
 
 enum {
     COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
@@ -915,7 +1058,8 @@ static int parse_composite_span_impl(
     uint32_t* media_hint,
     uint32_t* normalization_hint,
     uint32_t* text_normalization_hint,
-    int validate_glossary_types
+    int validate_glossary_types,
+    MetadataWitnessCache* metadata_cache
 ) {
     enum {
         ARRAY_FIRST, ARRAY_AFTER_VALUE, ARRAY_VALUE,
@@ -993,6 +1137,25 @@ static int parse_composite_span_impl(
                 ) {
                     if (normalization_hint != 0) { *normalization_hint = 1u; }
                     if (text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+                }
+                if (metadata_cache != 0 && common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
+                    depth < MAX_JSON_NESTING && is_metadata_key(src, i, s_end)) {
+                    const uint32_t colon = skip_ws(src, len, s_end);
+                    if (colon < len && src[colon] == ':') {
+                        const uint32_t value = skip_ws(src, len, colon + 1u);
+                        uint32_t metadata_end;
+                        uint32_t hints;
+                        if (value < len && src[value] == '{' &&
+                            reuse_or_parse_metadata_object(src, len, value, metadata_cache, &metadata_end, &hints)) {
+                            if (colon != s_end || value != colon + 1u) { hints |= METADATA_NORMALIZATION_HINT; }
+                            if ((hints & METADATA_MEDIA_HINT) != 0u && media_hint != 0) { *media_hint = 1u; }
+                            if ((hints & METADATA_NORMALIZATION_HINT) != 0u && normalization_hint != 0) { *normalization_hint = 1u; }
+                            if ((hints & METADATA_TEXT_NORMALIZATION_HINT) != 0u && text_normalization_hint != 0) { *text_normalization_hint = 1u; }
+                            state = OBJECT_AFTER_VALUE;
+                            i = metadata_end;
+                            continue;
+                        }
+                    }
                 }
                 // The key was already validated; consume an adjacent colon
                 // without redispatching it through the object state machine.
@@ -1094,7 +1257,7 @@ static int parse_composite_span_impl(
 }
 
 static int parse_composite_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0, 0);
+    return parse_composite_span_impl(src, len, start, out_end, 0, 0, 0, 0, 0);
 }
 
 static int token_equals_bytes(const uint8_t* src, uint32_t start, uint32_t end, const char* expected, uint32_t expected_length) {
@@ -1163,12 +1326,13 @@ static int parse_value_span_with_glossary_hints(
     uint32_t* media_hint,
     uint32_t* normalization_hint,
     uint32_t* text_normalization_hint,
-    int validate_glossary_types
+    int validate_glossary_types,
+    MetadataWitnessCache* metadata_cache
 ) {
     if (start >= len) { return 0; }
     uint8_t c = src[start];
     if (c == '[' || c == '{') {
-        return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint, validate_glossary_types);
+        return parse_composite_span_impl(src, len, start, out_end, media_hint, normalization_hint, text_normalization_hint, validate_glossary_types, metadata_cache);
     }
     return parse_value_span(src, len, start, out_end);
 }
@@ -1302,8 +1466,6 @@ static int next_term_row(TermBankCursor* cursor, uint32_t row_end) {
     return 1;
 }
 
-static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*, uint32_t, uint32_t);
-
 /* Samples only reject candidates. Only full equality with a successful earlier
  * row of THIS parse grants grammar/hint reuse. Nothing survives heap reset.
  * A witness also lets content dedup avoid comparing this same glossary twice. */
@@ -1357,7 +1519,8 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    MetadataWitnessCache* metadata_cache
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     uint32_t i = skip_ws(src, len, row_start + 1u);
@@ -1413,7 +1576,8 @@ static int parse_format3_row(
             media_hints ? &meta->glossary_may_contain_media : 0,
             &meta->glossary_requires_normalization,
             &meta->glossary_requires_text_normalization,
-            1
+            1,
+            metadata_cache
         )) { return 0; }
     meta->glossary_start = i;
     meta->glossary_length = end - i;
@@ -1451,12 +1615,13 @@ static int parse_row_single_pass(
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
     int validate_glossary_types,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    MetadataWitnessCache* metadata_cache
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask, metadata_cache
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -1499,7 +1664,8 @@ static int parse_row_single_pass(
                     media_hint,
                     &out_meta->glossary_requires_normalization,
                     &out_meta->glossary_requires_text_normalization,
-                    validate_glossary_types
+                    validate_glossary_types,
+                    metadata_cache
                 )) { return 0; }
         } else if (!parse_value_span(src, len, i, &value_end)) {
             return 0;
@@ -2097,7 +2263,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0)) {
             return -1;
         }
         ++row_count;
@@ -2119,6 +2285,8 @@ static int32_t parse_term_bank_impl(
     uint32_t json_ptr, uint32_t json_len, uint32_t out_ptr, uint32_t out_capacity,
     int media_hints, uint32_t bank_spans_ptr, uint32_t bank_count, int validate_glossary_types
 ) {
+    last_metadata_reuse_count = 0u;
+    last_metadata_reuse_bytes = 0u;
     if (bank_spans_ptr == 0u) {
         if (bank_count != 0u) { return -1; }
         return parse_contiguous_term_bank(json_ptr, json_len, out_ptr, out_capacity, media_hints, validate_glossary_types);
@@ -2135,7 +2303,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0)) {
             return -1;
         }
         ++row_count;
@@ -3136,6 +3304,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t validate_glossary_types,
     uint32_t glossary_witnesses_ptr
 ) {
+    last_metadata_reuse_count = 0u;
+    last_metadata_reuse_bytes = 0u;
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
         out_ptr == 0u || row_meta_ptr == 0u || hash_table_ptr == 0u ||
@@ -3188,6 +3358,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t strings_cursor = 0u;
     uint32_t row_count = 0u;
     uint32_t recent_content_hits = 0u;
+    MetadataWitnessCache metadata_cache = {0};
     const int validated_glossary_reuse_enabled = (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u;
     uint32_t glossary_reuse_probe_budget = 0u;
     uint32_t recent_content_match_streak = 0u;
@@ -3222,7 +3393,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
         uint32_t key_escape_mask;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask, &metadata_cache)) {
             return -1;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
@@ -3526,6 +3697,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
     *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
     *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
+    last_metadata_reuse_count = metadata_cache.reuse_count;
+    last_metadata_reuse_bytes = metadata_cache.reuse_bytes;
     return (int32_t)cursor;
 }
 
