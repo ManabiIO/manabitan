@@ -247,12 +247,35 @@ describe('lookup construction experiments', () => {
         await parse(makeBanks(24))
         expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
     })
-    test('native segmentation alone falls back when retired scratch cannot hold long keys', async () => {
+    test('staging keys in the final index keeps two wide segments within retired workspace', async () => {
         const banks = makeBanks(40001).map((bank) => {
             const rows = JSON.parse(new TextDecoder().decode(bank))
             for (const row of rows) {
                 row[0] = 'a'.repeat(20) + row[0]
                 row[1] = 'b'.repeat(20) + row[1]
+            }
+            return encoder.encode(JSON.stringify(rows))
+        })
+        const baseline = await parse(banks)
+        const candidate = await parse(banks, {experimentalNativeSegmentedLookup: true})
+        expect(candidate.profile?.fusedParseFallbacks).toBe(0)
+        expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(2)
+        expect(candidate.profile?.nativeSegmentedLookupFallbacks).toBe(0)
+        expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe(0)
+        expect(candidate.profile?.nativeLookupScratchReusedBytes).toBeGreaterThan(0)
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+        expect(hasCompletePreparedTermLookupIndexes(candidate.indexes, 40001)).toBe(true)
+        await parse(makeBanks(24))
+        expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
+    })
+    test('native segmentation alone falls back when retired scratch cannot hold long keys', async () => {
+        // Keep the fused key arena within its existing 64-byte-per-row budget,
+        // while the segment index output cannot fit any retired region.
+        const banks = makeBanks(40001).map((bank) => {
+            const rows = JSON.parse(new TextDecoder().decode(bank))
+            for (const row of rows) {
+                row[0] = 'a'.repeat(32) + row[0]
+                row[1] = 'b'.repeat(32) + row[1]
             }
             return encoder.encode(JSON.stringify(rows))
         })

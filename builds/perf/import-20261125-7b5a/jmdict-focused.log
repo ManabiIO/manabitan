@@ -1,0 +1,119 @@
+
+ RUN  v4.1.12 /workspace/scratch/7b5a4ac440c8/jmdict
+
+ ❯ test/lookup-construction-experiments.test.js (42 tests | 8 failed) 102875ms
+     × all new lookup combinations with previous flags and compressed banks: mask=3 18375ms
+     × all new lookup combinations with previous flags and compressed banks: mask=11 6414ms
+     × native segmentation alone falls back when retired scratch cannot hold long keys 833ms
+     × segment-sized arenas keep a wide multi-segment group within retired workspace 5763ms
+     × segment bounds include the final partial segment and long boundary keys 5108ms
+     × empty key tables preserve the existing index rejection: explicit reuse=true 6646ms
+     × preserves uint16 sentinel boundaries: rows=65534 11934ms
+     × JS allocation flags preserve segmented bytes: mask=3 6421ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > all new lookup combinations with previous flags and compressed banks: mask=3
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > all new lookup combinations with previous flags and compressed banks: mask=11
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/lookup-construction-experiments.test.js:181:53
+    179|     })
+    180|
+    181|     test.each(Array.from({length: 16}, (_, i) => i))('all new lookup c…
+       |                                                     ^
+    182|         const banks = makeBanks(70001)
+    183|         const baseline = await parse(banks)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > native segmentation alone falls back when retired scratch cannot hold long keys
+AssertionError: expected 2 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 2
+
+ ❯ test/lookup-construction-experiments.test.js:262:66
+    260|         const candidate = await parse(banks, {experimentalNativeSegmen…
+    261|         expect(candidate.profile?.fusedParseFallbacks).toBe(0)
+    262|         expect(candidate.profile?.nativeSegmentedLookupSegments).toBe(…
+       |                                                                  ^
+    263|         expect(candidate.profile?.nativeSegmentedLookupFallbacks).toBe…
+    264|         expect(candidate.profile?.nativeLookupScratchReuseMisses).toBe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > segment-sized arenas keep a wide multi-segment group within retired workspace
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/lookup-construction-experiments.test.js:272:9
+    270|         expect(recovered.profile?.nativeLookupScratchReuseGroups).toBe…
+    271|     })
+    272|     test('segment-sized arenas keep a wide multi-segment group within …
+       |         ^
+    273|         const banks = makeBanks(90001).map((bank) => {
+    274|             const rows = JSON.parse(new TextDecoder().decode(bank))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > segment bounds include the final partial segment and long boundary keys
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/lookup-construction-experiments.test.js:306:9
+    304|         expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(ba…
+    305|     })
+    306|     test('segment bounds include the final partial segment and long bo…
+       |         ^
+    307|         const rows = Array.from({length: 60001}, (_, index) => [
+    308|             index < 60000 ? '共通' : '長'.repeat(1000),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > empty key tables preserve the existing index rejection: explicit reuse=true
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/lookup-construction-experiments.test.js:332:29
+    330|         expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(ba…
+    331|     })
+    332|     test.each([false, true])('empty key tables preserve the existing i…
+       |                             ^
+    333|         const bank = encoder.encode(JSON.stringify(Array.from({length:…
+    334|             '',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > preserves uint16 sentinel boundaries: rows=65534
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/lookup-construction-experiments.test.js:432:37
+    430|         expect(digestIndexes(baseline.indexes)).toBe(expected)
+    431|     })
+    432|     test.each([65534, 65535, 65536])('preserves uint16 sentinel bounda…
+       |                                     ^
+    433|         const banks = makeBanks(count)
+    434|         const baseline = await parse(banks)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+ FAIL  test/lookup-construction-experiments.test.js > lookup construction experiments > JS allocation flags preserve segmented bytes: mask=3
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/lookup-construction-experiments.test.js:439:28
+    437|         expect(hasCompletePreparedTermLookupIndexes(candidate.indexes,…
+    438|     })
+    439|     test.each([0, 1, 2, 3])('JS allocation flags preserve segmented by…
+       |                            ^
+    440|         const banks = makeBanks(70001)
+    441|         const baseline = await parse(banks)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/8]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  8 failed | 62 passed (70)
+   Start at  09:49:11
+   Duration  112.46s (transform 1.34s, setup 329ms, import 1.67s, tests 108.09s, environment 0ms)
+

@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 /workspace/scratch/7b5a4ac440c8/jitendex
+
+ ❯ test/term-bank-experiments.test.js (147 tests | 1 failed) 21475ms
+     × exhausted native key arena falls back without overwriting earlier interned keys 12323ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/term-bank-experiments.test.js > native exceptional keys > exhausted native key arena falls back without overwriting earlier interned keys
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/term-bank-experiments.test.js:337:9
+    335|     })
+    336|
+    337|     test('exhausted native key arena falls back without overwriting ea…
+       |         ^
+    338|         const tokens = Array.from({length: 24}, (_, i) => `"${i}-${'x'…
+    339|         const bank = `[${tokens.map((token) => escapedBank(token).slic…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 696 passed (697)
+   Start at  09:50:12
+   Duration  77.47s (transform 39.42s, setup 7.02s, import 35.48s, tests 31.47s, environment 0ms)
+

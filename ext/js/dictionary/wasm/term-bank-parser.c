@@ -2849,7 +2849,18 @@ int32_t encode_term_lookup_index(
     const uint32_t output_length = (uint32_t)output_length_64;
 
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
-    memset(output, 0, output_length);
+    const uint32_t strings_output_offset = TERM_LOOKUP_CONTAINER_HEADER_BYTES + TERM_LOOKUP_BASE_HEADER_BYTES;
+    uint8_t* persisted_strings = output + strings_output_offset;
+    if (strings == persisted_strings) {
+        // Segmented compaction can write its keys directly into the final
+        // container. Preserve that exact slice while clearing every header,
+        // table and padding byte left by the preceding segment.
+        memset(output, 0, strings_output_offset);
+        memset(persisted_strings + strings_length, 0, output_length - strings_output_offset - strings_length);
+    } else {
+        memset(output, 0, output_length);
+        __builtin_memcpy(persisted_strings, strings, strings_length);
+    }
     uint32_t* container_header = (uint32_t*)output;
     container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;
     container_header[1] = TERM_LOOKUP_FORMAT_VERSION;
@@ -2863,8 +2874,6 @@ int32_t encode_term_lookup_index(
     base_header[3] = TERM_LOOKUP_FORMAT_VERSION;
     base_header[4] = sequence_key_count;
     base_header[5] = reading_posting_count;
-    __builtin_memcpy(base + TERM_LOOKUP_BASE_HEADER_BYTES, strings, strings_length);
-
     uint32_t cursor = TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length;
     uint16_t* persisted_key_lengths = (uint16_t*)(base + cursor);
     cursor += key_count * (uint32_t)sizeof(uint16_t);
