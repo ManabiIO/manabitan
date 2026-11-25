@@ -97,8 +97,12 @@ async function parse(preloadedSource, overrides = {}) {
 describe('raw glossary witness source CRC verification', () => {
     test('verifies newly eligible stored banks before exposing exact ordinary output', async () => {
         const source = banks.map((bytes, index) => ({
-            bytes, compressionMethod: 0, compressedSize: bytes.length, uncompressedSize: bytes.length,
-            signature: crc32(bytes), filename: `term_bank_${index + 1}.json`,
+            bytes,
+            compressionMethod: 0,
+            compressedSize: bytes.length,
+            uncompressedSize: bytes.length,
+            signature: crc32(bytes),
+            filename: `term_bank_${index + 1}.json`,
         }))
         const ordinary = await parse(await inflateCompressedTermBankSourcesWasm(source, options))
         const preloaded = await inflateCompressedTermBankSourcesWasm(source, options, true)
