@@ -231,3 +231,62 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## 2026-11-25: direct media indexes and pending import qualification
+
+[Source PR #909](https://github.com/ManabiIO/manabitan/pull/909) removes temporary full media records from speculative media preparation. It remains draft pending qualification. [Measurement PR #920](https://github.com/ManabiIO/manabitan/pull/920) freezes the complete-import comparison for JMdict, Jitendex and VNDB. At the recorded **2026-11-25 15:55:22 UTC** snapshot, [measurement run 45647637163](https://github.com/ManabiIO/manabitan/actions/runs/45647637163) was queued at its plan job; no browser timing observations or performance result existed.
+
+### Frozen sources and fixtures
+
+| Role                                       | Identity                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| Baseline A and identical-product control C | `7d1643e6147a10cb2165e9744cf0e63b59e46632`                         |
+| Published candidate B, PR #909             | `477353ff8e4d99fafd9224392bb0b26055745378`                         |
+| Candidate Git tree                         | `2dd64e9144076e824f4f7762d90ff43af79f0aad`                         |
+| Locally tested commit with the same tree   | `c34c6018275907083c698c9c68400af2babdf02f`                         |
+| Original measurement head, PR #920         | `bfc3b9e2288dda65b1236afdbeb3903c34719702`                         |
+| Fixture lock SHA-256                       | `60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89` |
+
+The current [fixture lock](../../test/perf/dictionaries.lock.json) supplies the following archives. These identities supersede the historical fixture sizes earlier in this handoff for this cohort only.
+
+| Dictionary                                 | Archive bytes | Term rows | Archive SHA-256                                                    |
+| ------------------------------------------ | ------------: | --------: | ------------------------------------------------------------------ |
+| JMdict, 2026-11-22                         |    15,645,766 |   528,299 | `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f` |
+| Jitendex, 2026.10.03.0                     |    38,831,822 |   436,555 | `e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356` |
+| VNDB, release 1.0.0, revision 395525135651 |   291,705,969 | 6,648,310 | `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` |
+
+The allowed release-package delta is exactly `js/dictionary/dictionary-generation-media-store.js`, `js/dictionary/source-zip-media-pack.js` and `js/dictionary/source-zip-media-preparation-worker.js`. Compression settings, native binaries, worker counts, byte budgets, import defaults and persisted formats are unchanged.
+
+### Verified source behavior
+
+The full pinned VNDB media comparison verified the media descriptor, complete index bytes, complete packed Blob bytes and I/O metrics against the frozen baseline:
+
+| Quantity                                    |                Result |
+| ------------------------------------------- | --------------------: |
+| Images / decoded image bytes                | 146,570 / 188,131,284 |
+| Identical media-index bytes                 |             3,912,816 |
+| Identical packed Blob bytes                 |           195,649,882 |
+| Range reads / bytes read, both arms         |     144 / 195,649,882 |
+| Full temporary media-record objects removed |               146,570 |
+
+The object count is deterministic work removal. It does not measure browser peak memory, allocator footprint or complete-import speed. This component proof covers media preparation; it does not establish equality of every persisted dictionary record.
+
+[Exact-source CI run 45643619075](https://github.com/ManabiIO/manabitan/actions/runs/45643619075) passed all 15 required jobs, with four conditional jobs skipped. The unit suite passed 14,610 tests across 647 files, with 47 existing skips. Chromium and Firefox extension tests, all four TypeScript projects, builds and pinned native reproduction passed. The six auxiliary workflows, including Chromium restart/interruption recovery, also succeeded. The source change had 238 passing focused tests and complete media byte parity. Earlier contended local tests exceeded unchanged timeouts; the exact-parent raw ZIP suite passed alone, and no baseline failure exception is claimed.
+
+### Pending complete-import screen
+
+The [fixed plan](import-source-screen-plan.json), [acquisition script](import-source-screen.py) and original measurement-head workflow schedule three dictionaries on two independent Linux hosts with opposite initial orders. Each cell has two excluded warmups, twelve alternating adjacent A/B pairs, four interleaved A/C control pairs and two exhaustive-media validation imports: **216 scheduled imports, including 192 timed observations**. Node 22.22.0, Chromium 153.0.8010.12, release Chrome packages, fresh profiles and production import defaults are fixed. The timed boundary starts at file-input change and ends after the current operation's post-UI completion event; tracing, screenshots and process sampling are disabled.
+
+Predeclared VNDB screening requires at least 5% paired median improvement, at least 10/12 faster pairs and an upper descriptive interval below zero on both hosts. JMdict and Jitendex permit at most 3% paired median regression; identical-product control intervals must contain zero. Source, helper, package and fixture identities, deterministic semantic receipts, all 72 lookup tuples, restart readability, logical storage bytes and media results must agree. Sampled and exhaustive media receipts are compared separately. Failures remain retained and stop the affected cohort; there are no selective replacement runs. Process peak memory is not measured, so even a successful timing screen cannot establish promotion by itself.
+
+A later `pull_request.types: [opened]` event-filter amendment prevents evidence-only updates from launching duplicate cohorts; the original queued run executes the frozen `bfc3b9e2288dda65b1236afdbeb3903c34719702` workflow, with its source identities and acquisition protocol unchanged.
+
+### Rejected and held local work
+
+- **Literal structured-content selector: do not promote.** Prototype `3751d38d23216194e62706b03836b49842ce7304` was not published. Its fixed four-pair Jitendex component comparison recorded +16.75% paired median change, +26.07% equal-work total change and only 1/4 faster pairs. The four-pair identical-source control recorded -12.44% paired median change and -16.39% total change. This host drift prevents a reliable benefit or regression conclusion. These resident-bank parser/lookup measurements exclude ZIP, IPC, compression, persistence and UI, and do not evaluate the broader selector in concurrent PR #895.
+- **Unused compression decoder context: retain evidence, avoid duplication.** Held prototype `d86bb2a8dcc456dc6fa7bd60ae2e3ab1128bb941` overlaps [PR #891](https://github.com/ManabiIO/manabitan/pull/891), observed at `b9cf94b4cc088cb4e06a4ae5cae6b29a7ae59241`. Its retained probe measures native allocation request bytes only; it does not measure RSS, WASM capacity or throughput. This change is not included in #909.
+- **Native lookup initialization and direct key compaction: hold.** The selective-initialization checkpoint `d9209607` passed 260 focused tests and scoped lint. Its later uncommitted extension has exact full-source JMdict and Jitendex component parity; the VNDB replay ended with exit 137 before its report, and extended full units, lint and type qualification remain incomplete. JMdict's eight production-policy groups used 15 native segments in each arm with no fallback, removing 5,320,092 key-copy bytes and 3,763,928 cumulative scratch-reservation bytes. Jitendex's 22 groups used no native segmentation. These counts are neither peak-memory nor timing measurements. [PR #894](https://github.com/ManabiIO/manabitan/pull/894) already owns the direct-key change, so no duplicate source PR was published. The retained read-only review applies only to historical head `8a191ce3f6a0b843ff195c086e7b8ff6e59245fd`, tree `30829deb9035d98f68a53e48cf313f017afb374a`; it does not qualify its later head `7ee8f0cde0845af3906e77b8adad11e3aaefc371` or combine that PR's different grouping counts with this proof.
+
+### Evidence retention
+
+The [readable manifest](direct-media-index-20261125/manifest.json) identifies every file in the [immutable evidence archive](direct-media-index-20261125/evidence.tar.gz). The archive preserves the original parity runners and reports, held patches, allocation probe, both noisy component cohorts, source/proof receipt, source CI job and workflow snapshots, and the queued benchmark snapshot. Its `evidence-index.json` records byte lengths and SHA-256 values; all original 14 indexed files were independently verified unchanged before adding the three metadata snapshots. Raw scripts and receipts retain their acquisition-time paths and identities. No benchmark observation is inferred from a queued workflow, and no held prototype is silently included in the published candidate.

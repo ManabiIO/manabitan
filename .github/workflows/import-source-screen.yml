@@ -2,6 +2,8 @@ name: Frozen import source screen
 
 on:
   pull_request:
+    # Evidence-only updates must not launch another frozen cohort.
+    types: [opened]
     paths:
       - '.github/workflows/import-source-screen.yml'
       - 'dev/perf/import-source-screen.py'

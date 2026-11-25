@@ -1,0 +1,92 @@
+{
+    "schemaVersion": 1,
+    "sourcePullRequest": 909,
+    "measurementPullRequest": 920,
+    "sourceHead": "477353ff8e4d99fafd9224392bb0b26055745378",
+    "frozenMeasurementHead": "bfc3b9e2288dda65b1236afdbeb3903c34719702",
+    "measurementRun": 45647637163,
+    "measurementSnapshot": "Queued at 2026-11-25 15:55:22 UTC; no observations acquired",
+    "scope": "Media preparation parity, source CI receipts and held component experiments; no complete-import timing or process peak-memory result",
+    "archive": {
+        "path": "evidence.tar.gz",
+        "bytes": 29340,
+        "sha256": "c0cda5a0614699e7d4cf84248e6d9bd4318d7e7a06b39faf9d5227c90febde09",
+        "files": 18,
+        "uncompressedFileBytes": 150594,
+        "format": "USTAR in gzip; sorted names, zero timestamps and owner IDs"
+    },
+    "contents": {
+        "benchmark-workflow-status.json": {
+            "bytes": 369,
+            "sha256": "5dd4cf58566ce375736887362d1d9a57da3d295ce199254eecd65feadadf8555"
+        },
+        "compression-worker-context-allocation.json": {
+            "bytes": 608,
+            "sha256": "a0936110f04231f09c0fdacb8238049830701841f62ac3e02ea404eb0063c0f2"
+        },
+        "evidence-index.json": {
+            "bytes": 2457,
+            "sha256": "5f3f3f521acc8e7a22cd464355c422bc92e60e9670a4d154010f520183191c23"
+        },
+        "held-compression-context.patch": {
+            "bytes": 5403,
+            "sha256": "f428f53d5a4fa6a0db0edac5c23bf6c13051baf13c7ac41c2293715126920bb9"
+        },
+        "held-literal-selector.patch": {
+            "bytes": 8513,
+            "sha256": "2ac35d6a038baef0d53aa8aa36030ad6b4f4926b002164c7fc862ceb5bbbdf88"
+        },
+        "held-native-initialization-and-keys.patch": {
+            "bytes": 21287,
+            "sha256": "cfa77bdc0e809bf1c7963fb70f1ed97335239146ce54a4bd1a8676e478174758"
+        },
+        "jitendex-keys-component-aa.json": {
+            "bytes": 18375,
+            "sha256": "3fcc4845ebc79b85d2d8a08cd4d1a8233e707932b86d78370f6fabe3b89d532d"
+        },
+        "jitendex-keys-component-ab.json": {
+            "bytes": 18365,
+            "sha256": "51c4ca8d2cd9feced3c0a5fcf079ea8a613e8517bfa589a1f6c6914846ec959e"
+        },
+        "lookup-init-held-receipt-20261125.json": {
+            "bytes": 2455,
+            "sha256": "6c872755f8f12f8b3d4fb6b6202345687483634858bebc4f7a14a69f4c83baea"
+        },
+        "lookup-init-parity-20261125.mjs": {
+            "bytes": 9940,
+            "sha256": "927affe13b4b06e3be457208975f5f366d4815ad0939e5e7e931b54baf57f0a5"
+        },
+        "lookup-init-parity-jitendex-20261125.json": {
+            "bytes": 16496,
+            "sha256": "16638b4550165aa952fa64955726a2ac161e7e22a18342c54af6f936feb1c917"
+        },
+        "lookup-init-parity-jmdict-20261125.json": {
+            "bytes": 8304,
+            "sha256": "c2bf5a6b4af9dd213391b422b5cd3f085ac96c9fed5b71fd8ff86ac5e1c8c139"
+        },
+        "measure-zstd-context-allocation.py": {
+            "bytes": 3484,
+            "sha256": "3472d857af8824a583ac2c91d1f8c60851321c0ded91afd07d0e189689a78f5a"
+        },
+        "source-and-proof-receipt.json": {
+            "bytes": 1173,
+            "sha256": "d2659596b837f98ea2af4fea0585f820eb7d776b201a55a5570658e33dfe7a3b"
+        },
+        "source-ci-jobs.json": {
+            "bytes": 25711,
+            "sha256": "3106cc70972be08abc5cdf59468b80fc37c014a84c5e42fc1ba24fec6420b0eb"
+        },
+        "source-workflow-runs.json": {
+            "bytes": 2813,
+            "sha256": "8f5c08c581020420e9ae8cfebf181ed85350092a7761aa2b056ebd354cd1dc89"
+        },
+        "vndb-media-parity.json": {
+            "bytes": 781,
+            "sha256": "bb47c1b6d4d0728d892e53723148f5a792b153667fe72cf6c9d9da228921132f"
+        },
+        "vndb-media-parity.mjs": {
+            "bytes": 4060,
+            "sha256": "9dc877c3cf2a02bf72eda65ed3b0203e4637689b3bd29a5a12d0339b597164cf"
+        }
+    }
+}
