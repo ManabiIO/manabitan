@@ -4247,6 +4247,39 @@ void 0,
         expect(overCapReader.findTermIds(dictionaryName, '二', 'expression')).toEqual([]);
     });
 
+    test.each(['complete', 'short', 'unavailable'])('reads a bounded lookup index with %s read-only access', async (outcome) => {
+        const store = new TermRecordOpfsStore();
+        const size = 8 * 1024 * 1024;
+        const file = /** @type {File} */ (/** @type {unknown} */ ({size}));
+        const close = vi.fn();
+        const open = vi.fn(async () => {
+            if (outcome === 'unavailable') { throw new TypeError('Read-only access is unavailable'); }
+            return {
+                getSize: () => size,
+                read: (/** @type {Uint8Array} */ bytes) => {
+                    bytes[0] = 17;
+                    return outcome === 'short' ? size - 1 : size;
+                },
+                close,
+            };
+        });
+        const handle = /** @type {FileSystemFileHandle} */ (/** @type {unknown} */ ({createSyncAccessHandle: open}));
+        const fallbackBytes = new Uint8Array([42]);
+        const readFallback = vi.spyOn(store, '_readFileRange').mockResolvedValue(fallbackBytes);
+        const bytes = await store._readWholeLookupIndex(handle, file);
+
+        expect(open).toHaveBeenCalledExactlyOnceWith({mode: 'read-only'});
+        expect(close).toHaveBeenCalledTimes(outcome === 'unavailable' ? 0 : 1);
+        if (outcome === 'complete') {
+            expect(bytes.byteLength).toBe(size);
+            expect(bytes[0]).toBe(17);
+            expect(readFallback).not.toHaveBeenCalled();
+        } else {
+            expect(bytes).toBe(fallbackBytes);
+            expect(readFallback).toHaveBeenCalledExactlyOnceWith(file, 0, size);
+        }
+    });
+
     test('gets cold MBTIDX11 dictionary counts and samples without materializing Maps', async () => {
         const textEncoder = new TextEncoder();
         const dictionaryName = 'Persistent metadata lookup';
