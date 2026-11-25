@@ -16,10 +16,10 @@ The screen runs the production importer's archive setup and bank classifier in f
 
 The fixed protocol contains three excluded warmups and six counterbalanced A/B/C blocks (18 measured observations). A and C are identical baseline controls. Every observation, including larger ArrayBuffer-retention samples, remains in the archive.
 
-| Boundary | Baseline A median | Candidate B median | Identical baseline C median |
-| --- | ---: | ---: | ---: |
-| Retained heap + ArrayBuffers after catalog and bank selection | 51,524,328 B | 18,689,256 B | 51,524,328 B |
-| Retained heap + ArrayBuffers after full member enumeration | 62,125,664 B | 57,428,600 B | 62,125,664 B |
+| Boundary                                                      | Baseline A median | Candidate B median | Identical baseline C median |
+| ------------------------------------------------------------- | ----------------: | -----------------: | --------------------------: |
+| Retained heap + ArrayBuffers after catalog and bank selection |      51,524,328 B |       18,689,256 B |                51,524,328 B |
+| Retained heap + ArrayBuffers after full member enumeration    |      62,125,664 B |       57,428,600 B |                62,125,664 B |
 
 After selection, the median reduction is **32,835,072 B (31.31 MiB; 63.73%)**. Heap delta changes from 49,123,768 B to 12,755,008 B; the candidate adds a 3,533,688 B compact metadata table. The existing 2,400,540 B filename arena is retained in both versions. Exactly **146,570 image entry objects and persistent filename views are not materialized** at this boundary: 147,237 entries become 667.
 
