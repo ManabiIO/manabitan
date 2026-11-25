@@ -37,9 +37,10 @@ beforeAll(async () => {
  * The adjacent allocation deliberately contains quotes/brackets. A truncated
  * input must not accidentally become valid by scanning beyond its logical end.
  * @param {string} source
+ * @param {boolean} [validateGlossaryTypes]
  * @returns {{count: number, spans: number[], bytes: Uint8Array}}
  */
-function parse(source) {
+function parse(source, validateGlossaryTypes = false) {
     const bytes = encoder.encode(source)
     wasm.wasm_reset_heap()
     const input = wasm.wasm_alloc(bytes.length)
@@ -48,7 +49,7 @@ function parse(source) {
     const heap = new Uint8Array(wasm.memory.buffer)
     heap.fill(0x22, input, adjacent + 64)
     heap.set(bytes, input)
-    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1)
+    const count = wasm.parse_term_bank_with_media_hints(input, bytes.length, output, 1, 0, 0, validateGlossaryTypes ? 1 : 0)
     return {count, spans: [...new Uint32Array(wasm.memory.buffer, output, 17)], bytes}
 }
 
@@ -140,6 +141,7 @@ function createRowSource(expressionToken, alignment) {
 const alignments = Array.from({length: 64}, (_, index) => index)
 const differentialAlignments = Array.from({length: 16}, (_, index) => index)
 const specialPositions = Array.from({length: 16}, (_, index) => index)
+const metadataKeys = ['data', 'code', 'lang', 'href', 'class', 'title', 'style']
 
 describe('term-bank string scanning', () => {
     test.each(alignments)('preserves string spans at byte alignment %i', (padding) => {
@@ -248,7 +250,7 @@ describe('term-bank string scanning', () => {
     test('rejects truncated structured keys at their logical input end', () => {
         for (const alignment of differentialAlignments) {
             const prefix = `${' '.repeat(alignment)}[["head","","","",0,[{`
-            for (const key of ['"content"', '"tag"']) {
+            for (const key of ['"content"', '"tag"', ...metadataKeys.map((value) => JSON.stringify(value))]) {
                 for (let length = 0; length <= key.length; ++length) {
                     expectMatchesJson(prefix + key.slice(0, length))
                 }
@@ -256,6 +258,46 @@ describe('term-bank string scanning', () => {
                     expectMatchesJson(prefix + key + tail)
                 }
             }
+        }
+    })
+
+    test.each(metadataKeys)('preserves exact, escaped and extended %s keys with nested hints', (key) => {
+        const spellings = [
+            JSON.stringify(key),
+            `"\\u${key.charCodeAt(0).toString(16).padStart(4, '0')}${key.slice(1)}"`,
+            JSON.stringify(`${key}x`),
+            JSON.stringify(`${key}\\`),
+        ]
+        for (const alignment of differentialAlignments) {
+            for (const spelling of spellings) {
+                const glossary = `[{"type":"structured-content","content":{${spelling}: [{"tag":"img","path":"picture.png"},{"type":"text","text":"payload"}]}}]`
+                const source = `${' '.repeat(alignment)}[["head","","","",0,${glossary},1,""]]`
+                const result = parse(source, true)
+                expect(result.count).toBe(1)
+                expect(readRow(result)).toEqual(JSON.parse(source)[0])
+                expect(result.spans.slice(14, 17)).toEqual([1, 1, 1])
+            }
+        }
+    })
+
+    test.each(metadataKeys)('does not treat %s as a required glossary field', (key) => {
+        for (const type of ['text', 'image', 'structured-content']) {
+            const source = `[["head","","","",0,[{"type":"${type}","${key}":"payload"}],1,""]]`
+            expect(parse(source, true).count).toBeLessThan(0)
+        }
+        const source = `[["head","","","",0,[{"type":"structured-content","content":"ok","${key}":"image"}],1,""]]`
+        const result = parse(source, true)
+        expect(result.count).toBe(1)
+        expect(readRow(result)).toEqual(JSON.parse(source)[0])
+        expect(result.spans.slice(14, 17)).toEqual([1, 0, 0])
+    })
+
+    test.each(metadataKeys)('retains malformed value and separator rejection for %s', (key) => {
+        for (const value of ['[1,]', '{"bad":}', 'truefalse', '"\\q"', '"unterminated']) {
+            expectMatchesJson(`[["head","","","",0,[{"${key}":${value}}],1,""]]`)
+        }
+        for (const separator of ['', ' ', ',', '::']) {
+            expectMatchesJson(`[["head","","","",0,[{"${key}"${separator}"value"}],1,""]]`)
         }
     })
 

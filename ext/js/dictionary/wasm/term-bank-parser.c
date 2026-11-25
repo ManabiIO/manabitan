@@ -840,7 +840,8 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
 enum {
-    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
+    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG,
+    COMMON_STRUCTURED_KEY_OTHER
 };
 
 /* These complete ASCII literals are already valid JSON strings. Matching
@@ -863,6 +864,37 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
         if (word == UINT32_C(0x67617422) && src[start + 4u] == '"') {
             *out_end = start + 5u;
             return COMMON_STRUCTURED_KEY_TAG;
+        }
+        /* Metadata keys cannot be media markers or required glossary fields.
+         * Match the complete bounded literal before skipping their general
+         * string scan. Escapes and longer names still use the full parser. */
+        uint32_t key_length = 0u;
+        switch (word) {
+            case UINT32_C(0x74616422): /* "data" */
+                if (len - start >= 6u && src[start + 4u] == 'a') { key_length = 6u; }
+                break;
+            case UINT32_C(0x646f6322): /* "code" */
+                if (len - start >= 6u && src[start + 4u] == 'e') { key_length = 6u; }
+                break;
+            case UINT32_C(0x6e616c22): /* "lang" */
+                if (len - start >= 6u && src[start + 4u] == 'g') { key_length = 6u; }
+                break;
+            case UINT32_C(0x65726822): /* "href" */
+                if (len - start >= 6u && src[start + 4u] == 'f') { key_length = 6u; }
+                break;
+            case UINT32_C(0x616c6322): /* "class" */
+                if (len - start >= 7u && src[start + 4u] == 's' && src[start + 5u] == 's') { key_length = 7u; }
+                break;
+            case UINT32_C(0x74697422): /* "title" */
+            case UINT32_C(0x79747322): /* "style" */
+                if (len - start >= 7u && src[start + 4u] == 'l' && src[start + 5u] == 'e') { key_length = 7u; }
+                break;
+            default:
+                break;
+        }
+        if (key_length != 0u && src[start + key_length - 1u] == '"') {
+            *out_end = start + key_length;
+            return COMMON_STRUCTURED_KEY_OTHER;
         }
     }
     return COMMON_STRUCTURED_KEY_NONE;
