@@ -33,7 +33,7 @@ export const MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS = 30000;
 const MAX_PERSISTED_TERM_LOOKUP_INDEX_ITEMS = 0xffff - 1;
 
 /**
- * @typedef {{bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex
+ * @typedef {{bytes: Uint8Array, routeFilter?: Uint32Array|null, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}} PreparedTermLookupIndex
  */
 
 /**

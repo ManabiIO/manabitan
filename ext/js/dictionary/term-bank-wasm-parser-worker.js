@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {buildTermLookupFilter} from './term-lookup-route.js';
 import {
     consumeLastTermBankWasmParseProfile,
     copyWasmBackedColumnChunk,
@@ -157,7 +158,7 @@ async function parse(data) {
                 )
                 const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
                 /* eslint-enable @stylistic/semi */
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
@@ -219,6 +220,11 @@ async function parse(data) {
                 }
             }
         }
+        if (options.prepareLookupRoute === true && stableResultChunk?.preparedLookupIndexes instanceof Map) {
+            for (const index of stableResultChunk.preparedLookupIndexes.values()) {
+                index.routeFilter ??= buildTermLookupFilter(index.preinternedPlan.stringHashes);
+            }
+        }
         const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);
         self.postMessage({
             type: 'result',
@@ -277,6 +283,7 @@ function collectChunkTransferables(chunk) {
         for (const prepared of preparedLookupIndexes.values()) {
             if (typeof prepared !== 'object' || prepared === null) { continue; }
             addView(Reflect.get(prepared, 'bytes'));
+            addView(Reflect.get(prepared, 'routeFilter'));
             const preparedPlan = /** @type {unknown} */ (Reflect.get(prepared, 'preinternedPlan'));
             if (typeof preparedPlan !== 'object' || preparedPlan === null) { continue; }
             addView(Reflect.get(preparedPlan, 'stringLengths'));
