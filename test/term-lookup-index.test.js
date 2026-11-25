@@ -611,6 +611,23 @@ describe('persisted term lookup index', () => {
         );
     });
 
+    test.each(/** @type {const} */ (['expressionPostingOffsets', 'readingPostingOffsets']))(
+        'rejects a range past the posting table in %s',
+        (column) => {
+            const encoded = encodePersistedTermLookupIndex([
+                {expressionBytes: bytes('alpha'), readingBytes: bytes('あるふぁ'), sequence: null},
+                {expressionBytes: bytes('beta'), readingBytes: bytes('べーた'), sequence: null},
+            ]);
+            const index = parsePersistedTermLookupIndex(encoded);
+            const offsets = index[column];
+            offsets[1] = offsets[offsets.length - 1] + 1;
+
+            expect(() => parseChecksummedPersistedTermLookupIndex(encoded)).toThrow(
+                'Invalid persisted term lookup posting order',
+            );
+        },
+    );
+
     test.each([
         ['readingKeys', 'Incomplete persisted term lookup posting rows'],
         ['sequenceRowKeys', 'Incomplete persisted sequence lookup postings'],
