@@ -115,6 +115,7 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
+const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
 const EMPTY_BYTES = new Uint8Array(0);
 
@@ -3048,6 +3049,34 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Read a large, already bounded index into its final buffer in the
+     * dictionary worker. The caller still validates the on-disk data.
+     * @param {FileSystemFileHandle} fileHandle
+     * @param {File} file
+     * @returns {Promise<Uint8Array>}
+     */
+    async _readWholeLookupIndex(fileHandle, file) {
+        if (file.size >= MIN_DIRECT_LOOKUP_INDEX_READ_BYTES && typeof fileHandle.createSyncAccessHandle === 'function') {
+            try {
+                // The DOM library still declares the original zero-argument method.
+                const readOnlyHandle = /** @type {{createSyncAccessHandle: (options: {mode: 'read-only'}) => Promise<FileSystemSyncAccessHandle>}} */ (fileHandle);
+                const access = await readOnlyHandle.createSyncAccessHandle({mode: 'read-only'});
+                try {
+                    if (access.getSize() === file.size) {
+                        const bytes = new Uint8Array(file.size);
+                        if (access.read(bytes, {at: 0}) === bytes.byteLength) { return bytes; }
+                    }
+                } finally {
+                    access.close();
+                }
+            } catch (_) {
+                // The snapshot read also works when read-only access is unavailable.
+            }
+        }
+        return await this._readFileRange(file, 0, file.size);
+    }
+
+    /**
      * @param {number} id
      * @returns {PersistentRecordChunk|null}
      */
@@ -3855,11 +3884,9 @@ export class TermRecordOpfsStore {
                 const shouldReadWholeIndex = indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES;
                 const initialReadLength = shouldReadWholeIndex ? indexFile.size : LOOKUP_INDEX_FILE_HEADER_BYTES;
                 const [indexRead, recordHeader] = await Promise.all([
-                    this._readFileRange(
-                        indexFile,
-                        0,
-                        initialReadLength,
-                    ),
+                    shouldReadWholeIndex ?
+                        this._readWholeLookupIndex(indexFileHandle, indexFile) :
+                        this._readFileRange(indexFile, 0, initialReadLength),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
                 if (indexRead.byteLength !== initialReadLength) {
