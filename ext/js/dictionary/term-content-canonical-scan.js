@@ -188,8 +188,17 @@ export class NativeCanonicalScanner {
         }
         // Check the constructor's reserved-prefix invariant before copying,
         // since even a read-only native rejection would follow those writes.
-        for (const table of [arena.slots, arena.hash1, arena.hash2, arena.state, arena.length,
-            arena.signaturePresent, arena.signature1, arena.signature2, arena.signature3]) {
+        for (const table of [
+            arena.slots,
+            arena.hash1,
+            arena.hash2,
+            arena.state,
+            arena.length,
+            arena.signaturePresent,
+            arena.signature1,
+            arena.signature2,
+            arena.signature3,
+        ]) {
             if (table.buffer !== buffer || table.byteOffset < PREFIX) { return null }
         }
         // Dense columns avoid touching unused gaps in the reserved scratch.

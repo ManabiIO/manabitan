@@ -83,12 +83,23 @@ function scannerHarness({database}, resolveExactCandidates = async () => {}) {
 }
 
 /**
+ * @param {DictionaryDatabase} database
+ * @returns {import('../ext/js/dictionary/term-content-metadata-arena.js').TermContentMetadataArena}
+ * @throws {Error} If the fixture has not allocated metadata storage.
+ */
+function getArena(database) {
+    const arena = Reflect.get(database, '_termContentMetadataArena')
+    if (arena === null) { throw new Error('Expected a fixture metadata arena') }
+    return arena
+}
+
+/**
  * @param {Harness} harness
  * @param {NativeCanonicalScanner} scanner
  * @returns {boolean|null}
  */
 function validateNative({database, state, staged}, scanner) {
-    const arena = Reflect.get(database, '_termContentMetadataArena')
+    const arena = getArena(database)
     return scanner.validateReservedMetadata(
         arena,
         staged.indexes,
@@ -417,8 +428,12 @@ describe('native publication preflight', () => {
         scalar.database._rollbackStagedArtifactTermContentMetadata(scalar.staged)
         expect(snapshot(candidate)).toEqual(snapshot(scalar))
         for (const harness of [candidate, scalar]) {
-            const staged = harness.database._stageArtifactTermContentMetadata(new Uint32Array([31, 32, 33]),
-                new Uint32Array([41, 42, 43]), [], harness.state.pendingContentSpans)
+            const staged = harness.database._stageArtifactTermContentMetadata(
+                new Uint32Array([31, 32, 33]),
+                new Uint32Array([41, 42, 43]),
+                [],
+                harness.state.pendingContentSpans,
+            )
             harness.staged = staged
             harness.state.stagedContentMetadata = staged
             harness.state.pendingContentHash1s = new Uint32Array([31, 32, 33])
@@ -429,9 +444,27 @@ describe('native publication preflight', () => {
         expect(snapshot(candidate)).toEqual(snapshot(scalar))
     })
 
-    test.each(['indexes', 'hash1', 'hash2', 'lengths', 'offsets', 'Id', 'Offset', 'DictNameId',
-        'HashPair', 'Hash1', 'Hash2', 'State', 'Length', 'SignaturePresent', 'Signature1', 'Signature2', 'Signature3',
-        'RecentSourceBatchId', 'RecentSourceOffset'])('keeps borrowed arena %s outside native scratch writes', async (column) => {
+    test.each([
+        'indexes',
+        'hash1',
+        'hash2',
+        'lengths',
+        'offsets',
+        'Id',
+        'Offset',
+        'DictNameId',
+        'HashPair',
+        'Hash1',
+        'Hash2',
+        'State',
+        'Length',
+        'SignaturePresent',
+        'Signature1',
+        'Signature2',
+        'Signature3',
+        'RecentSourceBatchId',
+        'RecentSourceOffset',
+    ])('keeps borrowed arena %s outside native scratch writes', async (column) => {
         const scalar = createHarness()
         const candidate = createHarness()
         const {scanner, run} = scannerHarness(candidate)
@@ -439,7 +472,7 @@ describe('native publication preflight', () => {
         const native = vi.spyOn(scanner, 'validateReservedMetadata')
         for (const harness of [scalar, candidate]) {
             harness.state.metadataValidated = true
-            const arena = Reflect.get(harness.database, '_termContentMetadataArena')
+            const arena = getArena(harness.database)
             const buffer = arena.memory.buffer
             const {state, staged} = harness
             if (column === 'indexes') {
@@ -494,7 +527,7 @@ describe('native publication preflight', () => {
         harness.state.metadataValidated = true
         const expectedError = new Error('Exact callback rejected')
         const {scanner, run} = scannerHarness(harness, async () => {
-            const arena = Reflect.get(harness.database, '_termContentMetadataArena')
+            const arena = getArena(harness.database)
             const prefix = new Uint8Array(arena.memory.buffer, 0, layout.PREFIX).slice()
             expect(validateNative(harness, scanner)).toBeNull()
             expect(Buffer.compare(new Uint8Array(arena.memory.buffer, 0, layout.PREFIX), prefix)).toBe(0)
@@ -508,9 +541,9 @@ describe('native publication preflight', () => {
     test('uses the JavaScript check after an awaited arena replacement', async () => {
         const harness = createHarness()
         const {scanner, run} = scannerHarness(harness, async () => {
-            const current = Reflect.get(harness.database, '_termContentMetadataArena')
+            const current = getArena(harness.database)
             harness.database._ensureTermEntryContentMetaHashPairCapacity(100)
-            expect(Reflect.get(harness.database, '_termContentMetadataArena')).not.toBe(current)
+            expect(getArena(harness.database)).not.toBe(current)
             expect(validateNative(harness, scanner)).toBeNull()
         })
         await run()
@@ -525,7 +558,7 @@ describe('native publication preflight', () => {
         const {scanner, run} = scannerHarness(harness)
         await run()
         expect(validateNative(harness, scanner)).toBe(true)
-        const arena = Reflect.get(harness.database, '_termContentMetadataArena')
+        const arena = getArena(harness.database)
         const buffer = arena.memory.buffer
         const config = new Uint32Array(buffer, 1088, 7)
         const validConfig = config.slice()
@@ -551,3 +584,5 @@ describe('native publication preflight', () => {
         expect(Buffer.compare(new Uint8Array(buffer, layout.PREFIX), before)).toBe(0)
     })
 })
+
+/* eslint-enable unicorn/prefer-spread */
