@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {MIN_EXACT_LOOKUP_SOURCE_BYTES} from './term-lookup-route.js';
 import {
     BlobReader as BlobReader0,
     BlobWriter as BlobWriter0,
@@ -834,6 +835,8 @@ export class DictionaryImporter {
         this._reverseStringCache = new Map();
         /** @type {boolean} */
         this._fastPrefixReverse = true;
+        /** @type {boolean} */
+        this._prepareExactLookupRoute = false;
         /** @type {ReturnType<typeof snapshotTermBankExperiments>} */
         this._termBankExperiments = snapshotTermBankExperiments();
     }
@@ -1414,6 +1417,7 @@ export class DictionaryImporter {
             null;
         const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
         const rawTermBankSourceBytes = useTermArtifactFiles || usePackedTermArtifact ? null : this._getRawTermBankSourceBytes(termFiles);
+        this._prepareExactLookupRoute = (rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES;
         /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
             ...snapshotTermBankExperiments(details),
@@ -5395,6 +5399,7 @@ export class DictionaryImporter {
                 emitTokenBinaryContent: useDirectArtifactChunkImport,
                 emitTermByteLists: !useDirectArtifactChunkImport,
                 prepareLookupIndexes: useDirectArtifactChunkImport,
+                prepareLookupRoute: useDirectArtifactChunkImport && this._prepareExactLookupRoute,
                 maxPendingChunks: useDirectArtifactChunkImport ? 2 : 1,
             };
             const parseTermBankChunks = useDirectArtifactChunkImport ? parseTermBankWithWasmColumnChunks : parseTermBankWithWasmChunks;

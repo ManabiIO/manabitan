@@ -6521,6 +6521,84 @@ describe('TermRecordOpfsStore preserves length-delimited Unicode fields', () => 
     }
 });
 
+describe('TermRecordOpfsStore query-scoped exact reads', () => {
+    async function importFixture() {
+        const dictionaryName = 'Scoped';
+        /** @type {Map<string, Uint8Array>} */
+        const files = new Map();
+        const store = new TermRecordOpfsStore();
+        store._recordsDirectoryHandle = createFakeDirectoryHandle(files);
+        store.setRawTermBankSourceBytes(2 ** 30);
+        await store.beginImportSession();
+        for (const [i, expression, reading] of /** @type {const} */ ([[0, '猫', 'ねこ'], [1, '犬', 'いぬ']])) {
+            await store.appendBatch([{
+                dictionary: dictionaryName,
+                expression,
+                reading,
+                expressionReverse: null,
+                readingReverse: null,
+                entryContentOffset: i * 8,
+                entryContentLength: 8,
+                entryContentDictName: 'raw',
+                score: i,
+                sequence: i,
+            }]);
+        }
+        await store.endImportSession();
+        return {dictionaryName, store, files};
+    }
+
+    test('keeps independent exact reads private until a full prefix load', async () => {
+        const {store, dictionaryName} = await importFixture();
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+        store.publishExactLookupRoute(dictionaryName);
+        const [cat, dog] = await Promise.all([
+            store.prepareExactLookupView(dictionaryName, ['猫']),
+            store.prepareExactLookupView(dictionaryName, ['いぬ']),
+        ]);
+        assert.ok(cat);
+        assert.ok(dog);
+        assert.deepEqual(store.findTermIdMatchesForDictionaries([dictionaryName], '猫', cat), [{expression: [1], reading: []}]);
+        assert.deepEqual(store.findTermIdMatchesForDictionaries([dictionaryName], 'いぬ', dog), [{expression: [], reading: [2]}]);
+        assert.equal((await store.getByIdsAsync([1], cat)).get(1)?.expression, '猫');
+        assert.equal((await store.getByIdsAsync([2], dog)).get(2)?.expression, '犬');
+        assert.equal(store.hasPersistentTermLookupIndex(dictionaryName), false);
+        assert.equal(store.getById(1), undefined);
+
+        await store.ensureDictionariesLoaded([dictionaryName]);
+        assert.equal(store.hasPersistentTermLookupIndex(dictionaryName), true);
+        assert.deepEqual(store.findTermPrefixIdMatches(dictionaryName, 'い', 'reading'), [{id: 2, exact: false}]);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+        assert.equal(cat.isCurrent(), true);
+        await store.deleteByDictionary(dictionaryName);
+        assert.equal(cat.isCurrent(), false);
+        assert.equal((await store.getByIdsAsync([1], cat)).size, 0);
+    });
+
+    test('rejects a changed index and declines to reuse its route', async () => {
+        const {store, dictionaryName, files} = await importFixture();
+        store.publishExactLookupRoute(dictionaryName);
+        const indexName = [...files.keys()].find((name) => name.endsWith('.mbti'));
+        assert.ok(indexName);
+        const healthyBytes = files.get(indexName);
+        assert.ok(healthyBytes);
+        const damaged = new Uint8Array(healthyBytes);
+        // First chunk's framed base payload after the two 40-byte headers.
+        damaged[128] ^= 1;
+        files.set(indexName, damaged);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+        files.set(indexName, healthyBytes);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
+
+        const reopened = new TermRecordOpfsStore();
+        reopened._recordsDirectoryHandle = createFakeDirectoryHandle(files);
+        await reopened._loadShardFiles(false);
+        assert.equal(await reopened.prepareExactLookupView(dictionaryName, ['猫']), null);
+        await reopened.ensureDictionariesLoaded([dictionaryName]);
+        assert.deepEqual(reopened.findTermIds(dictionaryName, '猫', 'expression'), [1]);
+    });
+});
+
 describe('TermRecordOpfsStore exact dictionary identity', () => {
     const names = ['Dictionary', ' Dictionary ', '\ufeffDictionary', 'Dictionary\t', ' '];
     /**
