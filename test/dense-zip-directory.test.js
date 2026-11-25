@@ -5,6 +5,8 @@
 
 import {describe, expect, test} from 'vitest';
 import {readDenseZipDirectory} from '../ext/js/dictionary/dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
 
 const count = 8192;
 const filenameLength = 8;
@@ -109,6 +111,56 @@ describe('dense ZIP directory', () => {
         expect(entries?.[0].rawFilename).toEqual(new TextEncoder().encode(' 000.pn~'))
     })
 
+    test.each([false, true])('preserves original raw names when logical names change after first read=%s', async (readBeforeChange) => {
+        const entries = await readDenseZipDirectory(new SparseZipDirectory())
+        if (entries === null) { throw new Error('Expected a dense directory') }
+        const first = entries[0]
+        const previous = readBeforeChange ? first.rawFilename : null
+        first.filename = 'a much longer alias.png'
+        expect(new TextDecoder().decode(first.rawFilename)).toBe('0000.png')
+        expect(first.rawFilename.byteLength).toBe(filenameLength)
+        const rawFilename = first.rawFilename
+        rawFilename[0] = 0x78
+        expect(first.rawFilename[0]).toBe(0x78)
+        if (previous !== null) { expect(previous[0]).toBe(0x78) }
+        expect(new TextDecoder().decode(entries[1].rawFilename)).toBe('0001.png')
+    })
+
+    test('checks local filenames against borrowed catalog views before returning payloads', async () => {
+        const archive = new SparseZipDirectory()
+        const directorySlice = archive.slice.bind(archive)
+        archive.slice = (start, end) => {
+            if (start !== 0) { return directorySlice(start, end) }
+            if (typeof end !== 'number') { throw new Error('Expected a bounded local read') }
+            const bytes = new Uint8Array(end)
+            const view = new DataView(bytes.buffer)
+            for (let i = 0; i < 2; i++) {
+                const offset = i * (30 + filenameLength + packedLength)
+                if (offset >= end) { break }
+                view.setUint32(offset, 0x04034b50, true)
+                view.setUint16(offset + 8, 8, true)
+                view.setUint16(offset + 26, filenameLength, true)
+                bytes.set(new TextEncoder().encode(`${String(i).padStart(4, '0')}.png`), offset + 30)
+            }
+            return new Blob([bytes])
+        }
+        const entries = await readDenseZipDirectory(archive)
+        if (entries === null) { throw new Error('Expected a dense directory') }
+        const reader = new RawZipPayloadReader(archive)
+        // The real catalog receiver attaches getData directly to the entry.
+        // Keep its prototype and getter intact when passing it to the reader.
+        const entry = Object.assign(entries[0], {getData: () => {}})
+        expect(await reader.read(entry, new AbortController().signal)).toEqual(new Uint8Array(packedLength))
+        const batch = await reader.readBatch([entry, entries[1]], void 0, () => false, true)
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual([new Uint8Array(packedLength), new Uint8Array(packedLength)])
+        expect(batch?.sources[0].file).toBe(entry)
+        expect(batch?.sources[1].file).toBe(entries[1])
+        expect(batch?.sources[0].bytes.buffer).toBe(batch?.sources[1].bytes.buffer)
+        entry.rawFilename[0] ^= 1
+        await expect(reader.read(entry, new AbortController().signal)).rejects.toThrow('local filename disagrees')
+        await expect(reader.readBatch([entry, entries[1]], void 0, () => false, true)).rejects.toThrow('local filename disagrees')
+    })
+
     test('packs variable-length names without gaps or overlap', async () => {
         const archive = new SparseZipDirectory()
         const encoder = new TextEncoder()
@@ -146,6 +198,38 @@ describe('dense ZIP directory', () => {
         const archive = new SparseZipDirectory()
         archive.directory[46] = value
         expect(await readDenseZipDirectory(archive)).toBeNull()
+    })
+
+    test.each(['non-ASCII filename', 'invalid header', 'wrong final offset', 'short final payload'])('declines a late %s after earlier names passed validation', async (corrupt) => {
+        const archive = new SparseZipDirectory({zip64: true})
+        const last = archive.directory.length - 46 - filenameLength
+        const view = new DataView(archive.directory.buffer)
+        switch (corrupt) {
+            case 'non-ASCII filename':
+                archive.directory[last + 46 + filenameLength - 1] = 0xc2
+                break
+            case 'invalid header':
+                archive.directory[last] ^= 1
+                break
+            case 'wrong final offset':
+                view.setUint32(last + 42, view.getUint32(last + 42, true) - 1, true)
+                break
+            default:
+                view.setUint32(last + 20, view.getUint32(last + 20, true) - 1, true)
+                break
+        }
+        let checks = 0
+        expect(await readDenseZipDirectory(archive, () => { checks++ })).toBeNull()
+        expect(checks).toBe(3)
+    })
+
+    test('checks cancellation after the central read and before decoding any names', async () => {
+        let checks = 0
+        const cancelled = new DOMException('Dictionary import cancelled', 'AbortError')
+        await expect(readDenseZipDirectory(new SparseZipDirectory(), () => {
+            if (++checks === 3) { throw cancelled }
+        })).rejects.toBe(cancelled)
+        expect(checks).toBe(3)
     })
 
     /* eslint-enable @stylistic/semi */
