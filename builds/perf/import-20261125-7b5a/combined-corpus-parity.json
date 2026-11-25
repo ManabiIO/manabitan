@@ -1,0 +1,3857 @@
+{
+  "kind": "complete bounded parser/lookup/media byte parity; no performance claim",
+  "node": "v22.22.0",
+  "execArgv": [
+    "--expose-gc",
+    "--max-old-space-size=512"
+  ],
+  "runnerSha256": "500486caf2d77c9481414df75bd68ebfc11927c373e5d328d8e476512cd808b6",
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "sources": [
+    {
+      "root": "/workspace/scratch/7b5a4ac440c8/manabitan",
+      "gitHead": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "hashes": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": "a2ef54fc8f66997097c49f2734e60544890f26f77223bbad0cafa82147e8b67d",
+        "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+        "dev/data/dictionary-wasm/manifest.json": "7c6182c253133ba34cc811c8f3c8b5d7838a9b896151119d303f4dc584e2df29",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+        "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+        "ext/js/dictionary/term-lookup-scratch.js": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1"
+      }
+    },
+    {
+      "root": "/workspace/scratch/7b5a4ac440c8/combined",
+      "gitHead": "ea0f20b5e38d730b6b3cc87431d4f12387f4d153",
+      "hashes": {
+        "ext/js/dictionary/wasm/term-bank-parser.c": "1cbb935397f851384c09159f3ae699251163b51b7d6f03ea71aa32ee3baa3834",
+        "ext/lib/term-bank-parser.wasm": "f3bb4ab538cce77a8f9681b853aba10bcfd62cd0b6ec63cb40429bf05d561d83",
+        "dev/data/dictionary-wasm/manifest.json": "a7c28c6ea19f31a27a8c371bfdf9e70a3e421ead03d39ef7d8ab9a6070314d35",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "92179e25c5a54fea20265c56f6fdd0593fec8447e0c0560067c809b15a79afc5",
+        "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+        "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+        "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+        "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+        "ext/js/dictionary/term-lookup-scratch.js": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1"
+      }
+    }
+  ],
+  "options": {
+    "singleChunk": true,
+    "emitTermByteLists": false,
+    "computeContentHashes": true,
+    "emitContentSlab": true,
+    "emitTokenBinaryContent": true,
+    "mediaHintFastScan": true,
+    "validateGlossaryTypes": true,
+    "prepareLookupIndexes": true,
+    "experimentalNativeEscapedKeys": true,
+    "experimentalNativeSegmentedLookup": true,
+    "compactContentMetadata": true
+  },
+  "filesPerGroup": {
+    "jmdict": 7,
+    "jitendex": 10,
+    "vndb": 8
+  },
+  "skippedTimingKeys": [
+    "preparedLookupIndexEncodeMs"
+  ],
+  "counterNotes": {
+    "segmentedKeyBytes": "Sum of stringsBuffer.byteLength over each natively prepared segment. Candidate avoids one encoder key memcpy for exactly this many bytes.",
+    "scratchBytes": "Retired scratch address reservations; not a resident-process memory measurement.",
+    "wasmHeapBytes": "WASM linear memory capacity sampled after each group; both instances persist across corpora."
+  },
+  "corpora": [
+    {
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": 53,
+      "filesPerGroup": 7,
+      "groups": [
+        {
+          "start": "term_bank_1.json",
+          "end": "term_bank_7.json",
+          "rows": 70000,
+          "digest": "63d3b7fc5140b7ddde8fb2aec22009bb42091918d89ef192fd87f26071cc9448",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 709032,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3739944,
+              "wasmHeapBytes": 51970048,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 709032,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3149040,
+              "wasmHeapBytes": 51970048,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_8.json",
+          "end": "term_bank_14.json",
+          "rows": 70000,
+          "digest": "685bf21c55271fd9bf54dcbb693542d61df9838eba74a8fbc16154fde77768d0",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 706156,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3859872,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 20160000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 706156,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3239664,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 20160000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_15.json",
+          "end": "term_bank_21.json",
+          "rows": 70000,
+          "digest": "1cf87e9653d9725f6e116d1c1df24c2f43634fcbff19af562c8dbeabadfbd4ed",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 687437,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3942328,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 20160000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 687437,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3273256,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 20160000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_22.json",
+          "end": "term_bank_28.json",
+          "rows": 70000,
+          "digest": "1a60778c880c5d13e7532efe81bbfda450837252e95fb669599f51bdfc0db449",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1094121,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4245936,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1094121,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3447872,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_29.json",
+          "end": "term_bank_35.json",
+          "rows": 70000,
+          "digest": "ffd18cfc12ddea40c938c4c9334c64c1c6edb91a4ba527ffe43eac88394cc66d",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1200159,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4465304,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1200159,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3542648,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_36.json",
+          "end": "term_bank_42.json",
+          "rows": 70000,
+          "digest": "5fecc986f828cf8f73a4fdc808a2ca2ab1006bb628158e562f67d8f98ee7f85a",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1058316,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4179272,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1058316,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3408752,
+              "wasmHeapBytes": 60686336,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 13440000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_43.json",
+          "end": "term_bank_49.json",
+          "rows": 70000,
+          "digest": "9d39cf0e7807bee6df86f28322bed97dce3e7a026a53b7c3e1ec071275330d2f",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1105912,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4230664,
+              "wasmHeapBytes": 61603840,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 20160000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1105912,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3435024,
+              "wasmHeapBytes": 61603840,
+              "metaAllocatedBytes": 4760000,
+              "contentCapacity": 20160000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_50.json",
+          "end": "term_bank_53.json",
+          "rows": 38299,
+          "digest": "ad4dc43a9fb454e991939a53118d5cc30f89abf65ab30f160b5b84577d2e61ba",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 2523384,
+              "wasmHeapBytes": 61603840,
+              "metaAllocatedBytes": 2720000,
+              "contentCapacity": 11520000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 2523384,
+              "wasmHeapBytes": 61603840,
+              "metaAllocatedBytes": 2720000,
+              "contentCapacity": 11520000
+            }
+          ]
+        }
+      ],
+      "rows": 528299,
+      "arms": [
+        {
+          "root": "/workspace/scratch/7b5a4ac440c8/manabitan",
+          "nativeSegments": 21,
+          "segmentedKeyBytes": 6561133,
+          "encoderKeyMemcpyBytesAvoided": 0,
+          "nativeSegmentedFallbacks": 0,
+          "fusedParseFallbacks": 0,
+          "scratchReuseGroups": 8,
+          "scratchReuseMisses": 0,
+          "sumRetiredScratchReservedBytes": 31186704,
+          "peakRetiredScratchReservedBytes": 4465304,
+          "peakWasmHeapBytes": 61603840,
+          "peakMetaAllocatedBytes": 4760000,
+          "peakContentCapacity": 20160000,
+          "arm": 0
+        },
+        {
+          "root": "/workspace/scratch/7b5a4ac440c8/combined",
+          "nativeSegments": 21,
+          "segmentedKeyBytes": 6561133,
+          "encoderKeyMemcpyBytesAvoided": 6561133,
+          "nativeSegmentedFallbacks": 0,
+          "fusedParseFallbacks": 0,
+          "scratchReuseGroups": 8,
+          "scratchReuseMisses": 0,
+          "sumRetiredScratchReservedBytes": 26019640,
+          "peakRetiredScratchReservedBytes": 3542648,
+          "peakWasmHeapBytes": 61603840,
+          "peakMetaAllocatedBytes": 4760000,
+          "peakContentCapacity": 20160000,
+          "arm": 1
+        }
+      ],
+      "maxInputBytes": 24220064,
+      "digest": "1c037d8611adad68b891ece556191d3f8e50a995ad2203ad239d53a44b2cb3d6",
+      "complete": true
+    },
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "filesPerGroup": 10,
+      "groups": [
+        {
+          "start": "term_bank_1.json",
+          "end": "term_bank_10.json",
+          "rows": 20000,
+          "digest": "34daf81fb62abf462cbceb3b5e38c8fb2e9d6cf6ee4c92321e0d5dccb47ba52b",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1270632,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1270632,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_11.json",
+          "end": "term_bank_20.json",
+          "rows": 20000,
+          "digest": "c4b0450419130f2c8d407ae5cdab812b068e12f58c191545f24020109dcd4b5d",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1226184,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1226184,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_21.json",
+          "end": "term_bank_30.json",
+          "rows": 20000,
+          "digest": "9ed64b0803f29951ebba83262c18bee365ce8b954d2620a7abff78d6bb666b22",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1244096,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1244096,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_31.json",
+          "end": "term_bank_40.json",
+          "rows": 20000,
+          "digest": "dd4576320adb54dd24342657ba61e39019cfa693cf02d55a35fd9aaafd300b5f",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1247120,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1247120,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_41.json",
+          "end": "term_bank_50.json",
+          "rows": 20000,
+          "digest": "da485ff79771decdfb5402d419e8542025fc88e3f54c9819b63f33de8dd0f0fa",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1251192,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1251192,
+              "wasmHeapBytes": 82378752,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_51.json",
+          "end": "term_bank_60.json",
+          "rows": 20000,
+          "digest": "5e093404a0feb4d3834731fd8bfb3f3d9fd3453a626e98ee4690fdd42b6cf274",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1183144,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1183144,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 28800000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_61.json",
+          "end": "term_bank_70.json",
+          "rows": 20000,
+          "digest": "a4c38480ac4d75ce9e7b31ac778e61f87212beab4a6dd14b2066169bce312334",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1271464,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1271464,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_71.json",
+          "end": "term_bank_80.json",
+          "rows": 20000,
+          "digest": "ad6f8f46879d3a4421495c822ac349b54c19b35d8d286e48d09f45f270b8b8f1",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1282352,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1282352,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_81.json",
+          "end": "term_bank_90.json",
+          "rows": 20000,
+          "digest": "888011da0652dcca50c7e101f044a1cf1fa2afd2f75a90cf9cae125373132254",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1346520,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1346520,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_91.json",
+          "end": "term_bank_100.json",
+          "rows": 20000,
+          "digest": "78208c0b6efb705a3489833620bd2ce2789a9a1a7108e0e403bd97c68878b05f",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1388184,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1388184,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_101.json",
+          "end": "term_bank_110.json",
+          "rows": 20000,
+          "digest": "fe06ebb0aa2a61fefb10f260946f19495722eed33317e3b6a90cbcaf30f726ff",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1351112,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1351112,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_111.json",
+          "end": "term_bank_120.json",
+          "rows": 20000,
+          "digest": "1c0808f73b43dd620d6f125940faeca87cc1fac77ce18336df1bc8fd7f5f1004",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1356264,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1356264,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_121.json",
+          "end": "term_bank_130.json",
+          "rows": 20000,
+          "digest": "acf566838c752a3c6cf05f4f4fbf11fc7fc7410260dbaec01eed0ba802849085",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1490104,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1490104,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_131.json",
+          "end": "term_bank_140.json",
+          "rows": 20000,
+          "digest": "bf477691838caa417e8741f32e8360631a18cb1218f027b66a319ce5ba2192da",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1418272,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1418272,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_141.json",
+          "end": "term_bank_150.json",
+          "rows": 20000,
+          "digest": "e9f0df010a2eac0da331069316fe09bd50ebc9fb314b83a28c630f73ccd3c3c6",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1350544,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1350544,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_151.json",
+          "end": "term_bank_160.json",
+          "rows": 20000,
+          "digest": "e1e07888c1e524a01492995a783fd718c5f3838e1e45f69b1f781af977f0f215",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1357840,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1357840,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_161.json",
+          "end": "term_bank_170.json",
+          "rows": 20000,
+          "digest": "7eb26c5eadba9d808e10f8491dbe44ca16c251c5a1e53901c312da14b18f8cab",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1363184,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1363184,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_171.json",
+          "end": "term_bank_180.json",
+          "rows": 20000,
+          "digest": "310161edf03ba2b3daaa01e863e31e3df26033e35129ab5a1a58b1b5806e3d37",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1358048,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1358048,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_181.json",
+          "end": "term_bank_190.json",
+          "rows": 20000,
+          "digest": "7cf78d97d0369ba009c076e679d416a40b99031f6f4c8b52f6c7fdd406e51964",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1374256,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1374256,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_191.json",
+          "end": "term_bank_200.json",
+          "rows": 20000,
+          "digest": "f1dda24b02e3d83e9097cda8a16218086ad6e08963899d1bdc19a65c8b0f2b20",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1384648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1384648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_201.json",
+          "end": "term_bank_210.json",
+          "rows": 20000,
+          "digest": "55df3a0d08463efcc7bd244f0ec3d3ddf1a56ac14961db977a2073a9bbbf3c26",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1349456,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1349456,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6800000,
+              "contentCapacity": 19200000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_211.json",
+          "end": "term_bank_219.json",
+          "rows": 16555,
+          "digest": "b62f089c7c24e51c1118423ca446698be5d9d65719dfed0e60072ec4c95ac8de",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1145696,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6120000,
+              "contentCapacity": 17280000
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 1145696,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 6120000,
+              "contentCapacity": 17280000
+            }
+          ]
+        }
+      ],
+      "rows": 436555,
+      "arms": [
+        {
+          "root": "/workspace/scratch/7b5a4ac440c8/manabitan",
+          "nativeSegments": 0,
+          "segmentedKeyBytes": 0,
+          "encoderKeyMemcpyBytesAvoided": 0,
+          "nativeSegmentedFallbacks": 0,
+          "fusedParseFallbacks": 0,
+          "scratchReuseGroups": 22,
+          "scratchReuseMisses": 0,
+          "sumRetiredScratchReservedBytes": 29010312,
+          "peakRetiredScratchReservedBytes": 1490104,
+          "peakWasmHeapBytes": 89063424,
+          "peakMetaAllocatedBytes": 6800000,
+          "peakContentCapacity": 28800000,
+          "arm": 0
+        },
+        {
+          "root": "/workspace/scratch/7b5a4ac440c8/combined",
+          "nativeSegments": 0,
+          "segmentedKeyBytes": 0,
+          "encoderKeyMemcpyBytesAvoided": 0,
+          "nativeSegmentedFallbacks": 0,
+          "fusedParseFallbacks": 0,
+          "scratchReuseGroups": 22,
+          "scratchReuseMisses": 0,
+          "sumRetiredScratchReservedBytes": 29010312,
+          "peakRetiredScratchReservedBytes": 1490104,
+          "peakWasmHeapBytes": 89063424,
+          "peakMetaAllocatedBytes": 6800000,
+          "peakContentCapacity": 28800000,
+          "arm": 1
+        }
+      ],
+      "maxInputBytes": 36910657,
+      "digest": "0d7c2ed0bfed2f28875357699a59fcd4a8099bdd07a6987ac0a4fad9b237d671",
+      "complete": true
+    },
+    {
+      "dictionary": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "banks": 665,
+      "filesPerGroup": 8,
+      "groups": [
+        {
+          "start": "term_bank_1.json",
+          "end": "term_bank_8.json",
+          "rows": 80000,
+          "digest": "efa90c96db710478e8dd76fb25b610a20a4125896e8e933f8fc80ed3e9e887b6",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2267740,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5143728,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2267740,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3982192,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_9.json",
+          "end": "term_bank_16.json",
+          "rows": 80000,
+          "digest": "4d1aae154a5ac1a266177c80ca51722e79ebe0c91379b773770d61445cbb1623",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2250429,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5084056,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2250429,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3954768,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_17.json",
+          "end": "term_bank_24.json",
+          "rows": 80000,
+          "digest": "53aed94e8e7619a75742cccf777f1ce154daf410c7592e305554060c721642c5",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2296082,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5149160,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2296082,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3988312,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_25.json",
+          "end": "term_bank_32.json",
+          "rows": 80000,
+          "digest": "42782a090b47cb8b3e0473e6716d473e5ce9bbc82ac117746113a74e8f3273d2",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2313730,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5152240,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2313730,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3990968,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_33.json",
+          "end": "term_bank_40.json",
+          "rows": 80000,
+          "digest": "21cff8dbc014dd3024c544d74290ff949bd08e6a32f0f1304824b3ce65a84af8",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2291048,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5139096,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2291048,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3984088,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_41.json",
+          "end": "term_bank_48.json",
+          "rows": 80000,
+          "digest": "46a5ce18ddfc5501b723c0bd6715965ab2d7d421afed1d16fcede3ca5eb065b8",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2319592,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5177296,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2319592,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4002248,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_49.json",
+          "end": "term_bank_56.json",
+          "rows": 80000,
+          "digest": "62d30f253ffd7ff04fb0c4ae1c06dca00c8c8e27ed964bb4b2b9e66adb209c46",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2293146,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5152168,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2293146,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3992088,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_57.json",
+          "end": "term_bank_64.json",
+          "rows": 80000,
+          "digest": "1fa0621afd8cabeff4dde37cbf06d6e502f17f859adead35b9e72ffe7355b88d",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2343179,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5203912,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2343179,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4018408,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_65.json",
+          "end": "term_bank_72.json",
+          "rows": 80000,
+          "digest": "4e23af9707cb8f733df5784364be9207fa353f06d19736fe09165df29326c0c2",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2376055,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5170624,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2376055,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4007096,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_73.json",
+          "end": "term_bank_80.json",
+          "rows": 80000,
+          "digest": "fb307852750502ea37f9b7fd808d41755b98f16922c7941b38a394c199b70cf8",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2357735,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5180648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2357735,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4008464,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_81.json",
+          "end": "term_bank_88.json",
+          "rows": 80000,
+          "digest": "980aec6d3314a38b2600714af5a0df2b34818fd7ffde4a9494a9ea12327367da",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2282025,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5103752,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2282025,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3971648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_89.json",
+          "end": "term_bank_96.json",
+          "rows": 80000,
+          "digest": "79748e97ac2a855f4d73fc4d3e75f87c644a9edcdf122a21ed0c75c667849979",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2342841,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5258792,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2342841,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4045632,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_97.json",
+          "end": "term_bank_104.json",
+          "rows": 80000,
+          "digest": "b279114dcf57b0125df2941a8cd0b99da75b26bd53aa48d028147d511bf9860a",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2274882,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5128704,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2274882,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3981272,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_105.json",
+          "end": "term_bank_112.json",
+          "rows": 80000,
+          "digest": "7d94899e9274a0eb4d5d5a1f0127667f599ed8027686723407e736402ad46be0",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2301477,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5172352,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2301477,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3997968,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_113.json",
+          "end": "term_bank_120.json",
+          "rows": 80000,
+          "digest": "2f1566ed53a7cd40980c920701e305005efed00bdef18f0f55d33e8f8d6c18fd",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2330526,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5151712,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2330526,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3996808,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_121.json",
+          "end": "term_bank_128.json",
+          "rows": 80000,
+          "digest": "4e2977efca1d54008c77a4e6ea6b5e64d04f424a2b1c46453422c0486febecd6",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2293221,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5128544,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2293221,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3982080,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_129.json",
+          "end": "term_bank_136.json",
+          "rows": 80000,
+          "digest": "7467b0a4349b28b98d39ea3db1bfb74b8d05d4130fd169fc33437e2817b5db03",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2314906,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5150616,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2314906,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3990696,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_137.json",
+          "end": "term_bank_144.json",
+          "rows": 80000,
+          "digest": "dec30abda0a92f33e972765bea57a3c5bf2361f246f0a3e7a81126385d85380b",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2350847,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5138168,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2350847,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3984928,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_145.json",
+          "end": "term_bank_152.json",
+          "rows": 80000,
+          "digest": "2b401745cf516d04478c8fbe295fa1dc29e581ad09c8d8bcbc3a70b5628a3ade",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2295381,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5155728,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2295381,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3992328,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_153.json",
+          "end": "term_bank_160.json",
+          "rows": 80000,
+          "digest": "9e8ad5da0b60aae32b7882f74cc3d79bdfbe2dbfd2d1661d8d37086116710e6d",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2305220,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5127384,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2305220,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3980640,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_161.json",
+          "end": "term_bank_168.json",
+          "rows": 80000,
+          "digest": "d74a4e125303b5728efc27f2118e4f999697833be398f0df5e5eadd9a0310e89",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2277339,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5101176,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2277339,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3968544,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_169.json",
+          "end": "term_bank_176.json",
+          "rows": 80000,
+          "digest": "ec748d630ea458ce0de7346f73028b4f4506a178c678c6f22cb0723809f78ef7",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2313205,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5115256,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2313205,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3977072,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_177.json",
+          "end": "term_bank_184.json",
+          "rows": 80000,
+          "digest": "6cbacad0e77bdf25f121374f39827fff6ddec3084ec8ad8732d4c2218dec889d",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2415468,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5234936,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2415468,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4039472,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_185.json",
+          "end": "term_bank_192.json",
+          "rows": 80000,
+          "digest": "6fee8c9e96adf73940ca33fc21bb8056e96e0235705cc5249f313e951cf2216a",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2250584,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5161680,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2250584,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3988072,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_193.json",
+          "end": "term_bank_200.json",
+          "rows": 80000,
+          "digest": "081415ce51690c7bf11a82fddf21100ede275cb484615c475902b01c180985d2",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2386487,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5253928,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2386487,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4049432,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_201.json",
+          "end": "term_bank_208.json",
+          "rows": 80000,
+          "digest": "fc8449095cfda0be1e7b6953aac5d435f422639d38c916bb969c48c67b57c7ba",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2369859,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5190512,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2369859,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4013304,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_209.json",
+          "end": "term_bank_216.json",
+          "rows": 80000,
+          "digest": "384f62de1a79a732c1ad7f2ec3e7ceae988bfe79c2eed691e4261bf484ac3476",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2288131,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5119920,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2288131,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3977616,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_217.json",
+          "end": "term_bank_224.json",
+          "rows": 80000,
+          "digest": "d9abcc69868395bd86d43a4712a9e6a816c34fcd1c0751f31ccef0ba01ad4b8c",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2234977,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5094088,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2234977,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3961128,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_225.json",
+          "end": "term_bank_232.json",
+          "rows": 80000,
+          "digest": "c44801e504fe0753af05066c83e99518e03f1a3301557a634b388d780e47d644",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2294698,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5111912,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2294698,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3976648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_233.json",
+          "end": "term_bank_240.json",
+          "rows": 80000,
+          "digest": "32d7fa7d54de26d96352d7c5cb4d8429c744392e7d3a5af2ca668c6256dff09e",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2287262,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5102456,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2287262,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3968472,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_241.json",
+          "end": "term_bank_248.json",
+          "rows": 80000,
+          "digest": "0397c16872a1d7f2a06bd4052fc5d7678ffcd0dc26e1912deb4fb298bf866fda",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2328750,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5151112,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2328750,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3997016,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_249.json",
+          "end": "term_bank_256.json",
+          "rows": 80000,
+          "digest": "897bd43a6acf61b40b219c49bb0e7e6dbe10798f2915e3b84dd8a08ffdf8b663",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2301507,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5115376,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2301507,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3975048,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_257.json",
+          "end": "term_bank_264.json",
+          "rows": 80000,
+          "digest": "3ef6ea8b15e580bc94eb9450ef32d1ff155b399b768fdcdad595cd4ae393feef",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2286604,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5109864,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2286604,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3972776,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_265.json",
+          "end": "term_bank_272.json",
+          "rows": 80000,
+          "digest": "5f5e0338671c3e1905f8d2ed8b42cbc2057c88548081c3dc9d60226dfbe2b004",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2295075,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5107992,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2295075,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3972912,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_273.json",
+          "end": "term_bank_280.json",
+          "rows": 80000,
+          "digest": "ef1730a30d10b200a1346b47d46d6c3a6e4aa715b86254313eb17c9e2d3db67a",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2300296,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5108136,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2300296,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3975960,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_281.json",
+          "end": "term_bank_288.json",
+          "rows": 80000,
+          "digest": "43f6cbf1297facc7e5a6dd974f9c8be5e9b6054840fe0f97b2fe3eafd0163884",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2234526,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5086144,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2234526,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3959648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_289.json",
+          "end": "term_bank_296.json",
+          "rows": 80000,
+          "digest": "9287fd95e092a8386c19032c56f9ef85da4f9bf6e110e02cfd9059e96a40cb07",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2218914,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5049792,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2218914,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3937736,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_297.json",
+          "end": "term_bank_304.json",
+          "rows": 80000,
+          "digest": "95543bdfb02d1b18a9a60e9d14b37c5bd623c4b35ef9f32f386bfded60306848",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2223475,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5072272,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2223475,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3950840,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_305.json",
+          "end": "term_bank_312.json",
+          "rows": 80000,
+          "digest": "0b569d4f52b069bb8d69929e697348906650fa80481de467d864aadd034296d3",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2256267,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5076160,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2256267,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3955760,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_313.json",
+          "end": "term_bank_320.json",
+          "rows": 80000,
+          "digest": "0716a1d91b71eeba1e6b000c5ba28601e1c6ba85f9a5671224ea49cfab50e2f9",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2279335,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5097736,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2279335,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3965304,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_321.json",
+          "end": "term_bank_328.json",
+          "rows": 80000,
+          "digest": "1ff42e0d85cd536cb4f10b99feec09ea7272d671687b9e23cbee75851bb04e0e",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2239853,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5096696,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2239853,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3963888,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_329.json",
+          "end": "term_bank_336.json",
+          "rows": 80000,
+          "digest": "a8a1fd6470cbaae6580e9fd7bff5fc719a71757754fcb6fc70dac9ebdd2fb7dd",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2186868,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4963080,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2186868,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3899552,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_337.json",
+          "end": "term_bank_344.json",
+          "rows": 80000,
+          "digest": "4a1673b2288df2119a975cd2f2de7d74596105779ab6f78c88ade9a449639070",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2217750,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5018056,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2217750,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3926592,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_345.json",
+          "end": "term_bank_352.json",
+          "rows": 80000,
+          "digest": "43a02aa96508d8c05ab8eca370904741f0c9367a37e6f4054a281af238ec6af6",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2207810,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5040448,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2207810,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3936120,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_353.json",
+          "end": "term_bank_360.json",
+          "rows": 80000,
+          "digest": "ce0220804f1e770342e417775b01216c98f8e1e44531eb6cb22dd6f950f1972f",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2321772,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5147856,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2321772,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3995440,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_361.json",
+          "end": "term_bank_368.json",
+          "rows": 80000,
+          "digest": "768665de62bd9e68cd2abdbf17332f80d6afc996e12e0b7a3efe29c84ac574c0",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2242955,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5023272,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2242955,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3928784,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_369.json",
+          "end": "term_bank_376.json",
+          "rows": 80000,
+          "digest": "3ee0b19c74bb9fb563caf434fd814109884c3d02b424b6988c0e79b4227f94b2",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2358773,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5141800,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2358773,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3995856,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_377.json",
+          "end": "term_bank_384.json",
+          "rows": 80000,
+          "digest": "1b218d2ac895a42c517d992b916e92dcae36593e58c98a6836ac104144ffa8cb",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2287133,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5126264,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2287133,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3982424,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_385.json",
+          "end": "term_bank_392.json",
+          "rows": 80000,
+          "digest": "b38a0cf6aaca662ae98ce66b793b7f85d4d2fc84bfa7905e79833897f44d848e",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2222249,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5007384,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2222249,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3924224,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_393.json",
+          "end": "term_bank_400.json",
+          "rows": 80000,
+          "digest": "ec10b1ff6bd76ea1b506500aafd6a1d6224b147dba26f91fe1241d1bd2fc5d79",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2176631,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4997400,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2176631,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3918736,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_401.json",
+          "end": "term_bank_408.json",
+          "rows": 80000,
+          "digest": "f43fb80dd7dd07c848038f238243beeced27edb2cc36f97ff33f9ce059b89293",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2173247,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4969496,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2173247,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3903560,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_409.json",
+          "end": "term_bank_416.json",
+          "rows": 80000,
+          "digest": "a7a493336573625ce49753c62d3ca32c49aea633765903f2c88aea0b8635b599",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2135261,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4971568,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2135261,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3899224,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_417.json",
+          "end": "term_bank_424.json",
+          "rows": 80000,
+          "digest": "03201a65c74d56480b46988229462fa50637bd4d72f7386015af1193d3829f43",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2190402,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4981344,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2190402,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3912688,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_425.json",
+          "end": "term_bank_432.json",
+          "rows": 80000,
+          "digest": "74a194c10f6a0fff4ba64ba2d69d0b4b0cbc7723e7561ec45b37199ed03beb2d",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2200508,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5016480,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2200508,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3928784,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_433.json",
+          "end": "term_bank_440.json",
+          "rows": 80000,
+          "digest": "974253cb3dd6c3d51c1eb613edeb15a97a68afe4f83c0a204c6018f083527d40",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2156363,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4915944,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2156363,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3876432,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_441.json",
+          "end": "term_bank_448.json",
+          "rows": 80000,
+          "digest": "5c40a99fd6e29e6d59b86863d3a122fee63420a3bbb10ec17ce5ccb2dd6897ed",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2102554,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4917056,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2102554,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3873264,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_449.json",
+          "end": "term_bank_456.json",
+          "rows": 80000,
+          "digest": "b708e6adf8e26d16950857924848e4dee382118fb7f52558db2bece9d28b87a4",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2075246,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4874792,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2075246,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3854016,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_457.json",
+          "end": "term_bank_464.json",
+          "rows": 80000,
+          "digest": "29c8cde83a7a9fe4969710a9550cf4109ab2d1e25ab0ae35dbba2abc95b430f3",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2196482,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5021744,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2196482,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3927904,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_465.json",
+          "end": "term_bank_472.json",
+          "rows": 80000,
+          "digest": "7fc8c781e8e69c1a2ef72757ad6ad4902133cb21d7b13cf7c57a5f450f10d176",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2082165,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4939712,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2082165,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3878728,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_473.json",
+          "end": "term_bank_480.json",
+          "rows": 80000,
+          "digest": "9c488f209542b6816c504dc471aafc1a8edb103da542fdd0923b713860c48bb4",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2127154,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4940984,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2127154,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3887344,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_481.json",
+          "end": "term_bank_488.json",
+          "rows": 80000,
+          "digest": "c49cd8919e171489ae06530db2d8b098598b25561f89d8b63db549d438b32258",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2187165,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5019024,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2187165,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3929840,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_489.json",
+          "end": "term_bank_496.json",
+          "rows": 80000,
+          "digest": "bf27e8813f87831b7c3a9f6d5f49f7be6459642fe356ee3e51d7970af39ea8fd",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2209848,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4946616,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2209848,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3894976,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_497.json",
+          "end": "term_bank_504.json",
+          "rows": 80000,
+          "digest": "8561c59bd5901c0f3000faa35314ed33445e2e8115d435d6538322bc9eb91b76",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2165232,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4967696,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2165232,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3902752,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_505.json",
+          "end": "term_bank_512.json",
+          "rows": 80000,
+          "digest": "b883c9db9044abc631831cd2ca7c9cad3201e3a8060571e67db5666ec0776fe6",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2207569,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5072920,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2207569,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3954648,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_513.json",
+          "end": "term_bank_520.json",
+          "rows": 80000,
+          "digest": "ac06c23bd538431c1887684b3ed37d0f40d6ebb7bd0dca49421d641d3073ba58",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2176075,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4973440,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2176075,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3907896,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_521.json",
+          "end": "term_bank_528.json",
+          "rows": 80000,
+          "digest": "f78614ef96ce4171ce75189f9c40d73c68e31055bd316fde44fa49398c4d6235",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2119965,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4925984,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2119965,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3880896,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_529.json",
+          "end": "term_bank_536.json",
+          "rows": 80000,
+          "digest": "81e9fd793b9b99744f4eef3e49109491e3cc4777aa5738cd3ace06af6fdcfc5b",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2187420,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4967000,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2187420,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3904344,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_537.json",
+          "end": "term_bank_544.json",
+          "rows": 80000,
+          "digest": "2a468ef6edd10850e2a775c54ec47e5725ae28effa9c64d0775fd28f9b1ff274",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2122278,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4928304,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2122278,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3880336,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_545.json",
+          "end": "term_bank_552.json",
+          "rows": 80000,
+          "digest": "286bd25960ebb537d80508e8cbff3c7c98a42a459724dd67f72fb3065a82cbe1",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2234632,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 5024504,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2234632,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3933960,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_553.json",
+          "end": "term_bank_560.json",
+          "rows": 80000,
+          "digest": "f66be4cf67c7359966f3ffb95d2237ebf2a127aef8d32dd9d99179bf386a8dee",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2101267,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4903256,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2101267,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3867304,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_561.json",
+          "end": "term_bank_568.json",
+          "rows": 80000,
+          "digest": "30ae4f53792a92a87b5babeaabb114f73a988cb56cf885176ba86f21325a135d",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2008613,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4887512,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2008613,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3855048,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_569.json",
+          "end": "term_bank_576.json",
+          "rows": 80000,
+          "digest": "c0257ff961dc0d3e6a7ca0d0bd8b642e1713d79dbb38c4ef739d04cccf4e3c06",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1982017,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4747096,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1982017,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3782056,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_577.json",
+          "end": "term_bank_584.json",
+          "rows": 80000,
+          "digest": "622848450f849b56447ce1567f4f165b42e1bca5cf53b254308a0dce13ef6d72",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1945582,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4783088,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 1945582,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3800600,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_585.json",
+          "end": "term_bank_592.json",
+          "rows": 80000,
+          "digest": "3c9c6805400005e3118fd38be6e447cea64fa4df19212b9dc60c7c5bc410a260",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2088117,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4804152,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2088117,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3816552,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_593.json",
+          "end": "term_bank_600.json",
+          "rows": 80000,
+          "digest": "4e7dc0cdb6ef5b3d979aab23e90c3074b1098ca72aca076f9332daa7ca915647",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2045777,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4879368,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2045777,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3852184,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_601.json",
+          "end": "term_bank_608.json",
+          "rows": 80000,
+          "digest": "8536490b0aab57a78a0ba2711bb0fe3e52e15126179614ea6f43d366709fe4a6",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2152685,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4952272,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2152685,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3888664,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_609.json",
+          "end": "term_bank_616.json",
+          "rows": 80000,
+          "digest": "3459d5be80821b732960375b0c43f5ed1c7ceafd7263709f3a21c455c4efb19c",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2033340,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4855232,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2033340,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3839456,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_617.json",
+          "end": "term_bank_624.json",
+          "rows": 80000,
+          "digest": "d1a225acad00dc49bdb956b892283bfff53856f480a9b7ee8a7c40891338dd84",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2181701,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4959888,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2181701,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3901176,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_625.json",
+          "end": "term_bank_632.json",
+          "rows": 80000,
+          "digest": "6a06b70a6649d08de843857bb8223a16f6da39774287a5776776893d02958259",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2011754,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4804152,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2011754,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3815232,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_633.json",
+          "end": "term_bank_640.json",
+          "rows": 80000,
+          "digest": "80a948eb293a1a86a633dfc714d7bbf5bf066e304a18beec80ba98354154dd3a",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2111642,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4885432,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2111642,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3861608,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_641.json",
+          "end": "term_bank_648.json",
+          "rows": 80000,
+          "digest": "8f8cc8a5f20c23e783feb3be278b30fb861df9664ddaefccb5158b5a4c41380e",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2137759,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4941880,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2137759,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3887584,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_649.json",
+          "end": "term_bank_656.json",
+          "rows": 80000,
+          "digest": "1c0c8c3f07dd7c72a460d284a41edbddb2fd3a566ee8d4ebc1f0c5af82adb534",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2137631,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4854448,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2137631,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3845664,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_657.json",
+          "end": "term_bank_664.json",
+          "rows": 80000,
+          "digest": "fcb09c89dbd6fc7f3272999fca702074a9b02952a80420b9ec328df93a18be3b",
+          "counters": [
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2100799,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 4928792,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            },
+            {
+              "nativeSegments": 3,
+              "segmentedKeyBytes": 2100799,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 1,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 3880656,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 5440000,
+              "contentCapacity": 15360000
+            }
+          ]
+        },
+        {
+          "start": "term_bank_665.json",
+          "end": "term_bank_665.json",
+          "rows": 8310,
+          "digest": "87cdb39de1318d4e6409c692fb0a3d4543b24159e04c4765ad64836fb4340462",
+          "counters": [
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 0,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 0,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 680000,
+              "contentCapacity": 1048576
+            },
+            {
+              "nativeSegments": 0,
+              "segmentedKeyBytes": 0,
+              "nativeSegmentedFallbacks": 0,
+              "fusedParseFallbacks": 0,
+              "scratchReuseGroups": 0,
+              "scratchReuseMisses": 0,
+              "retiredScratchReservedBytes": 0,
+              "wasmHeapBytes": 89063424,
+              "metaAllocatedBytes": 680000,
+              "contentCapacity": 1048576
+            }
+          ]
+        }
+      ],
+      "rows": 6648310,
+      "arms": [
+        {
+          "root": "/workspace/scratch/7b5a4ac440c8/manabitan",
+          "nativeSegments": 249,
+          "segmentedKeyBytes": 184592865,
+          "encoderKeyMemcpyBytesAvoided": 0,
+          "nativeSegmentedFallbacks": 0,
+          "fusedParseFallbacks": 0,
+          "scratchReuseGroups": 83,
+          "scratchReuseMisses": 0,
+          "sumRetiredScratchReservedBytes": 418652560,
+          "peakRetiredScratchReservedBytes": 5258792,
+          "peakWasmHeapBytes": 89063424,
+          "peakMetaAllocatedBytes": 5440000,
+          "peakContentCapacity": 15360000,
+          "arm": 0
+        },
+        {
+          "root": "/workspace/scratch/7b5a4ac440c8/combined",
+          "nativeSegments": 249,
+          "segmentedKeyBytes": 184592865,
+          "encoderKeyMemcpyBytesAvoided": 184592865,
+          "nativeSegmentedFallbacks": 0,
+          "fusedParseFallbacks": 0,
+          "scratchReuseGroups": 83,
+          "scratchReuseMisses": 0,
+          "sumRetiredScratchReservedBytes": 326932384,
+          "peakRetiredScratchReservedBytes": 4049432,
+          "peakWasmHeapBytes": 89063424,
+          "peakMetaAllocatedBytes": 5440000,
+          "peakContentCapacity": 15360000,
+          "arm": 1
+        }
+      ],
+      "maxInputBytes": 54110447,
+      "digest": "1672f93453f216c219c81235b85cd12e26c6b677885140de5509b8aa4f1404e8",
+      "complete": true
+    }
+  ],
+  "complete": true
+}

@@ -1,0 +1,12 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict: 528299 rows, 8 groups, complete output equality
+jitendex: 320000 rows / 16 groups match
+jitendex: 436555 rows, 22 groups, complete output equality
+vndb: 1280000 rows / 16 groups match
+vndb: 2560000 rows / 32 groups match
+vndb: 3840000 rows / 48 groups match
+vndb: 5120000 rows / 64 groups match
+vndb: 6400000 rows / 80 groups match
+vndb: 6648310 rows, 84 groups, complete output equality
+/workspace/scratch/7b5a4ac440c8/combined-corpus-parity.json
