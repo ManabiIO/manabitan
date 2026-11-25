@@ -106,11 +106,12 @@ expected_changes = {
     "js/dictionary/dictionary-generation-media-store.js",
     "js/dictionary/dictionary-importer.js",
     "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
     "lib/term-bank-parser.wasm",
 }
 save(OUTPUT / "package-changes.json", {"actual": changed_entries, "expected": sorted(expected_changes)})
 if set(changed_entries) != expected_changes:
-    raise RuntimeError("Packaged source changes differ from the four reviewed runtime files")
+    raise RuntimeError("Packaged source changes differ from the five reviewed implementation files")
 
 environment = dict(os.environ)
 environment.update({
