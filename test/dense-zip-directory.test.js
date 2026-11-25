@@ -3,8 +3,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import {readFile} from 'node:fs/promises';
+import {crc32} from 'node:zlib';
 import {describe, expect, test} from 'vitest';
+import {TextWriter, Uint8ArrayWriter} from '../ext/lib/zip.js';
 import {readDenseZipDirectory} from '../ext/js/dictionary/dense-zip-directory.js';
+import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+import {setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js';
+import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
 // eslint-disable-next-line @stylistic/semi
 import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
 
@@ -159,6 +165,53 @@ describe('dense ZIP directory', () => {
         entry.rawFilename[0] ^= 1
         await expect(reader.read(entry, new AbortController().signal)).rejects.toThrow('local filename disagrees')
         await expect(reader.readBatch([entry, entries[1]], void 0, () => false, true)).rejects.toThrow('local filename disagrees')
+    })
+
+    test('rejects a late duplicate filename when the importer builds the decoded catalog', async () => {
+        const archive = new SparseZipDirectory()
+        const last = archive.directory.length - 46 - filenameLength
+        archive.directory.set(new TextEncoder().encode('0000.png'), last + 46)
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+        await expect(importer._getFilesFromArchive(archive)).rejects.toThrow("Duplicate archive filename: '0000.png'")
+    })
+
+    test('decodes dense small entries through the importer text and byte writers', async () => {
+        setTermBankWasmModule(await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))))
+        const archive = new SparseZipDirectory()
+        const content = new Uint8Array(packedLength - 5).fill(0x61)
+        const stored = new Uint8Array(packedLength)
+        const header = new DataView(stored.buffer)
+        stored[0] = 1
+        header.setUint16(1, content.length, true)
+        header.setUint16(3, content.length ^ 0xffff, true)
+        stored.set(content, 5)
+        const directory = new DataView(archive.directory.buffer)
+        directory.setUint32(16, crc32(content), true)
+        directory.setUint32(24, content.length, true)
+        const directorySlice = archive.slice.bind(archive)
+        archive.slice = (start, end) => {
+            if (start !== 0) { return directorySlice(start, end) }
+            if (typeof end !== 'number') { throw new Error('Expected a bounded local read') }
+            const bytes = new Uint8Array(end)
+            const view = new DataView(bytes.buffer)
+            view.setUint32(0, 0x04034b50, true)
+            view.setUint16(8, 8, true)
+            view.setUint16(26, filenameLength, true)
+            bytes.set(new TextEncoder().encode('0000.png'), 30)
+            bytes.set(stored, 30 + filenameLength)
+            return new Blob([bytes])
+        }
+        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+        const {fileMap, zipReader, catalog} = await importer._getFilesFromArchive(archive)
+        try {
+            expect(catalog).toBe('dense-zip')
+            const entry = fileMap.get('0000.png')
+            if (typeof entry === 'undefined') { throw new Error('Expected the first dense entry') }
+            expect(await importer._getData(entry, new TextWriter())).toBe('a'.repeat(content.length))
+            expect(await importer._getData(entry, new Uint8ArrayWriter())).toEqual(content)
+        } finally {
+            await zipReader.close()
+        }
     })
 
     test('packs variable-length names without gaps or overlap', async () => {

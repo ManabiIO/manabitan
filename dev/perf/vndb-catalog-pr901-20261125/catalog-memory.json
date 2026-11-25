@@ -1,0 +1,294 @@
+{
+    "complete": true,
+    "node": "v24.22.3",
+    "v8": "13.6.233.17-node.63",
+    "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sourceIdentity": {
+        "A": {
+            "root": "/workspace/scratch/5275121b7875/manabitan",
+            "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "source": "/workspace/scratch/5275121b7875/manabitan/ext/js/dictionary/dense-zip-directory.js",
+            "sha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b"
+        },
+        "B": {
+            "root": "/workspace/scratch/5275121b7875/manabitan-vndb-901",
+            "head": "ea176867e66515d12f7a75c044d1082624ce76cd",
+            "source": "/workspace/scratch/5275121b7875/manabitan-vndb-901/ext/js/dictionary/dense-zip-directory.js",
+            "sha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63"
+        }
+    },
+    "runnerSha256": "5f8b0d5ddff93be0d61540340459b8a060d2599ba3d1addafbc0fcb8eecec91a",
+    "protocol": "Four fixed alternating AB/BA pairs. Fresh process per observation; two discarded catalog warmups; settle and GC before and after retaining one catalog. No timing measurement.",
+    "observations": [
+        {
+            "pair": 0,
+            "arm": "A",
+            "sourceSha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 147237,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 176697344,
+                "heapTotal": 142659584,
+                "heapUsed": 7347824,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 185757696,
+                "heapTotal": 180998144,
+                "heapUsed": 45678680,
+                "external": 6556055,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 9060352,
+                "heapTotal": 38338560,
+                "heapUsed": 38330856,
+                "external": 2400580,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 0,
+            "arm": "B",
+            "sourceSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 0,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 113881088,
+                "heapTotal": 75288576,
+                "heapUsed": 7340432,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 157184000,
+                "heapTotal": 167628800,
+                "heapUsed": 32284928,
+                "external": 8956595,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 43302912,
+                "heapTotal": 92340224,
+                "heapUsed": 24944496,
+                "external": 4801120,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 1,
+            "arm": "B",
+            "sourceSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 0,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 112828416,
+                "heapTotal": 75812864,
+                "heapUsed": 7340360,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 157642752,
+                "heapTotal": 167628800,
+                "heapUsed": 32525552,
+                "external": 8956595,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 44814336,
+                "heapTotal": 91815936,
+                "heapUsed": 25185192,
+                "external": 4801120,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 1,
+            "arm": "A",
+            "sourceSha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 147237,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 176631808,
+                "heapTotal": 142659584,
+                "heapUsed": 7347864,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 185511936,
+                "heapTotal": 181260288,
+                "heapUsed": 45678720,
+                "external": 6556055,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 8880128,
+                "heapTotal": 38600704,
+                "heapUsed": 38330856,
+                "external": 2400580,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 2,
+            "arm": "A",
+            "sourceSha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 147237,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 176664576,
+                "heapTotal": 142921728,
+                "heapUsed": 7347864,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 192258048,
+                "heapTotal": 180998144,
+                "heapUsed": 45678720,
+                "external": 6556055,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 15593472,
+                "heapTotal": 38076416,
+                "heapUsed": 38330856,
+                "external": 2400580,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 2,
+            "arm": "B",
+            "sourceSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 0,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 142458880,
+                "heapTotal": 75550720,
+                "heapUsed": 7340752,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 163225600,
+                "heapTotal": 167890944,
+                "heapUsed": 32285632,
+                "external": 8956595,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 20766720,
+                "heapTotal": 92340224,
+                "heapUsed": 24944880,
+                "external": 4801120,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 3,
+            "arm": "B",
+            "sourceSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 0,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 112029696,
+                "heapTotal": 75550720,
+                "heapUsed": 7340752,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 156495872,
+                "heapTotal": 167628800,
+                "heapUsed": 32285632,
+                "external": 8956595,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 44466176,
+                "heapTotal": 92078080,
+                "heapUsed": 24944880,
+                "external": 4801120,
+                "arrayBuffers": 2400540
+            }
+        },
+        {
+            "pair": 3,
+            "arm": "A",
+            "sourceSha256": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+            "count": 147237,
+            "filenameBytes": 2400540,
+            "retainedRawNameViews": 147237,
+            "digest": "6542a7006ec38536e573a6a443077be39f9b09565f1a1d9b48376dd69c8d87ff",
+            "before": {
+                "rss": 177934336,
+                "heapTotal": 142397440,
+                "heapUsed": 7347824,
+                "external": 4155475,
+                "arrayBuffers": 146579
+            },
+            "after": {
+                "rss": 193372160,
+                "heapTotal": 181260288,
+                "heapUsed": 45678680,
+                "external": 6556055,
+                "arrayBuffers": 2547119
+            },
+            "delta": {
+                "rss": 15437824,
+                "heapTotal": 38862848,
+                "heapUsed": 38330856,
+                "external": 2400580,
+                "arrayBuffers": 2400540
+            }
+        }
+    ],
+    "pairs": [
+        {
+            "pair": 0,
+            "baselineHeapBytes": 38330856,
+            "candidateHeapBytes": 24944496,
+            "reductionBytes": 13386360,
+            "reductionPercent": 34.92319607994144
+        },
+        {
+            "pair": 1,
+            "baselineHeapBytes": 38330856,
+            "candidateHeapBytes": 25185192,
+            "reductionBytes": 13145664,
+            "reductionPercent": 34.29525288973457
+        },
+        {
+            "pair": 2,
+            "baselineHeapBytes": 38330856,
+            "candidateHeapBytes": 24944880,
+            "reductionBytes": 13385976,
+            "reductionPercent": 34.92219427606834
+        },
+        {
+            "pair": 3,
+            "baselineHeapBytes": 38330856,
+            "candidateHeapBytes": 24944880,
+            "reductionBytes": 13385976,
+            "reductionPercent": 34.92219427606834
+        }
+    ]
+}

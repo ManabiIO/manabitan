@@ -1,0 +1,41 @@
+{
+    "runtimeHead": "ea176867e66515d12f7a75c044d1082624ce76cd",
+    "baselineHead": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "denseModuleSha256": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+    "acquiredMemoryRunnerSha256": "5f8b0d5ddff93be0d61540340459b8a060d2599ba3d1addafbc0fcb8eecec91a",
+    "finalMemoryRunnerSha256": "373b5c1f234d565f022ddcdfb089ccce53be454314088a8e6f512346c21e01a8",
+    "runnerChangesAfterAcquisition": "ESLint-only arrow/function parentheses, braces around a single conditional increment, and line wrapping. Exact acquired bytes are retained as acquired-memory-runner.txt.",
+    "runtimeChangedByFollowup": false,
+    "memoryMetric": "Per-catalog post-GC delta in heapUsed + external; arrayBuffers is a subset of external and is not added again.",
+    "memoryPairs": [
+        {
+            "pair": 0,
+            "A": 40731436,
+            "B": 29745616,
+            "reductionBytes": 10985820,
+            "reductionPercent": 26.97135450859135
+        },
+        {
+            "pair": 1,
+            "A": 40731436,
+            "B": 29986312,
+            "reductionBytes": 10745124,
+            "reductionPercent": 26.380420272931204
+        },
+        {
+            "pair": 2,
+            "A": 40731436,
+            "B": 29746000,
+            "reductionBytes": 10985436,
+            "reductionPercent": 26.970411747820535
+        },
+        {
+            "pair": 3,
+            "A": 40731436,
+            "B": 29746000,
+            "reductionBytes": 10985436,
+            "reductionPercent": 26.970411747820535
+        }
+    ],
+    "mediaOracleRetry": "First attempt failed writing packed-media.bin because /workspace was full (ENOSPC). Complete retry used separate /tmp output with unchanged runtime and fixture. Both results are preserved; diagnostic oracle durations are not benchmark observations."
+}

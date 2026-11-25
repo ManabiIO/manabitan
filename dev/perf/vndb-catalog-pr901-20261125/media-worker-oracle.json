@@ -1,0 +1,143 @@
+{
+    "schema": 1,
+    "complete": true,
+    "boundary": "Actual production media-preparation worker handler through posted packed Blob/index; includes dense ZIP reads, entry selection, planning, all payload reads and CRC checks, and index creation. Worker startup, module imports, WASM compilation, file opening and oracle hashing are outside timing. Each invocation uses a fresh Node process running the unchanged worker handler; no Blob crosses a Node worker lifetime. No browser import or peak-memory claim.",
+    "node": "v24.22.3",
+    "v8": "13.6.233.17-node.63",
+    "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+    "sourceIdentity": {
+        "A": {
+            "root": "/workspace/scratch/5275121b7875/manabitan",
+            "head": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "files": {
+                "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+                "ext/js/dictionary/source-zip-media-pack.js": "8c0587b49630f66db5f4f2cf96f1638a423c78e3503d0401f5f8c328a4622d6d",
+                "ext/js/dictionary/dense-zip-directory.js": "fa7fb083a9da3578c48378e95a7ff7c1ea1e274d8d5694fbbda8851e7a9ce84b",
+                "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+            }
+        },
+        "B": {
+            "root": "/workspace/scratch/5275121b7875/manabitan-vndb-901",
+            "head": "ea176867e66515d12f7a75c044d1082624ce76cd",
+            "files": {
+                "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+                "ext/js/dictionary/source-zip-media-pack.js": "8c0587b49630f66db5f4f2cf96f1638a423c78e3503d0401f5f8c328a4622d6d",
+                "ext/js/dictionary/dense-zip-directory.js": "0dd999aa90a24b227e41547fdac39b845ae0efec496ae6577d5ca7c2fe9a7f63",
+                "ext/js/dictionary/dictionary-generation-media-store.js": "4892f8df37bb30580dc66833b20e02f63af86942986f9892d4f7520f095df583",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+                "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+            }
+        }
+    },
+    "runnerSha256": "d4d758fbf2dfbec04912f505957b20b217dab62bd8306db78018c7fcb6eb756c",
+    "workerShimSha256": "4fa04a206720599e648fe7e619fb90116313eabe09ee0da8a67db7abf9e56895",
+    "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true,
+        "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "protocol": {
+        "warmups": "AB",
+        "measured": "ABBAABBA"
+    },
+    "hostBefore": {
+        "at": "2026-11-25T15:20:31.010Z",
+        "load": [
+            10.34,
+            11.95,
+            11.73
+        ],
+        "freeMemory": 4503945216
+    },
+    "oracle": [
+        {
+            "arm": "A",
+            "descriptor": {
+                "version": 2,
+                "prefix": "img/cc",
+                "suffix": ".webp",
+                "firstId": 1,
+                "slotCount": 163034,
+                "count": 146570,
+                "dataBytes": 195649882
+            },
+            "blobBytes": 195649882,
+            "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+            "blobIdentity": {
+                "sha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+                "bytes": 195649882
+            },
+            "metrics": {
+                "readMs": 1500,
+                "validationMs": 339,
+                "rangeReadCount": 144,
+                "rangeReadBytes": 195649882,
+                "compressedBytes": 188864129,
+                "uncompressedBytes": 188131284
+            },
+            "measurement": {
+                "elapsedMs": 2361.996389,
+                "cpuUserMs": 2026.234,
+                "cpuSystemMs": 677.762
+            }
+        },
+        {
+            "arm": "B",
+            "descriptor": {
+                "version": 2,
+                "prefix": "img/cc",
+                "suffix": ".webp",
+                "firstId": 1,
+                "slotCount": 163034,
+                "count": 146570,
+                "dataBytes": 195649882
+            },
+            "blobBytes": 195649882,
+            "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+            "blobIdentity": {
+                "sha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+                "bytes": 195649882
+            },
+            "metrics": {
+                "readMs": 1204,
+                "validationMs": 309,
+                "rangeReadCount": 144,
+                "rangeReadBytes": 195649882,
+                "compressedBytes": 188864129,
+                "uncompressedBytes": 188131284
+            },
+            "measurement": {
+                "elapsedMs": 1928.388404,
+                "cpuUserMs": 1751.057,
+                "cpuSystemMs": 339.051
+            }
+        }
+    ],
+    "observations": [],
+    "hostAfter": {
+        "at": "2026-11-25T15:20:37.338Z",
+        "load": [
+            9.77,
+            11.77,
+            11.68
+        ],
+        "freeMemory": 4510846976
+    }
+}

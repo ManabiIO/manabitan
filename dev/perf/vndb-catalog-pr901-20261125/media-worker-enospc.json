@@ -1,0 +1,7 @@
+{
+    "message": "Error: Command failed: /opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node /workspace/scratch/5275121b7875/manabitan-vndb-901/test/perf/direct-media-entries-20261123/worker.mjs /workspace/scratch/5275121b7875/manabitan-vndb-901 /workspace/scratch/5275121b7875/fixtures/vndb_characters_by_bee.zip /workspace/scratch/5275121b7875/vndb-901-evidence/media-worker/B oracle B\nnode:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\n[Error: ENOSPC: no space left on device, write] {\n  errno: -28,\n  code: 'ENOSPC',\n  syscall: 'write'\n}\n\nNode.js v24.22.3\n",
+    "signal": null,
+    "code": 1,
+    "stdout": "",
+    "stderr": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\n[Error: ENOSPC: no space left on device, write] {\n  errno: -28,\n  code: 'ENOSPC',\n  syscall: 'write'\n}\n\nNode.js v24.22.3\n"
+}
