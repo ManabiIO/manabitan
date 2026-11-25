@@ -840,7 +840,8 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
 enum {
-    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
+    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG,
+    COMMON_STRUCTURED_KEY_OTHER
 };
 
 /* These complete ASCII literals are already valid JSON strings. Matching
@@ -863,6 +864,37 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
         if (word == UINT32_C(0x67617422) && src[start + 4u] == '"') {
             *out_end = start + 5u;
             return COMMON_STRUCTURED_KEY_TAG;
+        }
+        /* Metadata keys cannot be media markers or required glossary fields.
+         * Match the complete bounded literal before skipping their general
+         * string scan. Escapes and longer names still use the full parser. */
+        uint32_t key_length = 0u;
+        switch (word) {
+            case UINT32_C(0x74616422): /* "data" */
+                if (len - start >= 6u && src[start + 4u] == 'a') { key_length = 6u; }
+                break;
+            case UINT32_C(0x646f6322): /* "code" */
+                if (len - start >= 6u && src[start + 4u] == 'e') { key_length = 6u; }
+                break;
+            case UINT32_C(0x6e616c22): /* "lang" */
+                if (len - start >= 6u && src[start + 4u] == 'g') { key_length = 6u; }
+                break;
+            case UINT32_C(0x65726822): /* "href" */
+                if (len - start >= 6u && src[start + 4u] == 'f') { key_length = 6u; }
+                break;
+            case UINT32_C(0x616c6322): /* "class" */
+                if (len - start >= 7u && src[start + 4u] == 's' && src[start + 5u] == 's') { key_length = 7u; }
+                break;
+            case UINT32_C(0x74697422): /* "title" */
+            case UINT32_C(0x79747322): /* "style" */
+                if (len - start >= 7u && src[start + 4u] == 'l' && src[start + 5u] == 'e') { key_length = 7u; }
+                break;
+            default:
+                break;
+        }
+        if (key_length != 0u && src[start + key_length - 1u] == '"') {
+            *out_end = start + key_length;
+            return COMMON_STRUCTURED_KEY_OTHER;
         }
     }
     return COMMON_STRUCTURED_KEY_NONE;
@@ -2849,7 +2881,18 @@ int32_t encode_term_lookup_index(
     const uint32_t output_length = (uint32_t)output_length_64;
 
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
-    memset(output, 0, output_length);
+    const uint32_t strings_output_offset = TERM_LOOKUP_CONTAINER_HEADER_BYTES + TERM_LOOKUP_BASE_HEADER_BYTES;
+    uint8_t* persisted_strings = output + strings_output_offset;
+    if (strings == persisted_strings) {
+        // Segmented compaction can write its keys directly into the final
+        // container. Preserve that exact slice while clearing every header,
+        // table and padding byte left by the preceding segment.
+        memset(output, 0, strings_output_offset);
+        memset(persisted_strings + strings_length, 0, output_length - strings_output_offset - strings_length);
+    } else {
+        memset(output, 0, output_length);
+        __builtin_memcpy(persisted_strings, strings, strings_length);
+    }
     uint32_t* container_header = (uint32_t*)output;
     container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;
     container_header[1] = TERM_LOOKUP_FORMAT_VERSION;
@@ -2863,8 +2906,6 @@ int32_t encode_term_lookup_index(
     base_header[3] = TERM_LOOKUP_FORMAT_VERSION;
     base_header[4] = sequence_key_count;
     base_header[5] = reading_posting_count;
-    __builtin_memcpy(base + TERM_LOOKUP_BASE_HEADER_BYTES, strings, strings_length);
-
     uint32_t cursor = TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length;
     uint16_t* persisted_key_lengths = (uint16_t*)(base + cursor);
     cursor += key_count * (uint32_t)sizeof(uint16_t);
