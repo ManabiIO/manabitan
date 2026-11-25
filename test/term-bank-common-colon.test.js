@@ -23,7 +23,7 @@ import {beforeAll, describe, expect, test} from 'vitest'
 /** @type {ParserExports} */
 let parser
 const encoder = new TextEncoder()
-const commonKeys = ['content', 'tag', 'data', 'class', 'title', 'href', 'code', 'lang']
+const commonKeys = ['content', 'tag', 'data', 'class', 'title', 'href', 'code', 'lang', 'style']
 
 beforeAll(async () => {
     const bytes = await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url))
@@ -138,7 +138,7 @@ describe('adjacent common-key colons', () => {
         }
     })
 
-    test.each(['data', 'class', 'title', 'href', 'code', 'lang'])('keeps %s distinct from required glossary fields', (key) => {
+    test.each(['data', 'class', 'title', 'href', 'code', 'lang', 'style'])('keeps %s distinct from required glossary fields', (key) => {
         for (const value of ['null', '0', 'true', '"text"', '[]', '{"tag":"img"}']) {
             for (const hints of [false, true]) {
                 expect(parseGlossary(`[{"type":"image","path":"image.png","${key}":${value}}]`, hints, true).count).toBe(1)

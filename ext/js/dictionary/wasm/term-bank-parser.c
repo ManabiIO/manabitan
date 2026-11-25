@@ -847,56 +847,55 @@ enum {
 /* These complete ASCII literals are already valid JSON strings. Matching
  * their closing quote avoids repeated span/media/type tests for common
  * structured-content keys. Return their kind for required-field validation;
- * metadata keys satisfy no required field. Escaped and other keys use the
- * full parser. */
+ * escaped and other keys use the full parser. */
 static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end) {
-    if (start >= len || len - start < 5u) { return COMMON_STRUCTURED_KEY_NONE; }
-    uint32_t prefix;
-    __builtin_memcpy(&prefix, src + start, sizeof(prefix));
-    switch (prefix) {
-        case UINT32_C(0x6e6f6322): /* "con */
-            if (len - start >= 9u) {
-                uint32_t suffix;
-                __builtin_memcpy(&suffix, src + start + 4u, sizeof(suffix));
-                if (suffix == UINT32_C(0x746e6574) && src[start + 8u] == '"') {
-                    *out_end = start + 9u;
-                    return COMMON_STRUCTURED_KEY_CONTENT;
-                }
-            }
-            break;
-        case UINT32_C(0x67617422): /* "tag */
-            if (src[start + 4u] == '"') {
-                *out_end = start + 5u;
-                return COMMON_STRUCTURED_KEY_TAG;
-            }
-            break;
-        case UINT32_C(0x74616422): /* "dat */
-        case UINT32_C(0x646f6322): /* "cod */
-        case UINT32_C(0x65726822): /* "hre */
-        case UINT32_C(0x6e616c22): /* "lan */
-            if (len - start >= 6u && src[start + 5u] == '"') {
-                const uint8_t last = src[start + 4u];
-                if ((prefix == UINT32_C(0x74616422) && last == 'a') ||
-                    (prefix == UINT32_C(0x646f6322) && last == 'e') ||
-                    (prefix == UINT32_C(0x65726822) && last == 'f') ||
-                    (prefix == UINT32_C(0x6e616c22) && last == 'g')) {
-                    *out_end = start + 6u;
-                    return COMMON_STRUCTURED_KEY_OTHER;
-                }
-            }
-            break;
-        case UINT32_C(0x616c6322): /* "cla */
-        case UINT32_C(0x74697422): /* "tit */
-            if (len - start >= 7u && src[start + 6u] == '"') {
-                if ((prefix == UINT32_C(0x616c6322) && src[start + 4u] == 's' && src[start + 5u] == 's') ||
-                    (prefix == UINT32_C(0x74697422) && src[start + 4u] == 'l' && src[start + 5u] == 'e')) {
-                    *out_end = start + 7u;
-                    return COMMON_STRUCTURED_KEY_OTHER;
-                }
-            }
-            break;
-        default:
-            break;
+    if (start >= len) { return COMMON_STRUCTURED_KEY_NONE; }
+    if (len - start >= 9u) {
+        uint64_t word;
+        __builtin_memcpy(&word, src + start, sizeof(word));
+        if (word == UINT64_C(0x746e65746e6f6322) && src[start + 8u] == '"') {
+            *out_end = start + 9u;
+            return COMMON_STRUCTURED_KEY_CONTENT;
+        }
+    }
+    if (len - start >= 5u) {
+        uint32_t word;
+        __builtin_memcpy(&word, src + start, sizeof(word));
+        if (word == UINT32_C(0x67617422) && src[start + 4u] == '"') {
+            *out_end = start + 5u;
+            return COMMON_STRUCTURED_KEY_TAG;
+        }
+        /* Metadata keys cannot be media markers or required glossary fields.
+         * Match the complete bounded literal before skipping their general
+         * string scan. Escapes and longer names still use the full parser. */
+        uint32_t key_length = 0u;
+        switch (word) {
+            case UINT32_C(0x74616422): /* "data" */
+                if (len - start >= 6u && src[start + 4u] == 'a') { key_length = 6u; }
+                break;
+            case UINT32_C(0x646f6322): /* "code" */
+                if (len - start >= 6u && src[start + 4u] == 'e') { key_length = 6u; }
+                break;
+            case UINT32_C(0x6e616c22): /* "lang" */
+                if (len - start >= 6u && src[start + 4u] == 'g') { key_length = 6u; }
+                break;
+            case UINT32_C(0x65726822): /* "href" */
+                if (len - start >= 6u && src[start + 4u] == 'f') { key_length = 6u; }
+                break;
+            case UINT32_C(0x616c6322): /* "class" */
+                if (len - start >= 7u && src[start + 4u] == 's' && src[start + 5u] == 's') { key_length = 7u; }
+                break;
+            case UINT32_C(0x74697422): /* "title" */
+            case UINT32_C(0x79747322): /* "style" */
+                if (len - start >= 7u && src[start + 4u] == 'l' && src[start + 5u] == 'e') { key_length = 7u; }
+                break;
+            default:
+                break;
+        }
+        if (key_length != 0u && src[start + key_length - 1u] == '"') {
+            *out_end = start + key_length;
+            return COMMON_STRUCTURED_KEY_OTHER;
+        }
     }
     return COMMON_STRUCTURED_KEY_NONE;
 }
