@@ -96,6 +96,7 @@ async function parse(preloadedSource, overrides = {}) {
 
 describe('raw glossary witness source CRC verification', () => {
     test('verifies newly eligible stored banks before exposing exact ordinary output', async () => {
+        /** @type {import('../ext/js/dictionary/term-bank-wasm-parser.js').CompressedTermBankSource[]} */
         const source = banks.map((bytes, index) => ({
             bytes,
             compressionMethod: 0,
