@@ -68,7 +68,9 @@ async function loadWorker(failFirstContext = false) {
             bridge.messages.push(structuredClone(message, {transfer}))
         },
     })
-    await import('../ext/js/dictionary/zstd-term-content-compression-worker.js')
+    const workerUrl = new URL('../ext/js/dictionary/zstd-term-content-compression-worker.js', import.meta.url).href
+    // eslint-disable-next-line no-unsanitized/method -- The URL names a fixed repository-owned worker entry.
+    await import(workerUrl)
     await vi.waitFor(() => { expect(bridge.messages).toHaveLength(1) })
     expect(bridge.messages[0].type).toBe(failFirstContext ? 'initialization-error' : 'ready')
     const api = await import('../ext/js/dictionary/zstd-term-content.js')
