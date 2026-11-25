@@ -482,44 +482,71 @@ function encodeIndexPlan(plan, directArena = false) {
     return output;
 }
 
+/* eslint-disable @stylistic/semi */
 /**
  * Interns non-negative row sequences with typed chained metadata.
  * @param {Int32Array|Float64Array} sequenceValues
  * @returns {{keys: Int32Array|Float64Array, keyByRow: Uint16Array, postingCount: number}}
  */
 function createSequencePlan(sequenceValues) {
-    const rowCount = sequenceValues.length;
-    const keys = sequenceValues instanceof Float64Array ? new Float64Array(rowCount) : new Int32Array(rowCount);
-    const keyByRow = new Uint16Array(rowCount);
-    const slots = new Uint16Array(getSequenceInternSlotCount(rowCount));
-    const slotMask = slots.length - 1;
-    let keyCount = 0;
-    let postingCount = 0;
+    const rowCount = sequenceValues.length
+    const keys = sequenceValues instanceof Float64Array ? new Float64Array(rowCount) : new Int32Array(rowCount)
+    const keyByRow = new Uint16Array(rowCount)
+    /** @type {Uint16Array|null} */
+    let slots = null
+    let keyCount = 0
+    let postingCount = 0
+    let lastSequence = -1
+    let lastKey = 0
     for (let row = 0; row < rowCount; ++row) {
-        const sequence = sequenceValues[row];
+        const sequence = sequenceValues[row]
         if (sequence < 0) {
-            keyByRow[row] = U16_NULL;
-            continue;
+            keyByRow[row] = U16_NULL
+            continue
         }
-        let slot = hashSequence(sequence) & slotMask;
-        let key;
-        while (true) {
-            const entry = slots[slot];
-            if (entry === 0) {
-                key = keyCount++;
-                keys[key] = sequence;
-                slots[slot] = key + 1;
-                break;
+        let key
+        if (sequence === lastSequence) {
+            key = lastKey
+        } else if (slots === null && sequence > lastSequence) {
+            // Ordered IDs are new keys. Absent rows do not interrupt the
+            // order proof or the previous valid ID's reuse opportunity.
+            key = keyCount++
+            keys[key] = sequence
+        } else {
+            if (slots === null) {
+                // The first decrease needs general interning. Allocate only
+                // now, preserving first-seen IDs while backfilling the prefix.
+                slots = new Uint16Array(getSequenceInternSlotCount(rowCount))
+                const mask = slots.length - 1
+                for (let previous = 0; previous < keyCount; ++previous) {
+                    let slot = hashSequence(keys[previous]) & mask
+                    while (slots[slot] !== 0) { slot = (slot + 1) & mask }
+                    slots[slot] = previous + 1
+                }
             }
-            key = entry - 1;
-            if (keys[key] === sequence) { break; }
-            slot = (slot + 1) & slotMask;
+            const mask = slots.length - 1
+            let slot = hashSequence(sequence) & mask
+            while (true) {
+                const entry = slots[slot]
+                if (entry === 0) {
+                    key = keyCount++
+                    keys[key] = sequence
+                    slots[slot] = key + 1
+                    break
+                }
+                key = entry - 1
+                if (keys[key] === sequence) { break }
+                slot = (slot + 1) & mask
+            }
         }
-        keyByRow[row] = key;
-        ++postingCount;
+        lastSequence = sequence
+        lastKey = key
+        keyByRow[row] = key
+        ++postingCount
     }
-    return {keys: keys.subarray(0, keyCount), keyByRow, postingCount};
+    return {keys: keys.subarray(0, keyCount), keyByRow, postingCount}
 }
+/* eslint-enable @stylistic/semi */
 
 /**
  * Returns the independently persistable authoritative and derived sections.

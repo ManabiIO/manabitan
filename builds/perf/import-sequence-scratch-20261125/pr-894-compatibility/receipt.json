@@ -1,0 +1,36 @@
+{
+    "boundary": "Compatibility unit/regression check only; no performance claim and no combined branch published.",
+    "basePr": 894,
+    "baseHead": "8a191ce3f6a0b843ff195c086e7b8ff6e59245fd",
+    "sequenceDeltaBase": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "sequenceDeltaHead": "6c4e5d2a7ed52219c368f384ab629b260a92af1a",
+    "sequenceDeltaSha256": "ac7065a074f037c73c902d5e302cde734eda7b65a282e5275fcbb9eb200278e9",
+    "additionalNativeRegressionPatchSha256": "2543117018ae8a82a43ab79080fddca760f2ed3a7acc23287b9f87d66d82feb2",
+    "node": "v22.22.0",
+    "sourceHashes": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "17537b6a3428d6ab6026339dd926e7bb3426a0005323ba9e01c2a0b9ab432d89",
+        "ext/js/dictionary/term-lookup-index.js": "de412f51e4c11987c4ce18fcb3c318f35160acc2a95efc9e69f61cd01f95d86d",
+        "ext/js/dictionary/wasm/term-bank-parser.c": "876f0221839a864e1c55d747596f1b9f249154c1235734dc62780b13cd3334fb",
+        "dev/data/dictionary-wasm/manifest.json": "afbf25b5f27086d34eed8963704890736eed82223ea337ff072912a4ba0f30ef",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "cdd83cd194552caed301af2b0ee4c1436cc9259bf4863cc370f4851fde7f5268",
+        "ext/lib/term-bank-parser.wasm": "cdd83cd194552caed301af2b0ee4c1436cc9259bf4863cc370f4851fde7f5268",
+        "test/term-lookup-native-key-alias.test.js": "f62b2fe3d94c8a39eb7c7cd5ae12b21322784bf258cbf5ad992f252c24354ac4",
+        "test/term-lookup-monotonic-sequences.test.js": "67dd85f378d2494befbcd1489539e5972d4775884758209fe4709491e6f29979",
+        "test/term-lookup-javascript-sequences.test.js": "27b81c772b505a03c5bc156ca544ce5df2012d6853c4b20ed310c8751ac451f4",
+        "test/lookup-construction-experiments.test.js": "44e0701d4f95d64724cbce79c2ec83821be01ec5f69e6bab2ea6f69206cb9d6f"
+    },
+    "buildLibraries": {
+        "command": "node dev/bin/build-libs.js",
+        "exitCode": 0,
+        "sourceBoundWasm": "cdd83cd194552caed301af2b0ee4c1436cc9259bf4863cc370f4851fde7f5268"
+    },
+    "validation": {
+        "command": "node node_modules/vitest/vitest.mjs run test/term-lookup-native-key-alias.test.js test/term-lookup-monotonic-sequences.test.js test/term-lookup-javascript-sequences.test.js test/lookup-construction-experiments.test.js --maxWorkers=1 --testTimeout=30000",
+        "exitCode": 0,
+        "testFilesPassed": 4,
+        "testsPassed": 126,
+        "logSha256": "de5134b5c23a35712c0bc77414e53ab79cff18d4a04cb1a77f8be59899d2807c"
+    },
+    "newRegression": "Live keys at output+48 and slots in aligned output tail; decreasing/repeated/absent sequence IDs force table backfill across repeated dirty output with short and 90KB keys. Full persisted bytes match JS encoder and external red zones remain intact.",
+    "existingCoverage": "Production parser native-segmented combinations and row boundaries include decreasing modulo503 IDs; existing native alias failures, dirty padding, large/small reuse and sequence wide/maximum-cardinality suites passed."
+}

@@ -1,0 +1,9 @@
+{
+  "dictionary": "vndb",
+  "sourceRoot": "/workspace/scratch/21ba6d4042b8/live",
+  "phase": "archive and ZIP directory materialization before worker results",
+  "exitCode": 137,
+  "workerObservations": 0,
+  "stderr": "/bin/bash: line 1: 37 Killed node replay.mjs ... live vndb 8 ...",
+  "resolution": "Use file-backed Blob, stream archive hashing, retain term-bank directory entries only. This is harness input-memory repair; product source unchanged."
+}
