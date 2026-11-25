@@ -16,6 +16,7 @@ import {BlobReader, Uint8ArrayWriter, ZipReader} from '@zip.js/zip.js'
 import {readDenseZipDirectory} from '../../../ext/js/dictionary/dense-zip-directory.js'
 import {hashTermKeyBytes} from '../../../ext/js/dictionary/term-key-hash.js'
 import {RawZipPayloadReader} from '../../../ext/js/dictionary/term-bank-source-pipeline.js'
+import {getImageMediaTypeFromFileName} from '../../../ext/js/media/media-util.js'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 const {values, positionals} = parseArgs({allowPositionals: true,
@@ -23,9 +24,13 @@ const {values, positionals} = parseArgs({allowPositionals: true,
         'baseline-root': {type: 'string'},
         'candidate-root': {type: 'string', default: root},
         'cache-dir': {type: 'string', default: path.join(root, 'builds/e2e-dictionary-cache')},
-        'out': {type: 'string', default: path.join(root, 'builds/perf/segmented-lookup-ownership.json')},
+        'parser-workers': {type: 'string'},
+        'out': {type: 'string'},
     }})
 assert(values['baseline-root'], 'Provide --baseline-root')
+const parserWorkers = Number(values['parser-workers'])
+assert([2, 3, 5].includes(parserWorkers), 'Provide --parser-workers 2, 3 or 5; the browser selects this policy from hardware and memory hints')
+const output = values.out ?? path.join(root, `builds/perf/segmented-lookup-ownership-policy/workers-${parserWorkers}.json`)
 const dictionaries = positionals.length > 0 ? positionals : ['jmdict', 'jitendex', 'vndb']
 const lockBytes = await readFile(path.join(root, 'test/perf/dictionaries.lock.json'))
 const fixtures = JSON.parse(lockBytes).dictionaries
@@ -40,6 +45,7 @@ const sourceFiles = [
     'ext/js/dictionary/term-lookup-index.js',
     'ext/js/dictionary/dense-zip-directory.js',
     'ext/js/dictionary/term-bank-source-pipeline.js',
+    'ext/js/media/media-util.js',
     'ext/lib/term-bank-parser.wasm',
 ]
 const sourceIdentity = async (sourceRoot) => Object.fromEntries(await Promise.all(sourceFiles.map(async (file) => [file, sha256(await readFile(path.join(sourceRoot, file)))])))
@@ -56,13 +62,13 @@ for (const [arm, sourceRoot] of Object.entries(roots)) {
 }
 assert.equal(sources.baseline.identity['ext/lib/term-bank-parser.wasm'], sources.candidate.identity['ext/lib/term-bank-parser.wasm'], 'This JS ownership replay requires identical native binaries')
 
-// Reproduce byte-balanced lazy source grouping for the default two-worker
-// policy with media hints (six groups minimum, 24 MiB target). Execute groups
-// serially to bound memory and avoid creating concurrent benchmark workers.
-// This models source partitioning only; it is not a browser import benchmark.
-function partition(entries) {
+// Model lazy byte balancing for an explicitly selected worker count. Actual
+// browser selection depends on hardware and memory hints. Plain banks use four
+// groups per worker; media-aware banks use three. Execute groups serially: this
+// component check does not reproduce browser scheduling or complete imports.
+function partition(entries, groupsPerWorker) {
     const total = entries.reduce((sum, entry) => sum + entry.uncompressedSize, 0)
-    const groupCount = Math.min(entries.length, Math.max(6, Math.ceil(total / (24 * 1024 * 1024))))
+    const groupCount = Math.min(entries.length, Math.max(parserWorkers * groupsPerWorker, Math.ceil(total / (24 * 1024 * 1024))))
     const groups = []
     let start = 0
     let consumed = 0
@@ -105,13 +111,16 @@ function digestPlan(digest, plan) {
 
 async function openTermBanks(archivePath) {
     const archive = await openAsBlob(archivePath)
-    const selectBanks = (entries) => entries.filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename))
-        .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+    const selectBanks = (entries) => ({
+        entries: entries.filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename))
+            .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5))),
+        hasArchiveImages: entries.some((entry) => !entry.directory && getImageMediaTypeFromFileName(entry.filename) !== null),
+    })
     const dense = await readDenseZipDirectory(archive)
     if (dense !== null) {
         const payloads = new RawZipPayloadReader(archive)
         const signal = new AbortController().signal
-        return {entries: selectBanks(dense),
+        return {...selectBanks(dense),
             close: async () => {},
             read: async (entry) => {
                 const compressed = await payloads.read(entry, signal)
@@ -122,12 +131,12 @@ async function openTermBanks(archivePath) {
             }}
     }
     const reader = new ZipReader(new BlobReader(archive), {useWebWorkers: false})
-    return {entries: selectBanks(await reader.getEntries()),
+    return {...selectBanks(await reader.getEntries()),
         close: () => reader.close(),
         read: (entry) => entry.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true})}
 }
 
-async function replayGroup(source, banks) {
+async function replayGroup(source, banks, mediaHintFastScan) {
     const {parser, preparation} = source
     let result
     await parser.parseTermBankWithWasmColumnChunks(banks, 3, (chunk) => {
@@ -173,7 +182,7 @@ async function replayGroup(source, banks) {
         computeContentHashes: true,
         emitContentSlab: true,
         emitTokenBinaryContent: true,
-        mediaHintFastScan: true,
+        mediaHintFastScan,
         validateGlossaryTypes: true,
         prepareLookupIndexes: true,
     })
@@ -184,18 +193,18 @@ async function replayGroup(source, banks) {
         nativeFallbacks: profile.nativeSegmentedLookupFallbacks ?? 0}
 }
 
-const report = {schema: 1,
+const report = {schema: 2,
     complete: false,
     boundary: 'Sequential parser, completed lookup construction and owned output. All locked term banks; canonical row content, metadata, media rows, every lookup byte and all semantic key-plan columns are compared. No storage, media payload import, browser timing or peak-memory claim.',
-    grouping: {kind: 'modeled production lazy byte balancing', parserWorkerPolicy: 2, groupsPerWorker: 3, targetBytes: 24 * 1024 * 1024, executionConcurrency: 1},
+    grouping: {kind: 'component model of lazy byte balancing with an explicit worker count', parserWorkers, targetBytes: 24 * 1024 * 1024, executionConcurrency: 1},
     node: process.version,
     lockSha256: sha256(lockBytes),
     runnerSha256: sha256(await readFile(fileURLToPath(import.meta.url))),
     sources: Object.fromEntries(Object.entries(sources).map(([arm, source]) => [arm, {root: roots[arm], hashes: source.identity}])),
     dictionaries: []}
-await mkdir(path.dirname(values.out), {recursive: true})
-const save = () => writeFile(values.out, JSON.stringify(report, null, 2) + '\n')
-await save()
+await mkdir(path.dirname(output), {recursive: true})
+const save = () => writeFile(output, JSON.stringify(report, null, 2) + '\n')
+await writeFile(output, JSON.stringify(report, null, 2) + '\n', {flag: 'wx'})
 for (const dictionary of dictionaries) {
     const fixture = fixtures[dictionary]
     const archivePath = path.join(values['cache-dir'], fixture.cacheFile)
@@ -210,9 +219,16 @@ for (const dictionary of dictionaries) {
     const reader = await openTermBanks(archivePath)
     try {
         const entries = reader.entries
-        const groups = partition(entries)
+        // These pinned fixtures are raw term banks, without artifact media.
+        // Match their importer media-hint choice from actual archive filenames.
+        const mediaHintFastScan = reader.hasArchiveImages
+        const groupsPerWorker = mediaHintFastScan ? 3 : 4
+        const groups = partition(entries, groupsPerWorker)
         const result = {dictionary,
             archiveSha256: fixture.sha256,
+            mediaHintFastScan,
+            groupsPerWorker,
+            minimumGroups: parserWorkers * groupsPerWorker,
             banks: entries.length,
             rows: 0,
             nativeSegments: 0,
@@ -225,8 +241,8 @@ for (const dictionary of dictionaries) {
         for (const [index, group] of groups.entries()) {
             const banks = []
             for (const entry of group) { banks.push(await reader.read(entry)) }
-            const baseline = await replayGroup(sources.baseline, banks)
-            const candidate = await replayGroup(sources.candidate, banks)
+            const baseline = await replayGroup(sources.baseline, banks, mediaHintFastScan)
+            const candidate = await replayGroup(sources.candidate, banks, mediaHintFastScan)
             assert.equal(candidate.digest, baseline.digest, `${dictionary} group ${index}: output mismatch`)
             assert.equal(candidate.rows, baseline.rows)
             assert.equal(candidate.nativeSegments, baseline.nativeSegments)
