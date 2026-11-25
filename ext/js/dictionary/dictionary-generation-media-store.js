@@ -93,8 +93,9 @@ export function createGenerationMediaIndex(records, dataBytes) {
 
 /**
  * Restrict a worker's verified index to the actual glossary references. Keep
- * the same slot range and its validated holes. Only dropped occupied slots
- * need their empty marker checksum recomputed.
+ * the same slot range and its validated holes. Reuse the immutable index when
+ * all occupied slots remain; copy only before dropping the first occupied slot.
+ * Only dropped occupied slots need their empty marker checksum recomputed.
  * @param {GenerationMediaIndex} plan
  * @param {Iterable<string>} paths
  * @returns {GenerationMediaIndex|null}
@@ -114,11 +115,15 @@ export function restrictGenerationMediaIndex({descriptor, index}, paths) {
         ++count;
     }
     if (count === 0 || count > descriptor.count) { return null; }
-    const selected = new Uint8Array(index);
-    const target = new DataView(selected.buffer);
+    let selected = index;
+    let target = source;
     for (let slot = 0; slot < keep.length; ++slot) {
         const row = slot * ROW_BYTES;
-        if (keep[slot] !== 0 || target.getUint32(row, true) === 0) { continue; }
+        if (keep[slot] !== 0 || source.getUint32(row, true) === 0) { continue; }
+        if (selected === index) {
+            selected = new Uint8Array(index);
+            target = new DataView(selected.buffer);
+        }
         selected.fill(0, row, row + ROW_ID_OFFSET);
         target.setUint32(row + ROW_CRC_OFFSET, computeGenerationMediaCrc(selected, row, row + ROW_CRC_OFFSET), true);
     }
