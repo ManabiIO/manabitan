@@ -4,7 +4,7 @@
  */
 
 import {describe, expect, test} from 'vitest';
-import {readDenseZipDirectory} from '../ext/js/dictionary/dense-zip-directory.js';
+import {readDenseZipDirectory, readDenseZipFileMap} from '../ext/js/dictionary/dense-zip-directory.js';
 
 const count = 8192;
 const filenameLength = 8;
@@ -162,3 +162,50 @@ describe('dense ZIP directory', () => {
         expect(await readDenseZipDirectory(new SparseZipDirectory({zip64: true, corrupt}))).toBeNull();
     });
 });
+
+/* eslint-disable @stylistic/semi */
+describe('compact dense ZIP catalog', () => {
+    const getData = async () => null
+
+    test.each([false, true])('preserves complete directory metadata with ZIP64=%s', async (zip64) => {
+        const archive = new SparseZipDirectory({zip64})
+        const entries = await readDenseZipDirectory(archive)
+        const map = await readDenseZipFileMap(archive, getData)
+        if (entries === null || map === null) { throw new Error('Expected supported dense directory') }
+        expect([...map.keys()]).toEqual(entries.map(({filename}) => filename))
+        expect(map.size).toBe(count)
+        for (const expected of entries) {
+            const entry = map.get(expected.filename)
+            expect(entry).toEqual({...expected, getData})
+            expect(map.get(expected.filename)).toBe(entry)
+        }
+    })
+
+    test('rejects duplicate names only after completing directory validation', async () => {
+        const archive = new SparseZipDirectory()
+        archive.directory.copyWithin(54 + 46, 46, 46 + filenameLength)
+        await expect(readDenseZipFileMap(archive, getData)).rejects.toThrow("Duplicate archive filename: '0000.png'")
+        expect(await readDenseZipDirectory(archive)).toHaveLength(count)
+        new DataView(archive.directory.buffer).setUint32((count - 1) * 54, 0, true)
+        await expect(readDenseZipFileMap(archive, getData)).resolves.toBeNull()
+    })
+
+    test.each(['filename', 'length', 'overlap', 'descriptor', 'locator'])('retains generic ZIP fallback for %s', async (corrupt) => {
+        expect(await readDenseZipFileMap(new SparseZipDirectory({zip64: true, corrupt}), getData)).toBeNull()
+    })
+
+    test('keeps small archives on the ordinary ZIP reader', async () => {
+        expect(await readDenseZipFileMap(new Blob(), getData)).toBeNull()
+        expect(await readDenseZipFileMap(new Blob([new Uint8Array(22)]), getData)).toBeNull()
+    })
+
+    test('checks cancellation at the same read boundaries', async () => {
+        let calls = 0
+        const error = new DOMException('Cancelled dense catalog', 'AbortError')
+        await expect(readDenseZipFileMap(new SparseZipDirectory(), getData, () => {
+            if (++calls === 3) { throw error }
+        })).rejects.toBe(error)
+        expect(calls).toBe(3)
+    })
+})
+/* eslint-enable @stylistic/semi */
