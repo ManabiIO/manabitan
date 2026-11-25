@@ -8,15 +8,17 @@ import {Translator} from '../../ext/js/language/translator.js';
 
 /**
  * @param {string} term
+ * @param {string[]} [observedQueries]
  * @returns {Translator}
  */
-function createTranslator(term) {
+function createTranslator(term, observedQueries) {
     const translator = new Translator(/** @type {import('../../ext/js/dictionary/dictionary-database.js').DictionaryDatabase} */ (/** @type {unknown} */ ({
         /**
          * @param {string[]} queries
          * @returns {Promise<import('dictionary-database').TermEntry[]>}
          */
         async findTermsBulk(queries) {
+            observedQueries?.push(...queries);
             return queries.flatMap((query, index) => {
                 if (query !== term) { return []; }
                 return [{
@@ -79,6 +81,19 @@ test.each(['\ufe00', '\ufe02', '\u{e0100}', '\u{e01ef}'])('CJK-only lookup prese
 
     expect(result.dictionaryEntries.map(({headwords}) => headwords[0].term)).toEqual([term]);
     expect(result.originalTextLength).toBe(term.length);
+});
+
+test.each([
+    ['𠮷野', '𠮷', '\ud842'],
+    ['葛\u{e0100}飾', '葛', '葛\udb40'],
+])('letter-resolution lookup uses complete code points in %s', async (source, term, brokenPrefix) => {
+    /** @type {string[]} */
+    const queries = [];
+    const result = await createTranslator(term, queries).findTerms('simple', source, createOptions('ja'));
+
+    expect(result.dictionaryEntries.map(({headwords}) => headwords[0].term)).toEqual([term]);
+    expect(result.originalTextLength).toBe(term.length);
+    expect(queries).not.toContain(brokenPrefix);
 });
 
 test.each([
