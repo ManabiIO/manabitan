@@ -1,7 +1,7 @@
-name: Current native media memory qualification 20261125
+name: Exact witness CRC memory qualification 20261125
 on:
   push:
-    branches: [research/import-memory-20261125-2754]
+    branches: [research/crc-import-memory-20261125-2754]
     paths:
       - '.github/workflows/import-memory-20261124-3aac.yml'
       - 'dev/perf/import-memory-20261124-3aac/**'
@@ -9,22 +9,22 @@ permissions:
   contents: read
 jobs:
   memory:
-    name: Current media ${{ matrix.dictionary }} memory ${{ matrix.replication }}
+    name: Exact witness CRC ${{ matrix.dictionary }} memory ${{ matrix.replication }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        dictionary: [vndb, jitendex]
+        dictionary: [jmdict, jitendex, vndb]
         replication: [1, 2]
     env:
       MEMORY_BASELINE: 7d1643e6147a10cb2165e9744cf0e63b59e46632
       MEMORY_BASELINE_TREE: 99d23f16e973c7ae9feba77ca3643d1c27dfb93d
-      MEMORY_CANDIDATE: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
-      MEMORY_CANDIDATE_TREE: 093a0be94fcf336ab5a0113b80fae7481855935a
+      MEMORY_CANDIDATE: c2cf7647c67b02474301ed48e54a53205be0f027
+      MEMORY_CANDIDATE_TREE: 074e622aec0c6537c7f0d8ac92725dd62c28b73b
       MEMORY_DICTIONARY: ${{ matrix.dictionary }}
       MEMORY_REPLICATION: ${{ matrix.replication }}
-      MEMORY_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+      MEMORY_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         with:
@@ -57,7 +57,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
-          name: current-media-memory-${{ matrix.dictionary }}-rep${{ matrix.replication }}-2754
+          name: exact-crc-memory-${{ matrix.dictionary }}-rep${{ matrix.replication }}-2754
           path: ${{ runner.temp }}/import-memory-2754
           include-hidden-files: true
           if-no-files-found: error
