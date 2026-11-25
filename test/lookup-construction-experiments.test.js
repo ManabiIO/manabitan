@@ -269,11 +269,13 @@ describe('lookup construction experiments', () => {
         expect(digestIndexes(candidate.indexes)).toBe(digestIndexes(baseline.indexes))
     })
     test('native segmentation alone falls back when retired scratch cannot hold long keys', async () => {
+        // Keep the fused key arena within its existing 64-byte-per-row budget,
+        // while the segment index output cannot fit any retired region.
         const banks = makeBanks(40001).map((bank) => {
             const rows = JSON.parse(new TextDecoder().decode(bank))
             for (const row of rows) {
-                row[0] = 'a'.repeat(100) + row[0]
-                row[1] = 'b'.repeat(100) + row[1]
+                row[0] = 'a'.repeat(32) + row[0]
+                row[1] = 'b'.repeat(32) + row[1]
             }
             return encoder.encode(JSON.stringify(rows))
         })
