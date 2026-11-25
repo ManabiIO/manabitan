@@ -17,7 +17,7 @@
 
 import {hashTermKeyByteRange} from './term-key-hash.js';
 
-export const MIN_EXACT_LOOKUP_SOURCE_BYTES = 1024 * 1024 * 1024;
+export const MIN_EXACT_LOOKUP_SOURCE_BYTES = 128 * 1024 * 1024;
 
 const BITS_PER_KEY = 20;
 const HASH_BUCKET_COUNT = 2 ** 20;

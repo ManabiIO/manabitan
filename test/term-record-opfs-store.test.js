@@ -6528,7 +6528,7 @@ describe('TermRecordOpfsStore query-scoped exact reads', () => {
         const files = new Map();
         const store = new TermRecordOpfsStore();
         store._recordsDirectoryHandle = createFakeDirectoryHandle(files);
-        store.setRawTermBankSourceBytes(2 ** 30);
+        store.setRawTermBankSourceBytes(128 * 1024 * 1024);
         await store.beginImportSession();
         for (const [i, expression, reading] of /** @type {const} */ ([[0, '猫', 'ねこ'], [1, '犬', 'いぬ']])) {
             await store.appendBatch([{
@@ -6552,6 +6552,7 @@ describe('TermRecordOpfsStore query-scoped exact reads', () => {
         const {store, dictionaryName} = await importFixture();
         assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫']), null);
         store.publishExactLookupRoute(dictionaryName);
+        assert.equal(await store.prepareExactLookupView(dictionaryName, ['猫', '犬']), null);
         const [cat, dog] = await Promise.all([
             store.prepareExactLookupView(dictionaryName, ['猫']),
             store.prepareExactLookupView(dictionaryName, ['いぬ']),

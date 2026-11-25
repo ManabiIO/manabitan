@@ -121,6 +121,7 @@ const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
 const EMPTY_BYTES = new Uint8Array(0);
 const MAX_EXACT_LOOKUP_ROUTE_BYTES = 32 * 1024 * 1024;
 const MAX_EXACT_LOOKUP_SELECTED_BYTES = 64 * 1024 * 1024;
+const MAX_EXACT_LOOKUP_SELECTED_FRACTION = 0.75;
 const MAX_EXACT_LOOKUP_ROUTE_CHUNKS = 512;
 const MAX_EXACT_LOOKUP_ROUTE_TERMS = 64;
 
@@ -4308,9 +4309,11 @@ export class TermRecordOpfsStore {
         /** @type {PersistentRecordRange[]} */
         const recordRanges = [];
         let selectedBytes = 0;
+        let indexBodyBytes = 0;
         for (const state of states) {
             const shard = route.shards.get(state);
             if (typeof shard === 'undefined') { return null; }
+            indexBodyBytes += shard.end - LOOKUP_INDEX_FILE_HEADER_BYTES;
             /** @type {ExactLookupChunkRange[]} */
             const chunks = [];
             for (const chunk of shard.chunks) {
@@ -4323,6 +4326,9 @@ export class TermRecordOpfsStore {
             }
             selection.set(state, {end: shard.end, generationId: shard.generationId, recordCount: shard.recordCount, chunkCount: shard.chunks.length, chunks});
         }
+        // Dense queries benefit from the full reader's coalesced I/O and leave
+        // a complete lookup cache for subsequent requests.
+        if (selectedBytes > indexBodyBytes * MAX_EXACT_LOOKUP_SELECTED_FRACTION) { return null; }
         recordRanges.sort((a, b) => a.firstId - b.firstId);
         for (let i = 1; i < recordRanges.length; ++i) {
             if (recordRanges[i].firstId < recordRanges[i - 1].firstId + recordRanges[i - 1].count) { return null; }
