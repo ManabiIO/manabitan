@@ -4,7 +4,7 @@
         "compilerVersion": "21.1.8",
         "linkerVersion": "21.1.8"
     },
-    "sourceDigest": "51253be7b58d1481097e0a27a1f69183c6dd763dc22bc32de3238b71982efa20",
+    "sourceDigest": "a1dfd9277b06bcd9ba015a2e747ef53b9cb84614ee9c4fb9d03eed810b2c9c54",
     "sourceFileCount": 14,
     "targets": [
         {
@@ -21,7 +21,7 @@
                 "-Wl,-z,stack-size=65536",
                 "-Wl,--strip-all"
             ],
-            "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+            "sha256": "df9901faad02dac6357241c9259d61cbca665ee60e89170473d46f399c4db514"
         },
         {
             "name": "term-bank-parser.wasm",
