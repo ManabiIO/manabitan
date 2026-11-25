@@ -1,0 +1,52 @@
+{
+  "commit": "cb6bfad023b94af2b73651dc662cdf9e0cb72c1b",
+  "tree": "316849658eb0e870dea28105fa29d3790867393c",
+  "node": "v22.22.0",
+  "scope": "Combined final sequence scratch and fused media selection candidates on frozen develop; no product source changes during validation.",
+  "unit": {
+    "exitCode": 1,
+    "exitCodeSource": "Captured by root from exec session 17345",
+    "runner": "Vitest 4.1.12",
+    "maxWorkers": 2,
+    "testTimeoutMs": 30000,
+    "testFilesPassed": 646,
+    "testFilesSetupFailed": 2,
+    "testFilesTotal": 648,
+    "testsPassed": 14593,
+    "testsSkipped": 68,
+    "durationSeconds": 397.68,
+    "setupFailedFiles": [
+      "test/term-bank-crc.test.js",
+      "test/term-bank-memory-page.test.js"
+    ],
+    "setupFailure": "No supported wasm compiler found; set MANABITAN_CLANG or CLANG",
+    "assertionFailures": 0,
+    "qualification": "Full unit run is not all-green. Two suites could not initialize their locally compiled WASM variants because clang/wasm-ld/zig are unavailable. Compiler installation was not broadened; PR CI must cover them.",
+    "rawLog": "integration-unit.log",
+    "rawLogSha256": "27e9123805d3bace1cec6968eb1ded4cfc75c0970698fe89d275db343a5411fb"
+  },
+  "build": {
+    "commit": "cb6bfad023b94af2b73651dc662cdf9e0cb72c1b",
+    "command": "npm run test:build",
+    "node": "v22.22.0",
+    "exitCode": 0,
+    "elapsedSeconds": 0.675,
+    "rawLog": "/workspace/scratch/21ba6d4042b8/integration-build.log",
+    "rawLogSha256": "69f7b61809e3d88155e12a92b9f9865c990de18a4e85d3975e259ed818da8980"
+  },
+  "sourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "754427025ff8bab52fca306e436e113d26e0247584de9df55c8e5c145b972b41",
+    "ext/js/dictionary/term-lookup-index.js": "de412f51e4c11987c4ce18fcb3c318f35160acc2a95efc9e69f61cd01f95d86d",
+    "ext/lib/term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+  },
+  "compressedLogs": {
+    "integration-unit.log.gz": {
+      "sha256": "fda0a2501e0a66432f3cfb71821abe09b474009c3ba02da2cf761f8592dbf6a9",
+      "sizeBytes": 5386
+    },
+    "integration-build.log.gz": {
+      "sha256": "e1ba338c934892919f0b2d408e8710d3ed5ae6151f1f5705cb92b46614fc0e11",
+      "sizeBytes": 384
+    }
+  }
+}

@@ -2311,5 +2311,8 @@
                 }
             ]
         }
-    }
+    },
+    "candidateCodeTree": "9c12c6737e037c68a1219f11e6dca6b9eaca6948",
+    "publishedRuntimeCommit": "70d41459a871da60a20b6c673528dacfd9365056",
+    "publicationEquivalence": "The published runtime commit and candidateCodeCommit have candidateCodeTree; connector publication changed commit identity, not source or tests."
 }

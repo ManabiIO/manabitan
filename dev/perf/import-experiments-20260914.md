@@ -231,3 +231,68 @@ Do not revive rejected SIMD hashing/scanning, inline canonical hashing, sampled-
 For every flag, return an accept/hold/reject decision based on its actual executed path, end-to-end effect and memory/storage/lookup gates. Correct implementation is enough to retain a default-off experiment for qualification, not enough to enable it. Keep an allocation-only flag on hold when its speed effect is inconclusive. A material complete-import benefit, or removal of a reproduced severe exception-path cliff with negligible normal-path cost, is required for promotion.
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
+
+## November 25, 2026: media scan and sequence scratch proposals
+
+This round starts from `7d1643e6147a10cb2165e9744cf0e63b59e46632`, using that revision's locked archives and existing production options. Its fixtures contain 528,299 JMdict rows, 436,555 Jitendex rows and 6,648,310 VNDB rows; the historical counts above describe an earlier lock. Neither proposal changes admission, worker counts, compression, feature defaults or persisted layouts. They are code-review proposals with verified work/capacity reductions, without a measured complete-import speedup or browser-memory claim.
+
+- [Media scan PR #903](https://github.com/ManabiIO/manabitan/pull/903): local runtime/tests commit `bc303c23556986d27342f51abf5829c4453a110f` and published runtime commit `70d41459a871da60a20b6c673528dacfd9365056` share tree `9c12c6737e037c68a1219f11e6dca6b9eaca6948`. Later changes on this branch contain documentation/evidence only. Exact source, runner, WASM and fixture hashes are in the [media corpus proof](../../builds/perf/fused-media-projection-20261125/corpus-proof.json).
+- [Sequence scratch PR #912](https://github.com/ManabiIO/manabitan/pull/912): final local head `915c5d7d5ffa823bdadb1068fdb4f7a0004cccb0` and published head `f5aa5ce36dd547cf790c34803b37a5bd4cc2e96c` share tree `3500293788fe3bba9e90def95778bf4a4278c784`. Its final runtime commit is `6c4e5d2a7ed52219c368f384ab629b260a92af1a`. The [sequence manifest and validation record](https://github.com/ManabiIO/manabitan/blob/f5aa5ce36dd547cf790c34803b37a5bd4cc2e96c/builds/perf/import-sequence-scratch-20261125/manifest.json) identifies the final `tail-alias/` reports; earlier prefix-alias reports are superseded history.
+
+### Fused media selection
+
+A complete fused parser result already contains every term column. Collect each canonical content ID's first **hinted raw row** during the required ID-validation scan, then decode only that sparse selection. Canonical equality does not imply identical raw hints: an overwritten duplicate object field can set a raw image hint while normalizing to the same text as an earlier unhinted row. Preserve the first hinted representative, its order and chunk-local diagnostic index. Finish validating the complete ID mapping before decoding any selected row, and decode before retired scratch writes begin. Chunked and fallback callers keep their existing path.
+
+The [bounded replay runner](../../builds/perf/fused-media-projection-20261125/replay.mjs) uses the production compressed source planner and actual parser workers under Node 22.22.0, with navigator hints set to eight logical CPUs and 8 GiB device memory (five workers). These are planner inputs, not measurements of host resources. File-backed Blobs and streamed archive hashing/directory iteration avoid archive-sized JS copies and retaining every media filename. Every returned chunk field is hashed, including complete media rows, image paths, local indexes, term keys, typed columns, content/dedup arrays, canonical bytes and prepared lookup bytes/plans/filters. Only `preparedLookupIndexEncodeMs` and the borrowed-content release function are excluded. A separate original lookup/content byte digest is retained.
+
+| Dictionary | Source rows | Groups | Selected media rows | Maximum selected per group | Secondary loop iterations avoided |
+| ---------- | ----------: | -----: | ------------------: | -------------------------: | --------------------------------: |
+| JMdict     |     528,299 |     20 |                   0 |                          0 |           0; media hints disabled |
+| Jitendex   |     436,555 |     22 |                 339 |                         30 |                           436,216 |
+| VNDB       |   6,648,310 |    170 |             146,725 |                      1,180 |                         6,501,585 |
+
+All groups used the fused path without fallback, and every group digest matched baseline. These media counts are group representatives before global deduplication, not distinct image-file counts. Media hint reads move into the existing scan; the avoided work is the second complete traversal. One bitmap replaces the same-sized bitmap at its previous location, while a temporary number array holds only selected indexes and is bounded by unique content count. Requested WASM allocation totals and maximum individual WASM heaps were unchanged. Sampled process RSS is diagnostic only.
+
+The `rowDecodeMs` counter now includes ID-map validation on this optimized path, so its previous and current values have different timing boundaries. The replay excludes global canonical deduplication, Zstd, storage, media reads and UI. Do not convert loop counts, phase counters or single-run RSS into complete-import latency or peak-memory claims.
+
+To reproduce, prepare each worktree's dependencies and generated libraries, use the locked archive cache, and run both arms sequentially:
+
+```sh
+node builds/perf/fused-media-projection-20261125/replay.mjs /path/to/baseline jitendex 8 /tmp/jitendex-baseline.json '{}' /path/to/cache
+node builds/perf/fused-media-projection-20261125/replay.mjs /path/to/candidate jitendex 8 /tmp/jitendex-candidate.json '{}' /path/to/cache
+```
+
+Repeat for `jmdict` and `vndb`. Compare `groups`, `fullDigest`, `mediaDigest`, row/index/canonical totals and resource summaries. Validate source/runner/WASM/fixture hashes first. The committed proof preserves every per-group oracle and raw-receipt identities.
+
+### Sequence construction and concurrent key-prefix compatibility
+
+Native sequence interning borrows the **aligned output tail** until output initialization starts. Capacity explicitly covers the 48-byte header, aligned live key prefix and aligned slot table. Slots must be beyond the whole live key prefix, not merely beyond the currently written header. Sequence keys and per-row IDs stay in separate arrays and encoded output becomes owned before arena reuse. This preserves the lifetime needed by [PR #894's direct key compaction](https://github.com/ManabiIO/manabitan/pull/894); a prefix alias would clobber its live keys when a decreasing sequence first initializes the hash table.
+
+The JavaScript fallback avoids the hash table for ordered or repeated IDs. Its first decrease allocates and backfills the existing general table while preserving first-seen IDs. Absent sequences, safe wide integers, signed zero and existing v7/v8 encoding remain covered. All captured default corpus groups used native lookup encoding, so those captures do not demonstrate activation or a speedup for the JavaScript fallback.
+
+Final paired actual-worker replays match complete chunk/media and byte digests for all three corpora. Cumulative separate retired-scratch reservations fall by 1,310,720 bytes for JMdict, 1,245,184 for Jitendex and 21,299,200 for VNDB. **Fresh WASM allocation requests are unchanged** in these production routes; the reclaimed capacity was already retired parser workspace. These sums are not peak memory saved. Every recorded final native call has a contained, four-byte-aligned tail alias beyond its live key prefix.
+
+Reproduce the sequence comparison with its preserved `builds/perf/import-sequence-scratch-20261125/tail-alias/replay.mjs`, the same source-root/dictionary/CPU/output/flags/cache arguments as above, and the final tail-alias source identities. Compare both full semantic digests and original byte digests, then inspect `aliased`, `slotsPastEncodedKeyPrefix` and `slotAlignment` on each native call.
+
+A separate compatibility checkout applied the sequence runtime/test delta to #894 head `8a191ce3f6a0b843ff195c086e7b8ff6e59245fd`. Libraries were built from #894's source-bound WASM (`cdd83cd194552caed301af2b0ee4c1436cc9259bf4863cc370f4851fde7f5268`). All **126 tests in four suites passed**, including successful live-prefix key encoding with tail backfill, short and 90 KB keys, decreasing/repeated/absent IDs, dirty output reuse, exact serialized bytes and external canaries. Existing production segmented tests also exercise decreasing IDs. The exact applied delta, added regression, command and log are retained under the sequence evidence's `pr-894-compatibility/`; no combined #894 branch was published or timed.
+
+### Validation completed and remaining
+
+Media's three focused suites passed 343 tests, including nine new regressions for differing raw hints under canonical normalization, escapes and false positives, strict validation, ordering, chunk-local indexes, duplicate suppression, numeric fallback, disabled hints and repeated ownership. Targeted ESLint and main TypeScript checks passed. Sequence's five focused suites passed 182 tests; scoped ESLint and main/test TypeScript checks passed.
+
+The final combined runtime `cb6bfad023b94af2b73651dc662cdf9e0cb72c1b` (tree `316849658eb0e870dea28105fa29d3790867393c`) was validated with unchanged source bytes. Its [integration receipt](../../builds/perf/fused-media-projection-20261125/integration-validation/receipt.json) and compressed [unit log](../../builds/perf/fused-media-projection-20261125/integration-validation/integration-unit.log.gz) and [build log](../../builds/perf/fused-media-projection-20261125/integration-validation/integration-build.log.gz) record:
+
+- Full-unit attempt **exited 1**: 646 suites and 14,593 tests passed, 68 tests were skipped, and two additional suites failed setup because a supported WASM compiler was unavailable. `term-bank-crc.test.js` and `term-bank-memory-page.test.js` could not build their local variants. No test assertions failed. This is not an all-green full-unit result; those two suites still require a capable CI environment.
+- `npm run test:build` under Node 22.22.0 passed all seven targets, exit 0.
+
+Remote CI and browser qualification must be recorded against their actual tested heads. Documentation-only descendants may cite earlier runtime results only with source/tree equivalence; a passing functional import does not establish paired timing or browser peak-memory benefit. This handoff does not claim final PR CI is complete.
+
+### Rejected exploratory candidates
+
+Keep these rejections separate from the two published proposals. The [rejected-experiment manifest](../../builds/perf/fused-media-projection-20261125/rejected/manifest.json) identifies compact raw observations, copy accounting, the discarded VNDB patch and a derived CDict screen record. No discarded runtime implementation or large captured binary is enabled or shipped.
+
+**Native Zstd CDict reuse:** an exploratory native libzstd 1.5.7 comparison used 50 canonical blocks (51,564,333 bytes) sampled from 56,555 Jitendex rows. Both APIs produced identical per-block bytes and 4,203,636 compressed bytes overall. The CDict added 47,680 bytes; each context was 549,920 bytes. Excluding round zero, six paired observations had mixed directions and only a 1.08% median decrease in a loop that also hashes output. This was a native-only screen without A/A controls, not a WASM or compression-only benchmark. It did not justify adding exports/toolchain work, and no integration or import benefit was established. [The compact record](../../builds/perf/fused-media-projection-20261125/rejected/native-cdict-screen.json) retains every observation and one shared set of identical block oracles.
+
+**VNDB media range copying:** two discarded variants retained the 4 MiB range bound and existing CRC/length/admission/immutability checks. The first used a separate geometry pass; the second fused geometry proof into existing source validation. Corpus copy accounting fell from 146,570 calls to 144, while bytes copied rose from 188,864,129 to 195,643,218 (+3.59%). The first variant preserved all packed/index/image bytes, but its four AB/BA timing pairs overlapped local lint/types work; the observed median elapsed +29.84% and CPU +4.48% do not qualify it.
+
+The second variant's resident screen used eight original ZIP payload batches, 32 repeats, ABC warmup and six balanced ABC/BCA/CAB/ACB/CBA/BAC blocks, with A and C using the same baseline instance. Median elapsed B/A was +32.85%, B/C -17.76% and C/A +35.13%; CPU B/A was +20.60%, B/C +6.69% and C/A +15.50%. Host load remained around 20 even with no competing task in the local slot. Control variation overwhelms any benefit claim. This later screen checked validation outputs; it did not repeat the first variant's full-corpus media oracle. Both variants were dropped and their product branch restored. The raw results retain all observations; do not select favorable arms or transfer the earlier oracle to the later source hash.
