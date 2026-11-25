@@ -1,0 +1,776 @@
+{
+  "auditorSha256": "25bb1f626d13d0a7319c8faa366d33f73480cd9823a58d2481a1e99585b81b7e",
+  "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "bootstrap": {
+    "interpretation": "descriptive percentile interval",
+    "resamples": 10000,
+    "seed": 897,
+    "sortedZeroBasedIndices": [
+      249,
+      9749
+    ],
+    "statistic": "median",
+    "unit": "complete paired ratio"
+  },
+  "candidate": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+  "cohorts": {
+    "AB": {
+      "allTimingUninstrumented": true,
+      "analysisMatchesIndependentRecalculation": true,
+      "analysisSha256": "9b3c0b6d89eee320970f399c1137bf2258fce744164cdbe05f7a04a288ffb973",
+      "artifactId": 15040500276,
+      "artifactSha256": "dc60f4f96653cbc6cc7709610027f8054834e2ec2606fcbae42664ecf4f161a9",
+      "candidatePairs": 12,
+      "candidateVsBaseline": {
+        "AmedianMs": 754.25,
+        "AtotalMs": 9146.70000000004,
+        "BmedianMs": 757.2000000000116,
+        "BtotalMs": 9217.500000000204,
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -2.9530721075694766,
+          2.0778121922366832
+        ],
+        "equalWorkChangePercent": 0.7740496572552047,
+        "fasterPairs": 6,
+        "medianPairedChangePercent": 0.13632479703198364,
+        "pairs": [
+          {
+            "Ams": 798.1999999999825,
+            "Bms": 741.7000000000116,
+            "order": "AB",
+            "pair": 1,
+            "ratio": 0.9292157354046954
+          },
+          {
+            "Ams": 746.5,
+            "Bms": 908.7000000000116,
+            "order": "BA",
+            "pair": 2,
+            "ratio": 1.2172806430006853
+          },
+          {
+            "Ams": 760.5,
+            "Bms": 774.8999999999942,
+            "order": "AB",
+            "pair": 3,
+            "ratio": 1.0189349112425958
+          },
+          {
+            "Ams": 752.5,
+            "Bms": 784.0999999999767,
+            "order": "BA",
+            "pair": 4,
+            "ratio": 1.0419933554816967
+          },
+          {
+            "Ams": 796,
+            "Bms": 770.3000000000466,
+            "order": "AB",
+            "pair": 5,
+            "ratio": 0.9677135678392544
+          },
+          {
+            "Ams": 749,
+            "Bms": 763,
+            "order": "BA",
+            "pair": 6,
+            "ratio": 1.0186915887850467
+          },
+          {
+            "Ams": 760.4000000000233,
+            "Bms": 767.1000000000349,
+            "order": "AB",
+            "pair": 7,
+            "ratio": 1.008811152025265
+          },
+          {
+            "Ams": 798.2000000000116,
+            "Bms": 735.1000000000349,
+            "order": "BA",
+            "pair": 8,
+            "ratio": 0.9209471310448812
+          },
+          {
+            "Ams": 749.2999999999884,
+            "Bms": 744.7000000000116,
+            "order": "AB",
+            "pair": 9,
+            "ratio": 0.9938609368744471
+          },
+          {
+            "Ams": 750.7000000000116,
+            "Bms": 730.6000000000349,
+            "order": "BA",
+            "pair": 10,
+            "ratio": 0.973224990009356
+          },
+          {
+            "Ams": 729.4000000000233,
+            "Bms": 745.9000000000233,
+            "order": "AB",
+            "pair": 11,
+            "ratio": 1.022621332602138
+          },
+          {
+            "Ams": 756,
+            "Bms": 751.4000000000233,
+            "order": "BA",
+            "pair": 12,
+            "ratio": 0.9939153439153747
+          }
+        ],
+        "ratios": [
+          0.9292157354046954,
+          1.2172806430006853,
+          1.0189349112425958,
+          1.0419933554816967,
+          0.9677135678392544,
+          1.0186915887850467,
+          1.008811152025265,
+          0.9209471310448812,
+          0.9938609368744471,
+          0.973224990009356,
+          1.022621332602138,
+          0.9939153439153747
+        ],
+        "worstPairChangePercent": 21.728064300068528
+      },
+      "chronologyMatchesPlan": true,
+      "excludedSeparateMediaObservations": 2,
+      "excludedSeparateMemoryObservations": 4,
+      "excludedWarmups": 4,
+      "failureFiles": [],
+      "identicalCodeControl": {
+        "AmedianMs": 753.3499999999767,
+        "AtotalMs": 3003.899999999907,
+        "CmedianMs": 772.6500000000233,
+        "CtotalMs": 3112.20000000007,
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -1.485608170838837,
+          8.390320883751912
+        ],
+        "equalWorkChangePercent": 3.6053130929846633,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 3.749570189502105,
+        "pairs": [
+          {
+            "Ams": 736.7999999999884,
+            "Cms": 771.5,
+            "order": "AC",
+            "pair": 1,
+            "ratio": 1.0470955483170632
+          },
+          {
+            "Ams": 752.7999999999884,
+            "Cms": 773.8000000000466,
+            "order": "CA",
+            "pair": 2,
+            "ratio": 1.027895855472979
+          },
+          {
+            "Ams": 760.3999999999651,
+            "Cms": 824.2000000000116,
+            "order": "AC",
+            "pair": 3,
+            "ratio": 1.0839032088375191
+          },
+          {
+            "Ams": 753.8999999999651,
+            "Cms": 742.7000000000116,
+            "order": "CA",
+            "pair": 4,
+            "ratio": 0.9851439182916116
+          }
+        ],
+        "ratios": [
+          1.0470955483170632,
+          1.027895855472979,
+          1.0839032088375191,
+          0.9851439182916116
+        ],
+        "worstPairChangePercent": 8.390320883751912
+      },
+      "identicalCodeControlPairs": 4,
+      "observationsSha256": "fe044aa78cf78a2482d592fb8996fec3cbf89ca19a00ecab30437fd389c05d65",
+      "rawBrowserDurationsMatch": true,
+      "registeredPlanSha256": "49e0d9b01c528a75177c9f38963cc39e6eb6d33d115b88209591908088dbb57f",
+      "scheduleMatchesRegisteredPlan": true,
+      "timedPathObservations": 36,
+      "timingReceipts": [
+        {
+          "durationMs": 736.7999999999884,
+          "id": "warmup-1-A",
+          "reportStartedAtIso": "2026-11-25T15:55:23.204Z"
+        },
+        {
+          "durationMs": 974.3999999999942,
+          "id": "warmup-1-B",
+          "reportStartedAtIso": "2026-11-25T15:55:30.766Z"
+        },
+        {
+          "durationMs": 761.2000000000116,
+          "id": "warmup-2-B",
+          "reportStartedAtIso": "2026-11-25T15:55:38.018Z"
+        },
+        {
+          "durationMs": 1298.7999999999884,
+          "id": "warmup-2-A",
+          "reportStartedAtIso": "2026-11-25T15:55:45.259Z"
+        },
+        {
+          "durationMs": 798.1999999999825,
+          "id": "pair-01-A",
+          "reportStartedAtIso": "2026-11-25T15:55:54.323Z"
+        },
+        {
+          "durationMs": 741.7000000000116,
+          "id": "pair-01-B",
+          "reportStartedAtIso": "2026-11-25T15:56:01.208Z"
+        },
+        {
+          "durationMs": 908.7000000000116,
+          "id": "pair-02-B",
+          "reportStartedAtIso": "2026-11-25T15:56:07.937Z"
+        },
+        {
+          "durationMs": 746.5,
+          "id": "pair-02-A",
+          "reportStartedAtIso": "2026-11-25T15:56:14.934Z"
+        },
+        {
+          "durationMs": 760.5,
+          "id": "pair-03-A",
+          "reportStartedAtIso": "2026-11-25T15:56:21.458Z"
+        },
+        {
+          "durationMs": 774.8999999999942,
+          "id": "pair-03-B",
+          "reportStartedAtIso": "2026-11-25T15:56:27.919Z"
+        },
+        {
+          "durationMs": 736.7999999999884,
+          "id": "control-01-A",
+          "reportStartedAtIso": "2026-11-25T15:56:34.762Z"
+        },
+        {
+          "durationMs": 771.5,
+          "id": "control-01-C",
+          "reportStartedAtIso": "2026-11-25T15:56:41.495Z"
+        },
+        {
+          "durationMs": 784.0999999999767,
+          "id": "pair-04-B",
+          "reportStartedAtIso": "2026-11-25T15:56:48.128Z"
+        },
+        {
+          "durationMs": 752.5,
+          "id": "pair-04-A",
+          "reportStartedAtIso": "2026-11-25T15:56:54.844Z"
+        },
+        {
+          "durationMs": 796,
+          "id": "pair-05-A",
+          "reportStartedAtIso": "2026-11-25T15:57:01.337Z"
+        },
+        {
+          "durationMs": 770.3000000000466,
+          "id": "pair-05-B",
+          "reportStartedAtIso": "2026-11-25T15:57:08.167Z"
+        },
+        {
+          "durationMs": 763,
+          "id": "pair-06-B",
+          "reportStartedAtIso": "2026-11-25T15:57:14.972Z"
+        },
+        {
+          "durationMs": 749,
+          "id": "pair-06-A",
+          "reportStartedAtIso": "2026-11-25T15:57:21.699Z"
+        },
+        {
+          "durationMs": 773.8000000000466,
+          "id": "control-02-C",
+          "reportStartedAtIso": "2026-11-25T15:57:28.365Z"
+        },
+        {
+          "durationMs": 752.7999999999884,
+          "id": "control-02-A",
+          "reportStartedAtIso": "2026-11-25T15:57:35.042Z"
+        },
+        {
+          "durationMs": 760.4000000000233,
+          "id": "pair-07-A",
+          "reportStartedAtIso": "2026-11-25T15:57:41.859Z"
+        },
+        {
+          "durationMs": 767.1000000000349,
+          "id": "pair-07-B",
+          "reportStartedAtIso": "2026-11-25T15:57:48.483Z"
+        },
+        {
+          "durationMs": 735.1000000000349,
+          "id": "pair-08-B",
+          "reportStartedAtIso": "2026-11-25T15:57:55.181Z"
+        },
+        {
+          "durationMs": 798.2000000000116,
+          "id": "pair-08-A",
+          "reportStartedAtIso": "2026-11-25T15:58:01.623Z"
+        },
+        {
+          "durationMs": 749.2999999999884,
+          "id": "pair-09-A",
+          "reportStartedAtIso": "2026-11-25T15:58:08.060Z"
+        },
+        {
+          "durationMs": 744.7000000000116,
+          "id": "pair-09-B",
+          "reportStartedAtIso": "2026-11-25T15:58:14.607Z"
+        },
+        {
+          "durationMs": 760.3999999999651,
+          "id": "control-03-A",
+          "reportStartedAtIso": "2026-11-25T15:58:21.091Z"
+        },
+        {
+          "durationMs": 824.2000000000116,
+          "id": "control-03-C",
+          "reportStartedAtIso": "2026-11-25T15:58:27.622Z"
+        },
+        {
+          "durationMs": 730.6000000000349,
+          "id": "pair-10-B",
+          "reportStartedAtIso": "2026-11-25T15:58:34.324Z"
+        },
+        {
+          "durationMs": 750.7000000000116,
+          "id": "pair-10-A",
+          "reportStartedAtIso": "2026-11-25T15:58:40.908Z"
+        },
+        {
+          "durationMs": 729.4000000000233,
+          "id": "pair-11-A",
+          "reportStartedAtIso": "2026-11-25T15:58:47.569Z"
+        },
+        {
+          "durationMs": 745.9000000000233,
+          "id": "pair-11-B",
+          "reportStartedAtIso": "2026-11-25T15:58:54.203Z"
+        },
+        {
+          "durationMs": 751.4000000000233,
+          "id": "pair-12-B",
+          "reportStartedAtIso": "2026-11-25T15:59:00.687Z"
+        },
+        {
+          "durationMs": 756,
+          "id": "pair-12-A",
+          "reportStartedAtIso": "2026-11-25T15:59:07.288Z"
+        },
+        {
+          "durationMs": 742.7000000000116,
+          "id": "control-04-C",
+          "reportStartedAtIso": "2026-11-25T15:59:13.862Z"
+        },
+        {
+          "durationMs": 753.8999999999651,
+          "id": "control-04-A",
+          "reportStartedAtIso": "2026-11-25T15:59:20.440Z"
+        }
+      ],
+      "unchangedArchiveEntries": 313
+    },
+    "BA": {
+      "allTimingUninstrumented": true,
+      "analysisMatchesIndependentRecalculation": true,
+      "analysisSha256": "2538056919f81b53dfc532fdd01c6b26324d75b8ed07e45180e044fcfbd67339",
+      "artifactId": 15039683170,
+      "artifactSha256": "ebb2ef69aa49a824f030b4e627adceb6cdc1af8f1c318bb4ad9dce44b56a8b0f",
+      "candidatePairs": 12,
+      "candidateVsBaseline": {
+        "AmedianMs": 947.3000000000029,
+        "AtotalMs": 11836.899999999965,
+        "BmedianMs": 972.9499999999971,
+        "BtotalMs": 12157.600000000006,
+        "count": 12,
+        "descriptiveBootstrap95Percent": [
+          -5.507157411996899,
+          13.122888409280886
+        ],
+        "equalWorkChangePercent": 2.7093242318515953,
+        "fasterPairs": 7,
+        "medianPairedChangePercent": -0.7066054667056898,
+        "pairs": [
+          {
+            "Ams": 921.3000000000175,
+            "Bms": 1011.6000000000058,
+            "order": "BA",
+            "pair": 1,
+            "ratio": 1.0980136763269148
+          },
+          {
+            "Ams": 1024,
+            "Bms": 957.2999999999884,
+            "order": "AB",
+            "pair": 2,
+            "ratio": 0.9348632812499886
+          },
+          {
+            "Ams": 1229.6000000000058,
+            "Bms": 969.6000000000058,
+            "order": "BA",
+            "pair": 3,
+            "ratio": 0.7885491216655833
+          },
+          {
+            "Ams": 946.6000000000058,
+            "Bms": 1073.4000000000233,
+            "order": "AB",
+            "pair": 4,
+            "ratio": 1.1339530952884183
+          },
+          {
+            "Ams": 925.2999999999884,
+            "Bms": 1266.2000000000116,
+            "order": "BA",
+            "pair": 5,
+            "ratio": 1.3684210526316087
+          },
+          {
+            "Ams": 923.8999999999942,
+            "Bms": 1108.8000000000175,
+            "order": "AB",
+            "pair": 6,
+            "ratio": 1.2001298841866268
+          },
+          {
+            "Ams": 933.2000000000116,
+            "Bms": 891.2000000000116,
+            "order": "BA",
+            "pair": 7,
+            "ratio": 0.9549935705100734
+          },
+          {
+            "Ams": 956.4000000000233,
+            "Bms": 944.6999999999534,
+            "order": "AB",
+            "pair": 8,
+            "ratio": 0.9877666248430891
+          },
+          {
+            "Ams": 964.1999999999534,
+            "Bms": 949.7000000000116,
+            "order": "BA",
+            "pair": 9,
+            "ratio": 0.9849616262186864
+          },
+          {
+            "Ams": 948,
+            "Bms": 946.2000000000116,
+            "order": "AB",
+            "pair": 10,
+            "ratio": 0.9981012658227971
+          },
+          {
+            "Ams": 1122.7999999999884,
+            "Bms": 976.2999999999884,
+            "order": "BA",
+            "pair": 11,
+            "ratio": 0.8695226220163863
+          },
+          {
+            "Ams": 941.5999999999767,
+            "Bms": 1062.5999999999767,
+            "order": "AB",
+            "pair": 12,
+            "ratio": 1.1285046728971995
+          }
+        ],
+        "ratios": [
+          1.0980136763269148,
+          0.9348632812499886,
+          0.7885491216655833,
+          1.1339530952884183,
+          1.3684210526316087,
+          1.2001298841866268,
+          0.9549935705100734,
+          0.9877666248430891,
+          0.9849616262186864,
+          0.9981012658227971,
+          0.8695226220163863,
+          1.1285046728971995
+        ],
+        "worstPairChangePercent": 36.842105263160875
+      },
+      "chronologyMatchesPlan": true,
+      "excludedSeparateMediaObservations": 2,
+      "excludedSeparateMemoryObservations": 4,
+      "excludedWarmups": 4,
+      "failureFiles": [],
+      "identicalCodeControl": {
+        "AmedianMs": 1101.2999999999884,
+        "AtotalMs": 4475.299999999988,
+        "CmedianMs": 953.25,
+        "CtotalMs": 3960.0999999999767,
+        "count": 4,
+        "descriptiveBootstrap95Percent": [
+          -31.38400118290754,
+          4.532116074334502
+        ],
+        "equalWorkChangePercent": -11.512077402632514,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": -5.051872689817094,
+        "pairs": [
+          {
+            "Ams": 1269.3999999999942,
+            "Cms": 1125.5,
+            "order": "CA",
+            "pair": 1,
+            "ratio": 0.8866393571766229
+          },
+          {
+            "Ams": 933.1999999999825,
+            "Cms": 944.7000000000116,
+            "order": "AC",
+            "pair": 2,
+            "ratio": 1.0123231890270352
+          },
+          {
+            "Ams": 1352.5999999999767,
+            "Cms": 928.0999999999767,
+            "order": "CA",
+            "pair": 3,
+            "ratio": 0.6861599881709246
+          },
+          {
+            "Ams": 920.1000000000349,
+            "Cms": 961.7999999999884,
+            "order": "AC",
+            "pair": 4,
+            "ratio": 1.045321160743345
+          }
+        ],
+        "ratios": [
+          0.8866393571766229,
+          1.0123231890270352,
+          0.6861599881709246,
+          1.045321160743345
+        ],
+        "worstPairChangePercent": 4.532116074334502
+      },
+      "identicalCodeControlPairs": 4,
+      "observationsSha256": "b1ea271e403b46f3e7a836bba70b578e0e354a59ec285b70a241242138bef312",
+      "rawBrowserDurationsMatch": true,
+      "registeredPlanSha256": "a030d9c710f87c826d21f182e77af6f324f43312602f59a6133a6d6f83b7e4d0",
+      "scheduleMatchesRegisteredPlan": true,
+      "timedPathObservations": 36,
+      "timingReceipts": [
+        {
+          "durationMs": 1139,
+          "id": "warmup-1-B",
+          "reportStartedAtIso": "2026-11-25T15:55:32.538Z"
+        },
+        {
+          "durationMs": 995.5,
+          "id": "warmup-1-A",
+          "reportStartedAtIso": "2026-11-25T15:55:42.327Z"
+        },
+        {
+          "durationMs": 1106.800000000003,
+          "id": "warmup-2-A",
+          "reportStartedAtIso": "2026-11-25T15:55:55.758Z"
+        },
+        {
+          "durationMs": 920.4000000000087,
+          "id": "warmup-2-B",
+          "reportStartedAtIso": "2026-11-25T15:56:04.996Z"
+        },
+        {
+          "durationMs": 1011.6000000000058,
+          "id": "pair-01-B",
+          "reportStartedAtIso": "2026-11-25T15:56:13.085Z"
+        },
+        {
+          "durationMs": 921.3000000000175,
+          "id": "pair-01-A",
+          "reportStartedAtIso": "2026-11-25T15:56:21.220Z"
+        },
+        {
+          "durationMs": 1024,
+          "id": "pair-02-A",
+          "reportStartedAtIso": "2026-11-25T15:56:29.412Z"
+        },
+        {
+          "durationMs": 957.2999999999884,
+          "id": "pair-02-B",
+          "reportStartedAtIso": "2026-11-25T15:56:38.874Z"
+        },
+        {
+          "durationMs": 969.6000000000058,
+          "id": "pair-03-B",
+          "reportStartedAtIso": "2026-11-25T15:56:47.042Z"
+        },
+        {
+          "durationMs": 1229.6000000000058,
+          "id": "pair-03-A",
+          "reportStartedAtIso": "2026-11-25T15:56:58.123Z"
+        },
+        {
+          "durationMs": 1125.5,
+          "id": "control-01-C",
+          "reportStartedAtIso": "2026-11-25T15:57:08.249Z"
+        },
+        {
+          "durationMs": 1269.3999999999942,
+          "id": "control-01-A",
+          "reportStartedAtIso": "2026-11-25T15:57:17.778Z"
+        },
+        {
+          "durationMs": 946.6000000000058,
+          "id": "pair-04-A",
+          "reportStartedAtIso": "2026-11-25T15:57:25.951Z"
+        },
+        {
+          "durationMs": 1073.4000000000233,
+          "id": "pair-04-B",
+          "reportStartedAtIso": "2026-11-25T15:57:34.626Z"
+        },
+        {
+          "durationMs": 1266.2000000000116,
+          "id": "pair-05-B",
+          "reportStartedAtIso": "2026-11-25T15:57:42.929Z"
+        },
+        {
+          "durationMs": 925.2999999999884,
+          "id": "pair-05-A",
+          "reportStartedAtIso": "2026-11-25T15:57:52.206Z"
+        },
+        {
+          "durationMs": 923.8999999999942,
+          "id": "pair-06-A",
+          "reportStartedAtIso": "2026-11-25T15:57:59.925Z"
+        },
+        {
+          "durationMs": 1108.8000000000175,
+          "id": "pair-06-B",
+          "reportStartedAtIso": "2026-11-25T15:58:08.355Z"
+        },
+        {
+          "durationMs": 933.1999999999825,
+          "id": "control-02-A",
+          "reportStartedAtIso": "2026-11-25T15:58:17.017Z"
+        },
+        {
+          "durationMs": 944.7000000000116,
+          "id": "control-02-C",
+          "reportStartedAtIso": "2026-11-25T15:58:25.425Z"
+        },
+        {
+          "durationMs": 891.2000000000116,
+          "id": "pair-07-B",
+          "reportStartedAtIso": "2026-11-25T15:58:34.286Z"
+        },
+        {
+          "durationMs": 933.2000000000116,
+          "id": "pair-07-A",
+          "reportStartedAtIso": "2026-11-25T15:58:42.509Z"
+        },
+        {
+          "durationMs": 956.4000000000233,
+          "id": "pair-08-A",
+          "reportStartedAtIso": "2026-11-25T15:58:50.677Z"
+        },
+        {
+          "durationMs": 944.6999999999534,
+          "id": "pair-08-B",
+          "reportStartedAtIso": "2026-11-25T15:58:59.164Z"
+        },
+        {
+          "durationMs": 949.7000000000116,
+          "id": "pair-09-B",
+          "reportStartedAtIso": "2026-11-25T15:59:07.577Z"
+        },
+        {
+          "durationMs": 964.1999999999534,
+          "id": "pair-09-A",
+          "reportStartedAtIso": "2026-11-25T15:59:15.769Z"
+        },
+        {
+          "durationMs": 928.0999999999767,
+          "id": "control-03-C",
+          "reportStartedAtIso": "2026-11-25T15:59:24.157Z"
+        },
+        {
+          "durationMs": 1352.5999999999767,
+          "id": "control-03-A",
+          "reportStartedAtIso": "2026-11-25T15:59:32.520Z"
+        },
+        {
+          "durationMs": 948,
+          "id": "pair-10-A",
+          "reportStartedAtIso": "2026-11-25T15:59:41.279Z"
+        },
+        {
+          "durationMs": 946.2000000000116,
+          "id": "pair-10-B",
+          "reportStartedAtIso": "2026-11-25T15:59:49.291Z"
+        },
+        {
+          "durationMs": 976.2999999999884,
+          "id": "pair-11-B",
+          "reportStartedAtIso": "2026-11-25T15:59:57.364Z"
+        },
+        {
+          "durationMs": 1122.7999999999884,
+          "id": "pair-11-A",
+          "reportStartedAtIso": "2026-11-25T16:00:05.663Z"
+        },
+        {
+          "durationMs": 941.5999999999767,
+          "id": "pair-12-A",
+          "reportStartedAtIso": "2026-11-25T16:00:14.926Z"
+        },
+        {
+          "durationMs": 1062.5999999999767,
+          "id": "pair-12-B",
+          "reportStartedAtIso": "2026-11-25T16:00:23.588Z"
+        },
+        {
+          "durationMs": 920.1000000000349,
+          "id": "control-04-A",
+          "reportStartedAtIso": "2026-11-25T16:00:32.137Z"
+        },
+        {
+          "durationMs": 961.7999999999884,
+          "id": "control-04-C",
+          "reportStartedAtIso": "2026-11-25T16:00:40.753Z"
+        }
+      ],
+      "unchangedArchiveEntries": 313
+    }
+  },
+  "cohortsPooled": false,
+  "conclusion": "No reproducible end-to-end latency improvement demonstrated. Both descriptive intervals include zero, both equal-work changes are positive, and identical-code controls show substantial host variation. Correctness and memory qualification have separate independent audits. The measured allocation saving remains conditional on split-record groups and is not a whole-import latency claim.",
+  "configuration": {
+    "dictionary": "jmdict",
+    "flags": {
+      "experimentalParserWorkers3": false
+    },
+    "parserWorkers": 2
+  },
+  "failedObservationsOmitted": 0,
+  "frozenRunnerSha256": "42a5bbaf9ee7f08079d7f4a150fd96b11c7d237c8ad2eefc82ce29aae7640e56",
+  "frozenWorkflowSha256": "71c934989aa3e4225d3c44d2a23532e1f7d1e43cacc5aa0914595adb60b0da91",
+  "limits": [
+    "Two hosted cohorts on the explicit existing two-worker policy; no claim for ordinary three-worker JMdict or real two-CPU hardware.",
+    "Bootstrap intervals are descriptive within each cohort and do not resolve host drift or cross-host variation.",
+    "No additional timing observations, exclusions, replacements, reruns, or pooled statistic were introduced by this audit."
+  ],
+  "ratioOrientation": "B/A for candidate comparisons; C/A for identical-code controls; negative change is faster",
+  "replacementObservations": 0,
+  "status": "passed-independent-statistical-audit",
+  "workflowRunId": 45646399468,
+  "workflowSourceSha": "b1a0c5b78295def8cc91e4fca5e831d2248c7d01"
+}

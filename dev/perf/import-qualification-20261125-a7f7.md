@@ -52,3 +52,21 @@ baseline's memory failure remains separate and is not overwritten.
 Fresh baseline diagnostic profiles and complete corpus replays informed the
 investigation of JMdict, Jitendex and VNDB. Single diagnostic timings and
 component byte savings are not used as complete-import speedup claims.
+
+## Completed outcome
+
+The frozen JMdict run `45646399468` completed both original jobs successfully.
+Independent audits passed all 84 import receipts, all 72 timed/warmup/control
+observations, and all 571 raw scans from eight separate memory imports. Both
+hosts pass correctness and the unchanged sampled-memory qualification.
+
+Latency remains inconclusive: paired medians are +0.136% and -0.707%, with
+descriptive 95% intervals [-2.953%, +2.078%] and [-5.507%, +13.123%]. Equal-work
+changes are +0.774% and +2.709%. All observations, including slow candidate
+pairs and noisy identical-code controls, remain included. No whole-import
+speedup is claimed. The conditional component-copy saving remains separate.
+
+[The complete evidence index](import-qualification-evidence-20261125-a7f7/README.md)
+contains raw observations, independent audits, current-source VNDB findings,
+the unchanged memory hold, and withheld Jitendex experiments. No observations
+were reacquired or substituted, and evidence commits do not rerun the cohort.

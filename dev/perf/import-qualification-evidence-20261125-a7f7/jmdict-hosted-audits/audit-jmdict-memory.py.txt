@@ -1,0 +1,197 @@
+"""Recompute both fixed JMdict memory cohorts from retained raw scans only."""
+
+import argparse
+from collections import Counter
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import zipfile
+
+
+def digest_bytes(value):
+    return hashlib.sha256(value).hexdigest()
+
+
+def digest(path):
+    return digest_bytes(Path(path).read_bytes())
+
+
+def load(path):
+    return json.loads(Path(path).read_text())
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('evidence', type=Path, help='Directory containing AB, BA and artifacts.json')
+parser.add_argument('tooling_root', type=Path, help='Repository containing the frozen memory auditor and tooling commit')
+args = parser.parse_args()
+evidence = args.evidence.resolve()
+tooling_root = args.tooling_root.resolve()
+tooling_commit = 'b1a0c5b78295def8cc91e4fca5e831d2248c7d01'
+helper_path = 'dev/perf/import-memory-20261125-a7f7'
+expected_helpers = {
+    'audit_memory.py': '871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c',
+    'chromium_memory.py': '8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7',
+    'protocol.py': 'ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7',
+}
+for name, expected in expected_helpers.items():
+    path = tooling_root / helper_path / name
+    assert digest(path) == expected, name
+    frozen = subprocess.check_output(
+        ['git', 'show', f'{tooling_commit}:{helper_path}/{name}'], cwd=tooling_root,
+        env={**os.environ, 'GIT_NO_LAZY_FETCH': '1'},
+    )
+    assert frozen == path.read_bytes(), 'Local helper differs from frozen workflow commit'
+
+sys.path.insert(0, str(tooling_root / helper_path))
+from audit_memory import audit_cell
+from protocol import memory_overlay, schedule
+
+artifact_metadata = load(evidence / 'artifacts.json')
+artifacts = {item['name']: item for item in artifact_metadata['artifacts']}
+expected_sources = {
+    'A': {'sha': '7d1643e6147a10cb2165e9744cf0e63b59e46632',
+          'tree': '99d23f16e973c7ae9feba77ca3643d1c27dfb93d'},
+    'B': {'sha': '475d351ff07c1b5cfc5651d7f59c624629e4fdc5',
+          'tree': '59959442e3d7ec9290d9da5d1177a7df28b58ed1'},
+}
+expected_flags = {'experimentalParserWorkers3': False}
+harness = 'test/chromium/extension-two-dictionary-import.e2e.js'
+cells = []
+fixed_failures = []
+individual_bound_excesses = []
+for order, replication in [('AB', 1), ('BA', 2)]:
+    cell = evidence / order
+    memory_root = cell / 'memory'
+    artifact = artifacts[f'jmdict-two-workers-{order}-a7f7']
+    archive_path = evidence / f'jmdict-two-workers-{order}-a7f7.zip'
+    assert archive_path.stat().st_size == artifact['size_in_bytes']
+    assert 'sha256:' + digest(archive_path) == artifact['digest']
+    assert artifact['workflow_run']['id'] == 45646399468
+    assert artifact['workflow_run']['head_sha'] == tooling_commit
+    plan = load(memory_root / 'plan.json')
+    registered = load(cell / 'registered-plan.json')
+    identities = load(cell / 'source-identities.json')['arms']
+    assert plan['dictionary'] == registered['dictionary'] == 'jmdict'
+    assert plan['authoritativeTiming'] is False
+    assert plan['replication'] == replication
+    assert plan['schedule'] == registered['memorySchedule'] == schedule(replication)
+    assert plan['sourceHashes'] == identities
+    assert registered['initialOrder'] == order
+    assert registered['expectedWorkers'] == 2
+    assert registered['flags'] == expected_flags
+    original = (memory_root / 'harness-original.js').read_text()
+    instrumented = (memory_root / 'harness-instrumented.js').read_text()
+    assert memory_overlay(original) == instrumented
+    assert digest_bytes(instrumented.encode()) == plan['overlaySha256']
+    for arm, identity in identities.items():
+        assert {key: identity[key] for key in ['sha', 'tree']} == expected_sources[arm]
+        assert identity['sha'] == registered['baseline' if arm == 'A' else 'candidate']
+        assert identity['sourceHashes'][harness] == digest_bytes(original.encode())
+        assert digest(cell / f'package-{arm}.zip') == identity['packageSha256']
+
+    # The original auditor recomputes process-tree membership, read completeness,
+    # PSS/private sums, marker coverage, maxima and every paired percentage.
+    audit = audit_cell(memory_root)
+    assert audit == load(memory_root / 'memory-audit.json')
+    comparison = load(memory_root / 'memory-comparison.json')
+    assert comparison['replication'] == replication
+    assert comparison['authoritativeTiming'] is False
+    input_names = [
+        'registered-plan.json', 'source-identities.json', 'browser-identity.json',
+        'memory/plan.json', 'memory/observations.json', 'memory/memory-comparison.json',
+        'memory/memory-audit.json', 'memory/semantic-failures.json',
+        'memory/harness-original.js', 'memory/harness-instrumented.js',
+    ]
+    rows = []
+    for item in plan['schedule']:
+        name, arm = item['name'], item['arm']
+        raw = load(memory_root / name / 'memory.json')
+        summary = load(memory_root / name / 'summary.json')
+        assert summary['gitSha'] == summary['source']['gitSha'] == identities[arm]['sha']
+        assert summary['importFlags'] == expected_flags
+        assert summary['traceEnabled'] is False
+        assert len(summary['runs']) == 1
+        run = summary['runs'][0]
+        assert run['packageSha256'] == identities[arm]['packageSha256']
+        for path, expected in identities[arm]['sourceHashes'].items():
+            if path == harness:
+                expected = plan['overlaySha256']
+            assert summary['source']['sha256'][path] == expected, path
+        workers = [value['parserWorkerCount'] for value in run['step4Breakdown']['dictionaries']]
+        assert workers == [2]
+        input_names += [f'memory/{name}/{suffix}' for suffix in [
+            'memory.json', 'markers.jsonl', 'summary.json', 'run-1.json', 'canonical-receipt.json',
+        ]]
+        failures = Counter(reason for sample in raw['samples'] for reason in sample['qualificationFailures'])
+        rows.append({
+            **item,
+            **{key: raw[key] for key in [
+                'allObservedSampleCount', 'qualifiedForWholeTreePss', 'qualificationFailures',
+                'maximumCoveredSampleGapMs', 'preImportBracketGapMs', 'postImportBracketGapMs',
+                'fullyContainedImportSampleCount', 'stableFullyReadImportSampleCount',
+                'maxSampledPssKiB', 'maxSampledPrivateKiB', 'observedProcessCountRange', 'benchmarkExitCode',
+            ]},
+            'rawScanQualificationFailureCounts': dict(sorted(failures.items())),
+            'sourceSha': identities[arm]['sha'],
+            'packageSha256': identities[arm]['packageSha256'], 'verifiedParserWorkerCounts': workers,
+        })
+        if not raw['qualifiedForWholeTreePss']:
+            fixed_failures.append({'cohort': order, 'name': name, 'failures': raw['qualificationFailures']})
+    for pair in comparison['pairs']:
+        for metric in ['maxSampledPssKiB', 'maxSampledPrivateKiB']:
+            change = pair[metric]['changePercent']
+            if pair['qualified'] and change > 10:
+                individual_bound_excesses.append({'cohort': order, 'pair': pair['pair'],
+                                                  'metric': metric, 'changePercent': change})
+    input_sha256 = {}
+    with zipfile.ZipFile(archive_path) as archive:
+        assert len(archive.namelist()) == len(set(archive.namelist())), 'Duplicate artifact entry'
+        for name in sorted(set(input_names)):
+            saved = (cell / name).read_bytes()
+            assert saved == archive.read(name), 'Extracted input differs from original artifact'
+            input_sha256[name] = digest_bytes(saved)
+    cells.append({
+        'cohort': order, 'memoryOrder': ''.join(item['arm'] for item in plan['schedule']),
+        'artifactId': artifact['id'], 'artifactSha256': digest(archive_path),
+        'inputSha256': input_sha256, 'schedule': plan['schedule'],
+        'overlaySha256': plan['overlaySha256'], 'memoryAudit': audit,
+        'pairs': comparison['pairs'], 'observations': rows,
+        'recordedSemanticFailures': load(memory_root / 'semantic-failures.json'),
+        'sourceIdentities': {arm: {key: value[key] for key in ['sha', 'tree', 'packageSha256']}
+                             for arm, value in identities.items()},
+    })
+
+report = {
+    'schemaVersion': 1, 'complete': True, 'workflowRun': 45646399468,
+    'toolingCommit': tooling_commit, 'frozenToolingHelpersVerifiedAgainstGit': True,
+    'helperSha256': expected_helpers, 'auditScriptSha256': digest(__file__),
+    'artifactMetadataSha256': digest(evidence / 'artifacts.json'),
+    'scope': 'Independent offline memory audit only. All raw observations retained. No browser imports, replacement observations, acquisition retries, threshold changes or pooled memory metrics.',
+    'sourceIdentities': expected_sources, 'importFlags': expected_flags, 'expectedParserWorkers': 2,
+    'fixedRules': {'minimumFullyCoveredImportScans': 5, 'maximumCoveredGapMs': 250,
+                   'maximumBracketGapMs': 250, 'betweenScanWaitMs': 25,
+                   'maximumMedianPairedIncreasePercent': 5, 'maximumIndividualPairedIncreasePercent': 10,
+                   'everyObservationQualified': True, 'bothReplicationsRequired': True},
+    'rawScanCount': sum(cell['memoryAudit']['rawScanCount'] for cell in cells),
+    'observationCount': sum(cell['memoryAudit']['observations'] for cell in cells),
+    'allObservationsQualified': all(cell['memoryAudit']['everyObservationQualified'] for cell in cells),
+    'bothReplicationsPassMemoryScreen': all(cell['memoryAudit']['passesProspectiveMemoryScreen'] for cell in cells),
+    'fixedObservationFailures': fixed_failures, 'qualifiedIndividualBoundExcesses': individual_bound_excesses,
+    'cells': cells,
+    'limitations': [
+        'Sampled PSS/private maxima are not exact peaks.',
+        'Startup, readback and restart scans remain in raw evidence but do not contribute to import-window maxima.',
+        'The external memory observer makes underlying native harness timing labels non-authoritative.',
+        'Canonical semantic receipts and non-instrumented timing statistics are audited separately by other reviewers.',
+        'These results apply to the explicitly selected two-parser-worker workload and pinned source/fixture environment.',
+    ],
+}
+output = evidence / 'independent-memory-audit.json'
+output.write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps({'output': str(output), 'sha256': digest(output),
+                  'rawScanCount': report['rawScanCount'], 'observations': report['observationCount'],
+                  'bothReplicationsPassMemoryScreen': report['bothReplicationsPassMemoryScreen'],
+                  'cells': [{'cohort': cell['cohort'], 'memoryAudit': cell['memoryAudit']} for cell in cells]}))

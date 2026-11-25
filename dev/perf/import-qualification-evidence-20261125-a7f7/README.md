@@ -22,8 +22,33 @@ identical-product controls, exhaustive media verification, and separate memory
 observations. They use the existing two-worker setting; no default-config or
 two-core-hardware performance claim follows from this configuration.
 
-The hosted study is pending. The component byte saving is not a measured
-complete-import speedup or peak-memory reduction.
+Both hosted jobs completed successfully. Three independent audits reconciled
+all 84 imports, every raw timing observation and all 571 memory scans. The
+hosted configuration used two workers, eight source groups and 15 native
+segments in every import. All 528,299 rows, output and lookup digests, restart
+receipts, and exact 43,476,429-byte storage layout match across arms and hosts.
+
+| Host | Candidate paired median | Equal-work change | Descriptive 95% interval | Faster pairs | Identical-code control median |
+| ---- | ----------------------: | ----------------: | -----------------------: | -----------: | ----------------------------: |
+| AB   |                 +0.136% |           +0.774% |       [-2.953%, +2.078%] |         6/12 |                       +3.750% |
+| BA   |                 -0.707% |           +2.709% |      [-5.507%, +13.123%] |         7/12 |                       -5.052% |
+
+The study does **not** demonstrate a complete-import latency improvement. Both
+intervals span zero, both equal-work changes are positive, and identical-code
+controls show substantial variation. The slowest candidate pairs, +21.728% on
+AB and +36.842% on BA, remain included. Hosts and stages are not pooled.
+
+Both separate memory cohorts pass the fixed gates. Median PSS/private changes
+are -2.669%/-3.396% for ABBA and +1.375%/+1.860% for BAAB. All eight observations
+qualify; the largest coverage gap is 157.220357 ms against 250 ms. The largest
+individual increase is +4.913596% private memory, below 10%; both median
+increases remain below 5%. These are sampled memory qualification results,
+not exact peak measurements or proof of a memory reduction.
+
+The component replay's 2,089,794-byte saving remains limited to that replay and
+its split groups. It is not a browser allocation counter, a measured speedup,
+or a benefit for ordinary three-worker imports. The completed browser study
+qualifies the explicit two-worker workload's correctness and sampled memory.
 
 ## Current-source native media projection
 
@@ -104,6 +129,15 @@ the rejected extra duplicate-reference filter: only 616 projected rows and
   remain in the original Actions artifacts and were independently inspected.
 - `current875-audits/`: independent timing and memory audit reports, reproduction
   scripts, current-head status receipt and the complete VNDB timing job log.
+- `jmdict-two-workers-AB.tar.gz` and `jmdict-two-workers-BA.tar.gz`: every
+  observation from the frozen two-host JMdict study, including source/package
+  manifests, raw browser reports, memory scans, markers and original/overlay
+  harnesses. Actual package ZIPs are independently verified and remain in the
+  original Actions artifacts; exclusions and their exact hashes are explicit
+  in the adjacent member manifests.
+- `jmdict-hosted-audits/`: independent statistical, semantic and raw-memory
+  audits, their reproduction scripts, original artifact identities and
+  successful job/acquisition receipts.
 - Adjacent `*-manifest.json.txt` files bind every archive member's unchanged
   bytes and the complete deterministic archive. Gzip/tar metadata is normalized;
   member contents are not altered.
