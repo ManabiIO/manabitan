@@ -62,7 +62,7 @@ function compressed(source, method) {
 }
 
 /**
- * @param {Chunk} chunk
+ * @param {import('../ext/js/dictionary/term-bank-wasm-parser.js').TermBankColumnChunk} chunk
  * @returns {SnapshotRow[]}
  */
 function snapshotChunk(chunk) {
@@ -98,12 +98,13 @@ function snapshotChunk(chunk) {
             readingEqualsExpression: chunk.readingEqualsExpressionList[i],
             content: {length: content.length, sha256: createHash('sha256').update(content).digest('hex')},
             hashes,
-            media: chunk.mediaRows.filter((row) => row.index === i).map(({row}) => ({
-                expression: row.expression,
-                reading: row.reading,
-                glossary: row.glossaryJson,
-                content: {length: row.termEntryContentBytes.length, sha256: createHash('sha256').update(row.termEntryContentBytes).digest('hex')},
-            }))}
+            media: chunk.mediaRows.filter((row) => row.index === i).map(({row, imagePaths}) => {
+                if (typeof imagePaths !== 'undefined') { throw new Error('Expected an unprojected media snapshot') }
+                return {expression: row.expression,
+                    reading: row.reading,
+                    glossary: row.glossaryJson,
+                    content: {length: row.termEntryContentBytes.length, sha256: createHash('sha256').update(row.termEntryContentBytes).digest('hex')}}
+            })}
     })
 }
 
@@ -599,14 +600,74 @@ function requestWorker(worker, request) {
 }
 
 describe('actual parser worker flag propagation', () => {
-    test('transfers the diagnostic key arena once and preserves its views after another request', async () => {
+    test('combines native compact media with borrowed content and exact lookup routing', async () => {
+        const glossary = JSON.stringify([{type: 'structured-content', content: {tag: 'div', content: ['text'.repeat(1024), {tag: 'img', path: 'img/猫.webp'}]}}])
+        const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
+        const bridge = `import {parentPort} from 'node:worker_threads'
+            const parse = JSON.parse
+            JSON.parse = (value, reviver) => {
+                if (value === ${JSON.stringify(glossary)}) { throw new Error('Unexpected full glossary reconstruction') }
+                return parse(value, reviver)
+            }
+            globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
+                postMessage: (data, transfer) => parentPort.postMessage(data, transfer)}
+            await import(${JSON.stringify(workerUrl)})
+            parentPort.postMessage({type: 'loaded'})`
+        const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(bridge)}`))
+        try {
+            expect((await requestWorker(worker, null)).type).toBe('loaded')
+            const module = await WebAssembly.compile(await readFile(new URL('../ext/lib/term-bank-parser.wasm', import.meta.url)))
+            expect((await requestWorker(worker, {type: 'initialize', module})).type).toBe('ready')
+            let prior
+            let snapshot
+            for (const current of [glossary, '[{"type":"image","path":"later.png"}]']) {
+                const payload = compressed(`[["画像","がぞう","","",0,${current},1,""]]`, 8)
+                const reply = await requestWorker(worker, {type: 'parse',
+                    id: 1,
+                    version: 3,
+                    sourceBuffers: [payload.bytes.buffer],
+                    sourceMetadata: [payload],
+                    options: {computeContentHashes: true,
+                        emitContentSlab: true,
+                        emitTokenBinaryContent: true,
+                        mediaHintFastScan: true,
+                        projectImagePaths: true,
+                        validateGlossaryTypes: true,
+                        ownContentBytes: true,
+                        prepareLookupIndexes: true,
+                        prepareLookupRoute: true}})
+                expect(reply.type, JSON.stringify(reply.error)).toBe('result')
+                const {chunk} = reply
+                if (!chunk) { throw new Error('Missing copied worker result') }
+                expect(chunk.mediaRows[0].imagePaths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
+                expect(Object.keys(chunk.mediaRows[0].row).sort()).toEqual(['expression', 'expressionBytes', 'reading', 'readingBytes'])
+                expect(reply.borrowsWorkerMemory).toBe(current === glossary)
+                expect(chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer).toBe(current === glossary)
+                expect(chunk.preparedLookupIndexes?.size).toBeGreaterThan(0)
+                for (const index of chunk.preparedLookupIndexes?.values() ?? []) {
+                    expect(index.routeFilter).toBeInstanceOf(Uint32Array)
+                    expect(index.routeFilter?.some((value) => value !== 0)).toBe(true)
+                }
+                if (prior) { expect(prior).toEqual(snapshot) }
+                // The next request may reuse leased content. Every transported
+                // key, index and compact diagnostic must own stable bytes.
+                const {contentBytesBuffer, ...independentFields} = chunk
+                void contentBytesBuffer
+                prior = independentFields
+                snapshot = structuredClone(independentFields)
+            }
+        } finally { await worker.terminate() }
+    })
+
+    test('transfers compact diagnostics alongside complete fallback media rows', async () => {
         const workerUrl = new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href
         const bridge = `import {parentPort} from 'node:worker_threads'
             globalThis.self = {addEventListener: (_, fn) => parentPort.on('message', data => fn({data})),
                 postMessage: (data, transfer = []) => {
                     if (data.type === 'result' && data.chunk) {
                         const arena = data.chunk.termRecordPreinternedPlan.stringsBuffer.buffer
-                        const keys = data.chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes]).filter(bytes => bytes?.byteLength > 0)
+                        const keys = data.chunk.mediaRows.filter(({imagePaths}) => imagePaths !== undefined)
+                            .flatMap(({row}) => [row.expressionBytes, row.readingBytes]).filter(bytes => bytes?.byteLength > 0)
                         data.transferObservation = {count: transfer.length, uniqueCount: new Set(transfer).size,
                             keyArenaOccurrences: transfer.filter(buffer => buffer === arena).length,
                             keyBuffers: new Set(keys.map(bytes => bytes.buffer)).size,
@@ -627,7 +688,7 @@ describe('actual parser worker flag propagation', () => {
                 '',
                 '',
                 index,
-                [{type: 'image', path: `${index}.png`}],
+                [{type: 'image', path: index === 31 ? 'unsupported.bin' : `${index}.png`}],
                 index,
                 '',
             ])
@@ -654,12 +715,23 @@ describe('actual parser worker flag propagation', () => {
             expect(transferObservation.keyBuffersOutsideArena).toBe(0)
             expect(chunk.mediaRows[0].row.expression).toBe('quoted"\ud800')
             expect(chunk.mediaRows[0].row.expressionBytes).toBeUndefined()
-            const keys = chunk.mediaRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes])
+            const projectedRows = chunk.mediaRows.filter(({imagePaths}) => typeof imagePaths !== 'undefined')
+            const keys = projectedRows.flatMap(({row}) => [row.expressionBytes, row.readingBytes])
                 .filter((bytes) => bytes instanceof Uint8Array)
             for (const bytes of keys) { expect(bytes.buffer).toBe(chunk.termRecordPreinternedPlan.stringsBuffer.buffer) }
             const snapshots = keys.map((bytes) => new Uint8Array(bytes))
             const imagePaths = chunk.mediaRows.map(({imagePaths}) => imagePaths)
-            expect(imagePaths).toEqual(rows.map((_, index) => [`${index}.png`]))
+            expect(imagePaths).toEqual(rows.map((_, index) => (index === 31 ? void 0 : [`${index}.png`])))
+            for (const {row: diagnostic} of projectedRows) {
+                expect(Object.keys(diagnostic).sort()).toEqual(['expression', 'expressionBytes', 'reading', 'readingBytes'])
+            }
+            const fallback = chunk.mediaRows[31]
+            if (typeof fallback.imagePaths !== 'undefined') { throw new Error('Expected a complete fallback row') }
+            expect(fallback.row.glossaryJsonBytes).toEqual(encoder.encode(JSON.stringify(rows[31][5])))
+            expect(fallback.row.termEntryContentBytes.length).toBeGreaterThan(0)
+            expect(fallback.row.score).toBe(31)
+            expect(fallback.row.sequence).toBe(31)
+            const fallbackSnapshot = structuredClone(fallback.row)
             const next = await requestWorker(worker, {type: 'parse',
                 id: 2,
                 version: 3,
@@ -668,6 +740,7 @@ describe('actual parser worker flag propagation', () => {
             expect(next.type, JSON.stringify(next.error)).toBe('result')
             expect(keys).toEqual(snapshots)
             expect(chunk.mediaRows.map(({imagePaths}) => imagePaths)).toEqual(imagePaths)
+            expect(fallback.row).toEqual(fallbackSnapshot)
         } finally { await worker.terminate() }
     })
 
@@ -685,8 +758,8 @@ describe('actual parser worker flag propagation', () => {
             const projected = copyWasmBackedColumnChunk(chunk, false, true)
             expect(projected.mediaRows).toHaveLength(1)
             expect(projected.mediaRows[0].imagePaths).toEqual(['img/猫.webp'])
-            expect(projected.mediaRows[0].row.glossaryJsonBytes).toBeUndefined()
-            expect(projected.mediaRows[0].row.termEntryContentBytes).toHaveLength(0)
+            expect(projected.mediaRows[0].row).not.toHaveProperty('glossaryJsonBytes')
+            expect(projected.mediaRows[0].row).not.toHaveProperty('termEntryContentBytes')
             expect(projected.mediaRows[0].row.expressionBytes).toEqual(baseline.mediaRows[0].row.expressionBytes)
             expect(projected.contentBytesBuffer).toEqual(baseline.contentBytesBuffer)
             expect(projected.contentMetaList).toEqual(baseline.contentMetaList)

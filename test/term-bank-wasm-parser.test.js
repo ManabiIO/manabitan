@@ -3362,10 +3362,10 @@ fallback ? i + 0.5 : i,
         ];
         /**
          * @param {Uint8Array|Uint8Array[]} source
-         * @returns {Promise<ReturnType<typeof copyWasmBackedColumnChunk>>}
+         * @returns {Promise<TermBankColumnChunk>}
          */
         const parseStableChunk = async (source) => {
-            /** @type {ReturnType<typeof copyWasmBackedColumnChunk>|null} */
+            /** @type {TermBankColumnChunk|null} */
             let result = null;
             await parseTermBankWithWasmColumnChunks(
                 source,

@@ -3394,7 +3394,7 @@ export class DictionaryImporter {
      * Keep diagnostic keys in one owned arena per projected chunk. Successful
      * image imports need neither decoded headwords nor one retained buffer per
      * key. Copying the exact key bytes also releases borrowed source/WASM views.
-     * @param {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} chunk
+     * @param {DirectTermChunk & {mediaRows: import('./term-bank-wasm-parser.js').TermBankMediaRow[]}} chunk
      * @returns {import('dictionary-importer').MediaImportDiagnosticKeys|null}
      * @throws {TermBankWasmResourceError} If key offsets would exceed the arena's index width.
      */
@@ -5138,13 +5138,14 @@ export class DictionaryImporter {
                 }
                 if (useDirectArtifactChunkImport) {
                     const tMaterializationStart = Date.now();
-                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
+                    const columnChunk = /** @type {DirectTermChunk & {mediaRows: import('./term-bank-wasm-parser.js').TermBankMediaRow[]}} */ (/** @type {unknown} */ (parsedRows));
                     const {mediaRows, ...columnPayload} = columnChunk;
                     if (requirementsForChunk !== null) {
                         const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
                         let diagnosticIndex = 0;
                         for (const {index, row, imagePaths} of mediaRows) {
-                            if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
+                            if (typeof imagePaths !== 'undefined') {
+                                if (diagnosticKeys === null) { throw new Error('Projected media diagnostic keys are unavailable'); }
                                 const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
                                 for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
                                 continue;
