@@ -95,6 +95,29 @@ async function parse(preloadedSource, overrides = {}) {
 }
 
 describe('raw glossary witness source CRC verification', () => {
+    test('verifies newly eligible stored banks before exposing exact ordinary output', async () => {
+        /** @type {import('../ext/js/dictionary/term-bank-wasm-parser.js').CompressedTermBankSource[]} */
+        const source = banks.map((bytes, index) => ({
+            bytes,
+            compressionMethod: 0,
+            compressedSize: bytes.length,
+            uncompressedSize: bytes.length,
+            signature: crc32(bytes),
+            filename: `term_bank_${index + 1}.json`,
+        }))
+        const ordinary = await parse(await inflateCompressedTermBankSourcesWasm(source, options))
+        const preloaded = await inflateCompressedTermBankSourcesWasm(source, options, true)
+        expect(preloaded.compressedBytes).toBe(preloaded.uncompressedBytes)
+        expect(preloaded.crcSignaturesPtr).toBeGreaterThan(0)
+        expect((await parse(preloaded)).digest).toBe(ordinary.digest)
+        expect(preloaded.crcVerified).toBe(true)
+        source[2].signature = (source[2].signature ^ 1) >>> 0
+        const corrupt = await inflateCompressedTermBankSourcesWasm(source, options, true)
+        const sink = vi.fn()
+        await expect(parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, sink, 2048, {...options, preloadedSource: corrupt})).rejects.toBeInstanceOf(DictionarySourceIntegrityError)
+        expect(sink).not.toHaveBeenCalled()
+    })
+
     test('matches ordinary CRC and every result byte across whitespace, empty banks, and cross-bank witnesses', async () => {
         const source = sourcesFor()
         const ordinary = await parse(await inflateCompressedTermBankSourcesWasm(source, options))
