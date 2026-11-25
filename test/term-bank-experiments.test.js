@@ -633,13 +633,23 @@ describe('actual parser worker flag propagation', () => {
                         projectImagePaths: true,
                         validateGlossaryTypes: true,
                         ownContentBytes: true,
-                        prepareLookupIndexes: true}})
+                        prepareLookupIndexes: true,
+                        prepareLookupRoute: true}})
                 expect(reply.type, JSON.stringify(reply.error)).toBe('result')
                 expect(reply.chunk?.mediaRows[0].imagePaths).toEqual(current === glossary ? ['img/猫.webp'] : ['later.png'])
-                expect(reply.borrowsWorkerMemory).toBe(false)
+                expect(reply.borrowsWorkerMemory).toBe(current === glossary)
+                if (!reply.chunk) { throw new Error('Missing projected worker result') }
+                expect(reply.chunk.preparedLookupIndexes?.size).toBeGreaterThan(0)
+                for (const index of reply.chunk.preparedLookupIndexes?.values() ?? []) {
+                    expect(index.routeFilter).toBeInstanceOf(Uint32Array)
+                }
                 if (prior) { expect(prior).toEqual(snapshot) }
-                prior = reply.chunk
-                snapshot = structuredClone(reply.chunk)
+                // The large source follows the current borrowed-content lease.
+                // Only its owned metadata may survive a later parser request.
+                const {contentBytesBuffer, ...metadata} = reply.chunk
+                expect(contentBytesBuffer?.buffer instanceof SharedArrayBuffer).toBe(current === glossary)
+                prior = metadata
+                snapshot = structuredClone(metadata)
             }
         } finally { await worker.terminate() }
     })

@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {buildTermLookupFilter} from './term-lookup-route.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
@@ -97,6 +98,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * emitTermByteLists?: boolean,
  * singleChunk?: boolean,
  * prepareLookupIndexes?: boolean,
+ * prepareLookupRoute?: boolean,
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
@@ -4035,11 +4037,12 @@ function tryProjectNativeGlossaryImagePath(row, source) {
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
+ * @param {boolean} [prepareLookupRoute=false]
  * @param {PreloadedTermBankSource} [preloadedSource]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, preloadedSource = void 0) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4126,6 +4129,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     new Uint8Array(prepared.bytes) :
                     prepared.bytes,
                 preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,
+                ...(prepareLookupRoute ? {routeFilter: buildTermLookupFilter(prepared.preinternedPlan.stringHashes)} : {}),
             });
         }
     }

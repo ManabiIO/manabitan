@@ -167,6 +167,25 @@ async function parseCompressedGlossary(glossary, inspect) {
 }
 
 describe('compressed worker-source media projection', () => {
+    /* eslint-disable @stylistic/semi */
+    test.each([false, true])('preserves prepared lookup routes with shared content=%s', async (shareContent) => {
+        await parseCompressedGlossary('[{"type":"image","path":"route.png"}]', (chunk, source) => {
+            const expected = copyWasmBackedColumnChunk(chunk, shareContent, true, true)
+            const project = vi.spyOn(source.wasm, 'project_single_glossary_image_path')
+            const actual = copyWasmBackedColumnChunk(chunk, shareContent, true, true, source)
+            expect(project).toHaveBeenCalledOnce()
+            expect(actual).toEqual(expected)
+            expect(actual.mediaRows[0].imagePaths).toEqual(['route.png'])
+            const indexes = actual.preparedLookupIndexes
+            expect(indexes?.size).toBeGreaterThan(0)
+            for (const index of indexes?.values() ?? []) {
+                expect(index.routeFilter).toBeInstanceOf(Uint32Array)
+            }
+            expect(actual.contentBytesBuffer?.buffer === source.wasm.memory.buffer).toBe(shareContent)
+        })
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('removes full glossary parsing and decoding while preserving all columns and owned paths', async () => {
         let retained;
         let snapshot;
@@ -176,7 +195,7 @@ describe('compressed worker-source media projection', () => {
             const sourceBefore = Uint8Array.from(new Uint8Array(source.wasm.memory.buffer, source.jsonPtr, source.jsonLength));
             const parse = vi.spyOn(JSON, 'parse');
             const decode = vi.spyOn(TextDecoder.prototype, 'decode');
-            const actual = copyWasmBackedColumnChunk(chunk, false, true, source);
+            const actual = copyWasmBackedColumnChunk(chunk, false, true, false, source);
             expect(parse).not.toHaveBeenCalled();
             expect(decode).toHaveBeenCalledTimes(1);
             expect(decode.mock.calls[0][0]?.byteLength).toBe(encoder.encode('img/日本.webp').length);
@@ -201,7 +220,7 @@ describe('compressed worker-source media projection', () => {
             if (kind === 'range') { source = {...source, jsonLength: 1}; }
             if (kind === 'missing-export') { source = {...source, wasm: {...source.wasm, project_single_glossary_image_path: undefined}}; }
             const parse = vi.spyOn(JSON, 'parse');
-            const actual = copyWasmBackedColumnChunk(chunk, false, true, source);
+            const actual = copyWasmBackedColumnChunk(chunk, false, true, false, source);
             expect(parse).toHaveBeenCalledTimes(1);
             expect(actual.mediaRows[0].imagePaths).toEqual(kind === 'multiple' ? ['first.png', 'second.png'] : ['first.png']);
         });
