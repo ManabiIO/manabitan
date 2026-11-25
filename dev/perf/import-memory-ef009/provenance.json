@@ -1,0 +1,26 @@
+{
+    "sourceCommit": "bea8d02be8c23ca6a3b0519df409d5d563d7486e",
+    "sourceDirectory": "dev/perf/import-memory-7762",
+    "originalObserverCommit": "f2f08c8ee74cdea548c5c1b494ec15bf10360b46",
+    "unchangedFiles": {
+        "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+        "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+        "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+        "test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce"
+    },
+    "packagerSource": "dev/perf/qualify-import-7762.py",
+    "unchangedPackagerSourceBlocks": {
+        "PACKAGER": "abd7f2c5b59f709c65e2f33a21cb6bbcd0d3217d13eecbd09f1ca5a05829a7b9",
+        "sha256": "9b6db9b7fbb7bbd38476a8ad9accb6c161f97b27dbbd5e2384e36296e0fc4916",
+        "write_json": "40efa0b9d1a7a3a612290824673cd29c7ad860f23cc7cb8bdcc6564b6c8c388b",
+        "command": "ca0c5b9b2a06c17774a6443899b96c9d0d3a6cdbb8e5f6aa6087825a48ff2a2a",
+        "package_members": "1222641b884788ca4ee7dfd29a83baea2bab61220ac25f52ba643838c02462c0",
+        "semantic_receipt": "9bc2fca5ddcbbf7f8d8219e8406e24403e2f893f561979d039e59dff0fe2c5c9",
+        "prepare_arm": "a4c3f458222abac787c84695335d428450b1234e0895fd8b1d7ec9a5c1351c0d"
+    },
+    "adaptedFiles": [
+        "overlay_helpers.py",
+        "run_memory.py"
+    ],
+    "adaptation": "Frozen media #905, explicit non-authoritative browser and summary labels, identical overlays per arm, compact receipts. Coverage and memory thresholds unchanged."
+}

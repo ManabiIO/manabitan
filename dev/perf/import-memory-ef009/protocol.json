@@ -1,0 +1,45 @@
+{
+    "schemaVersion": 1,
+    "base": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "candidate": {
+        "name": "single-image-projection",
+        "commit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+        "tree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+        "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/905",
+        "packagedDelta": [
+            "js/dictionary/term-bank-wasm-parser.js",
+            "js/dictionary/validated-image-path-projector.js"
+        ]
+    },
+    "nodeVersion": "v22.22.0",
+    "browserVersion": "153.0.8010.12",
+    "dictionaries": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+    ],
+    "independentHostsPerDictionary": 2,
+    "observationsPerHost": 4,
+    "orders": {
+        "1": "ABBA",
+        "2": "BAAB"
+    },
+    "promotionCriteria": {
+        "maximumMedianPairedIncreasePercent": 5,
+        "maximumIndividualPairedIncreasePercent": 10,
+        "everyObservationQualified": true
+    },
+    "frozenCoverage": {
+        "minimumFullyCoveredImportScans": 5,
+        "maximumCoveredGapMs": 250,
+        "maximumBracketGapMs": 250,
+        "betweenScanWaitMs": 25
+    },
+    "criterion": {
+        "scope": "Separate import-window Linux Chromium process-tree PSS and private-memory screen for source PR #905 against its exact base. Both metrics must satisfy the original limits on both hosts for every dictionary.",
+        "observations": "Four predetermined fresh-profile imports per host, with two adjacent pairs in ABBA or BAAB order. No observations excluded, replaced, or retried based on outcomes. Failure or incomplete coverage cannot qualify.",
+        "correctness": "Original production-default import, all 72 public lookup observations, restart, persistence, and every media payload must validate. Semantic receipts must match across all four observations in each cell.",
+        "timing": "The browser report, benchmark summary, and all memory receipts explicitly mark instrumented timing as non-authoritative. No latency claim uses this study.",
+        "limitations": "Non-atomic sampled import-window maxima, not exact peaks. Startup, semantic/media readback, and restart are excluded from maxima. Cumulative allocation or copying reductions do not establish peak-memory savings."
+    }
+}
