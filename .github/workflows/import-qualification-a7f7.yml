@@ -1,0 +1,63 @@
+name: Import qualification 20261125 a7f7
+
+on:
+  push:
+    branches: ['perf/import-qualification-20261125-a7f7']
+    paths:
+      - '.github/workflows/import-qualification-a7f7.yml'
+      - 'dev/perf/import-qualification-20261125-a7f7.py'
+      - 'dev/perf/import-memory-20261125-a7f7/**'
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    name: JMdict two-worker policy (${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+      PERF_CANDIDATE: 475d351ff07c1b5cfc5651d7f59c624629e4fdc5
+      PERF_ORDER: ${{ matrix.order }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+      MANABITAN_CHROMIUM_ALLOW_HEADED_FALLBACK: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Verify qualification observer and receipt checks
+        run: python -m unittest discover -s dev/perf/import-memory-20261125-a7f7 -p 'test_*.py'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch the frozen product revisions
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+      - name: Run the registered complete-import and separate memory cohorts
+        run: |
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary jmdict \
+            --initial-order "$PERF_ORDER" \
+            --pairs 12 \
+            --flags '{"experimentalParserWorkers3":false}' \
+            --expected-workers 2 \
+            --expected-package-entry js/dictionary/term-record-opfs-store.js \
+            --evidence builds/perf/jmdict-two-workers
+      - name: Retain every prescribed observation and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jmdict-two-workers-${{ matrix.order }}-a7f7
+          path: builds/perf/jmdict-two-workers
+          if-no-files-found: error
+          retention-days: 14
