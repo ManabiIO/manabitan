@@ -1,0 +1,60 @@
+name: Exact witness CRC import source screen 20261125
+on:
+  push:
+    branches: [research/crc-import-screen-20261125-2754]
+    paths:
+      - '.github/workflows/import-studies-20261124-3aac.yml'
+      - 'dev/perf/import-runtime-20261124-3aac.py'
+      - 'dev/perf/import-storage-20261124-3aac/**'
+permissions:
+  contents: read
+jobs:
+  compare:
+    name: Exact witness CRC screen (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+      PERF_CANDIDATE_SHA: c2cf7647c67b02474301ed48e54a53205be0f027
+      PERF_EXPECTED_DIFFERENCES: '["js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]'
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Fetch the frozen product revisions
+        run: git fetch --no-tags --depth=64 origin "$PERF_BASELINE_SHA" "$PERF_CANDIDATE_SHA"
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Validate unchanged storage policy
+        run: python3 -m unittest discover -s dev/perf/import-storage-20261124-3aac -p 'test_*.py' -v
+      - name: Run six fixed balanced blocks and exhaustive media diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/import-study-evidence"
+          cp .github/workflows/import-studies-20261124-3aac.yml "$RUNNER_TEMP/import-study-evidence/workflow.yml"
+          cp dev/perf/import-runtime-20261124-3aac.py "$RUNNER_TEMP/import-study-evidence/runner.py"
+          cp -R dev/perf/import-storage-20261124-3aac "$RUNNER_TEMP/import-study-evidence/storage-policy"
+          python3 dev/perf/import-runtime-20261124-3aac.py \
+            --baseline "$PERF_BASELINE_SHA" --candidate "$PERF_CANDIDATE_SHA" \
+            --dictionary "$PERF_DICTIONARY" --stage screen \
+            --expected-differences "$PERF_EXPECTED_DIFFERENCES" \
+            --output "$RUNNER_TEMP/import-study-evidence/cohort" \
+            2>&1 | tee "$RUNNER_TEMP/import-study-evidence/runner.log"
+      - name: Retain every attempted observation
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: exact-crc-screen-${{ matrix.dictionary }}-2754
+          path: ${{ runner.temp }}/import-study-evidence
+          if-no-files-found: error
+          retention-days: 14
+
