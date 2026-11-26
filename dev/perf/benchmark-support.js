@@ -111,9 +111,10 @@ function validateExperimentReceipts(debug, importFlags) {
             const prefix = key === 'parserExperiments' ? 'parser' : 'fastPathParser';
             const sourceBytes = details[`${prefix}SourceUncompressedBytes`];
             const workerCount = details[`${prefix}ParallelWorkerCount`];
-            // ParallelTermBankPipelineRun enables this key for image projection
-            // at >=512 MiB. Establish that production path from independent
-            // media/source/native receipts, never from the flag being checked.
+            // The importer permits native image projection at >=1 GiB. This
+            // gate is stricter than ParallelTermBankPipelineRun's 512 MiB
+            // owned-content threshold. Establish the production path from
+            // independent media/source/native receipts, never from this flag.
             const largeProjectedNativeImport = (
                 effective &&
                 bankDetails?.useMediaPipeline === true &&
@@ -122,7 +123,7 @@ function validateExperimentReceipts(debug, importFlags) {
                 flags.skipMediaImport !== true &&
                 Number.isSafeInteger(workerCount) && Number(workerCount) > 0 &&
                 details[`${prefix}ParallelSkipReason`] === null &&
-                Number.isSafeInteger(sourceBytes) && Number(sourceBytes) >= 512 * 1024 * 1024
+                Number.isSafeInteger(sourceBytes) && Number(sourceBytes) >= 1024 * 1024 * 1024
             );
             const roleExpected = largeProjectedNativeImport ? {...expected, experimentalNativeEscapedKeys: true} : expected;
             if (!isDeepStrictEqual(details[key], roleExpected)) {

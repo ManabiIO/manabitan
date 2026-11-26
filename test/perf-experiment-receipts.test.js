@@ -8,7 +8,8 @@ import {loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js'
 import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
 
 const fixture = (await loadDictionaryFixtures()).jmdict
-const threshold = 512 * 1024 * 1024
+const threshold = 1024 * 1024 * 1024
+const parserOwnedContentThreshold = 512 * 1024 * 1024
 const probeTerms = Array.from({length: 12}, (_, index) => `term-${index}`)
 
 /**
@@ -107,8 +108,21 @@ const invalidContexts = [
 ]
 
 describe('requested versus effective parser receipt policy', () => {
-    test.each([threshold - 1, threshold, threshold + 1, 537538792])('accepts the exact production policy at %i source bytes', (bytes) => {
+    test.each([
+        parserOwnedContentThreshold - 1,
+        parserOwnedContentThreshold,
+        parserOwnedContentThreshold + 1,
+        538927310,
+        threshold - 1,
+        threshold,
+        threshold + 1,
+    ])('accepts the exact production policy at %i source bytes', (bytes) => {
         expect(extract(report(bytes)).totalImportMs).toBe(200)
+    })
+    test('rejects obsolete automatic activation for the ordinary Jitendex source', () => {
+        const value = report(538927310)
+        details(value)[0].parserExperiments.experimentalNativeEscapedKeys = true
+        expect(() => extract(value)).toThrow('receipt mismatch: parserExperiments')
     })
     test('rejects an unexpected escaped-key switch on the small JMdict source', () => {
         const value = report(171092992)

@@ -1,0 +1,76 @@
+name: Import qualification 2026-11-26
+
+on:
+  push:
+    branches: [perf/import-qualification-20261126-ab9d]
+    paths:
+      - .github/workflows/import-qualification-20261126.yml
+      - dev/perf/qualify-imports-20261126.js
+      - dev/perf/benchmark-support.js
+      - test/perf-experiment-receipts.test.js
+
+permissions:
+  contents: read
+
+env:
+  PERF_BASELINE_SHA: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+
+jobs:
+  compare:
+    name: Frozen comparison (${{ matrix.candidate.id }}, ${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        candidate:
+          - id: decoder
+            sha: 651565742d6a322f973f651115f66fcb41409674
+            changed: [js/dictionary/zstd-term-content.js, lib/zstd-wasm.js, lib/zstd-wasm.js.map]
+          - id: media
+            sha: fcc66a237bc515fee6e9fd1b96d5773f69866ee2
+            changed: [js/dictionary/dense-zip-file-map.js, js/dictionary/dictionary-importer.js]
+    env:
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_CANDIDATE_ID: ${{ matrix.candidate.id }}
+      PERF_CANDIDATE_SHA: ${{ matrix.candidate.sha }}
+      PERF_EXPECTED_PACKAGE_CHANGES: ${{ toJSON(matrix.candidate.changed) }}
+      PERF_EVIDENCE_ROOT: ${{ github.workspace }}/builds/perf/import-compare-${{ matrix.candidate.id }}-${{ matrix.dictionary }}
+      MANABITAN_E2E_STRICT_RUNTIME: '1'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.PERF_BASELINE_SHA }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+
+      - name: Install lockfile-matched Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Restore pinned source archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-20261126-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+
+      - name: Compare frozen releases with one strict measurement overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_EVIDENCE_ROOT"
+          git show "$GITHUB_SHA:dev/perf/qualify-imports-20261126.js" > dev/perf/qualify-imports-20261126.js
+          node dev/perf/qualify-imports-20261126.js
+
+      - name: Preserve every observation and failure
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: import-20261126-${{ matrix.candidate.id }}-${{ matrix.dictionary }}
+          path: ${{ env.PERF_EVIDENCE_ROOT }}
+          if-no-files-found: error
+          retention-days: 14
