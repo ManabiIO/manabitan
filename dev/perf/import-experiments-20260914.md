@@ -687,3 +687,39 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## 2026-11-26: import allocation verification (b4b3)
+
+This round starts from `0143e9596cd8f790d5e166d4ba6a2425fbc57f14` and removes two remaining allocations without changing import settings, formats, worker counts, cache budgets, or native modules.
+
+- [PR #934](https://github.com/ManabiIO/manabitan/pull/934), frozen head `cc9fad4a3a528304f546e12e76ebb9afbe1cde6d`, keeps untouched dense ZIP image entries compact when the existing prepared-media or cached-read path owns their payload work. Obtained or replaced entries and all payload fallbacks retain their existing behavior. Concurrent [#935](https://github.com/ManabiIO/manabitan/pull/935) covers the same runtime scope; these are alternative implementations, not changes to merge together.
+- [PR #939](https://github.com/ManabiIO/manabitan/pull/939), frozen head `f6d685c0b2511257da4a9a83e7bd977087a42176`, aliases the owned v7 expression-ID column in segmented prepared plans. Value-based consumers accept its Uint16 IDs; native pointer inputs remain Uint32. Reading IDs retain their separate copy because the persisted column contains equality sentinels.
+- Combined verification source `e4803e96d581e64eddfc496d847f397ac79bac34`, tree `eeaaadd658b5d1e525806c9bdce8aafec9a8ebf7`, contains exactly both reviewed changes. Its tree matches an independent local merge of the source commits. It is a verification branch, not an integration or release decision.
+
+The first #934 unit run exposed one new replacement fixture missing the size metadata required by the existing inline-prefetch path. The corrected fixture retains that metadata and explicitly verifies it is not admitted to the new compact-entry path; runtime code is unchanged. All other checks in that run passed, including Chromium and Firefox E2E. The failed observation remains visible in run 45861195208.
+
+The first #939 CI run exposed two producer annotations that were too broad after admitting compact expression columns. The frozen head above corrects those annotations, preserving the actual Uint32 producers and native contracts. Local source reviews found no additional blocker; exact-head hosted checks remain required. Failed and incomplete local checks under shared-host pressure are not counted as passes.
+
+### Executable corpus checks
+
+Both source checkouts need `npm ci` and `npm run build:libs`, with the unchanged locked archives in the supplied cache. Run the external-boundary media replay with:
+
+```sh
+python3 dev/perf/compact-media-corpus-replay.py \
+  --base /path/to/baseline \
+  --candidate /path/to/media-candidate \
+  --cache /path/to/e2e-dictionary-cache \
+  --out builds/perf/20261126-b4b3/media
+```
+
+The Python driver invokes `test/perf/compact-media-corpus-replay.mjs`. It independently checks each archive hash, every source-bank row count and referenced image, ZIP CRCs, exact decoded media bytes, and path identities. The Node side uses the complete importer with an explicit counting database and a real source-worker result computed before import. Ordinary maps remain ordinary maps. Numeric-to-object transitions count compact catalog materialization independently of the candidate predicate. The sink checks packed-index geometry, row IDs, CRCs, bounded payload ranges, and decoded image hashes. The replay counts term rows; it does not prove full term-content equality or browser persistence, transport, concurrent preparation, timing, or peak memory.
+
+`--fixtures jitendex` selects one fixture. `--worker decline` tests the existing declined-result path; the importer may still prepare referenced media synchronously. Each subprocess has a bounded V8 heap, which is not a total process-memory limit. Receipts record running, failed, or passed state, reject optimized Python execution, and recheck source, generated libraries/WASM, dependency-lock, runtime, fixture, and harness identities. An incomplete receipt cannot be treated as a passing corpus.
+
+The existing `dev/perf/import-lookup-screen.js` in the expression candidate independently compares all JMdict and Jitendex parser/lookup output. It normalizes only the in-memory expression-ID representation to Uint32 outside measurement; all encoded index, key, and content bytes remain exact. `ownedCompactExpressionRows * 4` counts cumulative Uint32 allocation/copy bytes removed in executed native segments. It is neither peak memory saved nor a whole-import speedup. Do not assume every row executes that route.
+
+### Hosted verification boundary
+
+[The scoped workflow](../../.github/workflows/import-allocation-verification-b4b3.yml) freezes the four sources above and checks JMdict, Jitendex, and VNDB in separate jobs. It runs the native output oracle where supported, complete source-media replay, and actual baseline/combined release-browser imports with all referenced images checked. One browser import per source and dictionary is functional evidence, not a controlled performance comparison. Raw reports may contain timings; no speed or peak-memory claim follows from this acquisition.
+
+All receipts and failures are uploaded from `builds/perf/20261126-b4b3`. Product changes remain drafts pending their relevant checks and qualification. No completed corpus or browser result is asserted before its receipt is inspected.
