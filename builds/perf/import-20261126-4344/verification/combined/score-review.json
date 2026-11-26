@@ -1,0 +1,292 @@
+{
+  "purpose": "Single-process independent correctness replay; not a Vitest execution, corpus replay or timing comparison",
+  "node": "v24.22.3",
+  "runnerSha256": "a63b9c0234378c248243175401b549511b825c63f1c97e19c040b98818f694d9",
+  "baselineSource": {
+    "root": "/workspace/scratch/4344255ab4f9/manabitan-baseline",
+    "commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "storeSha256": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+    "lookupSha256": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94"
+  },
+  "candidateSource": {
+    "root": "/workspace/scratch/4344255ab4f9/manabitan",
+    "commit": "feac5eeb8a058b976a5f49448a870ec2be6ad183",
+    "storeSha256": "a7b080fa3d7fd3f6c38d81f04d95bfe22d105af12b21c98812cdccba736fa315",
+    "lookupSha256": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94"
+  },
+  "baselineCommitAfter": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidateCommitAfter": "feac5eeb8a058b976a5f49448a870ec2be6ad183",
+  "passed": 42,
+  "cases": [
+    {
+      "name": "valid-9-shared-false-offset-0",
+      "sidecarSha256": "bf28e2c0e67a7c19808e90d8bcf610a8b4bcfecab32b1d8d75419280499ce3d9",
+      "bytes": 532
+    },
+    {
+      "name": "valid-9-shared-false-offset-4",
+      "sidecarSha256": "bf28e2c0e67a7c19808e90d8bcf610a8b4bcfecab32b1d8d75419280499ce3d9",
+      "bytes": 532
+    },
+    {
+      "name": "valid-9-shared-false-offset-12",
+      "sidecarSha256": "bf28e2c0e67a7c19808e90d8bcf610a8b4bcfecab32b1d8d75419280499ce3d9",
+      "bytes": 532
+    },
+    {
+      "name": "invalid-key-9-0-3-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-0-65535-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-4-3-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-4-65535-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-8-3-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-8-65535-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "valid-9-shared-true-offset-0",
+      "sidecarSha256": "bf28e2c0e67a7c19808e90d8bcf610a8b4bcfecab32b1d8d75419280499ce3d9",
+      "bytes": 532
+    },
+    {
+      "name": "valid-9-shared-true-offset-4",
+      "sidecarSha256": "bf28e2c0e67a7c19808e90d8bcf610a8b4bcfecab32b1d8d75419280499ce3d9",
+      "bytes": 532
+    },
+    {
+      "name": "valid-9-shared-true-offset-12",
+      "sidecarSha256": "bf28e2c0e67a7c19808e90d8bcf610a8b4bcfecab32b1d8d75419280499ce3d9",
+      "bytes": 532
+    },
+    {
+      "name": "invalid-key-9-0-3-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-0-65535-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-4-3-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-4-65535-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-8-3-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-9-8-65535-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "valid-10-shared-false-offset-0",
+      "sidecarSha256": "0d19a2b6ebeda6637c685e34a3cd95d64006edcdab4746088eadd5192fd5b432",
+      "bytes": 572
+    },
+    {
+      "name": "valid-10-shared-false-offset-4",
+      "sidecarSha256": "0d19a2b6ebeda6637c685e34a3cd95d64006edcdab4746088eadd5192fd5b432",
+      "bytes": 572
+    },
+    {
+      "name": "valid-10-shared-false-offset-12",
+      "sidecarSha256": "0d19a2b6ebeda6637c685e34a3cd95d64006edcdab4746088eadd5192fd5b432",
+      "bytes": 572
+    },
+    {
+      "name": "invalid-key-10-0-3-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-0-65535-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-5-3-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-5-65535-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-9-3-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-9-65535-shared-false",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "valid-10-shared-true-offset-0",
+      "sidecarSha256": "0d19a2b6ebeda6637c685e34a3cd95d64006edcdab4746088eadd5192fd5b432",
+      "bytes": 572
+    },
+    {
+      "name": "valid-10-shared-true-offset-4",
+      "sidecarSha256": "0d19a2b6ebeda6637c685e34a3cd95d64006edcdab4746088eadd5192fd5b432",
+      "bytes": 572
+    },
+    {
+      "name": "valid-10-shared-true-offset-12",
+      "sidecarSha256": "0d19a2b6ebeda6637c685e34a3cd95d64006edcdab4746088eadd5192fd5b432",
+      "bytes": 572
+    },
+    {
+      "name": "invalid-key-10-0-3-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-0-65535-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-5-3-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-5-65535-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-9-3-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-key-10-9-65535-shared-true",
+      "error": {
+        "name": "Error",
+        "message": "Compact term-record score key is invalid"
+      }
+    },
+    {
+      "name": "invalid-score-count-0",
+      "error": {
+        "name": "Error",
+        "message": "Invalid compact term-record fields dimensions"
+      }
+    },
+    {
+      "name": "invalid-score-count-65535",
+      "error": {
+        "name": "Error",
+        "message": "Invalid compact term-record fields dimensions"
+      }
+    },
+    {
+      "name": "invalid-row-count",
+      "error": {
+        "name": "Error",
+        "message": "Invalid compact term-record fields dimensions"
+      }
+    },
+    {
+      "name": "short-header",
+      "error": {
+        "name": "Error",
+        "message": "Invalid compact term-record fields header"
+      }
+    },
+    {
+      "name": "truncated-key",
+      "error": {
+        "name": "Error",
+        "message": "Invalid authoritative term-record fields"
+      }
+    },
+    {
+      "name": "extra-byte",
+      "error": {
+        "name": "Error",
+        "message": "Invalid authoritative term-record fields"
+      }
+    }
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Component correctness and exploratory local evidence for indexed compact record score validation; no complete-import performance claim.",
+  "runtime": {
+    "path": "ext/js/dictionary/term-record-opfs-store.js",
+    "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "candidateCommit": "4d2316c97587fca1736fbace07901c4965c74483",
+    "baselineSha256": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+    "candidateSha256": "a7b080fa3d7fd3f6c38d81f04d95bfe22d105af12b21c98812cdccba736fa315",
+    "change": "Replace Uint16Array for-of score-key scan with an ascending indexed scan, preserving every bound and error."
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "navigatorHardwareConcurrency": 1,
+    "navigatorDeviceMemoryGiB": 4,
+    "execution": "One source bank at a time in one process, no parser workers. Navigator values are runner hints, not host resource limits.",
+    "metadataErratum": "Original sequential JMdict and Jitendex receipts inherited CLI labels hardwareConcurrency=4/deviceMemory=8 although their runner explicitly assigned navigator values 1/4. Those original receipts are preserved unchanged; actual values were 1/4. Corrected VNDB receipt reports 1/4."
+  },
+  "scope": {
+    "covered": "All locked term rows: native parser output through actual record encoders and lookup sidecar envelope builder; compare all captured writer arguments and sidecar envelopes byte-for-byte. Every term produced compact score fields.",
+    "notCovered": [
+      "Production source grouping and worker scheduling",
+      "Compressed physical content offsets (replaced with deterministic offsets based on native spans)",
+      "Content compression and OPFS persistence",
+      "Browser, worker IPC, UI or complete import behavior and time"
+    ],
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "parserWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+  },
+  "corpora": {
+    "jmdict": {
+      "complete": true,
+      "rows": 528299,
+      "runs": 53,
+      "compactScoreEntries": 528299,
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "encodedByteSha256": "4abc81c1cb5e47d929da403bc8c9544fad128c9e9ac054583bea71d93931fad0",
+      "receipt": "raw/score-validation-sequential-jmdict-v2.json",
+      "runner": "raw/score-validation-sequential-replay-v2.mjs",
+      "runnerSha256": "c1e5c1ea01ab9ed188020fc2c57ae3a90417d6675d077a2f5732ea1d9aae3dc1"
+    },
+    "jitendex": {
+      "complete": true,
+      "rows": 436555,
+      "runs": 219,
+      "compactScoreEntries": 436555,
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "encodedByteSha256": "237aa33ac7f11cb7b7515df7c91c8a8c68de3312ba74fac53bd317699e19784d",
+      "receipt": "raw/score-validation-jitendex-parity.json",
+      "runner": "raw/score-validation-parity-replay.mjs",
+      "runnerSha256": "7f260281307007eca76ad39762e36726e1cc0e68b6b0cf45fa90736fb3e3b95d"
+    },
+    "vndb": {
+      "complete": true,
+      "rows": 6648310,
+      "runs": 665,
+      "compactScoreEntries": 6648310,
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "encodedByteSha256": "7b33e222eea979e1c828ad6227f7c3eb4c5f0a7835d5aa3c21c22583b80a4780",
+      "receipt": "raw/score-validation-vndb-parity-v2.json",
+      "runner": "raw/score-validation-corpus-parity-v2.mjs",
+      "runnerSha256": "2fc203394f90d2ea8aa7de257e5b538c0cc88aca6e05b48d47e7a650f18d12dc"
+    }
+  },
+  "totals": {
+    "rows": 7613164,
+    "runs": 937,
+    "compactScoreEntries": 7613164
+  },
+  "independentBoundaryReplay": {
+    "passedCases": 42,
+    "receipt": "raw/compact-score-independent-review.json",
+    "runner": "raw/compact-score-independent-review.mjs",
+    "candidateCommit": "8fb8acb08e7374678ad0f45bb0a88bb3c0472261",
+    "sameRuntimeAsFrozenCandidate": true,
+    "coverage": "Actual encoder and sidecar outputs/errors: odd/even counts, first/middle/last invalid keys, score bound and uint16 sentinel, aligned shifted normal/shared buffers, untouched padding, malformed dimensions and truncated/extra input. This is single-process node:assert, not Vitest."
+  },
+  "exploratoryTiming": {
+    "corpus": "jmdict",
+    "selection": "First compact run of every tenth bank: six real field inputs, 60,000 rows.",
+    "design": "Two fixed warmups per arm, twelve fixed ABC permutation blocks. A and C are identical baseline; B is indexed candidate. Actual validator function body is not modified; a test-only export exposes it. Sidecar uses production caller.",
+    "rawObservations": 72,
+    "summary": {
+      "validator": {
+        "observations": 36,
+        "medianMilliseconds": {
+          "A": 84.10128000000259,
+          "B": 32.184118999997736,
+          "C": 74.43046899998444
+        },
+        "medianPairedPercentChange": {
+          "B/A": -61.2099122782815,
+          "B/C": -56.221470902595804,
+          "C/A": -8.171844482814837
+        }
+      },
+      "sidecar": {
+        "observations": 36,
+        "medianMilliseconds": {
+          "A": 54.82856699998956,
+          "B": 46.65723649998836,
+          "C": 39.02141049999045
+        },
+        "medianPairedPercentChange": {
+          "B/A": -22.673489702470373,
+          "B/C": 14.849393964283198,
+          "C/A": -33.42528317168566
+        }
+      }
+    },
+    "conclusion": "Validator component improved in this shared-host sample; full-sidecar evidence is inconclusive (B/A improves while B/C regresses, with large same-code C/A drift). No browser or complete-import speedup is established. No further timing was acquired for Jitendex or VNDB."
+  },
+  "attempts": [
+    {
+      "id": "parallel-jmdict",
+      "runner": "raw/score-validation-replay.mjs",
+      "log": "raw/score-validation-jmdict.log",
+      "outcome": "Process exited 137 before output or receipt; no rows accepted. Resource pressure suspected, not established by kernel telemetry."
+    },
+    {
+      "id": "sequential-jmdict-v1",
+      "runner": "raw/score-validation-sequential-replay.mjs",
+      "receipt": "raw/score-validation-sequential-jmdict.json",
+      "log": "raw/score-validation-sequential-jmdict.log",
+      "outcome": "Harness assertion incorrectly required true from the void single-bank parser API after 10,000 rows matched. Exit 1. Corrected v2 completed full corpus."
+    },
+    {
+      "id": "vndb-incomplete",
+      "runner": "raw/score-validation-corpus-parity.mjs",
+      "log": "raw/score-validation-vndb-parity.log",
+      "outcome": "Stopped after 200,000 rows in progress log; no final receipt and exit status unavailable. Baseline path was later composed by another agent and original loaded source identity was not durably saved. Excluded from parity claims."
+    },
+    {
+      "id": "vndb-corrective",
+      "runner": "raw/score-validation-corpus-parity-v2.mjs",
+      "receipt": "raw/score-validation-vndb-parity-v2.json",
+      "log": "raw/score-validation-vndb-parity-v2.log",
+      "exitStatus": "raw/score-validation-vndb-parity-v2.exit",
+      "outcome": "Exit 0, complete all-row equality against detached immutable baseline. Expected runtime hashes verified across import, printed before rows, and verified unchanged again at completion."
+    }
+  ],
+  "localQualityGateLimits": {
+    "vitest": {
+      "log": "raw/compact-score-validation.log",
+      "outcome": "Fork worker startup timed out at 65.21 seconds; zero tests ran, one runner error. Not a pass."
+    },
+    "initialLint": {
+      "log": "raw/compact-score-eslint.log",
+      "outcome": "Six test-only diagnostics, four array-newline and two typed-array slice. Corrected in commits 8fb8acb and 4d2316c."
+    },
+    "finalLint": {
+      "log": "raw/compact-score-eslint-final.log",
+      "outcome": "Process exited 137 after an existing vendor CommonJS warning; no final lint diagnostic result. Hosted CI determines the final gate."
+    }
+  },
+  "reproduceCorrectness": "node builds/perf/import-20261126-4344/score-validation-corpus-parity-v2.mjs BASELINE_ROOT CANDIDATE_ROOT FIXTURE_CACHE NEW_OUTPUT_JSON jmdict|jitendex|vndb. Baseline/candidate runtime hashes are pinned; provide generated term-bank-parser.wasm and installed dependencies at each root. Output path must not already exist. No timing is collected.",
+  "archive": {
+    "path": "score-validation-raw-evidence.tar.gz",
+    "sha256": "187260302565eb61bd93a35d5e2c05e749c8666dd42a833e62beb3d41eea1890",
+    "bytes": 78545,
+    "members": {
+      "raw/compact-score-eslint-final.log": {
+        "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+        "bytes": 694
+      },
+      "raw/compact-score-eslint.log": {
+        "sha256": "654f3948c018bdb1e60f7a0e7a6b1b8d513085e839e203b14ddb02a131012264",
+        "bytes": 1478
+      },
+      "raw/compact-score-independent-review.json": {
+        "sha256": "f408fa9dd64612c616a2ae605a23790535503bcc2d969ac9f8a4cf7dcaab2e70",
+        "bytes": 8262
+      },
+      "raw/compact-score-independent-review.log": {
+        "sha256": "ce36a27edb27522f1cf52bc0c27914dea563ff7a02be86aa65a585899707dd06",
+        "bytes": 51
+      },
+      "raw/compact-score-independent-review.mjs": {
+        "sha256": "a63b9c0234378c248243175401b549511b825c63f1c97e19c040b98818f694d9",
+        "bytes": 6665
+      },
+      "raw/compact-score-validation.log": {
+        "sha256": "9456b0a54478f9edc11a2477827cd2ddb6213b35d578c5a199bb57a39f3a56b3",
+        "bytes": 1214
+      },
+      "raw/score-validation-corpus-parity-v2.mjs": {
+        "sha256": "2fc203394f90d2ea8aa7de257e5b538c0cc88aca6e05b48d47e7a650f18d12dc",
+        "bytes": 8853
+      },
+      "raw/score-validation-corpus-parity.mjs": {
+        "sha256": "f19b4c365c520359eb1c5c56a1da68d786bbc5493b9ce877616ca59ed8057119",
+        "bytes": 7898
+      },
+      "raw/score-validation-jitendex-parity.json": {
+        "sha256": "b34eb66bc26676c7c77f4b528f798b43fc837d8bdd010e7984c91eea62fb6c40",
+        "bytes": 597736
+      },
+      "raw/score-validation-jitendex-parity.log": {
+        "sha256": "8aa2b54fea026b93503f6a2e3c6e4ac36688d9d49fd7b8081906b8e0a1999827",
+        "bytes": 6383
+      },
+      "raw/score-validation-jmdict.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "raw/score-validation-parity-replay.mjs": {
+        "sha256": "7f260281307007eca76ad39762e36726e1cc0e68b6b0cf45fa90736fb3e3b95d",
+        "bytes": 12662
+      },
+      "raw/score-validation-replay.mjs": {
+        "sha256": "d8155f35f2ccf6237b825d2b24ad5d89f7918dff14ef609d568c0a04639b7566",
+        "bytes": 15104
+      },
+      "raw/score-validation-sequential-jmdict-v2.json": {
+        "sha256": "2f859ed7df0147a2253406c736809dd0d38812298d166fc17e6707465936d572",
+        "bytes": 160778
+      },
+      "raw/score-validation-sequential-jmdict-v2.log": {
+        "sha256": "66995d2cecc5c6817a47449a046f698b215976d610f0f0d2b8e9c542817cc687",
+        "bytes": 1506
+      },
+      "raw/score-validation-sequential-jmdict.json": {
+        "sha256": "e5662f4b1acb4feca2704608a98a89f3476ba31dd77bc45a5a08a77eb23e65d2",
+        "bytes": 2078
+      },
+      "raw/score-validation-sequential-jmdict.log": {
+        "sha256": "cfa464aca9b7dda3ac8804a957cf211755238bed7d0b88e64c87a966ddc943b4",
+        "bytes": 786
+      },
+      "raw/score-validation-sequential-replay-v2.mjs": {
+        "sha256": "c1e5c1ea01ab9ed188020fc2c57ae3a90417d6675d077a2f5732ea1d9aae3dc1",
+        "bytes": 12651
+      },
+      "raw/score-validation-sequential-replay.mjs": {
+        "sha256": "924f3cd55d9ca6523d0734bb1d2d9902930f0b2063547ae5cba1fd3bb76e750e",
+        "bytes": 12671
+      },
+      "raw/score-validation-vndb-parity-v2.exit": {
+        "sha256": "bde294368bfed77c2cddf8cec271d398aee9cdbab3b26e1059281bd33adb0120",
+        "bytes": 12
+      },
+      "raw/score-validation-vndb-parity-v2.json": {
+        "sha256": "ffbd81a3ca311c0af08ee30fd9fdd315cfb401eb4363ea970e71ac00ec935d23",
+        "bytes": 1813341
+      },
+      "raw/score-validation-vndb-parity-v2.log": {
+        "sha256": "5b2e6d60b362b28a71229c02f4aed25665cbc7a19422f301bd69c638c193f9e5",
+        "bytes": 18859
+      },
+      "raw/score-validation-vndb-parity.log": {
+        "sha256": "1872741264fb1dd79dbc5e2c7bb1ccfe065f2bf360c2e2fcc11f3155f9d70f12",
+        "bytes": 511
+      }
+    }
+  }
+}

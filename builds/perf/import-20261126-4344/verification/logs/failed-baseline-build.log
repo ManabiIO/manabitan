@@ -1,0 +1,44 @@
+[perf-import] JMdict run 1/1
+[chromium-e2e] rebuilding manabitan-chrome.zip before test run
+[chromium-e2e] Failed to write report: ENOSPC: no space left on device, write
+file:///workspace/scratch/4344255ab4f9/manabitan/test/chromium/extension-two-dictionary-import.e2e.js:5979
+            runError = new Error(withE2ETag(failureReason));
+                       ^
+
+Error: [chromium-e2e] Command failed: node ./dev/bin/build.js --target chrome
+node:fs:977
+  handleErrorFromBinding(ctx);
+  ^
+
+Error: ENOSPC: no space left on device, write
+    at Object.writeSync (node:fs:977:3)
+    at Object.writeFileSync (node:fs:2502:26)
+    at createJSZip (file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:200:12)
+    at async file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:166:9
+    at async writePackageOutput (file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:82:9)
+    at async createZip (file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:139:5)
+    at async build (file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:315:21)
+    at async main (file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:417:13)
+    at async file:///workspace/scratch/4344255ab4f9/manabitan/dev/bin/build.js:430:72 {
+  errno: -28,
+  syscall: 'write',
+  code: 'ENOSPC'
+}
+
+Node.js v24.22.3
+
+    at main (file:///workspace/scratch/4344255ab4f9/manabitan/test/chromium/extension-two-dictionary-import.e2e.js:5979:24)
+    at async file:///workspace/scratch/4344255ab4f9/manabitan/test/chromium/extension-two-dictionary-import.e2e.js:6028:1
+
+Node.js v24.22.3
+file:///workspace/scratch/4344255ab4f9/manabitan/dev/perf/import-benchmark.js:119
+                reject(new Error(`Command failed code=${String(code)} signal=${String(signal)}: ${command} ${args.join(' ')}`));
+                       ^
+
+Error: Command failed code=1 signal=null: /opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node /workspace/scratch/4344255ab4f9/manabitan/test/chromium/extension-two-dictionary-import.e2e.js
+    at ChildProcess.<anonymous> (file:///workspace/scratch/4344255ab4f9/manabitan/dev/perf/import-benchmark.js:119:24)
+    at ChildProcess.emit (node:events:526:24)
+    at maybeClose (node:internal/child_process:1172:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:335:5)
+
+Node.js v24.22.3

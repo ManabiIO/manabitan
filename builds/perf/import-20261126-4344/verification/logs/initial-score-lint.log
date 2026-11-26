@@ -1,0 +1,26 @@
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/4344255ab4f9/manabitan-storage/test/term-record-compact-score-validation.test.js
+   68:62  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+   76:16  error  There should be a linebreak after this element   @stylistic/array-element-newline
+   76:24  error  There should be a linebreak after this element   @stylistic/array-element-newline
+   77:17  error  There should be a linebreak after this element   @stylistic/array-element-newline
+   77:26  error  There should be a linebreak after this element   @stylistic/array-element-newline
+  102:38  error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+
+✖ 6 problems (6 errors, 0 warnings)
+  6 errors and 0 warnings potentially fixable with the `--fix` option.
+

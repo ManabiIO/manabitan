@@ -687,3 +687,102 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## 2026-11-26: archive classification and compact-score validation
+
+Two independent runtime proposals start from develop
+`0143e9596cd8f790d5e166d4ba6a2425fbc57f14`:
+
+- [PR #931](https://github.com/ManabiIO/manabitan/pull/931) rejects filenames
+  that cannot match any built-in bank prefix before testing six regular
+  expressions. Explicit custom and pruned query paths retain their prior
+  behavior. Exact catalog replay preserves all bank entries and ordering for
+  JMdict, Jitendex and VNDB, plus 15,023 adversarial names. It avoids 6 / 1,530 /
+  879,426 regex tests respectively; these are work counts, not import speedups.
+- [PR #944](https://github.com/ManabiIO/manabitan/pull/944) traverses the compact
+  `Uint16Array` score keys with an indexed loop. Validation remains complete and
+  ordered. An independent single-process replay passes 42 exact sidecar-output
+  and rejection-parity cases, including shared/shifted inputs and malformed
+  keys. A separate native component replay compares all captured record-writer
+  arguments and complete sidecar envelopes byte-for-byte for every locked term
+  row: 528,299 JMdict rows / 53 runs, 436,555 Jitendex rows / 219 runs, and
+  6,648,310 VNDB rows / 665 runs. All 7,613,164 rows in 937 runs use compact score
+  fields. This uses one native bank at a time, deterministic content offsets and
+  intercepted persistence; it does not exercise production worker grouping,
+  compression, OPFS persistence or the browser import pipeline.
+
+Frozen published source bindings:
+
+| PR   | Remote head                                | Tree                                       |
+| ---- | ------------------------------------------ | ------------------------------------------ |
+| #931 | `752706ebbc0156096cf2727ba6651d223a9132fd` | `ce9d574df46be5c8f8f223ba311a07f7e9197771` |
+| #944 | `fbc49eb08c00097b91ddf9c90ab94e90b9da799b` | `6a68b5724de33799e77f2ae68690612913621bd8` |
+
+The composed source at `feac5eeb8a058b976a5f49448a870ec2be6ad183`, tree
+`378638700e03c64fadcaa87624bc0726d68f3fe2`, passes the same independent catalog
+and score-validation checks against detached baseline. Runtime hashes are
+unchanged by the subsequent test formatting corrections. Portable runners,
+source/fixture hashes, original receipts and failure logs are retained in the
+adjacent verification evidence.
+
+The independent storage-artifact audit verifies all 23 raw member hashes and
+sizes, all 937 source-bank names and sizes against the locked ZIP directories,
+every group/profile/run row total, the runtime/WASM pins, and the reported timing
+statistics. Encoded-byte digests agree between the original receipts and index;
+the raw encoded envelopes are not retained, so the audit does not independently
+recompute those output digests. The JMdict and Jitendex acquisition receipts have
+stale CPU/memory labels of 4/8; the archived runners actually set navigator hints
+to 1/4, as corrected in the index. The interrupted, provenance-uncertain first
+VNDB attempt is preserved but excluded. Accepted VNDB evidence uses the detached
+immutable baseline and verifies the pinned runtime hashes before and after its
+complete run.
+
+Exploratory JMdict timing has six fixed real inputs / 60,000 rows, two warmups per
+arm and twelve ABC permutation blocks. A and C run identical baseline code. The
+private validator's paired median changes are -61.2% versus A and -56.2% versus C;
+the whole sidecar caller changes -22.7% versus A but +14.8% versus C, while the
+same-code C/A drift is -33.4%. The caller result is inconclusive. These observations
+establish no browser or complete-import speedup; Jitendex and VNDB have no timing
+claim.
+
+All three locked archives were hash/size checked and their complete term JSON
+counted: 528,299 / 436,555 / 6,648,310 rows. This count does not verify persisted
+browser state or all media payloads. No local browser timing was acquired:
+browser installation returned HTTP 403, the installed system launcher had no
+executable, and the release baseline build failed with `ENOSPC` before launch.
+A focused Vitest attempt timed out before starting its sole worker; the final
+scoped lint process was killed with exit 137. These failures remain recorded.
+The successful standalone correctness checks do not replace the product PRs'
+hosted full-suite gates or establish a complete-import speedup.
+
+### Reproduce the bounded checks
+
+Use the frozen baseline and relevant candidate checkouts with dependencies and
+matching generated libraries available, including `term-bank-parser.wasm`.
+Replace the uppercase path arguments below with local paths; select a fresh
+output filename for each invocation. The two independent Node scripts also run
+against the composed candidate. The native corpus runner accepts one of the
+three dictionary identifiers per invocation and collects correctness only.
+
+```sh
+node VERIFY_DIR/catalog-independent-review.mjs BASELINE_ROOT CATALOG_ROOT FIXTURE_CACHE NEW_CATALOG_JSON
+node VERIFY_DIR/compact-score-independent-review.mjs BASELINE_ROOT SCORE_ROOT NEW_SCORE_JSON
+python VERIFY_DIR/count-fixture-rows.py BASELINE_ROOT FIXTURE_CACHE NEW_FIXTURE_JSON
+node builds/perf/import-20261126-4344/score-validation-corpus-parity-v2.mjs BASELINE_ROOT SCORE_ROOT FIXTURE_CACHE NEW_CORPUS_JSON jmdict
+node builds/perf/import-20261126-4344/score-validation-corpus-parity-v2.mjs BASELINE_ROOT SCORE_ROOT FIXTURE_CACHE NEW_CORPUS_JSON jitendex
+node builds/perf/import-20261126-4344/score-validation-corpus-parity-v2.mjs BASELINE_ROOT SCORE_ROOT FIXTURE_CACHE NEW_CORPUS_JSON vndb
+```
+
+The read-only archive audit requires no native parser execution:
+
+```sh
+python VERIFY_DIR/audit-storage-evidence.py builds/perf/import-20261126-4344 VERIFY_DIR/fixture-receipts.json FIXTURE_CACHE BASELINE_ROOT SCORE_ROOT NEW_AUDIT_JSON 737120c401ad5396f40c48c9e0b34e6bfbe84e68ea53009033f3b8ecf8192414
+```
+
+Here `VERIFY_DIR` is the adjacent published verification directory. Original
+receipt acquisition paths remain intact as provenance; the runners accept new
+paths. `provenance.json` binds the independent checks and composed-source receipts
+to the unchanged runtime hashes. `score-validation-index.json` binds the native
+receipts, original runners, failures and exploratory observations to
+`score-validation-raw-evidence.tar.gz` (SHA-256
+`187260302565eb61bd93a35d5e2c05e749c8666dd42a833e62beb3d41eea1890`).

@@ -1,0 +1,3 @@
+{"id":"jmdict","path":"/workspace/scratch/4344255ab4f9/fixtures/JMdict.zip","sha256":"3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f","sizeBytes":15645766,"termRows":528299}
+{"id":"jitendex","path":"/workspace/scratch/4344255ab4f9/fixtures/jitendex-yomitan.zip","sha256":"e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356","sizeBytes":38831822,"termRows":436555}
+{"id":"vndb","path":"/workspace/scratch/4344255ab4f9/fixtures/vndb_characters_by_bee.zip","sha256":"da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792","sizeBytes":291705969,"termRows":6648310}

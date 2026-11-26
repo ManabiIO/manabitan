@@ -1,0 +1,81 @@
+Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243)[2m from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip[22m
+Error: Download failed: server returned code 403 body '<html>
+    <head><title>Site Unavailable</title></head>
+    <body>
+      <center>
+        <h1>Site Unavailable</h1>
+        <p>Unable to access this site.</p>
+      </center>
+    </body>
+</html>
+'. URL: https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+    at IncomingMessage.handleError (/workspace/scratch/4344255ab4f9/manabitan/node_modules/playwright-core/lib/coreBundle.js:32551:23)
+    at IncomingMessage.emit (node:events:526:24)
+    at endReadableNT (node:internal/streams/readable:1783:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243)[2m from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip[22m
+Error: Download failed: server returned code 403 body '<html>
+    <head><title>Site Unavailable</title></head>
+    <body>
+      <center>
+        <h1>Site Unavailable</h1>
+        <p>Unable to access this site.</p>
+      </center>
+    </body>
+</html>
+'. URL: https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+    at IncomingMessage.handleError (/workspace/scratch/4344255ab4f9/manabitan/node_modules/playwright-core/lib/coreBundle.js:32551:23)
+    at IncomingMessage.emit (node:events:526:24)
+    at endReadableNT (node:internal/streams/readable:1783:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243)[2m from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip[22m
+Error: Download failed: server returned code 403 body '<html>
+    <head><title>Site Unavailable</title></head>
+    <body>
+      <center>
+        <h1>Site Unavailable</h1>
+        <p>Unable to access this site.</p>
+      </center>
+    </body>
+</html>
+'. URL: https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+    at IncomingMessage.handleError (/workspace/scratch/4344255ab4f9/manabitan/node_modules/playwright-core/lib/coreBundle.js:32551:23)
+    at IncomingMessage.emit (node:events:526:24)
+    at endReadableNT (node:internal/streams/readable:1783:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243)[2m from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip[22m
+Error: Download failed: server returned code 403 body '<html>
+    <head><title>Site Unavailable</title></head>
+    <body>
+      <center>
+        <h1>Site Unavailable</h1>
+        <p>Unable to access this site.</p>
+      </center>
+    </body>
+</html>
+'. URL: https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+    at IncomingMessage.handleError (/workspace/scratch/4344255ab4f9/manabitan/node_modules/playwright-core/lib/coreBundle.js:32551:23)
+    at IncomingMessage.emit (node:events:526:24)
+    at endReadableNT (node:internal/streams/readable:1783:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243)[2m from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip[22m
+Error: Download failed: server returned code 403 body '<html>
+    <head><title>Site Unavailable</title></head>
+    <body>
+      <center>
+        <h1>Site Unavailable</h1>
+        <p>Unable to access this site.</p>
+      </center>
+    </body>
+</html>
+'. URL: https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+    at IncomingMessage.handleError (/workspace/scratch/4344255ab4f9/manabitan/node_modules/playwright-core/lib/coreBundle.js:32551:23)
+    at IncomingMessage.emit (node:events:526:24)
+    at endReadableNT (node:internal/streams/readable:1783:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Failed to install browsers
+Error: Failed to download Chrome for Testing 153.0.8010.12 (playwright chromium v1243), caused by
+Error: Download failure, code=1
+    at ChildProcess.<anonymous> (/workspace/scratch/4344255ab4f9/manabitan/node_modules/playwright-core/lib/coreBundle.js:32428:32)
+    at ChildProcess.emit (node:events:514:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:324:12)
