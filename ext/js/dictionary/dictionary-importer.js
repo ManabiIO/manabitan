@@ -1160,11 +1160,12 @@ export class DictionaryImporter {
         );
 
         // Files
-        /** @type {import('dictionary-importer').QueryDetails} */
-        const queryDetails = usePrunedArtifactAuxFastPath ?
-            ARCHIVE_BANK_QUERY_DETAILS.slice(0, 2) :
-            ARCHIVE_BANK_QUERY_DETAILS;
-        const archiveFiles = Object.fromEntries(this._getArchiveFiles(fileMap, queryDetails));
+        /* eslint-disable @stylistic/semi */
+        const archiveFiles = Object.fromEntries(this._getArchiveFiles(
+            fileMap,
+            usePrunedArtifactAuxFastPath ? ARCHIVE_BANK_QUERY_DETAILS.slice(0, 2) : void 0,
+        ))
+        /* eslint-enable @stylistic/semi */
         const termFiles = archiveFiles.termFiles ?? [];
         const termArtifactFiles = incompleteTermArtifactManifest ? [] : archiveFiles.termArtifactFiles ?? [];
         const termMetaFiles = archiveFiles.termMetaFiles ?? [];
@@ -4387,10 +4388,10 @@ export class DictionaryImporter {
 
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
-     * @param {import('dictionary-importer').QueryDetails} queryDetails
+     * @param {import('dictionary-importer').QueryDetails} [queryDetails]
      * @returns {import('dictionary-importer').QueryResult}
      */
-    _getArchiveFiles(fileMap, queryDetails) {
+    _getArchiveFiles(fileMap, queryDetails = ARCHIVE_BANK_QUERY_DETAILS) {
         /** @type {import('dictionary-importer').QueryResult} */
         const results = new Map();
 
@@ -4398,7 +4399,16 @@ export class DictionaryImporter {
             results.set(fileType, []);
         }
 
+        /* eslint-disable @stylistic/semi */
+        const standardBankQueries = queryDetails === ARCHIVE_BANK_QUERY_DETAILS
         for (const fileName of fileMap.keys()) {
+            // Every built-in bank pattern starts with "t" or "k". Most media
+            // names cannot match; keep custom patterns on their original path.
+            if (standardBankQueries) {
+                const firstCharacter = fileName.charCodeAt(0)
+                if (firstCharacter !== 0x74 && firstCharacter !== 0x6b) { continue }
+            }
+            /* eslint-enable @stylistic/semi */
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
