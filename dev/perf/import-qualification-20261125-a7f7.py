@@ -29,6 +29,8 @@ parser.add_argument("--evidence", type=pathlib.Path, required=True)
 parser.add_argument("--flags", default="{}")
 parser.add_argument("--expected-workers", type=int)
 parser.add_argument("--expected-package-entry", action="append", required=True)
+parser.add_argument("--vndb-sah-allocation-units", type=int, nargs=2, metavar=("MIN", "MAX"),
+                    help="Prospective VNDB active SAH allocation range in 4096-byte units; default: historical 129–131")
 args = parser.parse_args()
 for value in (args.baseline, args.candidate):
     if re.fullmatch(r"[a-f0-9]{40}", value) is None:
@@ -44,7 +46,17 @@ sys.path.insert(0, str(root / "dev/perf/import-memory-20261125-a7f7"))
 from chromium_memory import run_with_sampling, summarize_import_window
 from protocol import memory_overlay, memory_comparison, schedule as memory_schedule
 from audit_memory import audit_cell
-from qualification_receipts import validate_import_summary, require_matching_receipts
+from qualification_receipts import (
+    SAH_ALLOCATION_UNIT_BYTES, validate_import_summary, require_matching_receipts,
+    validate_vndb_sah_allocation_units,
+)
+
+if args.vndb_sah_allocation_units is not None and args.dictionary != "vndb":
+    parser.error("An explicit VNDB SAH allocation range requires --dictionary vndb")
+try:
+    vndb_sah_allocation_units = validate_vndb_sah_allocation_units(args.vndb_sah_allocation_units)
+except ValueError as error:
+    parser.error(str(error))
 
 evidence = args.evidence.resolve()
 evidence.mkdir(parents=True, exist_ok=False)
@@ -184,6 +196,11 @@ write_json(evidence / "registered-plan.json", {
     "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
     "expectedPackageEntries": args.expected_package_entry,
     "expectedWorkers": args.expected_workers,
+    "vndbSahAllocationPolicy": {
+        "unitBytes": SAH_ALLOCATION_UNIT_BYTES,
+        "rangeUnits": vndb_sah_allocation_units,
+        "origin": "explicit" if args.vndb_sah_allocation_units is not None else "legacy-default",
+    } if args.dictionary == "vndb" else None,
     "memorySchedule": memory_schedule(1 if first == "AB" else 2),
     "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
 })
@@ -202,6 +219,7 @@ def validate_observation(output, arm, media_check="sample", overlay=None):
         source_sha=identity["sha"], package_sha256=identity["packageSha256"],
         browser_version=browser_version, import_flags=flags if flags else None,
         source_hashes=hashes, source_dirty=overlay is not None, media_check=media_check,
+        vndb_sah_allocation_units=vndb_sah_allocation_units,
     )
     if args.expected_workers is not None:
         actual = summary["runs"][0]["step4Breakdown"]["dictionaries"][0]["parserWorkerCount"]
