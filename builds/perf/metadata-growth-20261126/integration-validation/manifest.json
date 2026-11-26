@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-11-26T17:28:06.060983+00:00",
+  "scope": "Retained local integration validation and failure diagnosis for the combined metadata/VNDB runtime. Original failed cohorts remain failed. No complete-import timing, peak-memory or persisted-database parity claim.",
+  "sourceIdentities": {
+    "path": "source-identities.json",
+    "sha256": "2ecc14bdd002748efa1e3938bf820ac5b101384c2b522f8763110117bbae24c8",
+    "sizeBytes": 6073
+  },
+  "integration": {
+    "commit": "9841d639032cbae60400a46649bcc77d32725c87",
+    "tree": "05f513325daee935b1353de39b4c02813d4fcb4b",
+    "scope": "Combined metadata and VNDB runtime plus final test cleanup; distinct from either source PR alone."
+  },
+  "publishedAtCollection": {
+    "metadata": {
+      "pullRequest": 964,
+      "url": "https://github.com/ManabiIO/manabitan/pull/964",
+      "head": "7dfb917a19f85f5a2a00d66a225a3e67a2141eb7",
+      "tree": "a39fef4b16757dc46cad0bfd3094f5d653ddb746"
+    },
+    "vndb": {
+      "pullRequest": 954,
+      "url": "https://github.com/ManabiIO/manabitan/pull/954",
+      "head": "9e8981724db775d95483d696c7be4319522ba729",
+      "tree": "3f47ea6b831fdba1c35cb25a9450343d164af6d1"
+    }
+  },
+  "archiveFormat": {
+    "format": "gzip",
+    "compressionLevel": 9,
+    "mtime": 0,
+    "filename": "",
+    "deterministicRegenerationVerified": true,
+    "decompressedByteEqualityVerified": true
+  },
+  "results": {
+    "fullUnitSuite": {
+      "status": "failed",
+      "exitCode": 1,
+      "testFiles": {
+        "passed": 647,
+        "failed": 4,
+        "total": 651
+      },
+      "tests": {
+        "passed": 14667,
+        "failedTimeouts": 3,
+        "skipped": 68,
+        "total": 14738
+      },
+      "suiteSetupFailures": 2,
+      "failureReason": "Two native compiler/linker discovery failures and three unchanged-default 5000ms test timeouts.",
+      "receipt": "full-unit-receipt.json",
+      "log": "full-unit.log"
+    },
+    "failedFilesRecheck": {
+      "status": "failed",
+      "exitCode": 1,
+      "testFiles": {
+        "passed": 3,
+        "failed": 1,
+        "total": 4
+      },
+      "tests": {
+        "passed": 115,
+        "failedTimeouts": 1,
+        "total": 116
+      },
+      "changes": "Only per-process compiler, linker PATH and library-path availability; serial maxWorkers=1. Product source, test source and default 5000ms timeout unchanged.",
+      "remainingFailure": "term-entry-content-hash.test.js: reads a stable shared subrange without changing its owner",
+      "reportedFailedTestDurationMs": 5047,
+      "receipt": "failed-files-recheck-receipt.json",
+      "log": "failed-files-recheck.log"
+    },
+    "baselineTimeoutDiagnostic": {
+      "status": "failed",
+      "exitCode": 1,
+      "baseline": {
+        "commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+        "tree": "004fa8fde0055379ffbf22f9bbb60ae50f99114a"
+      },
+      "tests": {
+        "failedTimeouts": 1,
+        "skippedByNameFilter": 89,
+        "total": 90
+      },
+      "defaultTimeoutMs": 5000,
+      "reportedFailedTestDurationMs": 5226,
+      "interpretation": "The same shared-subrange timeout reproduces on unchanged baseline. This single-test diagnostic is not a performance comparison and does not turn either failed run into a pass.",
+      "receipt": "baseline-timeout-check-receipt.json",
+      "log": "baseline-timeout-check.log"
+    },
+    "allTargetDryBuild": {
+      "status": "passed",
+      "targets": 7,
+      "reportedBy": "root command completion",
+      "log": "build-all.log"
+    },
+    "chromeReleaseBuild": {
+      "initialStatus": "failed-ENOSPC",
+      "initialLog": "build-chrome.log",
+      "retryStatus": "passed",
+      "retryReportedBy": "root command completion",
+      "retryLog": "build-chrome-retry.log",
+      "packageSha256": "9e608fa5a61a18d1b60808d23cab023761643df1705daa54041de12b90d5fadf",
+      "packageBytesArchived": false
+    },
+    "browserLifecycle": {
+      "status": "blocked-before-any-import",
+      "reason": "Chromium process_singleton_posix socket() failed with EPERM",
+      "startedCorpora": [],
+      "phaseCount": 0,
+      "receipt": "browser-launch-receipt.json",
+      "report": "browser/jmdict.json",
+      "log": "browser/jmdict.log",
+      "hostedGateRequired": true
+    },
+    "vndbCommentOnlyCleanup": {
+      "normalizedAstUnchanged": true,
+      "receipt": "vndb-ast-parity.json"
+    }
+  },
+  "claims": {
+    "fullSuitePassed": false,
+    "newFailingAssertionObserved": false,
+    "remainingTimeoutReproducedOnBaseline": true,
+    "wholeImportSpeedup": false,
+    "peakMemoryReduction": false,
+    "completeBrowserImport": false,
+    "completePersistedDatabaseParity": false
+  },
+  "artifacts": {
+    "baseline-timeout-check-receipt.json": {
+      "archive": "raw/baseline-timeout-check-receipt.json.gz",
+      "uncompressedSha256": "f4df5db9194f623619d5dd7d6fc1bc9bcc817dd93cf6c11e1862c589d51a9893",
+      "uncompressedSizeBytes": 692,
+      "archiveSha256": "1dcd840f1d85262c89dd1cb8b83f029caadf91ab57447b979afc98db32bb22c5",
+      "archiveSizeBytes": 448
+    },
+    "baseline-timeout-check.log": {
+      "archive": "raw/baseline-timeout-check.log.gz",
+      "uncompressedSha256": "57112aa87250aec17e6defc1640ca72c45bb67063e366058a8cc92b6692a28d3",
+      "uncompressedSizeBytes": 6380,
+      "archiveSha256": "cbe259fa0afa88d628992714d4e2d44a9a100e1fe9fa6f46af55e61166e9a3a1",
+      "archiveSizeBytes": 1053
+    },
+    "browser/jmdict.json": {
+      "archive": "raw/browser/jmdict.json.gz",
+      "uncompressedSha256": "ba3c0e57a877b347b93e901984ba69046ddf9d4cae62a1c45d1e142ecefb36c6",
+      "uncompressedSizeBytes": 23045,
+      "archiveSha256": "5bfc31e715c1c39a425db371547de70f4dbdeda2630fac5952c0be4897a6db06",
+      "archiveSizeBytes": 2860
+    },
+    "browser/jmdict.log": {
+      "archive": "raw/browser/jmdict.log.gz",
+      "uncompressedSha256": "3234ea39514ce2e265689d5701f44bc2fbc2ec3d66072c589d3c91a19026c0fc",
+      "uncompressedSizeBytes": 11424,
+      "archiveSha256": "bae3bad2732f6ce26c2d5edffae38611af162b5a8fa6315ab7e5fe4b5f7b9b4d",
+      "archiveSizeBytes": 2446
+    },
+    "browser/runs.json": {
+      "archive": "raw/browser/runs.json.gz",
+      "uncompressedSha256": "41e8004c8a6fbb19f3bdd80f2b481015b0db63379607558a59b170fbe0b5379f",
+      "uncompressedSizeBytes": 375,
+      "archiveSha256": "97c2e877e3dd11a777222944422e8ad9b34704d6381dc1681201fec621716c21",
+      "archiveSizeBytes": 214
+    },
+    "browser-launch-receipt.json": {
+      "archive": "raw/browser-launch-receipt.json.gz",
+      "uncompressedSha256": "9fba4ebfd375bf0d86c22f17357e9da9ce5258504c807908e4e6b5a67a8d34c6",
+      "uncompressedSizeBytes": 373,
+      "archiveSha256": "a8e94a4dbfd10e2e281379100b9e9f2c707c129cb433e217efa6dbccc7c7b04f",
+      "archiveSizeBytes": 289
+    },
+    "build-all.log": {
+      "archive": "raw/build-all.log.gz",
+      "uncompressedSha256": "3b1efb08a5da4371064b456908f0b0dc0b128b64c8e27a702bff8c27575707c6",
+      "uncompressedSizeBytes": 384,
+      "archiveSha256": "d3b0d24efd5ef97a3c7393b0efefefce7626ed00c9a41ee2e1dd233708fd7c9b",
+      "archiveSizeBytes": 238
+    },
+    "build-chrome-retry.log": {
+      "archive": "raw/build-chrome-retry.log.gz",
+      "uncompressedSha256": "522a235f139483efdbfbe9b642b349d78022df47d319fba7b272aa6d675fa8e1",
+      "uncompressedSizeBytes": 237,
+      "archiveSha256": "1e96a1c46a1e3952e25d828b23e90a8e190f76658fe1b0e5eda2b3baa7230ab6",
+      "archiveSizeBytes": 200
+    },
+    "build-chrome.log": {
+      "archive": "raw/build-chrome.log.gz",
+      "uncompressedSha256": "243b3cbd775ce4c2e370740e3f88457e7a75223333ebb42f045d4c9464d855b8",
+      "uncompressedSizeBytes": 1157,
+      "archiveSha256": "5666f5f445e5ce5264a3c336f37dd42d246b5df20eae421592490fe80e3df2d3",
+      "archiveSizeBytes": 486
+    },
+    "compiler-probe/initial.stderr.txt": {
+      "archive": "raw/compiler-probe/initial.stderr.txt.gz",
+      "uncompressedSha256": "b7910ae3dab8e91844eaa2247bf5ef1993ca4cf962288e34ea6dfaadf276ba89",
+      "uncompressedSizeBytes": 167,
+      "archiveSha256": "a6733bd339648fded54d2e502cb4298e078454a57584f8bdd8b580fef9b670d9",
+      "archiveSizeBytes": 140
+    },
+    "compiler-probe/path-adjusted.stderr.txt": {
+      "archive": "raw/compiler-probe/path-adjusted.stderr.txt.gz",
+      "uncompressedSha256": "2a0663f038041445ae33748c57a380d03ff9d5cf6e7b05badf8fa12ed37c9b92",
+      "uncompressedSizeBytes": 1879,
+      "archiveSha256": "445eddc56520f4f301e36697e604f3d8ccdd7318044f63fc9fdf2fe6083be7fa",
+      "archiveSizeBytes": 840
+    },
+    "compiler-probe/probe.c": {
+      "archive": "raw/compiler-probe/probe.c.gz",
+      "uncompressedSha256": "560a7695bae5b3e5c00e5b918bcaffa414efb2bd2fb1097424953fce22dae8d8",
+      "uncompressedSizeBytes": 20,
+      "archiveSha256": "cb9f5b879825455dc7c801dbc016c51d16836d360e6bfee080ced3ad8dfb06ae",
+      "archiveSizeBytes": 38
+    },
+    "compiler-probe/probe.wasm": {
+      "archive": "raw/compiler-probe/probe.wasm.gz",
+      "uncompressedSha256": "927715d9a632200b86cc7117bd76883d01313236a6a64745fdb43a0bde4da697",
+      "uncompressedSizeBytes": 63,
+      "archiveSha256": "b289b1f6ad49867930d3d2fc3652b177313801030bc984a6e5660acf5c8ce9eb",
+      "archiveSizeBytes": 82
+    },
+    "compiler-probe/resolved.stderr.txt": {
+      "archive": "raw/compiler-probe/resolved.stderr.txt.gz",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uncompressedSizeBytes": 0,
+      "archiveSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "archiveSizeBytes": 20
+    },
+    "failed-files-recheck-receipt.json": {
+      "archive": "raw/failed-files-recheck-receipt.json.gz",
+      "uncompressedSha256": "df6e833cd2c867f979c19acdfd2a899cdfc67ee57ea405d14f434546f1f4fb20",
+      "uncompressedSizeBytes": 1030,
+      "archiveSha256": "396c7ba980ca099cb84f80a2c94b6f0daf4b297ecf11a2627f60ab18adea8df6",
+      "archiveSizeBytes": 550
+    },
+    "failed-files-recheck.log": {
+      "archive": "raw/failed-files-recheck.log.gz",
+      "uncompressedSha256": "06883ac1f92eb5d466f73a0d28cd1a3d547492b04c518ea186e1c1486695348e",
+      "uncompressedSizeBytes": 7681,
+      "archiveSha256": "98a2f04a227516b0060bc8bd2b23244f4dd74993f2d5bd720056969b04c59efa",
+      "archiveSizeBytes": 1270
+    },
+    "full-unit-receipt.json": {
+      "archive": "raw/full-unit-receipt.json.gz",
+      "uncompressedSha256": "1159f467d654c8ae4606109a83612088c73f8f1852ddef4de9ffde60e5793c4b",
+      "uncompressedSizeBytes": 394,
+      "archiveSha256": "7f532b097bbe79b6066dc6a3621c7c6e9cb435b33c7c5bde6f595f505677b3cc",
+      "archiveSizeBytes": 288
+    },
+    "full-unit.log": {
+      "archive": "raw/full-unit.log.gz",
+      "uncompressedSha256": "2c87a198f108c3aaec224c1327e5beb72960c17a810388a5f241cc5262781ee3",
+      "uncompressedSizeBytes": 196400,
+      "archiveSha256": "9bf9d98a73dcda60dd31721375314d2c147445f213e3b21c5fa3f5fbcfe21180",
+      "archiveSizeBytes": 7823
+    },
+    "vndb-ast-parity.json": {
+      "archive": "raw/vndb-ast-parity.json.gz",
+      "uncompressedSha256": "d9d06dbf78aac4bac2bb1c8743b7534273bd86739f87a3707e24ab2eff454f5e",
+      "uncompressedSizeBytes": 395,
+      "archiveSha256": "5287eb51940c7cafcf1d6ab3f41a441ba35b1ccb60de4b30d3e083ef66cfa60f",
+      "archiveSizeBytes": 247
+    }
+  },
+  "omittedArtifacts": {
+    "browser/jmdict.html": {
+      "reason": "HTML presentation omitted; exact machine-readable report and log retained.",
+      "sha256": "2c13a8d9db73c8117f85585339d580cf5b6ca53ab9dfed6ea43180368e7fc851",
+      "sizeBytes": 34706
+    }
+  }
+}

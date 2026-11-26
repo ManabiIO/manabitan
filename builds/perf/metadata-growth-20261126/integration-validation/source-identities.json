@@ -1,0 +1,144 @@
+{
+  "baseline": {
+    "commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "tree": "004fa8fde0055379ffbf22f9bbb60ae50f99114a"
+  },
+  "integratedTested": {
+    "commit": "9841d639032cbae60400a46649bcc77d32725c87",
+    "tree": "05f513325daee935b1353de39b4c02813d4fcb4b",
+    "scope": "Combined metadata and VNDB runtime plus final test cleanup; distinct from either source PR alone."
+  },
+  "publishedAtCollection": {
+    "metadata": {
+      "pullRequest": 964,
+      "url": "https://github.com/ManabiIO/manabitan/pull/964",
+      "head": "7dfb917a19f85f5a2a00d66a225a3e67a2141eb7",
+      "tree": "a39fef4b16757dc46cad0bfd3094f5d653ddb746"
+    },
+    "vndb": {
+      "pullRequest": 954,
+      "url": "https://github.com/ManabiIO/manabitan/pull/954",
+      "head": "9e8981724db775d95483d696c7be4319522ba729",
+      "tree": "3f47ea6b831fdba1c35cb25a9450343d164af6d1"
+    }
+  },
+  "runtimeMatchesPublishedSource": {
+    "ext/js/dictionary/dictionary-database.js": {
+      "pullRequest": 964,
+      "sha256": "e45ca4795755acfc4ef2b2e80f4ef61f6dd5e208b430c31288c2969925ea7eb7",
+      "sizeBytes": 609567,
+      "gitBlob": "78cb4cb196d80f07a070fdfa94ad0be3cf0d92f8"
+    },
+    "ext/js/dictionary/term-content-metadata-arena.js": {
+      "pullRequest": 964,
+      "sha256": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+      "sizeBytes": 5580,
+      "gitBlob": "39ec6a4dcaafafbdbec4b94b7dac0a26379c6223"
+    },
+    "ext/js/dictionary/term-bank-source-pipeline.js": {
+      "pullRequest": 954,
+      "sha256": "602c1369d8df6c134601dde28ab7b6ed4b77235811153c2036f3ae29731d93c9",
+      "sizeBytes": 47175,
+      "gitBlob": "8fc3ba89987cac5da4f6ac18a1b76e05ceeb9831"
+    }
+  },
+  "unchangedFailedTestFilesAndRelevantCheckedInDependencies": {
+    "test/term-bank-crc.test.js": {
+      "sha256": "978c0eb2addbfb391a28a6640150c26b1e251b51ad344fa572b5b24c39620c48",
+      "sizeBytes": 7628,
+      "gitBlob": "94c9d502e53b7e0f8337daf2c283c41ed3688235"
+    },
+    "test/term-bank-memory-page.test.js": {
+      "sha256": "04e3a1caf12d31b666f4a8c8b15e9db831b7ccf2211acd2c52a9e2cb24c9f222",
+      "sizeBytes": 4900,
+      "gitBlob": "f17b66a1237826f366c0329c441fb31d5c0d3d76"
+    },
+    "test/term-entry-content-hash.test.js": {
+      "sha256": "bbe8819a0f795dedd1302f05c58e6f6070c697e6499c8e7f714490cd6ff6c4d8",
+      "sizeBytes": 4918,
+      "gitBlob": "c8954ec540efcb5396964c7f7a270bf1f0f79fdd"
+    },
+    "test/zstd-compression-worker-context.test.js": {
+      "sha256": "7713e4a38b1c659d9546f9f2a8e40a687da4f17bf3874dae64ba185d0cf6b6b8",
+      "sizeBytes": 8797,
+      "gitBlob": "6c817463e31e8dad9876180f275d3c5cd02c69d6"
+    },
+    "test/util/wasm-compiler.js": {
+      "sha256": "3576bd5c761b358976e959f4753bfd47518df38d30603586175b3a34a96a4ce8",
+      "sizeBytes": 2466,
+      "gitBlob": "ebe25e9b449b54ba169e3e4f4278240e450b89f9"
+    },
+    "test/util/move-fixture-to-trash.js": {
+      "sha256": "c69a7f56702991e4c475b0948708ece457ccd914d32eac6ed38021c77dcff5a7",
+      "sizeBytes": 1551,
+      "gitBlob": "bd11c3a5e82246444860c13b72fb17e6185ecf24"
+    },
+    "ext/js/dictionary/term-entry-content-hash.js": {
+      "sha256": "99429f2a812ccac6538c914555775895c5a1115325dd9b0eb42886d23fbca23d",
+      "sizeBytes": 5729,
+      "gitBlob": "b9a01b05355b7d2befb18ce8af1323bf2659d327"
+    },
+    "ext/js/dictionary/wasm/term-bank-parser.c": {
+      "sha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+      "sizeBytes": 156075,
+      "gitBlob": "86cb9e18ea59993f08c4f6f1fb6e1b8e3571c0d9"
+    },
+    "ext/js/dictionary/zstd-term-content.js": {
+      "sha256": "f28eaf9425fad2031423518170b0888c4ad0f607d62b349ea57a2438fe4b17ed",
+      "sizeBytes": 40984,
+      "gitBlob": "95da4c781ffe0264aa504d92536bc176935f20c0"
+    },
+    "ext/js/dictionary/zstd-term-content-compression-worker.js": {
+      "sha256": "125b11437922f28cb09f9b9d7a8e209d68296153d82e41a766b8ef8f251f8247",
+      "sizeBytes": 4055,
+      "gitBlob": "186bc38d0875b4fe0ae00d457d0ffcd6b4f90567"
+    },
+    "ext/js/dictionary/term-bank-experiments.js": {
+      "sha256": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+      "sizeBytes": 3523,
+      "gitBlob": "38ffe9035ffad5a4cb00de5406ce2dda5b823b4c"
+    },
+    "ext/js/dictionary/term-content-block-envelope.js": {
+      "sha256": "4e360c1bc2c4ec2980039db1c0db0f170409a97ebd75235e8e79b2ab67190018",
+      "sizeBytes": 2041,
+      "gitBlob": "a02be448e7d709c7644ce1a98372bd9004f5ac85"
+    },
+    "dev/lib/zstd-wasm.js": {
+      "sha256": "67bfbc665b0c25bcb19b4b660e68d81995f39c273292de7a934cd0bf6136d86c",
+      "sizeBytes": 20561,
+      "gitBlob": "0e587336f8b3692f24ec782b70ea5c8a4c2f5f16"
+    },
+    "dev/lib/zstd-simd-module.js": {
+      "sha256": "9ec18a2a02698c24e797882ffcee1ef8d97dd7b00e5fa58aa5a0365c7234fe48",
+      "sizeBytes": 9046,
+      "gitBlob": "3294d38f1880e60661083ee5202d7e1ee6a16c6d"
+    },
+    "dev/data/zstd-simd.wasm": {
+      "sha256": "ad3a18c197d72167262d01fd202976325f57a6697bca627f4527c96d4dbbcfcc",
+      "sizeBytes": 433631,
+      "gitBlob": "bc83266947d7d1900e49e8cf88b0621cbe32c16e"
+    },
+    "dev/data/zstd-dicts/jmdict.zdict": {
+      "sha256": "f384a821c2f122bde518ee8a513ea76cbe9876c3534fc1fff4cacdf1ecc509cb",
+      "sizeBytes": 16384,
+      "gitBlob": "5c964dbe65205eb5245f79379173a208005640d4"
+    },
+    "package.json": {
+      "sha256": "b47b507e9fb0c80e85e3a5e38e92339847f83f613431bcf5728bc5c2297ae7dc",
+      "sizeBytes": 9515,
+      "gitBlob": "55e166cdeec6ac759a25296c33025e6e52ea9c82"
+    },
+    "package-lock.json": {
+      "sha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "sizeBytes": 333801,
+      "gitBlob": "46d4c84c09debdc6e307a3cfa948bb924a4d903b"
+    }
+  },
+  "unchangedDependencyTrees": {
+    "ext/js/dictionary/wasm": "40ae420f341a63ba6da013c302e8c36401f22e68",
+    "ext/js/core": "4838f9d14aeebe1c8f339ddba3ebde21f57e97f0",
+    "test/util": "717a5009fe51121fddb3477c900885f803d86508",
+    "dev/lib": "c2a83d540c140357dc04f12ccdd65ea19fe1b8d1",
+    "dev/data": "8dba914f721a4ba2984f71d7f6b8f9647899b19a"
+  }
+}
