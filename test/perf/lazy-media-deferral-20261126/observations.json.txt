@@ -1,0 +1,199 @@
+{
+  "boundary": "Production dense ZIP catalog on the locked archive; compare the previous get/bytes membership probe with the nonmaterializing predicate used during speculative image deferral. Non-image entries are opened before measurement. Measures one complete membership pass and post-GC retained Node heap plus ArrayBuffer deltas, not browser peak memory or complete-import latency. No image payload is read or validation bypassed by this component screen.",
+  "node": "v24.22.3",
+  "v8": "13.6.233.17-node.63",
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true
+  },
+  "sourceSha256": {
+    "ext/js/dictionary/dictionary-importer.js": "e1f6a6993ffa16a0d36060d4dd493adbe6d31021562872b9a12ab537bc780617",
+    "ext/js/dictionary/dense-zip-file-map.js": "550de3271dfd29b743aa4613407927eb7a63634d7759dc7ebd74bf1c946154fa",
+    "ext/js/dictionary/dense-zip-directory.js": "73e690d6ebee26608d7033f143745662d47e0cabb7434d264a9e68aeac686498"
+  },
+  "runnerSha256": "ad7c7cb50c0eab33cb5f44d925fe46d2cc6379e92cd846571681a3eea8b059f1",
+  "schedule": "ABBAABBAABBA",
+  "observations": [
+    {
+      "arm": "baseline",
+      "elapsedMs": 2106.584208,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 146570,
+      "retainedHeapDelta": 32826800,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293112
+    },
+    {
+      "arm": "candidate",
+      "elapsedMs": 486.56557199999224,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 0,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    },
+    {
+      "arm": "candidate",
+      "elapsedMs": 515.3331620000026,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 0,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    },
+    {
+      "arm": "baseline",
+      "elapsedMs": 5919.487162999998,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 146570,
+      "retainedHeapDelta": 32826800,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293112
+    },
+    {
+      "arm": "baseline",
+      "elapsedMs": 2311.3643520000023,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 146570,
+      "retainedHeapDelta": 32826800,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293112
+    },
+    {
+      "arm": "candidate",
+      "elapsedMs": 288.6262370000004,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 0,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    },
+    {
+      "arm": "candidate",
+      "elapsedMs": 71.07150000000001,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 0,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    },
+    {
+      "arm": "baseline",
+      "elapsedMs": 5636.100985000001,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 146570,
+      "retainedHeapDelta": 32827032,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293344
+    },
+    {
+      "arm": "baseline",
+      "elapsedMs": 6043.326789000001,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 146570,
+      "retainedHeapDelta": 32827032,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293344
+    },
+    {
+      "arm": "candidate",
+      "elapsedMs": 264.1388220000008,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 0,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    },
+    {
+      "arm": "candidate",
+      "elapsedMs": 399.64382099999966,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 0,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    },
+    {
+      "arm": "baseline",
+      "elapsedMs": 9712.595329999996,
+      "entries": 147237,
+      "images": 146570,
+      "admitted": 146570,
+      "pathsSha256": "2ff9206c5b068945c045be7482283c24e8b62581440f8c350e3229b339dadd81",
+      "beforeMaterialized": 0,
+      "afterMaterialized": 146570,
+      "retainedHeapDelta": 32826856,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293168
+    }
+  ],
+  "summaries": {
+    "baseline": {
+      "elapsedMs": 5777.7940739999995,
+      "retainedHeapDelta": 32826828,
+      "retainedArrayBufferDelta": -3533688,
+      "retainedTotalDelta": 29293140
+    },
+    "candidate": {
+      "elapsedMs": 344.13502900000003,
+      "retainedHeapDelta": 3032,
+      "retainedArrayBufferDelta": 0,
+      "retainedTotalDelta": 3032
+    }
+  }
+}

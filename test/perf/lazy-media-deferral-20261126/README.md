@@ -33,3 +33,16 @@ references, failed publication, failed term writes, and cancellation. Their
 synthetic archive adapter supplies `getData()` payloads, so dense fallback
 tests disable raw range batching rather than pretending those fixture bytes
 form a physical ZIP archive. Actual browser import coverage is still required.
+
+## Recorded component result
+
+`observations.json.txt` contains all twelve completed observations and the
+fixture, source, and runner hashes. Every arm admitted the same 146,570 pinned
+VNDB image paths. The previous membership probe materialized 146,570 entries;
+the candidate materialized none.
+
+Median retained heap plus ArrayBuffer growth was 29,293,140 bytes for the
+previous probe and 3,032 bytes for the candidate: 29,290,108 fewer bytes at this
+boundary. This is a Node allocation measurement, not browser peak memory.
+The run experienced severe shared-host contention; its elapsed times are
+preserved for transparency and must not be used as speed evidence.
