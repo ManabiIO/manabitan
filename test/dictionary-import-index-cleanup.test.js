@@ -148,11 +148,9 @@ describe('dictionary import secondary-index cleanup', () => {
         const session = await database.startBulkImport()
         expect(secondaryIndexes(sql)).toEqual([])
         await addTag(database, 'Jitendex', finish)
-        if (finish === 'abort') {
-            await database.abortBulkImport(session)
-        } else {
-            await database.finishBulkImport(null, null, session)
-        }
+        finish === 'abort'
+            ? await database.abortBulkImport(session)
+            : await database.finishBulkImport(null, null, session)
 
         expect(secondaryIndexes(sql)).toEqual(initial)
         expect(sql.selectValues('SELECT name FROM tagMeta')).toEqual(finish === 'abort' ? [] : ['finish'])
@@ -160,3 +158,5 @@ describe('dictionary import secondary-index cleanup', () => {
         expect(drops).toHaveLength(23)
     })
 })
+
+/* eslint-enable @stylistic/semi */
