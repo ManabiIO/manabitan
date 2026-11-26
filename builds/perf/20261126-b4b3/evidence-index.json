@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded local correctness attempts. No whole-import speed, browser-memory, or complete candidate corpus parity claim.",
+  "sourcePRs": {
+    "expression": "https://github.com/ManabiIO/manabitan/pull/939",
+    "media": "https://github.com/ManabiIO/manabitan/pull/934",
+    "verification": "https://github.com/ManabiIO/manabitan/pull/957"
+  },
+  "publishedSources": {
+    "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "expression": "f6d685c0b2511257da4a9a83e7bd977087a42176",
+    "media": "cc9fad4a3a528304f546e12e76ebb9afbe1cde6d",
+    "combined": "e4803e96d581e64eddfc496d847f397ac79bac34",
+    "tooling": "02700756bd5467a1d77c58db3c73c9c76da1e247"
+  },
+  "localSourceNotes": "Local and connector-created commit IDs differ because commit metadata differs; corresponding reviewed trees were compared before publication. The local Jitendex baseline uses the tooling tree; its runtime, dependencies, and fixture lock are unchanged from baseline0143.",
+  "results": {
+    "expressionFocused": {
+      "status": "passed",
+      "tests": 55,
+      "files": 2
+    },
+    "mainTypeScript": {
+      "status": "passed"
+    },
+    "localTestTypeScript": {
+      "status": "incomplete",
+      "exitCode": 137,
+      "hostedFollowup": "Exact-head TypeScript (test) passed in run45862629506; original local attempt retained"
+    },
+    "inlineMediaRegressions": {
+      "status": "passed",
+      "tests": 2,
+      "unselected": 17
+    },
+    "jitendexReplay": {
+      "status": "incomplete",
+      "exitCode": 124,
+      "oracle": "passed",
+      "baselineImporter": "passed",
+      "candidateImporter": "incomplete",
+      "candidateParity": "unverified",
+      "termRows": 436555,
+      "referencedImages": 236,
+      "decodedMediaBytes": 4992155
+    }
+  },
+  "hostedSnapshot": {
+    "observedAt": "2026-11-26T17:09:49Z",
+    "expressionCI": {
+      "run": 45862629506,
+      "passed": [
+        "Test Build",
+        "TypeScript (test)",
+        "TypeScript (dev)",
+        "Markdown",
+        "Anki Deduplication Matrix (Chromium)"
+      ],
+      "running": [
+        "Unit Tests"
+      ],
+      "remaining": "queued; not counted as passing"
+    },
+    "mediaCI": {
+      "run": 45863594954,
+      "status": "queued; no current-head core jobs started"
+    },
+    "fullCorpusAndBrowserVerification": {
+      "run": 45863749748,
+      "status": "queued; no corpus/browser success asserted"
+    }
+  },
+  "files": [
+    {
+      "path": "builds/perf/20261126-b4b3/local-jitendex/report.json",
+      "bytes": 25922,
+      "sha256": "8b0ac19f1a9093fb94456d68c1e59e1d9b1a7c4c3d96c6c484d0bd1e899d4b58"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-jitendex/jitendex-base.json",
+      "bytes": 1366,
+      "sha256": "20d3a3411404c104fa57b3127c6bae540df4b2809323ba2c11016dc8fae87d3c"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-jitendex/jitendex-base.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-jitendex/jitendex-candidate.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-jitendex/local-execution.json",
+      "bytes": 24858,
+      "sha256": "392ec3f2f12c28dac5df3a16764b4172a914eefb5a2df6d7c7cf1bcb69651c67"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-validation/jmdict/validation.json",
+      "bytes": 1839,
+      "sha256": "8b78e4bd907ace51931d8c79de73f533a32990eb069b8f6fba67c69f3563f772"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-validation/jmdict/focused.log",
+      "bytes": 239,
+      "sha256": "2489ab41299b108e81c56abafc57a01c5ff5c6252d479d4664dd93f1bf907726"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-validation/jmdict/main-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-validation/jmdict/test-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-validation/vndb/validation.json",
+      "bytes": 726,
+      "sha256": "d0aa2f25bdc5eb479f90167290d6c14983cf30d079f15468441c1e039cd46299"
+    },
+    {
+      "path": "builds/perf/20261126-b4b3/local-validation/vndb/inline-bytes.log",
+      "bytes": 246,
+      "sha256": "0dab96941dcc5feba06bcb97c704a6028651e16f115e027d1f8f90b8d18b825e"
+    }
+  ]
+}

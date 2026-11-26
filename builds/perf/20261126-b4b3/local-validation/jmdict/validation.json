@@ -1,0 +1,47 @@
+{
+  "localCommit": "f6860b7f7dca990e43a4b850508714d433c28195",
+  "localTree": "b4cedc0f0bc57b46e96e5c70bc428fe9d8da21bc",
+  "trackedTreeClean": true,
+  "node": "v24.22.3",
+  "publishedHead": "f6d685c0b2511257da4a9a83e7bd977087a42176",
+  "scope": "Sequential bounded focused regressions and main/test types; no full-suite, corpus, browser, or timing qualification.",
+  "checks": [
+    {
+      "name": "focused expression regressions",
+      "command": "node node_modules/vitest/vitest.mjs run test/term-record-compact-expression-plan.test.js test/lookup-construction-experiments.test.js --maxWorkers=1 --no-file-parallelism",
+      "exitCode": 0,
+      "status": "passed",
+      "testFiles": 2,
+      "tests": 55,
+      "durationSeconds": 18.07,
+      "log": "focused.log",
+      "timeoutSeconds": 90,
+      "nodeMaxOldSpaceMiB": 1536,
+      "logSha256": "2489ab41299b108e81c56abafc57a01c5ff5c6252d479d4664dd93f1bf907726",
+      "logBytes": 239
+    },
+    {
+      "name": "main TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json",
+      "exitCode": 0,
+      "status": "passed",
+      "log": "main-types.log",
+      "timeoutSeconds": 90,
+      "nodeMaxOldSpaceMiB": 1536,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logBytes": 0
+    },
+    {
+      "name": "test TypeScript",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json",
+      "exitCode": 137,
+      "status": "incomplete",
+      "diagnostic": "Shell reported Killed; no TypeScript diagnostics were emitted. No rerun.",
+      "log": "test-types.log",
+      "timeoutSeconds": 90,
+      "nodeMaxOldSpaceMiB": 1536,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "logBytes": 0
+    }
+  ]
+}

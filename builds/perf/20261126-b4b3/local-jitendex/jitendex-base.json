@@ -1,0 +1,66 @@
+{
+  "fixture": "jitendex",
+  "runtime": {
+    "node": "v24.22.3",
+    "v8": "13.6.233.17-node.63",
+    "zlib": "1.3.2.1-motley-285e94b"
+  },
+  "termRows": 436555,
+  "nativeTermChunks": 1,
+  "counts": {
+    "terms": {
+      "total": 436555
+    },
+    "termMeta": {
+      "total": 0
+    },
+    "kanji": {
+      "total": 0
+    },
+    "kanjiMeta": {
+      "total": 0
+    },
+    "tagMeta": {
+      "total": 8
+    },
+    "media": {
+      "total": 236
+    }
+  },
+  "materialization": {
+    "initialImages": 249,
+    "createdAll": 0,
+    "createdImages": 0,
+    "atLastTermSink": 249,
+    "beforeDeferredDrain": 249,
+    "finalImages": 249
+  },
+  "requirements": {
+    "uniqueImagePaths": 236,
+    "imagePathsSha256": "451d13c2002c3facf65dc79463693c4fc3e784033166bf979638e4c6e8e72d69",
+    "orderSha256": "2513ffe39e2c19ef9ddf51c49ecfbeed1f2112154b56259c10d5b1c76e646515"
+  },
+  "media": {
+    "route": "decoded-rows",
+    "count": 236,
+    "bytes": 4992155,
+    "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+  },
+  "deferredDrain": {
+    "requirements": 23,
+    "prefetched": 213,
+    "cachedBatchReads": false
+  },
+  "worker": {
+    "started": 0,
+    "prepared": false,
+    "selectedImages": 0
+  },
+  "sourceCatalog": {
+    "type": "Map",
+    "adapter": "zip.js",
+    "totalEntries": 475
+  },
+  "nativeParserUsed": true,
+  "staged": false
+}

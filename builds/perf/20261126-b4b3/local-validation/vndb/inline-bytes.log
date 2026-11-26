@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/b4b304adc609/manabitan-vndb
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 17 skipped (19)
+   Start at  12:01:54
+   Duration  3.22s (transform 1.26s, setup 59ms, import 1.52s, tests 1.28s, environment 0ms)
+

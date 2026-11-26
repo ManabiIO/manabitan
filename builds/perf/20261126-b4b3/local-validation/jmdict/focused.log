@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/b4b304adc609/manabitan-jmdict
+
+
+ Test Files  2 passed (2)
+      Tests  55 passed (55)
+   Start at  12:02:40
+   Duration  18.07s (transform 982ms, setup 119ms, import 1.17s, tests 15.79s, environment 0ms)
+

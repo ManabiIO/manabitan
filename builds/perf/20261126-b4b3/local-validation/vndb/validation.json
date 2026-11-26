@@ -1,0 +1,15 @@
+{
+  "scope": "Only the two corrected inline-byte replacement/mutation cases; no full-suite or corpus claim",
+  "command": "node node_modules/vitest/vitest.mjs run test/dictionary-importer-speculative-media.test.js --maxWorkers=1 --no-file-parallelism --testNamePattern='reads inline bytes'",
+  "externalTimeoutSeconds": 45,
+  "exitCode": 0,
+  "status": "passed",
+  "testsPassed": 2,
+  "testsUnselected": 17,
+  "node": "v24.22.3",
+  "localCommit": "9251061a568b0a24817999c5eea79d60e9a35b67",
+  "localTree": "4d63b8347cb44609b5fe8a5671ce80950620cb03",
+  "publishedHead": "cc9fad4a3a528304f546e12e76ebb9afbe1cde6d",
+  "log": "inline-bytes.log",
+  "logSha256": "0dab96941dcc5feba06bcb97c704a6028651e16f115e027d1f8f90b8d18b825e"
+}
