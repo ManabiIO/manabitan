@@ -1,0 +1,7 @@
+{
+  "status": "identical AST",
+  "measuredSha256": "37c3e11594960afc7c35317f9a143a0db18c25696450610c0842e7877a992395",
+  "checkedInSha256": "a16c19e1030c4f9e7681c063507017f3413f4b770299e7505b77ef4894666a7f",
+  "change": "Two ESLint trusted-CLI import annotations and object-property line breaks only",
+  "original": "proofs.tar.gz:measured-replay.mjs"
+}

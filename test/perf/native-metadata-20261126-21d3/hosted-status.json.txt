@@ -1,0 +1,111 @@
+{
+  "capturedAt": "2026-11-26 17:21:25 UTC",
+  "scope": "Hosted qualification state at component-proof publication; no throughput or whole-process memory outcome is inferred from queued work",
+  "runs": [
+    {
+      "runId": 45865811773,
+      "source": "f44e6f390eb21d220fab1595212e2973c3db941d",
+      "jobs": [
+        {
+          "id": 140068217822,
+          "name": "VNDB current-policy qualification (BA)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218198,
+          "name": "Native parser qualification (jitendex, BA)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218232,
+          "name": "Native parser qualification (vndb, AB)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218391,
+          "name": "Native parser qualification (jmdict, BA)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218394,
+          "name": "Native parser qualification (vndb, BA)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218396,
+          "name": "VNDB current-policy qualification (AB)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218451,
+          "name": "Native parser qualification (jitendex, AB)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068218530,
+          "name": "Native parser qualification (jmdict, AB)",
+          "status": "queued",
+          "conclusion": null
+        },
+        {
+          "id": 140068219835,
+          "name": "VNDB media qualification (${{ matrix.order }})",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 140068220282,
+          "name": "Current baseline profile (${{ matrix.dictionary }})",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ]
+    },
+    {
+      "runId": 45863377198,
+      "source": "bfa5d7b73644c555ec5ea5d3788b00469c723b74",
+      "jobs": [
+        {
+          "id": 140059877396,
+          "name": "VNDB media qualification (BA)",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 140059877941,
+          "name": "VNDB media qualification (AB)",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 140059879711,
+          "name": "Current baseline profile (${{ matrix.dictionary }})",
+          "status": "completed",
+          "conclusion": "skipped"
+        }
+      ],
+      "failure": "Both jobs stopped at first warmup receipt validation: VNDB active SAH allocation is outside 129\u2013131 pages. No paired timing cohort completed.",
+      "artifacts": [
+        {
+          "id": 15141150894,
+          "order": "AB",
+          "bytes": 33543434,
+          "sha256": "c2aa40e8a41438318f450a9405adc03be6641f15dc26dd5a6496b73fc6b38aff"
+        },
+        {
+          "id": 15139693510,
+          "order": "BA",
+          "bytes": 33543437,
+          "sha256": "97724794bf740b8ec199c0c36e236a5fee44c91950817e9d1b3667b222696168"
+        }
+      ]
+    }
+  ]
+}

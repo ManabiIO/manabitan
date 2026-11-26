@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "complete": true,
+  "scope": "Sequential native compressed-source parser and completed lookup/route output parity. Explicit production worker counts select grouping only. No actual browser parallelism, complete import time, stored artifact comparison, media payload import or process peak-memory measurement.",
+  "baseline": {
+    "localCommit": "4efc41a8f516abf637777c6a23d6b7b3dd8cebd7",
+    "publishedEquivalent": "439a1c9b6d40452061cda094b0727005553c1d1d",
+    "runtimeSource": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "wasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+  },
+  "candidate": {
+    "localCommit": "6ad7d0112a8dd1078a007952d2f5647162525cd9",
+    "publishedEquivalent": "0e233538e975c7be11b2144974923e2bf6396254",
+    "tree": "c83e5d77135b1ccf8ab86a4c51065758e3038b5d",
+    "qualificationWithIdenticalHarness": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+    "wasmSha256": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+  },
+  "runnerSha256": "37c3e11594960afc7c35317f9a143a0db18c25696450610c0842e7877a992395",
+  "node": "v22.22.0",
+  "policies": [
+    2,
+    3,
+    5
+  ],
+  "totalRowsComparedPerArm": 22839492,
+  "totalGroupsPerArm": 616,
+  "zeroScratchReuseMisses": true,
+  "zeroFusedFallbacks": true,
+  "zeroNativeLookupFallbacks": true,
+  "results": [
+    {
+      "dictionary": "jmdict",
+      "workerPolicy": 2,
+      "rows": 528299,
+      "groups": 8,
+      "sourceBytes": 171617523,
+      "nativeSegments": 15,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 8,
+        "scratchReuseBytes": 30136432,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 8,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 62259200,
+        "metadataBytes": 36040000
+      },
+      "candidate": {
+        "scratchReuseGroups": 8,
+        "scratchReuseBytes": 30136432,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 8,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 59441152,
+        "metadataBytes": 14840000
+      },
+      "rawReport": "results/workers-2-jmdict-6ad7d.json",
+      "rawSha256": "6085ede561598473b96c70e0ee43175d2e6964eb126812dfe9d77439ef463294"
+    },
+    {
+      "dictionary": "jitendex",
+      "workerPolicy": 2,
+      "rows": 436555,
+      "groups": 22,
+      "sourceBytes": 538927310,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 22,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 76087296,
+        "metadataBytes": 43350000
+      },
+      "candidate": {
+        "scratchReuseGroups": 22,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 71237632,
+        "metadataBytes": 17850000
+      },
+      "rawReport": "results/workers-2-jitendex-6ad7d.json",
+      "rawSha256": "b04a1d4dd7a173f19b41bfa3918960740ecf818916b0a7f2a2f7034e07a1d579"
+    },
+    {
+      "dictionary": "vndb",
+      "workerPolicy": 2,
+      "rows": 6648310,
+      "groups": 170,
+      "sourceBytes": 4267992967,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 170,
+        "scratchReuseBytes": 501936456,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 170,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 45219840,
+        "metadataBytes": 452200000
+      },
+      "candidate": {
+        "scratchReuseGroups": 170,
+        "scratchReuseBytes": 501936456,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 170,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 43646976,
+        "metadataBytes": 186200000
+      },
+      "rawReport": "results/workers-2-vndb-6ad7d.json",
+      "rawSha256": "67ca80ca2a26b66c81ba2190dcb057285dfb7434ab27c04f39416a3473f7ea98"
+    },
+    {
+      "dictionary": "jmdict",
+      "workerPolicy": 3,
+      "rows": 528299,
+      "groups": 12,
+      "sourceBytes": 171617523,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 12,
+        "scratchReuseBytes": 29954640,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 12,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 43384832,
+        "metadataBytes": 36040000
+      },
+      "candidate": {
+        "scratchReuseGroups": 12,
+        "scratchReuseBytes": 29954640,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 12,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 41353216,
+        "metadataBytes": 14840000
+      },
+      "rawReport": "results/workers-3-jmdict-6ad7d.json",
+      "rawSha256": "60e574d11ed54c79cfb729fcf1b6669dfcb1d40162f219d26c00ed27d2df9e13"
+    },
+    {
+      "dictionary": "jitendex",
+      "workerPolicy": 3,
+      "rows": 436555,
+      "groups": 22,
+      "sourceBytes": 538927310,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 22,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 76087296,
+        "metadataBytes": 43350000
+      },
+      "candidate": {
+        "scratchReuseGroups": 22,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 71237632,
+        "metadataBytes": 17850000
+      },
+      "rawReport": "results/workers-3-jitendex-6ad7d.json",
+      "rawSha256": "2e031fc0a78b903267c927dae52120b794d0cc7744339dca66a89793e3508917"
+    },
+    {
+      "dictionary": "vndb",
+      "workerPolicy": 3,
+      "rows": 6648310,
+      "groups": 170,
+      "sourceBytes": 4267992967,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 170,
+        "scratchReuseBytes": 501936456,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 170,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 45219840,
+        "metadataBytes": 452200000
+      },
+      "candidate": {
+        "scratchReuseGroups": 170,
+        "scratchReuseBytes": 501936456,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 170,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 43646976,
+        "metadataBytes": 186200000
+      },
+      "rawReport": "results/workers-3-vndb-6ad7d.json",
+      "rawSha256": "adb94b9fab0c36263c8601ca6be7af1f7e1f758631f26f77a2a761fb72adbe2a"
+    },
+    {
+      "dictionary": "jmdict",
+      "workerPolicy": 5,
+      "rows": 528299,
+      "groups": 20,
+      "sourceBytes": 171617523,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 20,
+        "scratchReuseBytes": 29644424,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 20,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 26476544,
+        "metadataBytes": 36040000
+      },
+      "candidate": {
+        "scratchReuseGroups": 20,
+        "scratchReuseBytes": 29644424,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 20,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 25296896,
+        "metadataBytes": 14840000
+      },
+      "rawReport": "results/workers-5-jmdict-6ad7d.json",
+      "rawSha256": "d7ee2e9653f68c53ed58d64c3e45cd060cfa69dff75745a85c0b7bfdc5300136"
+    },
+    {
+      "dictionary": "jitendex",
+      "workerPolicy": 5,
+      "rows": 436555,
+      "groups": 22,
+      "sourceBytes": 538927310,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 22,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 76087296,
+        "metadataBytes": 43350000
+      },
+      "candidate": {
+        "scratchReuseGroups": 22,
+        "scratchReuseBytes": 28790800,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 22,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 71237632,
+        "metadataBytes": 17850000
+      },
+      "rawReport": "results/workers-5-jitendex-6ad7d.json",
+      "rawSha256": "ef2be21667bc55bea24bb20ee1069e0a2bfd7bebd0fc2c932e3af1aa1fa1da6a"
+    },
+    {
+      "dictionary": "vndb",
+      "workerPolicy": 5,
+      "rows": 6648310,
+      "groups": 170,
+      "sourceBytes": 4267992967,
+      "nativeSegments": 0,
+      "nativeFallbacks": 0,
+      "baseline": {
+        "scratchReuseGroups": 170,
+        "scratchReuseBytes": 501936456,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 170,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 45219840,
+        "metadataBytes": 452200000
+      },
+      "candidate": {
+        "scratchReuseGroups": 170,
+        "scratchReuseBytes": 501936456,
+        "scratchReuseMisses": 0,
+        "fusedAttempts": 170,
+        "fusedFallbacks": 0,
+        "maxHeapBytes": 43646976,
+        "metadataBytes": 186200000
+      },
+      "rawReport": "results/workers-5-vndb-6ad7d.json",
+      "rawSha256": "c05c13b6558adb66a2c61c2eaedf4f4fb98862941dec482d3661cfc8ed32130e"
+    }
+  ],
+  "crc": "Every raw ZIP payload independently inflated and CRC32-checked with Node zlib before either native arm. Deferred native CRC receipts compared and required complete before publication. VNDB scanned+reused bytes cover all source bytes.",
+  "limitations": [
+    "Per-instance WASM buffer capacities are component allocation observations, not process PSS/private-memory peaks.",
+    "Metadata bytes are cumulative allocated capacities over serial groups, not concurrently retained memory.",
+    "JSON media-row serialization normalizes negative zero; the separate native literal -0 regression witness uses Object.is and the baseline raw decoder.",
+    "The component executes groups serially and owns output copies; browser scheduling, borrowed-memory lifetimes and storage remain hosted qualification concerns."
+  ]
+}
