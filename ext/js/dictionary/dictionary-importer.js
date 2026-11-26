@@ -71,7 +71,7 @@ import {DictionaryImportSession} from './dictionary-import-session.js';
 import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
-import {readDenseZipDirectory} from './dense-zip-directory.js';
+import {readDenseZipFileMap} from './dense-zip-directory.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
 import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
@@ -93,6 +93,22 @@ const TERM_BANK_WASM_ROW_CHUNK_SIZE = 12000;
 const TERM_BANK_WASM_INITIAL_CONTENT_BYTES_PER_ROW = 48;
 const TERM_ARTIFACT_ROW_CHUNK_SIZE = 75000;
 const NO_MEDIA_FAST_PATH_TERM_BANK_WASM_ROW_CHUNK_SIZE = 8192;
+const MIN_NATIVE_IMAGE_PROJECTION_SOURCE_BYTES = 1024 * 1024 * 1024;
+
+/**
+ * Native single-image projection is admitted only for large ordinary source imports.
+ * Unknown or malformed source totals preserve the JavaScript collector path.
+ * @param {number|null} rawTermBankSourceBytes
+ * @returns {boolean}
+ */
+export function isNativeImageProjectionSourceSizeEligible(rawTermBankSourceBytes) {
+    return (
+        typeof rawTermBankSourceBytes === 'number' &&
+        Number.isSafeInteger(rawTermBankSourceBytes) &&
+        rawTermBankSourceBytes >= MIN_NATIVE_IMAGE_PROJECTION_SOURCE_BYTES
+    );
+}
+
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_THRESHOLD_BYTES = 8 * 1024 * 1024;
 const ADAPTIVE_TERM_BANK_WASM_ROW_CHUNK_SIZE_UPPER_BOUND_BYTES = 128 * 1024 * 1024;
 const SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE = 262_144;
@@ -1417,6 +1433,7 @@ export class DictionaryImporter {
             null;
         const expectedTermRecordImportBytes = this._getExpectedTermRecordImportBytes(totalArtifactTermRows);
         const rawTermBankSourceBytes = useTermArtifactFiles || usePackedTermArtifact ? null : this._getRawTermBankSourceBytes(termFiles);
+        const allowNativeImageProjection = isNativeImageProjectionSourceSizeEligible(rawTermBankSourceBytes);
         this._prepareExactLookupRoute = (rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES;
         /** @type {import('dictionary-importer').ImportExperiments & {termContentStorageMode: 'baseline'|'raw-bytes', expectedTermContentImportBytes?: number, expectedTermRecordImportBytes?: number, rawTermBankSourceBytes?: number, artifactFixedPackMinTotalRows: number|null, queueTermContentWrites: boolean}} */
         const importOptimizationOptions = {
@@ -1975,13 +1992,17 @@ export class DictionaryImporter {
                             }
                             /** @type {import('dictionary-importer').ImportRequirement[]} */
                             const prefetchRequirements = [];
-                            // Source reads have now populated any reusable archive cache.
-                            // Drain its media after term sinks release borrowed WASM views.
-                            const deferCachedArchiveImages = rawZipPayloadReader?.supportsCachedBatchReads() === true;
+                            // Let the speculative packer handle images it already reads.
+                            // Drain reusable archive bytes after term sinks release borrowed views.
+                            const deferArchiveImages = sourceMediaPreparation !== null || rawZipPayloadReader?.supportsCachedBatchReads() === true;
                             for (const requirement of notAddedRequirements) {
+                                if (mediaPrefetchRemainingEntries === 0 && !deferArchiveImages) {
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
+                                    continue;
+                                }
                                 const file = fileMap.get(requirement.source.path);
                                 if (
-                                    deferCachedArchiveImages &&
+                                    deferArchiveImages &&
                                     (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
                                     typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
                                     getImageMediaTypeFromFileName(requirement.source.path) !== null
@@ -2307,6 +2328,7 @@ export class DictionaryImporter {
                             },
                             preloadedTermFileBytes,
                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
+                            allowNativeImageProjection,
                         );
                         termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
@@ -2996,45 +3018,39 @@ export class DictionaryImporter {
         const zipReader = /** @type {import('@zip.js/zip.js').ZipReader<import('@zip.js/zip.js').BlobReader|import('@zip.js/zip.js').Uint8ArrayReader>} */ (new ZipReader(zipFileReader));
         try {
             if (archiveContent instanceof Blob) {
-                const entries = await readDenseZipDirectory(archiveContent, () => this._throwIfCancelled());
-                if (entries !== null) {
-                    const rawReader = new RawZipPayloadReader(archiveContent);
-                    const textDecoder = new TextDecoder();
-                    /** @type {Promise<Map<string, import('@zip.js/zip.js').Entry>>|null} */
-                    let fallback = null;
-                    /**
-                     * @this {import('./dense-zip-directory.js').DenseZipEntry}
-                     * @param {import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter} writer
-                     * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
-                     * @returns {Promise<unknown>}
-                     */
-                    const getData = async function getDenseEntryData(writer, options = {}) {
-                        if (
-                            this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
-                            this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
-                            (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter)
-                        ) {
-                            const signal = options.signal ?? new AbortController().signal;
-                            const bytes = await rawReader.read(this, signal);
-                            const decoded = await inflateCompressedZipMediaBatchWasm([{...this, bytes}]);
-                            signal.throwIfAborted();
-                            return writer instanceof TextWriter ? textDecoder.decode(decoded.sources[0]) : decoded.sources[0];
-                        }
-                        fallback ??= zipReader.getEntries().then((all) => new Map(all.map((entry) => [entry.filename, entry])));
-                        const entry = (await fallback).get(this.filename);
-                        if (typeof entry?.getData !== 'function') {
-                            throw new Error(`Cannot read ${this.filename}`);
-                        }
-                        return await entry.getData(writer, options);
-                    };
-                    /** @type {import('dictionary-importer').ArchiveFileMap} */
-                    const fileMap = new Map();
-                    for (const entry of entries) {
-                        if (fileMap.has(entry.filename)) {
-                            throw new Error(`Duplicate archive filename: '${entry.filename}'`);
-                        }
-                        fileMap.set(entry.filename, /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ (Object.assign(entry, {getData}))));
+                /** @type {RawZipPayloadReader|null} */
+                let rawReader = null;
+                const textDecoder = new TextDecoder();
+                /** @type {Promise<Map<string, import('@zip.js/zip.js').Entry>>|null} */
+                let fallback = null;
+                /**
+                 * @this {import('./dense-zip-directory.js').DenseZipEntry}
+                 * @param {import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter} writer
+                 * @param {import('@zip.js/zip.js').EntryGetDataOptions} [options]
+                 * @returns {Promise<unknown>}
+                 */
+                const getData = async function getDenseEntryData(writer, options = {}) {
+                    if (
+                        this.compressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                        this.uncompressedSize <= INLINE_TEXT_ENTRY_MAX_BYTES &&
+                        (writer instanceof TextWriter || writer instanceof Uint8ArrayWriter)
+                    ) {
+                        const signal = options.signal ?? new AbortController().signal;
+                        rawReader ??= new RawZipPayloadReader(archiveContent);
+                        const bytes = await rawReader.read(this, signal);
+                        const decoded = await inflateCompressedZipMediaBatchWasm([{...this, bytes}]);
+                        signal.throwIfAborted();
+                        return writer instanceof TextWriter ? textDecoder.decode(decoded.sources[0]) : decoded.sources[0];
                     }
+                    fallback ??= zipReader.getEntries().then((all) => new Map(all.map((entry) => [entry.filename, entry])));
+                    const entry = (await fallback).get(this.filename);
+                    if (typeof entry?.getData !== 'function') {
+                        throw new Error(`Cannot read ${this.filename}`);
+                    }
+                    return await entry.getData(writer, options);
+                };
+                const fileMap = await readDenseZipFileMap(archiveContent, getData, () => this._throwIfCancelled());
+                if (fileMap !== null) {
                     return {fileMap, zipReader, catalog: 'dense-zip'};
                 }
             }
@@ -3089,9 +3105,9 @@ export class DictionaryImporter {
      */
     _findRedundantDirectories(fileMap) {
         let indexPath = '';
-        for (const file of fileMap) {
-            if (file[0].replace(/.*\//, '') === INDEX_FILE_NAME) {
-                indexPath = file[0];
+        for (const filename of fileMap.keys()) {
+            if (filename.replace(/.*\//, '') === INDEX_FILE_NAME) {
+                indexPath = filename;
             }
         }
         const redundantDirectoriesRegex = new RegExp(`.*(?=${INDEX_FILE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`);
@@ -4382,13 +4398,14 @@ export class DictionaryImporter {
             results.set(fileType, []);
         }
 
-        for (const [fileName, fileEntry] of fileMap.entries()) {
+        for (const fileName of fileMap.keys()) {
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
 
                 if (typeof entries !== 'undefined') {
-                    entries.push(fileEntry);
+                    const fileEntry = fileMap.get(fileName);
+                    if (typeof fileEntry !== 'undefined') { entries.push(fileEntry); }
                     break;
                 }
             }
@@ -4421,9 +4438,10 @@ export class DictionaryImporter {
         if (manifest.termBanksByArtifact.size === 0) { return false; }
         /** @type {ImportFileEntry[]} */
         const termFiles = [];
-        for (const [filename, fileEntry] of fileMap.entries()) {
+        for (const filename of fileMap.keys()) {
             if (/^term_bank_(\d+)\.json$/.test(filename)) {
-                termFiles.push(fileEntry);
+                const fileEntry = fileMap.get(filename);
+                if (typeof fileEntry !== 'undefined') { termFiles.push(fileEntry); }
             }
         }
 
@@ -5029,9 +5047,10 @@ export class DictionaryImporter {
      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
      * @param {number|null} [wasmRowChunkSizeOverride]
+     * @param {boolean} [allowNativeImageProjection]
      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
      */
-    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null) {
+    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, allowNativeImageProjection = false) {
         this._lastFastTermBankReadProfile = null;
         /** @type {import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|null} */
         let deferredSourceBatch = null;
@@ -5392,7 +5411,7 @@ export class DictionaryImporter {
                 skipTagRuleDecode: usePrecomputedContentForMediaRows,
                 lazyGlossaryDecode: useLazyGlossaryDecode,
                 mediaHintFastScan: useMediaHintFastScan,
-                projectImagePaths: useMediaDirectArtifactChunkImport,
+                projectImagePaths: useMediaDirectArtifactChunkImport && allowNativeImageProjection,
                 validateGlossaryTypes: true,
                 computeContentHashes: enableTermEntryContentDedup,
                 emitContentSlab: useDirectArtifactChunkImport && enableTermEntryContentDedup,
