@@ -999,6 +999,20 @@ static int parse_composite_span_impl(
                 if (s_end < len && src[s_end] == ':') {
                     state = OBJECT_VALUE;
                     i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
+                    // A literal content key and its colon already establish
+                    // the parent state. Enter an adjacent child here without
+                    // dispatching its opener through the general token loop.
+                    if (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT &&
+                        i < len && (src[i] == '[' || src[i] == '{')) {
+                        if (depth >= MAX_JSON_NESTING) { return 0; }
+                        if (validate_top_level_objects && depth == 2u) {
+                            glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
+                        }
+                        parents[depth - 1u] = OBJECT_AFTER_VALUE;
+                        ++depth;
+                        state = src[i] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
+                        ++i;
+                    }
                     continue;
                 }
                 state = OBJECT_COLON;
@@ -2522,20 +2536,34 @@ static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t lengt
         const uint8_t first = bytes[i++];
         output[i - 1u] = first;
         if (first < 0x80u) { continue; }
-        uint32_t width;
-        if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
-        else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
-        else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
-        else { return 0; }
-        if (width - 1u > length - i) { return 0; }
-        const uint8_t second = bytes[i];
-        if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
-            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
-        for (uint32_t j = 0u; j < width - 1u; ++j) {
-            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
+        if (first >= 0xe0u && first <= 0xefu) {
+            if (length - i < 2u) { return 0; }
+            const uint8_t second = bytes[i];
+            const uint8_t third = bytes[i + 1u];
+            if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u ||
+                (first == 0xe0u && second < 0xa0u) ||
+                (first == 0xedu && second > 0x9fu)) { return 0; }
+            output[i] = second;
+            output[i + 1u] = third;
+            i += 2u;
+            continue;
         }
-        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
-        i += width - 1u;
+        if (first >= 0xc2u && first <= 0xdfu) {
+            if (i >= length || (bytes[i] & 0xc0u) != 0x80u) { return 0; }
+            output[i] = bytes[i];
+            ++i;
+            continue;
+        }
+        if (first < 0xf0u || first > 0xf4u || length - i < 3u) { return 0; }
+        const uint8_t second = bytes[i];
+        const uint8_t third = bytes[i + 1u];
+        const uint8_t fourth = bytes[i + 2u];
+        if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u || (fourth & 0xc0u) != 0x80u ||
+            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
+        output[i] = second;
+        output[i + 1u] = third;
+        output[i + 2u] = fourth;
+        i += 3u;
     }
     return 1;
 }
@@ -2967,7 +2995,9 @@ int32_t encode_term_lookup_index(
     const uint32_t output_length = (uint32_t)output_length_64;
 
     uint8_t* output = (uint8_t*)(uintptr_t)output_ptr;
-    memset(output, 0, output_length);
+    // Every live output column below is overwritten or initialized for its
+    // accumulator role. Clear only padding/reserved bytes; zeroing the full
+    // container would write keys, postings and hash chains twice.
     uint32_t* container_header = (uint32_t*)output;
     container_header[0] = TERM_LOOKUP_CONTAINER_MAGIC;
     container_header[1] = TERM_LOOKUP_FORMAT_VERSION;
@@ -2981,7 +3011,10 @@ int32_t encode_term_lookup_index(
     base_header[3] = TERM_LOOKUP_FORMAT_VERSION;
     base_header[4] = sequence_key_count;
     base_header[5] = reading_posting_count;
+    base_header[6] = 0u;
+    base_header[7] = 0u;
     __builtin_memcpy(base + TERM_LOOKUP_BASE_HEADER_BYTES, strings, strings_length);
+    memset(base + TERM_LOOKUP_BASE_HEADER_BYTES + strings_length, 0, aligned_string_length - strings_length);
 
     uint32_t cursor = TERM_LOOKUP_BASE_HEADER_BYTES + aligned_string_length;
     uint16_t* persisted_key_lengths = (uint16_t*)(base + cursor);
@@ -2992,6 +3025,7 @@ int32_t encode_term_lookup_index(
     cursor += row_count * (uint32_t)sizeof(uint16_t);
     uint16_t* persisted_sequence_row_keys = (uint16_t*)(base + cursor);
     cursor += row_count * (uint32_t)sizeof(uint16_t);
+    memset(base + cursor, 0, align4(cursor) - cursor);
     cursor = align4(cursor);
     int32_t* persisted_sequence_keys = (int32_t*)(base + cursor);
     __builtin_memcpy(
@@ -3043,10 +3077,12 @@ int32_t encode_term_lookup_index(
     cursor += (sequence_key_count + 1u) * (uint32_t)sizeof(uint16_t);
     uint16_t* sequence_rows = (uint16_t*)(derived + cursor);
     cursor += sequence_posting_count * (uint32_t)sizeof(uint16_t);
+    memset(derived + cursor, 0, derived_length - cursor);
     memset(key_heads, 0xff, key_slot_count * sizeof(uint16_t));
-    memset(key_next, 0xff, key_count * sizeof(uint16_t));
     memset(sequence_heads, 0xff, sequence_hash_slot_count * sizeof(uint16_t));
-    memset(sequence_next, 0xff, sequence_key_count * sizeof(uint16_t));
+    memset(expression_offsets, 0, (key_count + 1u) * sizeof(uint16_t));
+    memset(reading_offsets, 0, (key_count + 1u) * sizeof(uint16_t));
+    memset(sequence_offsets, 0, (sequence_key_count + 1u) * sizeof(uint16_t));
     for (uint32_t key = 0u; key < key_count; ++key) {
         term_lookup_insert_hash(key_heads, key_next, key, string_hashes[key], key_slot_count);
     }
@@ -3252,7 +3288,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t raw_content_hash_table_size,
     uint32_t raw_content_hashes_ptr,
     uint32_t validate_glossary_types,
-    uint32_t glossary_witnesses_ptr
+    uint32_t glossary_witnesses_ptr,
+    uint32_t media_hint_present_ptr
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -3306,6 +3343,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t strings_cursor = 0u;
     uint32_t row_count = 0u;
     uint32_t recent_content_hits = 0u;
+    // Without hint detection, absence has not been established.
+    uint32_t media_hint_present = media_hints == 0u ? 1u : 0u;
     const int validated_glossary_reuse_enabled = (experiment_mask & EXPERIMENT_VALIDATED_GLOSSARY_REUSE) != 0u;
     uint32_t glossary_reuse_probe_budget = 0u;
     uint32_t recent_content_match_streak = 0u;
@@ -3354,6 +3393,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         }
 
         const TermRowMeta* parsed_row = &rows[row_count];
+        media_hint_present |= parsed_row->glossary_may_contain_media;
         const uint32_t token_starts[2] = {
             parsed_row->expression_start,
             parsed_row->reading_start,
@@ -3644,6 +3684,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     *(uint32_t*)(uintptr_t)string_unique_count_ptr = string_unique_count;
     *(uint32_t*)(uintptr_t)string_bytes_count_ptr = strings_cursor;
     *(uint32_t*)(uintptr_t)recent_content_hits_ptr = recent_content_hits;
+    // Publish only after every bank has passed validation. Older callers omit
+    // this optional output pointer and retain their per-row hint scan.
+    if (media_hint_present_ptr != 0u) {
+        *(uint32_t*)(uintptr_t)media_hint_present_ptr = media_hint_present;
+    }
     return (int32_t)cursor;
 }
 
