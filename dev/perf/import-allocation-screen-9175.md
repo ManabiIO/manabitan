@@ -35,3 +35,17 @@ are distinct from full-import latency and browser memory.
 
 The workflow triggers only on this evidence branch when its workflow or runner
 changes. Documentation and archived evidence updates do not reacquire a cohort.
+
+## Supplementary full VNDB parser replay
+
+A separate one-job workflow completes the VNDB component replay that exceeded
+the local execution environment's memory limit. It uses the final parser source
+`01d0eb7164385828c97efae1b319ccc1c4fe92f9` and the same baseline, archive and native
+module. The final helper differs from the frozen browser candidate only in its
+required license header and equivalent nonzero typed-array length checks.
+
+This job checks every emitted row, content, key, media and lookup payload across
+fixed groups of four term banks, after initializing the deferred columns. It
+records cumulative deferred bytes and exact source/runner provenance. It does
+not measure import time or peak memory. Its separate workflow trigger leaves
+the original browser observations and their source identities intact.
