@@ -3,7 +3,11 @@ name: Import qualification 2026-11-26
 on:
   push:
     branches: [perf/import-qualification-20261126-ab9d]
-    paths: [.github/workflows/import-qualification-20261126.yml]
+    paths:
+      - .github/workflows/import-qualification-20261126.yml
+      - dev/perf/qualify-imports-20261126.js
+      - dev/perf/benchmark-support.js
+      - test/perf-experiment-receipts.test.js
 
 permissions:
   contents: read
@@ -12,17 +16,27 @@ env:
   PERF_BASELINE_SHA: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
 
 jobs:
-  baseline:
-    name: Frozen baseline (${{ matrix.dictionary }})
+  compare:
+    name: Frozen comparison (${{ matrix.candidate.id }}, ${{ matrix.dictionary }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         dictionary: [jmdict, jitendex, vndb]
+        candidate:
+          - id: decoder
+            sha: 651565742d6a322f973f651115f66fcb41409674
+            changed: [js/dictionary/zstd-term-content.js, lib/zstd-wasm.js, lib/zstd-wasm.js.map]
+          - id: media
+            sha: fcc66a237bc515fee6e9fd1b96d5773f69866ee2
+            changed: [js/dictionary/dense-zip-file-map.js, js/dictionary/dictionary-importer.js]
     env:
       PERF_DICTIONARY: ${{ matrix.dictionary }}
-      PERF_EVIDENCE_ROOT: ${{ github.workspace }}/builds/perf/import-baseline-${{ matrix.dictionary }}
+      PERF_CANDIDATE_ID: ${{ matrix.candidate.id }}
+      PERF_CANDIDATE_SHA: ${{ matrix.candidate.sha }}
+      PERF_EXPECTED_PACKAGE_CHANGES: ${{ toJSON(matrix.candidate.changed) }}
+      PERF_EVIDENCE_ROOT: ${{ github.workspace }}/builds/perf/import-compare-${{ matrix.candidate.id }}-${{ matrix.dictionary }}
       MANABITAN_E2E_STRICT_RUNTIME: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -44,97 +58,19 @@ jobs:
           path: builds/e2e-dictionary-cache
           key: import-20261126-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
 
-      - name: Prepare immutable release and provenance before observations
-        id: prepare
+      - name: Compare frozen releases with one strict measurement overlay
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$PERF_BASELINE_SHA"
           mkdir -p "$PERF_EVIDENCE_ROOT"
-          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
-          npm run build -- --target chrome
-          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE_ROOT/product-source.txt"
-          git status --porcelain > "$PERF_EVIDENCE_ROOT/build-status.txt"
-          git show "$GITHUB_SHA:.github/workflows/import-qualification-20261126.yml" > "$PERF_EVIDENCE_ROOT/executed-workflow.yml"
-          cp test/perf/dictionaries.lock.json "$PERF_EVIDENCE_ROOT/dictionaries.lock.json"
-          cp builds/manabitan-chrome.zip "$PERF_EVIDENCE_ROOT/manabitan-chrome.zip"
-          sha256sum package-lock.json test/perf/dictionaries.lock.json dev/perf/import-benchmark.js dev/perf/benchmark-support.js test/chromium/extension-two-dictionary-import.e2e.js builds/manabitan-chrome.zip > "$PERF_EVIDENCE_ROOT/source-package-sha256.txt"
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs'
-          import path from 'node:path'
-          import {createHash} from 'node:crypto'
-          import {execFileSync} from 'node:child_process'
-          import {chromium} from '@playwright/test'
-          const executable = chromium.executablePath()
-          const receipt = {
-            workflowHead: process.env.GITHUB_SHA,
-            workflowRun: process.env.GITHUB_RUN_ID,
-            workflowAttempt: process.env.GITHUB_RUN_ATTEMPT,
-            productHead: process.env.PERF_BASELINE_SHA,
-            dictionary: process.env.PERF_DICTIONARY,
-            node: process.version,
-            v8: process.versions.v8,
-            playwright: JSON.parse(fs.readFileSync('node_modules/@playwright/test/package.json', 'utf8')).version,
-            browserExecutable: executable,
-            browserVersion: execFileSync(executable, ['--version'], {encoding: 'utf8'}).trim(),
-            browserSha256: createHash('sha256').update(fs.readFileSync(executable)).digest('hex'),
-            schedule: ['ordinary-1', 'ordinary-2', 'ordinary-3', 'trace'],
-            timing: 'Three descriptive baseline observations only; no candidate speed comparison.',
-            trace: 'Separate diagnostic after ordinary observations; never an authoritative timing sample.',
-            verification: 'Production defaults, fresh profiles, restart, locked source counts, sampled content and media. Exhaustive media remains a separate qualification.'
-          }
-          fs.writeFileSync(path.join(process.env.PERF_EVIDENCE_ROOT, 'provenance.json'), JSON.stringify(receipt, null, 2) + '\n')
-          NODE
-          python3 - <<'PYTHON'
-          import hashlib, json, os, pathlib, zipfile
-          with zipfile.ZipFile('builds/manabitan-chrome.zip') as archive:
-              hashes = {item.filename: hashlib.sha256(archive.read(item)).hexdigest()
-                        for item in archive.infolist() if not item.is_dir()}
-          target = pathlib.Path(os.environ['PERF_EVIDENCE_ROOT']) / 'package-members.json'
-          target.write_text(json.dumps(hashes, sort_keys=True, indent=2) + '\n')
-          PYTHON
-
-      - name: Record three ordinary imports with production defaults
-        shell: bash
-        run: |
-          set -euo pipefail
-          failed=0
-          for observation in ordinary-1 ordinary-2 ordinary-3; do
-            output="$PERF_EVIDENCE_ROOT/$observation"
-            mkdir -p "$output"
-            node dev/perf/host-environment.js > "$output/host-before.json"
-            if node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --output "$output" > "$output/run.log" 2>&1; then
-              printf '0\n' > "$output/exit-code.txt"
-            else
-              code=$?
-              printf '%s\n' "$code" > "$output/exit-code.txt"
-              failed=1
-            fi
-            node dev/perf/host-environment.js > "$output/host-after.json"
-            cat "$output/run.log"
-          done
-          exit "$failed"
-
-      - name: Capture a separate diagnostic trace
-        if: always() && steps.prepare.outcome == 'success'
-        shell: bash
-        run: |
-          set -euo pipefail
-          output="$PERF_EVIDENCE_ROOT/trace"
-          mkdir -p "$output"
-          node dev/perf/host-environment.js > "$output/host-before.json"
-          code=0
-          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" --runs 1 --no-build --build-target chrome --media-check sample --trace --output "$output" > "$output/run.log" 2>&1 || code=$?
-          printf '%s\n' "$code" > "$output/exit-code.txt"
-          node dev/perf/host-environment.js > "$output/host-after.json"
-          cat "$output/run.log"
-          exit "$code"
+          git show "$GITHUB_SHA:dev/perf/qualify-imports-20261126.js" > dev/perf/qualify-imports-20261126.js
+          node dev/perf/qualify-imports-20261126.js
 
       - name: Preserve every observation and failure
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: import-20261126-baseline-${{ matrix.dictionary }}
+          name: import-20261126-${{ matrix.candidate.id }}-${{ matrix.dictionary }}
           path: ${{ env.PERF_EVIDENCE_ROOT }}
           if-no-files-found: error
           retention-days: 14
