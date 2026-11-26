@@ -820,3 +820,30 @@ not supersede the failed focused-unit invocation. The
 records exact output hashes, the earlier invalid or failed attempts, and the
 remaining validation gates. Native source and the source-bound module are
 unchanged from the measured candidate.
+
+### Combined local QA with shared-media staging
+
+A frozen QA overlay combines the native runtime and final test annotations
+above with shared-media staging from `9d2e0398bdf88b82eaf2c4c993de25f311b6340d`.
+Its original four-shard unit run remains failed. All 653 discovered files
+appear exactly once: 648 file results pass and five fail, with 14,704 passing,
+11 failing, and 68 skipped assertions. All 68 new native/media assertions pass.
+The raw failures comprise ten unchanged 5-second test timeouts, one Android
+stderr assertion mismatch, and two native compiler-discovery setup failures.
+Main and test TypeScript checks pass, as does the combined seven-target dry
+build.
+
+A single bounded recheck of the five failed files ran once on develop and once
+on the combined candidate with pinned Clang/LLD 21.1.8. Both arms reached the
+original 240-second process cap, exited 124, and produced no final Vitest JSON.
+Their 154-file source manifests remain unchanged. The baseline partial log
+contains Android 22/22 and direct-field 15/15 passing plus CRC setup skips;
+the candidate log contains no completed-file results. This is an incomplete
+comparison and does not replace the original failed full-unit result.
+
+The [combined QA receipt](../../builds/perf/native-lookup-initialization-20261126/combined-qa/README.md)
+provides the source bindings, exact inventory reconciliation, readable summary,
+and compact deterministic archive with per-member hashes. It retains both
+original failed shards, all partial recheck logs and failed setup/preflight
+records, and the successful type/build receipts. Production native source and
+artifacts are unchanged; hosted CI is tracked separately.

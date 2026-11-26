@@ -1,0 +1,608 @@
+{
+  "schema": 1,
+  "scope": "Combined local correctness/type/build verification of native PR #952 plus media PR #956. This overlay is not either individual published PR head and supplies no browser or performance result.",
+  "originalFullUnitRunPassed": false,
+  "provenance": {
+    "nativeRuntimeCommit": "de7363b9cda818f6c6e2a64ab7d21fa0ffc48a97",
+    "nativeFinalTestsCommit": "47194b5e4af3f1f7909a9f15c417d321a469de25",
+    "nativePublishedCounterpart": "a66ea6488e607d2eb6afca194101c56c4f136d6f",
+    "mediaCommit": "9d2e0398bdf88b82eaf2c4c993de25f311b6340d",
+    "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "node": {
+      "path": "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+      "version": "v22.22.0",
+      "sha256": "1bec56ef7cfa9a76f3e0b7c0a87f220eb73f23102b9c0b4c7529a3f7c3ce7c31"
+    },
+    "dependencyLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "sourceBindings": [
+      {
+        "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+        "commit": "de7363b9cda818f6c6e2a64ab7d21fa0ffc48a97",
+        "sha256": "6088e9109a7a348aa3f8b2a98e048b7daa31946b670c761f525185eaf507f51c",
+        "bytes": 157471,
+        "matchesCommittedSource": true
+      },
+      {
+        "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+        "commit": "de7363b9cda818f6c6e2a64ab7d21fa0ffc48a97",
+        "sha256": "354a71c2adb4692a9304a14274f2b277d819b9929a10057ad04af61d6f41bd3e",
+        "bytes": 67997,
+        "matchesCommittedSource": true
+      },
+      {
+        "path": "dev/data/dictionary-wasm/manifest.json",
+        "commit": "de7363b9cda818f6c6e2a64ab7d21fa0ffc48a97",
+        "sha256": "d133771617bf5323ada4ff46bf565b061efff75fd8b6a6d2cb9ed595264c0a70",
+        "bytes": 2588,
+        "matchesCommittedSource": true
+      },
+      {
+        "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+        "commit": "9d2e0398bdf88b82eaf2c4c993de25f311b6340d",
+        "sha256": "695a50ee6fb8a85d14d2c260c2eb7fce15def793644ab6cfbf9020f7922fa91f",
+        "bytes": 208722,
+        "matchesCommittedSource": true
+      },
+      {
+        "path": "test/zip-media-shared-staging.test.js",
+        "commit": "9d2e0398bdf88b82eaf2c4c993de25f311b6340d",
+        "sha256": "fb81eb45087439f3a142bf7beaf26e6a78b790614097817621204ba2d8a9c607",
+        "bytes": 6095,
+        "matchesCommittedSource": true
+      },
+      {
+        "path": "test/term-bank-content-container-open.test.js",
+        "commit": "47194b5e4af3f1f7909a9f15c417d321a469de25",
+        "sha256": "f2d1afa8a05ac1b53251888a7d2c8221566a8f2ea75825454f0d5802fda5c97f",
+        "bytes": 6956,
+        "matchesCommittedSource": true
+      },
+      {
+        "path": "test/term-lookup-output-initialization.test.js",
+        "commit": "47194b5e4af3f1f7909a9f15c417d321a469de25",
+        "sha256": "1c6471eb515b33d0d661ffffd27dea5950b85aea973de1c493f58fdde919dca4",
+        "bytes": 5343,
+        "matchesCommittedSource": true
+      }
+    ],
+    "raw": [
+      "provenance.json",
+      "completion-provenance.json"
+    ]
+  },
+  "originalFullUnitRun": {
+    "status": "failed",
+    "inventory": {
+      "expectedFiles": 653,
+      "observedFiles": 653,
+      "uniqueObservedFiles": 653,
+      "missing": [],
+      "unexpected": [],
+      "duplicates": []
+    },
+    "files": {
+      "passed": 648,
+      "failed": 5
+    },
+    "assertions": {
+      "passed": 14704,
+      "failed": 11,
+      "skipped": 68,
+      "total": 14783
+    },
+    "shards": [
+      {
+        "shard": "1/4",
+        "exitCode": 1,
+        "files": 164,
+        "passedAssertions": 2204,
+        "failedAssertions": 11,
+        "skippedAssertions": 50,
+        "report": "unit-shard-1.json",
+        "log": "unit-shard-1.log"
+      },
+      {
+        "shard": "2/4",
+        "exitCode": 0,
+        "files": 163,
+        "passedAssertions": 6013,
+        "failedAssertions": 0,
+        "skippedAssertions": 0,
+        "report": "unit-shard-2.json",
+        "log": "unit-shard-2.log"
+      },
+      {
+        "shard": "3/4",
+        "exitCode": 0,
+        "files": 163,
+        "passedAssertions": 3239,
+        "failedAssertions": 0,
+        "skippedAssertions": 1,
+        "report": "unit-shard-3.json",
+        "log": "unit-shard-3.log"
+      },
+      {
+        "shard": "4/4",
+        "exitCode": 1,
+        "files": 163,
+        "passedAssertions": 3248,
+        "failedAssertions": 0,
+        "skippedAssertions": 17,
+        "report": "unit-shard-4.json",
+        "log": "unit-shard-4.log"
+      }
+    ],
+    "failures": [
+      {
+        "file": "test/term-bank-crc.test.js",
+        "suiteMessage": "No supported wasm compiler found; set MANABITAN_CLANG or CLANG",
+        "failedAssertions": 0,
+        "skippedAssertions": 4,
+        "failedAssertionNames": []
+      },
+      {
+        "file": "test/term-entry-content-hash.test.js",
+        "suiteMessage": "",
+        "failedAssertions": 6,
+        "skippedAssertions": 0,
+        "failedAssertionNames": [
+          "term content XXH32 pair respects a byte offset of 2 and leaves the backing buffer unchanged",
+          "term content XXH32 pair respects a byte offset of 3 and leaves the backing buffer unchanged",
+          "term content XXH32 pair respects a byte offset of 7 and leaves the backing buffer unchanged",
+          "term content XXH32 pair respects a byte offset of 15 and leaves the backing buffer unchanged",
+          "term content XXH32 pair respects a byte offset of 31 and leaves the backing buffer unchanged",
+          "term content XXH32 pair reads a stable shared subrange without changing its owner"
+        ]
+      },
+      {
+        "file": "test/term-record-direct-field-columns.test.js",
+        "suiteMessage": "",
+        "failedAssertions": 1,
+        "skippedAssertions": 0,
+        "failedAssertionNames": [
+          "direct resolved record-field columns preserves high-cardinality score fallback at 65535 rows"
+        ]
+      },
+      {
+        "file": "test/android/enable-firefox-remote-debugging.test.js",
+        "suiteMessage": "",
+        "failedAssertions": 4,
+        "skippedAssertions": 0,
+        "failedAssertionNames": [
+          "Firefox Android remote debugging preference helper quiesces Firefox before writing preferences, updates pending backup, and defers launch verification until after ACK",
+          "Firefox Android remote debugging preference helper waits through empty and incomplete startup snapshots, then preserves initialized user preferences",
+          "Firefox Android remote debugging preference helper fails closed on permanently invalid wrong root preferences without writes or PackageManager changes",
+          "Firefox Android remote debugging preference helper fails setup when package state restoration fails and does not report success"
+        ]
+      },
+      {
+        "file": "test/term-bank-memory-page.test.js",
+        "suiteMessage": "No supported wasm compiler found; set MANABITAN_CLANG or CLANG",
+        "failedAssertions": 0,
+        "skippedAssertions": 17,
+        "failedAssertionNames": []
+      }
+    ],
+    "failureInterpretation": "Raw default reporter records ten 5000-ms test timeouts, one Android expected-stderr assertion mismatch, and two compiler-discovery suite setup failures. Original JSON serializes timeouts as STACK_TRACE_ERROR. No definitive cause is assigned to the Android assertion mismatch.",
+    "newTests": [
+      {
+        "file": "test/term-bank-content-container-open.test.js",
+        "shard": 2,
+        "status": "passed",
+        "assertions": 25,
+        "counts": {
+          "passed": 25,
+          "failed": 0,
+          "pending": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "file": "test/term-lookup-output-initialization.test.js",
+        "shard": 4,
+        "status": "passed",
+        "assertions": 31,
+        "counts": {
+          "passed": 31,
+          "failed": 0,
+          "pending": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      },
+      {
+        "file": "test/zip-media-shared-staging.test.js",
+        "shard": 4,
+        "status": "passed",
+        "assertions": 12,
+        "counts": {
+          "passed": 12,
+          "failed": 0,
+          "pending": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      }
+    ],
+    "all68NewCasesPassed": true,
+    "raw": [
+      "unit-inventory.json",
+      "unit-inventory-audit.json",
+      "unit-run-results.json",
+      "failed-tests.json"
+    ]
+  },
+  "typechecks": {
+    "status": "passed",
+    "projects": [
+      {
+        "project": "jsconfig.json",
+        "exitCode": 0
+      },
+      {
+        "project": "test/jsconfig.typecheck.json",
+        "exitCode": 0
+      }
+    ],
+    "raw": [
+      "typecheck-results.json",
+      "types-main.log",
+      "types-test.log"
+    ]
+  },
+  "dryBuild": {
+    "status": "passed",
+    "exitCode": 0,
+    "targets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ],
+    "raw": [
+      "combined-dry-build.json",
+      "combined-dry-build.log"
+    ]
+  },
+  "boundedRecheck": {
+    "scope": "One baseline arm followed by one combined candidate arm for exactly the five originally failed files. This does not replace or relabel the original failed complete-inventory run.",
+    "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "testFiles": [
+      "test/android/enable-firefox-remote-debugging.test.js",
+      "test/term-record-direct-field-columns.test.js",
+      "test/term-entry-content-hash.test.js",
+      "test/term-bank-crc.test.js",
+      "test/term-bank-memory-page.test.js"
+    ],
+    "nodeVersion": "v22.22.0",
+    "clangVersion": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin",
+    "lldVersion": "Debian LLD 21.1.8",
+    "protocol": {
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "repeatCountPerArm": 1,
+      "maxWorkers": 1,
+      "fileParallelism": false,
+      "outerTimeoutSeconds": 240,
+      "killGraceSeconds": 10,
+      "testTimeoutOverrides": false,
+      "hookTimeoutOverrides": false
+    },
+    "arms": [
+      {
+        "arm": "baseline",
+        "status": "outer_timeout",
+        "exitCode": 124,
+        "sourceStable": true,
+        "report": {
+          "available": false
+        },
+        "rawStatus": "bounded-recheck/baseline-status.json"
+      },
+      {
+        "arm": "candidate",
+        "status": "outer_timeout",
+        "exitCode": 124,
+        "sourceStable": true,
+        "report": {
+          "available": false
+        },
+        "rawStatus": "bounded-recheck/candidate-status.json"
+      }
+    ],
+    "partialObservations": {
+      "baseline": {
+        "completedPassingFiles": [
+          {
+            "path": "test/android/enable-firefox-remote-debugging.test.js",
+            "tests": 22,
+            "durationMs": 42494
+          },
+          {
+            "path": "test/term-record-direct-field-columns.test.js",
+            "tests": 15,
+            "durationMs": 7756
+          }
+        ],
+        "setupSkippedFiles": [
+          {
+            "path": "test/term-bank-crc.test.js",
+            "skippedTests": 4,
+            "durationMs": 251,
+            "finalDiagnosticAvailable": false
+          }
+        ],
+        "otherFiles": "No completion was recorded before the process ceiling"
+      },
+      "candidate": {
+        "completedFileResultsRecorded": 0,
+        "details": "Partial log contains runtime/Android subprocess output but no completed-file result before the process ceiling"
+      }
+    },
+    "preflight": "One metadata-only invocation failed on missing optional /proc/pressure/cpu before any test arm started; retained preflight-failure.json and original runner. Continued only after verifying no arm status/log/report existed.",
+    "interpretation": "No complete baseline/candidate comparison. No new test retry is authorized or planned. Original full-suite failures remain failures. No performance inference.",
+    "raw": [
+      "bounded-recheck/stage.json",
+      "bounded-recheck/provenance.json",
+      "bounded-recheck/results.json",
+      "bounded-recheck/summary.json",
+      "bounded-recheck/run-recheck.py",
+      "bounded-recheck/preflight-failure.json",
+      "bounded-recheck/run-recheck-preflight-v1.py"
+    ]
+  },
+  "retention": "All raw source receipts, original inventory/shard reports and logs, setup failure log, type/build receipts, and bounded recheck reports/exit/status/environment/source snapshots are retained byte-for-byte. The original failed run remains failed even if a narrower recheck passes.",
+  "remainingLimits": "No successful complete full-unit invocation is claimed. These checks do not qualify actual browser imports, persistence, restart, whole-import speed, or peak memory; hosted correctness and independent performance gates remain separate.",
+  "archive": {
+    "path": "raw-receipts.tar.gz",
+    "sha256": "bcf55588eb36ab9ef183fb5c1df175ac954a3f651a679d794830d8e0e2cb0c84",
+    "bytes": 572341,
+    "uncompressedMemberBytes": 6242783,
+    "memberCount": 47,
+    "encoding": "Sorted USTAR files, mode 0644, uid/gid/mtime 0, empty owner names; gzip level 9, empty filename and mtime 0.",
+    "verified": "Every extracted member equals its frozen input bytes; a second serialization is byte-identical.",
+    "members": [
+      {
+        "path": "bounded-recheck/baseline-environment-after.json",
+        "bytes": 2233,
+        "sha256": "a6edabe146e66192abafdab29f115a70302e3f2fd5ef1d73c0ab0f30d29387e3"
+      },
+      {
+        "path": "bounded-recheck/baseline-environment-before.json",
+        "bytes": 2232,
+        "sha256": "62cace34a40738d31ab65f02a8e270b928a93d943080fe7838843ff2a84722e5"
+      },
+      {
+        "path": "bounded-recheck/baseline-source-after.json",
+        "bytes": 25641,
+        "sha256": "53452709a985ba8dd46df4bef167522c7ed545007808f7fd10ac49f8bebb2ad7"
+      },
+      {
+        "path": "bounded-recheck/baseline-source-before.json",
+        "bytes": 25641,
+        "sha256": "53452709a985ba8dd46df4bef167522c7ed545007808f7fd10ac49f8bebb2ad7"
+      },
+      {
+        "path": "bounded-recheck/baseline-source-manifest.json",
+        "bytes": 25641,
+        "sha256": "53452709a985ba8dd46df4bef167522c7ed545007808f7fd10ac49f8bebb2ad7"
+      },
+      {
+        "path": "bounded-recheck/baseline-status.json",
+        "bytes": 1123,
+        "sha256": "bffa3acf67c3924d40a0725651ba771f1ddae14f81cf85f8043ed98b6f6136c4"
+      },
+      {
+        "path": "bounded-recheck/baseline.exit",
+        "bytes": 4,
+        "sha256": "ca2ebdf97d7469496b1f4b78958f9dc8447efdcb623953fee7b6996b762f6fff"
+      },
+      {
+        "path": "bounded-recheck/baseline.log",
+        "bytes": 62342,
+        "sha256": "c262e572d9a9e71805e0b8d6688f5f497268b92f4c4d60ddb902e18f6ca8f72a"
+      },
+      {
+        "path": "bounded-recheck/candidate-environment-after.json",
+        "bytes": 2235,
+        "sha256": "89cbd9ee1fb5b8a69dce5ec7a334968f3987109d032490eae0b071e38b261213"
+      },
+      {
+        "path": "bounded-recheck/candidate-environment-before.json",
+        "bytes": 2233,
+        "sha256": "25300704035479139ead6eff639f8165c7d7823e16133916a9f009a1e33fbd57"
+      },
+      {
+        "path": "bounded-recheck/candidate-source-after.json",
+        "bytes": 25641,
+        "sha256": "eaeb8ff2b266767e22be05fc5598ad1cdc4af7d840b629009f71ae22c32b3fc4"
+      },
+      {
+        "path": "bounded-recheck/candidate-source-before.json",
+        "bytes": 25641,
+        "sha256": "eaeb8ff2b266767e22be05fc5598ad1cdc4af7d840b629009f71ae22c32b3fc4"
+      },
+      {
+        "path": "bounded-recheck/candidate-source.diff",
+        "bytes": 9000,
+        "sha256": "3c35ad506518d2dbb2fe0dcbfd0d9d104591872371a719f5f9ddbe956b3a5162"
+      },
+      {
+        "path": "bounded-recheck/candidate-status.json",
+        "bytes": 1119,
+        "sha256": "f7480b5c53da04feb709495dfc532dab786faf80e051a6e4144804cab0ef698d"
+      },
+      {
+        "path": "bounded-recheck/candidate.exit",
+        "bytes": 4,
+        "sha256": "ca2ebdf97d7469496b1f4b78958f9dc8447efdcb623953fee7b6996b762f6fff"
+      },
+      {
+        "path": "bounded-recheck/candidate.log",
+        "bytes": 31104,
+        "sha256": "715691afbf5038296c20fb1ea309309698e170fea42a469f4b40391d6571ec9c"
+      },
+      {
+        "path": "bounded-recheck/continued-before-tests.json",
+        "bytes": 143,
+        "sha256": "a9bf1c674cd6b925eb7586bb183e55b0773b9138ab1510f0188b40fe7a134283"
+      },
+      {
+        "path": "bounded-recheck/preflight-failure.json",
+        "bytes": 437,
+        "sha256": "edf2c2c30b7f840a42495b8502540ebbd5e42a6218a09ac78c6d2533c83471b1"
+      },
+      {
+        "path": "bounded-recheck/provenance.json",
+        "bytes": 2406,
+        "sha256": "47d22aa44ce810610c35e16793c87cf82dd2d624c2fb0050f5af1323f287a41a"
+      },
+      {
+        "path": "bounded-recheck/results.json",
+        "bytes": 2399,
+        "sha256": "9e9e90acc196fb21e9bca2bcf6ac0ec77ea5daba5c2cfce6f96c34a071753e09"
+      },
+      {
+        "path": "bounded-recheck/run-recheck-preflight-v1.py",
+        "bytes": 7668,
+        "sha256": "936a2cab32e9d5ceec0c617a8b4e4c2a4c621176a19c232b7ce120b2fa2cb5c1"
+      },
+      {
+        "path": "bounded-recheck/run-recheck.py",
+        "bytes": 8528,
+        "sha256": "670835232ec358c8d9e3bd1b70027c8dde56d20f295060f88d7d879b2da12338"
+      },
+      {
+        "path": "bounded-recheck/stage.json",
+        "bytes": 8910,
+        "sha256": "8fddbf1d5a0ef90306bc9d794c718aca8ea5790b68dd08f48dfc36562b60f986"
+      },
+      {
+        "path": "bounded-recheck/started.json",
+        "bytes": 143,
+        "sha256": "57a955c4f75559e49cc5056752c1e1bd489a3798e2ac9bb21218ea8d5b5670e6"
+      },
+      {
+        "path": "bounded-recheck/summary.json",
+        "bytes": 2941,
+        "sha256": "8e3090479aff57903b8e08895d9b0d29a6e43f88cab8840a3c084a212af8a6f1"
+      },
+      {
+        "path": "build-libs-missing-runtime.log",
+        "bytes": 120,
+        "sha256": "b54bfd01078ae41cdb6d7a9d7a2beced3b44fa8dec5ab0482d125e07da5d5b86"
+      },
+      {
+        "path": "build-libs.log",
+        "bytes": 174,
+        "sha256": "6e0397817ffa2805772b72ae58ea3485d3ba1711148a601f88d00a91fab8934f"
+      },
+      {
+        "path": "combined-dry-build.json",
+        "bytes": 235,
+        "sha256": "af6ed0ca21145372b3275d241f4e09f6998a14fffe90dd09c178c39fc5b84f83"
+      },
+      {
+        "path": "combined-dry-build.log",
+        "bytes": 386,
+        "sha256": "a343baeba4881e19673188ca833e5609042ad787b43c5341a0ead5c4e54f629d"
+      },
+      {
+        "path": "completion-provenance.json",
+        "bytes": 3323,
+        "sha256": "e58affec96f5b82d3d1b4be45e3c8aa96bcb97f3264237850cf1122ba0150517"
+      },
+      {
+        "path": "failed-tests.json",
+        "bytes": 16199,
+        "sha256": "76d2e2f1d1005b59e95f25c88bab1d36061adefc9c475bd6ba2da4acfad9e2d1"
+      },
+      {
+        "path": "provenance.json",
+        "bytes": 1653,
+        "sha256": "3c122c743d874b5146f53bf785914cd57420917a00e707f34bfb36c32ecf14e1"
+      },
+      {
+        "path": "typecheck-results.json",
+        "bytes": 820,
+        "sha256": "329b5efb0b7d3b185d7edb0d12b2d7e07633c746daa7992ab0fcfeaf28d681c3"
+      },
+      {
+        "path": "types-main.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "types-test.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "unit-inventory-audit.json",
+        "bytes": 16272,
+        "sha256": "0197ba8cb7ac73f71d8b92332d4842c211728c66693562af7b4870381deea1b5"
+      },
+      {
+        "path": "unit-inventory.json",
+        "bytes": 70802,
+        "sha256": "f5179ce6bc38a38d7bba11dffe68a64b6d2def6221c0b65d9f736275b9da5311"
+      },
+      {
+        "path": "unit-inventory.log",
+        "bytes": 174,
+        "sha256": "db12ad97221988bf346c55d06788e21a01bb6a683d69266bf732ed4d6d9763c8"
+      },
+      {
+        "path": "unit-run-results.json",
+        "bytes": 2862,
+        "sha256": "bd1d9a3e8edb050b35934f432f2f66077490a90a000540d8f54c1ac846e6e0d9"
+      },
+      {
+        "path": "unit-shard-1.json",
+        "bytes": 791073,
+        "sha256": "4c59df11c3a18e08abbbfeb9a819fa397c1f3ca86df3be076f963d2d186d647a"
+      },
+      {
+        "path": "unit-shard-1.log",
+        "bytes": 172570,
+        "sha256": "7008c3e68def3991bde502be8a9d9920653c16c364b611d935a262af40d90e44"
+      },
+      {
+        "path": "unit-shard-2.json",
+        "bytes": 2149106,
+        "sha256": "2a6485421dd72aa2b015485ef3a4fecaa2a464b30bd03567499958c52eda5b3d"
+      },
+      {
+        "path": "unit-shard-2.log",
+        "bytes": 162849,
+        "sha256": "bf8f8895fd374d98ccce7ab6ebf530f019f4555f909faf0480d3fe4c6d3e85e3"
+      },
+      {
+        "path": "unit-shard-3.json",
+        "bytes": 1117011,
+        "sha256": "f50b6b140ef0f40c676fa08058999fdcabf71bf7e39cafe7df408c33baefc250"
+      },
+      {
+        "path": "unit-shard-3.log",
+        "bytes": 198502,
+        "sha256": "a668ad41609a573341082a7a4943e6a6c7ca4e786c72bc562cac385215a8b6be"
+      },
+      {
+        "path": "unit-shard-4.json",
+        "bytes": 1113015,
+        "sha256": "c253b364f1732b9a4700ee9cf3646481f55656511bd3bd00f0d0f57ae7bf3f05"
+      },
+      {
+        "path": "unit-shard-4.log",
+        "bytes": 150228,
+        "sha256": "4d4f40497c291c2ed1669124e30bca80a0196214d3ebf4f4fd538b61445a465a"
+      }
+    ]
+  }
+}
