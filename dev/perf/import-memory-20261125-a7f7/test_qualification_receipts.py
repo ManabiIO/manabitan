@@ -8,7 +8,7 @@ from pathlib import Path
 import unittest
 
 from qualification_receipts import (
-    EMPTY_SHA256, EXPECTED_PRODUCT_PATHS, LOOKUP_BOUNDARY,
+    CURRENT_BASELINE_SHA, CURRENT_STORAGE_POLICY, EMPTY_SHA256, EXPECTED_PRODUCT_PATHS, LOOKUP_BOUNDARY,
     SOURCE_HASH_FIELDS, STORAGE_KIND, TIMING_BOUNDARY, canonicalize_storage,
     require_matching_receipts, validate_import_summary,
 )
@@ -93,6 +93,55 @@ def change_validation(summary, report, change):
 
 
 class QualificationReceiptWitness(unittest.TestCase):
+    def test_current_baseline_requires_exactly_37_pages_and_retains_legacy_default(self):
+        for pages in (36, 37, 38, 129, 130, 131):
+            summary, report = observation()
+
+            def resize(validation):
+                storage = validation['storage']
+                active = next(item for item in storage['files'] if '/.opaque/' in item['path'] and item['bytes'] > 4096)
+                storage['bytes'] += pages * 4096 - active['bytes']
+                active['bytes'] = pages * 4096
+
+            change_validation(summary, report, resize)
+            with self.subTest(pages=pages):
+                if pages == 37:
+                    receipt = validate(summary, report, storage_policy=CURRENT_STORAGE_POLICY, baseline_sha=CURRENT_BASELINE_SHA)
+                    self.assertEqual(receipt['common']['storagePolicy']['vndbActiveSahBytes'], 151552)
+                else:
+                    with self.assertRaisesRegex(ValueError, 'exactly 151552'):
+                        validate(summary, report, storage_policy=CURRENT_STORAGE_POLICY, baseline_sha=CURRENT_BASELINE_SHA)
+                if 129 <= pages <= 131:
+                    self.assertNotIn('storagePolicy', validate(summary, report)['common'])
+                else:
+                    with self.assertRaisesRegex(ValueError, '129–131'):
+                        validate(summary, report)
+
+    def test_storage_contract_is_bound_to_baseline_and_compared_for_every_dictionary(self):
+        summary, report = observation('jitendex')
+        legacy = validate(summary, report)
+        current = validate(summary, report, storage_policy=CURRENT_STORAGE_POLICY, baseline_sha=CURRENT_BASELINE_SHA)
+        with self.assertRaises(ValueError):
+            require_matching_receipts(legacy, current)
+        for baseline in (None, SOURCE, CURRENT_BASELINE_SHA[:-1]):
+            with self.subTest(baseline=baseline), self.assertRaises(ValueError):
+                validate(summary, report, storage_policy=CURRENT_STORAGE_POLICY, baseline_sha=baseline)
+        with self.assertRaises(ValueError):
+            validate(summary, report, storage_policy='unregistered-policy', baseline_sha=CURRENT_BASELINE_SHA)
+
+    def test_measurement_dirty_paths_require_exact_hashes_and_preserve_default_marker_contract(self):
+        summary, report = observation('jitendex')
+        path = 'dev/perf/benchmark-support.js'
+        summary['source']['dirty'] = True
+        options = {'source_dirty': True, 'source_dirty_paths': [path], 'source_hashes': {path: 'e' * 64}}
+        validate(summary, report, **options)
+        for change in ({'source_dirty_paths': []}, {'source_dirty_paths': [path, path]},
+                       {'source_dirty_paths': ['ext/js/dictionary/zstd-term-content.js']},
+                       {'source_hashes': {}}, {'source_hashes': {path: 'f' * 64}},
+                       {'source_dirty_paths': [HARNESS]}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                validate(summary, report, **{**options, **change})
+
     def test_all_three_frozen_fixture_shapes_pass_without_mutating_inputs(self):
         for dictionary in ('jmdict', 'jitendex', 'vndb'):
             with self.subTest(dictionary=dictionary):

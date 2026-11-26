@@ -6,6 +6,7 @@ production defaults, fresh profiles, and the repository's strict import verifier
 Memory sampling and exhaustive media verification run only after the timed plan.
 """
 import argparse
+import atexit
 import hashlib
 import json
 import os
@@ -19,6 +20,20 @@ import sys
 import time
 import zipfile
 
+root = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(root / "dev/perf/import-memory-20261125-a7f7"))
+from chromium_memory import run_with_sampling, summarize_import_window
+from protocol import memory_overlay, memory_comparison, schedule as memory_schedule
+from audit_memory import audit_cell
+from qualification_receipts import (
+    CURRENT_STORAGE_POLICY, LEGACY_STORAGE_POLICY, storage_policy_identity,
+    validate_import_summary, require_matching_receipts,
+)
+from qualification_overlay import (
+    BENCHMARK_SUPPORT_PATH, MEMORY_HARNESS_PATH, OVERLAY_NAME,
+    apply_measurement_overlay, load_measurement_overlay, require_source_state,
+)
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--baseline", required=True)
 parser.add_argument("--candidate", required=True)
@@ -29,6 +44,8 @@ parser.add_argument("--evidence", type=pathlib.Path, required=True)
 parser.add_argument("--flags", default="{}")
 parser.add_argument("--expected-workers", type=int)
 parser.add_argument("--expected-package-entry", action="append", required=True)
+parser.add_argument("--measurement-overlay", choices=(OVERLAY_NAME,))
+parser.add_argument("--storage-policy", choices=(LEGACY_STORAGE_POLICY, CURRENT_STORAGE_POLICY), default=LEGACY_STORAGE_POLICY)
 args = parser.parse_args()
 for value in (args.baseline, args.candidate):
     if re.fullmatch(r"[a-f0-9]{40}", value) is None:
@@ -39,12 +56,8 @@ flags = json.loads(args.flags)
 if not isinstance(flags, dict):
     parser.error("Flags must be an object")
 
-root = pathlib.Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(root / "dev/perf/import-memory-20261125-a7f7"))
-from chromium_memory import run_with_sampling, summarize_import_window
-from protocol import memory_overlay, memory_comparison, schedule as memory_schedule
-from audit_memory import audit_cell
-from qualification_receipts import validate_import_summary, require_matching_receipts
+measurement_overlay = load_measurement_overlay(root, args.measurement_overlay)
+storage_policy = storage_policy_identity(args.storage_policy, args.baseline)
 
 evidence = args.evidence.resolve()
 evidence.mkdir(parents=True, exist_ok=False)
@@ -123,6 +136,10 @@ for label, sha in (("A", args.baseline), ("B", args.candidate)):
     target = work / label
     run(["git", "worktree", "add", "--detach", str(target), sha], root, evidence / f"worktree-{label}.log")
     for relative in required_same:
+        if measurement_overlay is not None and relative == BENCHMARK_SUPPORT_PATH:
+            if digest(target / relative) != measurement_overlay["identity"]["originalSha256"]:
+                raise RuntimeError(f"Frozen original measurement source differs: {label} {relative}")
+            continue
         if (target / relative).read_bytes() != (root / relative).read_bytes():
             raise RuntimeError(f"Source or harness differs: {label} {relative}")
     shutil.copytree(root / "node_modules", target / "node_modules", copy_function=os.link, symlinks=True)
@@ -154,11 +171,52 @@ changed_entries = [
 write_json(evidence / "source-identities.json", {
     "arms": identities, "changedPackageEntries": changed_entries,
     "controlC": "Same A source, package, runtime, and flags under a distinct observation label",
+    "storagePolicy": storage_policy,
+    "measurementOverlay": None if measurement_overlay is None else measurement_overlay["identity"],
 })
 if not changed_entries:
     raise RuntimeError("Candidate has no changed runtime package bytes")
 if set(changed_entries) != set(args.expected_package_entry):
     raise RuntimeError(f"Unexpected packaged changes: {changed_entries}")
+
+measurement_hashes = {} if measurement_overlay is None else {
+    BENCHMARK_SUPPORT_PATH: measurement_overlay["identity"]["sha256"],
+}
+measurement_originals = {}
+
+
+def restore_measurement_sources():
+    restored = []
+    for arm, original in measurement_originals.items():
+        target = sources[arm]
+        try:
+            require_source_state(target, measurement_hashes)
+            (target / BENCHMARK_SUPPORT_PATH).write_bytes(original)
+            state = require_source_state(target, {})
+            if digest(target / "builds/manabitan-chrome.zip") != identities[arm]["packageSha256"]:
+                raise RuntimeError("Product package changed during measurement acquisition")
+            restored.append({"arm": arm, "restored": True, "sourceState": state})
+        except Exception as failure:
+            restored.append({"arm": arm, "restored": False, "error": str(failure)})
+    write_json(evidence / "source-restoration.json", restored)
+    if any(not item["restored"] for item in restored):
+        raise RuntimeError("Measurement source restoration failed; see source-restoration.json")
+
+
+if measurement_overlay is not None:
+    atexit.register(restore_measurement_sources)
+    for arm, target in sources.items():
+        measurement_originals[arm] = apply_measurement_overlay(target, measurement_overlay)
+        if digest(target / "builds/manabitan-chrome.zip") != identities[arm]["packageSha256"]:
+            raise RuntimeError("Measurement overlay changed product package bytes")
+    write_json(evidence / "measurement-overlay.json", {
+        **measurement_overlay["identity"],
+        "arms": {arm: {
+            "originalSourceHashes": identities[arm]["sourceHashes"],
+            "effectiveSourceHashes": {**identities[arm]["sourceHashes"], **measurement_hashes},
+            "sourceState": require_source_state(target, measurement_hashes),
+        } for arm, target in sources.items()},
+    })
 
 schedule = []
 first = args.initial_order
@@ -181,27 +239,48 @@ write_json(evidence / "registered-plan.json", {
     "mediaCheck": "sample per timed observation; separate all-media verification after timing",
     "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
     "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
-    "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+    "sourceBoundary": ("Each revision built independently before timing; no product or harness overlays" if measurement_overlay is None else
+                       "Clean product packages built independently before the pinned measurement-only receipt overlay; no product overlays"),
     "expectedPackageEntries": args.expected_package_entry,
     "expectedWorkers": args.expected_workers,
+    "storagePolicy": storage_policy,
+    "measurementOverlay": None if measurement_overlay is None else measurement_overlay["identity"],
+    "deliberateTimedDirtyPaths": sorted(measurement_hashes),
     "memorySchedule": memory_schedule(1 if first == "AB" else 2),
     "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
 })
 observations = []
 reference = None
 
+def record_observation_source_state(output, arm, phase, overlay=None):
+    expected = measurement_hashes.copy()
+    if overlay is not None:
+        expected[MEMORY_HARNESS_PATH] = hashlib.sha256(overlay.encode()).hexdigest()
+    try:
+        state = require_source_state(sources[arm], expected)
+        if digest(sources[arm] / "builds/manabitan-chrome.zip") != identities[arm]["packageSha256"]:
+            raise RuntimeError("Product package changed during cohort")
+        write_json(output / f"source-state-{phase}.json", state)
+    except Exception as failure:
+        write_json(output / f"source-state-{phase}-failure.json", {"expectedDirtyPaths": sorted(expected), "error": str(failure)})
+        raise
+    return expected
+
+
 def validate_observation(output, arm, media_check="sample", overlay=None):
+    deliberate_changes = record_observation_source_state(output, arm, "after", overlay)
     summary = json.loads((output / "summary.json").read_text())
     report = json.loads((output / "run-1.json").read_text())
     identity = identities[arm]
     hashes = identity["sourceHashes"].copy()
-    if overlay is not None:
-        hashes["test/chromium/extension-two-dictionary-import.e2e.js"] = hashlib.sha256(overlay.encode()).hexdigest()
+    hashes.update(deliberate_changes)
     receipt = validate_import_summary(
         summary, report, dictionary=args.dictionary, fixture=fixture,
         source_sha=identity["sha"], package_sha256=identity["packageSha256"],
         browser_version=browser_version, import_flags=flags if flags else None,
-        source_hashes=hashes, source_dirty=overlay is not None, media_check=media_check,
+        source_hashes=hashes, source_dirty=bool(deliberate_changes), media_check=media_check,
+        source_dirty_paths=sorted(deliberate_changes),
+        storage_policy=args.storage_policy, baseline_sha=args.baseline,
     )
     if args.expected_workers is not None:
         actual = summary["runs"][0]["step4Breakdown"]["dictionaries"][0]["parserWorkerCount"]
@@ -210,12 +289,19 @@ def validate_observation(output, arm, media_check="sample", overlay=None):
     write_json(output / "canonical-receipt.json", receipt)
     return summary, receipt
 
+
+def run_import_observation(command, target, output, arm):
+    try:
+        run(command, target, output / "run.log")
+    finally:
+        record_observation_source_state(output, arm, "after")
+
+
 for item in schedule:
     target = sources["B" if item["arm"] == "B" else "A"]
     output = evidence / item["id"]
     output.mkdir()
-    if digest(target / "builds/manabitan-chrome.zip") != identities["B" if item["arm"] == "B" else "A"]["packageSha256"]:
-        raise RuntimeError("Package changed during cohort")
+    record_observation_source_state(output, "B" if item["arm"] == "B" else "A", "before")
     run(["node", str(root / "dev/perf/host-environment.js")], root, output / "host-before.json")
     command = [
         "node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1",
@@ -223,7 +309,7 @@ for item in schedule:
     ]
     if flags:
         command.extend(("--flags", args.flags))
-    run(command, target, output / "run.log")
+    run_import_observation(command, target, output, "B" if item["arm"] == "B" else "A")
     result, receipt = validate_observation(output, "B" if item["arm"] == "B" else "A")
     if reference is None:
         reference = receipt
@@ -241,13 +327,14 @@ for arm in first:
     target = sources[arm]
     output = evidence / f"exhaustive-media-{arm}"
     output.mkdir()
+    record_observation_source_state(output, arm, "before")
     command = [
         "node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1",
         "--no-build", "--build-target", "chrome", "--media-check", "all", "--output", str(output),
     ]
     if flags:
         command.extend(("--flags", args.flags))
-    run(command, target, output / "run.log")
+    run_import_observation(command, target, output, arm)
     _, receipt = validate_observation(output, arm, "all")
     require_matching_receipts(reference, receipt, compare_media=False)
     if full_media_reference is None:
@@ -259,7 +346,7 @@ memory_root = evidence / "memory"
 memory_root.mkdir()
 replication = 1 if first == "AB" else 2
 memory_plan = memory_schedule(replication)
-harness_path = "test/chromium/extension-two-dictionary-import.e2e.js"
+harness_path = MEMORY_HARNESS_PATH
 original_harness = (sources["A"] / harness_path).read_text()
 instrumented_harness = memory_overlay(original_harness)
 (memory_root / "harness-original.js").write_text(original_harness)
@@ -268,11 +355,15 @@ write_json(memory_root / "plan.json", {
     "schedule": memory_plan, "replication": replication, "dictionary": args.dictionary,
     "authoritativeTiming": False, "sourceHashes": identities,
     "overlaySha256": hashlib.sha256(instrumented_harness.encode()).hexdigest(),
+    "measurementOverlay": None if measurement_overlay is None else measurement_overlay["identity"],
+    "storagePolicy": storage_policy,
+    "deliberateDirtyPaths": sorted([*measurement_hashes, harness_path]),
 })
 memory_observations = []
 semantic_failures = []
 try:
     for target in sources.values():
+        require_source_state(target, measurement_hashes)
         if (target / harness_path).read_text() != original_harness:
             raise RuntimeError("Memory harness overlay sources differ")
         (target / harness_path).write_text(instrumented_harness)
@@ -281,6 +372,7 @@ try:
         target = sources[arm]
         output = memory_root / item["name"]
         output.mkdir()
+        record_observation_source_state(output, arm, "before", instrumented_harness)
         command = ["node", "dev/perf/import-benchmark.js", args.dictionary, "--runs", "1", "--no-build", "--build-target", "chrome", "--media-check", "sample", "--output", str(output)]
         if flags:
             command.extend(("--flags", args.flags))
@@ -316,8 +408,7 @@ finally:
         (target / harness_path).write_text(original_harness)
         if digest(target / "builds/manabitan-chrome.zip") != identities["B" if target == sources["B"] else "A"]["packageSha256"]:
             raise RuntimeError("Product package changed during memory acquisition")
-        if git("status", "--porcelain", cwd=target):
-            raise RuntimeError("Unexpected source changes after restoring memory harness")
+        require_source_state(target, measurement_hashes)
 memory_result = memory_comparison(memory_observations, args.dictionary, replication, memory_schedule)
 write_json(memory_root / "memory-comparison.json", memory_result)
 audit_error = None
@@ -357,3 +448,6 @@ write_json(evidence / "analysis.json", {
 })
 if semantic_failures or audit_error is not None or not memory_result["passesProspectiveMemoryScreen"]:
     raise RuntimeError("Complete timing retained; separate memory/semantic qualification failed")
+if measurement_overlay is not None:
+    atexit.unregister(restore_measurement_sources)
+    restore_measurement_sources()

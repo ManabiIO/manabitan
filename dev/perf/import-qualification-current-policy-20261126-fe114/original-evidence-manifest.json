@@ -1,0 +1,972 @@
+{
+    "acquisitions": {
+        "jitendex": {
+            "artifactId": 15138149888,
+            "artifactSha256": "0017e9d4118a5c5cb62da8eba1fae47d2bc8ca0f4f3f013197e7eaa11dccab62",
+            "directory": "jitendex-evidence",
+            "jobId": 140055397838,
+            "status": "invalid first baseline warmup: stale native-image receipt inference; no candidate observation"
+        },
+        "jmdict": {
+            "artifactId": 15138564828,
+            "artifactSha256": "ee6b374ac8b7e903d9e69fc2bdeaee08d12a44a1923204a766a4ce12c7ceb904",
+            "directory": "jmdict-evidence",
+            "jobId": 140055397648,
+            "status": "valid correctness/memory; timing inconclusive; preserve without reacquisition"
+        },
+        "vndb": {
+            "artifactId": 15139650925,
+            "artifactSha256": "a92fdf39cf98818776c038a6499343a540be3d222b7e1546af93ba8db662b3e7",
+            "directory": "vndb-evidence",
+            "jobId": 140055397701,
+            "status": "invalid first baseline warmup: stale active-SAH storage contract; no candidate observation"
+        }
+    },
+    "archive": "original-pr938-acquisitions.tar.gz",
+    "archiveBytes": 1571241,
+    "archiveSha256": "8e848b91a689b4d8f895d5ddd15e80fd2e3049350ac07c7c76cb395a5a455a28",
+    "excluded": [
+        "package-A.zip",
+        "package-B.zip"
+    ],
+    "exclusionReason": "Original source-identities retain package and every member hash; hosted artifacts retain complete binaries. No report, observation, receipt, log, plan, or memory scan was omitted.",
+    "members": {
+        "jitendex-evidence/browser-identity.json": {
+            "bytes": 264,
+            "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+        },
+        "jitendex-evidence/build-A.log": {
+            "bytes": 128,
+            "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        "jitendex-evidence/build-B.log": {
+            "bytes": 128,
+            "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        "jitendex-evidence/fixtures.log": {
+            "bytes": 169,
+            "sha256": "f5b95e5225fed2af6fb0c993938f1634a9bb30264bf34ccc1f681aa0114e8ce3"
+        },
+        "jitendex-evidence/libs-A.log": {
+            "bytes": 60,
+            "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "jitendex-evidence/libs-B.log": {
+            "bytes": 60,
+            "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "jitendex-evidence/license-A.log": {
+            "bytes": 215,
+            "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        "jitendex-evidence/license-B.log": {
+            "bytes": 215,
+            "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        "jitendex-evidence/registered-plan.json": {
+            "bytes": 3277,
+            "sha256": "c9dfac9e5bb9b0b1ab8296c04af48e1bec4113d3bcd6309ab6aa4ed773c854b5"
+        },
+        "jitendex-evidence/source-identities.json": {
+            "bytes": 128451,
+            "sha256": "3571f5014d3ce80c626bfc56bfb7ad7109b79fa48d197b93d115aeb4b5db3049"
+        },
+        "jitendex-evidence/warmup-1-A/host-before.json": {
+            "bytes": 503,
+            "sha256": "bc88e3c0d1cb596338dbab3b745f05fba2b9a729f14470d3ea1533af05734161"
+        },
+        "jitendex-evidence/warmup-1-A/run-1.html": {
+            "bytes": 83984,
+            "sha256": "b2a8a64b896d6b57f64ad99513c872e7d2380af7b5231b3bf28e2e8e29fae525"
+        },
+        "jitendex-evidence/warmup-1-A/run-1.json": {
+            "bytes": 150781,
+            "sha256": "323beba35120542da8fcfac9666fcb2532d0760fe7b899f7d7a409309cd61b37"
+        },
+        "jitendex-evidence/warmup-1-A/run.log": {
+            "bytes": 2373,
+            "sha256": "80d61246250d4c1136f1d12d8eab0fdb57518001ed809c072bdb7e7eb740fc41"
+        },
+        "jitendex-evidence/worktree-A.log": {
+            "bytes": 143,
+            "sha256": "db3ef798fa8877c61b320ed0511833fd47eac789adcf75c744894cdf349ac015"
+        },
+        "jitendex-evidence/worktree-B.log": {
+            "bytes": 119,
+            "sha256": "28f59eeb2be20fa89374483d864230e6f6d3fe7da662e0307788a00453dbdbc2"
+        },
+        "jmdict-evidence/analysis.json": {
+            "bytes": 1320,
+            "sha256": "54df9fb79f6d7256457339081482554f00d7418a1b26b98b7aa60982fb82f197"
+        },
+        "jmdict-evidence/browser-identity.json": {
+            "bytes": 264,
+            "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+        },
+        "jmdict-evidence/build-A.log": {
+            "bytes": 128,
+            "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        "jmdict-evidence/build-B.log": {
+            "bytes": 128,
+            "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        "jmdict-evidence/control-01-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/control-01-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "8b0192a4787f7f460979d42173d8139f2b31971d86162ff4f46ff83c53d4dfdc"
+        },
+        "jmdict-evidence/control-01-A/host-before.json": {
+            "bytes": 497,
+            "sha256": "bce1e97b31f23a7995f02678dd949a38319d8367ebe3f2af080fc1acb4a77030"
+        },
+        "jmdict-evidence/control-01-A/run-1.html": {
+            "bytes": 83861,
+            "sha256": "07446cfaf358029ef071766e9606a5af4cb4024d2dc3e94e4f58eff9ae022acd"
+        },
+        "jmdict-evidence/control-01-A/run-1.json": {
+            "bytes": 150862,
+            "sha256": "381df00e7ef4b764b05d2965083bc730eda39b886eedaeabdd7117c5f97e41c6"
+        },
+        "jmdict-evidence/control-01-A/run.log": {
+            "bytes": 1794,
+            "sha256": "7dbeb37fb44cb1c4c4ed8a94a1db50dff9ffb9c4c62b19f32d8947bb25862608"
+        },
+        "jmdict-evidence/control-01-A/summary.json": {
+            "bytes": 58807,
+            "sha256": "a80b02cc4e39463c965675a13b87afaf69a940a70132d6589657ee313945db9c"
+        },
+        "jmdict-evidence/control-01-C/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/control-01-C/host-after.json": {
+            "bytes": 497,
+            "sha256": "2a4b79928034315d2669a422f60db749716b717da385e91939b9cef586470ced"
+        },
+        "jmdict-evidence/control-01-C/host-before.json": {
+            "bytes": 497,
+            "sha256": "e342beea65c34d7ed711e853c923656fa0d20442a02f9d43dcf919e4515d7455"
+        },
+        "jmdict-evidence/control-01-C/run-1.html": {
+            "bytes": 83167,
+            "sha256": "72a62e57428edcdb6f5b7fcad77d51b809de49248e98fbd68f9a0099f50be2d7"
+        },
+        "jmdict-evidence/control-01-C/run-1.json": {
+            "bytes": 150410,
+            "sha256": "5c95297e578a591999398294f2bd3bd67c3a2caf20b3fb6384f6db0ce2392cd2"
+        },
+        "jmdict-evidence/control-01-C/run.log": {
+            "bytes": 1705,
+            "sha256": "1f3a559d9fa30f23ad01dba340dddd5af3aac6c294c28e83866a2c43a078ed07"
+        },
+        "jmdict-evidence/control-01-C/summary.json": {
+            "bytes": 58735,
+            "sha256": "061afa75ff1195c517f35662c903909bcf75c2add44202a55788eed325009eaf"
+        },
+        "jmdict-evidence/control-02-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/control-02-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "8dfeadc713facd2613e1189a8b64be4b1e9b25630448c6a6dfa23b20343d5e68"
+        },
+        "jmdict-evidence/control-02-A/host-before.json": {
+            "bytes": 497,
+            "sha256": "3f0502b629a9ebd5308cbd924349f9b1fb3b74e203f8e81378b6741c5180ca55"
+        },
+        "jmdict-evidence/control-02-A/run-1.html": {
+            "bytes": 83128,
+            "sha256": "cfb83eefa35da94481324be234ca12d027b817101b79c7ca323483bd2cc968ee"
+        },
+        "jmdict-evidence/control-02-A/run-1.json": {
+            "bytes": 150394,
+            "sha256": "27669f2a5e4f5195f4506f4f738062afa0670ecef6a1da2bbfec1c0a35bd47f5"
+        },
+        "jmdict-evidence/control-02-A/run.log": {
+            "bytes": 1705,
+            "sha256": "925db2497cac85876fec043cd251dd4199a62dc330c14794ba85aec7c66821ba"
+        },
+        "jmdict-evidence/control-02-A/summary.json": {
+            "bytes": 58797,
+            "sha256": "e1e721e50dceb0041bf90a54db1a8ef89dd126b5a7b8dbf320883032d4329b0c"
+        },
+        "jmdict-evidence/control-02-C/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/control-02-C/host-after.json": {
+            "bytes": 497,
+            "sha256": "24a9e86d3771b967f3ae8cf382e6d94e727bd9da8796a64439cfdc801efa8651"
+        },
+        "jmdict-evidence/control-02-C/host-before.json": {
+            "bytes": 497,
+            "sha256": "83ca9ad18c91f69553ac8d7cfb26b9abfbcb930fd45b23bd33f1ecc9814e6608"
+        },
+        "jmdict-evidence/control-02-C/run-1.html": {
+            "bytes": 83145,
+            "sha256": "00a571996ea9aec6d46ace0dfde8949cb1179ec612951528eb4fa07bf23a2187"
+        },
+        "jmdict-evidence/control-02-C/run-1.json": {
+            "bytes": 150403,
+            "sha256": "1b38468d41c672e7fd917d6283406c0163c284850fef5aa2aa0e38185c487255"
+        },
+        "jmdict-evidence/control-02-C/run.log": {
+            "bytes": 1705,
+            "sha256": "e15e82849065642fe6f675ecf842e308e6c82221c4e0a7fc843169306810f097"
+        },
+        "jmdict-evidence/control-02-C/summary.json": {
+            "bytes": 58770,
+            "sha256": "bafcfc6a12dc6cdb193d278aaeba274e4f89a61cd2701dfac4eca3154cedabb2"
+        },
+        "jmdict-evidence/exhaustive-media-A/canonical-receipt.json": {
+            "bytes": 25066,
+            "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+        },
+        "jmdict-evidence/exhaustive-media-A/run-1.html": {
+            "bytes": 83025,
+            "sha256": "2a1cee4e879460e5a26c8df16dff10944482a2b6539a21db17368e7dfcb130e3"
+        },
+        "jmdict-evidence/exhaustive-media-A/run-1.json": {
+            "bytes": 150231,
+            "sha256": "bbd6396e672aca95a08dd4636f3d6b5878d51e94dbb51a8e1de77a7c0d8b6dbb"
+        },
+        "jmdict-evidence/exhaustive-media-A/run.log": {
+            "bytes": 1723,
+            "sha256": "cdba1c4886473f63cabd7bf74419250f950637af7dfbbd57cce2011c854f125b"
+        },
+        "jmdict-evidence/exhaustive-media-A/summary.json": {
+            "bytes": 58729,
+            "sha256": "266426d019bbfa9e9b6c4e35982e7714ae0a79e60ffeb17a8c6c78ee0bf453e1"
+        },
+        "jmdict-evidence/exhaustive-media-B/canonical-receipt.json": {
+            "bytes": 25066,
+            "sha256": "2ef8e5a43437e8bd11f4c6912893b35ffdbca3d3128f781c7ae615e1ad0a8395"
+        },
+        "jmdict-evidence/exhaustive-media-B/run-1.html": {
+            "bytes": 82334,
+            "sha256": "02706ee7aa816539989b678a1dc2b5fedccd04f39d6987e3a1d0ebffdee49f83"
+        },
+        "jmdict-evidence/exhaustive-media-B/run-1.json": {
+            "bytes": 149808,
+            "sha256": "cdfc58b344a55ba5d2777dd8ae1001c3acbc843615c34d9e5df66ce2830ceaed"
+        },
+        "jmdict-evidence/exhaustive-media-B/run.log": {
+            "bytes": 1616,
+            "sha256": "3c6830417324006836a290bd27779a680e26e08d2ccb2083a774bc6e7e9309f9"
+        },
+        "jmdict-evidence/exhaustive-media-B/summary.json": {
+            "bytes": 58652,
+            "sha256": "fd3044a4c4b1bac6f39ae73bf76dda62408d47a3a2926245fcbea128a2dc29c7"
+        },
+        "jmdict-evidence/fixtures.log": {
+            "bytes": 157,
+            "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+        },
+        "jmdict-evidence/libs-A.log": {
+            "bytes": 60,
+            "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "jmdict-evidence/libs-B.log": {
+            "bytes": 60,
+            "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "jmdict-evidence/license-A.log": {
+            "bytes": 215,
+            "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        "jmdict-evidence/license-B.log": {
+            "bytes": 215,
+            "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        "jmdict-evidence/memory/A1/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/memory/A1/markers.jsonl": {
+            "bytes": 140,
+            "sha256": "319be194465693efa44d60188dd3546f8f612ac04857e8be5b60e8b704ddc539"
+        },
+        "jmdict-evidence/memory/A1/memory.json": {
+            "bytes": 2345420,
+            "sha256": "de865e987dd7916d30ec1fa4f5ef7ac4ec97d332334418484333d201a098a91a"
+        },
+        "jmdict-evidence/memory/A1/run-1.html": {
+            "bytes": 83263,
+            "sha256": "de2c39a543c3049737f99d414b0edf92f2cc28d4b3aff140de2390a1ed24da54"
+        },
+        "jmdict-evidence/memory/A1/run-1.json": {
+            "bytes": 150483,
+            "sha256": "c87914a42f25697830357310aebf10da029a738e03101bb10ee20bdce20f0d05"
+        },
+        "jmdict-evidence/memory/A1/run.log": {
+            "bytes": 1696,
+            "sha256": "37ac2fcf253e1bfdb69bc1da6cae3e3ea8076b7eed5e5f780ce88e2ca9e28329"
+        },
+        "jmdict-evidence/memory/A1/summary.json": {
+            "bytes": 58622,
+            "sha256": "aad626d5790dbfe962cad53d99a5f9552c4cdddd6b7212ddbf4b29a64a95d696"
+        },
+        "jmdict-evidence/memory/A2/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/memory/A2/markers.jsonl": {
+            "bytes": 140,
+            "sha256": "b07ac3024d270027ebc3147f0845f72c3769c3dc3d508f3ccc6aa70ff6f15bf0"
+        },
+        "jmdict-evidence/memory/A2/memory.json": {
+            "bytes": 2409107,
+            "sha256": "80158cfdc2cb65871c936a4c291a3c31e8569ace877a02acf102cc95d8b734ed"
+        },
+        "jmdict-evidence/memory/A2/run-1.html": {
+            "bytes": 82985,
+            "sha256": "f1da7d262118165deea0ec56b6631fd3e34b6dbbd39e3e8b2e62a2b249a75f65"
+        },
+        "jmdict-evidence/memory/A2/run-1.json": {
+            "bytes": 150243,
+            "sha256": "53eef0626d96e4dd81f8c6ca4ff6ffa682eed3355aef59086170157ab68d150e"
+        },
+        "jmdict-evidence/memory/A2/run.log": {
+            "bytes": 1696,
+            "sha256": "dd3a619ead7750bd7ee6079049d2fc15b82c50ac794d84250e7a57123bb4ec0f"
+        },
+        "jmdict-evidence/memory/A2/summary.json": {
+            "bytes": 58677,
+            "sha256": "64cdf8d2fbdffbcfb4c34edc1f4d13dc7af8e2fa39d8bed076c4d5ca3ed653f5"
+        },
+        "jmdict-evidence/memory/B1/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/memory/B1/markers.jsonl": {
+            "bytes": 140,
+            "sha256": "54384dd28ec1d315449b05867191bf50faf6298f033870628a2cd32ce60f7f8a"
+        },
+        "jmdict-evidence/memory/B1/memory.json": {
+            "bytes": 2374676,
+            "sha256": "003f1e204d17be414287ff46884cfe44bd33e025cf14a88b7a4846c9cc556756"
+        },
+        "jmdict-evidence/memory/B1/run-1.html": {
+            "bytes": 83292,
+            "sha256": "91e11b7630b9b0e8ea6c0eefca1bbf3663e23292f5f4a5e7c8d40cd9ce61dbd1"
+        },
+        "jmdict-evidence/memory/B1/run-1.json": {
+            "bytes": 150553,
+            "sha256": "65da15bb7e2afa7fddac633d3fc22b1c351d9d8f0d22e7ebba641628b1108cb8"
+        },
+        "jmdict-evidence/memory/B1/run.log": {
+            "bytes": 1696,
+            "sha256": "34e5bf5f8b5a7ed46b83cf7633add7faa023af62e9bd586fbae8b664a6e8353e"
+        },
+        "jmdict-evidence/memory/B1/summary.json": {
+            "bytes": 58668,
+            "sha256": "94d0031d809661336e0972554eecd2285aad0d58c2992a73f195547dffb4a20d"
+        },
+        "jmdict-evidence/memory/B2/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/memory/B2/markers.jsonl": {
+            "bytes": 140,
+            "sha256": "c3a5d39e16df1488436cb76cde1b863346414f1119785bb2b208353ad0c403d6"
+        },
+        "jmdict-evidence/memory/B2/memory.json": {
+            "bytes": 2300538,
+            "sha256": "6ea9d1723ed58b543c95c67013ca129807984379ee249da9f6070efbf8954da7"
+        },
+        "jmdict-evidence/memory/B2/run-1.html": {
+            "bytes": 83325,
+            "sha256": "2129b679b005d549b92aed030f3f1629091199e35b6f895f9a8fc7690800eff1"
+        },
+        "jmdict-evidence/memory/B2/run-1.json": {
+            "bytes": 150722,
+            "sha256": "2c90c7486b8fa291f1d2e7d71c9dda5acea312a28548d3c2133819c98d71dfa2"
+        },
+        "jmdict-evidence/memory/B2/run.log": {
+            "bytes": 1696,
+            "sha256": "602893a520e239e062c4c9e149d40eb8d43bb3cc5ac59d59f3a454d674e36102"
+        },
+        "jmdict-evidence/memory/B2/summary.json": {
+            "bytes": 58792,
+            "sha256": "0d55ba3378816862943be49539f844a67477401b2e5510d6fe5048bc7ccec60e"
+        },
+        "jmdict-evidence/memory/harness-instrumented.js": {
+            "bytes": 326351,
+            "sha256": "81adafaae2763693ae074bd8fe30c6712d066c29ec424c6385590f6eaa10a9bb"
+        },
+        "jmdict-evidence/memory/harness-original.js": {
+            "bytes": 325917,
+            "sha256": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+        },
+        "jmdict-evidence/memory/memory-audit.json": {
+            "bytes": 456,
+            "sha256": "c1aac9089a4056cb33fbd759beec2deb812b9c7d08ed6e3501d2ad25eea7d062"
+        },
+        "jmdict-evidence/memory/memory-comparison.json": {
+            "bytes": 10134,
+            "sha256": "c2a01e0e2a740f26fc6894f7290225cf0b9a3e187265be62d29e5f8d2355d59d"
+        },
+        "jmdict-evidence/memory/observations.json": {
+            "bytes": 8509,
+            "sha256": "150a084573fb3ed61e95e62ea56efef8ca9849e5aaa6714af0f4ca87c4cf9995"
+        },
+        "jmdict-evidence/memory/plan.json": {
+            "bytes": 128814,
+            "sha256": "17c75375db7e4d126e0463aba095c77b1bc2071a4ca2f3035a38f6781ac7f69c"
+        },
+        "jmdict-evidence/memory/semantic-failures.json": {
+            "bytes": 3,
+            "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+        },
+        "jmdict-evidence/observations.json": {
+            "bytes": 2490,
+            "sha256": "dedda99e73caf2a8f26168e43fe987c8dc97f7c1b6a9e6d7b385e4a828334a3e"
+        },
+        "jmdict-evidence/pair-01-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-01-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "ce03195f2454021d61b1fefb2201b47decd6c9e0ed259b000e1fb0c29dbd7737"
+        },
+        "jmdict-evidence/pair-01-A/host-before.json": {
+            "bytes": 496,
+            "sha256": "d480cc0caae68f63c1682c082ea4896964e7d7b688f31d17c2fafa1885dbd350"
+        },
+        "jmdict-evidence/pair-01-A/run-1.html": {
+            "bytes": 83008,
+            "sha256": "17121c03c8883abac181cc64cc36745ea3a040bcd7ada2f9c4cd47b4e2c8a23e"
+        },
+        "jmdict-evidence/pair-01-A/run-1.json": {
+            "bytes": 150297,
+            "sha256": "f7a1fac7350967f2da8f711bf143e6f0c802029d920f27506bd4f92793237e12"
+        },
+        "jmdict-evidence/pair-01-A/run.log": {
+            "bytes": 1695,
+            "sha256": "d3e7e0569ef43ca176e6d1bad24372a53d6b10bbb7493d7197f11e69847fdadf"
+        },
+        "jmdict-evidence/pair-01-A/summary.json": {
+            "bytes": 58841,
+            "sha256": "207215fedca03f1f173d6bbcd6e2c5348d2e3e391ccf6f513a403f7d76cf8a1e"
+        },
+        "jmdict-evidence/pair-01-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-01-B/host-after.json": {
+            "bytes": 497,
+            "sha256": "91ffb49c7b3363c7c497cb521a3bef66cfbc870305fc2800d41ec4c1872f9377"
+        },
+        "jmdict-evidence/pair-01-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "878101600312d8cd986469ea6c7ea0582c515501e1411eb6ff09c04817040452"
+        },
+        "jmdict-evidence/pair-01-B/run-1.html": {
+            "bytes": 83310,
+            "sha256": "838184ce474738067333cb1d8ffd0a8b7318d0590fa6e3feebb9fd60070cac0b"
+        },
+        "jmdict-evidence/pair-01-B/run-1.json": {
+            "bytes": 150738,
+            "sha256": "b76915fea80dab888fe734f4b9fabbbf7288e28b7184772d625e16ebf887b528"
+        },
+        "jmdict-evidence/pair-01-B/run.log": {
+            "bytes": 1696,
+            "sha256": "d0752898eb48cfb91364e504f19bc8addd8ed373a11b625fee251dcef8e225fe"
+        },
+        "jmdict-evidence/pair-01-B/summary.json": {
+            "bytes": 58825,
+            "sha256": "4f54b7815aadf628cef18dca864571c07916fb1fd9edd6325ea6eeaa060ed3c6"
+        },
+        "jmdict-evidence/pair-02-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-02-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "e70f00ba7de0c83b82446544efeb8f88f1b034878835adb0dbcc0f51fcf71c25"
+        },
+        "jmdict-evidence/pair-02-A/host-before.json": {
+            "bytes": 496,
+            "sha256": "46b0c6614ec41a4cb4f1f2bc0884a94514d866806282b9c00f0d27b3671a28d6"
+        },
+        "jmdict-evidence/pair-02-A/run-1.html": {
+            "bytes": 82274,
+            "sha256": "08eaa5f72f3d72a7c7b7ed3d2c34b7b51174e98a8ea6775d0a01d252a4e281fe"
+        },
+        "jmdict-evidence/pair-02-A/run-1.json": {
+            "bytes": 149786,
+            "sha256": "76c5360dc28adb58bd053823f39b3141d33b63776bd34d936f711fd1345c6b5f"
+        },
+        "jmdict-evidence/pair-02-A/run.log": {
+            "bytes": 1589,
+            "sha256": "cc900192d62b8f4ad2356ae41b66f8928bba0cdcda9bc5f22719788f60dc8e9f"
+        },
+        "jmdict-evidence/pair-02-A/summary.json": {
+            "bytes": 58640,
+            "sha256": "296ce3d9202f840e8eb536dcbc7ed82fe9412eef4fdf3300e6468de0cd4d3d9d"
+        },
+        "jmdict-evidence/pair-02-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-02-B/host-after.json": {
+            "bytes": 496,
+            "sha256": "394214bf735c2159742500e7684651c268c0594bc0ac1b61519ef3b2da876591"
+        },
+        "jmdict-evidence/pair-02-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "92deebc2f4e340e006ab9eccecf3ad613f4fdba5f86811809ebc41d420fd2d7c"
+        },
+        "jmdict-evidence/pair-02-B/run-1.html": {
+            "bytes": 83138,
+            "sha256": "f42358777d8ef7f014394da577025468a5ee100c8a9905d6f7e79014f3b1e89b"
+        },
+        "jmdict-evidence/pair-02-B/run-1.json": {
+            "bytes": 150385,
+            "sha256": "af8f54795d5dba04611cde6bc8641d114f6a6e5aac1aa3df3e98e648865e37dc"
+        },
+        "jmdict-evidence/pair-02-B/run.log": {
+            "bytes": 1695,
+            "sha256": "ababb0f9d59faacbdf3c89bd39d50914b22c684e91db7c80719ca917df888506"
+        },
+        "jmdict-evidence/pair-02-B/summary.json": {
+            "bytes": 58688,
+            "sha256": "47f710eac9b03fd2f3012b658a8b475f4a441ac2bec39082943d393ebe9f65f4"
+        },
+        "jmdict-evidence/pair-03-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-03-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "c2c55e3d8f6d0a79de2660f3b4112cfb19d3fa33a15307c8a070a9b8e5b559b8"
+        },
+        "jmdict-evidence/pair-03-A/host-before.json": {
+            "bytes": 497,
+            "sha256": "82caf136d79129a0e20c00c79daa447602cc10dc5a10fea16b28011af470ba89"
+        },
+        "jmdict-evidence/pair-03-A/run-1.html": {
+            "bytes": 83346,
+            "sha256": "a5e851d254b9e1aa4ea52a10cb43b22b51eb6e72fb64251d10fd6acef7bda35d"
+        },
+        "jmdict-evidence/pair-03-A/run-1.json": {
+            "bytes": 150727,
+            "sha256": "cef1f9698f1c1d60639697286622c7f7ace45d89616780fd43f97f85d42293d2"
+        },
+        "jmdict-evidence/pair-03-A/run.log": {
+            "bytes": 1696,
+            "sha256": "3c73971536ce1efa3ccabf23859e033ae544931a9ed657e6618d68a0a9f04d96"
+        },
+        "jmdict-evidence/pair-03-A/summary.json": {
+            "bytes": 58784,
+            "sha256": "91af50df3209b6a8913f7b585ab19599595dff2e21f637765526c104c75eeedd"
+        },
+        "jmdict-evidence/pair-03-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-03-B/host-after.json": {
+            "bytes": 497,
+            "sha256": "f2881dc6c7a89cca27084712bef890ba41d4fef8aa51165b4f3ca76b989711d5"
+        },
+        "jmdict-evidence/pair-03-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "6f1e7e05e67b32d585f32b3c3aa2ab21cb3b57eb4e2dad7cea0b050c53ea9adc"
+        },
+        "jmdict-evidence/pair-03-B/run-1.html": {
+            "bytes": 83987,
+            "sha256": "9d5dc672a3d7fedaf39fddbb7c02df56441a66595e265dbcc9380f3a25ad2a2b"
+        },
+        "jmdict-evidence/pair-03-B/run-1.json": {
+            "bytes": 151041,
+            "sha256": "f1eebd2dd61d62d3f1723d7819147c468fa01a65b8494b8d81eb65de55092873"
+        },
+        "jmdict-evidence/pair-03-B/run.log": {
+            "bytes": 1785,
+            "sha256": "ec3bd2473a7ee97462c623cccb5961e5059942af53ceca14b681944607ce03b4"
+        },
+        "jmdict-evidence/pair-03-B/summary.json": {
+            "bytes": 58840,
+            "sha256": "848624fc4cd02a594c9f357e94c4e691f2f67c95aa9da5f4c5435e6090250309"
+        },
+        "jmdict-evidence/pair-04-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-04-A/host-after.json": {
+            "bytes": 496,
+            "sha256": "89d2d05448a4c614cdc3b46b2b4174a25f80ee1e2aff6f1e83d4a4ea021ccedc"
+        },
+        "jmdict-evidence/pair-04-A/host-before.json": {
+            "bytes": 497,
+            "sha256": "7724180e34dfa0731c4e12e0a06e6ca9bc66e978ca859670c3d525ce17a4653a"
+        },
+        "jmdict-evidence/pair-04-A/run-1.html": {
+            "bytes": 83311,
+            "sha256": "e4c5adb9841f8472e55cb93845b1ec635dc4b48220f9136c465863dc61412e50"
+        },
+        "jmdict-evidence/pair-04-A/run-1.json": {
+            "bytes": 150720,
+            "sha256": "dc249270ccb79e641ad14bc990190cd012f866bbf0c1f9775b8200a0aceaa587"
+        },
+        "jmdict-evidence/pair-04-A/run.log": {
+            "bytes": 1696,
+            "sha256": "6fcc1a1b297b1915d191fc4d6d6c42f14674e9a35255f0ea1fcd27d6af63a71d"
+        },
+        "jmdict-evidence/pair-04-A/summary.json": {
+            "bytes": 58855,
+            "sha256": "62031d2549755beb3f81a7cf6c17fe75fcc68ae31049de81b8ebeafa13d4c55b"
+        },
+        "jmdict-evidence/pair-04-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-04-B/host-after.json": {
+            "bytes": 497,
+            "sha256": "89ff4462930b9e00a9c3907ac1af139159bbd398cfd83dc16696a7be5cef14ad"
+        },
+        "jmdict-evidence/pair-04-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "efd36ab07cddd813708ee8d0167dba851311166e17d4d746680815133f4b11b9"
+        },
+        "jmdict-evidence/pair-04-B/run-1.html": {
+            "bytes": 83158,
+            "sha256": "d8513f636570dadc41e993dfe15fe42ecd62e9106ba366717237790af5e5faec"
+        },
+        "jmdict-evidence/pair-04-B/run-1.json": {
+            "bytes": 150473,
+            "sha256": "ccdb8cff9659d3b5d26b232cf12e20ec91170655b2ce5e03d2a4bf75307fbf92"
+        },
+        "jmdict-evidence/pair-04-B/run.log": {
+            "bytes": 1696,
+            "sha256": "ae7726f0379f955ace5e6cd4b3c5a93ebd6308d7d444c949b36a8978c36fed58"
+        },
+        "jmdict-evidence/pair-04-B/summary.json": {
+            "bytes": 58803,
+            "sha256": "ab3814c293050052c9e209f5d80b4b1ac3b7a3f87d72adf60d393c76dbf5d350"
+        },
+        "jmdict-evidence/pair-05-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-05-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "22d0e51e75f5d2a541e13a437090176050a94e34f4bb88dd0faf0be060cd4418"
+        },
+        "jmdict-evidence/pair-05-A/host-before.json": {
+            "bytes": 496,
+            "sha256": "1748f6ab3d8687940e9d7dd818b777fdc183bc40e5425d0aa324e2958d347e5e"
+        },
+        "jmdict-evidence/pair-05-A/run-1.html": {
+            "bytes": 83026,
+            "sha256": "825c946ba94ab3009d1d3c9a08e066dea5387b40e182b570d37f6c406cbda15c"
+        },
+        "jmdict-evidence/pair-05-A/run-1.json": {
+            "bytes": 150095,
+            "sha256": "9c07d6bcde71158c3733cc00155836d178d494ad0cb2bcc82fb39fbdcd2a5eb9"
+        },
+        "jmdict-evidence/pair-05-A/run.log": {
+            "bytes": 1696,
+            "sha256": "16f3b3126658f1b4eafdc4c437ec7acd30612cc000db98e3adb2548aac87bf8b"
+        },
+        "jmdict-evidence/pair-05-A/summary.json": {
+            "bytes": 58594,
+            "sha256": "605dd7e344119c58bd47d750f765bf9e084763f93371186964d2eac2a6d85417"
+        },
+        "jmdict-evidence/pair-05-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-05-B/host-after.json": {
+            "bytes": 497,
+            "sha256": "2009c98432496d339b362bc85de6a80b9513c6aa559a6de37c7f1a4c19b57486"
+        },
+        "jmdict-evidence/pair-05-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "6bef2d945e52563f6acef88c9ce45cf89fa71303eef8ed613d87ea69958c6453"
+        },
+        "jmdict-evidence/pair-05-B/run-1.html": {
+            "bytes": 82263,
+            "sha256": "6fe3c3e5f160ed662f9b2a2f3d379ba105f0802e08fa39df4aaf1fad01f7ca1a"
+        },
+        "jmdict-evidence/pair-05-B/run-1.json": {
+            "bytes": 149770,
+            "sha256": "4c9b1a2c191dfefa4638cb1427d695fd6ab89511a594a4186bd995f1bf70bafd"
+        },
+        "jmdict-evidence/pair-05-B/run.log": {
+            "bytes": 1589,
+            "sha256": "bab6b044da137cc038adaf49936ae625f1c1ecaf9af3b11ff1ebde21ccb6f100"
+        },
+        "jmdict-evidence/pair-05-B/summary.json": {
+            "bytes": 58727,
+            "sha256": "3d965ead189a0a9c2644167a499223de85c03c71742711da0cf53169b3842304"
+        },
+        "jmdict-evidence/pair-06-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-06-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "644f9ba2c1a3d136793bf808ccf3ec1a5980d17063c38b7f4e337120ad69b992"
+        },
+        "jmdict-evidence/pair-06-A/host-before.json": {
+            "bytes": 497,
+            "sha256": "6da14c7f0850263c26800307bf85fbb932eea83eeef01027c6995a4da63ebaff"
+        },
+        "jmdict-evidence/pair-06-A/run-1.html": {
+            "bytes": 82513,
+            "sha256": "ea1021353aaad51dea95512ca4905979950a6635bc30cb10be483f4cbe91e3e9"
+        },
+        "jmdict-evidence/pair-06-A/run-1.json": {
+            "bytes": 150220,
+            "sha256": "86242a992c699d53628dff41f5860f21112da347c43abebfaa6f83126fcf31bb"
+        },
+        "jmdict-evidence/pair-06-A/run.log": {
+            "bytes": 1589,
+            "sha256": "56050b33f6d5e07ab825a89cfeadccc6d7a50d486c3cae87dc3e79841a46510f"
+        },
+        "jmdict-evidence/pair-06-A/summary.json": {
+            "bytes": 58805,
+            "sha256": "b02fe964ddde936b296a9f912d1397ecd3a99ac6d957da742b38816e3129de94"
+        },
+        "jmdict-evidence/pair-06-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/pair-06-B/host-after.json": {
+            "bytes": 497,
+            "sha256": "a73be22bb06ee7ddc1464ed2fd7b731049c75e4c4720e4be11d6c4792bf08c50"
+        },
+        "jmdict-evidence/pair-06-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "62363187f00f77aaf11130371144a71c629bd661f673f02c93740ed84be33689"
+        },
+        "jmdict-evidence/pair-06-B/run-1.html": {
+            "bytes": 83151,
+            "sha256": "dcb56def4b17bed4ac552572cdfe0b6c29195980cf72350c4b5f7f8f1e22894e"
+        },
+        "jmdict-evidence/pair-06-B/run-1.json": {
+            "bytes": 150358,
+            "sha256": "6f9f1a8587aa19ac4b35e3e4a71562f90436add0a19bddaa3d5c844a17118e3b"
+        },
+        "jmdict-evidence/pair-06-B/run.log": {
+            "bytes": 1696,
+            "sha256": "95737be0c97552fd7cdd003dedf4b07ce428adfd4cb4b9a00d3f37b0642f071c"
+        },
+        "jmdict-evidence/pair-06-B/summary.json": {
+            "bytes": 58730,
+            "sha256": "e7b288c7394750f32639660d18606060b03b52d3073ca2dd07fcf9f25ced9ab7"
+        },
+        "jmdict-evidence/registered-plan.json": {
+            "bytes": 3275,
+            "sha256": "1a48c0cb40eba2c282434d20b2d31d8fb6c65e4ad135c43e03bae551bc5e8f0e"
+        },
+        "jmdict-evidence/source-identities.json": {
+            "bytes": 128451,
+            "sha256": "1118b7032c1e0e88f6407d757e0935b50e397aa6ba881d657f7b9639ff23c168"
+        },
+        "jmdict-evidence/warmup-1-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/warmup-1-A/host-after.json": {
+            "bytes": 497,
+            "sha256": "d9743ef858701f2d19ca407ac409b2503529f582f3079504a0688d7980486ea2"
+        },
+        "jmdict-evidence/warmup-1-A/host-before.json": {
+            "bytes": 496,
+            "sha256": "a913907cee3d62300b616c0d9bdcb0e6bd5962944cb5ff43d68b5fd822f68cae"
+        },
+        "jmdict-evidence/warmup-1-A/run-1.html": {
+            "bytes": 83061,
+            "sha256": "9e278ef0816dabef032e75b667c19adc13beee5b5169371c3534dce14f08d9d3"
+        },
+        "jmdict-evidence/warmup-1-A/run-1.json": {
+            "bytes": 150232,
+            "sha256": "9927754ffdb68f2bb4b83851282e4f5287933277e7e9328b5f9fa86bb55f4c94"
+        },
+        "jmdict-evidence/warmup-1-A/run.log": {
+            "bytes": 1698,
+            "sha256": "8b18c90cc23772710b0220879c2e60818bfa95c079823f81eabc4d57cb48064c"
+        },
+        "jmdict-evidence/warmup-1-A/summary.json": {
+            "bytes": 58732,
+            "sha256": "bdbb409ee7500d7c55905c1e7ffcc6552c118db7169dc3b7641971c771a281bb"
+        },
+        "jmdict-evidence/warmup-1-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/warmup-1-B/host-after.json": {
+            "bytes": 497,
+            "sha256": "7285f1b596364af0e62dbe954ba1ba38a258b31b2e8b23eed69b52b0350d1155"
+        },
+        "jmdict-evidence/warmup-1-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "25c03a0eb79703bf91c977eda8ba859cebaa4571b049c55d23241da9d1262067"
+        },
+        "jmdict-evidence/warmup-1-B/run-1.html": {
+            "bytes": 83319,
+            "sha256": "b4928d3899796ae857607ef571ff886266a365b1ca6ff1a5a34e5f7d21407e7a"
+        },
+        "jmdict-evidence/warmup-1-B/run-1.json": {
+            "bytes": 150737,
+            "sha256": "3680228c200da5e21f7d0c921b144312d7f161e0e496592d3876068d5bcf04c3"
+        },
+        "jmdict-evidence/warmup-1-B/run.log": {
+            "bytes": 1699,
+            "sha256": "6f1a97dce2c292ab58a59116ec05cd0fdb720dd902411e6365a412aba8eb85bd"
+        },
+        "jmdict-evidence/warmup-1-B/summary.json": {
+            "bytes": 58815,
+            "sha256": "cf7eb8d25bce2e5ecb412737230a34cd1449fb8be2dcb421e99f948cca552735"
+        },
+        "jmdict-evidence/warmup-2-A/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/warmup-2-A/host-after.json": {
+            "bytes": 496,
+            "sha256": "c3d3459da41cd1ffbc0b6ade6b825d9a8ac3836e21714c30cb2b72dd7611da3f"
+        },
+        "jmdict-evidence/warmup-2-A/host-before.json": {
+            "bytes": 496,
+            "sha256": "e633c901c1faafa16718006adc5cafaffbbaa0a22069faa1ca216f14a95ea912"
+        },
+        "jmdict-evidence/warmup-2-A/run-1.html": {
+            "bytes": 83165,
+            "sha256": "7fb59d004833109bdabda7bee9751f4439138928d99adcb57a00c098bfee6f81"
+        },
+        "jmdict-evidence/warmup-2-A/run-1.json": {
+            "bytes": 150462,
+            "sha256": "ed3b331330e53f57b356a0b4507782855c0836d6b053461bc32995f40efd493b"
+        },
+        "jmdict-evidence/warmup-2-A/run.log": {
+            "bytes": 1698,
+            "sha256": "8ee7b3a26a8c31222ed2d71350161b1f41a63d4ba5844a14bcbad2d27d3bb225"
+        },
+        "jmdict-evidence/warmup-2-A/summary.json": {
+            "bytes": 58691,
+            "sha256": "6c75a224c0c50265462076483cedf5069eb3aa9932d4f7ebd9f1ccccf02a2073"
+        },
+        "jmdict-evidence/warmup-2-B/canonical-receipt.json": {
+            "bytes": 25069,
+            "sha256": "0b24b4923aae6ad0e67d81ee72ab55f4b5939381783d985402c07f3862d2a0dd"
+        },
+        "jmdict-evidence/warmup-2-B/host-after.json": {
+            "bytes": 496,
+            "sha256": "d9a02e9385ede5685ab50854c0e42db975000ce7c84c7df4be20883f2d7cdff5"
+        },
+        "jmdict-evidence/warmup-2-B/host-before.json": {
+            "bytes": 497,
+            "sha256": "873fdddec6bb53ae753af378621d5b28789dae30013955ad2f9d0802f094902a"
+        },
+        "jmdict-evidence/warmup-2-B/run-1.html": {
+            "bytes": 83259,
+            "sha256": "c273f8c0de46769f8771002fcdabd53252023e7e2805caa3e135b3cc9e4f7f6b"
+        },
+        "jmdict-evidence/warmup-2-B/run-1.json": {
+            "bytes": 150605,
+            "sha256": "b17eddb10c142f02e05ec2180d1cfc8f187981231437a272e42a767e8233e8c2"
+        },
+        "jmdict-evidence/warmup-2-B/run.log": {
+            "bytes": 1704,
+            "sha256": "30992559a04ad672c4dad0ea2b165a8d1c9e5dfb1bd9e23246b29a9e4b5ba94a"
+        },
+        "jmdict-evidence/warmup-2-B/summary.json": {
+            "bytes": 58825,
+            "sha256": "4a50d6ccccaba8317e9b01029ebf697fb49c0aed12639530d07d12258e155476"
+        },
+        "jmdict-evidence/worktree-A.log": {
+            "bytes": 143,
+            "sha256": "db3ef798fa8877c61b320ed0511833fd47eac789adcf75c744894cdf349ac015"
+        },
+        "jmdict-evidence/worktree-B.log": {
+            "bytes": 119,
+            "sha256": "28f59eeb2be20fa89374483d864230e6f6d3fe7da662e0307788a00453dbdbc2"
+        },
+        "vndb-evidence/browser-identity.json": {
+            "bytes": 264,
+            "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+        },
+        "vndb-evidence/build-A.log": {
+            "bytes": 128,
+            "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        "vndb-evidence/build-B.log": {
+            "bytes": 128,
+            "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+        },
+        "vndb-evidence/fixtures.log": {
+            "bytes": 171,
+            "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+        },
+        "vndb-evidence/libs-A.log": {
+            "bytes": 60,
+            "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "vndb-evidence/libs-B.log": {
+            "bytes": 60,
+            "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+        },
+        "vndb-evidence/license-A.log": {
+            "bytes": 215,
+            "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        "vndb-evidence/license-B.log": {
+            "bytes": 215,
+            "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+        },
+        "vndb-evidence/registered-plan.json": {
+            "bytes": 3273,
+            "sha256": "6ab91351a6de669b3d6a4842938768ef162ad12d0fd23dde7065a398a948fd08"
+        },
+        "vndb-evidence/source-identities.json": {
+            "bytes": 128451,
+            "sha256": "e35883e3f3c697ccf2cd197a94f995a3378ee3ada8aecc6c8beaaad9c455a4d0"
+        },
+        "vndb-evidence/warmup-1-A/host-before.json": {
+            "bytes": 504,
+            "sha256": "faf04d28c98e81064f25bfabacb19342424a9d4e811828f3b0114e2b65f02fe7"
+        },
+        "vndb-evidence/warmup-1-A/run-1.html": {
+            "bytes": 84064,
+            "sha256": "ae98ae6d269496a8105292a805705ac34026b25155f75410f034ad84f226764a"
+        },
+        "vndb-evidence/warmup-1-A/run-1.json": {
+            "bytes": 152567,
+            "sha256": "a291e78671453964e1b25c1f826c7d3573a271224325d6547137437ae175f982"
+        },
+        "vndb-evidence/warmup-1-A/run.log": {
+            "bytes": 1698,
+            "sha256": "78784f7b8b9cb7e05a060652f7dd04c11d6a3115916e1fbde2853b3cae67041c"
+        },
+        "vndb-evidence/warmup-1-A/summary.json": {
+            "bytes": 59891,
+            "sha256": "bcc7ee135bdee20b5d58aef7dbcf609056a4160fa7714a25b58b3fc418a26e81"
+        },
+        "vndb-evidence/worktree-A.log": {
+            "bytes": 143,
+            "sha256": "db3ef798fa8877c61b320ed0511833fd47eac789adcf75c744894cdf349ac015"
+        },
+        "vndb-evidence/worktree-B.log": {
+            "bytes": 119,
+            "sha256": "28f59eeb2be20fa89374483d864230e6f6d3fe7da662e0307788a00453dbdbc2"
+        }
+    },
+    "representation": "Unmodified original artifact file bytes; sorted USTAR regular files, mode0644, uid/gid/mtime0, empty owner names; gzip filename empty, mtime0, compression9",
+    "schemaVersion": 1,
+    "source": {
+        "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+        "candidate": "c6835c1bc1ddcc07ac5c9bc10ac0558e1f3cc7de",
+        "pullRequest": 938,
+        "repository": "ManabiIO/manabitan",
+        "runId": 45861596123
+    }
+}

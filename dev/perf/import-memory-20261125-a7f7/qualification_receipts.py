@@ -29,6 +29,9 @@ SQLITE_FILE_RE = re.compile(re.escape(SQLITE_PREFIX) + r'[a-z0-9]+')
 SHA256_RE = re.compile(r'[a-f0-9]{64}')
 SHA_RE = re.compile(r'[a-f0-9]{40}')
 EMPTY_SHA256 = hashlib.sha256(b'').hexdigest()
+LEGACY_STORAGE_POLICY = 'historical-vndb-sah-129-131'
+CURRENT_STORAGE_POLICY = 'baseline-0143e959-vndb-sah-37'
+CURRENT_BASELINE_SHA = '0143e9596cd8f790d5e166d4ba6a2425fbc57f14'
 EXPECTED_PRODUCT_PATHS = {
     'jmdict': frozenset({
         'manabitan-term-content.bin',
@@ -99,8 +102,18 @@ def _same(actual, expected, label):
         raise ValueError(f'{label} differs from the required value')
 
 
-def canonicalize_storage(storage, dictionary):
+def storage_policy_identity(storage_policy=LEGACY_STORAGE_POLICY, baseline_sha=None):
+    """The new exact allocation contract is valid only for its frozen baseline."""
+    if storage_policy == LEGACY_STORAGE_POLICY:
+        return {'name': storage_policy}
+    if storage_policy != CURRENT_STORAGE_POLICY or baseline_sha != CURRENT_BASELINE_SHA:
+        raise ValueError('Storage policy requires the frozen 0143e959 baseline')
+    return {'name': storage_policy, 'baselineSha': CURRENT_BASELINE_SHA, 'vndbActiveSahBytes': 151552}
+
+
+def canonicalize_storage(storage, dictionary, *, storage_policy=LEGACY_STORAGE_POLICY, baseline_sha=None):
     """Keep exact logical sizes, normalizing only two validated random names."""
+    policy = storage_policy_identity(storage_policy, baseline_sha)
     if dictionary not in EXPECTED_PRODUCT_PATHS:
         raise ValueError('Unsupported frozen dictionary storage policy')
     storage = _record(storage, 'storage')
@@ -148,13 +161,17 @@ def canonicalize_storage(storage, dictionary):
     # Retain the prior prospective VNDB bound and additionally require exact
     # sizes across observations. Even one allowed page's difference fails the
     # cross-observation comparison; the range never replaces actual bytes.
-    if dictionary == 'vndb' and not 129 <= active[0] // 4096 <= 131:
-        raise ValueError('VNDB active SAH allocation is outside 129–131 pages')
+    if dictionary == 'vndb':
+        if storage_policy == LEGACY_STORAGE_POLICY and not 129 <= active[0] // 4096 <= 131:
+            raise ValueError('VNDB active SAH allocation is outside 129–131 pages')
+        if storage_policy == CURRENT_STORAGE_POLICY and active[0] != policy['vndbActiveSahBytes']:
+            raise ValueError('VNDB active SAH allocation must be exactly 151552 bytes (37 pages)')
     return {'kind': storage['kind'], 'bytes': total,
             'files': sorted(normalized, key=lambda item: (item['path'], item['bytes']))}
 
 
-def canonicalize_validation(validation, *, dictionary, fixture, media_check):
+def canonicalize_validation(validation, *, dictionary, fixture, media_check,
+                            storage_policy=LEGACY_STORAGE_POLICY, baseline_sha=None):
     """Validate all semantic coverage and preserve every field except elapsedMs."""
     validation = _record(validation, 'validation')
     fixture = _record(fixture, 'fixture')
@@ -217,20 +234,24 @@ def canonicalize_validation(validation, *, dictionary, fixture, media_check):
     if expected_files == 0 and (media_bytes != 0 or media['sha256'] != EMPTY_SHA256):
         raise ValueError('Empty media receipt differs from the empty digest')
     canonical = deepcopy(validation)
-    canonical['storage'] = canonicalize_storage(validation.get('storage'), dictionary)
+    canonical['storage'] = canonicalize_storage(validation.get('storage'), dictionary,
+                                               storage_policy=storage_policy, baseline_sha=baseline_sha)
     canonical['lookup']['observations'] = sorted(canonical_rows, key=lambda row: (row['pass'], row['term']))
     return canonical
 
 
 def validate_import_summary(summary, report, *, dictionary, fixture, source_sha, package_sha256,
                             browser_version=None, import_flags=None, source_hashes=None,
-                            source_dirty=False, media_check='sample'):
+                            source_dirty=False, media_check='sample', source_dirty_paths=None,
+                            storage_policy=LEGACY_STORAGE_POLICY, baseline_sha=None):
     """Bind one summary/raw report to frozen identities and return semantic keys.
 
     source_hashes, when supplied, maps report provenance paths to their expected
     hashes. The caller separately freezes the complete harness dependency set;
     the native report exposes only its documented provenance subset. A dirty
-    source is accepted only when explicitly requested for the marker overlay.
+    source is accepted only when explicitly requested for a measurement overlay.
+    New callers also bind the exact dirty paths; the orchestrator independently
+    checks their Git states and hashes before and after each observation.
     """
     summary = _record(summary, 'summary')
     report = _record(report, 'raw report')
@@ -239,6 +260,7 @@ def validate_import_summary(summary, report, *, dictionary, fixture, source_sha,
     _digest(package_sha256, 'expected package digest')
     if type(source_dirty) is not bool:
         raise ValueError('Expected source dirty state must be explicit')
+    policy = storage_policy_identity(storage_policy, baseline_sha)
     if import_flags is not None and type(import_flags) is not dict:
         raise ValueError('Expected import flags must be an object or null')
     for key, expected in (('schemaVersion', 3), ('dictionary', dictionary), ('buildTarget', 'chrome'),
@@ -259,8 +281,19 @@ def validate_import_summary(summary, report, *, dictionary, fixture, source_sha,
     for name in SOURCE_HASH_FIELDS:
         _digest(hashes.get(name), f'source hash {name}')
     _same(hashes['builds/manabitan-chrome.zip'], package_sha256, 'source package digest')
-    if source_dirty and (type(source_hashes) is not dict or 'test/chromium/extension-two-dictionary-import.e2e.js' not in source_hashes):
-        raise ValueError('Marker-overlay source requires an explicit expected harness hash')
+    if source_dirty_paths is None:
+        if source_dirty and (type(source_hashes) is not dict or 'test/chromium/extension-two-dictionary-import.e2e.js' not in source_hashes):
+            raise ValueError('Marker-overlay source requires an explicit expected harness hash')
+    else:
+        allowed = {'dev/perf/benchmark-support.js', 'test/chromium/extension-two-dictionary-import.e2e.js'}
+        if (type(source_dirty_paths) is not list or any(type(path) is not str for path in source_dirty_paths) or
+                len(source_dirty_paths) != len(set(source_dirty_paths)) or not set(source_dirty_paths) <= allowed or
+                source_dirty != bool(source_dirty_paths)):
+            raise ValueError('Unexpected deliberate dirty source paths')
+        for path in source_dirty_paths:
+            if type(source_hashes) is not dict or path not in source_hashes:
+                raise ValueError('Measurement overlay requires its explicit expected hash')
+            _digest(source_hashes[path], f'expected measurement source hash {path}')
     if source_hashes is not None:
         for name, expected in _record(source_hashes, 'expected source hashes').items():
             _same(_required(hashes, name, f'source hash {name}'), expected, f'source hash {name}')
@@ -285,7 +318,8 @@ def validate_import_summary(summary, report, *, dictionary, fixture, source_sha,
                           ('mediaCheck', media_check)):
         _same(_required(benchmark, key, f'benchmark.{key}'), expected, f'benchmark.{key}')
     _same(run.get('validation'), benchmark.get('validation'), 'summary/raw validation binding')
-    validation = canonicalize_validation(run.get('validation'), dictionary=dictionary, fixture=fixture, media_check=media_check)
+    validation = canonicalize_validation(run.get('validation'), dictionary=dictionary, fixture=fixture, media_check=media_check,
+                                         storage_policy=storage_policy, baseline_sha=baseline_sha)
     phases = report.get('phases')
     if type(phases) is not list or any(type(phase) is not dict for phase in phases):
         raise ValueError('Invalid raw phase list')
@@ -329,9 +363,12 @@ def validate_import_summary(summary, report, *, dictionary, fixture, source_sha,
                           ('errorCount', 0), ('addSettingsErrorCount', 0), ('usesFallbackStorage', False)):
         _same(debug.get(key), expected, f'import completion {key}')
     media = validation.pop('media')
+    common = {'dictionary': dictionary, 'fixture': deepcopy(fixture),
+              'importFlags': deepcopy(import_flags), 'validation': validation}
+    if storage_policy != LEGACY_STORAGE_POLICY:
+        common['storagePolicy'] = policy
     return {'browserVersion': browser,
-            'common': {'dictionary': dictionary, 'fixture': deepcopy(fixture),
-                       'importFlags': deepcopy(import_flags), 'validation': validation},
+            'common': common,
             'media': media}
 
 

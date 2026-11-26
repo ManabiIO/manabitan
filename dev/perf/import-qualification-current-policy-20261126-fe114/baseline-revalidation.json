@@ -1,0 +1,55 @@
+{
+    "browserAcquisitions": 0,
+    "counterexamples": {
+        "historicalContractStillRejects37Pages": true,
+        "rejectedVndbPages": [
+            36,
+            38
+        ]
+    },
+    "measurementOverlay": {
+        "name": "native-image-policy-439a1c9b",
+        "originalSha256": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+        "path": "dev/perf/benchmark-support.js",
+        "scope": "Measurement receipt validation only; applied after clean product packaging",
+        "sha256": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+        "sourceSha": "439a1c9b6d40452061cda094b0727005553c1d1d"
+    },
+    "observations": [
+        {
+            "canonicalValidationSha256": "51067cef508416fd5356441023fc1d228b3ccba7e07e91fe884c28682689b816",
+            "dictionary": "jitendex",
+            "lookupObservations": 72,
+            "mediaFiles": 236,
+            "nativeExtractionPassed": true,
+            "packageSha256": "ae18024e4e47ddf21d1a91941ddc7b6c5b449421b3b37ed52300c8bedcc7b77b",
+            "rawReportSha256": "323beba35120542da8fcfac9666fcb2532d0760fe7b899f7d7a409309cd61b37",
+            "rawSummaryAvailable": false,
+            "semanticValidationPassed": true,
+            "sourceSha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+            "termRows": 436555
+        },
+        {
+            "canonicalValidationSha256": "5608138beaecf4548ab74a726fe8795f600bd3618163090cc317adf3fbdefd91",
+            "dictionary": "vndb",
+            "lookupObservations": 72,
+            "mediaFiles": 146570,
+            "nativeExtractionPassed": true,
+            "packageSha256": "70b434ac55b9c7630ee050a4f342d5fc1eccc9990dfaec0a2f3c072a06bb99e1",
+            "rawReportSha256": "a291e78671453964e1b25c1f826c7d3573a271224325d6547137437ae175f982",
+            "rawSummaryAvailable": true,
+            "semanticValidationPassed": true,
+            "sourceSha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+            "termRows": 6648310
+        }
+    ],
+    "originalArchiveSha256": "8e848b91a689b4d8f895d5ddd15e80fd2e3049350ac07c7c76cb395a5a455a28",
+    "purpose": "Offline diagnosis only; original failed acquisitions stay invalid and are excluded from every timing cohort",
+    "schemaVersion": 1,
+    "storagePolicy": {
+        "baselineSha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+        "name": "baseline-0143e959-vndb-sah-37",
+        "vndbActiveSahBytes": 151552
+    },
+    "verifiedOriginalFiles": 232
+}
