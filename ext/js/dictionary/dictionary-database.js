@@ -76,6 +76,7 @@ import {
 } from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
@@ -140,6 +141,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint8Array} resolvedFlags
  * @property {Float64Array} resolvedOffsets
  * @property {Uint32Array} resolvedLengths
+ * @property {boolean} [resolutionDeferred] Empty resolution columns await first storage admission.
  * @property {string[]|null} resolvedDictNames
  * @property {string} [resolvedUniformDictName]
  * @property {Uint32Array|null} pendingEpochs Null together with pendingIndexes until generic deduplication needs scratch.
@@ -8699,6 +8701,7 @@ this._readTermContentSignature(
         ) ?
             /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) :
             null;
+        if (contentDedupPlan !== null) { initializeTermContentPlanResolution(contentDedupPlan); }
         const useResolvedContentReferences = chunk.useResolvedContentReferences === true && contentDedupPlan !== null;
         if (
             useUniqueContentMetadata &&

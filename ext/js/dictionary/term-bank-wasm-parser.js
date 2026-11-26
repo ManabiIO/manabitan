@@ -73,6 +73,8 @@ const CRC_REUSE_MIN_COMPRESSION_RATIO = 32;
 const U32_NULL = 0xffffffff;
 const MAX_META_ROW_CAPACITY = Math.floor(0xffffffff / (META_U32_FIELDS * 4));
 const EMPTY_UINT8_ARRAY = new Uint8Array(0);
+const EMPTY_UINT32_ARRAY = new Uint32Array(0);
+const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
 /** @typedef {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}} ParsedTermBankRow */
 /** @typedef {{rowCount: number, contentRowStart?: number, expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[], readingEqualsExpressionList: Uint8Array, scoreList: Int32Array|Float64Array, sequenceList: Int32Array|Float64Array, contentBytesList: Uint8Array[], contentHash1List: Uint32Array, contentHash2List: Uint32Array, contentBytesBuffer?: Uint8Array, contentBytesBaseOffset?: number, contentBytesLength?: number, contentMetaList?: Uint32Array, contentMetaByUniqueIndex?: boolean, contentUniqueIndexList: Uint32Array|null, contentDedupPlan: import('core').SafeAny|null, useResolvedContentReferences?: boolean, releaseBorrowedContent?: () => void, termRecordPreinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan, preparedLookupIndexes?: Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>, preparedLookupIndexEncodeMs?: number, mediaRows: Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>, imagePaths?: string[]}>}} TermBankColumnChunk */
 /** @typedef {{type?: unknown, id?: unknown, rowCount?: unknown, resultSentEpochMs?: unknown, borrowsWorkerMemory?: unknown, ownsContentBytes?: unknown, chunk?: unknown, profile?: unknown, error?: unknown}} ParallelParserWorkerMessage */
@@ -2240,9 +2242,12 @@ null :
             sourceRowCount: rowCount,
             uniqueRowIndexes: buildContentUniqueRowIndexes(contentUniqueIndexes, contentUniqueCount),
             uniqueSignatures: parsed.contentUniqueSignatures,
-            resolvedFlags: new Uint8Array(contentUniqueCount),
-            resolvedOffsets: new Float64Array(contentUniqueCount),
-            resolvedLengths: new Uint32Array(contentUniqueCount),
+            // Queued parser results need no storage-resolution scratch. The
+            // ordered sink allocates all three columns together on admission.
+            resolutionDeferred: true,
+            resolvedFlags: EMPTY_UINT8_ARRAY,
+            resolvedOffsets: EMPTY_FLOAT64_ARRAY,
+            resolvedLengths: EMPTY_UINT32_ARRAY,
             resolvedDictNames: null,
             resolvedUniformDictName: void 0,
             // Canonical scans do not use generic pending-row scratch. The
