@@ -687,3 +687,67 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## 2026-11-26: c951 content-reservation eligibility study
+
+### Source changes and decision
+
+[PR #936](https://github.com/ManabiIO/manabitan/pull/936) adds an early eligibility check before the database attempts an initial content reservation. The reservation API accepts shared JMdict content. Previously, private buffers and dictionaries using generic compression entered that API, validated every pending span, and then returned without reserving storage; ordinary persistence validated the spans again. The ten-line call-site change skips that rejected attempt. Public block-store validation, ordinary persistence validation, publication ordering, rollback, compression settings, worker counts and stored formats remain unchanged.
+
+The product remains a draft: this round establishes no complete-import speedup for any of the three requested dictionaries. VNDB's generic compression route supports the removed-work hypothesis; JMdict and Jitendex normally use the eligible shared route in the observed current parser configuration. An owned parser result is not necessarily private: it can own a newly allocated `SharedArrayBuffer`. Neither `parallelOwnedContentBytes` nor a zero initial-reservation count measures skipped reservation attempts.
+
+| Role                         | Exact revision                             |
+| ---------------------------- | ------------------------------------------ |
+| Baseline                     | `0143e9596cd8f790d5e166d4ba6a2425fbc57f14` |
+| Acquisition product source   | `5a667ed90e2f92a8d7140ec751ee63e34b40b500` |
+| Final product head           | `23e8574a70543e1590eedf3d63cb4f09d0084878` |
+| Original acquisition tooling | `7e6dda05470da6e29af2b06bc50dde26f14633fb` |
+
+The final product commit fixes one test mock's byte-copy expression for ESLint. Its runtime file is byte-identical to the acquisition candidate: Git blob `ddd25b9e4001d69d0822b56d721b3c2301f2fae2`, SHA-256 `557a2c9994802f88742800fdef3dfa87446c6008c77dd864bb62e24ca5e5be18`. Both remote file responses and the packaged entry were checked independently. Every acquisition package differs from its baseline only in `js/dictionary/dictionary-database.js`.
+
+### Original browser acquisition
+
+[Run 45862057912](https://github.com/ManabiIO/manabitan/actions/runs/45862057912) is the sole acquisition for this candidate. Its registered protocol requires separate AB/BA hosts for each dictionary, six candidate pairs per host, interleaved identical-product controls, four fixed warmups, two separate exhaustive-media observations and four separate memory observations. It uses production defaults, the fixture lock, Node 22, pinned Chromium and fresh profiles. The timing boundary is file-input change through post-UI completion. Observations stop at the first failed qualification check; none were replaced. Only the two JMdict cells acquired the complete registered schedule.
+
+Both JMdict cells complete their original protocol. All 52 JMdict observations pass the existing correctness and storage requirements, with identical canonical semantic receipts and 43,520,477 logical storage bytes. The eight separate memory observations pass the unchanged sampled-memory requirements; 652 raw scans were independently reconciled. The descriptive timing results do not establish an improvement:
+
+| JMdict cell | Candidate/baseline paired median | Descriptive 95% interval | Equal-work change | Identical-product control median |
+| ----------- | -------------------------------: | ------------------------ | ----------------: | -------------------------------: |
+| AB          |                         -1.4026% | [-3.5936%, +1.5691%]     |          -1.1602% |                         +0.0978% |
+| BA          |                         -1.0535% | [-6.7276%, +1.7409%]     |          -2.1478% |                         +0.8037% |
+
+Both candidate intervals cross zero. Hosts, controls and memory observations remain separate; no pooled speedup is reported. Passing the sampled-memory bounds is not a claim of lower peak memory.
+
+Both Jitendex cells stop after their first warmup: baseline A on the AB host and candidate B on the BA host. The browser reports a successful import, then the existing experiment-receipt validator rejects `experimentalNativeEscapedKeys=false`. `benchmark-support.js` infers native projection for a media-bearing source at least 512 MiB; current production uses a 1 GiB projection threshold. The locked Jitendex source is 538,927,310 bytes, between those thresholds, so the receipt expectation is stale. The failure is retained on both arms. No Jitendex timed pairs, complete exhaustive-media verification or memory cohort were acquired.
+
+Both VNDB cells likewise stop after a successful first browser import because the original storage policy requires the active SAH file to occupy 129–131 full-file 4,096-byte allocation units. Both baseline and candidate instead report 151,552 bytes, or 37 units. The original required range, 528,384–536,576 bytes, was not changed. Descriptively, the two warmups match on the full non-SAH path/size inventory after normalizing the recognized generation UUID, SAH size multiset, total storage of 609,176,779 bytes, output digest, restart receipt, semantic fields of 72 lookup observations excluding elapsed times, and sampled media. These agreements do not override the failed gate. No qualifying VNDB timed pairs, exhaustive-media or memory observations exist.
+
+Each retained VNDB warmup reports 170 native groups, no native fallback, 157,150 pending unique content descriptors, three parser workers and zero initial reservations. The generic dictionary and native pending-span route support a source-derived explanation for avoiding rejected validation work. There is no explicit skipped-scan counter, so the descriptor count is not presented as a measured skipped-call count. The unrelated warmup durations on different hosts are not compared as performance evidence.
+
+An incidental second private-reservation workflow run, `45862547614`, was cancelled without jobs or observations. It is excluded. The withdrawn score workflow, `45862547911`, has six cancelled jobs with no recorded steps or artifacts; no score browser measurements are claimed. Both workflows now pin their original acquisition head so evidence updates cannot acquire replacement observations, and the follow-up qualification runs are recorded as skipped. No receipt threshold or production setting was modified to turn a failed cohort into a passing one.
+
+### Withdrawn score-buffer candidate
+
+[PR #949](https://github.com/ManabiIO/manabitan/pull/949), source `97273b91c94a6385800bc5179afc684c818a786f`, delayed allocating score keys until a second distinct score appeared. Eight focused regression cases and 28 exact production-encoder comparisons passed, including mixed/uniform inputs, signed extremes, score-cardinality limits and fallback cases. Its possible savings apply only to uniform compact writer groups.
+
+A complete source census verified each locked archive's size and SHA-256, CRCs for `index.json` and every term-bank entry read, title, row count and score types. It did not separately CRC-check unread media members. It found no uniform raw source bank:
+
+| Dictionary |      Rows | Raw source banks | Distinct scores | Uniform raw banks |
+| ---------- | --------: | ---------------: | --------------: | ----------------: |
+| JMdict     |   528,299 |               53 |             761 |                 0 |
+| Jitendex   |   436,555 |              219 |             109 |                 0 |
+| VNDB       | 6,648,310 |              665 |               3 |                 0 |
+
+All 665 VNDB banks contain all three scores: 50, 75 and 100. Uniformity of smaller writer slices was not demonstrated. The candidate was closed without merge because a benefit for the requested inputs had not been established. The evidence retains its exact implementation, encoder comparisons and two earlier rejected prototypes; no uniform-VNDB allocation saving is claimed.
+
+### Correctness validation and durable evidence
+
+The acquisition product head's hosted suite passed 651 test files, with 14,678 tests passed and 47 skipped. TypeScript main/dev/test/bench validation, build including pinned WASM checks, Chromium/Firefox extension tests and Chromium restart/interruption recovery passed. One test mock failed the JS lint rule and was corrected in the final head; the final focused ten-case suite and scoped ESLint passed locally. The final-head hosted run is recorded separately in the timestamped validation ledger. At its frozen snapshot, Chromium E2E, build, main TypeScript, CodeQL and static checks passed while other checks were queued or running. Pending checks are not represented as passing.
+
+The ten new cases cover ordinary content readback, eligible shared JMdict reservations, generic shared inputs, malformed spans and columns including shared descriptor arrays, and actual database-call-site metadata rollback. Two older reservation-fault tests now use eligible shared JMdict fixtures without weakening their assertions. Independent source reviews checked the asynchronous publication and rollback boundary.
+
+[PR #945](https://github.com/ManabiIO/manabitan/pull/945) retains this handoff and the machine-readable evidence under `builds/perf/import-20261126-c951`. Its manifest binds all six original Actions artifacts, raw successful and failed receipts, original schedules, host/browser identities, logs, memory scans, source/package hashes, complete source census, independent audits and withdrawn-candidate evidence. Failed local native replay attempts are explicitly recorded as environment failures without a retained completed corpus result or performance evidence; the number of groups processed before termination is unknown. The source census completed before its shared local fixture cache became unavailable; archive identities and the census output remain retained.
+
+The packager independently verifies every original artifact ZIP hash, size and CRC, every release ZIP hash and all 552 entry hashes per arm. It retains all non-package artifact members verbatim, adds the outer job logs, and verifies every generated archive member after writing. Rebuildable release ZIP bytes are excluded after verification; their hashes and complete entry inventories remain. Consequently, committed evidence alone cannot rehash the excluded ZIP container bytes after the original Actions artifacts expire. Package container hashes may differ across hosts while corresponding entry hashes remain identical.
+
+`package-evidence.py` takes the original acquisition directory, prepared component evidence directory and output directory. It requires all six original cells, including failures, and never launches imports. Use the frozen workflow at `7e6dda05470da6e29af2b06bc50dde26f14633fb` to inspect the complete acquisition commands and original validation policy. This round schedules no replacement cohorts and makes no complete-import latency or peak-memory improvement claim.
