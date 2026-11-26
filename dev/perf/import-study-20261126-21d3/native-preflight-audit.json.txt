@@ -1,0 +1,794 @@
+{
+  "schema": 1,
+  "runId": 45865811773,
+  "source": "f44e6f390eb21d220fab1595212e2973c3db941d",
+  "capturedAt": "2026-11-26 17:46:47 UTC",
+  "rootCause": "Native candidate changed a C source file already shipped by the normal extension build, but the registered expected package set listed only the two JavaScript files and WASM. The strict package check stopped acquisition before any warmup.",
+  "classification": "Qualification registration error; no runtime import observation or product regression was measured.",
+  "baseline": "439a1c9b6d40452061cda094b0727005553c1d1d",
+  "candidate": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+  "expectedPackagedChanges": [
+    "js/dictionary/term-bank-source-crc.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "sourceBindings": {
+    "A": {
+      "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+      "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+      "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+      "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+    },
+    "B": {
+      "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+      "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+      "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+      "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+    }
+  },
+  "jobs": [
+    {
+      "id": 140068217822,
+      "name": "VNDB current-policy qualification (BA)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 140068218198,
+      "name": "Native parser qualification (jitendex, BA)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140068218232,
+      "name": "Native parser qualification (vndb, AB)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140068218391,
+      "name": "Native parser qualification (jmdict, BA)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140068218394,
+      "name": "Native parser qualification (vndb, BA)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140068218396,
+      "name": "VNDB current-policy qualification (AB)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 140068218451,
+      "name": "Native parser qualification (jitendex, AB)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140068218530,
+      "name": "Native parser qualification (jmdict, AB)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 140068219835,
+      "name": "VNDB media qualification (${{ matrix.order }})",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 140068220282,
+      "name": "Current baseline profile (${{ matrix.dictionary }})",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "failedCells": [
+    {
+      "cell": "vndb-AB",
+      "id": 15142546507,
+      "name": "import-native-qualification-20261126-vndb-AB",
+      "bytes": 33531750,
+      "sha256": "3e853cd4504455dcc6331505f9868d69b3fb13cebe6c2fecebea6a8f21c61a93",
+      "status": "failed-before-warmup",
+      "observations": 0,
+      "packages": {
+        "A": {
+          "sha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+          "packageSha256": "961adb2e30d040fef8579d89149ea46bfccf9e6425fbcff18b05b811b11a8d58",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+            "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+            "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+            "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          }
+        },
+        "B": {
+          "sha": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+          "packageSha256": "5f70ce9c1567d165afd9309709047d66d864616900d7a6d116d29e99a5959031",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+            "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+            "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+            "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+          }
+        }
+      },
+      "error": "Strict packaged-file equality rejected the unregistered C source member",
+      "preservedPrefix": "native-qualification-vndb-AB"
+    },
+    {
+      "cell": "jitendex-BA",
+      "id": 15142241216,
+      "name": "import-native-qualification-20261126-jitendex-BA",
+      "bytes": 33532129,
+      "sha256": "c8cd31f00a74a8b9cbd6c345a3cd92b8e3c34bc846c5e856373cf5720cb90fac",
+      "status": "failed-before-warmup",
+      "observations": 0,
+      "packages": {
+        "A": {
+          "sha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+          "packageSha256": "af9c85d36057a7599e9b0caed2a9212a4648ba46e3f77d39d987705cb88f0e1d",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+            "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+            "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+            "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          }
+        },
+        "B": {
+          "sha": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+          "packageSha256": "6a2c90fdb27d72ff073f631980ea4a3515881dff9933b890e5a8a3509200b36f",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+            "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+            "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+            "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+          }
+        }
+      },
+      "error": "Strict packaged-file equality rejected the unregistered C source member",
+      "preservedPrefix": "native-qualification-jitendex-BA"
+    },
+    {
+      "cell": "jmdict-AB",
+      "id": 15141967627,
+      "name": "import-native-qualification-20261126-jmdict-AB",
+      "bytes": 33532169,
+      "sha256": "558c9a1996d6b41796e34e14b3fd620d1f73144c34aa05007f2572d041fad925",
+      "status": "failed-before-warmup",
+      "observations": 0,
+      "packages": {
+        "A": {
+          "sha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+          "packageSha256": "a43995413961a74d7becd532d84cd04339b760612e243b2387e5f5e99c1be20d",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+            "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+            "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+            "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          }
+        },
+        "B": {
+          "sha": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+          "packageSha256": "d35d9b0b60abb8f25e940684a7b3b858216f343cbfbdf10ea740c2b16cc901f2",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+            "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+            "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+            "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+          }
+        }
+      },
+      "error": "Strict packaged-file equality rejected the unregistered C source member",
+      "preservedPrefix": "native-qualification-jmdict-AB"
+    },
+    {
+      "cell": "vndb-BA",
+      "id": 15141623084,
+      "name": "import-native-qualification-20261126-vndb-BA",
+      "bytes": 33531791,
+      "sha256": "c9c409c73a1220ad6e9d0cd49e633caea647c472bb78202c7035d219768ba784",
+      "status": "failed-before-warmup",
+      "observations": 0,
+      "packages": {
+        "A": {
+          "sha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+          "packageSha256": "2dfd35b86a21840defea71fda92fb8bd7afa90132449356a2a710b68cb0a9c7e",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+            "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+            "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+            "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          }
+        },
+        "B": {
+          "sha": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+          "packageSha256": "a8713e6e2e0fbdfaf3071ee6241d15beca01cec4d96858d0dc8d31a34263edd4",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+            "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+            "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+            "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+          }
+        }
+      },
+      "error": "Strict packaged-file equality rejected the unregistered C source member",
+      "preservedPrefix": "native-qualification-vndb-BA"
+    },
+    {
+      "cell": "jmdict-BA",
+      "id": 15141612971,
+      "name": "import-native-qualification-20261126-jmdict-BA",
+      "bytes": 33532120,
+      "sha256": "e57e4a0e318a840c84fe658223f028f48086418363f0161254ad8cbfb7987306",
+      "status": "failed-before-warmup",
+      "observations": 0,
+      "packages": {
+        "A": {
+          "sha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+          "packageSha256": "132777f382f070cd0747c6e2a607b41526d01b9ec75802e6b5b2506d1b5e824c",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+            "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+            "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+            "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          }
+        },
+        "B": {
+          "sha": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+          "packageSha256": "912a0bf1c5186ccdd3a80f64e0e9851fb606a4e5ef5a23597279a8d59b9562bd",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+            "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+            "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+            "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+          }
+        }
+      },
+      "error": "Strict packaged-file equality rejected the unregistered C source member",
+      "preservedPrefix": "native-qualification-jmdict-BA"
+    },
+    {
+      "cell": "jitendex-AB",
+      "id": 15141518011,
+      "name": "import-native-qualification-20261126-jitendex-AB",
+      "bytes": 33532268,
+      "sha256": "ba94e64a4e6f62714474b633e60bcb3440c037294c47633182891fe42ccc0b0a",
+      "status": "failed-before-warmup",
+      "observations": 0,
+      "packages": {
+        "A": {
+          "sha": "439a1c9b6d40452061cda094b0727005553c1d1d",
+          "packageSha256": "5829f6ddd40ebf00c1bace6f56c340e07c7bedbd6413c354e35130e9e4e38384",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "141bd3e2a82ba33e9b7e25efcab3e5aa41626a014678c49531e691d1154aaeb3",
+            "js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+            "js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+            "lib/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          }
+        },
+        "B": {
+          "sha": "f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18",
+          "packageSha256": "c85cfbd34c5d54ead3311376203f057f791c57fb6f4767aa1ca717656456b3f5",
+          "packagedFiles": 552,
+          "boundChangedEntries": {
+            "js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+            "js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+            "js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+            "lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+          }
+        }
+      },
+      "error": "Strict packaged-file equality rejected the unregistered C source member",
+      "preservedPrefix": "native-qualification-jitendex-AB"
+    }
+  ],
+  "totalObservations": 0,
+  "nextCohort": "A new native-v2 registration adds only the exact verified C source path, preserves the old f44 native/media-v2 jobs, and runs the same six dictionary/order cells. Existing media jobs continue unchanged.",
+  "archive": {
+    "path": "native-preflight-failures.tar.gz",
+    "bytes": 505587,
+    "sha256": "f8fae577cd16f33e69fd78a9208b04391cf62101eb21c3c3e4f3925a272b464a",
+    "entries": [
+      {
+        "path": "native-qualification-jitendex-AB/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/fixtures.log",
+        "bytes": 169,
+        "sha256": "f5b95e5225fed2af6fb0c993938f1634a9bb30264bf34ccc1f681aa0114e8ce3"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/prospective-policy.json",
+        "bytes": 63423,
+        "sha256": "b5f723a3a4e4d194aa2f9cf71ea590df7dbf374f5ab885a33feb1a61336d3ab0"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/source-identities.json",
+        "bytes": 128578,
+        "sha256": "c4fdcf4f4ef5367efef8263f470d21a029537642be5e794a4cdfee411d82ba12"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "native-qualification-jitendex-AB/worktree-B.log",
+        "bytes": 140,
+        "sha256": "6a303527dabf6d0398002074c3ddb23e8df5419284a4c1d5f01c9ac98930bfc7"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/fixtures.log",
+        "bytes": 169,
+        "sha256": "f5b95e5225fed2af6fb0c993938f1634a9bb30264bf34ccc1f681aa0114e8ce3"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/prospective-policy.json",
+        "bytes": 63423,
+        "sha256": "b5f723a3a4e4d194aa2f9cf71ea590df7dbf374f5ab885a33feb1a61336d3ab0"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/source-identities.json",
+        "bytes": 128578,
+        "sha256": "8c894a7931ce13823d2ebc482a3160bd607c690217d0e94f6e96ff2f42aa888d"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "native-qualification-jitendex-BA/worktree-B.log",
+        "bytes": 140,
+        "sha256": "6a303527dabf6d0398002074c3ddb23e8df5419284a4c1d5f01c9ac98930bfc7"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/fixtures.log",
+        "bytes": 157,
+        "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/prospective-policy.json",
+        "bytes": 63423,
+        "sha256": "b5f723a3a4e4d194aa2f9cf71ea590df7dbf374f5ab885a33feb1a61336d3ab0"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/source-identities.json",
+        "bytes": 128578,
+        "sha256": "7bd60a056129d30aec3ce217405847e02fdd2059aa854ba9c23f1df2742d723a"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "native-qualification-jmdict-AB/worktree-B.log",
+        "bytes": 140,
+        "sha256": "6a303527dabf6d0398002074c3ddb23e8df5419284a4c1d5f01c9ac98930bfc7"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/fixtures.log",
+        "bytes": 157,
+        "sha256": "c7b820d4fedd5a3afc93c10d93cfd1e58d11f4c50ad4ec16e4040a57e4740349"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/prospective-policy.json",
+        "bytes": 63423,
+        "sha256": "b5f723a3a4e4d194aa2f9cf71ea590df7dbf374f5ab885a33feb1a61336d3ab0"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/source-identities.json",
+        "bytes": 128578,
+        "sha256": "003d343ebf2f883c2e9886b3f0b0432cdd8c4b1dff8f4aba6b4a35033f01b00d"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "native-qualification-jmdict-BA/worktree-B.log",
+        "bytes": 140,
+        "sha256": "6a303527dabf6d0398002074c3ddb23e8df5419284a4c1d5f01c9ac98930bfc7"
+      },
+      {
+        "path": "native-qualification-vndb-AB/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "native-qualification-vndb-AB/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-vndb-AB/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-vndb-AB/fixtures.log",
+        "bytes": 171,
+        "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+      },
+      {
+        "path": "native-qualification-vndb-AB/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-vndb-AB/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-vndb-AB/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-vndb-AB/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-vndb-AB/prospective-policy.json",
+        "bytes": 63423,
+        "sha256": "b5f723a3a4e4d194aa2f9cf71ea590df7dbf374f5ab885a33feb1a61336d3ab0"
+      },
+      {
+        "path": "native-qualification-vndb-AB/source-identities.json",
+        "bytes": 128578,
+        "sha256": "9de0df20b548a37abf7559127c003c2fb317a640b7be6406799addfc1556cafa"
+      },
+      {
+        "path": "native-qualification-vndb-AB/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "native-qualification-vndb-AB/worktree-B.log",
+        "bytes": 140,
+        "sha256": "6a303527dabf6d0398002074c3ddb23e8df5419284a4c1d5f01c9ac98930bfc7"
+      },
+      {
+        "path": "native-qualification-vndb-BA/browser-identity.json",
+        "bytes": 264,
+        "sha256": "09b4c6229e670127734f765026c7772eb0c1fc5c43256e7aa8d9d06746191dcd"
+      },
+      {
+        "path": "native-qualification-vndb-BA/build-A.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-vndb-BA/build-B.log",
+        "bytes": 128,
+        "sha256": "4d975ae3255d34827bf81bce0be56d449e459421ede709773b011ea430621046"
+      },
+      {
+        "path": "native-qualification-vndb-BA/fixtures.log",
+        "bytes": 171,
+        "sha256": "22d815588fe25e77f18293ff4de91970b8ebf1394a75653dfd6f1ba7c30f22a4"
+      },
+      {
+        "path": "native-qualification-vndb-BA/libs-A.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-vndb-BA/libs-B.log",
+        "bytes": 60,
+        "sha256": "eae5f6a86733bd08ffb64f0c824302831f339bccb43aeed326c3e12550141d2c"
+      },
+      {
+        "path": "native-qualification-vndb-BA/license-A.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-vndb-BA/license-B.log",
+        "bytes": 215,
+        "sha256": "eb7864efd5b19c6d09dbbfb764c33f737408121c269e83afe36ada980b02e5cd"
+      },
+      {
+        "path": "native-qualification-vndb-BA/prospective-policy.json",
+        "bytes": 63423,
+        "sha256": "b5f723a3a4e4d194aa2f9cf71ea590df7dbf374f5ab885a33feb1a61336d3ab0"
+      },
+      {
+        "path": "native-qualification-vndb-BA/source-identities.json",
+        "bytes": 128578,
+        "sha256": "f75dc2a00d55aefcbf811681bfefacdf8e3c7d00edef77fdc965aea47e435dcc"
+      },
+      {
+        "path": "native-qualification-vndb-BA/worktree-A.log",
+        "bytes": 133,
+        "sha256": "6dce7f61b97fcd2b92aeec613f03bb50c1c7df0d5773cf67ce447e7b392b8078"
+      },
+      {
+        "path": "native-qualification-vndb-BA/worktree-B.log",
+        "bytes": 140,
+        "sha256": "6a303527dabf6d0398002074c3ddb23e8df5419284a4c1d5f01c9ac98930bfc7"
+      },
+      {
+        "path": "native-setup-jitendex-AB/browser-install.log",
+        "bytes": 17219,
+        "sha256": "48a249266fa44990d4a6663aaa27a108aac0c7c9609e4dd3852e556cef746c2e"
+      },
+      {
+        "path": "native-setup-jitendex-AB/npm-ci.log",
+        "bytes": 421,
+        "sha256": "b3b0bce2ce0f308b4822f7f1892bc571328eb584b54fd07df782d0a642ba3d7c"
+      },
+      {
+        "path": "native-setup-jitendex-AB/qualification.log",
+        "bytes": 415,
+        "sha256": "9eb6d2ca39135a86cfbc21c19c92b254f1623f2e7792e9447205f256b19793af"
+      },
+      {
+        "path": "native-setup-jitendex-AB/source-fetch.log",
+        "bytes": 203,
+        "sha256": "c5087756615e2874d49d05d5827ec4a7cc063806b13f32a0b2226055cafc1b87"
+      },
+      {
+        "path": "native-setup-jitendex-BA/browser-install.log",
+        "bytes": 17219,
+        "sha256": "acabcb916ff37438e18deb23c42bc582e83934f88e2fc23908147c31d5328d92"
+      },
+      {
+        "path": "native-setup-jitendex-BA/npm-ci.log",
+        "bytes": 421,
+        "sha256": "b3b0bce2ce0f308b4822f7f1892bc571328eb584b54fd07df782d0a642ba3d7c"
+      },
+      {
+        "path": "native-setup-jitendex-BA/qualification.log",
+        "bytes": 415,
+        "sha256": "9eb6d2ca39135a86cfbc21c19c92b254f1623f2e7792e9447205f256b19793af"
+      },
+      {
+        "path": "native-setup-jitendex-BA/source-fetch.log",
+        "bytes": 203,
+        "sha256": "c5087756615e2874d49d05d5827ec4a7cc063806b13f32a0b2226055cafc1b87"
+      },
+      {
+        "path": "native-setup-jmdict-AB/browser-install.log",
+        "bytes": 17219,
+        "sha256": "639538e935615679ca988739a88a9c70da74b04dcbcb6f42d577677fd6c97ddd"
+      },
+      {
+        "path": "native-setup-jmdict-AB/npm-ci.log",
+        "bytes": 421,
+        "sha256": "b3b0bce2ce0f308b4822f7f1892bc571328eb584b54fd07df782d0a642ba3d7c"
+      },
+      {
+        "path": "native-setup-jmdict-AB/qualification.log",
+        "bytes": 415,
+        "sha256": "9eb6d2ca39135a86cfbc21c19c92b254f1623f2e7792e9447205f256b19793af"
+      },
+      {
+        "path": "native-setup-jmdict-AB/source-fetch.log",
+        "bytes": 203,
+        "sha256": "c5087756615e2874d49d05d5827ec4a7cc063806b13f32a0b2226055cafc1b87"
+      },
+      {
+        "path": "native-setup-jmdict-BA/browser-install.log",
+        "bytes": 17219,
+        "sha256": "f6ee9b8b4ccbc3766e03fc860ad0ca5e06a1f4c373247717fed6f170ee22f800"
+      },
+      {
+        "path": "native-setup-jmdict-BA/npm-ci.log",
+        "bytes": 421,
+        "sha256": "d20493f5407799d844277c0f925b90670e51c6be163db1171a454ae2503a71c9"
+      },
+      {
+        "path": "native-setup-jmdict-BA/qualification.log",
+        "bytes": 415,
+        "sha256": "9eb6d2ca39135a86cfbc21c19c92b254f1623f2e7792e9447205f256b19793af"
+      },
+      {
+        "path": "native-setup-jmdict-BA/source-fetch.log",
+        "bytes": 203,
+        "sha256": "c5087756615e2874d49d05d5827ec4a7cc063806b13f32a0b2226055cafc1b87"
+      },
+      {
+        "path": "native-setup-vndb-AB/browser-install.log",
+        "bytes": 17435,
+        "sha256": "8b57d06c3445c06fff08039b1bd9eaf040cebc867aceb5c0e4efbbf6807695fe"
+      },
+      {
+        "path": "native-setup-vndb-AB/npm-ci.log",
+        "bytes": 421,
+        "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+      },
+      {
+        "path": "native-setup-vndb-AB/qualification.log",
+        "bytes": 415,
+        "sha256": "9eb6d2ca39135a86cfbc21c19c92b254f1623f2e7792e9447205f256b19793af"
+      },
+      {
+        "path": "native-setup-vndb-AB/source-fetch.log",
+        "bytes": 203,
+        "sha256": "c5087756615e2874d49d05d5827ec4a7cc063806b13f32a0b2226055cafc1b87"
+      },
+      {
+        "path": "native-setup-vndb-BA/browser-install.log",
+        "bytes": 17435,
+        "sha256": "4ef16e11d7096bcadfc2154fee22c994ae3f9d09cae9e32f95c97cd029f086b3"
+      },
+      {
+        "path": "native-setup-vndb-BA/npm-ci.log",
+        "bytes": 421,
+        "sha256": "077283430b877954ac26bf1dd273a3ae7806f54e740acb3c7dfbc9b6908fff5a"
+      },
+      {
+        "path": "native-setup-vndb-BA/qualification.log",
+        "bytes": 415,
+        "sha256": "9eb6d2ca39135a86cfbc21c19c92b254f1623f2e7792e9447205f256b19793af"
+      },
+      {
+        "path": "native-setup-vndb-BA/source-fetch.log",
+        "bytes": 203,
+        "sha256": "c5087756615e2874d49d05d5827ec4a7cc063806b13f32a0b2226055cafc1b87"
+      }
+    ]
+  },
+  "omittedBinaries": "All twelve independently verified package ZIPs remain in original Actions artifacts. This bundle retains their exact hashes and complete member maps while omitting reproducible binary copies."
+}

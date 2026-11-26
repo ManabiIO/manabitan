@@ -188,6 +188,7 @@ jobs:
           retention-days: 14
 
   media-qualification-v2:
+    if: github.sha == 'f44e6f390eb21d220fab1595212e2973c3db941d'
     name: VNDB current-policy qualification (${{ matrix.order }})
     runs-on: ubuntu-latest
     timeout-minutes: 115
@@ -260,6 +261,7 @@ jobs:
           retention-days: 14
 
   native-qualification:
+    if: github.sha == 'f44e6f390eb21d220fab1595212e2973c3db941d'
     name: Native parser qualification (${{ matrix.dictionary }}, ${{ matrix.order }})
     runs-on: ubuntu-latest
     timeout-minutes: 115
@@ -327,6 +329,81 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: import-native-qualification-20261126-${{ matrix.dictionary }}-${{ matrix.order }}
+          path: |
+            ${{ env.PERF_EVIDENCE }}
+            ${{ env.PERF_SETUP }}
+          if-no-files-found: error
+          retention-days: 14
+
+  native-qualification-v2:
+    name: Native parser qualification v2 (${{ matrix.dictionary }}, ${{ matrix.order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        order: [AB, BA]
+    env:
+      PERF_BASELINE: 439a1c9b6d40452061cda094b0727005553c1d1d
+      PERF_CANDIDATE: f06eaa069ffe07cf9f1ae3a4014311f3a95b9a18
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_ORDER: ${{ matrix.order }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/native-qualification-v2-${{ matrix.dictionary }}-${{ matrix.order }}
+      PERF_SETUP: ${{ github.workspace }}/builds/perf/native-setup-v2-${{ matrix.dictionary }}-${{ matrix.order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prepare setup logs
+        run: mkdir -p "$PERF_SETUP"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Install the identical harness dependencies
+        run: |
+          set -euo pipefail
+          npm ci 2>&1 | tee "$PERF_SETUP/npm-ci.log"
+          git fetch origin "$PERF_BASELINE" "$PERF_CANDIDATE" 2>&1 | tee "$PERF_SETUP/source-fetch.log"
+          git diff --exit-code
+      - name: Verify prospective source and semantic gates
+        run: python3 -m unittest discover -s dev/perf/import-study-20261126-21d3 -p 'test_*.py' -v
+      - name: Install and verify pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_SETUP/browser-install.log"
+          test "$(node --version)" = v22.22.0
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict'
+          import {execFileSync} from 'node:child_process'
+          import {chromium} from '@playwright/test'
+          const version = execFileSync(chromium.executablePath(), ['--version'], {encoding: 'utf8'}).trim()
+          assert.match(version, /153\.0\.8010\.12/)
+          console.log(version)
+          JS
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run the fixed paired qualification plan
+        run: |
+          set -euo pipefail
+          python3 dev/perf/import-study-20261126-21d3.py \
+            --baseline "$PERF_BASELINE" --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" --initial-order "$PERF_ORDER" --pairs 12 \
+            --expected-workers 3 --evidence "$PERF_EVIDENCE" \
+            --expected-package-entry js/dictionary/term-bank-wasm-parser.js \
+            --expected-package-entry js/dictionary/term-bank-source-crc.js \
+            --expected-package-entry js/dictionary/wasm/term-bank-parser.c \
+            --expected-package-entry lib/term-bank-parser.wasm \
+            2>&1 | tee "$PERF_SETUP/qualification.log"
+      - name: Preserve every observation, package and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-native-qualification-v2-20261126-${{ matrix.dictionary }}-${{ matrix.order }}
           path: |
             ${{ env.PERF_EVIDENCE }}
             ${{ env.PERF_SETUP }}

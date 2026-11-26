@@ -86,3 +86,40 @@ semantic receipts and finds identical content, lookup, sampled-media and exact
 storage results. This is a correctness diagnostic only. Both original jobs
 remain failed, and their timing values are not admitted to the new cohort.
 Neither job completed a paired timing, exhaustive-media, or memory cohort.
+
+## Native package registration correction
+
+All six native cells of cohort `45865811773` stopped during package preflight,
+before a warmup or any timing or memory observation. The normal extension
+build already ships `js/dictionary/wasm/term-bank-parser.c`. The native
+candidate changes that source as well as the two parser JavaScript files and
+compiled WASM, but the original registration listed only three members.
+
+The preserved packages were independently checked against every recorded
+member hash and the frozen A/B Git sources. All 552 member paths are the same;
+exactly these four members differ:
+
+- `js/dictionary/term-bank-source-crc.js`
+- `js/dictionary/term-bank-wasm-parser.js`
+- `js/dictionary/wasm/term-bank-parser.c`
+- `lib/term-bank-parser.wasm`
+
+The baseline C source has SHA-256
+`70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e`;
+the candidate has
+`5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34`.
+Both match their exact packaged bytes and Git blobs.
+
+`native-preflight-audit.json.txt` binds all six failed artifacts and source
+maps. `native-preflight-failures.tar.gz` preserves all 96 original text
+members, including build logs and complete package identities. Reproducible
+package ZIPs remain in the original Actions artifacts and are represented by
+exact hashes here. No failed cell contributed an accepted observation.
+
+The new `native-qualification-v2` registration adds only the exact verified C
+path. The original strict package-set equality, source refs, default flags,
+12-pair schedule, opposite-order replications, semantic checks, exhaustive
+media checks and separate memory gates remain unchanged. The original native
+and media-v2 jobs are pinned to their original `f44e6f3` workflow commit. The
+existing media cohort continues under its original registration; this update
+starts only the six corrected native cells.
