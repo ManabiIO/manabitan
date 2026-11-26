@@ -840,8 +840,7 @@ static int scan_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, ui
 static int parse_scalar_span(const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end);
 
 enum {
-    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG,
-    COMMON_STRUCTURED_KEY_TYPE
+    COMMON_STRUCTURED_KEY_NONE, COMMON_STRUCTURED_KEY_CONTENT, COMMON_STRUCTURED_KEY_TAG
 };
 
 /* These complete ASCII literals are already valid JSON strings. Matching
@@ -865,31 +864,8 @@ static inline int parse_common_structured_key_span(const uint8_t* src, uint32_t 
             *out_end = start + 5u;
             return COMMON_STRUCTURED_KEY_TAG;
         }
-        if (word == UINT32_C(0x70797422) && len - start >= 6u &&
-            src[start + 4u] == 'e' && src[start + 5u] == '"') {
-            *out_end = start + 6u;
-            return COMMON_STRUCTURED_KEY_TYPE;
-        }
     }
     return COMMON_STRUCTURED_KEY_NONE;
-}
-
-/* This complete literal is common to both JMdict and Jitendex. It cannot
- * introduce media or text-normalization hints. Require the exact closing quote
- * and keep the caller's normal delimiter and duplicate-field handling. */
-static inline uint32_t structured_content_type_end(const uint8_t* src, uint32_t len, uint32_t key_end) {
-    if (key_end >= len || src[key_end] != ':') { return 0u; }
-    uint32_t value = key_end + 1u;
-    if (value < len && src[value] == ' ') { ++value; }
-    if (len - value < 20u) { return 0u; }
-    uint64_t first;
-    uint64_t middle;
-    uint32_t last;
-    __builtin_memcpy(&first, src + value, sizeof(first));
-    __builtin_memcpy(&middle, src + value + 8u, sizeof(middle));
-    __builtin_memcpy(&last, src + value + 16u, sizeof(last));
-    return first == UINT64_C(0x7574637572747322) &&
-        middle == UINT64_C(0x746e6f632d646572) && last == UINT32_C(0x22746e65) ? value + 20u : 0u;
 }
 
 /* A single ASCII space is common after a structured-content delimiter.
@@ -929,6 +905,26 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
         default:
             return 0u;
     }
+}
+
+/* The validated type key commonly selects structured content. The complete
+ * ASCII value is already a valid JSON string, so keep its colon and value in
+ * the same dispatch. Other values, spacing and escapes use the full parser. */
+static inline uint32_t common_structured_glossary_type_end(
+    const uint8_t* src, uint32_t len, uint32_t start
+) {
+    if (start >= len || src[start] != ':') { return 0u; }
+    uint32_t value = start + 1u;
+    if (value < len && src[value] == ' ') { ++value; }
+    if (len - value < 20u) { return 0u; }
+    uint64_t first;
+    uint64_t second;
+    uint32_t last;
+    __builtin_memcpy(&first, src + value, sizeof(first));
+    __builtin_memcpy(&second, src + value + 8u, sizeof(second));
+    __builtin_memcpy(&last, src + value + 16u, sizeof(last));
+    return first == UINT64_C(0x7574637572747322) &&
+        second == UINT64_C(0x746e6f632d646572) && last == UINT32_C(0x22746e65) ? value + 20u : 0u;
 }
 
 static int parse_composite_span_impl(
@@ -988,23 +984,6 @@ static int parse_composite_span_impl(
                 }
             }
             if (object_key) {
-                if (common_key_kind == COMMON_STRUCTURED_KEY_TYPE) {
-                    const uint32_t type_end = structured_content_type_end(src, len, s_end);
-                    if (type_end != 0u) {
-                        if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
-                        if (validate_top_level_objects && depth == 2u) {
-                            glossary_key = GLOSSARY_TYPE_FIELD;
-                            glossary_object_type = GLOSSARY_CONTENT_FIELD;
-                        }
-                        state = OBJECT_AFTER_VALUE;
-                        i = type_end;
-                        if (i < len && src[i] == ',') {
-                            state = OBJECT_KEY;
-                            i = advance_glossary_delimiter(src, len, i, normalization_hint);
-                        }
-                        continue;
-                    }
-                }
                 if (common_key_kind == COMMON_STRUCTURED_KEY_TAG) {
                     const uint32_t tag_end = common_structured_tag_end(src, len, s_end);
                     if (tag_end != 0u) {
@@ -1017,15 +996,28 @@ static int parse_composite_span_impl(
                 }
                 if (validate_top_level_objects && depth == 2u) {
                     glossary_key = common_key_kind != COMMON_STRUCTURED_KEY_NONE ?
-                        (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD :
-                            common_key_kind == COMMON_STRUCTURED_KEY_TYPE ? GLOSSARY_TYPE_FIELD : 0u) :
+                        (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT ? GLOSSARY_CONTENT_FIELD : 0u) :
                         json_string_matches_ascii(src, i, s_end, "type", 4u) ? GLOSSARY_TYPE_FIELD :
                         json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
                         json_string_matches_ascii(src, i, s_end, "path", 4u) ? GLOSSARY_PATH_FIELD :
                         json_string_matches_ascii(src, i, s_end, "content", 7u) ? GLOSSARY_CONTENT_FIELD : 0u;
+                    if (glossary_key == GLOSSARY_TYPE_FIELD) {
+                        const uint32_t type_end = common_structured_glossary_type_end(src, len, s_end);
+                        if (type_end != 0u) {
+                            if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
+                            glossary_object_type = GLOSSARY_CONTENT_FIELD;
+                            state = OBJECT_AFTER_VALUE;
+                            i = type_end;
+                            if (i < len && src[i] == ',') {
+                                state = OBJECT_KEY;
+                                i = advance_glossary_delimiter(src, len, i, normalization_hint);
+                            }
+                            continue;
+                        }
+                    }
                 }
                 if (
-                    (common_key_kind == COMMON_STRUCTURED_KEY_NONE || common_key_kind == COMMON_STRUCTURED_KEY_TYPE) &&
+                    common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
                     (src[i + 1u] == 't' || src[i + 1u] == '\\') &&
                     (
                         (normalization_hint != 0 && *normalization_hint == 0u) ||

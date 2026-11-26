@@ -1,0 +1,100 @@
+import {readFile, writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import {createRequire} from 'node:module'
+import {performance} from 'node:perf_hooks'
+import path from 'node:path'
+import assert from 'node:assert/strict'
+const root = '/workspace/scratch/fe1144369b6e/manabitan-structured'
+const scratch = '/workspace/scratch/fe1144369b6e/structured-screen'
+const require = createRequire(path.join(root, 'package.json'))
+const {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} = await import(require.resolve('@zip.js/zip.js'))
+const lock = JSON.parse(await readFile(path.join(root, 'test/perf/dictionaries.lock.json'), 'utf8')).dictionaries
+const dictionary = process.argv[2] ?? 'jitendex'
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
+const baselineBytes = await readFile(path.join(scratch, 'baseline.wasm'))
+const candidateBytes = await readFile(path.join(root, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))
+const parserPath = path.join(root, 'ext/js/dictionary/term-bank-wasm-parser.js')
+const modules = {}
+for (const [name, bytes] of [['A', baselineBytes], ['B', candidateBytes]]) {
+    const parser = await import(`${parserPath}?${name}`)
+    parser.setTermBankWasmModule(await WebAssembly.compile(bytes))
+    await parser.initializeTermBankWasmParser()
+    modules[name] = parser
+}
+const archive = await readFile(path.join(root, 'builds/e2e-dictionary-cache', lock[dictionary].cacheFile))
+assert.equal(sha256(archive), lock[dictionary].sha256)
+const reader = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)))
+const entries = (await reader.getEntries()).filter(e => /^term_bank_\d+\.json$/.test(e.filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const groupSize = {jitendex: 10, jmdict: 7, vndb: 4}[dictionary]
+const observations = Object.fromEntries(['warmupA', 'warmupB', 'A1', 'B1', 'B2', 'A2', 'B3', 'A3', 'A4', 'B4'].map(label => [label, {parseBankMs: 0, wallMs: 0, rows: 0}]))
+const corpus = createHash('sha256')
+let groups = 0
+let sourceBytes = 0
+let rows = 0
+function digest(chunk) {
+    const hash = createHash('sha256')
+    const seen = new Set()
+    function add(value, key = '') {
+        if (/Ms$/.test(key)) return
+        if (ArrayBuffer.isView(value)) {
+            hash.update(key)
+            hash.update(new Uint8Array(value.buffer, value.byteOffset, value.byteLength))
+        } else if (value instanceof Map) {
+            for (const [name, item] of value) { add(item, `${key}.${name}`) }
+        } else if (Array.isArray(value)) {
+            hash.update(key)
+            for (let i = 0; i < value.length; i++) add(value[i], String(i))
+        } else if (value && typeof value === 'object') {
+            if (seen.has(value)) return
+            seen.add(value)
+            for (const name of Object.keys(value).sort()) add(value[name], `${key}.${name}`)
+        } else {
+            hash.update(`${key}:${JSON.stringify(value)};`)
+        }
+    }
+    add(chunk)
+    return hash.digest('hex')
+}
+try {
+    for (let start = 0; start < entries.length; start += groupSize) {
+        const sources = []
+        for (const entry of entries.slice(start, start + groupSize)) sources.push(await entry.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}))
+        sourceBytes += sources.reduce((sum, bytes) => sum + bytes.byteLength, 0)
+        let expected = null
+        let groupRows = null
+        for (const label of Object.keys(observations)) {
+            const arm = label.replace('warmup', '').charAt(0)
+            const parser = modules[arm]
+            let chunkResult = null
+            const started = performance.now()
+            await parser.parseTermBankWithWasmColumnChunks(sources, 3, chunk => { chunkResult = chunk }, 2048, {
+                singleChunk: true, emitTermByteLists: false, computeContentHashes: true,
+                emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true,
+                validateGlossaryTypes: true, prepareLookupIndexes: true,
+            })
+            const wallMs = performance.now() - started
+            const profile = parser.consumeLastTermBankWasmParseProfile()
+            assert(chunkResult)
+            const resultDigest = digest(chunkResult)
+            if (expected === null) { expected = resultDigest; groupRows = chunkResult.rowCount }
+            else assert.equal(resultDigest, expected, `${dictionary} ${start} ${label}`)
+            observations[label].parseBankMs += profile.parseBankMs
+            observations[label].wallMs += wallMs
+            observations[label].rows += chunkResult.rowCount
+        }
+        corpus.update(expected)
+        rows += groupRows
+        groups++
+        if (groups % 5 === 0) console.log(`${dictionary}: ${groups} groups / ${rows} rows`)
+    }
+} finally { await reader.close() }
+assert.equal(rows, lock[dictionary].termRows)
+const result = {
+    kind: 'Node 22 parser component screen, not complete-import timing',
+    dictionary, archiveSha256: lock[dictionary].sha256,
+    baselineWasmSha256: sha256(baselineBytes), candidateWasmSha256: sha256(candidateBytes),
+    node: process.version, groups, sourceBytes, rows, encodedCorpusDigest: corpus.digest('hex'),
+    orderPerGroup: Object.keys(observations), observations,
+}
+await writeFile(path.join(scratch, `${dictionary}.json`), JSON.stringify(result, null, 2) + '\n')
+console.log(JSON.stringify(result, null, 2))

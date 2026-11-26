@@ -238,6 +238,114 @@ afterAll(() => {
     vi.unstubAllGlobals();
 });
 
+/* eslint-disable @stylistic/semi */
+describe('validated structured glossary literal dispatch', () => {
+    /**
+     * @param {string} glossary
+     * @param {boolean} validateGlossaryTypes
+     * @param {boolean} mediaHintFastScan
+     * @returns {Promise<TermBankColumnChunk[]>}
+     */
+    async function snapshot(glossary, validateGlossaryTypes, mediaHintFastScan) {
+        /** @type {TermBankColumnChunk[]} */
+        const chunks = []
+        await parseTermBankWithWasmColumnChunks([
+            textEncoder.encode(`[["entry","","","",1,${glossary},1,""]]`),
+            textEncoder.encode('[]'),
+        ], 3, (chunk) => {
+            const copied = copyWasmBackedColumnChunk(chunk)
+            delete copied.preparedLookupIndexEncodeMs
+            chunks.push(copied)
+        }, 1, {
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            singleChunk: true,
+            prepareLookupIndexes: true,
+            validateGlossaryTypes,
+            mediaHintFastScan,
+        })
+        const profile = consumeLastTermBankWasmParseProfile()
+        expect(profile?.fusedParseAttempts).toBe(1)
+        expect(profile?.fusedParseFallbacks ?? 0).toBe(0)
+        return chunks
+    }
+
+    maybeTest.each(['', ' ', '  ', '\t', '\r\n'])(
+        'preserves literal type pairs and nested hints with separator %j',
+        async (space) => {
+            for (const key of ['"type"', String.raw`"ty\u0070e"`]) {
+                for (const mediaHintFastScan of [false, true]) {
+                    const glossary = `[{${key}:${space}"structured-content",${space}"content":{"tag":"div","content":[{"tag":"img","path":"image.png"},{"type":"text","text":"text"}]}}]`
+                    const expected = await snapshot(glossary, false, mediaHintFastScan)
+                    const actual = await snapshot(glossary, true, mediaHintFastScan)
+                    expect(actual).toStrictEqual(expected)
+                    expect(actual[0].mediaRows).toHaveLength(mediaHintFastScan ? 1 : 0)
+                }
+            }
+        },
+    )
+
+    maybeTest.each([
+        ['content before type', '[{"content":[],"type":"structured-content"}]'],
+        ['duplicate type restores structured content', '[{"type":"image","content":[],"type":"structured-content"}]'],
+        ['duplicate type selects text', '[{"type":"structured-content","content":null,"type":"text","text":"valid"}]'],
+        ['duplicate type selects image', '[{"type":"structured-content","content":null,"type":"image","path":"image.png"}]'],
+        ['escaped value keeps general parsing', String.raw`[{"type":"structured\u002dcontent","content":[]}]`],
+        ['nested type stays in its own object', '[{"type":"structured-content","content":{"type":"unknown","content":"nested"}}]'],
+    ])('preserves %s after strict type dispatch', async (_name, glossary) => {
+        expect(await snapshot(glossary, true, true)).toStrictEqual(await snapshot(glossary, false, true))
+    })
+
+    maybeTest.each([
+        ['unknown literal suffix', '[{"type":"structured-content-extra","content":[]}]'],
+        ['unknown literal prefix', '[{"type":"xstructured-content","content":[]}]'],
+        ['missing content', '[{"type":"structured-content"}]'],
+        ['duplicate null content', '[{"type":"structured-content","content":[],"content":null}]'],
+        ['duplicate scalar type', '[{"type":"structured-content","content":[],"type":0}]'],
+        ['duplicate type needs path', '[{"type":"structured-content","content":[],"type":"image"}]'],
+        ['trailing comma', '[{"type":"structured-content","content":[],}]'],
+        ['double comma', '[{"type":"structured-content",,"content":[]}]'],
+        ['second value', '[{"type":"structured-content""extra","content":[]}]'],
+        ['colon after value', '[{"type":"structured-content":"extra","content":[]}]'],
+    ])('rejects %s before dispatching a chunk', async (_name, glossary) => {
+        const onChunk = vi.fn()
+        await expect(parseTermBankWithWasmColumnChunks([
+            textEncoder.encode(`[["entry","","","",1,${glossary},1,""]]`),
+            textEncoder.encode('[]'),
+        ], 3, onChunk, 1, {
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            singleChunk: true,
+            validateGlossaryTypes: true,
+            mediaHintFastScan: true,
+        })).rejects.toThrow(/parser failed/u)
+        expect(onChunk).not.toHaveBeenCalled()
+    })
+
+    maybeTest('bounds strict type literal loads to the logical source across alignments', async () => {
+        const {instance} = await WebAssembly.instantiate(await readFile(termBankParserWasmPath))
+        const parser = /** @type {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number}} */ (/** @type {unknown} */ (instance.exports))
+        const source = textEncoder.encode('[["entry","","","",1,[{"type":"structured-content","content":[]}],1,""]]')
+        const valueStart = textDecoder.decode(source).indexOf('"structured-content"')
+        for (let alignment = 0; alignment < 8; ++alignment) {
+            parser.wasm_reset_heap()
+            const allocation = parser.wasm_alloc(source.length + alignment + 32)
+            const input = allocation + alignment
+            const output = parser.wasm_alloc(17 * 4)
+            const memory = new Uint8Array(parser.memory.buffer)
+            memory.fill(0x22, allocation, allocation + source.length + alignment + 32)
+            memory.set(source, input)
+            for (const parse of [parser.parse_term_bank, parser.parse_term_bank_with_media_hints]) {
+                expect(parse(input, source.length, output, 1, 0, 0, 1)).toBe(1)
+                for (let length = valueStart; length <= valueStart + 20; ++length) {
+                    expect(parse(input, length, output, 1, 0, 0, 1)).toBeLessThan(0)
+                }
+            }
+        }
+    })
+})
+/* eslint-enable @stylistic/semi */
+
 describe('term-bank WASM parser', () => {
     maybeTest('preserves canonical source rows across duplicate distributions and chunk boundaries', async () => {
         for (const uniqueCount of [1, 7, 101]) {

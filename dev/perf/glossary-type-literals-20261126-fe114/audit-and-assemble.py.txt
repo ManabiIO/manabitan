@@ -1,0 +1,78 @@
+from pathlib import Path
+import hashlib, json, shutil, subprocess
+root=Path('/workspace/scratch/fe1144369b6e/manabitan-structured')
+source=Path('/workspace/scratch/fe1144369b6e/structured-screen')
+destination=root/'dev/perf/glossary-type-literals-20261126-fe114'
+destination.mkdir(parents=True, exist_ok=True)
+base='0143e9596cd8f790d5e166d4ba6a2425fbc57f14'
+native='1499a61a7d981179a24757e0d649b7e43e4e0cac'
+published='e197c714ac7738097b6cf005f178b075eaf2ab80'
+local_published='772d6cb6d6e0f440579ed7560fc6e4abf4a52bd9'
+published_tree='82ef06f34589040a07c7a65d963a5e0fb2df9de7'
+assert subprocess.check_output(['git','rev-parse',local_published+'^{tree}'],cwd=root,text=True).strip()==published_tree
+def sha(data): return hashlib.sha256(data).hexdigest()
+def at(revision, name): return subprocess.check_output(['git','show',f'{revision}:{name}'],cwd=root)
+lock=json.loads((root/'test/perf/dictionaries.lock.json').read_text())['dictionaries']
+base_native=at(base,'dev/data/dictionary-wasm/term-bank-parser.wasm')
+candidate_native=at(native,'dev/data/dictionary-wasm/term-bank-parser.wasm')
+assert sha(candidate_native)==sha((root/'dev/data/dictionary-wasm/term-bank-parser.wasm').read_bytes())
+wrapper='ext/js/dictionary/term-bank-wasm-parser.js'
+assert at(base,wrapper)==at(native,wrapper)==(root/wrapper).read_bytes()
+checks=[]
+for name in ['jmdict','jitendex','vndb']:
+ a=json.loads((source/f'{name}-A.json').read_text())
+ b=json.loads((source/f'{name}-B.json').read_text())
+ assert a['wasmSha256']==sha(base_native)
+ assert b['wasmSha256']==sha(candidate_native)
+ assert {k:v for k,v in a.items() if k!='wasmSha256'}=={k:v for k,v in b.items() if k!='wasmSha256'}
+ assert a['archiveSha256']==lock[name]['sha256']
+ assert a['rowCount']==sum(group['rowCount'] for group in a['groups'])==lock[name]['termRows']
+ banks=[bank for group in a['groups'] for bank in group['banks']]
+ assert banks==[f'term_bank_{i}.json' for i in range(1,a['termBanks']+1)]
+ assert a['mediaRows']==sum(group['mediaRows'] for group in a['groups'])
+ assert a['node']=='v22.22.0'
+ assert len(a['groups'])==(a['termBanks']+1)//2
+ digest=hashlib.sha256()
+ for group in a['groups']: digest.update(json.dumps(group,separators=(',',':'),ensure_ascii=False).encode())
+ assert digest.hexdigest()==a['corpusDigest']
+ assert a['groupSize']==2 and a['copiedOutputInsideLease'] is True
+ assert a['skippedOutputFields']==['preparedLookupIndexEncodeMs']
+ checks.append({**{k:a[k] for k in ['dictionary','termBanks','rowCount','sourceBytes','mediaRows','corpusDigest']},'groups':len(a['groups']),'onlyArmDifference':'wasmSha256','orderedBankCoverage':True,'matchesLockedRowsAndArchive':True})
+ for arm in ['A','B']: shutil.copyfile(source/f'{name}-{arm}.json',destination/f'{name}-{arm}.json.txt')
+for name in ['replay.mjs','adversarial-check.mjs','adversarial-receipt.json']:
+ shutil.copyfile(source/name,destination/f'{name}.txt')
+# Preserve the discarded first attempt as historical source, not active tooling.
+shutil.copyfile(source/'screen.mjs',destination/'abandoned-screen.mjs.txt')
+record={
+ 'purpose':'Independent full-corpus parser correctness; no import timing or memory qualification',
+ 'baselineCommit':base,
+ 'localNativeChangeCommit':native,
+ 'publishedAcquisitionSource':{'commit':published,'tree':published_tree,'equivalentLocalCommit':local_published},
+ 'baselineWasmSha256':sha(base_native),
+ 'candidateWasmSha256':sha(candidate_native),
+ 'baselineSourceManifest':json.loads(at(base,'dev/data/dictionary-wasm/manifest.json')),
+ 'candidateSourceManifest':json.loads(at(native,'dev/data/dictionary-wasm/manifest.json')),
+ 'identicalJavaScriptWrapper':{'path':wrapper,'sha256':sha(at(base,wrapper))},
+ 'fixtureLockSha256':sha((root/'test/perf/dictionaries.lock.json').read_bytes()),
+ 'packageLockSha256':sha((root/'package-lock.json').read_bytes()),
+ 'replaySourceSha256':sha((source/'replay.mjs').read_bytes()),
+ 'adversarialSourceSha256':sha((source/'adversarial-check.mjs').read_bytes()),
+ 'expectedNodeReplay':'v22.22.0',
+ 'checks':checks,
+ 'totalRowsPerArm':sum(item['rowCount'] for item in checks),
+ 'totalBanksPerArm':sum(item['termBanks'] for item in checks),
+ 'localValidation':{
+  'rawLogsRetained':False,
+  'reportedNodeVersion':'v24.22.3',
+  'targetedCommand':"node node_modules/vitest/vitest.mjs run test/term-bank-wasm-parser.test.js -t 'validated structured glossary literal dispatch' --maxWorkers=1",
+  'targetedTests':{'passed':22,'skippedByFilter':187,'total':209},
+  'eslintCommand':'node node_modules/eslint/bin/eslint.js test/term-bank-wasm-parser.test.js',
+  'eslintExitCode':0,
+  'diffCheckExitCode':0,
+  'buildLibraries':'passed; existing pako-inflate CommonJS-in-ESM warning',
+ },
+ 'discardedAttempt':{'script':'abandoned-screen.mjs.txt','exitCode':137,'usableResult':False,'issues':['two parser instances and whole-archive retention','hash traversal included internal heap-backed views']},
+ 'limitations':['two-bank groups, not the production scheduler partition','decoded-bank/main-thread parser path','no worker transport, OPFS transaction, compression, browser restart, actual media payload, import timing, or peak-memory qualification'],
+}
+(destination/'provenance.json.txt').write_text(json.dumps(record,indent=2)+'\n')
+print(json.dumps({'directory':str(destination),'checks':checks,'totalRowsPerArm':record['totalRowsPerArm']},indent=2))

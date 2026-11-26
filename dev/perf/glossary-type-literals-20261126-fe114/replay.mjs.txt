@@ -1,0 +1,153 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {createReadStream} from 'node:fs'
+import {open, readFile, writeFile} from 'node:fs/promises'
+import {createRequire} from 'node:module'
+import path from 'node:path'
+
+const [root, wasmPath, dictionary, outputPath] = process.argv.slice(2)
+assert(root && wasmPath && dictionary && outputPath, 'Expected root, WASM path, dictionary, output JSON path')
+const require = createRequire(path.join(root, 'package.json'))
+const {Reader, ZipReader, Uint8ArrayWriter} = await import(require.resolve('@zip.js/zip.js'))
+const parser = await import(path.join(root, 'ext/js/dictionary/term-bank-wasm-parser.js'))
+const lock = JSON.parse(await readFile(path.join(root, 'test/perf/dictionaries.lock.json'), 'utf8')).dictionaries[dictionary]
+assert(lock, 'Dictionary must be present in the repository lock file')
+const wasmBytes = await readFile(wasmPath)
+const wasmSha256 = createHash('sha256').update(wasmBytes).digest('hex')
+parser.setTermBankWasmModule(await WebAssembly.compile(wasmBytes))
+await parser.initializeTermBankWasmParser()
+console.log(`Initialized ${dictionary} ${wasmSha256}`)
+
+const archivePath = path.join(root, 'builds/e2e-dictionary-cache', lock.cacheFile)
+const archiveHash = createHash('sha256')
+for await (const bytes of createReadStream(archivePath, {highWaterMark: 1024 * 1024})) archiveHash.update(bytes)
+const archiveSha256 = archiveHash.digest('hex')
+assert.equal(archiveSha256, lock.sha256)
+const archive = await open(archivePath, 'r')
+class ArchiveReader extends Reader {
+    constructor(size) {
+        super()
+        this.size = size
+    }
+    async readUint8Array(offset, length) {
+        const bytes = new Uint8Array(length)
+        let completed = 0
+        while (completed < length) {
+            const {bytesRead} = await archive.read(bytes, completed, length - completed, offset + completed)
+            assert(bytesRead > 0, 'Unexpected end of ZIP input')
+            completed += bytesRead
+        }
+        return bytes
+    }
+}
+
+// Hash every returned public field, repeated references included. Only the
+// timing diagnostic is excluded. Owned output is copied while the parser's
+// borrowed-memory lease is live; no unrelated WASM heap bytes are hashed.
+function outputDigest(value) {
+    const hash = createHash('sha256')
+    const ancestors = new Set()
+    function add(item) {
+        if (item === null) { hash.update('null;'); return }
+        if (typeof item === 'undefined') { hash.update('undefined;'); return }
+        if (ArrayBuffer.isView(item)) {
+            hash.update(`view:${item.constructor.name}:${item.byteLength}:`)
+            hash.update(new Uint8Array(item.buffer, item.byteOffset, item.byteLength))
+            return
+        }
+        if (typeof item !== 'object') {
+            const text = typeof item === 'number' && Object.is(item, -0) ? '-0' : JSON.stringify(item)
+            assert.equal(typeof text, 'string', 'Unsupported output value')
+            hash.update(`${typeof item}:${Buffer.byteLength(text)}:${text}`)
+            return
+        }
+        assert(!ancestors.has(item), 'Unexpected cycle in public parser output')
+        ancestors.add(item)
+        if (item instanceof Map) {
+            hash.update(`map:${item.size}:`)
+            for (const [key, entry] of item) { add(key); add(entry) }
+        } else if (Array.isArray(item)) {
+            hash.update(`array:${item.length}:`)
+            for (const entry of item) add(entry)
+        } else {
+            assert(Object.getPrototypeOf(item) === Object.prototype || Object.getPrototypeOf(item) === null, 'Unsupported output object')
+            const keys = Object.keys(item).filter(key => key !== 'preparedLookupIndexEncodeMs').sort()
+            hash.update(`object:${keys.length}:`)
+            for (const key of keys) { add(key); add(item[key]) }
+        }
+        ancestors.delete(item)
+    }
+    add(value)
+    return hash.digest('hex')
+}
+
+const reader = new ZipReader(new ArchiveReader((await archive.stat()).size))
+const entries = []
+const groups = []
+const corpus = createHash('sha256')
+let rowCount = 0
+let sourceBytes = 0
+let mediaRows = 0
+const groupSize = 2
+try {
+    for await (const entry of reader.getEntriesGenerator()) {
+        if (/^term_bank_\d+\.json$/.test(entry.filename)) entries.push(entry)
+    }
+    entries.sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+    console.log(`Verified archive, selected ${entries.length} term banks`)
+    for (let start = 0; start < entries.length; start += groupSize) {
+        const banks = entries.slice(start, start + groupSize)
+        const sources = []
+        for (const entry of banks) sources.push(await entry.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}))
+        let copied = null
+        let chunks = 0
+        await parser.parseTermBankWithWasmColumnChunks(sources, 3, chunk => {
+            assert.equal(chunks++, 0, 'Expected one complete bounded group')
+            copied = parser.copyWasmBackedColumnChunk(chunk, false, true, true)
+        }, 2048, {
+            singleChunk: true,
+            emitTermByteLists: false,
+            computeContentHashes: true,
+            emitContentSlab: true,
+            emitTokenBinaryContent: true,
+            mediaHintFastScan: true,
+            validateGlossaryTypes: true,
+            prepareLookupIndexes: true,
+        })
+        assert(copied)
+        const digest = outputDigest(copied)
+        const group = {banks: banks.map(entry => entry.filename), rowCount: copied.rowCount, mediaRows: copied.mediaRows.length, digest}
+        groups.push(group)
+        corpus.update(JSON.stringify(group))
+        rowCount += copied.rowCount
+        mediaRows += copied.mediaRows.length
+        sourceBytes += sources.reduce((sum, bytes) => sum + bytes.byteLength, 0)
+        copied = null
+        // This is a bounded correctness replay, not a timing or memory study.
+        // GC between groups keeps old owned projections off the next parse.
+        globalThis.gc?.()
+        if (groups.length % 10 === 0) console.log(`${dictionary}: ${groups.length} groups, ${rowCount} rows`)
+    }
+} finally {
+    await reader.close()
+    await archive.close()
+}
+assert.equal(rowCount, lock.termRows)
+const report = {
+    kind: 'File-backed bounded full-corpus output parity replay; not an import benchmark',
+    node: process.version,
+    dictionary,
+    archiveSha256,
+    wasmSha256,
+    groupSize,
+    termBanks: entries.length,
+    sourceBytes,
+    rowCount,
+    mediaRows,
+    corpusDigest: corpus.digest('hex'),
+    copiedOutputInsideLease: true,
+    skippedOutputFields: ['preparedLookupIndexEncodeMs'],
+    groups,
+}
+await writeFile(outputPath, JSON.stringify(report, null, 2) + '\n')
+console.log(JSON.stringify({...report, groups: groups.length}))

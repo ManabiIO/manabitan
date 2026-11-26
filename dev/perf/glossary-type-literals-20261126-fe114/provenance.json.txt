@@ -1,0 +1,219 @@
+{
+  "purpose": "Independent full-corpus parser correctness; no import timing or memory qualification",
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "localNativeChangeCommit": "1499a61a7d981179a24757e0d649b7e43e4e0cac",
+  "publishedAcquisitionSource": {
+    "commit": "e197c714ac7738097b6cf005f178b075eaf2ab80",
+    "tree": "82ef06f34589040a07c7a65d963a5e0fb2df9de7",
+    "equivalentLocalCommit": "772d6cb6d6e0f440579ed7560fc6e4abf4a52bd9"
+  },
+  "baselineWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+  "candidateWasmSha256": "051373ece6336a53091094fe1ee37a96ff3d771d6906a72f99ea6b7ee14137d6",
+  "baselineSourceManifest": {
+    "format": 1,
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "sourceDigest": "0791c8fa7956774d8c87b3a0611121e0efaede9e5936d6a5dc6666c17b079963",
+    "sourceFileCount": 14,
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+        ],
+        "arguments": [
+          "--target=wasm32",
+          "-O3",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--import-memory",
+          "-Wl,-z,stack-size=65536",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-bank-parser.c",
+          "ext/js/dictionary/wasm/term-bank-inflate.c"
+        ],
+        "arguments": [
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=verify_term_bank_source_crcs",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=project_single_glossary_image_path",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+      }
+    ]
+  },
+  "candidateSourceManifest": {
+    "format": 1,
+    "toolchain": {
+      "compilerVersion": "21.1.8",
+      "linkerVersion": "21.1.8"
+    },
+    "sourceDigest": "26e8c428e9b8e3037b017c1aea062176ebba17f2537c1e27331af9b2be630b56",
+    "sourceFileCount": 14,
+    "targets": [
+      {
+        "name": "term-content-canonical-scan-v1.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c"
+        ],
+        "arguments": [
+          "--target=wasm32",
+          "-O3",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--import-memory",
+          "-Wl,-z,stack-size=65536",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+      },
+      {
+        "name": "term-bank-parser.wasm",
+        "sources": [
+          "ext/js/dictionary/wasm/term-bank-parser.c",
+          "ext/js/dictionary/wasm/term-bank-inflate.c"
+        ],
+        "arguments": [
+          "--target=wasm32-freestanding",
+          "-O3",
+          "-matomics",
+          "-mbulk-memory",
+          "-msimd128",
+          "-nostdlib",
+          "-Wl,--no-entry",
+          "-Wl,--shared-memory",
+          "-Wl,--max-memory=4294967296",
+          "-Wl,--export=wasm_reset_heap",
+          "-Wl,--export=wasm_alloc",
+          "-Wl,--export=wasm_get_last_parse_capacity",
+          "-Wl,--export=wasm_get_last_content_capacity",
+          "-Wl,--export=inflate_and_join_term_banks",
+          "-Wl,--export=verify_term_bank_source_crcs",
+          "-Wl,--export=inflate_zip_media_batch",
+          "-Wl,--export=project_single_glossary_image_path",
+          "-Wl,--export=parse_term_bank",
+          "-Wl,--export=parse_term_bank_with_media_hints",
+          "-Wl,--export=parse_and_encode_term_bank_token_binary_dedup",
+          "-Wl,--export=build_term_string_plan",
+          "-Wl,--export=encode_term_lookup_index",
+          "-Wl,--export=compact_term_lookup_keys",
+          "-Wl,--export=encode_term_content",
+          "-Wl,--export=encode_term_content_no_hash",
+          "-Wl,--export=encode_term_content_token_binary",
+          "-Wl,--export=encode_term_content_token_binary_dedup",
+          "-Wl,--strip-all"
+        ],
+        "sha256": "051373ece6336a53091094fe1ee37a96ff3d771d6906a72f99ea6b7ee14137d6"
+      }
+    ]
+  },
+  "identicalJavaScriptWrapper": {
+    "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+    "sha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64"
+  },
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "packageLockSha256": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+  "replaySourceSha256": "493556a03de07e7cdccc693f0b216cca12fe2baa3061c3d4708fb5a180b7ee17",
+  "adversarialSourceSha256": "cc103353a462fd74e7984fdc64c075c7a1bbb4775db355f56df4843d2bfb0834",
+  "expectedNodeReplay": "v22.22.0",
+  "checks": [
+    {
+      "dictionary": "jmdict",
+      "termBanks": 53,
+      "rowCount": 528299,
+      "sourceBytes": 171617523,
+      "mediaRows": 17,
+      "corpusDigest": "b1b537982e67949983915d618c0657eb2f21554705a3ec16e1a81dc5b5c7c7b9",
+      "groups": 27,
+      "onlyArmDifference": "wasmSha256",
+      "orderedBankCoverage": true,
+      "matchesLockedRowsAndArchive": true
+    },
+    {
+      "dictionary": "jitendex",
+      "termBanks": 219,
+      "rowCount": 436555,
+      "sourceBytes": 538927310,
+      "mediaRows": 339,
+      "corpusDigest": "e684a7ee5eac3aeb1e2a9a34cacb7b839a9f0a55addc3f1dbf7b84a94844e9e2",
+      "groups": 110,
+      "onlyArmDifference": "wasmSha256",
+      "orderedBankCoverage": true,
+      "matchesLockedRowsAndArchive": true
+    },
+    {
+      "dictionary": "vndb",
+      "termBanks": 665,
+      "rowCount": 6648310,
+      "sourceBytes": 4267992967,
+      "mediaRows": 146876,
+      "corpusDigest": "fc65ea53d8c090a85334e64bf24d3d850a2fcbfc6c1a4ea6bc9d5af68aa35929",
+      "groups": 333,
+      "onlyArmDifference": "wasmSha256",
+      "orderedBankCoverage": true,
+      "matchesLockedRowsAndArchive": true
+    }
+  ],
+  "totalRowsPerArm": 7613164,
+  "totalBanksPerArm": 937,
+  "localValidation": {
+    "rawLogsRetained": false,
+    "reportedNodeVersion": "v24.22.3",
+    "targetedCommand": "node node_modules/vitest/vitest.mjs run test/term-bank-wasm-parser.test.js -t 'validated structured glossary literal dispatch' --maxWorkers=1",
+    "targetedTests": {
+      "passed": 22,
+      "skippedByFilter": 187,
+      "total": 209
+    },
+    "eslintCommand": "node node_modules/eslint/bin/eslint.js test/term-bank-wasm-parser.test.js",
+    "eslintExitCode": 0,
+    "diffCheckExitCode": 0,
+    "buildLibraries": "passed; existing pako-inflate CommonJS-in-ESM warning"
+  },
+  "discardedAttempt": {
+    "script": "abandoned-screen.mjs.txt",
+    "exitCode": 137,
+    "usableResult": false,
+    "issues": [
+      "two parser instances and whole-archive retention",
+      "hash traversal included internal heap-backed views"
+    ]
+  },
+  "limitations": [
+    "two-bank groups, not the production scheduler partition",
+    "decoded-bank/main-thread parser path",
+    "no worker transport, OPFS transaction, compression, browser restart, actual media payload, import timing, or peak-memory qualification"
+  ]
+}
