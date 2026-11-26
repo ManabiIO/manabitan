@@ -907,6 +907,26 @@ static inline uint32_t common_structured_tag_end(const uint8_t* src, uint32_t le
     }
 }
 
+/* The validated type key commonly selects structured content. The complete
+ * ASCII value is already a valid JSON string, so keep its colon and value in
+ * the same dispatch. Other values, spacing and escapes use the full parser. */
+static inline uint32_t common_structured_glossary_type_end(
+    const uint8_t* src, uint32_t len, uint32_t start
+) {
+    if (start >= len || src[start] != ':') { return 0u; }
+    uint32_t value = start + 1u;
+    if (value < len && src[value] == ' ') { ++value; }
+    if (len - value < 20u) { return 0u; }
+    uint64_t first;
+    uint64_t second;
+    uint32_t last;
+    __builtin_memcpy(&first, src + value, sizeof(first));
+    __builtin_memcpy(&second, src + value + 8u, sizeof(second));
+    __builtin_memcpy(&last, src + value + 16u, sizeof(last));
+    return first == UINT64_C(0x7574637572747322) &&
+        second == UINT64_C(0x746e6f632d646572) && last == UINT32_C(0x22746e65) ? value + 20u : 0u;
+}
+
 static int parse_composite_span_impl(
     const uint8_t* src,
     uint32_t len,
@@ -981,6 +1001,20 @@ static int parse_composite_span_impl(
                         json_string_matches_ascii(src, i, s_end, "text", 4u) ? GLOSSARY_TEXT_FIELD :
                         json_string_matches_ascii(src, i, s_end, "path", 4u) ? GLOSSARY_PATH_FIELD :
                         json_string_matches_ascii(src, i, s_end, "content", 7u) ? GLOSSARY_CONTENT_FIELD : 0u;
+                    if (glossary_key == GLOSSARY_TYPE_FIELD) {
+                        const uint32_t type_end = common_structured_glossary_type_end(src, len, s_end);
+                        if (type_end != 0u) {
+                            if (normalization_hint != 0 && src[s_end + 1u] == ' ') { *normalization_hint = 1u; }
+                            glossary_object_type = GLOSSARY_CONTENT_FIELD;
+                            state = OBJECT_AFTER_VALUE;
+                            i = type_end;
+                            if (i < len && src[i] == ',') {
+                                state = OBJECT_KEY;
+                                i = advance_glossary_delimiter(src, len, i, normalization_hint);
+                            }
+                            continue;
+                        }
+                    }
                 }
                 if (
                     common_key_kind == COMMON_STRUCTURED_KEY_NONE &&
