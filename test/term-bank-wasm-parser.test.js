@@ -259,7 +259,6 @@ describe('validated structured glossary literal dispatch', () => {
         }, 1, {
             emitContentSlab: true,
             emitTokenBinaryContent: true,
-            decodeMediaRowsOnly: true,
             singleChunk: true,
             prepareLookupIndexes: true,
             validateGlossaryTypes,
