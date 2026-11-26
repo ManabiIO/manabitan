@@ -42,7 +42,7 @@ function fixture(count = 128) {
  */
 function encodeGeneric(chunk, base = 2 ** 40) {
     // Spreading deliberately removes the internal origin proof; this exercises
-    // the unchanged generic encoder with exactly the same column values.
+    // the generic reference path with exactly the same column values.
     return new TermRecordOpfsStore()._encodeArtifactRecordFields({...chunk}, [], [], base)
 }
 
@@ -80,6 +80,32 @@ describe('direct resolved record-field columns', () => {
         expect(shortCopies).toHaveBeenCalledTimes(1) // Only score keys are staged.
         expect(actual).toEqual(expected)
         expect(actual?.buffer.byteLength).toBe(actual?.byteLength)
+    })
+
+    test.each([0, -200, -10200, -2147483648, 2147483647])('omits score-key staging for uniform score %i', (score) => {
+        const chunk = fixture(1024)
+        chunk.scoreList.fill(score)
+        const expected = encodeGeneric(chunk)
+        const copies = vi.spyOn(Uint16Array.prototype, 'set')
+        const actual = encodeDirect(chunk)
+        expect(actual).toEqual(expected)
+        expect(actual.byteLength).toBe(20 + 1024 * 8)
+        expect(copies).not.toHaveBeenCalled()
+        const header = new DataView(actual.buffer)
+        expect(header.getUint32(8, true)).toBe(1)
+        expect(header.getInt32(16, true)).toBe(score)
+        expect(actual.subarray(20 + 1024 * 6)).toEqual(new Uint8Array(1024 * 2))
+    })
+
+    test.each([1, 63, 127])('preserves implicit zero keys when a second score first occurs at row %i', (firstChange) => {
+        const chunk = fixture()
+        chunk.scoreList.fill(-200)
+        chunk.scoreList[firstChange] = 999800
+        const actual = encodeDirect(chunk)
+        expect(actual).toEqual(encodeGeneric(chunk))
+        expect(actual.byteLength).toBe(24 + chunk.rowCount * 8)
+        const keys = new Uint16Array(actual.buffer, 24 + chunk.rowCount * 6, chunk.rowCount)
+        expect([...keys]).toEqual(Array.from({length: chunk.rowCount}, (_, row) => row === firstChange ? 1 : 0))
     })
 
     test.each([65535, 65536, 0xffffffff])('preserves legacy fallback for content length %i', (length) => {

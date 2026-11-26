@@ -5824,7 +5824,9 @@ view.chunks :
         const offsets = directReferences === null ? new Uint32Array(count) : null
         const lengths = directReferences === null ? new Uint16Array(count) : null
         /* eslint-enable @stylistic/semi */
-        const scoreKeys = new Uint16Array(count);
+        /** @type {Uint16Array|null} */
+        /* eslint-disable-next-line @stylistic/semi */
+        let scoreKeys = null
         /** @type {number[]} */
         const scores = [];
         /** @type {Map<number, number>} */
@@ -5859,6 +5861,10 @@ view.chunks :
                     compact = false;
                     break;
                 }
+                // A uniform score has key zero in every row. Until a second
+                // score appears, the final zero-initialized column is enough.
+                /* eslint-disable-next-line @stylistic/semi */
+                if (scoreIndex === 1) { scoreKeys = new Uint16Array(count) }
                 if (useInlineScore) {
                     inlineScoreIndexes[inlineScore] = scoreIndex + 1;
                 } else {
@@ -5866,7 +5872,8 @@ view.chunks :
                 }
                 scores.push(score);
             }
-            scoreKeys[i] = scoreIndex;
+            /* eslint-disable-next-line @stylistic/semi */
+            if (scoreKeys !== null) { scoreKeys[i] = scoreIndex }
         }
         const compactByteLength = COMPACT_RECORD_FIELDS_HEADER_BYTES +
         (scores.length * 4) +
@@ -5921,7 +5928,8 @@ view.chunks :
         }
         /* eslint-enable @stylistic/semi */
         cursor += count * 2;
-        new Uint16Array(output.buffer, cursor, count).set(scoreKeys);
+        /* eslint-disable-next-line @stylistic/semi */
+        if (scoreKeys !== null) { new Uint16Array(output.buffer, cursor, count).set(scoreKeys) }
         return output;
     }
 
