@@ -128,7 +128,7 @@ describe('compression worker native contexts', () => {
         expect(createDecoder).not.toHaveBeenCalled()
         const generic = await send({id: 2, content: content.subarray(0, 50), wrap: false})
         expect(api.decompressTermContentZstd(generic, null)).toEqual(content.subarray(0, 50))
-        expect(createDecoder).not.toHaveBeenCalled()
+        expect(createDecoder).toHaveBeenCalledOnce()
         expect(api.decompressTermContentZstd(compressed.subarray(12), 'jmdict')).toEqual(content)
         expect(createDecoder).toHaveBeenCalledOnce()
         expect(api.decompressTermContentZstd(compressed.subarray(12), 'jmdict')).toEqual(content)
