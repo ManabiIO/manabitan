@@ -1402,8 +1402,13 @@ export class DictionaryDatabase {
                 this._applyImportPragmas();
                 this._deferTermsVirtualTableSync = true;
                 this._termsVirtualTableDirty = false;
-                for (const dropIndexSql of this._createDropIndexesSql()) {
-                    db.exec(dropIndexSql);
+                // Schema setup already removes current and legacy indexes when
+                // secondary indexes are disabled. Only enabled indexes can have
+                // been recreated since then and need to be deferred for import.
+                if (this._enableSqliteSecondaryIndexes) {
+                    for (const dropIndexSql of this._createDropIndexesSql()) {
+                        db.exec(dropIndexSql);
+                    }
                 }
                 this._clearTermEntryContentMetaCaches();
                 this._termContentBlockImportSession?.close();
