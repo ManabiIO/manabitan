@@ -1389,7 +1389,7 @@ function createNativeTermStringPlanScratch(wasm, rowCapacity, stringsCapacity) {
  * @param {number} rowStart
  * @param {number} rowCount
  * @param {ReturnType<typeof createNativeTermStringPlanScratch>} scratch
- * @returns {(import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array})|null}
+ * @returns {(import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array, expressionIndexes: Uint32Array})|null}
  * @throws {Error}
  */
 function buildNativeTermStringPlan(wasm, jsonPtr, metasPtr, rowStart, rowCount, scratch) {
