@@ -462,6 +462,7 @@ The timing matrix used all three named candidates and all three dictionaries at 
 The temporary measurement PRs are closed after acquisition and preservation. The bookkeeping-only registry repairs are retained separately at [timing repair commit `3cec8e1`](https://github.com/ManabiIO/manabitan/commit/3cec8e1c1dd158964ab3aa0cc567ec6285e5a698) and [memory repair commit `4b4f7e2`](https://github.com/ManabiIO/manabitan/commit/4b4f7e280067f3eaa2f5555b822b0b33d8db8d2e), preserving the exact executed study heads and avoiding another acquisition. They do not change any result.
 
 The numeric and image-projection PRs remain on hold, and the measured metadata-key candidate does not meet the target speed gate. The extra parser boundary tests remain a separate reviewable follow-up. Further runtime promotion needs a new material complete-import result under a prospectively fixed comparison; image-projection memory qualification additionally needs a complete covered cohort. No favorable component percentage, unchanged-control fluctuation or incomplete memory observation is substituted for those requirements.
+
 ## 2026-11-24: frozen import source qualification (3aac)
 
 ### Scope, source identities and disposition
