@@ -62,9 +62,10 @@ def main():
     parser.add_argument("--candidate", required=True)
     parser.add_argument("--dictionary", choices=("jmdict", "jitendex", "vndb"), required=True)
     parser.add_argument("--allowed-entry", action="append", required=True)
+    parser.add_argument("--harness-overlay-ref")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    for ref in (args.baseline, args.candidate):
+    for ref in (args.baseline, args.candidate, *([args.harness_overlay_ref] if args.harness_overlay_ref else [])):
         if len(ref) != 40 or any(c not in "0123456789abcdef" for c in ref):
             raise ValueError("Product revisions must be complete commit SHAs")
     root = Path(__file__).resolve().parents[2]
@@ -83,6 +84,7 @@ def main():
         "scope": "Single-host ABBA regression screen; no speed or peak-memory qualification",
         "failurePolicy": "Stop on failure and retain all observations; no replacement runs",
         "scriptSha256": sha256(Path(__file__)),
+        "harnessOverlayRef": args.harness_overlay_ref,
     })
     cache = root / "builds/e2e-dictionary-cache"
     run(["node", "dev/perf/prepare-dictionaries.js", "--all"], root)
@@ -125,6 +127,26 @@ def main():
     })
     if changed != sorted(args.allowed_entry):
         raise ValueError(f"Unexpected shipped changes: {changed}")
+    overlay_hash = None
+    if args.harness_overlay_ref:
+        relative = "dev/perf/benchmark-support.js"
+        original = (roots["A"] / relative).read_bytes()
+        overlay = subprocess.check_output([
+            "git", "show", f"{args.harness_overlay_ref}:{relative}",
+        ], cwd=root)
+        overlay_hash = hashlib.sha256(overlay).hexdigest()
+        (output / "original-benchmark-support.js").write_bytes(original)
+        (output / "corrected-benchmark-support.js").write_bytes(overlay)
+        write_json(output / "harness-overlay.json", {
+            "ref": args.harness_overlay_ref, "path": relative,
+            "originalSha256": hashlib.sha256(original).hexdigest(),
+            "overlaySha256": overlay_hash,
+            "scope": "Identical measurement-only overlay after unchanged product packages are built",
+        })
+        for label, source in roots.items():
+            (source / relative).write_bytes(overlay)
+            status = subprocess.check_output(["git", "status", "--porcelain"], cwd=source, text=True)
+            (output / f"{label}-status-with-harness-overlay.txt").write_text(status)
     observations = []
     expected_receipt = None
     expected_browser = None
@@ -151,6 +173,8 @@ def main():
             raise ValueError("Source SHA changed during screen")
         if sample["packageSha256"] != package_hashes[label]:
             raise ValueError("Package changed during screen")
+        if overlay_hash and summary["source"]["sha256"]["dev/perf/benchmark-support.js"] != overlay_hash:
+            raise ValueError("Measurement overlay changed during screen")
         current_receipt = receipt(sample["validation"])
         write_json(destination / "semantic-receipt.json", current_receipt)
         if expected_receipt is None:

@@ -1,0 +1,54 @@
+name: Corrected Jitendex allocation screen 9175
+
+on:
+  push:
+    branches: ['perf/import-allocation-screen-20261126-9175']
+    paths:
+      - '.github/workflows/import-jitendex-screen-9175.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  screen:
+    name: Final parser / Jitendex with corrected receipt policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PERF_BASELINE: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+      PERF_CANDIDATE: 01d0eb7164385828c97efae1b319ccc1c4fe92f9
+      PERF_HARNESS: 439a1c9b6d40452061cda094b0727005553c1d1d
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - name: Install pinned Chromium
+        run: npx playwright install --with-deps chromium
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Fetch exact product and existing verifier revisions
+        run: git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE" "$PERF_HARNESS"
+      - name: Run a separate Jitendex ABBA with the same corrected verifier in both arms
+        run: |
+          python dev/perf/import-allocation-screen-9175.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --harness-overlay-ref "$PERF_HARNESS" \
+            --dictionary jitendex \
+            --allowed-entry js/dictionary/dictionary-database.js \
+            --allowed-entry js/dictionary/term-bank-wasm-parser.js \
+            --allowed-entry js/dictionary/term-content-plan-resolution.js \
+            --output builds/perf/jitendex-corrected
+      - name: Retain all observations and overlay provenance
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: allocation-scratch-jitendex-corrected-9175
+          path: builds/perf/jitendex-corrected
+          if-no-files-found: error
+          retention-days: 14

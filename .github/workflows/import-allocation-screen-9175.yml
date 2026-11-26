@@ -1,11 +1,7 @@
 name: Import allocation regression screen 9175
 
 on:
-  push:
-    branches: ['perf/import-allocation-screen-20261126-9175']
-    paths:
-      - '.github/workflows/import-allocation-screen-9175.yml'
-      - 'dev/perf/import-allocation-screen-9175.py'
+  workflow_dispatch:
 
 permissions:
   contents: read

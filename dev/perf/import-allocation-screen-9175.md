@@ -33,8 +33,10 @@ The VNDB media job also runs the standalone catalog component screen after the
 browser observations. Its retained Node allocations and materialization counts
 are distinct from full-import latency and browser memory.
 
-The workflow triggers only on this evidence branch when its workflow or runner
-changes. Documentation and archived evidence updates do not reacquire a cohort.
+The original workflow was restricted to this evidence branch. After its frozen
+run began, its trigger was changed to manual-only so later tooling and evidence
+updates cannot reacquire the original cohort. Existing observations retain their
+original workflow, runner and source identities.
 
 ## Supplementary full VNDB parser replay
 
@@ -49,3 +51,28 @@ fixed groups of four term banks, after initializing the deferred columns. It
 records cumulative deferred bytes and exact source/runner provenance. It does
 not measure import time or peak memory. Its separate workflow trigger leaves
 the original browser observations and their source identities intact.
+
+## Corrected Jitendex verification
+
+The original scratch/Jitendex cell stopped at A1 after the unchanged baseline
+completed its import, restart, content and media checks. The benchmark's derived
+flag expectation still used a 512 MiB media-projection threshold, although
+production had changed to 1 GiB. Jitendex lies between those thresholds. The
+original failed observation remains diagnostic-only; none of its timing enters
+the corrected cohort.
+
+The separate Jitendex-only workflow reuses the existing fix from PR #950 at
+`439a1c9b6d40452061cda094b0727005553c1d1d`. It builds and hashes the unchanged A/B
+product packages first, then applies that exact `dev/perf/benchmark-support.js`
+blob identically to both measurement worktrees. Original and corrected bytes,
+hashes, source status, runtime receipts and every new ABBA observation are kept.
+The candidate is the final style-corrected parser at `01d0eb7`. JMdict and VNDB
+observations are not reacquired to repair this Jitendex-specific verifier error.
+
+## Concurrent VNDB overlap
+
+PR #935 was closed after discovering that PR #934 opened four seconds earlier
+with the same runtime scope. The selected implementation is #934 with #937's
+raw-ZIP fallback tests. This study retains its already frozen #935 observations
+as evidence of that alternative only; none is relabeled as a measurement of
+#934. No new #935 cohort is scheduled.
