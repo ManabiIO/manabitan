@@ -72,6 +72,8 @@ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipFileMap} from './dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from './dense-zip-file-map.js'
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
 import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
@@ -2000,6 +2002,21 @@ export class DictionaryImporter {
                                     deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
+                                /* eslint-disable @stylistic/semi */
+                                // Prepared media owns its own checked catalog. Keep
+                                // unopened image entries compact in this owner until
+                                // a real payload fallback needs their metadata.
+                                if (
+                                    deferArchiveImages &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                    fileMap instanceof DenseZipFileMap &&
+                                    fileMap.hasUnmaterializedEntry(requirement.source.path) &&
+                                    getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                ) {
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement))
+                                    continue
+                                }
+                                /* eslint-enable @stylistic/semi */
                                 const file = fileMap.get(requirement.source.path);
                                 if (
                                     deferArchiveImages &&
