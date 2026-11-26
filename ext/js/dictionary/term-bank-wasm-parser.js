@@ -31,6 +31,8 @@ import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
 
 const META_U32_FIELDS = 17;
+const FUSED_META_U32_FIELDS = 7;
+const FUSED_META_SEQUENCE_NEGATIVE_ZERO = 2;
 const U8_BACKSLASH = 0x5c;
 const U8_QUOTE = 0x22;
 const U8_N = 0x6e;
@@ -98,12 +100,13 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * emitTermByteLists?: boolean,
  * singleChunk?: boolean,
  * prepareLookupIndexes?: boolean,
+ * compactFusedMetadata?: boolean,
  * prepareLookupRoute?: boolean,
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number}} TermBankExperimentProfile */
-/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
+/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, metaFields?: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
@@ -792,12 +795,13 @@ function estimateFusedTermBankMetaCapacity(source, defaultCapacity) {
  * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @param {import('dictionary-importer').ImportExperiments} [experiments]
  * @param {boolean} [validateGlossaryTypes]
+ * @param {boolean} [compactFusedMetadata]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
+async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false, compactFusedMetadata = true) {
     try {
-        return await parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse, preloadedSource, experiments, validateGlossaryTypes);
+        return await parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse, preloadedSource, experiments, validateGlossaryTypes, compactFusedMetadata);
     } finally {
         // Allocation errors, native traps, and every early return still settle
         // the original source CRC before an importer can select its fallback.
@@ -817,10 +821,11 @@ async function parseTermBankWasmBuffers(contentBytes, includeContentMetadata, in
  * @param {PreloadedTermBankSource|null} [preloadedSource]
  * @param {import('dictionary-importer').ImportExperiments} [experiments]
  * @param {boolean} [validateGlossaryTypes]
+ * @param {boolean} [compactFusedMetadata]
  * @returns {Promise<ParsedTermBankWasmBuffers>}
  * @throws {Error}
  */
-async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false) {
+async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMetadata, initialContentBytesPerRow, mediaHintFastScan, computeContentHashes, emitTokenBinaryContent, deduplicateContent, allowFusedParse = true, preloadedSource = null, experiments = {}, validateGlossaryTypes = false, compactFusedMetadata = true) {
     const sourceArrays = Array.isArray(contentBytes) ? contentBytes : [contentBytes];
     // Every multi-bank route must retain source boundaries until the native
     // term-bank cursor has validated each source as a complete JSON array.
@@ -922,11 +927,24 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
     if (useFusedParse) {
         tStart = Date.now();
         const fusedMetaCapacity = estimateFusedTermBankMetaCapacity(preloadedSource, initialMetaCapacity);
-        const outPtr = wasm.wasm_alloc(fusedMetaCapacity * META_U32_FIELDS * 4);
-        const contentMetaPtr = wasm.wasm_alloc(fusedMetaCapacity * CONTENT_META_U32_FIELDS * 4);
+        // Strict fused rows no longer need tag/rule and numeric source spans
+        // after encoding. Distant raw reuse still requires full row history.
+        const useCompactMetadata = compactFusedMetadata && validateGlossaryTypes && !experiments.experimentalGlobalExactContentReuse;
+        const metaFields = useCompactMetadata ? FUSED_META_U32_FIELDS : META_U32_FIELDS;
         let contentHashTableSize = 1;
         while (contentHashTableSize < fusedMetaCapacity * 2) { contentHashTableSize *= 2; }
+        let stringHashTableSize = 1;
+        while (stringHashTableSize < fusedMetaCapacity * 4) { stringHashTableSize *= 2; }
+        const outPtr = wasm.wasm_alloc(fusedMetaCapacity * metaFields * 4);
+        let contentMetaPtr = useCompactMetadata ? 0 : wasm.wasm_alloc(fusedMetaCapacity * CONTENT_META_U32_FIELDS * 4);
         const contentHashTablePtr = wasm.wasm_alloc(contentHashTableSize * 4);
+        // Keep the three retired compact-parser buffers contiguous so lookup
+        // output can reuse their combined span without another heap allocation.
+        let stringHashTablePtr = 0;
+        if (useCompactMetadata) {
+            stringHashTablePtr = wasm.wasm_alloc(stringHashTableSize * 4);
+            contentMetaPtr = wasm.wasm_alloc(fusedMetaCapacity * CONTENT_META_U32_FIELDS * 4);
+        }
         const rawContentHashTablePtr = experiments.experimentalGlobalExactContentReuse ?
             wasm.wasm_alloc(contentHashTableSize * 4) :
             0;
@@ -947,9 +965,7 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
         const stringHashesPtr = wasm.wasm_alloc(fusedMetaCapacity * 2 * 4);
         const expressionIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const readingIndexesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
-        let stringHashTableSize = 1;
-        while (stringHashTableSize < fusedMetaCapacity * 4) { stringHashTableSize *= 2; }
-        const stringHashTablePtr = wasm.wasm_alloc(stringHashTableSize * 4);
+        if (!useCompactMetadata) { stringHashTablePtr = wasm.wasm_alloc(stringHashTableSize * 4); }
         const stringUniqueCountPtr = wasm.wasm_alloc(4);
         const stringBytesCountPtr = wasm.wasm_alloc(4);
         const readingEqualsPtr = wasm.wasm_alloc(fusedMetaCapacity);
@@ -1034,12 +1050,14 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
             rawContentHashesPtr,
             validateGlossaryTypes ? 1 : 0,
             glossaryWitnessesPtr,
+            useCompactMetadata ? 1 : 0,
         );
         verifyTermBankSourceCrc(
             preloadedSource,
             encodedContentBytes >= 0 ? outPtr : 0,
             encodedContentBytes >= 0 ? new Uint32Array(wasm.memory.buffer, rowCountPtr, 1)[0] : 0,
             encodedContentBytes >= 0 ? glossaryWitnessesPtr : 0,
+            useCompactMetadata,
         );
         parseBankMs += Math.max(0, Date.now() - tStart);
         const experimentStats = experimentStatsPtr === 0 ?
@@ -1103,6 +1121,8 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
         const stringBytesCount = new Uint32Array(wasm.memory.buffer, stringBytesCountPtr, 1)[0];
         const recentContentDedupHitCount = new Uint32Array(wasm.memory.buffer, recentContentHitsPtr, 1)[0];
         const contentCapacity = wasm.wasm_get_last_content_capacity();
+        const retiredContentOffset = Math.ceil(encodedContentBytes / 8) * 8;
+        const retiredStringOffset = Math.ceil(stringBytesCount / 8) * 8;
         const heap = new Uint8Array(wasm.memory.buffer);
         return {
             wasm,
@@ -1110,11 +1130,32 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
             jsonPtr,
             jsonLength,
             metasPtr: outPtr,
+            metaFields,
             retiredLookupScratch: (experiments.experimentalLookupScratchReuse || experiments.experimentalNativeSegmentedLookup) ?
 [
-    {pointer: outPtr, byteLength: fusedMetaCapacity * META_U32_FIELDS * 4},
-    {pointer: stringHashTablePtr, byteLength: stringHashTableSize * 4},
-    {pointer: contentHashTablePtr, byteLength: contentHashTableSize * 4},
+    {
+        pointer: outPtr,
+        byteLength: useCompactMetadata ?
+            stringHashTablePtr + stringHashTableSize * 4 - outPtr :
+            fusedMetaCapacity * metaFields * 4,
+    },
+    ...(useCompactMetadata ?
+        [] :
+        [
+            {pointer: stringHashTablePtr, byteLength: stringHashTableSize * 4},
+            {pointer: contentHashTablePtr, byteLength: contentHashTableSize * 4},
+        ]),
+    // The complete fused parse has finished growing/encoding its content.
+    // Only unused capacity is retired; media and content still own every
+    // byte before encodedContentBytes until their callback finishes.
+    ...(useCompactMetadata && retiredContentOffset < contentCapacity ?
+        [{pointer: contentOutPtr + retiredContentOffset, byteLength: contentCapacity - retiredContentOffset}] :
+        []),
+    // The final key plan exposes only the interned prefix. Escaped-key decode
+    // has also finished using the spare interner bytes by this point.
+    ...(useCompactMetadata && retiredStringOffset < stringsCapacity ?
+        [{pointer: stringsPtr + retiredStringOffset, byteLength: stringsCapacity - retiredStringOffset}] :
+        []),
 ] :
 void 0,
             contentMetasPtr: contentMetaPtr,
@@ -1126,7 +1167,7 @@ void 0,
             )),
             heap,
             source: heap.subarray(jsonPtr, jsonPtr + jsonLength),
-            metas: new Uint32Array(wasm.memory.buffer, outPtr, rowCount * META_U32_FIELDS),
+            metas: new Uint32Array(wasm.memory.buffer, outPtr, rowCount * metaFields),
             contentMetas: new Uint32Array(wasm.memory.buffer, contentMetaPtr, rowCount * CONTENT_META_U32_FIELDS),
             contentOutPtr,
             contentUniqueIndexes: new Uint32Array(wasm.memory.buffer, contentUniqueIndexesPtr, rowCount),
@@ -1788,10 +1829,13 @@ function decodeParsedTermRow(source, metas, contentMetas, heap, contentOutPtr, v
  * @param {boolean} reuseExpressionForReadingDecode
  * @param {boolean} lazyGlossaryDecode
  * @param {boolean} mediaHintFastScan
+ * @param {number} [metaFields]
+ * @param {FusedTermStringPlan|null} [fusedStringPlan]
  * @returns {{expression: string, reading: string, expressionBytes?: Uint8Array, readingBytes?: Uint8Array, readingEqualsExpression?: boolean, definitionTags: string, rules: string, score: number, glossaryJson: string, glossaryJsonBytes?: Uint8Array, glossaryMayContainMedia?: boolean, sequence: number|null, termTags: string, termEntryContentHash1?: number, termEntryContentHash2?: number, termEntryContentBytes: Uint8Array}}
  */
-function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, lazyGlossaryDecode, mediaHintFastScan) {
-    const o = i * META_U32_FIELDS;
+function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, i, copyContentBytes, includeContentMetadata, reuseExpressionForReadingDecode, lazyGlossaryDecode, mediaHintFastScan, metaFields = META_U32_FIELDS, fusedStringPlan = null) {
+    const o = i * metaFields;
+    const compactMetadata = metaFields === FUSED_META_U32_FIELDS;
     const c = i * CONTENT_META_U32_FIELDS;
     const expressionStart = metas[o + 0];
     const expressionLength = metas[o + 1];
@@ -1812,14 +1856,17 @@ function decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOu
     const reading = reuseExpressionReading ?
         expression :
         (typeof readingBytes === 'undefined' ? decodeJsonStringToken(source, readingStart, readingLength) : '');
-    const score = decodeJsonNumberToken(source, metas[o + 8]);
-    const glossaryStart = metas[o + 9];
-    const glossaryLength = metas[o + 10];
+    const score = compactMetadata && fusedStringPlan !== null ? fusedStringPlan.scoreList[i] : decodeJsonNumberToken(source, metas[o + 8]);
+    const glossaryField = compactMetadata ? 4 : 9;
+    const glossaryStart = metas[o + glossaryField];
+    const glossaryLength = metas[o + glossaryField + 1];
     const glossaryJsonBytes = lazyGlossaryDecode ? source.subarray(glossaryStart, glossaryStart + glossaryLength) : void 0;
     const glossaryJson = lazyGlossaryDecode ? '' : decodeRawToken(source, glossaryStart, glossaryLength);
-    const glossaryMayContainMedia = mediaHintFastScan ? metas[o + 14] === 1 : void 0;
-    const sequenceStart = metas[o + 11];
-    const sequenceValue = sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart);
+    const glossaryMayContainMedia = mediaHintFastScan ? (metas[o + (compactMetadata ? 6 : 14)] & 1) !== 0 : void 0;
+    const sequenceStart = compactMetadata ? U32_NULL : metas[o + 11];
+    const sequenceValue = compactMetadata && fusedStringPlan !== null ?
+        ((metas[o + 6] & FUSED_META_SEQUENCE_NEGATIVE_ZERO) !== 0 ? -0 : fusedStringPlan.sequenceList[i]) :
+        (sequenceStart === U32_NULL ? -1 : decodeJsonSequenceToken(source, sequenceStart));
     const sequence = version >= 3 && sequenceValue >= 0 ? sequenceValue : null;
     let termEntryContentHash1;
     let termEntryContentHash2;
@@ -2086,9 +2133,12 @@ export async function parseTermBankWithWasmColumnChunks(contentBytes, version, o
         options.preloadedSource ?? null,
         experiments,
         options.validateGlossaryTypes === true && version >= 3,
+        options.compactFusedMetadata !== false,
     );
     const bufferSetupMs = Math.max(0, Date.now() - tBufferSetupStart);
     const {contentOutPtr, contentUniqueCount, rowCount, metaCapacity, contentCapacity} = parsed;
+    const metaFields = parsed.metaFields ?? META_U32_FIELDS;
+    const mediaHintField = metaFields === FUSED_META_U32_FIELDS ? 6 : 14;
     const normalizedChunkSize = options.singleChunk === true ?
         Math.max(1, rowCount) :
         (Number.isFinite(chunkSize) ? Math.max(1, Math.trunc(chunkSize)) : DEFAULT_ROW_CHUNK_SIZE);
@@ -2227,7 +2277,7 @@ null :
     const source = parsed.wasm === null ? parsed.source : heap.subarray(parsed.jsonPtr, parsed.jsonPtr + parsed.jsonLength);
     const metas = parsed.wasm === null ?
         parsed.metas :
-        new Uint32Array(parsed.wasm.memory.buffer, parsed.metasPtr, rowCount * META_U32_FIELDS);
+        new Uint32Array(parsed.wasm.memory.buffer, parsed.metasPtr, rowCount * metaFields);
     const contentMetas = parsed.wasm === null ?
         parsed.contentMetas :
         new Uint32Array(parsed.wasm.memory.buffer, parsed.contentMetasPtr, rowCount * CONTENT_META_U32_FIELDS);
@@ -2344,10 +2394,10 @@ null :
             const needsRowProjection = !projectMediaHintsOnly || mediaHintFastScan;
             const tRowDecodeStart = needsRowProjection ? Date.now() : 0;
             for (let sourceIndex = start, i = 0; needsRowProjection && sourceIndex < end; ++sourceIndex, ++i) {
-                const o = sourceIndex * META_U32_FIELDS;
+                const o = sourceIndex * metaFields;
                 // Fused columns already contain the final term fields. Only
                 // hinted media rows need JavaScript projection in this mode.
-                if (projectMediaHintsOnly && metas[o + 14] !== 1) { continue; }
+                if (projectMediaHintsOnly && (metas[o + mediaHintField] & 1) === 0) { continue; }
                 const c = sourceIndex * CONTENT_META_U32_FIELDS;
                 if (nativeStringPlan === null) {
                     if (planBuilder === null) {
@@ -2433,13 +2483,13 @@ null :
                     contentHash1List[i] = contentMetas[c + 2] >>> 0;
                     contentHash2List[i] = contentMetas[c + 3] >>> 0;
                 }
-                if (mediaHintFastScan && metas[o + 14] === 1) {
+                if (mediaHintFastScan && (metas[o + mediaHintField] & 1) !== 0) {
                     const uniqueIndex = contentUniqueIndexes[sourceIndex];
                     if (seenMediaContent === null || uniqueIndex >= seenMediaContent.length || seenMediaContent[uniqueIndex] === 0) {
                         if (seenMediaContent !== null && uniqueIndex < seenMediaContent.length) { seenMediaContent[uniqueIndex] = 1; }
                         mediaRows.push({
                             index: i,
-                            row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true),
+                            row: decodeParsedTermRowMinimal(source, metas, contentMetas, heap, contentOutPtr, version, sourceIndex, false, true, true, true, true, metaFields, fusedStringPlan),
                         });
                     }
                 }
@@ -2627,7 +2677,7 @@ null :
         chunkDispatchMs,
         rowCount,
         metaCapacity,
-        metaAllocatedBytes: metaCapacity * META_U32_FIELDS * 4,
+        metaAllocatedBytes: metaCapacity * metaFields * 4,
         encodedContentBytes: parsed.encodedContentBytes,
         contentCapacity,
         initialContentBytesPerRow: parsed.initialContentBytesPerRow,
