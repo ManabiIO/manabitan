@@ -1,5 +1,15 @@
 # Codex instructions: import optimization experiments
 
+## November 26, 2026: index setup coverage and frozen screen
+
+[PR #940](https://github.com/ManabiIO/manabitan/pull/940), head `afebf0a84057397afeffaa2c6b80b5c5563c46eb`, owns the runtime change that skips 23 redundant import-start index statements when secondary indexes are disabled. It was published concurrently before [PR #946](https://github.com/ManabiIO/manabitan/pull/946). The latter is now a test follow-up to #940: its runtime bytes match the owner exactly, and it adds only the missing real-SQLite partial-index-drop and transaction-start failure/retry cases. The owner's four tests plus these two pass, as do scoped lint and strict TypeScript. The original published implementation remains in the merge ancestry; it is not a second runtime candidate.
+
+The original #946 acquisition remains frozen at `bfc31cc07a805238f57ba2411a8aee4b593c42b3`, against `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`, in [run 45862169149](https://github.com/ManabiIO/manabitan/actions/runs/45862169149). Its one-shot workflow is retained for provenance and does not run again on this consolidation. Local Chromium failed before extension loading because the container rejected its process-singleton socket with `EPERM`; no local import timing exists.
+
+Both original JMdict hosts completed all 26 prescribed observations, including six timed pairs, two identical-code control pairs, separate exhaustive-media checks, and four memory observations. Independent raw-receipt and memory audits pass. Paired medians were -4.240% and -4.192%, with 5/6 faster pairs on each host, but both descriptive intervals include zero and the identical-code controls drifted materially. The elapsed benefit remains unqualified. These are observations of the original frozen implementation, not measurements of the current follow-up head or the owner's exact package.
+
+The original Jitendex and VNDB cells failed their first warmup receipt checks on both unchanged baseline A and candidate B, before any timed pair. Jitendex's observer expected a 512 MiB image-projection policy after production moved to 1 GiB; [PR #950](https://github.com/ManabiIO/manabitan/pull/950) owns that repair. VNDB's historical observer required 129–131 aligned 4096-byte SAH allocation units, while both current imports produced the same 37-unit active file. Imports, sampled content/media, and restart checks succeeded, but those failed cohorts remain failed and provide no timing or memory qualification. Any prospective observer policy must be explicit, source-bound, and independently tested; it must not relabel these acquisitions.
+
 ## Goal, baseline and rules
 
 Qualify the implemented default-off experiments in `ManabiIO/manabitan`. Optimize full dictionary import completion time first and lookup latency second. Memory, extension package size and stored dictionary size are non-regression gates, not resources to spend freely for throughput. Do not tune worker counts, batch sizes, cache capacities, compression levels or dictionary-specific thresholds.

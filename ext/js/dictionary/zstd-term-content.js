@@ -453,6 +453,24 @@ export class TermContentCompressionPool {
     }
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * @returns {Promise<Uint8Array>}
+ * @throws {Error} If the dictionary cannot be loaded or is empty.
+ */
+async function loadTermContentZstdDictionary() {
+    const response = await fetch(new URL('../../lib/zstd-dicts/jmdict.zdict', import.meta.url))
+    if (!response.ok) {
+        throw new Error(`Failed to load zstd dictionary: ${response.status}`)
+    }
+    const dictionary = new Uint8Array(await response.arrayBuffer())
+    if (dictionary.byteLength === 0) {
+        throw new Error('Loaded zstd dictionary is empty')
+    }
+    return dictionary
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * @returns {Promise<void>}
  */
@@ -463,15 +481,17 @@ export async function initializeTermContentZstd() {
         return;
     }
     initializePromise = (async () => {
-        await init(new URL('../../lib/zstd.wasm', import.meta.url).href);
-        const response = await fetch(new URL('../../lib/zstd-dicts/jmdict.zdict', import.meta.url));
-        if (!response.ok) {
-            throw new Error(`Failed to load zstd dictionary: ${response.status}`);
-        }
-        const loadedJmdictDict = new Uint8Array(await response.arrayBuffer());
-        if (loadedJmdictDict.byteLength === 0) {
-            throw new Error('Loaded zstd dictionary is empty');
-        }
+        /* eslint-disable @stylistic/semi */
+        // The immutable assets are independent. Join both loads before publishing
+        // contexts or allowing a retry, including when either load fails first.
+        const [moduleResult, dictionaryResult] = await Promise.allSettled([
+            init(new URL('../../lib/zstd.wasm', import.meta.url).href),
+            loadTermContentZstdDictionary(),
+        ])
+        if (moduleResult.status === 'rejected') { throw moduleResult.reason }
+        if (dictionaryResult.status === 'rejected') { throw dictionaryResult.reason }
+        const loadedJmdictDict = dictionaryResult.value
+        /* eslint-enable @stylistic/semi */
         const nextCctx = Number(createCCtx());
         if (nextCctx === 0) {
             throw new Error('Failed to create zstd compression context');
