@@ -2532,9 +2532,10 @@ static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t lengt
         if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
             (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
         for (uint32_t j = 0u; j < width - 1u; ++j) {
-            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
+            const uint8_t continuation = bytes[i + j];
+            if ((continuation & 0xc0u) != 0x80u) { return 0; }
+            output[i + j] = continuation;
         }
-        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
         i += width - 1u;
     }
     return 1;
