@@ -33,7 +33,7 @@ vi.mock('../ext/js/dictionary/zstd-term-content.js', async (importOriginal) => (
         envelopeMs: 0,
         wrapped: false,
     })),
-    decompressTermContentZstd: (/** @type {Uint8Array} */ bytes) => bytes.slice(),
+    decompressTermContentZstd: (/** @type {Uint8Array} */ bytes) => new Uint8Array(bytes),
 }))
 
 /**
