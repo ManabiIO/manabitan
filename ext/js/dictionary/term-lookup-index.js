@@ -282,7 +282,7 @@ export function encodePersistedTermLookupIndex(rows) {
 }
 
 /**
- * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, keyCount?: number, expressionKeys: Uint32Array, readingKeys: Uint32Array, readingEqualsExpressionList?: boolean[]|Uint8Array, sequenceValues: Int32Array|Float64Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
+ * @param {{keyBytes: Uint8Array, keyOffsets: Uint32Array, keyCount?: number, expressionKeys: Uint16Array|Uint32Array, readingKeys: Uint32Array, readingEqualsExpressionList?: boolean[]|Uint8Array, sequenceValues: Int32Array|Float64Array, readingPostingCount: number, keyHashes?: Uint32Array}} plan
  * @param {boolean} [directArena=false]
  * @returns {Uint8Array}
  * @throws {RangeError} If one chunk cannot represent all interned keys.

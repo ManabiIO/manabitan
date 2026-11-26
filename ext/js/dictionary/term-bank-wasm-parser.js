@@ -68,6 +68,9 @@ const OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES = 512 * 1024 * 1024;
 const LOW_MEMORY_PARALLEL_SOURCE_LIMIT_BYTES = 64 * 1024 * 1024;
 const MAX_WASM32_BUFFER_BYTES = 0xffffffff;
 const MAX_WASM_MEDIA_BATCH_BYTES = 4 * 1024 * 1024;
+// Match the source-media packer's existing maximum relative range overhead.
+// eslint-disable-next-line @stylistic/semi
+const MAX_WASM_MEDIA_INPUT_GAP_RATIO = 1 / 8
 const CRC_REUSE_MIN_SOURCE_BYTES = 4 * 1024 * 1024;
 const CRC_REUSE_MIN_COMPRESSION_RATIO = 32;
 const U32_NULL = 0xffffffff;
@@ -411,7 +414,11 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
 
     const wasm = await getWasm();
     wasm.wasm_reset_heap();
-    const inputPtr = allocateWasmBuffer(wasm, compressedBytes, 'ZIP media input');
+    /* eslint-disable @stylistic/semi */
+    const sharedInput = retainDecodedSources ? null : getSharedMediaInputRange(sources, compressedBytes, wasm.memory.buffer)
+    const inputLength = sharedInput === null ? compressedBytes : sharedInput.byteLength
+    const inputPtr = allocateWasmBuffer(wasm, inputLength, 'ZIP media input')
+    /* eslint-enable @stylistic/semi */
     const inputOffsetsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media input offset');
     const compressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media compressed length');
     const uncompressedLengthsPtr = allocateWasmBuffer(wasm, sources.length * 4, 'ZIP media uncompressed length');
@@ -426,11 +433,19 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
     const uncompressedLengths = new Uint32Array(wasm.memory.buffer, uncompressedLengthsPtr, sources.length);
     const compressionMethods = new Uint32Array(wasm.memory.buffer, compressionMethodsPtr, sources.length);
     const signatures = new Uint32Array(wasm.memory.buffer, signaturesPtr, sources.length);
+    // eslint-disable-next-line @stylistic/semi
+    if (sharedInput !== null) { input.set(sharedInput, inputPtr) }
     let inputOffset = 0;
     for (let i = 0; i < sources.length; ++i) {
         const source = sources[i];
-        input.set(source.bytes, inputPtr + inputOffset);
-        inputOffsets[i] = inputOffset;
+        /* eslint-disable @stylistic/semi */
+        if (sharedInput === null) {
+            input.set(source.bytes, inputPtr + inputOffset)
+            inputOffsets[i] = inputOffset
+        } else {
+            inputOffsets[i] = source.bytes.byteOffset - sharedInput.byteOffset
+        }
+        /* eslint-enable @stylistic/semi */
         compressedLengths[i] = source.compressedSize;
         uncompressedLengths[i] = source.uncompressedSize;
         compressionMethods[i] = source.compressionMethod;
@@ -440,7 +455,7 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
     const startedAt = safePerformance.now();
     const outputLength = wasm.inflate_zip_media_batch(
         inputPtr,
-        compressedBytes,
+        inputLength,
         inputOffsetsPtr,
         compressedLengthsPtr,
         uncompressedLengthsPtr,
@@ -474,6 +489,34 @@ async function processCompressedZipMediaBatchWasm(sources, retainDecodedSources)
     const decoded = sources.map((source, index) => output.slice(outputOffsets[index], outputOffsets[index] + source.uncompressedSize));
     return {sources: decoded, inflateMs, compressedBytes, uncompressedBytes};
 }
+
+/* eslint-disable @stylistic/semi */
+/**
+ * Raw media batches borrow payload views into one bounded archive range. Copy
+ * that range once when its gaps are small, preserving each payload's exact
+ * bounds and the existing input arena limit. Other layouts keep compact copies.
+ * @param {CompressedTermBankSource[]} sources
+ * @param {number} compressedBytes
+ * @param {ArrayBuffer} outputBuffer
+ * @returns {Uint8Array<ArrayBuffer>|null}
+ */
+function getSharedMediaInputRange(sources, compressedBytes, outputBuffer) {
+    if (sources.length < 2) { return null }
+    const first = sources[0].bytes
+    const buffer = first.buffer
+    if (!(buffer instanceof ArrayBuffer) || buffer === outputBuffer || Reflect.get(buffer, 'resizable') === true) { return null }
+    const start = first.byteOffset
+    let end = start + first.byteLength
+    for (let i = 1; i < sources.length; ++i) {
+        const bytes = sources[i].bytes
+        if (bytes.buffer !== buffer || bytes.byteOffset < end) { return null }
+        end = bytes.byteOffset + bytes.byteLength
+    }
+    const length = end - start
+    if (length > MAX_WASM_MEDIA_BATCH_BYTES || length - compressedBytes > compressedBytes * MAX_WASM_MEDIA_INPUT_GAP_RATIO) { return null }
+    return new Uint8Array(buffer, start, length)
+}
+/* eslint-enable @stylistic/semi */
 
 /** @returns {Promise<void>} */
 export async function initializeTermBankWasmParser() {
@@ -1389,7 +1432,7 @@ function createNativeTermStringPlanScratch(wasm, rowCapacity, stringsCapacity) {
  * @param {number} rowStart
  * @param {number} rowCount
  * @param {ReturnType<typeof createNativeTermStringPlanScratch>} scratch
- * @returns {(import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array})|null}
+ * @returns {(import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan & {stringOffsets: Uint32Array, expressionIndexes: Uint32Array})|null}
  * @throws {Error}
  */
 function buildNativeTermStringPlan(wasm, jsonPtr, metasPtr, rowStart, rowCount, scratch) {
@@ -1554,6 +1597,7 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
     const memory = wasm.memory.buffer;
     if (
         !(sequenceList instanceof Int32Array) ||
+        !(plan.expressionIndexes instanceof Uint32Array) ||
         plan.stringLengths.buffer !== memory ||
         plan.stringOffsets.buffer !== memory ||
         plan.stringHashes?.buffer !== memory ||
@@ -1639,7 +1683,8 @@ allocator(n, 'segmented lookup compaction'));
 function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, indexScratch, scratch) {
     const compact = wasm.compact_term_lookup_keys;
     const memory = wasm.memory.buffer;
-    if (!(sequences instanceof Int32Array) || typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
+    if (!(sequences instanceof Int32Array) || !(plan.expressionIndexes instanceof Uint32Array) ||
+    typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
     plan.stringsBuffer.buffer !== memory || plan.stringLengths.buffer !== memory ||
     plan.stringOffsets.buffer !== memory || plan.expressionIndexes.buffer !== memory ||
     plan.readingIndexes.buffer !== memory || equals.buffer !== memory) { return null; }
@@ -1688,14 +1733,16 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
         if (bytes === null) { return null; }
         /* eslint-disable @stylistic/semi */
         // The owned v7 base already contains the compact lengths immediately
-        // after its padded key arena. Reuse that column; offsets are optional
-        // and can be reconstructed from lengths if a later split needs them.
+        // after its padded key arena, followed by the expression IDs. Reuse
+        // both owned columns; optional offsets can be reconstructed for splits.
         const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(length / 4) * 4, keys)
         const ownedPlan = {stringLengths,
             stringHashes: new Uint32Array(runPlan.stringHashes),
             // v7: 16-byte container header, then the 32-byte base header.
             stringsBuffer: bytes.subarray(48, 48 + length),
-            expressionIndexes: new Uint32Array(runPlan.expressionIndexes),
+            expressionIndexes: new Uint16Array(bytes.buffer, stringLengths.byteOffset + stringLengths.byteLength, rows),
+            // The persisted reading column uses a sentinel for equal readings;
+            // the plan still requires their actual interned string IDs.
             readingIndexes: new Uint32Array(runPlan.readingIndexes)}
         indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan})
         /* eslint-enable @stylistic/semi */

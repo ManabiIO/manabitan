@@ -2219,7 +2219,7 @@ export class TermRecordOpfsStore {
             stableStringOffsets instanceof Uint32Array &&
             stableStringLengths instanceof Uint16Array &&
             stableStringsBuffer instanceof Uint8Array &&
-            stableExpressionIndexes instanceof Uint32Array &&
+            (stableExpressionIndexes instanceof Uint16Array || stableExpressionIndexes instanceof Uint32Array) &&
             stableReadingIndexes instanceof Uint32Array &&
             stableStringOffsets.length === stableStringLengths.length &&
             stableExpressionIndexes.length >= count &&
