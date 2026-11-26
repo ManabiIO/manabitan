@@ -117,6 +117,44 @@ describe('direct generation media index writer', () => {
         expect(reads).toBe(initialReads)
     })
 
+    test.each([
+        'img/cc01.webp',
+        'img/cc+1.webp',
+        'img/cc1.0.webp',
+        'img/cc1e0.webp',
+        'img/cc 1.webp',
+        'img/cc1 .webp',
+        'img/cc0x1.webp',
+        'img/cc１.webp',
+        'img/cc1.WebP',
+        'img/cc1.webp.webp',
+        'other/cc1.webp',
+        'img/cc2.webp',
+        'img/cc4294967297.webp',
+    ])('rejects a different spelling or identity at write: %s', (path) => {
+        const writer = createGenerationMediaIndexWriter(1, () => 'img/cc1.webp')
+        if (writer === null) { throw new Error('Expected index writer') }
+        expect(writer.write(0, path, 0, 4, 4, 0, 0)).toBe(false)
+        expect(writer.write(0, 'img/cc1.webp', 0, 4, 4, 0, 0)).toBe(false)
+        expect(writer.finish(4)).toBeNull()
+    })
+
+    test.each([null, undefined, 1, true, Object('img/cc1.webp'), {startsWith() { throw new Error('Must not inspect non-string paths') }}])('rejects a non-string write path without coercion: %s', (path) => {
+        const writer = createGenerationMediaIndexWriter(1, () => 'img/cc1.webp')
+        if (writer === null) { throw new Error('Expected index writer') }
+        expect(writer.write(0, /** @type {string} */ (/** @type {unknown} */ (path)), 0, 4, 4, 0, 0)).toBe(false)
+        expect(writer.finish(4)).toBeNull()
+    })
+
+    test('retains the final checked callback identity when an early read changes', () => {
+        let calls = 0
+        const writer = createGenerationMediaIndexWriter(1, () => ++calls < 3 ? 'img/cc1.webp' : 'img/cc4294967295.webp')
+        if (writer === null) { throw new Error('Expected index writer') }
+        expect(writer.write(0, 'img/cc4294967295.webp', 0, 4, 4, 0, 123)).toBe(true)
+        expect(writer.finish(4)).toEqual(createGenerationMediaIndex([{...range('img/cc4294967295.webp'), signature: 123}], 4))
+        expect(calls).toBe(3)
+    })
+
     test.each(['wrong-path', 'replaced-namespace', 'duplicate', 'missing', 'fractional-index', 'negative-index', 'past-index'])('does not publish a %s completion', (mode) => {
         const paths = ['img/cc1.webp', 'img/cc2.webp']
         const writer = createGenerationMediaIndexWriter(paths.length, (i) => paths[i])
