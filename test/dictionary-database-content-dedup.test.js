@@ -2567,6 +2567,7 @@ describe('DictionaryDatabase artifact term content dedup import', () => {
         const find = Reflect.get(harness.database, '_findMatchingTermEntryContentMeta').bind(harness.database)
         const findBatch = Reflect.get(harness.database, '_findMatchingPersistedTermEntryContentMetaBatch').bind(harness.database)
         const primary = getMeta(harness.database, 10, 20)
+        if (typeof primary === 'undefined') { throw new Error('Expected published term content metadata') }
         const duplicate = find(10, 20, Uint8Array.from(original))
         const different = find(10, 20, Uint8Array.from(collision))
         const compared = findBatch([
