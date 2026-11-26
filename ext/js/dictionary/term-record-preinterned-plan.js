@@ -525,18 +525,15 @@ function compactValidatedTermRecordPlan(plan, start, count, remapScratch, readin
 function hasTermRecordPreinternedPlanShape(plan, count) {
     if (plan === null || !Number.isSafeInteger(count) || count < 0) { return false; }
     const {stringLengths, stringOffsets, stringHashes, stringsBuffer, expressionIndexes, readingIndexes} = plan;
-    if (
-        !(stringLengths instanceof Uint16Array) ||
-        !(stringsBuffer instanceof Uint8Array) ||
-        !(expressionIndexes instanceof Uint16Array || expressionIndexes instanceof Uint32Array) ||
-        !(readingIndexes instanceof Uint32Array) ||
-        expressionIndexes.length < count || readingIndexes.length < count ||
-        (stringHashes !== void 0 && (!(stringHashes instanceof Uint32Array) || stringHashes.length !== stringLengths.length)) ||
-        (stringOffsets !== void 0 && (!(stringOffsets instanceof Uint32Array) || stringOffsets.length !== stringLengths.length))
-    ) {
-        return false;
-    }
-    return true;
+    return (
+        stringLengths instanceof Uint16Array &&
+        stringsBuffer instanceof Uint8Array &&
+        (expressionIndexes instanceof Uint16Array || expressionIndexes instanceof Uint32Array) &&
+        readingIndexes instanceof Uint32Array &&
+        expressionIndexes.length >= count && readingIndexes.length >= count &&
+        (stringHashes === void 0 || (stringHashes instanceof Uint32Array && stringHashes.length === stringLengths.length)) &&
+        (stringOffsets === void 0 || (stringOffsets instanceof Uint32Array && stringOffsets.length === stringLengths.length))
+    );
 }
 
 /**
