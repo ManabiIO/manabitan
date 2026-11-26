@@ -1,0 +1,33 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "outputPath": "/tmp/manabitan-4362/vndb-evidence/work-parity.json",
+  "fixture": {
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "batches": 144,
+    "rangeReadCount": 144,
+    "rangeReadBytes": 195649882,
+    "sourcesSha256": "339c94876bf129cf0f2ff75a2d1f32d52cce399cede3da8607935e7849872c73"
+  },
+  "work": {
+    "A": {
+      "copies": 146570,
+      "copiedBytes": 188864129,
+      "maxCopiedSpanBytes": 4269,
+      "maxDestinationBufferBytes": 1638400
+    },
+    "B": {
+      "copies": 144,
+      "copiedBytes": 195643218,
+      "maxCopiedSpanBytes": 1537894,
+      "maxDestinationBufferBytes": 1703936
+    },
+    "C": {
+      "copies": 146570,
+      "copiedBytes": 188864129,
+      "maxCopiedSpanBytes": 4269,
+      "maxDestinationBufferBytes": 1638400
+    }
+  }
+}
