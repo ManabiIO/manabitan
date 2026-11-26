@@ -133,6 +133,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {boolean} sortedOffsets
  * @property {number} minimumOffset
  * @property {number} maximumOffset
+ * @property {Promise<unknown>|null} pendingCompletion
  */
 
 /**
@@ -6523,7 +6524,7 @@ void 0 :
                 continue;
             }
             const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
-            if (typeof inFlightSource !== 'undefined') {
+            if (typeof inFlightSource !== 'undefined' && !('completion' in inFlightSource)) {
                 if (
                     this._termContentBytesEqualSpan(
                         contentBytes,
@@ -6622,7 +6623,7 @@ void 0 :
                         continue;
                     }
                     const inFlightSource = this._findInFlightTermContentSource(meta.offset, meta.length, meta.dictName);
-                    if (typeof inFlightSource !== 'undefined') {
+                    if (typeof inFlightSource !== 'undefined' && !('completion' in inFlightSource)) {
                         if (
                             this._termContentBytesEqualSpan(
                                 contentBytes,
@@ -6713,7 +6714,7 @@ void 0 :
      * @param {number} offset
      * @param {number} length
      * @param {string} dictName
-     * @returns {{buffer: Uint8Array, offset: number, length: number}|undefined}
+     * @returns {{buffer: Uint8Array, offset: number, length: number}|{completion: Promise<unknown>}|undefined}
      */
     _findInFlightTermContentSource(offset, length, dictName) {
         for (const batch of this._inFlightTermContentSourceBatches) {
@@ -6736,6 +6737,9 @@ void 0 :
                 if (candidateOffset !== offset || batch.lengths[i] !== length) { continue; }
                 const candidateDictName = Array.isArray(batch.dictNames) ? batch.dictNames[i] : batch.dictNames;
                 if (candidateDictName !== dictName) { continue; }
+                /* eslint-disable @stylistic/semi */
+                if (batch.pendingCompletion !== null) { return {completion: batch.pendingCompletion} }
+                /* eslint-enable @stylistic/semi */
                 if (batch.contentSpans === null) {
                     const buffer = batch.contentBytes[i];
                     return {buffer, offset: 0, length: buffer.byteLength};
@@ -6928,7 +6932,7 @@ void 0 :
      * @param {string|string[]} pendingResolvedDictNames
      * @param {Uint8Array[]} pendingContentBytes
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {() => void}
+     * @returns {{unregister: () => void, releaseSource: (completion: Promise<unknown>) => void}}
      * @throws {Error} If source metadata is inconsistent or aliases an active reservation.
      */
     _registerInFlightTermContentSources(
@@ -7015,6 +7019,7 @@ void 0 :
                 );
             }
         }
+        /** @type {InFlightTermContentSourceBatch} */
         const batch = {
             offsets: pendingOffsets,
             lengths: pendingLengths,
@@ -7024,11 +7029,21 @@ void 0 :
             sortedOffsets,
             minimumOffset,
             maximumOffset,
+            pendingCompletion: null,
         };
         this._inFlightTermContentSourceBatches.add(batch);
-        return () => {
-            this._inFlightTermContentSourceBatches.delete(batch);
-        };
+        /* eslint-disable @stylistic/semi */
+        return {
+            unregister: () => { this._inFlightTermContentSourceBatches.delete(batch) },
+            releaseSource: (completion) => {
+                // The reservation stays visible after the parser reuses its
+                // heap. Readers must wait for these exact bytes to persist.
+                batch.pendingCompletion = completion
+                batch.contentBytes = []
+                batch.contentSpans = null
+            },
+        }
+        /* eslint-enable @stylistic/semi */
     }
 
     /**
@@ -7038,6 +7053,10 @@ void 0 :
      * @returns {Promise<Uint8Array|null>}
      */
     async _readTermEntryContentBytes(contentOffset, contentLength, contentDictName) {
+        /* eslint-disable @stylistic/semi */
+        const source = this._findInFlightTermContentSource(contentOffset, contentLength, contentDictName)
+        if (typeof source !== 'undefined' && 'completion' in source) { await source.completion }
+        /* eslint-enable @stylistic/semi */
         return await this._termContentBlockStore.read(contentOffset, contentLength, contentDictName);
     }
 
@@ -7048,6 +7067,10 @@ void 0 :
      * @returns {Promise<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>}
      */
     async _readTermEntryContentBytesDetailed(contentOffset, contentLength, contentDictName) {
+        /* eslint-disable @stylistic/semi */
+        const source = this._findInFlightTermContentSource(contentOffset, contentLength, contentDictName)
+        if (typeof source !== 'undefined' && 'completion' in source) { await source.completion }
+        /* eslint-enable @stylistic/semi */
         return await this._termContentBlockStore.readDetailed(contentOffset, contentLength, contentDictName);
     }
 
@@ -7056,6 +7079,23 @@ void 0 :
      * @returns {Promise<Array<{status: 'ok', bytes: Uint8Array}|{status: 'temporarilyUnavailable'|'corrupt', reason: string}>>}
      */
     async _readTermEntryContentBytesDetailedBatch(requests) {
+        /* eslint-disable @stylistic/semi */
+        if (this._inFlightTermContentSourceBatches.size > 0) {
+            const pending = new Set()
+            for (const {contentOffset, contentLength, contentDictName} of requests) {
+                const source = this._findInFlightTermContentSource(contentOffset, contentLength, contentDictName)
+                if (typeof source !== 'undefined' && 'completion' in source) { pending.add(source.completion) }
+            }
+            if (pending.size > 0) {
+                const settled = await Promise.allSettled(pending)
+                const errors = settled
+                    .filter((result) => result.status === 'rejected')
+                    .map((result) => toError(result.reason))
+                if (errors.length === 1) { throw errors[0] }
+                if (errors.length > 1) { throw new AggregateError(errors, 'Multiple term content reservations failed') }
+            }
+        }
+        /* eslint-enable @stylistic/semi */
         if (Object.hasOwn(this, '_readTermEntryContentBytesDetailed')) {
             const settled = await Promise.allSettled(requests.map(({contentOffset, contentLength, contentDictName}) => (
                 this._readTermEntryContentBytesDetailed(contentOffset, contentLength, contentDictName)
@@ -8418,17 +8458,22 @@ this._readTermContentSignature(
                     null;
                 /** @type {Promise<void>|null} */
                 let pendingRecordAppend = null;
-                /** @type {(() => void)|null} */
-                let unregisterInFlightContentSources = null;
+                /* eslint-disable @stylistic/semi */
+                /** @type {ReturnType<DictionaryDatabase['_registerInFlightTermContentSources']>|null} */
+                let inFlightContentSources = null
                 let borrowedContentReleased = false;
-                const releaseInFlightContentSources = () => {
-                    unregisterInFlightContentSources?.();
-                    unregisterInFlightContentSources = null;
+                const releaseBorrowedContent = () => {
                     if (!borrowedContentReleased) {
-                        borrowedContentReleased = true;
-                        chunk.releaseBorrowedContent?.();
+                        borrowedContentReleased = true
+                        chunk.releaseBorrowedContent?.()
                     }
-                };
+                }
+                const releaseInFlightContentSources = () => {
+                    inFlightContentSources?.unregister()
+                    inFlightContentSources = null
+                    releaseBorrowedContent()
+                }
+                /* eslint-enable @stylistic/semi */
                 try {
                     if (stagedContentMetadata === null) {
                         const tContentMetadataPrepareStart = safePerformance.now();
@@ -8487,7 +8532,7 @@ this._readTermContentSignature(
                         /* eslint-enable @stylistic/semi */
                     }
                     if (earlyContentPersistence !== null) {
-                        unregisterInFlightContentSources = this._registerInFlightTermContentSources(
+                        inFlightContentSources = this._registerInFlightTermContentSources(
                             pendingOffsets,
                             pendingLengths,
                             pendingResolvedDictNames,
@@ -8535,6 +8580,18 @@ this._readTermContentSignature(
                             resolvedContentDictNames,
                             importMetrics,
                         );
+                        /* eslint-disable @stylistic/semi */
+                        // Publication and record preparation have finished all
+                        // synchronous reads of the parser's content. Once the
+                        // compressor has gathered it, retain only a barrier to
+                        // the already-started write before releasing that heap.
+                        const sourceRelease = typeof chunk.releaseBorrowedContent === 'function' ?
+                            earlyContentPersistence.sourceConsumed.then(() => {
+                                inFlightContentSources?.releaseSource(earlyContentPersistence.completion)
+                                releaseBorrowedContent()
+                            }, () => {}) :
+                            Promise.resolve()
+                        /* eslint-enable @stylistic/semi */
                         // Prepare the record append before creating the derived
                         // promise so both operations can be joined immediately.
                         const measuredContentCompletion = earlyContentPersistence.completion
@@ -8546,6 +8603,7 @@ this._readTermContentSignature(
                         const concurrentResults = await Promise.allSettled([
                             measuredContentCompletion,
                             pendingRecordAppend,
+                            sourceRelease,
                         ]);
                         const concurrentErrors = concurrentResults
                             .filter((result) => result.status === 'rejected')
@@ -9507,7 +9565,7 @@ null :
      * import. A null result means the caller must use normal persistence.
      * @param {string} dictionary
      * @param {{buffer: Uint8Array, offsets: Uint32Array, lengths: Uint32Array}|null} pendingContentSpans
-     * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
+     * @returns {{storage: Promise<{pendingOffsets: Float64Array, pendingLengths: Uint32Array, pendingResolvedDictNames: string}>, sourceConsumed: Promise<void>, completion: Promise<{packMs: number, compressMs: number, envelopeMs: number, referenceMs: number, opfsAppendMs: number, initialSelectionSavingsMiss: boolean}>, initialSelection: boolean}|null}
      */
     _tryBeginPersistArtifactTermContent(dictionary, pendingContentSpans) {
         if (
@@ -9542,7 +9600,9 @@ null :
         }));
         void storage.catch(() => {});
         void completion.catch(() => {});
-        return {storage, completion, initialSelection: operation.initialSelection};
+        /* eslint-disable @stylistic/semi */
+        return {storage, sourceConsumed: operation.sourceConsumed, completion, initialSelection: operation.initialSelection}
+        /* eslint-enable @stylistic/semi */
     }
 
     /**
