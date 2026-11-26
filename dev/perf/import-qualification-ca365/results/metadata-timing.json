@@ -1,0 +1,1181 @@
+{
+    "schemaVersion": 1,
+    "checkedAtUtc": "2026-11-25T16:32:08.957887+00:00",
+    "repository": "ManabiIO/manabitan",
+    "qualificationPr": 918,
+    "sourcePr": 831,
+    "runId": 45647030745,
+    "candidate": "metadata-witness",
+    "commits": {
+        "workflow": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770",
+        "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "candidate": "11bf4550a26e98ccc3df1579da7444244fe1e861"
+    },
+    "trees": {
+        "workflow": "46d2bd320df65d0baeee16b40d36d4cb05aac269",
+        "baseline": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+        "candidate": "49ea808e09b3d9ce26c27614c1b49ff9f0466c70"
+    },
+    "protocolSha256": "3d42832a4ddc4036ee844acabfad9515bc282fe0f816a320896b36897d7d0686",
+    "complete": true,
+    "crossHostIntegrityIssues": [],
+    "scheduledObservations": 132,
+    "verifiedObservations": 132,
+    "timedObservations": 108,
+    "passesFrozenTimingScreen": false,
+    "targetDictionary": "jitendex",
+    "crossHost": {
+        "jmdict": {
+            "comparable": true,
+            "bothHostScreensPass": true,
+            "publicLookupRestartAndSampleMediaMatch": true,
+            "releaseMemberBytesMatch": true,
+            "sourceCommitsMatch": true
+        },
+        "jitendex": {
+            "comparable": true,
+            "bothHostScreensPass": false,
+            "publicLookupRestartAndSampleMediaMatch": true,
+            "releaseMemberBytesMatch": true,
+            "sourceCommitsMatch": true
+        },
+        "vndb": {
+            "comparable": true,
+            "bothHostScreensPass": true,
+            "publicLookupRestartAndSampleMediaMatch": true,
+            "releaseMemberBytesMatch": true,
+            "sourceCommitsMatch": true
+        }
+    },
+    "cells": [
+        {
+            "name": "jmdict-host-0",
+            "path": "/workspace/scratch/ca3652ed5eb0/hosted-metadata-timing/jmdict-host-0",
+            "integrityErrors": [],
+            "observationErrors": [],
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            },
+            "auditedAtUtc": "2026-11-25T16:04:53.616178+00:00",
+            "auditPythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+            "auditorSha256": "09df7513d36c0f8b9da6b4beb4925badd944009d9a621e2bd797a03527fa09d4",
+            "candidate": "metadata-witness",
+            "dictionary": "jmdict",
+            "replica": 0,
+            "artifact": {
+                "artifactId": 15039284476,
+                "artifactName": "import-qualification-ca365-metadata-witness-jmdict-0",
+                "artifactSha256": "740f9dfbe1d3dc8a94efc73686ab1b80ed57f5bb68fc47130ee38f0e2c1ee1c3",
+                "artifactBytes": 34400511
+            },
+            "scheduledObservations": 23,
+            "recordedObservations": 23,
+            "verifiedObservations": 23,
+            "complete": true,
+            "pairs": [
+                {
+                    "cohort": 0,
+                    "qualified": true,
+                    "ms": {
+                        "A": 960.5999999999913,
+                        "B": 999.4000000000087,
+                        "C": 955.5999999999913
+                    },
+                    "BvsA": 4.039142202791779,
+                    "BvsC": 4.583507743827742,
+                    "CvsA": -0.520508015823451
+                },
+                {
+                    "cohort": 1,
+                    "qualified": true,
+                    "ms": {
+                        "B": 987.2000000000116,
+                        "C": 1193.6000000000058,
+                        "A": 951.2000000000116
+                    },
+                    "BvsA": 3.784693019343943,
+                    "BvsC": -17.29222520107181,
+                    "CvsA": 25.483599663581913
+                },
+                {
+                    "cohort": 2,
+                    "qualified": true,
+                    "ms": {
+                        "C": 962,
+                        "A": 986.5999999999767,
+                        "B": 994.1000000000058
+                    },
+                    "BvsA": 0.7601864990907536,
+                    "BvsC": 3.3367983367989407,
+                    "CvsA": -2.4934117170056003
+                },
+                {
+                    "cohort": 3,
+                    "qualified": true,
+                    "ms": {
+                        "A": 973.8000000000175,
+                        "C": 994.5999999999767,
+                        "B": 986.1000000000058
+                    },
+                    "BvsA": 1.263093037583496,
+                    "BvsC": -0.8546149205681752,
+                    "CvsA": 2.135962209895137
+                },
+                {
+                    "cohort": 4,
+                    "qualified": true,
+                    "ms": {
+                        "C": 987.3999999999942,
+                        "B": 1000.1000000000058,
+                        "A": 1005.6000000000058
+                    },
+                    "BvsA": -0.5469371519490784,
+                    "BvsC": 1.2862061980972062,
+                    "CvsA": -1.8098647573599358
+                },
+                {
+                    "cohort": 5,
+                    "qualified": true,
+                    "ms": {
+                        "B": 1005.1000000000058,
+                        "A": 986,
+                        "C": 947.1999999999534
+                    },
+                    "BvsA": 1.9371196754569775,
+                    "BvsC": 6.112753378384217,
+                    "CvsA": -3.9350912778951863
+                }
+            ],
+            "medians": {
+                "BvsA": 1.6001063565202367,
+                "BvsC": 2.3115022674480734,
+                "CvsA": -1.1651863865916934
+            },
+            "fasterPairs": {
+                "BvsA": 1,
+                "BvsC": 2
+            },
+            "semanticDigests": {
+                "sample": "ec357a4c55144731e1903bcd9e553d5dceeabe30ea536b520cdfd44a3017503c",
+                "all": "37c8c86f0f6384d235b562bb5fd1cd5aab5bd8f5e82e71fcc810db11964ee85b"
+            },
+            "packageMemberDigests": {
+                "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+                "B": "644c143af9b8002c9f5c89e181190c26a6e6c1b253b97818e0839cb6f5920579"
+            },
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+                "C": "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+            },
+            "memoryQualified": false,
+            "integrityAuditPassed": true
+        },
+        {
+            "name": "jmdict-host-1",
+            "path": "/workspace/scratch/ca3652ed5eb0/hosted-metadata-timing/jmdict-host-1",
+            "integrityErrors": [],
+            "observationErrors": [],
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            },
+            "auditedAtUtc": "2026-11-25T16:08:05.182753+00:00",
+            "auditPythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+            "auditorSha256": "09df7513d36c0f8b9da6b4beb4925badd944009d9a621e2bd797a03527fa09d4",
+            "candidate": "metadata-witness",
+            "dictionary": "jmdict",
+            "replica": 1,
+            "artifact": {
+                "artifactId": 15041450543,
+                "artifactName": "import-qualification-ca365-metadata-witness-jmdict-1",
+                "artifactSha256": "35b5acda8699069b25d6d53e7a173d56d2e69dcbbed8d127f02f609aac5aca4d",
+                "artifactBytes": 34319606
+            },
+            "scheduledObservations": 21,
+            "recordedObservations": 21,
+            "verifiedObservations": 21,
+            "complete": true,
+            "pairs": [
+                {
+                    "cohort": 0,
+                    "qualified": true,
+                    "ms": {
+                        "B": 717,
+                        "A": 740.6999999999534,
+                        "C": 713.2000000000116
+                    },
+                    "BvsA": -3.1996759821729337,
+                    "BvsC": 0.5328098710022822,
+                    "CvsA": -3.7127041987233045
+                },
+                {
+                    "cohort": 1,
+                    "qualified": true,
+                    "ms": {
+                        "C": 723.6999999999534,
+                        "B": 767.8999999999651,
+                        "A": 761.3999999999651
+                    },
+                    "BvsA": 0.8536905700026631,
+                    "BvsC": 6.107503109025081,
+                    "CvsA": -4.951405306016987
+                },
+                {
+                    "cohort": 2,
+                    "qualified": true,
+                    "ms": {
+                        "A": 768.5,
+                        "C": 751.2999999999884,
+                        "B": 732.6000000000349
+                    },
+                    "BvsA": -4.671437865968131,
+                    "BvsC": -2.4890190336688045,
+                    "CvsA": -2.23812621991043
+                },
+                {
+                    "cohort": 3,
+                    "qualified": true,
+                    "ms": {
+                        "C": 740.5,
+                        "A": 737.3999999999069,
+                        "B": 759
+                    },
+                    "BvsA": 2.9292107404523815,
+                    "BvsC": 2.498311951384191,
+                    "CvsA": 0.42039598590908334
+                },
+                {
+                    "cohort": 4,
+                    "qualified": true,
+                    "ms": {
+                        "B": 732.9000000000233,
+                        "C": 735.5,
+                        "A": 729.0999999999767
+                    },
+                    "BvsA": 0.5211905088529312,
+                    "BvsC": -0.35350101971131087,
+                    "CvsA": 0.8777945412184129
+                },
+                {
+                    "cohort": 5,
+                    "qualified": true,
+                    "ms": {
+                        "A": 728.6999999999534,
+                        "B": 753.7000000000698,
+                        "C": 751.1999999999534
+                    },
+                    "BvsA": 3.4307671195441314,
+                    "BvsC": 0.33280085198570397,
+                    "CvsA": 3.0876904075753275
+                }
+            ],
+            "medians": {
+                "BvsA": 0.6874405394277971,
+                "BvsC": 0.43280536149399307,
+                "CvsA": -0.9088651170006734
+            },
+            "fasterPairs": {
+                "BvsA": 2,
+                "BvsC": 2
+            },
+            "semanticDigests": {
+                "sample": "ec357a4c55144731e1903bcd9e553d5dceeabe30ea536b520cdfd44a3017503c"
+            },
+            "packageMemberDigests": {
+                "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+                "B": "644c143af9b8002c9f5c89e181190c26a6e6c1b253b97818e0839cb6f5920579"
+            },
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+                "C": "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+            },
+            "memoryQualified": false,
+            "integrityAuditPassed": true
+        },
+        {
+            "name": "jitendex-host-0",
+            "path": "/workspace/scratch/ca3652ed5eb0/hosted-metadata-timing/jitendex-host-0",
+            "integrityErrors": [],
+            "observationErrors": [],
+            "performanceScreen": {
+                "role": "target",
+                "passes": false
+            },
+            "auditedAtUtc": "2026-11-25T16:21:33.991508+00:00",
+            "auditPythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+            "auditorSha256": "09df7513d36c0f8b9da6b4beb4925badd944009d9a621e2bd797a03527fa09d4",
+            "candidate": "metadata-witness",
+            "dictionary": "jitendex",
+            "replica": 0,
+            "artifact": {
+                "artifactId": 15040048008,
+                "artifactName": "import-qualification-ca365-metadata-witness-jitendex-0",
+                "artifactSha256": "616b8623059e30a50ff7838f52023fce0f0c08d79808af29bc63ded37c130daa",
+                "artifactBytes": 34408285
+            },
+            "scheduledObservations": 23,
+            "recordedObservations": 23,
+            "verifiedObservations": 23,
+            "complete": true,
+            "pairs": [
+                {
+                    "cohort": 0,
+                    "qualified": true,
+                    "ms": {
+                        "A": 1561.2999999999884,
+                        "B": 1635.5999999999913,
+                        "C": 1585
+                    },
+                    "BvsA": 4.758854800486989,
+                    "BvsC": 3.1924290220814777,
+                    "CvsA": 1.5179657977334227
+                },
+                {
+                    "cohort": 1,
+                    "qualified": true,
+                    "ms": {
+                        "B": 1579.8999999999942,
+                        "C": 1599.6000000000058,
+                        "A": 1538.2999999999884
+                    },
+                    "BvsA": 2.7042839498151228,
+                    "BvsC": -1.2315578894730894,
+                    "CvsA": 3.9849184164348905
+                },
+                {
+                    "cohort": 2,
+                    "qualified": true,
+                    "ms": {
+                        "C": 1584.2999999999884,
+                        "A": 1569.7000000000116,
+                        "B": 1609.2999999999884
+                    },
+                    "BvsA": 2.522775052556314,
+                    "BvsC": 1.5779839676828944,
+                    "CvsA": 0.9301140345274073
+                },
+                {
+                    "cohort": 3,
+                    "qualified": true,
+                    "ms": {
+                        "A": 1547.8999999999942,
+                        "C": 1596.8999999999942,
+                        "B": 1570.1000000000058
+                    },
+                    "BvsA": 1.4342011757872974,
+                    "BvsC": -1.6782516124984936,
+                    "CvsA": 3.16557917178113
+                },
+                {
+                    "cohort": 4,
+                    "qualified": true,
+                    "ms": {
+                        "C": 1507.8999999999942,
+                        "B": 1598.7000000000116,
+                        "A": 1554.1000000000058
+                    },
+                    "BvsA": 2.8698281963841277,
+                    "BvsC": 6.021619470788364,
+                    "CvsA": -2.972781674281677
+                },
+                {
+                    "cohort": 5,
+                    "qualified": true,
+                    "ms": {
+                        "B": 1592.7999999999884,
+                        "A": 1579.2000000000116,
+                        "C": 1540.600000000035
+                    },
+                    "BvsA": 0.8611955420451345,
+                    "BvsC": 3.388290276512551,
+                    "CvsA": -2.444275582571964
+                }
+            ],
+            "medians": {
+                "BvsA": 2.6135295011857185,
+                "BvsC": 2.385206494882186,
+                "CvsA": 1.224039916130415
+            },
+            "fasterPairs": {
+                "BvsA": 0,
+                "BvsC": 2
+            },
+            "semanticDigests": {
+                "sample": "187665195428c2fe92564180dfd74ca3fd6a55ac71d29dc57441a32ab5486183",
+                "all": "3ebfaef5a92ab5c589a43d3dea8f4d19144c6f3f57bd0d5ec74c9fdcbc6186a0"
+            },
+            "packageMemberDigests": {
+                "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+                "B": "644c143af9b8002c9f5c89e181190c26a6e6c1b253b97818e0839cb6f5920579"
+            },
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+                "C": "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+            },
+            "memoryQualified": false,
+            "integrityAuditPassed": true
+        },
+        {
+            "name": "jitendex-host-1",
+            "path": "/workspace/scratch/ca3652ed5eb0/hosted-metadata-timing/jitendex-host-1",
+            "integrityErrors": [],
+            "observationErrors": [],
+            "performanceScreen": {
+                "role": "target",
+                "passes": false
+            },
+            "auditedAtUtc": "2026-11-25T16:16:50.675863+00:00",
+            "auditPythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+            "auditorSha256": "09df7513d36c0f8b9da6b4beb4925badd944009d9a621e2bd797a03527fa09d4",
+            "candidate": "metadata-witness",
+            "dictionary": "jitendex",
+            "replica": 1,
+            "artifact": {
+                "artifactId": 15040237541,
+                "artifactName": "import-qualification-ca365-metadata-witness-jitendex-1",
+                "artifactSha256": "3edc3d5edfeddd2f7790a3230f4f900d9e82796a0ca604f4dca159f6dd6fb576",
+                "artifactBytes": 34331146
+            },
+            "scheduledObservations": 21,
+            "recordedObservations": 21,
+            "verifiedObservations": 21,
+            "complete": true,
+            "pairs": [
+                {
+                    "cohort": 0,
+                    "qualified": true,
+                    "ms": {
+                        "B": 1492.7999999999884,
+                        "A": 1439.2000000000116,
+                        "C": 1428.6999999999534
+                    },
+                    "BvsA": 3.724291272927749,
+                    "BvsC": 4.486596206344018,
+                    "CvsA": -0.7295719844398363
+                },
+                {
+                    "cohort": 1,
+                    "qualified": true,
+                    "ms": {
+                        "C": 1459,
+                        "B": 1499.5,
+                        "A": 1442.3000000000466
+                    },
+                    "BvsA": 3.965887818065017,
+                    "BvsC": 2.7758738862234456,
+                    "CvsA": 1.1578728419852302
+                },
+                {
+                    "cohort": 2,
+                    "qualified": true,
+                    "ms": {
+                        "A": 1445.5999999999767,
+                        "C": 1465.2999999999884,
+                        "B": 1481.2000000000116
+                    },
+                    "BvsA": 2.4626452684031186,
+                    "BvsC": 1.0851020268902944,
+                    "CvsA": 1.3627559490877017
+                },
+                {
+                    "cohort": 3,
+                    "qualified": true,
+                    "ms": {
+                        "C": 1437,
+                        "A": 1461,
+                        "B": 1517
+                    },
+                    "BvsA": 3.8329911019849394,
+                    "BvsC": 5.567153792623514,
+                    "CvsA": -1.642710472279263
+                },
+                {
+                    "cohort": 4,
+                    "qualified": true,
+                    "ms": {
+                        "B": 1467,
+                        "C": 1444.6999999999534,
+                        "A": 1416.600000000035
+                    },
+                    "BvsA": 3.5578144853849913,
+                    "BvsC": 1.5435730601541797,
+                    "CvsA": 1.9836227587122668
+                },
+                {
+                    "cohort": 5,
+                    "qualified": true,
+                    "ms": {
+                        "A": 1445.9000000000233,
+                        "B": 1493.7999999999884,
+                        "C": 1443
+                    },
+                    "BvsA": 3.312815547407455,
+                    "BvsC": 3.5204435204427176,
+                    "CvsA": -0.2005671208260118
+                }
+            ],
+            "medians": {
+                "BvsA": 3.64105287915637,
+                "BvsC": 3.1481587033330816,
+                "CvsA": 0.4786528605796092
+            },
+            "fasterPairs": {
+                "BvsA": 0,
+                "BvsC": 0
+            },
+            "semanticDigests": {
+                "sample": "187665195428c2fe92564180dfd74ca3fd6a55ac71d29dc57441a32ab5486183"
+            },
+            "packageMemberDigests": {
+                "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+                "B": "644c143af9b8002c9f5c89e181190c26a6e6c1b253b97818e0839cb6f5920579"
+            },
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+                "C": "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+            },
+            "memoryQualified": false,
+            "integrityAuditPassed": true
+        },
+        {
+            "name": "vndb-host-0",
+            "path": "/workspace/scratch/ca3652ed5eb0/hosted-metadata-timing/vndb-host-0",
+            "integrityErrors": [],
+            "observationErrors": [],
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            },
+            "auditedAtUtc": "2026-11-25T16:29:56.141270+00:00",
+            "auditPythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+            "auditorSha256": "09df7513d36c0f8b9da6b4beb4925badd944009d9a621e2bd797a03527fa09d4",
+            "candidate": "metadata-witness",
+            "dictionary": "vndb",
+            "replica": 0,
+            "artifact": {
+                "artifactId": 15040104511,
+                "artifactName": "import-qualification-ca365-metadata-witness-vndb-0",
+                "artifactSha256": "1d880ef87f8e44fa1e7177b646225b3198e8460c6c26eb1d59827b37279e3087",
+                "artifactBytes": 34423941
+            },
+            "scheduledObservations": 23,
+            "recordedObservations": 23,
+            "verifiedObservations": 23,
+            "complete": true,
+            "pairs": [
+                {
+                    "cohort": 0,
+                    "qualified": true,
+                    "ms": {
+                        "A": 4367.300000000003,
+                        "B": 4245.399999999994,
+                        "C": 4330
+                    },
+                    "BvsA": -2.791198223158675,
+                    "BvsC": -1.9538106235567176,
+                    "CvsA": -0.8540745998672605
+                },
+                {
+                    "cohort": 1,
+                    "qualified": true,
+                    "ms": {
+                        "B": 4915.399999999994,
+                        "C": 4482.399999999994,
+                        "A": 4381.299999999988
+                    },
+                    "BvsA": 12.190445758108481,
+                    "BvsC": 9.660003569516352,
+                    "CvsA": 2.307534293474678
+                },
+                {
+                    "cohort": 2,
+                    "qualified": true,
+                    "ms": {
+                        "C": 4330.6999999999825,
+                        "A": 4454.8000000000175,
+                        "B": 4382.600000000035
+                    },
+                    "BvsA": -1.6207237137465746,
+                    "BvsC": 1.1984205786605528,
+                    "CvsA": -2.7857591811087934
+                },
+                {
+                    "cohort": 3,
+                    "qualified": true,
+                    "ms": {
+                        "A": 4295.400000000023,
+                        "C": 4556.200000000012,
+                        "B": 4463.400000000023
+                    },
+                    "BvsA": 3.911160776644751,
+                    "BvsC": -2.0367850401647902,
+                    "CvsA": 6.07161149136255
+                },
+                {
+                    "cohort": 4,
+                    "qualified": true,
+                    "ms": {
+                        "C": 4753.5,
+                        "B": 4318.5,
+                        "A": 4708.299999999988
+                    },
+                    "BvsA": -8.27899666546289,
+                    "BvsC": -9.151151782896816,
+                    "CvsA": 0.960006796508539
+                },
+                {
+                    "cohort": 5,
+                    "qualified": true,
+                    "ms": {
+                        "B": 4366.400000000023,
+                        "A": 4866.5,
+                        "C": 4309
+                    },
+                    "BvsA": -10.276379328058704,
+                    "BvsC": 1.3320956138320517,
+                    "CvsA": -11.455871776430705
+                }
+            ],
+            "medians": {
+                "BvsA": -2.205960968452625,
+                "BvsC": -0.3776950224480824,
+                "CvsA": 0.052966098320639254
+            },
+            "fasterPairs": {
+                "BvsA": 4,
+                "BvsC": 3
+            },
+            "semanticDigests": {
+                "sample": "fee8387c4a39646738eff95a5266782aa5aa3caf54a75dd20d36f1b9995db3b4",
+                "all": "6ac06cabba71f6831826e3a33db558b631a6a198aabf0a461ea1749c6ec0e67b"
+            },
+            "packageMemberDigests": {
+                "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+                "B": "644c143af9b8002c9f5c89e181190c26a6e6c1b253b97818e0839cb6f5920579"
+            },
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+                "C": "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+            },
+            "memoryQualified": false,
+            "integrityAuditPassed": true
+        },
+        {
+            "name": "vndb-host-1",
+            "path": "/workspace/scratch/ca3652ed5eb0/hosted-metadata-timing/vndb-host-1",
+            "integrityErrors": [],
+            "observationErrors": [],
+            "performanceScreen": {
+                "role": "non-target",
+                "passes": true
+            },
+            "auditedAtUtc": "2026-11-25T16:21:39.547529+00:00",
+            "auditPythonVersion": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+            "auditorSha256": "09df7513d36c0f8b9da6b4beb4925badd944009d9a621e2bd797a03527fa09d4",
+            "candidate": "metadata-witness",
+            "dictionary": "vndb",
+            "replica": 1,
+            "artifact": {
+                "artifactId": 15041262684,
+                "artifactName": "import-qualification-ca365-metadata-witness-vndb-1",
+                "artifactSha256": "82864c8cd8daa4bdb2e2cc43dc0cd3f98d1921b559c6d5e527cdfb8499f81017",
+                "artifactBytes": 34347028
+            },
+            "scheduledObservations": 21,
+            "recordedObservations": 21,
+            "verifiedObservations": 21,
+            "complete": true,
+            "pairs": [
+                {
+                    "cohort": 0,
+                    "qualified": true,
+                    "ms": {
+                        "B": 6501.8000000000175,
+                        "A": 6566,
+                        "C": 6576.399999999994
+                    },
+                    "BvsA": -0.9777642400241038,
+                    "BvsC": -1.1343592238911349,
+                    "CvsA": 0.1583917148948233
+                },
+                {
+                    "cohort": 1,
+                    "qualified": true,
+                    "ms": {
+                        "C": 6680.899999999994,
+                        "B": 6481,
+                        "A": 6492
+                    },
+                    "BvsA": -0.1694393099199054,
+                    "BvsC": -2.992111841218914,
+                    "CvsA": 2.9097350585334913
+                },
+                {
+                    "cohort": 2,
+                    "qualified": true,
+                    "ms": {
+                        "A": 6468.099999999977,
+                        "C": 6636.399999999965,
+                        "B": 6473
+                    },
+                    "BvsA": 0.07575640450863119,
+                    "BvsC": -2.4621782894335142,
+                    "CvsA": 2.6020005874984875
+                },
+                {
+                    "cohort": 3,
+                    "qualified": true,
+                    "ms": {
+                        "C": 6466.799999999988,
+                        "A": 6400.199999999953,
+                        "B": 6987.700000000012
+                    },
+                    "BvsA": 9.179400643730862,
+                    "BvsC": 8.054988556937337,
+                    "CvsA": 1.0405924814855139
+                },
+                {
+                    "cohort": 4,
+                    "qualified": true,
+                    "ms": {
+                        "B": 6604.899999999965,
+                        "C": 6525.199999999953,
+                        "A": 6505.5
+                    },
+                    "BvsA": 1.5279378987005598,
+                    "BvsC": 1.2214185005825495,
+                    "CvsA": 0.3028206901845021
+                },
+                {
+                    "cohort": 5,
+                    "qualified": true,
+                    "ms": {
+                        "A": 6406.900000000023,
+                        "B": 6597.899999999907,
+                        "C": 6621.899999999907
+                    },
+                    "BvsA": 2.981160935864202,
+                    "BvsC": -0.3624337425814361,
+                    "CvsA": 3.3557570744023213
+                }
+            ],
+            "medians": {
+                "BvsA": 0.8018471516045955,
+                "BvsC": -0.7483964832362855,
+                "CvsA": 1.8212965344920007
+            },
+            "fasterPairs": {
+                "BvsA": 2,
+                "BvsC": 4
+            },
+            "semanticDigests": {
+                "sample": "fee8387c4a39646738eff95a5266782aa5aa3caf54a75dd20d36f1b9995db3b4"
+            },
+            "packageMemberDigests": {
+                "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+                "B": "644c143af9b8002c9f5c89e181190c26a6e6c1b253b97818e0839cb6f5920579"
+            },
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+                "C": "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+            },
+            "memoryQualified": false,
+            "integrityAuditPassed": true
+        }
+    ],
+    "activationAndLogicalStorage": {
+        "jmdict-host-0": {
+            "A": {
+                "observations": 8,
+                "opfsLogicalFileBytesRange": [
+                    43520477,
+                    43520477
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            },
+            "B": {
+                "observations": 8,
+                "opfsLogicalFileBytesRange": [
+                    43520477,
+                    43520477
+                ],
+                "metadataReuseCountRange": [
+                    851412,
+                    851412
+                ],
+                "metadataReuseBytesRange": [
+                    19958283,
+                    19958283
+                ]
+            },
+            "C": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    43520477,
+                    43520477
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            }
+        },
+        "jmdict-host-1": {
+            "A": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    43520477,
+                    43520477
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            },
+            "B": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    43520477,
+                    43520477
+                ],
+                "metadataReuseCountRange": [
+                    851412,
+                    851412
+                ],
+                "metadataReuseBytesRange": [
+                    19958283,
+                    19958283
+                ]
+            },
+            "C": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    43520477,
+                    43520477
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            }
+        },
+        "jitendex-host-0": {
+            "A": {
+                "observations": 8,
+                "opfsLogicalFileBytesRange": [
+                    67466332,
+                    67466332
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            },
+            "B": {
+                "observations": 8,
+                "opfsLogicalFileBytesRange": [
+                    67466332,
+                    67466332
+                ],
+                "metadataReuseCountRange": [
+                    1447817,
+                    1447817
+                ],
+                "metadataReuseBytesRange": [
+                    42246078,
+                    42246078
+                ]
+            },
+            "C": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    67466332,
+                    67466332
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            }
+        },
+        "jitendex-host-1": {
+            "A": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    67466332,
+                    67466332
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            },
+            "B": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    67466332,
+                    67466332
+                ],
+                "metadataReuseCountRange": [
+                    1447817,
+                    1447817
+                ],
+                "metadataReuseBytesRange": [
+                    42246078,
+                    42246078
+                ]
+            },
+            "C": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    67466332,
+                    67466332
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            }
+        },
+        "vndb-host-0": {
+            "A": {
+                "observations": 8,
+                "opfsLogicalFileBytesRange": [
+                    609553611,
+                    609553611
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            },
+            "B": {
+                "observations": 8,
+                "opfsLogicalFileBytesRange": [
+                    609553611,
+                    609553611
+                ],
+                "metadataReuseCountRange": [
+                    438215,
+                    438215
+                ],
+                "metadataReuseBytesRange": [
+                    35010530,
+                    35010530
+                ]
+            },
+            "C": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    609553611,
+                    609553611
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            }
+        },
+        "vndb-host-1": {
+            "A": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    609553611,
+                    609553611
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            },
+            "B": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    609553611,
+                    609553611
+                ],
+                "metadataReuseCountRange": [
+                    438215,
+                    438215
+                ],
+                "metadataReuseBytesRange": [
+                    35010530,
+                    35010530
+                ]
+            },
+            "C": {
+                "observations": 7,
+                "opfsLogicalFileBytesRange": [
+                    609553611,
+                    609553611
+                ],
+                "metadataReuseCountRange": null,
+                "metadataReuseBytesRange": null
+            }
+        }
+    },
+    "acquisitionCheckpoint": {
+        "checkedAtUtc": "2026-11-25T16:30:28Z",
+        "runId": 45647030745,
+        "workflowCommit": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770",
+        "jobs": [
+            {
+                "id": 139320658615,
+                "name": "metadata-witness jmdict host 0",
+                "status": "completed",
+                "conclusion": "success",
+                "step": null
+            },
+            {
+                "id": 139320659146,
+                "name": "metadata-witness jmdict host 1",
+                "status": "completed",
+                "conclusion": "success",
+                "step": null
+            },
+            {
+                "id": 139320659282,
+                "name": "metadata-witness jitendex host 0",
+                "status": "completed",
+                "conclusion": "success",
+                "step": null
+            },
+            {
+                "id": 139320659295,
+                "name": "metadata-witness vndb host 1",
+                "status": "completed",
+                "conclusion": "success",
+                "step": null
+            },
+            {
+                "id": 139320659383,
+                "name": "metadata-witness jitendex host 1",
+                "status": "completed",
+                "conclusion": "success",
+                "step": null
+            },
+            {
+                "id": 139320659493,
+                "name": "metadata-witness vndb host 0",
+                "status": "completed",
+                "conclusion": "success",
+                "step": null
+            }
+        ],
+        "artifacts": [
+            {
+                "id": 15041450543,
+                "name": "import-qualification-ca365-metadata-witness-jmdict-1",
+                "size_in_bytes": 34319606,
+                "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041450543",
+                "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041450543/zip",
+                "expired": false,
+                "created_at": "2026-11-25T16:07:37Z",
+                "expires_at": "2026-12-09T16:07:35Z",
+                "updated_at": "2026-11-25T16:07:37Z",
+                "digest": "sha256:35b5acda8699069b25d6d53e7a173d56d2e69dcbbed8d127f02f609aac5aca4d",
+                "workflow_run": {
+                    "id": 45647030745,
+                    "repository_id": 1165902460,
+                    "head_repository_id": 1165902460,
+                    "head_branch": "diagnostic/import-qualification-20261125-ca365",
+                    "head_sha": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770"
+                }
+            },
+            {
+                "id": 15041262684,
+                "name": "import-qualification-ca365-metadata-witness-vndb-1",
+                "size_in_bytes": 34347028,
+                "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041262684",
+                "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041262684/zip",
+                "expired": false,
+                "created_at": "2026-11-25T16:19:12Z",
+                "expires_at": "2026-12-09T16:19:09Z",
+                "updated_at": "2026-11-25T16:19:12Z",
+                "digest": "sha256:82864c8cd8daa4bdb2e2cc43dc0cd3f98d1921b559c6d5e527cdfb8499f81017",
+                "workflow_run": {
+                    "id": 45647030745,
+                    "repository_id": 1165902460,
+                    "head_repository_id": 1165902460,
+                    "head_branch": "diagnostic/import-qualification-20261125-ca365",
+                    "head_sha": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770"
+                }
+            },
+            {
+                "id": 15040237541,
+                "name": "import-qualification-ca365-metadata-witness-jitendex-1",
+                "size_in_bytes": 34331146,
+                "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040237541",
+                "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040237541/zip",
+                "expired": false,
+                "created_at": "2026-11-25T16:15:26Z",
+                "expires_at": "2026-12-09T16:15:24Z",
+                "updated_at": "2026-11-25T16:15:26Z",
+                "digest": "sha256:3edc3d5edfeddd2f7790a3230f4f900d9e82796a0ca604f4dca159f6dd6fb576",
+                "workflow_run": {
+                    "id": 45647030745,
+                    "repository_id": 1165902460,
+                    "head_repository_id": 1165902460,
+                    "head_branch": "diagnostic/import-qualification-20261125-ca365",
+                    "head_sha": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770"
+                }
+            },
+            {
+                "id": 15040104511,
+                "name": "import-qualification-ca365-metadata-witness-vndb-0",
+                "size_in_bytes": 34423941,
+                "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040104511",
+                "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040104511/zip",
+                "expired": false,
+                "created_at": "2026-11-25T16:28:46Z",
+                "expires_at": "2026-12-09T16:28:43Z",
+                "updated_at": "2026-11-25T16:28:46Z",
+                "digest": "sha256:1d880ef87f8e44fa1e7177b646225b3198e8460c6c26eb1d59827b37279e3087",
+                "workflow_run": {
+                    "id": 45647030745,
+                    "repository_id": 1165902460,
+                    "head_repository_id": 1165902460,
+                    "head_branch": "diagnostic/import-qualification-20261125-ca365",
+                    "head_sha": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770"
+                }
+            },
+            {
+                "id": 15040048008,
+                "name": "import-qualification-ca365-metadata-witness-jitendex-0",
+                "size_in_bytes": 34408285,
+                "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040048008",
+                "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040048008/zip",
+                "expired": false,
+                "created_at": "2026-11-25T16:18:40Z",
+                "expires_at": "2026-12-09T16:18:38Z",
+                "updated_at": "2026-11-25T16:18:40Z",
+                "digest": "sha256:616b8623059e30a50ff7838f52023fce0f0c08d79808af29bc63ded37c130daa",
+                "workflow_run": {
+                    "id": 45647030745,
+                    "repository_id": 1165902460,
+                    "head_repository_id": 1165902460,
+                    "head_branch": "diagnostic/import-qualification-20261125-ca365",
+                    "head_sha": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770"
+                }
+            },
+            {
+                "id": 15039284476,
+                "name": "import-qualification-ca365-metadata-witness-jmdict-0",
+                "size_in_bytes": 34400511,
+                "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039284476",
+                "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039284476/zip",
+                "expired": false,
+                "created_at": "2026-11-25T16:02:54Z",
+                "expires_at": "2026-12-09T16:02:52Z",
+                "updated_at": "2026-11-25T16:02:54Z",
+                "digest": "sha256:740f9dfbe1d3dc8a94efc73686ab1b80ed57f5bb68fc47130ee38f0e2c1ee1c3",
+                "workflow_run": {
+                    "id": 45647030745,
+                    "repository_id": 1165902460,
+                    "head_repository_id": 1165902460,
+                    "head_branch": "diagnostic/import-qualification-20261125-ca365",
+                    "head_sha": "7b021ebe3e7625a56ab9dde346ae72f3cd39b770"
+                }
+            }
+        ],
+        "startedCells": 6,
+        "completedCells": 6,
+        "pollingPaused": true,
+        "pauseReason": "All six metadata timing cells are complete, downloaded and independently audited; monitoring finished.",
+        "measurementsAudited": 6
+    },
+    "limitations": [
+        "Thresholds apply separately to each host and each control. No outcome-dependent exclusions or pooled-host substitution.",
+        "A successful acquisition job does not establish numerical performance-screen passage.",
+        "Browser process sampling is disabled in these timing observations. Memory qualification is separate.",
+        "Semantic equality covers the frozen public lookup, persistence/restart and media validation workload; complete parser parity is separate evidence."
+    ]
+}
