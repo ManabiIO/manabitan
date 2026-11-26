@@ -1335,51 +1335,62 @@ function createTermContentReferenceSlabs(
     let blockIndex = -1;
     let nextBlockStart = 0;
     let sourceOffset = 0;
-    const blockPrefix = new DataView(new ArrayBuffer(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES));
-    let blockOffsetLow = 0;
-    let blockOffsetHigh = 0;
-    let blockStoredLength = 0;
+    const blockPrefix = new Uint8Array(RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
+    const blockPrefixView = new DataView(blockPrefix.buffer);
     let blockUncompressedLength = 0;
     for (let slabIndex = 0; slabIndex < slabCount; ++slabIndex) {
         const startIndex = slabIndex * entriesPerSlab;
         const entryCount = Math.min(entriesPerSlab, sourceLengths.length - startIndex);
         const slab = new Uint8Array(entryCount * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES);
         const view = new DataView(slab.buffer, slab.byteOffset, slab.byteLength);
-        for (let localIndex = 0; localIndex < entryCount; ++localIndex) {
+        for (let localIndex = 0; localIndex < entryCount;) {
             const contentIndex = startIndex + localIndex;
             if (contentIndex === nextBlockStart) {
                 ++blockIndex;
                 nextBlockStart = packed.blockStartIndexes[blockIndex + 1];
+                if (
+                    packed.blockStartIndexes[blockIndex] !== contentIndex ||
+                    !Number.isInteger(nextBlockStart) || nextBlockStart <= contentIndex || nextBlockStart > sourceLengths.length
+                ) {
+                    throw new RangeError('Invalid compact term-content block reference');
+                }
                 sourceOffset = 0;
                 blockUncompressedLength = packedChunkLengths[blockIndex];
-                // The checked scalar encoder validates the invariant block
-                // fields once. Cache its fixed words for each entry in the block.
+                // Validate the invariant fields once per compressed block.
                 writeRawTermContentCompactBlockReference(
-                    blockPrefix,
+                    blockPrefixView,
                     0,
                     blockOffsets[blockIndex],
                     blockLengths[blockIndex],
                     blockUncompressedLength,
                     0,
                 );
-                blockOffsetLow = blockPrefix.getUint32(0, true);
-                blockOffsetHigh = blockPrefix.getUint32(4, true);
-                blockStoredLength = blockPrefix.getUint32(8, true);
             }
-            const length = sourceLengths[contentIndex];
-            const entryOffset = sourceOffset;
-            sourceOffset += length;
-            // Empty rows at the end keep their reference slot with an in-block
-            // placeholder offset. Exact deduplication handles them by length.
-            if (sourceOffset > blockUncompressedLength || (contentIndex + 1 === nextBlockStart && sourceOffset !== blockUncompressedLength)) {
-                throw new RangeError('Invalid compact term-content block reference');
+            const runEnd = Math.min(entryCount, nextBlockStart - startIndex);
+            const runStartByte = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            const runEndByte = runEnd * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
+            slab.set(blockPrefix, runStartByte);
+            // Repeat complete templates in-place, retaining explicit little-
+            // endian bytes without rewriting four invariant words per entry.
+            for (let filledEnd = runStartByte + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES; filledEnd < runEndByte;) {
+                const copyLength = Math.min(filledEnd - runStartByte, runEndByte - filledEnd);
+                slab.copyWithin(filledEnd, runStartByte, runStartByte + copyLength);
+                filledEnd += copyLength;
             }
-            const offset = localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES;
-            view.setUint32(offset, blockOffsetLow, true);
-            view.setUint32(offset + 4, blockOffsetHigh, true);
-            view.setUint32(offset + 8, blockStoredLength, true);
-            view.setUint32(offset + 12, blockUncompressedLength, true);
-            view.setUint32(offset + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES - 4, entryOffset === blockUncompressedLength ? 0 : entryOffset, true);
+            for (; localIndex < runEnd; ++localIndex) {
+                const index = startIndex + localIndex;
+                const entryOffset = sourceOffset;
+                sourceOffset += sourceLengths[index];
+                // Empty trailing rows keep an in-block placeholder offset.
+                if (sourceOffset > blockUncompressedLength || (index + 1 === nextBlockStart && sourceOffset !== blockUncompressedLength)) {
+                    throw new RangeError('Invalid compact term-content block reference');
+                }
+                view.setUint32(
+                    localIndex * RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES + RAW_TERM_CONTENT_COMPACT_BLOCK_REFERENCE_BYTES - 4,
+                    entryOffset === blockUncompressedLength ? 0 : entryOffset,
+                    true,
+                );
+            }
         }
         referenceSlabs[slabIndex] = slab;
     }

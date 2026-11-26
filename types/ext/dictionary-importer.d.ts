@@ -269,7 +269,7 @@ export type MdxImportSource = {
     options?: MdxImportOptions;
 };
 
-export type ArchiveFileMap = Map<string, ImportFileEntry>;
+export type ArchiveFileMap = Map<string, ImportFileEntry> | import('../../ext/js/dictionary/dense-zip-file-map.js').DenseZipFileMap;
 
 /**
  * An array of tuples of a file type inside a dictionary and its corresponding regular expression.

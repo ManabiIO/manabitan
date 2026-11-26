@@ -1,0 +1,1350 @@
+{
+  "allAuditReconciliationsPassed": true,
+  "allCorrectnessPassed": true,
+  "artifacts": [
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/memory/15037132938.zip",
+      "archiveSha256": "dc727b9b2be9cac55680797896ded53ee8856e50131a24a3ec2c88fdb5001533",
+      "auditReconciliation": "passed",
+      "dictionary": "jitendex",
+      "directory": "/tmp/manabitan-2754-crc-audit/memory/15037132938",
+      "id": 15037132938,
+      "kind": "memory",
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": -0.34838858283586793,
+          "medianPairedChangePercent": -0.4593973964284681
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": -0.2659497043281611,
+          "medianPairedChangePercent": -0.41387795587766174
+        }
+      },
+      "name": "exact-crc-memory-jitendex-rep1-2754",
+      "observations": [
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 148,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 17,
+          "index": 1,
+          "maxSampledPrivateKiB": 831688,
+          "maxSampledPssKiB": 1063178,
+          "maximumCoveredSampleGapMs": 106.636102,
+          "name": "A1",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 49.376634,
+          "preImportBracketGapMs": 53.302761,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 17
+        },
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 88,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 17,
+          "index": 2,
+          "maxSampledPrivateKiB": 826944,
+          "maxSampledPssKiB": 1057205,
+          "maximumCoveredSampleGapMs": 130.909858,
+          "name": "B1",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 41.675697,
+          "preImportBracketGapMs": 21.698435,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 17
+        },
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 84,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 16,
+          "index": 3,
+          "maxSampledPrivateKiB": 830648,
+          "maxSampledPssKiB": 1062031,
+          "maximumCoveredSampleGapMs": 97.367765,
+          "name": "B2",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 72.62688,
+          "preImportBracketGapMs": 18.680295,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 16
+        },
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 86,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 17,
+          "index": 4,
+          "maxSampledPrivateKiB": 833552,
+          "maxSampledPssKiB": 1064863,
+          "maximumCoveredSampleGapMs": 104.211569,
+          "name": "A2",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 57.997877,
+          "preImportBracketGapMs": 17.875702,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 17
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 831688,
+            "candidate": 826944,
+            "changePercent": -0.5704062100210683
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1063178,
+            "candidate": 1057205,
+            "changePercent": -0.5618062074271624
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 833552,
+            "candidate": 830648,
+            "changePercent": -0.34838858283586793
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1064863,
+            "candidate": 1062031,
+            "changePercent": -0.2659497043281611
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "rawScanAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -0.34838858283586793,
+            "medianPairedChangePercent": -0.4593973964284681
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -0.2659497043281611,
+            "medianPairedChangePercent": -0.41387795587766174
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 406,
+        "schemaVersion": 1
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          }
+        }
+      },
+      "replication": 1,
+      "retainedFailure": null,
+      "run": "45644635208"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/memory/15038726730.zip",
+      "archiveSha256": "db106e0ef170110cfd9fc6009f2a89633dbccf00f120078f6f9b5d1d8f5036f4",
+      "auditReconciliation": "passed",
+      "dictionary": "jitendex",
+      "directory": "/tmp/manabitan-2754-crc-audit/memory/15038726730",
+      "id": 15038726730,
+      "kind": "memory",
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 3.8718599914506324,
+          "medianPairedChangePercent": 1.141970032148626
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 2.703905781767335,
+          "medianPairedChangePercent": 0.8710418572841161
+        }
+      },
+      "name": "exact-crc-memory-jitendex-rep2-2754",
+      "observations": [
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 80,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 15,
+          "index": 1,
+          "maxSampledPrivateKiB": 808408,
+          "maxSampledPssKiB": 1040917,
+          "maximumCoveredSampleGapMs": 154.93941,
+          "name": "B1",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 6.616649,
+          "preImportBracketGapMs": 50.157256,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 15
+        },
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 76,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 12,
+          "index": 2,
+          "maxSampledPrivateKiB": 821452,
+          "maxSampledPssKiB": 1051026,
+          "maximumCoveredSampleGapMs": 145.605519,
+          "name": "A1",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 41.063016,
+          "preImportBracketGapMs": 43.893688,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 12
+        },
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 79,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 13,
+          "index": 3,
+          "maxSampledPrivateKiB": 795380,
+          "maxSampledPssKiB": 1031138,
+          "maximumCoveredSampleGapMs": 144.769781,
+          "name": "A2",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 28.574782,
+          "preImportBracketGapMs": 42.527494,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 13
+        },
+        {
+          "activeSahFileBytes": 5459968,
+          "allObservedSampleCount": 94,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 13,
+          "index": 4,
+          "maxSampledPrivateKiB": 826176,
+          "maxSampledPssKiB": 1059019,
+          "maximumCoveredSampleGapMs": 153.260117,
+          "name": "B2",
+          "nonSahBytes": 61977692,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 67.971403,
+          "preImportBracketGapMs": 28.694554,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 67466332,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 13
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 821452,
+            "candidate": 808408,
+            "changePercent": -1.5879199271533806
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1051026,
+            "candidate": 1040917,
+            "changePercent": -0.9618220671991029
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 795380,
+            "candidate": 826176,
+            "changePercent": 3.8718599914506324
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1031138,
+            "candidate": 1059019,
+            "changePercent": 2.703905781767335
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "rawScanAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.8718599914506324,
+            "medianPairedChangePercent": 1.141970032148626
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.703905781767335,
+            "medianPairedChangePercent": 0.8710418572841161
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 329,
+        "schemaVersion": 1
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          }
+        }
+      },
+      "replication": 2,
+      "retainedFailure": null,
+      "run": "45644635208"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/memory/15037852350.zip",
+      "archiveSha256": "8ec241627ad4fa38e8b64f8d7960e8edebee8d4d70dae0e020bf166728b9cfaa",
+      "auditReconciliation": "passed",
+      "dictionary": "jmdict",
+      "directory": "/tmp/manabitan-2754-crc-audit/memory/15037852350",
+      "id": 15037852350,
+      "kind": "memory",
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 0.22948115744558795,
+          "medianPairedChangePercent": 0.17904455749996329
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 0.6408582495539106,
+          "medianPairedChangePercent": 0.47810405456081284
+        }
+      },
+      "name": "exact-crc-memory-jmdict-rep1-2754",
+      "observations": [
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 95,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 7,
+          "index": 1,
+          "maxSampledPrivateKiB": 780892,
+          "maxSampledPssKiB": 1010988,
+          "maximumCoveredSampleGapMs": 184.428087,
+          "name": "A1",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 58.023472,
+          "preImportBracketGapMs": 58.149562,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 7
+        },
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 75,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 9,
+          "index": 2,
+          "maxSampledPrivateKiB": 782684,
+          "maxSampledPssKiB": 1017467,
+          "maximumCoveredSampleGapMs": 205.884669,
+          "name": "B1",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 18.787656,
+          "preImportBracketGapMs": 114.481258,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 9
+        },
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 71,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 7,
+          "index": 3,
+          "maxSampledPrivateKiB": 794128,
+          "maxSampledPssKiB": 1026853,
+          "maximumCoveredSampleGapMs": 216.710224,
+          "name": "B2",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 54.593469,
+          "preImportBracketGapMs": 73.450725,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 7
+        },
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 72,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 7,
+          "index": 4,
+          "maxSampledPrivateKiB": 793108,
+          "maxSampledPssKiB": 1023625,
+          "maximumCoveredSampleGapMs": 197.05964,
+          "name": "A2",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 51.864586,
+          "preImportBracketGapMs": 108.691968,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 7
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 780892,
+            "candidate": 782684,
+            "changePercent": 0.22948115744558795
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1010988,
+            "candidate": 1017467,
+            "changePercent": 0.6408582495539106
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 793108,
+            "candidate": 794128,
+            "changePercent": 0.12860795755433863
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1023625,
+            "candidate": 1026853,
+            "changePercent": 0.3153498595677151
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "rawScanAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 0.22948115744558795,
+            "medianPairedChangePercent": 0.17904455749996329
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.6408582495539106,
+            "medianPairedChangePercent": 0.47810405456081284
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 313,
+        "schemaVersion": 1
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          }
+        }
+      },
+      "replication": 1,
+      "retainedFailure": null,
+      "run": "45644635208"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/memory/15037468972.zip",
+      "archiveSha256": "e358e51201858bcea6b04c067b891d87964debfb79bee79cd92db94e6b4c3b92",
+      "auditReconciliation": "passed",
+      "dictionary": "jmdict",
+      "directory": "/tmp/manabitan-2754-crc-audit/memory/15037468972",
+      "id": 15037468972,
+      "kind": "memory",
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 1.6670256515575854,
+          "medianPairedChangePercent": -2.063490325669087
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 1.0379198897440656,
+          "medianPairedChangePercent": -1.6549216343292592
+        }
+      },
+      "name": "exact-crc-memory-jmdict-rep2-2754",
+      "observations": [
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 73,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 7,
+          "index": 1,
+          "maxSampledPrivateKiB": 811860,
+          "maxSampledPssKiB": 1041024,
+          "maximumCoveredSampleGapMs": 187.565095,
+          "name": "B1",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 93.999246,
+          "preImportBracketGapMs": 65.691206,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 7
+        },
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 72,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 8,
+          "index": 2,
+          "maxSampledPrivateKiB": 798548,
+          "maxSampledPssKiB": 1030330,
+          "maximumCoveredSampleGapMs": 222.010907,
+          "name": "A1",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 71.586485,
+          "preImportBracketGapMs": 102.193672,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 8
+        },
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 72,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 7,
+          "index": 3,
+          "maxSampledPrivateKiB": 807248,
+          "maxSampledPssKiB": 1036372,
+          "maximumCoveredSampleGapMs": 182.301527,
+          "name": "A2",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 69.975838,
+          "preImportBracketGapMs": 27.667941,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 7
+        },
+        {
+          "activeSahFileBytes": 176128,
+          "allObservedSampleCount": 71,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 8,
+          "index": 4,
+          "maxSampledPrivateKiB": 760476,
+          "maxSampledPssKiB": 991313,
+          "maximumCoveredSampleGapMs": 199.843258,
+          "name": "B2",
+          "nonSahBytes": 43315677,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 24.593836,
+          "preImportBracketGapMs": 89.018273,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 43520477,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 8
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 798548,
+            "candidate": 811860,
+            "changePercent": 1.6670256515575854
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1030330,
+            "candidate": 1041024,
+            "changePercent": 1.0379198897440656
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 807248,
+            "candidate": 760476,
+            "changePercent": -5.79400630289576
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1036372,
+            "candidate": 991313,
+            "changePercent": -4.347763158402584
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "rawScanAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 1.6670256515575854,
+            "medianPairedChangePercent": -2.063490325669087
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 1.0379198897440656,
+            "medianPairedChangePercent": -1.6549216343292592
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 288,
+        "schemaVersion": 1
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          }
+        }
+      },
+      "replication": 2,
+      "retainedFailure": null,
+      "run": "45644635208"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/memory/15039581472.zip",
+      "archiveSha256": "6d677ed82afe248b6820909ea7e416be3be8eee361c30ab319777617f55b9949",
+      "auditReconciliation": "passed",
+      "dictionary": "vndb",
+      "directory": "/tmp/manabitan-2754-crc-audit/memory/15039581472",
+      "id": 15039581472,
+      "kind": "memory",
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "name": "exact-crc-memory-vndb-rep1-2754",
+      "observations": [
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 124,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 45,
+          "index": 1,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 330.48311,
+          "name": "A1",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 93.995733,
+          "preImportBracketGapMs": 61.843967,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 45
+        },
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 110,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 43,
+          "index": 2,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 266.171054,
+          "name": "B1",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 111.900955,
+          "preImportBracketGapMs": 108.068183,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 43
+        },
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 110,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 43,
+          "index": 3,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 322.760177,
+          "name": "B2",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 100.568281,
+          "preImportBracketGapMs": 77.518786,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 43
+        },
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 111,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 1,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 43,
+          "index": 4,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 370.239653,
+          "name": "A2",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 104.959582,
+          "preImportBracketGapMs": 47.666963,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 6,
+          "samplesWithUnreadableAddressSpaces": 1,
+          "stableFullyReadImportSampleCount": 42
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 1,
+          "qualified": false
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "rawScanAudit": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 455,
+        "schemaVersion": 1
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          }
+        }
+      },
+      "replication": 1,
+      "retainedFailure": {
+        "message": "Memory coverage/gates or correctness failed; every scheduled observation is retained without replacement",
+        "recordedAtEpochSeconds": 1795621384.1243944,
+        "retried": false,
+        "type": "RuntimeError"
+      },
+      "run": "45644635208"
+    },
+    {
+      "archive": "/tmp/manabitan-2754-crc-audit/memory/15039215938.zip",
+      "archiveSha256": "1c935613a38fdec4baf9cf08a82be68d38b2c65439bbaad7db48efc5fd8f60fa",
+      "auditReconciliation": "passed",
+      "dictionary": "vndb",
+      "directory": "/tmp/manabitan-2754-crc-audit/memory/15039215938",
+      "id": 15039215938,
+      "kind": "memory",
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "name": "exact-crc-memory-vndb-rep2-2754",
+      "observations": [
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 154,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 59,
+          "index": 1,
+          "maxSampledPrivateKiB": 1166004,
+          "maxSampledPssKiB": 1391290,
+          "maximumCoveredSampleGapMs": 194.789603,
+          "name": "B1",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 74.061802,
+          "preImportBracketGapMs": 41.665385,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 59
+        },
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 136,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 68,
+          "index": 2,
+          "maxSampledPrivateKiB": 1171752,
+          "maxSampledPssKiB": 1400519,
+          "maximumCoveredSampleGapMs": 185.981748,
+          "name": "A1",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 1,
+          "postImportBracketGapMs": 73.021724,
+          "preImportBracketGapMs": 23.774978,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 68
+        },
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 200,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 80,
+          "index": 3,
+          "maxSampledPrivateKiB": 1191644,
+          "maxSampledPssKiB": 1421623,
+          "maximumCoveredSampleGapMs": 182.086322,
+          "name": "A2",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 17.058019,
+          "preImportBracketGapMs": 12.261217,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 80
+        },
+        {
+          "activeSahFileBytes": 528384,
+          "allObservedSampleCount": 154,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieIdentityCount": 0,
+          "correctness": "passed",
+          "fullyContainedImportSampleCount": 70,
+          "index": 4,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 452.154636,
+          "name": "B2",
+          "nonSahBytes": 608996555,
+          "observedProcessCountRange": [
+            9,
+            9
+          ],
+          "pair": 2,
+          "postImportBracketGapMs": 73.985599,
+          "preImportBracketGapMs": 49.212896,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "rawStorageBytes": 609553611,
+          "samplesWithUnavailableSmaps": 0,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 70
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1171752,
+            "candidate": 1166004,
+            "changePercent": -0.49054748786432345
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1400519,
+            "candidate": 1391290,
+            "changePercent": -0.6589699961228712
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1191644,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1421623,
+            "candidate": null,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "rawScanAudit": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 644,
+        "schemaVersion": 1
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+            "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+          }
+        }
+      },
+      "replication": 2,
+      "retainedFailure": {
+        "message": "Memory coverage/gates or correctness failed; every scheduled observation is retained without replacement",
+        "recordedAtEpochSeconds": 1795621230.086009,
+        "retried": false,
+        "type": "RuntimeError"
+      },
+      "run": "45644635208"
+    }
+  ],
+  "complete": true,
+  "crossReplicationReceiptEquality": {
+    "jitendex": {
+      "allEqual": true,
+      "browserVersion": "153.0.8010.12",
+      "observations": 8
+    },
+    "jmdict": {
+      "allEqual": true,
+      "browserVersion": "153.0.8010.12",
+      "observations": 8
+    },
+    "vndb": {
+      "allEqual": true,
+      "browserVersion": "153.0.8010.12",
+      "observations": 8
+    }
+  },
+  "crossReplicationReceiptsPassed": true,
+  "expectedArtifacts": 6,
+  "frozenObserver": {
+    "audit_memory.py": {
+      "sha256": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+      "unchanged": true
+    },
+    "chromium_memory.py": {
+      "sha256": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+      "unchanged": true
+    }
+  },
+  "promotionMemoryPass": false,
+  "receivedArtifacts": 6,
+  "schemaVersion": 1,
+  "scope": "Independent raw-scan and receipt reconciliation; memory timings are non-authoritative; no new acquisition",
+  "sourceIdentities": {
+    "A": {
+      "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    },
+    "B": {
+      "commit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+      "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+    }
+  },
+  "totalRawScans": 2435,
+  "workflowRun": "45644635208"
+}

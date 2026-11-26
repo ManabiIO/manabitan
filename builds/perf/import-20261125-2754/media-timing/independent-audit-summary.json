@@ -1,0 +1,335 @@
+{
+  "jitendex": {
+    "analysisRecomputedIndependently": true,
+    "comparisons": {
+      "candidate": {
+        "baselineMedianMs": 1572.050000000003,
+        "bestPairPercent": -0.44404973356647615,
+        "candidateMedianMs": 1568.7500000000146,
+        "equalWorkPercent": 0.10206576862972216,
+        "fasterPairs": 3,
+        "pairedChangesPercent": [
+          0.17537266691647346,
+          -0.3495170310116924,
+          0.05093919134144809,
+          1.4998052200997591,
+          -0.29708085766176895,
+          -0.44404973356647615
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -0.3967833822890843,
+          0.8375889435081163
+        ],
+        "pairedMedianPercent": -0.12307083316016043,
+        "pairs": 6,
+        "worstPairPercent": 1.4998052200997591
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 1577.5999999999913,
+        "bestPairPercent": -2.315448773805173,
+        "candidateMedianMs": 1568.7500000000146,
+        "equalWorkPercent": -0.4483119574519856,
+        "fasterPairs": 2,
+        "pairedChangesPercent": [
+          0.5722190781598746,
+          -1.3525415198774038,
+          0.36407766990365076,
+          0.07041351939796048,
+          0.025916807047110524,
+          -2.315448773805173
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.8339951468412885,
+          0.4681483740317627
+        ],
+        "pairedMedianPercent": 0.0481651632225355,
+        "pairs": 6,
+        "worstPairPercent": 0.5722190781598746
+      },
+      "identicalProductControl": {
+        "baselineMedianMs": 1572.050000000003,
+        "bestPairPercent": -0.3945885005629646,
+        "candidateMedianMs": 1577.5999999999913,
+        "equalWorkPercent": 0.5528562467433717,
+        "fasterPairs": 3,
+        "pairedChangesPercent": [
+          -0.3945885005629646,
+          1.0167768174867087,
+          -0.31200254695920027,
+          1.4283859239021979,
+          -0.3229139757168653,
+          1.9157574219748952
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -0.35875123813991494,
+          1.6720716729385465
+        ],
+        "pairedMedianPercent": 0.3523871352637542,
+        "pairs": 6,
+        "worstPairPercent": 1.9157574219748952
+      }
+    },
+    "dictionary": "jitendex",
+    "exhaustiveMedia": {
+      "bytes": 4992155,
+      "files": 236,
+      "mode": "all",
+      "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402",
+      "totalBytes": 4992155,
+      "totalFiles": 236
+    },
+    "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+    "observationsReopened": 23,
+    "packageDifferences": [
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "rawReportValidator": "unchanged frozen benchmark-support.js",
+    "rawReportsRevalidated": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "B": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "C": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      }
+    },
+    "stage": "screen",
+    "status": "passed",
+    "storageBytesRange": [
+      67466332,
+      67466332
+    ],
+    "timedObservations": 18
+  },
+  "jmdict": {
+    "analysisRecomputedIndependently": true,
+    "comparisons": {
+      "candidate": {
+        "baselineMedianMs": 710.9000000000087,
+        "bestPairPercent": -6.24914535758383,
+        "candidateMedianMs": 699.4499999999971,
+        "equalWorkPercent": -1.25132306244915,
+        "fasterPairs": 4,
+        "pairedChangesPercent": [
+          0.7835874056154157,
+          2.1716649431203994,
+          -0.6670372429111282,
+          -6.24914535758383,
+          -1.4207342804943845,
+          -1.8005345336880696
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -4.02483994563595,
+          1.4776261743679076
+        ],
+        "pairedMedianPercent": -1.0438857617027564,
+        "pairs": 6,
+        "worstPairPercent": 2.1716649431203994
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 707.5999999999913,
+        "bestPairPercent": -4.883462819087558,
+        "candidateMedianMs": 699.4499999999971,
+        "equalWorkPercent": -1.573123270969523,
+        "fasterPairs": 5,
+        "pairedChangesPercent": [
+          0.511508951409545,
+          -1.8171493469603117,
+          -0.8874098724340418,
+          -4.883462819087558,
+          -1.3096746937035109,
+          -0.9927669834066011
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -3.350306083023935,
+          -0.1879504605122484
+        ],
+        "pairedMedianPercent": -1.151220838555056,
+        "pairs": 6,
+        "worstPairPercent": 0.511508951409545
+      },
+      "identicalProductControl": {
+        "baselineMedianMs": 710.9000000000087,
+        "bestPairPercent": -1.435799261592896,
+        "candidateMedianMs": 707.5999999999913,
+        "equalWorkPercent": 0.3269434317277886,
+        "fasterPairs": 3,
+        "pairedChangesPercent": [
+          0.27069383102924505,
+          4.062638499035298,
+          0.2223457476383972,
+          -1.435799261592896,
+          -0.11253340836214765,
+          -0.8158672105765041
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -1.1258332360847,
+          2.1666661650322716
+        ],
+        "pairedMedianPercent": 0.05490616963812478,
+        "pairs": 6,
+        "worstPairPercent": 4.062638499035298
+      }
+    },
+    "dictionary": "jmdict",
+    "exhaustiveMedia": {
+      "bytes": 0,
+      "files": 0,
+      "mode": "all",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "totalBytes": 0,
+      "totalFiles": 0
+    },
+    "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+    "observationsReopened": 23,
+    "packageDifferences": [
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "rawReportValidator": "unchanged frozen benchmark-support.js",
+    "rawReportsRevalidated": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "B": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "C": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      }
+    },
+    "stage": "screen",
+    "status": "passed",
+    "storageBytesRange": [
+      43520477,
+      43520477
+    ],
+    "timedObservations": 18
+  },
+  "vndb": {
+    "analysisRecomputedIndependently": true,
+    "comparisons": {
+      "candidate": {
+        "baselineMedianMs": 6593.849999999948,
+        "bestPairPercent": -7.602752847901062,
+        "candidateMedianMs": 6292.1999999999825,
+        "equalWorkPercent": -4.524360776066749,
+        "fasterPairs": 5,
+        "pairedChangesPercent": [
+          -5.282601217451299,
+          -5.527114574366021,
+          0.11355505086625417,
+          -7.602752847901062,
+          -3.825885649882055,
+          -4.802717936838851
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -6.564933711133541,
+          -1.8561652995079003
+        ],
+        "pairedMedianPercent": -5.042659577145075,
+        "pairs": 6,
+        "worstPairPercent": 0.11355505086625417
+      },
+      "candidateVsSecondBaseline": {
+        "baselineMedianMs": 6606.850000000006,
+        "bestPairPercent": -6.508354006635364,
+        "candidateMedianMs": 6292.1999999999825,
+        "equalWorkPercent": -4.250643211112781,
+        "fasterPairs": 6,
+        "pairedChangesPercent": [
+          -4.996999699970084,
+          -6.508354006635364,
+          -3.789577540586586,
+          -4.244238434870606,
+          -2.114400868082833,
+          -3.754879000780642
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -5.752676853302724,
+          -2.9346399344317375
+        ],
+        "pairedMedianPercent": -4.0169079877285965,
+        "pairs": 6,
+        "worstPairPercent": -2.114400868082833
+      },
+      "identicalProductControl": {
+        "baselineMedianMs": 6593.849999999948,
+        "bestPairPercent": -3.507375805001689,
+        "candidateMedianMs": 6606.850000000006,
+        "equalWorkPercent": -0.2858688289232747,
+        "fasterPairs": 4,
+        "pairedChangesPercent": [
+          -0.3006236819671493,
+          1.049547712892962,
+          4.056870858351536,
+          -3.507375805001689,
+          -1.7484541106937646,
+          -1.0887190178364592
+        ],
+        "pairedMedianBootstrap95Percent": [
+          -2.627914957847727,
+          2.553209285622249
+        ],
+        "pairedMedianPercent": -0.6946713499018042,
+        "pairs": 6,
+        "worstPairPercent": 4.056870858351536
+      }
+    },
+    "dictionary": "vndb",
+    "exhaustiveMedia": {
+      "bytes": 188131284,
+      "files": 146570,
+      "mode": "all",
+      "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb",
+      "totalBytes": 188131284,
+      "totalFiles": 146570
+    },
+    "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+    "observationsReopened": 23,
+    "packageDifferences": [
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "rawReportValidator": "unchanged frozen benchmark-support.js",
+    "rawReportsRevalidated": true,
+    "sourceIdentities": {
+      "A": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      },
+      "B": {
+        "commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "C": {
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+      }
+    },
+    "stage": "screen",
+    "status": "passed",
+    "storageBytesRange": [
+      609553611,
+      609553611
+    ],
+    "timedObservations": 18
+  }
+}

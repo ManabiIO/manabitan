@@ -1,0 +1,295 @@
+{
+    "schemaVersion": 1,
+    "recordedDate": "2026-11-25",
+    "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/899",
+    "purpose": "Correctness-only complete-corpus comparison for the frozen numeric scalar parser candidate",
+    "authoritativeTiming": false,
+    "performanceClaim": null,
+    "scope": {
+        "included": [
+            "Production parser output",
+            "Prepared lookup bytes and compact plans",
+            "Score, sequence and reading-equality columns",
+            "Canonical token-content bytes and hashes",
+            "Projected media-row fields and typed bytes"
+        ],
+        "excluded": [
+            "Worker IPC",
+            "Zstd compression",
+            "Persistence and OPFS",
+            "Browser restart",
+            "Media image-payload readback",
+            "Whole-process peak memory",
+            "Import latency"
+        ],
+        "grouping": "Fixed component groups, not a claim about production planner partitions",
+        "outputComparison": "SHA-256 of every covered emitted byte and row field plus exact counts; raw byte arrays are not retained"
+    },
+    "sources": {
+        "baseline": {
+            "root": "/workspace/scratch/ef009a302ea8/manabitan",
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+            "nativeSources": {
+                "digest": "51253be7b58d1481097e0a27a1f69183c6dd763dc22bc32de3238b71982efa20",
+                "count": 14
+            },
+            "hashes": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+                "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+                "ext/js/dictionary/term-lookup-scratch.js": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1",
+                "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+                "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+                "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "a2ef54fc8f66997097c49f2734e60544890f26f77223bbad0cafa82147e8b67d",
+                "dev/data/dictionary-wasm/manifest.json": "7c6182c253133ba34cc811c8f3c8b5d7838a9b896151119d303f4dc584e2df29"
+            },
+            "wasmSha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+        },
+        "candidate": {
+            "root": "/workspace/scratch/ef009a302ea8/jmdict-work",
+            "commit": "cc750d34d7672a25e8adb8660ab71cdfa6ba66a6",
+            "tree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5",
+            "nativeSources": {
+                "digest": "1eee8c0e70d8850796b705e72448d2016e26fdedf2f702746015781a3cbfd437",
+                "count": 14
+            },
+            "hashes": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+                "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+                "ext/js/dictionary/term-lookup-scratch.js": "59537b57b7c988558969bff26455901afb5710ea30bdc18afa24eb48c96aa7d1",
+                "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+                "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+                "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "3b99d08ca741fa798ac99887ec27f32176951d075085c58012901fb4e6998300",
+                "dev/data/dictionary-wasm/manifest.json": "ed70f88ff91009249f61af2a5e965377505e2872eafc0f279356f5963d4f9adc"
+            },
+            "wasmSha256": "b91dc90f9f42fe09f922d62cfc9f7788246d4c53c74d5373db4c671a174c5e0d"
+        },
+        "candidatePublishedCommit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+        "candidatePublishedTree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5"
+    },
+    "runtime": {
+        "node": "v22.22.0",
+        "nativeToolchain": {
+            "compilerVersion": "21.1.8",
+            "linkerVersion": "21.1.8"
+        },
+        "sourceBoundWasmValidated": true
+    },
+    "dictionaryLock": {
+        "path": "test/perf/dictionaries.lock.json",
+        "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "parserOptions": {
+        "singleChunk": true,
+        "emitTermByteLists": false,
+        "computeContentHashes": true,
+        "emitContentSlab": true,
+        "emitTokenBinaryContent": true,
+        "mediaHintFastScan": true,
+        "validateGlossaryTypes": true,
+        "prepareLookupIndexes": true
+    },
+    "maximumSourceGroupBytes": 67108864,
+    "runner": {
+        "preservedPath": "numeric-corpus-parity-resume-runner.mjs.txt",
+        "preservedBytes": 13077,
+        "preservedSha256": "2fa14d162d57557000516cb00635889781a975d3dbd364bc58591e01683777b5",
+        "originalExecutionPath": "/workspace/scratch/ef009a302ea8/numeric-corpus-parity.mjs",
+        "archiveNotice": "Exact execution source retained as text. Its absolute worktree paths and relative imports refer to the original scratch layout; it is not a relocatable CLI.",
+        "originalSha256RecordedByReports": "63999e7f071c99b8ca4efdf5344b4e0dc38fa8c8126e9e0cec7461b363f1ec0b",
+        "originalSourcePreserved": false,
+        "originalSourceSearch": {
+            "root": "/workspace/scratch/ef009a302ea8",
+            "includedIgnoredFiles": true,
+            "excluded": [
+                "node_modules",
+                ".git"
+            ],
+            "candidateNames": [
+                "*numeric*",
+                "*parity*"
+            ],
+            "result": "Only the resume runner and its exact preserved copy were found; no untouched original runner source was recovered."
+        },
+        "provenanceLimitation": "The source for the runner used for all Jitendex groups and the first 15 VNDB groups was overwritten when resume support was added. Its recorded hash is retained, but the old source is unavailable and was not reconstructed or claimed to have been archived."
+    },
+    "dictionaries": {
+        "jitendex": {
+            "archive": {
+                "cacheFile": "jitendex-yomitan.zip",
+                "bytes": 38831822,
+                "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356"
+            },
+            "reportArtifact": "numeric-jitendex-corpus-parity.json",
+            "summary": {
+                "banks": 219,
+                "groups": 22,
+                "rows": 436555,
+                "sourceBytes": 538927310,
+                "indexBytes": 20078148,
+                "digest": "1d18ee585ea4f2e3ac9720d6ec0f578390408d9ccf35dffae0fb3e84e83d6e3f",
+                "allEqual": true
+            },
+            "complete": true,
+            "maximumBanksPerGroup": 10,
+            "counters": {
+                "baseline": {
+                    "fusedParseAttempts": 22,
+                    "fusedParseFallbacks": 0,
+                    "mediaRows": 339,
+                    "maximumIndividualParserWasmHeapBytes": 89063424
+                },
+                "candidate": {
+                    "fusedParseAttempts": 22,
+                    "fusedParseFallbacks": 0,
+                    "mediaRows": 339,
+                    "maximumIndividualParserWasmHeapBytes": 89063424
+                }
+            },
+            "counterNotice": "Media rows are projected term rows, not distinct images. Individual parser heap maxima are diagnostics, not whole-process memory measurements.",
+            "consecutiveBankCoverageIndependentlyVerified": true,
+            "exactLockedRowTotalVerified": true
+        },
+        "vndb": {
+            "archive": {
+                "cacheFile": "vndb_characters_by_bee.zip",
+                "bytes": 291705969,
+                "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+            },
+            "reportArtifact": "numeric-vndb-corpus-parity.json",
+            "summary": {
+                "banks": 665,
+                "groups": 84,
+                "rows": 6648310,
+                "sourceBytes": 4267992967,
+                "indexBytes": 353523608,
+                "digest": "05942aee301c1f8e7bb434c701132d1856353a8e692d083b3163cb32396c494a",
+                "allEqual": true,
+                "consecutiveBankCoverageVerified": true
+            },
+            "complete": true,
+            "maximumBanksPerGroup": 8,
+            "counters": {
+                "baseline": {
+                    "fusedParseAttempts": 83,
+                    "fusedParseFallbacks": 24,
+                    "mediaRows": 146645,
+                    "maximumIndividualParserWasmHeapBytes": 88801280
+                },
+                "candidate": {
+                    "fusedParseAttempts": 83,
+                    "fusedParseFallbacks": 24,
+                    "mediaRows": 146645,
+                    "maximumIndividualParserWasmHeapBytes": 88801280
+                }
+            },
+            "counterNotice": "Media rows are projected term rows, not distinct images. Individual parser heap maxima are diagnostics, not whole-process memory measurements.",
+            "consecutiveBankCoverageIndependentlyVerified": true,
+            "exactLockedRowTotalVerified": true
+        }
+    },
+    "recovery": {
+        "error": "ENOSPC while checkpointing the original VNDB pass",
+        "partialArtifact": "numeric-vndb-corpus-parity-enospc.partial.json",
+        "partialOriginalSha256": "a21cdb5902c80df8f53d92f1558f4306cb860f6377e7ef1fe1b5d83c17235cc4",
+        "recoveredCompleteGroups": 15,
+        "recoveredBanks": "1..120",
+        "recoveredRows": 1200000,
+        "resumedGroups": 69,
+        "resumedBanks": "121..665",
+        "resumedRows": 5448310,
+        "incompleteGroupReprocessed": true,
+        "originalGroupObjectsVerifiedAgainstPartialArtifact": true,
+        "resumeRequiresMatchingIdentities": [
+            "dictionary",
+            "baseline",
+            "candidate",
+            "dictionaryLockSha256",
+            "archiveSha256",
+            "archiveBytes",
+            "options",
+            "maxFilesPerGroup",
+            "maxSourceGroupBytes"
+        ],
+        "resumeChanges": [
+            "Atomic report checkpoints",
+            "Explicit per-group runner provenance",
+            "Validation of recovered consecutive banks",
+            "Final exact source byte total and consecutive bank coverage checks"
+        ],
+        "attempts": [
+            {
+                "runnerSha256": "63999e7f071c99b8ca4efdf5344b4e0dc38fa8c8126e9e0cec7461b363f1ec0b",
+                "status": "interrupted-enospc",
+                "recordedGroups": 15
+            },
+            {
+                "runnerSha256": "2fa14d162d57557000516cb00635889781a975d3dbd364bc58591e01683777b5",
+                "status": "complete",
+                "resumedAfterGroups": 15
+            }
+        ]
+    },
+    "artifacts": {
+        "numeric-jitendex-corpus-parity.json": {
+            "path": "raw/numeric-jitendex-corpus-parity.json.gz",
+            "encoding": "gzip",
+            "compressedBytes": 14303,
+            "compressedSha256": "4fa110c6e29c10b4e386db9482a65d8192c6b57d8d73076658fe6ea40a5ebf4e",
+            "originalBytes": 58551,
+            "originalSha256": "748b175373a6861aa49206d04e748aa94b65d44a56dec524f5a88f1d962ae191"
+        },
+        "numeric-vndb-corpus-parity.json": {
+            "path": "raw/numeric-vndb-corpus-parity.json.gz",
+            "encoding": "gzip",
+            "compressedBytes": 40819,
+            "compressedSha256": "b455728d2072d06b103fdcab055bc9401ddb8e5c50c10938698502ef4b229765",
+            "originalBytes": 190559,
+            "originalSha256": "10131ec18947e822fc9b71add6c21ee118c1ec8cf7d7da2c0d1cd40d446b59cf"
+        },
+        "numeric-vndb-corpus-parity-enospc.partial.json": {
+            "path": "raw/numeric-vndb-corpus-parity-enospc.partial.json.gz",
+            "encoding": "gzip",
+            "compressedBytes": 9051,
+            "compressedSha256": "a05fd742e3207a8bce194a644d91e268a74ddf3ce7c3394062f9b5a2ec43cc72",
+            "originalBytes": 36864,
+            "originalSha256": "a21cdb5902c80df8f53d92f1558f4306cb860f6377e7ef1fe1b5d83c17235cc4"
+        },
+        "numeric-jitendex-corpus-parity.log": {
+            "path": "raw/numeric-jitendex-corpus-parity.log.gz",
+            "encoding": "gzip",
+            "compressedBytes": 510,
+            "compressedSha256": "09c49a0f19881b5f739af4e26f65802a1e861ba53863e4214bf435fb3b63ae15",
+            "originalBytes": 2308,
+            "originalSha256": "44ffad7519910551ce6629e18bbc513ba4b50ed4b6694e090b8f642b2d0e26a4"
+        },
+        "numeric-vndb-corpus-parity.log": {
+            "path": "raw/numeric-vndb-corpus-parity.log.gz",
+            "encoding": "gzip",
+            "compressedBytes": 567,
+            "compressedSha256": "258003fdf4fd39f905d4549c2844ac591b12f519499d50024b3a35399400f8e6",
+            "originalBytes": 1832,
+            "originalSha256": "2066c24b5be1248ea9035150bfcf576122d56a26b7c4a45ef2ce986e8d780af1"
+        },
+        "numeric-vndb-corpus-parity-resume.log": {
+            "path": "raw/numeric-vndb-corpus-parity-resume.log.gz",
+            "encoding": "gzip",
+            "compressedBytes": 957,
+            "compressedSha256": "d1c596d42d429d41855dfcbb5bc5c5467a5fef7398305daf504d1fc0c1f7e142",
+            "originalBytes": 6396,
+            "originalSha256": "15e71a26d85128f977bf6ee644ba7e3e63f97b4f2d050b106840cbb26336625a"
+        }
+    },
+    "postRunVerification": {
+        "exactConsecutiveBankNames": true,
+        "exactLockedRowTotals": true,
+        "groupSourceByteTotals": true,
+        "allBaselineCandidateGroupObservationsEqual": true,
+        "aggregateOutputDigestsRecomputed": true,
+        "first15VndbGroupObjectsMatchPreservedPartialArtifact": true,
+        "archivedBytesMatchOriginalHashes": true
+    },
+    "qualificationStatus": "Component correctness observations only. Does not establish browser correctness, complete-import performance, memory non-regression, or promotion readiness."
+}

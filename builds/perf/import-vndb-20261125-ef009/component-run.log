@@ -1,0 +1,33 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"stage":"oracle","groups":20,"of":170,"rows":800000,"mediaRows":17231,"accepted":17231}
+{"stage":"oracle","groups":40,"of":170,"rows":1600000,"mediaRows":34016,"accepted":34016}
+{"stage":"oracle","groups":60,"of":170,"rows":2400000,"mediaRows":50952,"accepted":50952}
+{"stage":"oracle","groups":80,"of":170,"rows":3200000,"mediaRows":67474,"accepted":67474}
+{"stage":"oracle","groups":100,"of":170,"rows":4000000,"mediaRows":84920,"accepted":84920}
+{"stage":"oracle","groups":120,"of":170,"rows":4800000,"mediaRows":103102,"accepted":103102}
+{"stage":"oracle","groups":140,"of":170,"rows":5570000,"mediaRows":119185,"accepted":119185}
+{"stage":"oracle","groups":160,"of":170,"rows":6300000,"mediaRows":137454,"accepted":137454}
+{"stage":"oracle","groups":170,"of":170,"rows":6648310,"mediaRows":146725,"accepted":146725}
+{"arm":"A","phase":"warmup","block":-1,"elapsedMs":1017.8456740000001,"cpuUserMs":974.851,"cpuSystemMs":67.777,"checksum":17797303}
+{"arm":"B","phase":"warmup","block":-1,"elapsedMs":675.3495779999976,"cpuUserMs":645.583,"cpuSystemMs":3.822,"checksum":17797303}
+{"arm":"C","phase":"warmup","block":-1,"elapsedMs":1102.5210750000006,"cpuUserMs":1091.859,"cpuSystemMs":49.762,"checksum":17797303}
+{"arm":"A","phase":"timed","block":0,"elapsedMs":1180.521013999998,"cpuUserMs":1212.203,"cpuSystemMs":49.631,"checksum":17797303}
+{"arm":"B","phase":"timed","block":0,"elapsedMs":751.5814129999999,"cpuUserMs":681.019,"cpuSystemMs":0,"checksum":17797303}
+{"arm":"C","phase":"timed","block":0,"elapsedMs":1078.158150000003,"cpuUserMs":1150.323,"cpuSystemMs":39.394,"checksum":17797303}
+{"arm":"B","phase":"timed","block":1,"elapsedMs":493.27713799999765,"cpuUserMs":454.694,"cpuSystemMs":8.018,"checksum":17797303}
+{"arm":"C","phase":"timed","block":1,"elapsedMs":890.9296219999997,"cpuUserMs":946.115,"cpuSystemMs":30.03,"checksum":17797303}
+{"arm":"A","phase":"timed","block":1,"elapsedMs":1106.935145000003,"cpuUserMs":1216.215,"cpuSystemMs":78.03,"checksum":17797303}
+{"arm":"C","phase":"timed","block":2,"elapsedMs":872.6325140000008,"cpuUserMs":938.625,"cpuSystemMs":40.638,"checksum":17797303}
+{"arm":"A","phase":"timed","block":2,"elapsedMs":730.8232210000024,"cpuUserMs":758.955,"cpuSystemMs":43.049,"checksum":17797303}
+{"arm":"B","phase":"timed","block":2,"elapsedMs":1162.3419790000007,"cpuUserMs":1167.967,"cpuSystemMs":0.206,"checksum":17797303}
+{"arm":"A","phase":"timed","block":3,"elapsedMs":807.2258289999991,"cpuUserMs":850.637,"cpuSystemMs":60.731,"checksum":17797303}
+{"arm":"C","phase":"timed","block":3,"elapsedMs":795.0212979999997,"cpuUserMs":850.716,"cpuSystemMs":57.64,"checksum":17797303}
+{"arm":"B","phase":"timed","block":3,"elapsedMs":574.4139119999963,"cpuUserMs":571.658,"cpuSystemMs":4.683,"checksum":17797303}
+{"arm":"C","phase":"timed","block":4,"elapsedMs":2232.101923999995,"cpuUserMs":2652.412,"cpuSystemMs":98.025,"checksum":17797303}
+{"arm":"B","phase":"timed","block":4,"elapsedMs":547.8959019999966,"cpuUserMs":544.513,"cpuSystemMs":3.441,"checksum":17797303}
+{"arm":"A","phase":"timed","block":4,"elapsedMs":866.0740219999934,"cpuUserMs":945.171,"cpuSystemMs":23.26,"checksum":17797303}
+{"arm":"B","phase":"timed","block":5,"elapsedMs":720.743226999999,"cpuUserMs":678.255,"cpuSystemMs":12.791,"checksum":17797303}
+{"arm":"A","phase":"timed","block":5,"elapsedMs":1006.956975000001,"cpuUserMs":1057.466,"cpuSystemMs":22.869,"checksum":17797303}
+{"arm":"C","phase":"timed","block":5,"elapsedMs":954.8433460000015,"cpuUserMs":1029.684,"cpuSystemMs":32.648,"checksum":17797303}
+{"complete":true,"rows":6648310,"mediaRows":146725,"accepted":146725,"fallback":0,"glossaryBytes":84398732,"baselineDecode":{"calls":146725,"bytes":84398732,"shared":0},"candidateDecode":{"calls":146725,"bytes":2684628,"shared":0},"comparisons":{"BA":{"pairs":[{"block":0,"numeratorMs":751.5814129999999,"denominatorMs":1180.521013999998,"changePercent":-36.33477048804139},{"block":1,"numeratorMs":493.27713799999765,"denominatorMs":1106.935145000003,"changePercent":-55.43757552299993},{"block":2,"numeratorMs":1162.3419790000007,"denominatorMs":730.8232210000024,"changePercent":59.04557293753492},{"block":3,"numeratorMs":574.4139119999963,"denominatorMs":807.2258289999991,"changePercent":-28.84098955163673},{"block":4,"numeratorMs":547.8959019999966,"denominatorMs":866.0740219999934,"changePercent":-36.737982195244655},{"block":5,"numeratorMs":720.743226999999,"denominatorMs":1006.956975000001,"changePercent":-28.423632300675173}],"pairedMedianPercent":-32.58788001983906,"equalWorkPercent":-25.414994002760004},"BC":{"pairs":[{"block":0,"numeratorMs":751.5814129999999,"denominatorMs":1078.158150000003,"changePercent":-30.29024424663508},{"block":1,"numeratorMs":493.27713799999765,"denominatorMs":890.9296219999997,"changePercent":-44.63343390775732},{"block":2,"numeratorMs":1162.3419790000007,"denominatorMs":872.6325140000008,"changePercent":33.19948092147293},{"block":3,"numeratorMs":574.4139119999963,"denominatorMs":795.0212979999997,"changePercent":-27.74861334595383},{"block":4,"numeratorMs":547.8959019999966,"denominatorMs":2232.101923999995,"changePercent":-75.45381346125313},{"block":5,"numeratorMs":720.743226999999,"denominatorMs":954.8433460000015,"changePercent":-24.517123147025842}],"pairedMedianPercent":-29.019428796294456,"equalWorkPercent":-37.71323828395613},"CA":{"pairs":[{"block":0,"numeratorMs":1078.158150000003,"denominatorMs":1180.521013999998,"changePercent":-8.670990417456082},{"block":1,"numeratorMs":890.9296219999997,"denominatorMs":1106.935145000003,"changePercent":-19.51383728086462},{"block":2,"numeratorMs":872.6325140000008,"denominatorMs":730.8232210000024,"changePercent":19.404048602336065},{"block":3,"numeratorMs":795.0212979999997,"denominatorMs":807.2258289999991,"changePercent":-1.51191036777385},{"block":4,"numeratorMs":2232.101923999995,"denominatorMs":866.0740219999934,"changePercent":157.7264607066129},{"block":5,"numeratorMs":954.8433460000015,"denominatorMs":1006.956975000001,"changePercent":-5.175358063337255}],"pairedMedianPercent":-3.3436342155555523,"equalWorkPercent":19.744555572277143}}}

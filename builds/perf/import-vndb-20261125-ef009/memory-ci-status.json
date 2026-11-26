@@ -1,0 +1,723 @@
+{
+    "schemaVersion": 1,
+    "observedAtUtc": "2026-11-25 16:23:04 UTC",
+    "repository": "ManabiIO/manabitan",
+    "runId": 45646484626,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/45646484626",
+    "name": "Import memory qualification ef009",
+    "status": "completed",
+    "conclusion": "failure",
+    "head": "57590f5eaee359d721ba9d5d8bde28728a8d172e",
+    "tree": "1be0798152baa751fd22a4bbd8f4b6a48c21be08",
+    "attempt": 1,
+    "createdAt": "2026-11-25T15:33:23Z",
+    "updatedAt": "2026-11-25T16:18:43Z",
+    "startedAt": "2026-11-25T15:33:23Z",
+    "successfulJobs": 5,
+    "failedJobs": 1,
+    "jobs": [
+        {
+            "id": 139318748616,
+            "name": "media memory jmdict host 1",
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Verify observer coverage, clocks, overlays, and fixed protocol",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Install pinned Chromium",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Fetch frozen media candidate",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Execute all four predetermined memory observations",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain compact memory summary",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain exact packages, raw scans, and every failure",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success"
+                }
+            ]
+        },
+        {
+            "id": 139318749050,
+            "name": "media memory vndb host 1",
+            "status": "completed",
+            "conclusion": "failure",
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Verify observer coverage, clocks, overlays, and fixed protocol",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Install pinned Chromium",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Fetch frozen media candidate",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Execute all four predetermined memory observations",
+                    "status": "completed",
+                    "conclusion": "failure"
+                },
+                {
+                    "name": "Retain compact memory summary",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain exact packages, raw scans, and every failure",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Restore source archives",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success"
+                }
+            ]
+        },
+        {
+            "id": 139318749084,
+            "name": "media memory jitendex host 2",
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Verify observer coverage, clocks, overlays, and fixed protocol",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Install pinned Chromium",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Fetch frozen media candidate",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Execute all four predetermined memory observations",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain compact memory summary",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain exact packages, raw scans, and every failure",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success"
+                }
+            ]
+        },
+        {
+            "id": 139318749108,
+            "name": "media memory vndb host 2",
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Verify observer coverage, clocks, overlays, and fixed protocol",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Install pinned Chromium",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Fetch frozen media candidate",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Execute all four predetermined memory observations",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain compact memory summary",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain exact packages, raw scans, and every failure",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success"
+                }
+            ]
+        },
+        {
+            "id": 139318749115,
+            "name": "media memory jmdict host 2",
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Verify observer coverage, clocks, overlays, and fixed protocol",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Install pinned Chromium",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Fetch frozen media candidate",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Execute all four predetermined memory observations",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain compact memory summary",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain exact packages, raw scans, and every failure",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success"
+                }
+            ]
+        },
+        {
+            "id": 139318749182,
+            "name": "media memory jitendex host 1",
+            "status": "completed",
+            "conclusion": "success",
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Verify observer coverage, clocks, overlays, and fixed protocol",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Install pinned Chromium",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Fetch frozen media candidate",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Execute all four predetermined memory observations",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain compact memory summary",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Retain exact packages, raw scans, and every failure",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Restore source archives",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success"
+                }
+            ]
+        }
+    ],
+    "artifacts": [
+        {
+            "id": 15041851355,
+            "name": "import-memory-summary-ef009-vndb-1",
+            "size_in_bytes": 4338,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041851355",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15041851355/zip",
+            "expired": false,
+            "created_at": "2026-11-25T16:18:36Z",
+            "expires_at": "2026-12-09T16:18:35Z",
+            "updated_at": "2026-11-25T16:18:36Z",
+            "digest": "sha256:66ffcb9dd804f9cbdf2d65fc2f9528e40880abf5eb8d41cd294beb4b6cb7aeb8",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15040177878,
+            "name": "import-memory-ef009-vndb-1",
+            "size_in_bytes": 34276643,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040177878",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040177878/zip",
+            "expired": false,
+            "created_at": "2026-11-25T16:18:39Z",
+            "expires_at": "2026-12-09T16:18:37Z",
+            "updated_at": "2026-11-25T16:18:39Z",
+            "digest": "sha256:fd9464f15d4848a7a37ba0690d9540b2db95e2344fa7227a38e8ccc5271e4873",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15040025573,
+            "name": "import-memory-ef009-jmdict-2",
+            "size_in_bytes": 34140177,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040025573",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040025573/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:56:38Z",
+            "expires_at": "2026-12-09T15:56:35Z",
+            "updated_at": "2026-11-25T15:56:38Z",
+            "digest": "sha256:e5bdc66406d34da0516c4ae8b5df3635ad7aa13702f913d2b671a9a539b951a9",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15039794809,
+            "name": "import-memory-summary-ef009-vndb-2",
+            "size_in_bytes": 4324,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039794809",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039794809/zip",
+            "expired": false,
+            "created_at": "2026-11-25T16:12:44Z",
+            "expires_at": "2026-12-09T16:12:44Z",
+            "updated_at": "2026-11-25T16:12:44Z",
+            "digest": "sha256:f17924e406db744ebc4cfc348357a4a9d66264427b89e45559976dc643e71415",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15039734990,
+            "name": "import-memory-ef009-vndb-2",
+            "size_in_bytes": 34233322,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039734990",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039734990/zip",
+            "expired": false,
+            "created_at": "2026-11-25T16:12:46Z",
+            "expires_at": "2026-12-09T16:12:44Z",
+            "updated_at": "2026-11-25T16:12:46Z",
+            "digest": "sha256:9f05a7555410bf1830185fc478c93fda975c40b38430adca322ae97b733448b7",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15039358218,
+            "name": "import-memory-summary-ef009-jitendex-2",
+            "size_in_bytes": 4378,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039358218",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039358218/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:55:53Z",
+            "expires_at": "2026-12-09T15:55:52Z",
+            "updated_at": "2026-11-25T15:55:53Z",
+            "digest": "sha256:74a2e21ca89c8e4ef5bb1a478c509fc27b040c389aff3ba32047b43b93d5649d",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15038718992,
+            "name": "import-memory-ef009-jitendex-2",
+            "size_in_bytes": 34175754,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038718992",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038718992/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:55:57Z",
+            "expires_at": "2026-12-09T15:55:54Z",
+            "updated_at": "2026-11-25T15:55:57Z",
+            "digest": "sha256:e48dab45c4f7aec318e201843f0071bbf0ecec2933f875f4a5da3bb96de22b78",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15038619062,
+            "name": "import-memory-ef009-jmdict-1",
+            "size_in_bytes": 34081031,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038619062",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038619062/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:56:19Z",
+            "expires_at": "2026-12-09T15:56:17Z",
+            "updated_at": "2026-11-25T15:56:19Z",
+            "digest": "sha256:0a7cd5d6d8415aa1accd5aaa2e83ab5961eaadc6ed6f7c4d3f3c0b4f6886656f",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15038273991,
+            "name": "import-memory-summary-ef009-jmdict-1",
+            "size_in_bytes": 4268,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038273991",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038273991/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:56:17Z",
+            "expires_at": "2026-12-09T15:56:16Z",
+            "updated_at": "2026-11-25T15:56:17Z",
+            "digest": "sha256:91cce912a3286a0b56e3abc4505d4d541320d758316f482a03cb6a582b963210",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15038264134,
+            "name": "import-memory-summary-ef009-jmdict-2",
+            "size_in_bytes": 4276,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038264134",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038264134/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:56:35Z",
+            "expires_at": "2026-12-09T15:56:34Z",
+            "updated_at": "2026-11-25T15:56:35Z",
+            "digest": "sha256:bc1f1b6da410328c8e2c6154ed8bb273d65a4897c2bf7856bc8eec1b4a4563f8",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15038104755,
+            "name": "import-memory-summary-ef009-jitendex-1",
+            "size_in_bytes": 4371,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038104755",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038104755/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:58:12Z",
+            "expires_at": "2026-12-09T15:58:11Z",
+            "updated_at": "2026-11-25T15:58:12Z",
+            "digest": "sha256:b5971839fedef0fcb1bdb22375b9136663a486faef30eefd4cdd993afcf06327",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        },
+        {
+            "id": 15038074916,
+            "name": "import-memory-ef009-jitendex-1",
+            "size_in_bytes": 34101739,
+            "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038074916",
+            "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038074916/zip",
+            "expired": false,
+            "created_at": "2026-11-25T15:58:14Z",
+            "expires_at": "2026-12-09T15:58:12Z",
+            "updated_at": "2026-11-25T15:58:14Z",
+            "digest": "sha256:64bf547fdf802a1f77b47a276bc586fe36c9fa19245c5dffebe41b5df6772293",
+            "workflow_run": {
+                "id": 45646484626,
+                "repository_id": 1165902460,
+                "head_repository_id": 1165902460,
+                "head_branch": "codex/import-memory-20261125-ef009",
+                "head_sha": "57590f5eaee359d721ba9d5d8bde28728a8d172e"
+            }
+        }
+    ],
+    "decision": {
+        "qualified": false,
+        "acquisitionComplete": true,
+        "reason": "VNDB host 1 candidate B1 violates the frozen maximum covered-scan gap: 254.998740 ms > 250 ms. Its maxima and pair 1 remain null; no observation was replaced or excluded, and no threshold was adjusted."
+    }
+}

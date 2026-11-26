@@ -1,0 +1,537 @@
+#!/usr/bin/env python3
+"""Independent read-only audit of the frozen nine-cell import screen."""
+
+import gzip
+import hashlib
+import json
+import math
+from pathlib import Path
+import statistics
+import subprocess
+import tarfile
+
+
+ROOT = Path('/workspace/scratch/ef009a302ea8/qualification-work')
+EVIDENCE = ROOT / 'builds/perf/import-screen-20261125-ef009'
+OUTPUT = Path('/workspace/scratch/ef009a302ea8/import-screen-independent-audit.json')
+BASE = '7d1643e6147a10cb2165e9744cf0e63b59e46632'
+WORKFLOW = '863bda45046ba0bf0c778008d0fb30e65b7f0669'
+RUN_ID = '45644488882'
+CANDIDATES = {
+    'integer-fields': ('6d3d06408280e0f5d4437186c07b1d93429e2180', 'jmdict'),
+    'structured-metadata-keys': ('36fd7a27b7aa631fc8aa20bd70a9f125850499cb', 'jitendex'),
+    'single-image-projection': ('2af6593a6e3631cbddff736bf2280f0fd40c2a69', 'vndb'),
+}
+ORDERS = ('ABC', 'BCA', 'CAB', 'ACB', 'CBA', 'BAC')
+THRESHOLDS = {
+    'targetMinimumReductionPercent': 5,
+    'targetMinimumFasterPairs': 5,
+    'nonTargetMaximumRegressionPercent': 3,
+}
+EXPECTED = {(candidate, dictionary) for candidate in CANDIDATES for dictionary in ('jmdict', 'jitendex', 'vndb')}
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git_bytes(commit, path):
+    return subprocess.check_output(['git', 'show', f'{commit}:{path}'], cwd=ROOT)
+
+
+def tree(commit):
+    return subprocess.check_output(['git', 'rev-parse', f'{commit}^{{tree}}'], cwd=ROOT, text=True).strip()
+
+
+PROTOCOL_BYTES = git_bytes(WORKFLOW, 'dev/perf/import-qualification-ef009.json')
+PROTOCOL = json.loads(PROTOCOL_BYTES)
+RUNNER_BYTES = git_bytes(WORKFLOW, 'dev/perf/qualify-import-ef009.py')
+LOCK_BYTES = git_bytes(BASE, 'test/perf/dictionaries.lock.json')
+LOCK = json.loads(LOCK_BYTES)['dictionaries']
+TREES = {commit: tree(commit) for commit in [BASE] + [value[0] for value in CANDIDATES.values()]}
+HARNESS_PATHS = (
+    'package-lock.json', 'test/perf/dictionaries.lock.json',
+    'dev/perf/benchmark-support.js', 'dev/perf/dictionary-fixtures.js',
+    'dev/perf/import-benchmark.js', 'test/e2e/import-timing.js',
+    'test/chromium/extension-two-dictionary-import.e2e.js',
+)
+HARNESS = {path: sha(git_bytes(BASE, path)) for path in HARNESS_PATHS}
+FULL_SOURCE_HASHES = {
+    **HARNESS,
+    **{path: sha(git_bytes(BASE, path)) for path in (
+        'test/chromium/import-flags-ab-benchmark.js',
+        'ext/js/pages/settings/dictionary-import-controller.js',
+    )},
+}
+for commit, _ in CANDIDATES.values():
+    assert {path: sha(git_bytes(commit, path)) for path in HARNESS_PATHS} == HARNESS
+assert PROTOCOL['base'] == BASE
+assert PROTOCOL['thresholds'] == THRESHOLDS
+assert PROTOCOL['orders'][0] == list(ORDERS)
+assert PROTOCOL['warmups'][0] == 'ABC'
+assert PROTOCOL['browserVersion'] == '153.0.8010.12'
+assert PROTOCOL['stage'] == 'single-host-screen'
+assert PROTOCOL['replicasPerCandidateDictionary'] == 1
+for name, (commit, target) in CANDIDATES.items():
+    assert PROTOCOL['candidates'][name]['commit'] == commit
+    assert PROTOCOL['candidates'][name]['targetDictionaries'] == [target]
+
+
+def close(actual, expected):
+    assert math.isclose(actual, expected, rel_tol=0, abs_tol=1e-10), (actual, expected)
+
+
+def audit_summary(path, retrieval):
+    packed = path.read_bytes()
+    raw = gzip.decompress(packed)
+    assert len(raw) == retrieval['originalBytes']
+    assert sha(raw) == retrieval['originalSha256']
+    assert len(packed) == retrieval['compressedBytes']
+    assert sha(packed) == retrieval['compressedSha256']
+    data = json.loads(raw)
+    name, dictionary = data['candidate'], data['dictionary']
+    assert (name, dictionary) in EXPECTED
+    assert data['replica'] == 0 and data['prepareOnly'] is False
+    assert data['stage'] == 'single-host-screen'
+    assert data['status'] == 'complete' and data['error'] is None
+    assert data['protocol'] == PROTOCOL
+    assert data['fixture'] == LOCK[dictionary]
+    execution = data['execution']
+    assert execution == {
+        'candidate': name, 'dictionary': dictionary, 'replica': 0,
+        'workflowCommit': WORKFLOW, 'protocolSha256': sha(PROTOCOL_BYTES),
+        'runnerSha256': sha(RUNNER_BYTES), 'runId': RUN_ID, 'runAttempt': '1',
+    }
+    artifact = retrieval['artifact']
+    assert artifact['workflow_run']['head_sha'] == WORKFLOW
+    assert str(artifact['workflow_run']['id']) == RUN_ID
+    assert artifact['name'] == f'import-screen-summary-ef009-{name}-{dictionary}-0'
+    assert artifact['expired'] is False
+
+    packages = data['packages']
+    assert set(packages) == {'A', 'B', 'C'}
+    for arm in 'ABC':
+        receipt = packages[arm]
+        expected_commit = CANDIDATES[name][0] if arm == 'B' else BASE
+        assert receipt['sourceCommit'] == expected_commit
+        assert receipt['sourceTree'] == TREES[expected_commit]
+        assert receipt['harnessSha256'] == HARNESS
+        assert receipt['generatedLibrariesShared'] is True
+        assert receipt['nativeModulesRestoredFromOwnManifest'] is True
+        assert len(receipt['packageSha256']) == 64
+    assert packages['C'] == {**packages['A'], 'identicalTo': 'A'}
+    assert packages['A']['packageSha256'] != packages['B']['packageSha256']
+    assert data['packageDelta'] == sorted(PROTOCOL['candidates'][name]['packagedDelta'])
+
+    expected = [
+        {'name': f'warmup-{arm}', 'arm': arm, 'phase': 'warmup', 'media': 'sample'}
+        for arm in 'ABC'
+    ]
+    for cohort, order in enumerate(ORDERS):
+        expected += [
+            {'name': f'cohort-{cohort}-{arm}', 'arm': arm, 'phase': 'timed', 'cohort': cohort, 'media': 'sample'}
+            for arm in order
+        ]
+    expected += [
+        {'name': f'all-media-{arm}', 'arm': arm, 'phase': 'validation', 'media': 'all'}
+        for arm in 'AB'
+    ]
+    observations, proofs = data['observations'], data['semanticProofs']
+    assert data['scheduledObservationCount'] == len(observations) == len(proofs) == len(expected) == 23
+    assert [row['name'] for row in observations] == [row['name'] for row in expected]
+    assert [row['name'] for row in proofs] == [row['name'] for row in expected]
+    assert len({row['name'] for row in observations}) == 23
+    for row, proof, scheduled in zip(observations, proofs, expected):
+        assert all(row[key] == value for key, value in scheduled.items())
+        assert row['status'] == 'success' and 'error' not in row
+        assert row['sourceCommit'] == packages[row['arm']]['sourceCommit']
+        assert row['packageSha256'] == packages[row['arm']]['packageSha256']
+        assert math.isfinite(row['totalImportMs']) and row['totalImportMs'] > 0
+        assert math.isfinite(row['workerImportMs']) and row['workerImportMs'] > 0
+        assert proof['publicLookupObservationCount'] == 72
+        assert proof['distinctProbeCount'] == 12
+        assert proof['termRows'] == LOCK[dictionary]['termRows']
+        assert proof['contentReadable'] is True and proof['restartContentReadable'] is True
+        media = proof['media']
+        assert media['mode'] == scheduled['media']
+        assert media['totalFiles'] == LOCK[dictionary]['mediaFiles']
+        assert media['totalBytes'] == LOCK[dictionary]['mediaBytes']
+        assert 0 <= media['files'] <= media['totalFiles']
+        assert 0 <= media['bytes'] <= media['totalBytes']
+        if scheduled['media'] == 'all':
+            assert media['files'] == media['totalFiles']
+            assert media['bytes'] == media['totalBytes']
+    assert len({proof['publicResultSha256'] for proof in proofs}) == 1
+    for mode in ('sample', 'all'):
+        selected = [proof for proof in proofs if proof['media']['mode'] == mode]
+        assert len({proof['semanticReceiptSha256'] for proof in selected}) == 1
+        assert len({json.dumps(proof['media'], sort_keys=True) for proof in selected}) == 1
+
+    cohorts = [{row['arm']: row['totalImportMs'] for row in observations if row.get('cohort') == i} for i in range(6)]
+    assert sum(row['phase'] == 'timed' for row in observations) == 18
+    ratios = {key: [] for key in ('BvsA', 'BvsC', 'CvsA')}
+    analysis = data['analysis']
+    assert analysis['complete'] is True and analysis['failures'] == []
+    assert len(analysis['pairs']) == 6
+    for i, times in enumerate(cohorts):
+        assert set(times) == {'A', 'B', 'C'}
+        recorded = analysis['pairs'][i]
+        assert recorded['cohort'] == i and recorded['qualified'] is True
+        assert recorded['ms'] == times
+        for key, treatment, control in [('BvsA', 'B', 'A'), ('BvsC', 'B', 'C'), ('CvsA', 'C', 'A')]:
+            value = 100 * (times[treatment] / times[control] - 1)
+            ratios[key].append(value)
+            close(recorded[key], value)
+    medians = {key: statistics.median(values) for key, values in ratios.items()}
+    faster = {key: sum(value < 0 for value in ratios[key]) for key in ('BvsA', 'BvsC')}
+    for key, value in medians.items():
+        close(analysis['medians'][key], value)
+    assert faster == analysis['fasterPairs']
+    target = dictionary == CANDIDATES[name][1]
+    passes = all(medians[key] <= -5 and faster[key] >= 5 for key in ('BvsA', 'BvsC')) if target else all(medians[key] <= 3 for key in ('BvsA', 'BvsC'))
+    assert analysis['performanceScreen'] == {'role': 'target' if target else 'non-target', 'passes': passes}
+    return {
+        'candidate': name, 'dictionary': dictionary, 'summarySha256': sha(raw),
+        'observationCount': 23, 'proofCount': 23, 'timedObservationCount': 18,
+        'role': 'target' if target else 'non-target', 'recomputedPairsPercent': ratios,
+        'recomputedMediansPercent': medians, 'recomputedFasterPairCounts': faster,
+        'recomputedFrozenGatePasses': passes,
+        'controlRangePercent': [min(ratios['CvsA']), max(ratios['CvsA'])],
+        'publicResultSha256': proofs[0]['publicResultSha256'],
+        'semanticReceiptSha256ByMediaMode': {mode: next(proof['semanticReceiptSha256'] for proof in proofs if proof['media']['mode'] == mode) for mode in ('sample', 'all')},
+        'mediaReadbackByMode': {mode: next(proof['media'] for proof in proofs if proof['media']['mode'] == mode) for mode in ('sample', 'all')},
+        'sourceTreeAndHarnessReceiptsVerified': True,
+        'artifactZipDigestVerifiedByRetriever': retrieval.get('artifactZipDigestVerified', False),
+        'pendingFullArtifactChecks': ['Observed browser/version/options', 'Host identity and distinct hosts', 'Actual package member maps', 'Underlying 72-lookup semantic receipts and raw reports'],
+    }
+
+
+def audit_full(data, bundle, jobs):
+    path = EVIDENCE / bundle['archivePath']
+    archive = path.read_bytes()
+    assert len(archive) == bundle['archiveBytes'] and sha(archive) == bundle['archiveSha256']
+    assert bundle['artifactZipDigestVerified'] is True
+    name, dictionary = data['candidate'], data['dictionary']
+    artifact = bundle['artifact']
+    assert artifact['name'] == f'import-screen-ef009-{name}-{dictionary}-0'
+    assert artifact['workflow_run']['head_sha'] == WORKFLOW
+    assert str(artifact['workflow_run']['id']) == RUN_ID
+    expected_members = {member['path']: member for member in bundle['members']}
+    assert len(expected_members) == len(bundle['members'])
+    raw_members = {}
+    visited = set()
+    with tarfile.open(path, 'r|gz') as tar:
+        for member in tar:
+            assert member.isfile() and member.name not in visited
+            visited.add(member.name)
+            record = expected_members[member.name]
+            raw = tar.extractfile(member).read()
+            assert len(raw) == record['bytes'] and sha(raw) == record['sha256']
+            if member.name.endswith('.json') or member.name in ('executed-runner.py', 'executed-workflow.yml'):
+                raw_members[member.name] = raw
+    assert visited == set(expected_members)
+    read = lambda name: json.loads(raw_members[name])
+    assert raw_members['executed-runner.py'] == RUNNER_BYTES
+    assert raw_members['executed-workflow.yml'] == git_bytes(WORKFLOW, '.github/workflows/import-qualification-ef009.yml')
+    assert raw_members['protocol.json'] == PROTOCOL_BYTES
+    for file, expected in (
+        ('execution.json', data['execution']), ('fixture.json', data['fixture']),
+        ('analysis.json', data['analysis']), ('observations.json', data['observations']),
+        ('package-delta.json', data['packageDelta']),
+    ):
+        assert read(file) == expected
+    schedule = read('schedule.json')
+    assert len(schedule) == 23
+    for expected, observation in zip(schedule, data['observations']):
+        assert all(observation[key] == value for key, value in expected.items())
+    packages = data['packages']
+    for arm in 'ABC':
+        assert read(f'package-{arm}-receipt.json') == packages[arm]
+    member_maps = {arm: read(f'package-{arm}-members.json') for arm in 'AB'}
+    actual_delta = sorted(member for member in set(member_maps['A']) | set(member_maps['B'])
+                          if member_maps['A'].get(member) != member_maps['B'].get(member))
+    assert actual_delta == data['packageDelta']
+    for arm in 'AB':
+        assert len(member_maps[arm]) == packages[arm]['memberCount']
+        commit = packages[arm]['sourceCommit']
+        for member in actual_delta:
+            if member.startswith('js/'):
+                raw = subprocess.run(['git', 'show', f'{commit}:ext/{member}'], cwd=ROOT, capture_output=True)
+                if raw.returncode == 0:
+                    assert member_maps[arm][member] == sha(raw.stdout)
+                else:
+                    assert member not in member_maps[arm]
+            elif member == 'lib/term-bank-parser.wasm':
+                assert member_maps[arm][member] == sha(git_bytes(commit, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))
+            else:
+                raise AssertionError(f'Unexpected packaged delta: {member}')
+    excluded = {entry['path']: entry for entry in bundle['excludedMembers']}
+    assert set(excluded) == {'package-A.zip', 'package-B.zip'}
+    for arm in 'AB':
+        assert excluded[f'package-{arm}.zip']['sha256'] == packages[arm]['packageSha256']
+        assert excluded[f'package-{arm}.zip']['sha256MatchesPackageReceipt'] is True
+    package_sizes = {arm: excluded[f'package-{arm}.zip']['bytes'] for arm in 'AB'}
+    package_delta_bytes = package_sizes['B'] - package_sizes['A']
+
+    job = [job for job in jobs if job['name'] == f'{name} {dictionary} host 0']
+    assert len(job) == 1
+    job = job[0]
+    assert job['head_sha'] == WORKFLOW and str(job['run_id']) == RUN_ID
+    assert job['runner_id'] > 0 and job['runner_name']
+
+    fixtures = LOCK[dictionary]
+    totals = {arm: [] for arm in 'ABC'}
+    media_archive_totals = {arm: [] for arm in 'ABC'}
+    sqlite_pool_totals = {arm: [] for arm in 'ABC'}
+    storage_observations = []
+    files_by_name = {}
+    stable_host_fields = ('nodeVersion', 'v8Version', 'platform', 'arch', 'cpuModel', 'logicalCpuCount', 'availableParallelism', 'totalMemoryBytes')
+    host_identities = set()
+    dirty_values = set()
+    browser_versions = set()
+    proof_by_name = {proof['name']: proof for proof in data['semanticProofs']}
+    for observation in data['observations']:
+        prefix = observation['name']
+        arm = observation['arm']
+        report, summary = read(f'{prefix}/run-1.json'), read(f'{prefix}/summary.json')
+        proof = proof_by_name[prefix]
+        semantic_raw = raw_members[f'{prefix}/semantic-receipt.json']
+        semantic = json.loads(semantic_raw)
+        assert sha(semantic_raw) == proof['semanticReceiptSha256']
+        assert report['status'] == 'success' and report['skippedVerification'] is False
+        assert report['failureReason'] == '' and report['skipReason'] == ''
+        assert report['browserFlavor'] == 'chromium' and report['launchMode'] == 'headless'
+        assert report['buildTarget'] == summary['buildTarget'] == 'chrome'
+        assert report['browserVersion'] == summary['browserVersion'] == PROTOCOL['browserVersion']
+        assert report['packageSha256'] == packages[arm]['packageSha256']
+        browser_versions.add(report['browserVersion'])
+        assert summary['gitSha'] == summary['source']['gitSha'] == packages[arm]['sourceCommit']
+        assert summary['authoritativeTiming'] is True and summary['traceEnabled'] is False
+        assert summary['dictionary'] == dictionary and summary['fixture'] == fixtures
+        assert summary['importFlags'] is None and summary['mediaCheck'] == observation['media']
+        assert summary['timingBoundary'] == 'page file-input change event to post-UI import-complete event; browser monotonic clock'
+        source_hashes = summary['source']['sha256']
+        assert {key: source_hashes[key] for key in FULL_SOURCE_HASHES} == FULL_SOURCE_HASHES
+        assert source_hashes['builds/manabitan-chrome.zip'] == packages[arm]['packageSha256']
+        dirty_values.add(summary['source']['dirty'])
+        assert len(summary['runs']) == 1
+        run = summary['runs'][0]
+        assert run['browserVersion'] == PROTOCOL['browserVersion']
+        assert run['packageSha256'] == packages[arm]['packageSha256']
+        assert run['tracePath'] is None
+        close(run['totalImportMs'], observation['totalImportMs'])
+        close(run['workerImportMs'], observation['workerImportMs'])
+        benchmark = report['benchmark']
+        expected_benchmark = {
+            'dictionary': dictionary, 'pinnedDictionaries': True,
+            'productionImportDefaults': True, 'traceEnabled': False,
+            'authoritativeTiming': True, 'phaseProfiling': False,
+            'phaseScreenshots': False, 'processSampling': False,
+            'importFlags': None, 'mediaCheck': observation['media'],
+        }
+        assert {key: benchmark[key] for key in expected_benchmark} == expected_benchmark
+        phases = report['phases']
+        total_phases = [phase for phase in phases if phase['name'] == f'{fixtures["label"]}: total import']
+        triggers = [phase for phase in phases if phase['name'] == f'Import {fixtures["label"]} via file input']
+        assert len(total_phases) == len(triggers) == 1
+        total, trigger = total_phases[0], triggers[0]
+        assert total['startMs'] == trigger['startMs'] <= trigger['endMs'] <= total['endMs']
+        close(total['durationMs'], total['endMs'] - total['startMs'])
+        timing = total['data']['browserTiming']
+        assert timing['trigger'] == 'file-input-change' and timing['errorCount'] == 0
+        assert timing['sequence'] > timing['sequenceBefore']
+        assert timing['completedAtMs'] > timing['startedAtMs']
+        close(timing['completedAtMs'] - timing['startedAtMs'], observation['totalImportMs'])
+        debug = total['data']['importDebug']
+        assert debug['hasResult'] is True and debug['resultTitle'] == fixtures['expectedTitle']
+        assert debug['errorCount'] == debug['addSettingsErrorCount'] == 0 and debug['usesFallbackStorage'] is False
+        validation = benchmark['validation']
+        assert validation['title'] == fixtures['expectedTitle'] and validation['revision'] == fixtures['revision']
+        assert validation['termRows'] == fixtures['termRows'] and validation['contentReadable'] is True
+        probes = validation['probeTerms']
+        assert validation['probeCount'] == len(probes) == len(set(probes)) == 12
+        restart = validation['restart']
+        assert restart['title'] == fixtures['expectedTitle'] and restart['revision'] == fixtures['revision']
+        assert restart['termRows'] == fixtures['termRows'] and restart['contentReadable'] is True
+        assert restart['mediaFiles'] == fixtures['mediaFiles'] and restart['probeCount'] == 12
+        lookups = validation['lookup']['observations']
+        assert len(lookups) == 72
+        assert {(row['pass'], row['term']) for row in lookups} == {(i, term) for i in range(6) for term in probes}
+        by_term = {}
+        for row in lookups:
+            assert row['originalTextLength'] == len(row['term'].encode('utf-16-le')) // 2
+            assert row['hasExactHeadwordMatch'] is True and row['results'] > 0
+            assert math.isfinite(row['elapsedMs']) and row['elapsedMs'] >= 0
+            assert len(row['sha256']) == 64
+            identity = {key: row[key] for key in ('term', 'sha256', 'results', 'originalTextLength', 'hasExactHeadwordMatch')}
+            if row['term'] in by_term:
+                assert by_term[row['term']] == identity
+            by_term[row['term']] = identity
+        expected_semantic = {
+            'title': validation['title'], 'revision': validation['revision'],
+            'termRows': validation['termRows'], 'contentReadable': validation['contentReadable'],
+            'probeTerms': sorted(probes), 'publicResults': [by_term[key] for key in sorted(by_term)],
+            'restart': restart, 'media': validation['media'],
+        }
+        assert semantic == expected_semantic
+        assert sha(json.dumps(semantic['publicResults'], sort_keys=True, ensure_ascii=False).encode()) == proof['publicResultSha256']
+        assert validation['media'] == proof['media']
+        expected_files = fixtures['mediaFiles'] if observation['media'] == 'all' else min(fixtures['mediaFiles'], 64)
+        assert validation['media']['files'] == expected_files
+        storage = validation['storage']
+        assert storage['kind'] == 'OPFS logical file sizes after restart and verification'
+        assert storage['bytes'] == sum(file['bytes'] for file in storage['files']) > 0
+        assert len({file['path'] for file in storage['files']}) == len(storage['files'])
+        assert all(isinstance(file['bytes'], int) and file['bytes'] >= 0 for file in storage['files'])
+        totals[arm].append(storage['bytes'])
+        media_archive_totals[arm].append(sum(file['bytes'] for file in storage['files'] if file['path'].startswith('manabitan-dictionary-media-v1/')))
+        pool_bytes = sum(file['bytes'] for file in storage['files'] if '/.opaque/' in file['path'])
+        sqlite_pool_totals[arm].append(pool_bytes)
+        storage_observations.append({'name': prefix, 'arm': arm, 'bytes': storage['bytes'], 'sqlitePoolBytes': pool_bytes})
+        # SQLite SAH-pool filenames are random. Preserve totals and report the
+        # fixed content/index files separately rather than claiming byte equality.
+        for file in storage['files']:
+            if '/.opaque/' not in file['path'] and not file['path'].startswith('manabitan-dictionary-media-v1/'):
+                files_by_name.setdefault(file['path'], {}).setdefault(arm, set()).add(file['bytes'])
+        for host in [report['hostEnvironment'], summary['hostEnvironment'], read(f'{prefix}/host-before.json'), read(f'{prefix}/host-after.json')]:
+            assert host['nodeVersion'] == 'v22.22.0' and host['platform'] == 'linux' and host['arch'] == 'x64'
+            host_identities.add(tuple(host.get(field) for field in stable_host_fields))
+    assert len(host_identities) == 1
+    base_min, base_max = min(totals['A'] + totals['C']), max(totals['A'] + totals['C'])
+    treatment_min, treatment_max = min(totals['B']), max(totals['B'])
+    return {
+        'archiveSha256': bundle['archiveSha256'], 'allRetainedMemberHashesVerified': True,
+        'retainedMembers': len(visited), 'rawObservationsAndSemanticProofsVerified': 23,
+        'observedBrowserVersions': sorted(browser_versions), 'productionDefaultTimingConfigurationVerified': True,
+        'exactSourceHarnessPackageAndFixtureIdentitiesVerified': True,
+        'sourceDirtyValues': list(dirty_values),
+        'dirtyStatusLimitation': 'Dirty status is recorded; exact harness and packaged source hashes are checked separately. No claim that the worktrees were clean.',
+        'runnerAssignment': {key: job[key] for key in ('id', 'status', 'conclusion', 'runner_id', 'runner_name', 'runner_group_id', 'runner_group_name', 'started_at', 'completed_at')},
+        'ciJobCompletionVerified': job['status'] == 'completed' and job['conclusion'] == 'success',
+        'hostFingerprint': dict(zip(stable_host_fields, next(iter(host_identities)))),
+        'hostIdentityLimitation': 'CI runner assignment is recorded; physical host identity, hostname and boot ID are not recorded.',
+        'packageBytes': {**package_sizes, 'BminusA': package_delta_bytes, 'BvsAPercent': 100 * (package_sizes['B'] / package_sizes['A'] - 1)},
+        'packageMemberMapSha256': {arm: sha(json.dumps(members, sort_keys=True, separators=(',', ':')).encode()) for arm, members in member_maps.items()},
+        'packageArchiveLimitation': 'Release ZIP bytes were hash-verified by the retriever against receipts before omission from the durable bundle; original CI artifact retains them.',
+        'logicalOpfsBytes': {arm: {'observations': len(values), 'minimum': min(values), 'maximum': max(values), 'distinct': sorted(set(values))} for arm, values in totals.items()},
+        'logicalMediaArchiveBytes': {arm: sorted(set(values)) for arm, values in media_archive_totals.items()},
+        'logicalSqlitePoolBytes': {arm: sorted(set(values)) for arm, values in sqlite_pool_totals.items()},
+        'logicalOpfsObservationsAboveCellMinimum': [observation for observation in storage_observations if observation['bytes'] > min(row['bytes'] for row in storage_observations)],
+        'candidateLogicalOpfsRangeVsControls': {
+            'minimumDifferenceBytes': treatment_min - base_max,
+            'maximumDifferenceBytes': treatment_max - base_min,
+            'allObservedTotalsEqual': len(set(value for values in totals.values() for value in values)) == 1,
+        },
+        'fixedLogicalFileSizes': {name: {arm: sorted(values) for arm, values in arms.items()} for name, arms in files_by_name.items()},
+        'storageLimitation': 'Logical file sizes after restart and verification; not allocated disk usage or complete persisted byte equality.',
+    }
+
+
+def main():
+    retrievals = json.loads((EVIDENCE / 'retrieved-artifacts.json').read_text())
+    full_index_path = EVIDENCE / 'full-evidence-index.json'
+    full_index = json.loads(full_index_path.read_text()) if full_index_path.exists() else []
+    jobs_path = EVIDENCE / 'workflow-jobs.json'
+    jobs = json.loads(jobs_path.read_text()) if jobs_path.exists() else []
+    if jobs:
+        assert len(jobs) == 9 and len({job['runner_id'] for job in jobs}) == 9
+        assert {job['name'] for job in jobs} == {f'{candidate} {dictionary} host 0' for candidate, dictionary in EXPECTED}
+    workflow_path = EVIDENCE / 'workflow-run.json'
+    artifacts_path = EVIDENCE / 'workflow-artifacts.json'
+    completed_workflow_verified = False
+    workflow_metadata = None
+    if workflow_path.exists() and artifacts_path.exists():
+        workflow = json.loads(workflow_path.read_text())
+        artifacts = json.loads(artifacts_path.read_text())
+        assert str(workflow['id']) == RUN_ID and workflow['head_sha'] == WORKFLOW
+        assert workflow['head_commit']['id'] == WORKFLOW
+        assert workflow['head_commit']['tree_id'] == tree(WORKFLOW)
+        assert workflow['head_branch'] == 'codex/import-qualification-20261125-ef009'
+        assert workflow['run_attempt'] == 1
+        assert len(artifacts) == 18 and len({artifact['id'] for artifact in artifacts}) == 18
+        recorded_artifacts = {artifact['id']: artifact for artifact in artifacts}
+        for record in retrievals + full_index:
+            original = record['artifact']
+            current = recorded_artifacts[original['id']]
+            for key in ('id', 'name', 'size_in_bytes', 'digest', 'workflow_run'):
+                assert original[key] == current[key]
+        completed_workflow_verified = workflow['status'] == 'completed' and workflow['conclusion'] == 'success'
+        workflow_metadata = {
+            'runStatus': workflow['status'], 'runConclusion': workflow['conclusion'],
+            'runAttempt': 1, 'headCommit': WORKFLOW, 'headTree': workflow['head_commit']['tree_id'],
+            'completedWorkflowVerified': completed_workflow_verified, 'artifactCount': 18,
+        }
+    results = []
+    failures = []
+    seen = set()
+    for retrieval in retrievals:
+        path = EVIDENCE / retrieval['rawPath']
+        try:
+            result = audit_summary(path, retrieval)
+            key = (result['candidate'], result['dictionary'])
+            assert key not in seen
+            seen.add(key)
+            bundles = [bundle for bundle in full_index if bundle['artifact']['name'] == f'import-screen-ef009-{key[0]}-{key[1]}-0']
+            assert len(bundles) <= 1
+            if bundles:
+                try:
+                    result['fullArtifactAudit'] = audit_full(json.loads(gzip.decompress(path.read_bytes())), bundles[0], jobs)
+                    result['pendingFullArtifactChecks'] = [] if result['fullArtifactAudit']['ciJobCompletionVerified'] else ['Refresh CI jobs snapshot after completion']
+                except Exception as error:
+                    import traceback
+                    failures.append({'path': bundles[0]['archivePath'], 'error': repr(error), 'traceback': traceback.format_exc()})
+            results.append(result)
+        except Exception as error:
+            failures.append({'path': str(path), 'error': repr(error)})
+    for dictionary in ('jmdict', 'jitendex', 'vndb'):
+        same_fixture = [result for result in results if result['dictionary'] == dictionary]
+        if len({result['publicResultSha256'] for result in same_fixture}) > 1:
+            failures.append({'dictionary': dictionary, 'error': 'Public result hashes differ across candidate cells'})
+        for field in ('semanticReceiptSha256ByMediaMode', 'mediaReadbackByMode'):
+            if len({json.dumps(result[field], sort_keys=True) for result in same_fixture}) > 1:
+                failures.append({'dictionary': dictionary, 'error': f'{field} differs across candidate cells'})
+    all_full = [result for result in results if 'fullArtifactAudit' in result]
+    if len({result['fullArtifactAudit']['packageMemberMapSha256']['A'] for result in all_full}) > 1:
+        failures.append({'error': 'Baseline package member hashes differ across cells'})
+    for candidate in CANDIDATES:
+        matching = [result for result in all_full if result['candidate'] == candidate]
+        if len({result['fullArtifactAudit']['packageMemberMapSha256']['B'] for result in matching}) > 1:
+            failures.append({'candidate': candidate, 'error': 'Candidate package member hashes differ across dictionaries'})
+    result = {
+        'frozenWorkflowCommit': WORKFLOW, 'workflowRunId': RUN_ID,
+        'auditRunnerSha256': sha(Path(__file__).read_bytes()),
+        'workflow': workflow_metadata,
+        'retrievalMetadataSha256': {path.name: sha(path.read_bytes()) for path in [EVIDENCE / 'retrieved-artifacts.json', full_index_path, jobs_path, workflow_path, artifacts_path] if path.exists()},
+        'retrievedCellCount': len(retrievals), 'auditedCellCount': len(results),
+        'allNineCellsPresent': seen == EXPECTED, 'failures': failures, 'cells': results,
+        'fullyAuditedCells': sum('fullArtifactAudit' in result for result in results),
+        'distinctAssignedRunnerCount': len({job['runner_id'] for job in jobs}),
+        'sourcePackageMemberMapsIdenticalAcrossAvailableCells': not any('package member hashes differ' in failure.get('error', '') for failure in failures),
+        'missingCells': [list(key) for key in sorted(EXPECTED - seen)],
+        'scope': 'Read-only independent audit of downloaded compact summaries and available archived full observations. No timings, thresholds or measurements changed.',
+    }
+    result['completeIndependentAudit'] = (seen == EXPECTED and len(all_full) == 9 and not failures and
+                                        completed_workflow_verified and all(cell['fullArtifactAudit']['ciJobCompletionVerified'] for cell in all_full))
+    result['totals'] = {
+        'successfulObservations': sum(cell['observationCount'] for cell in results),
+        'semanticProofs': sum(cell['proofCount'] for cell in results),
+        'timedObservations': sum(cell['timedObservationCount'] for cell in results),
+        'publicLookupObservations': sum(cell['observationCount'] * 72 for cell in all_full),
+        'fullMediaValidationObservations': sum(2 for cell in all_full),
+        'targetGatePasses': sum(cell['role'] == 'target' and cell['recomputedFrozenGatePasses'] for cell in results),
+        'nonTargetGatePasses': sum(cell['role'] == 'non-target' and cell['recomputedFrozenGatePasses'] for cell in results),
+    }
+    result['candidateDecisionsUnderFrozenScreen'] = {
+        candidate: {
+            'cells': sum(cell['candidate'] == candidate for cell in results),
+            'passesAllRequiredCells': sum(cell['candidate'] == candidate for cell in results) == 3 and
+                                     all(cell['recomputedFrozenGatePasses'] for cell in results if cell['candidate'] == candidate),
+        }
+        for candidate in CANDIDATES
+    }
+    OUTPUT.write_text(json.dumps(result, indent=2) + '\n')
+    print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+    main()

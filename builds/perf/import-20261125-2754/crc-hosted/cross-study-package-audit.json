@@ -1,0 +1,116 @@
+{
+  "status": "passed",
+  "artifacts": 9,
+  "entriesIdenticalAcrossStudiesByArm": true,
+  "records": [
+    {
+      "artifactId": 15037132938,
+      "kind": "memory",
+      "arm": "A",
+      "packageSha256": "7d85de725f9ef250d6e543b3ddfe2ebd9c3d9344e11aa0285b18ded206d5a653"
+    },
+    {
+      "artifactId": 15037132938,
+      "kind": "memory",
+      "arm": "B",
+      "packageSha256": "8ad7d3ca41480bccd3712706c8429f2b214e12ed37ed19fd97f8b0c75ead782f"
+    },
+    {
+      "artifactId": 15038726730,
+      "kind": "memory",
+      "arm": "A",
+      "packageSha256": "d2bb78c211abdfd3d3dc5bb2e6ddfeb51190123705bc95402389392cf49e13b8"
+    },
+    {
+      "artifactId": 15038726730,
+      "kind": "memory",
+      "arm": "B",
+      "packageSha256": "11b189a2c3cf0a64919fd47ade53122dc69343f69e038921a61db15b81aaf5ed"
+    },
+    {
+      "artifactId": 15037852350,
+      "kind": "memory",
+      "arm": "A",
+      "packageSha256": "c7c9530522d64d88c4e182e7e24337b8109e4ce281738381f381f34469ee3373"
+    },
+    {
+      "artifactId": 15037852350,
+      "kind": "memory",
+      "arm": "B",
+      "packageSha256": "211e03e907328d7e2c4fc3582bb515ca684d0fc0c990a0155d41c190a20a0030"
+    },
+    {
+      "artifactId": 15037468972,
+      "kind": "memory",
+      "arm": "A",
+      "packageSha256": "047d02abbb4cd21591685832ed39e869821b823ee35e62278f2c012dc2073ef7"
+    },
+    {
+      "artifactId": 15037468972,
+      "kind": "memory",
+      "arm": "B",
+      "packageSha256": "f43e0f47b2e7cede3b3f37addb2cda03f8b04fac92e8c1bbb2f2169bfcbeb7a3"
+    },
+    {
+      "artifactId": 15039581472,
+      "kind": "memory",
+      "arm": "A",
+      "packageSha256": "1e275804e20c23ece98c317c77e41adac93dc61b68b2bb09102bd992c4ce9acb"
+    },
+    {
+      "artifactId": 15039581472,
+      "kind": "memory",
+      "arm": "B",
+      "packageSha256": "6921e20dbc4361b7afd648d9eb5dbcb44e42bb41098c7499d354e93732f640b4"
+    },
+    {
+      "artifactId": 15039215938,
+      "kind": "memory",
+      "arm": "A",
+      "packageSha256": "da984f027ec43784b7a3e22960df77366ec7658ea4e7740f6bf4d666253a8d3e"
+    },
+    {
+      "artifactId": 15039215938,
+      "kind": "memory",
+      "arm": "B",
+      "packageSha256": "f09781ebd4eb056b99aadb36962fe305b684992e1fdf542ad5ccebfbfca63523"
+    },
+    {
+      "artifactId": 15038541229,
+      "kind": "timing",
+      "arm": "A",
+      "packageSha256": "5cf2c2e33ed3418d7bc9c60acde1cd00d98310d0e69fc30696e93672f9f51a5f"
+    },
+    {
+      "artifactId": 15038541229,
+      "kind": "timing",
+      "arm": "B",
+      "packageSha256": "8fd4f4db92435950af1af7f0911ab8c3c68ee662dbda9fbf36936816da95f96c"
+    },
+    {
+      "artifactId": 15036814976,
+      "kind": "timing",
+      "arm": "A",
+      "packageSha256": "9f48f4ce4df153701368ed74c77073aa2a03ade47a7cf8b3c52eec45c497d647"
+    },
+    {
+      "artifactId": 15036814976,
+      "kind": "timing",
+      "arm": "B",
+      "packageSha256": "3d5ae52e7bba3845623770bf26faf6e239158d0ebea16c98ec249156eead1705"
+    },
+    {
+      "artifactId": 15038993452,
+      "kind": "timing",
+      "arm": "A",
+      "packageSha256": "80c49da06af90a64491f41fc9268410b3a3cf97b54295ef5d5cb02c3782b7faf"
+    },
+    {
+      "artifactId": 15038993452,
+      "kind": "timing",
+      "arm": "B",
+      "packageSha256": "3ed8f71082617fac0a5dfe7c41ba8b5104504c9dc4d0bc5a84c088b86ee7f9dd"
+    }
+  ],
+  "note": "ZIP archive hashes vary across builds; exact package-entry bytes are identical within each source arm. Timing C reuses the exact A archive."
+}

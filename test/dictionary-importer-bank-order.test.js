@@ -18,6 +18,7 @@
 import {describe, expect, test} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
 import {DictionaryImporterMediaLoader} from '../ext/js/dictionary/dictionary-importer-media-loader.js';
+import {DenseZipFileMap} from '../ext/js/dictionary/dense-zip-file-map.js';
 
 /** @type {import('dictionary-importer').QueryDetails} */
 const queryDetails = [['termFiles', /^term_bank_(\d+)\.json$/]];
@@ -105,3 +106,34 @@ describe('DictionaryImporter archive bank ordering', () => {
         ]);
     });
 });
+
+/* eslint-disable @stylistic/semi */
+test('classifies dense bank names without materializing unrelated media', () => {
+    const names = ['img/cc1.webp', 'term_bank_10.json', 'img/cc2.webp', 'term_bank_2.json', 'nested/index.json', 'term_bank_2.mbtb']
+    const map = new DenseZipFileMap(names.length, new TextEncoder().encode(names.join('')), async () => null)
+    let position = 0
+    for (let row = 0; row < names.length; ++row) {
+        map.addDirectoryEntry(row, names[row], position, row * 100, 10, 10, 0, row)
+        position += names[row].length
+    }
+    const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+    expect(importer._findRedundantDirectories(map)).toBe('nested/')
+    const entries = /** @type {Map<string, unknown>} */ (Reflect.get(map, '_entries'))
+    expect([...entries.values()].every((entry) => typeof entry === 'number')).toBe(true)
+    const files = importer._getArchiveFiles(map, queryDetails).get('termFiles')
+    expect(files?.map(({filename}) => filename)).toEqual(['term_bank_2.json', 'term_bank_10.json'])
+    expect(typeof entries.get('img/cc1.webp')).toBe('number')
+    expect(typeof entries.get('img/cc2.webp')).toBe('number')
+    expect(typeof entries.get('nested/index.json')).toBe('number')
+    expect(importer._hasUsableArtifactTermSource({
+        termBanksByArtifact: new Map([
+            ['term_bank_2.mbtb', {packedOffset: 0, packedLength: 1, rows: 1}],
+            ['term_bank_10.mbtb', {packedOffset: 1, packedLength: 1, rows: 1}],
+        ]),
+        packedFileName: null,
+    }, map)).toBe(false)
+    expect(typeof entries.get('img/cc1.webp')).toBe('number')
+    expect(typeof entries.get('img/cc2.webp')).toBe('number')
+    expect(typeof entries.get('term_bank_2.mbtb')).toBe('number')
+})
+/* eslint-enable @stylistic/semi */

@@ -1,0 +1,13 @@
+diff --git a/test/data/json.json b/test/data/json.json
+index 5867ac07d..c6eee31cb 100644
+--- a/test/data/json.json
++++ b/test/data/json.json
+@@ -37,6 +37,8 @@
+         {"path": "dev/perf/native-lookup-qualification-20260918.json", "ignore": true},
+         {"path": "dev/perf/mdict-checksum-overhead-abba-20260920.json", "ignore": true},
+         {"path": "dev/perf/mdict-record-cache-abba-20260920.json", "ignore": true},
++        {"path": "dev/perf/import-memory-ef009/protocol.json", "ignore": true},
++        {"path": "dev/perf/import-memory-ef009/provenance.json", "ignore": true},
+         {"path": "dev/perf/direct-media-entries-20261123/exact-base-worker-oracle.json", "ignore": true},
+         {"path": "dev/perf/direct-media-entries-20261123/historical-base-worker-oracle.json", "ignore": true},
+         {"path": "dev/perf/direct-media-entries-20261123/media-verification.json", "ignore": true},
