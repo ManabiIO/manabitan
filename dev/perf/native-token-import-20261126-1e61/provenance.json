@@ -1,0 +1,135 @@
+{
+    "schema": 1,
+    "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "testedNode": "v24.22.3",
+    "runnerSha256": "0598cf6be8f5e9718cd334d8d5ee511b4dd749224fa27e47812b6836f18ab666",
+    "lockedFixtures": {
+        "jmdict": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "jitendex": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "vndb": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+    },
+    "runtimeSources": {
+        "baseline": {
+            "root": "/workspace/scratch/1e61bf8c01fe/vndb",
+            "hashes": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+                "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+                "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+                "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+                "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+                "ext/js/dictionary/dense-zip-directory.js": "73e690d6ebee26608d7033f143745662d47e0cabb7434d264a9e68aeac686498",
+                "ext/js/dictionary/dense-zip-file-map.js": "ddd620800d56dd3f7f8733d76d33405c63e7dfbae4365be0aca856c2c1f13f82",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+                "dev/data/dictionary-wasm/manifest.json": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd"
+            }
+        },
+        "preflight": {
+            "root": "/workspace/scratch/1e61bf8c01fe/jmdict",
+            "hashes": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+                "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+                "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+                "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+                "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+                "ext/js/dictionary/dense-zip-directory.js": "73e690d6ebee26608d7033f143745662d47e0cabb7434d264a9e68aeac686498",
+                "ext/js/dictionary/dense-zip-file-map.js": "ddd620800d56dd3f7f8733d76d33405c63e7dfbae4365be0aca856c2c1f13f82",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "3c1f05bb7d856070362d51cc21fe5712414125bff411c879b6af29ba657d68ab",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "8918824b3d8d74383bdbce6021272e5667064ad1039480b00123c44625e03aa2",
+                "dev/data/dictionary-wasm/manifest.json": "75c23fb58d13c57a377fb3be6741b386e89fd1c8e89bb8f15e539ed721cec496"
+            }
+        },
+        "empty_string": {
+            "root": "/workspace/scratch/1e61bf8c01fe/jitendex",
+            "hashes": {
+                "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+                "ext/js/dictionary/term-bank-experiments.js": "c3a0302d5ae434267191416cd6848612aeb011e6313731aed39450a44dae84fb",
+                "ext/js/dictionary/term-record-preinterned-plan.js": "d4d02c80c179cf57eed125e82ad01af703999c16cc4e59777f1fccf83546200b",
+                "ext/js/dictionary/term-lookup-index-preparation.js": "429de32ecb9f455c413827567a2494ac6ed7c33fa896e18932624ecba33d5969",
+                "ext/js/dictionary/term-lookup-index.js": "a1c3950636b14cfd83306c96cd043d2cc936f45e5c762e83e24a54045e10ba94",
+                "ext/js/dictionary/dense-zip-directory.js": "73e690d6ebee26608d7033f143745662d47e0cabb7434d264a9e68aeac686498",
+                "ext/js/dictionary/dense-zip-file-map.js": "ddd620800d56dd3f7f8733d76d33405c63e7dfbae4365be0aca856c2c1f13f82",
+                "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+                "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+                "ext/js/dictionary/wasm/term-bank-parser.c": "14db020b77a043c26f5b1c2a2a534ce35abe4a3eeb5f5cce158e0e04474c6a5e",
+                "dev/data/dictionary-wasm/term-bank-parser.wasm": "dbb7dea6ffd0afdc8817682c1d306d1e25bff4fa2848cca70fe59ac8e20b6cc7",
+                "dev/data/dictionary-wasm/manifest.json": "a4b48e674af9b9d22172d3c4f8b8ec23c9f2ad509ffd08bd67554109833bed42"
+            }
+        }
+    },
+    "scope": "Sequential parser, owned output, completed lookup construction, and projected media. Every locked term bank; every key/numeric/content column and persisted lookup byte. Not storage, decoded media payloads, browser timing or standalone peak memory.",
+    "publishedEmptyStringPR": "https://github.com/ManabiIO/manabitan/pull/951",
+    "publishedEmptyStringSourceHead": "8c32e0e4d9ad61a1dafd324efa717f2680ba31db",
+    "preflightPublication": {
+        "branch": "perf/jmdict-import-20261126-1e61",
+        "localSourceHead": "c305c95d39e145d8a8118d77e4fc854d1e15ac98",
+        "localSourceTree": "4ccf956f80e86d7aaf2c6e96a6406ff40fb0cfff",
+        "pullRequest": "https://github.com/ManabiIO/manabitan/pull/958",
+        "publishedSourceHead": "e5dffc2889f814eec7231ed37ab46cfe7c9ae61b"
+    },
+    "verbatimReceipts": {
+        "corpus-parity.json.txt": "builds/perf/native-token-parity-20261126/corpus-parity.json",
+        "source-review.json.txt": "builds/perf/native-token-parity-20261126/source-review.json",
+        "summary.json.txt": "builds/perf/native-token-parity-20261126/summary.json",
+        "replay.mjs.txt": "test/perf/native-token-parity-20261126/replay.mjs"
+    },
+    "rawArchive": {
+        "file": "raw-evidence.tar.gz",
+        "members": [
+            {
+                "path": "raw/corpus-parity.json.txt",
+                "sha256": "397c870c543788de2b58913fb72ec848514a7d96980df462e556c6dbb2e869d1",
+                "bytes": 1237578
+            },
+            {
+                "path": "raw/corpus-parity.log",
+                "sha256": "782ae7ed7e118d92512d0e8f1ef1e4d1572c93d79c2e8832651cc237fe8cb2dd",
+                "bytes": 9506
+            },
+            {
+                "path": "raw/empty_string.c.patch.txt",
+                "sha256": "2e07a1f6e93d4dc76cde5c68b5a4a1375e07b2361d04402f8255bd9ff682801f",
+                "bytes": 811
+            },
+            {
+                "path": "raw/empty_string.manifest.json",
+                "sha256": "a4b48e674af9b9d22172d3c4f8b8ec23c9f2ad509ffd08bd67554109833bed42",
+                "bytes": 2588
+            },
+            {
+                "path": "raw/empty_string.wasm",
+                "sha256": "dbb7dea6ffd0afdc8817682c1d306d1e25bff4fa2848cca70fe59ac8e20b6cc7",
+                "bytes": 68299
+            },
+            {
+                "path": "raw/preflight.c.patch.txt",
+                "sha256": "1d72ffc640d38fb247c66e8390a836e89b2395a415f3f8f6bb74260bdbbd9a96",
+                "bytes": 3018
+            },
+            {
+                "path": "raw/preflight.manifest.json",
+                "sha256": "75c23fb58d13c57a377fb3be6741b386e89fd1c8e89bb8f15e539ed721cec496",
+                "bytes": 2588
+            },
+            {
+                "path": "raw/preflight.wasm",
+                "sha256": "8918824b3d8d74383bdbce6021272e5667064ad1039480b00123c44625e03aa2",
+                "bytes": 68162
+            },
+            {
+                "path": "raw/replay.mjs.txt",
+                "sha256": "0598cf6be8f5e9718cd334d8d5ee511b4dd749224fa27e47812b6836f18ab666",
+                "bytes": 16417
+            },
+            {
+                "path": "raw/source-review.json.txt",
+                "sha256": "0b25714d956519c09e8530db96f8f087a785fa81efd9cfd8809a53eb14cae771",
+                "bytes": 3240
+            }
+        ]
+    }
+}

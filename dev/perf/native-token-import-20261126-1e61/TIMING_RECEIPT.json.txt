@@ -1,0 +1,9 @@
+{
+  "archive": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/shared-native-components-20261126/native-import-components-20261126.zip",
+  "sizeBytes": 49959,
+  "sha256": "b6abcb5b082adbb477793afe165eae57c0712e3ec0b98365e262ed269c02bbaf",
+  "originalFiles": 22,
+  "zipMembers": 24,
+  "inventory": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/shared-native-components-20261126/MANIFEST.json",
+  "summary": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/shared-native-components-20261126/SUMMARY.md"
+}

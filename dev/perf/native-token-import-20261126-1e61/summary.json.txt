@@ -1,0 +1,142 @@
+{
+  "complete": true,
+  "totalRows": 7613164,
+  "totalBanks": 937,
+  "totalGroups": 204,
+  "dictionaries": [
+    {
+      "dictionary": "jmdict",
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "banks": 53,
+      "rows": 528299,
+      "mediaRows": 0,
+      "projectedMediaRows": 0,
+      "uniqueProjectedMediaPaths": 0,
+      "groups": 12,
+      "counts": {
+        "baseline": {
+          "fusedAttempts": 12,
+          "fusedFallbacks": 0,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        },
+        "preflight": {
+          "fusedAttempts": 12,
+          "fusedFallbacks": 0,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        },
+        "empty_string": {
+          "fusedAttempts": 12,
+          "fusedFallbacks": 0,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        }
+      },
+      "maxReusedWasmCapacity": {
+        "baseline": 41680896,
+        "preflight": 41680896,
+        "empty_string": 41680896
+      }
+    },
+    {
+      "dictionary": "jitendex",
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "banks": 219,
+      "rows": 436555,
+      "mediaRows": 339,
+      "projectedMediaRows": 324,
+      "uniqueProjectedMediaPaths": 236,
+      "groups": 22,
+      "counts": {
+        "baseline": {
+          "fusedAttempts": 22,
+          "fusedFallbacks": 0,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        },
+        "preflight": {
+          "fusedAttempts": 22,
+          "fusedFallbacks": 0,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        },
+        "empty_string": {
+          "fusedAttempts": 22,
+          "fusedFallbacks": 0,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        }
+      },
+      "maxReusedWasmCapacity": {
+        "baseline": 76218368,
+        "preflight": 76218368,
+        "empty_string": 76218368
+      }
+    },
+    {
+      "dictionary": "vndb",
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "banks": 665,
+      "rows": 6648310,
+      "mediaRows": 146725,
+      "projectedMediaRows": 146725,
+      "uniqueProjectedMediaPaths": 146570,
+      "groups": 170,
+      "counts": {
+        "baseline": {
+          "fusedAttempts": 170,
+          "fusedFallbacks": 26,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        },
+        "preflight": {
+          "fusedAttempts": 170,
+          "fusedFallbacks": 26,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        },
+        "empty_string": {
+          "fusedAttempts": 170,
+          "fusedFallbacks": 26,
+          "nativeSegments": 0,
+          "nativeFallbacks": 0
+        }
+      },
+      "maxReusedWasmCapacity": {
+        "baseline": 76218368,
+        "preflight": 76218368,
+        "empty_string": 76218368
+      }
+    }
+  ],
+  "wasmIdentities": {
+    "baseline": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "preflight": "8918824b3d8d74383bdbce6021272e5667064ad1039480b00123c44625e03aa2",
+    "empty_string": "dbb7dea6ffd0afdc8817682c1d306d1e25bff4fa2848cca70fe59ac8e20b6cc7"
+  },
+  "sourceTreeBoundary": "Unchanged JavaScript from develop 0143e959; native C/WASM-only candidates. All source hashes checked again after replay.",
+  "scope": "Sequential parser, owned output, completed lookup construction, and projected media. Every locked term bank; every key/numeric/content column and persisted lookup byte. Not storage, decoded media payloads, browser timing or standalone peak memory.",
+  "processMemory": {
+    "scope": "same process retaining all arm WASM instances; not a per-arm or browser maximum",
+    "maxRssKiB": 576204
+  },
+  "evidence": {
+    "builds/perf/native-token-parity-20261126/corpus-parity.json": {
+      "sha256": "397c870c543788de2b58913fb72ec848514a7d96980df462e556c6dbb2e869d1",
+      "bytes": 1237578
+    },
+    "builds/perf/native-token-parity-20261126/corpus-parity.log": {
+      "sha256": "782ae7ed7e118d92512d0e8f1ef1e4d1572c93d79c2e8832651cc237fe8cb2dd",
+      "bytes": 9506
+    },
+    "builds/perf/native-token-parity-20261126/source-review.json": {
+      "sha256": "0b25714d956519c09e8530db96f8f087a785fa81efd9cfd8809a53eb14cae771",
+      "bytes": 3240
+    },
+    "test/perf/native-token-parity-20261126/replay.mjs": {
+      "sha256": "0598cf6be8f5e9718cd334d8d5ee511b4dd749224fa27e47812b6836f18ab666",
+      "bytes": 16417
+    }
+  }
+}
