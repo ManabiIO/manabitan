@@ -1,0 +1,56 @@
+{
+  "baseline": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "candidate": "c3a9e25814392b97d313fb7f6fe65797ed752b3c",
+  "tree": "64345e92fff3800b5035b6aab52dff06e20bc874",
+  "worktree": "/workspace/scratch/3aacd533c01f/round2/jmdict-canonical-inputs",
+  "decision": "Frozen for one independent complete-import screen; no performance claim",
+  "mechanism": "Snapshot validated immutable config and current-row length/hash scalars across unchanged volatile rollback journal barrier",
+  "assemblyWorkProof": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/canonical-input-work-proof.json",
+  "rawWasmBytes": {
+    "baseline": 1624,
+    "candidate": 1667,
+    "delta": 43
+  },
+  "checks": {
+    "focusedSuites": 5,
+    "focusedTestsPassed": 130,
+    "newDirectNativeWitnesses": 79,
+    "scopedLint": "passed after formatting/JSDoc correction; initial failed log retained",
+    "testTypeScript": "passed",
+    "pinnedWasmWrite": "passed",
+    "pinnedWasmCheck": "passed",
+    "fullUnitAndAllTargetBuild": "delegated to exact-source PR CI; not duplicated locally"
+  },
+  "review": "Independent Jit agent alias/bounds/trap/reentrancy review: no blocker",
+  "overlap": "Exact PR864 diff inspected: mutable header counter caching not included. PR856 journal narrowing not included. All seven volatile header fields and all three journal words unchanged.",
+  "logs": {
+    "focused-tests.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/focused-tests.log",
+      "sha256": "5b306d1cdc661daf9ec73ace41ad71c22cb260de33e18d0ddc1888efe300c380"
+    },
+    "scoped-lint.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/scoped-lint.log",
+      "sha256": "59e541bd114f39618da5bc50164a251050254101c3df16e899db983dc9cd683e"
+    },
+    "scoped-lint-fixed.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/scoped-lint-fixed.log",
+      "sha256": "1b469690b421d5bfc60e6ee1e741308fa0d2fe4c715caa7d481f27de31ac32e9"
+    },
+    "test-types.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/test-types.log",
+      "sha256": "7e11f6439dd9144a328a87acb551ac17f1b51efc1c1497bc0b46cf5bbb71ee67"
+    },
+    "native-rebuild.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/native-rebuild.log",
+      "sha256": "b3dedc9f89ef72de9fbdccfa8b9a0b8324859f377c320cd9e6ba39872446e84c"
+    },
+    "native-check.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/native-check.log",
+      "sha256": "f8ea6924056a0d4cb6cd0433bf1204afdfb9eb98d165e50d29a30d87fb8e732a"
+    },
+    "build-libs.log": {
+      "path": "/workspace/scratch/3aacd533c01f/round2/jmdict-audit/build-libs.log",
+      "sha256": "add25ac457c4da34a4d73127d2a4d8d219cce35a6cbc8f5e20acb6a8a5cdb906"
+    }
+  }
+}

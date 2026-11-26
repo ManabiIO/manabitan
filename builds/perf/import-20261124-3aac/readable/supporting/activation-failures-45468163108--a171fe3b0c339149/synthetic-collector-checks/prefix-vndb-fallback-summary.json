@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "synthetic",
+  "tree": "synthetic",
+  "dictionary": "vndb",
+  "mode": "prefix",
+  "packageSha256": "94ca2fadb4d8d6e655182f68f914690230e1358c1223a4d31b9b988926d9385b",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "4d2c339d4635206c9b3b2f27be0cc1c7d16e1eb38f2ff02feeca0ae1cb83b44f",
+  "activationOwner": "fallback",
+  "eventCounts": {
+    "attempt": 1
+  },
+  "activation": {
+    "attempts": 1,
+    "privateAdmissions": 0,
+    "privatePrefixReservations": 0,
+    "privateSuffixFallbacks": 0,
+    "existingSharedAdmissions": 0,
+    "firstPrivateAttempts": 1,
+    "privateAdmittedContentBytes": 0,
+    "privateAdmittedUniqueCount": 0,
+    "eligibleOwnedSourceBytes": 0
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": true,
+    "diagnosticOnly": true,
+    "productionOffscreenOwner": false,
+    "eventsObserved": true,
+    "attemptsObserved": true,
+    "privateAdmissionMatchesOwnedForcedInputs": true,
+    "everyPrivateAdmissionHasOnePlacement": true,
+    "firstPrivateSelectionUnchanged": true,
+    "boundedPrefixCursor": true,
+    "negativeControlHasNoPrivateAdmission": true
+  },
+  "allChecksPass": false,
+  "events": [
+    {
+      "event": "attempt",
+      "compressionDictName": null,
+      "sourceKind": "private",
+      "force": false,
+      "ownsContent": true,
+      "sourceBytes": 20,
+      "uncompressedBytes": 20
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "prefix": {
+    "expectedDifferences": [
+      "js/dictionary/term-content-block-store.js",
+      "js/dictionary/term-content-opfs-store.js",
+      "js/dictionary/term-content-ownership.js",
+      "js/dictionary/zstd-term-content.js",
+      "lib/zstd-wasm.js",
+      "lib/zstd-wasm.js.map"
+    ],
+    "baselineZipBytes": 17265196,
+    "candidateZipBytes": 17266785,
+    "zipDeltaBytes": 1589,
+    "baselineZipSha256": "231a5f41a54fd11ed34662a5e6114ab624ac3106f62628b37262e44ef4029faa",
+    "candidateZipSha256": "dee2bb80d3a637ca3ddb7488dce35391781a18d87857407be4ac01c443861491"
+  },
+  "media": {
+    "expectedDifferences": [
+      "js/dictionary/term-bank-wasm-parser-worker.js",
+      "js/dictionary/term-bank-wasm-parser.js",
+      "js/dictionary/wasm/term-bank-parser.c",
+      "lib/term-bank-parser.wasm"
+    ],
+    "baselineZipBytes": 17265196,
+    "candidateZipBytes": 17267981,
+    "zipDeltaBytes": 2785,
+    "baselineZipSha256": "231a5f41a54fd11ed34662a5e6114ab624ac3106f62628b37262e44ef4029faa",
+    "candidateZipSha256": "0f0e22efb63164843c72191f53b06551def6396bd8aa1405517cdcea349e6475"
+  },
+  "cache": {
+    "expectedDifferences": [
+      "js/dictionary/dictionary-database.js"
+    ],
+    "baselineZipBytes": 17265196,
+    "candidateZipBytes": 17265421,
+    "zipDeltaBytes": 225,
+    "baselineZipSha256": "231a5f41a54fd11ed34662a5e6114ab624ac3106f62628b37262e44ef4029faa",
+    "candidateZipSha256": "7e4b43455f578e20d2bf3de8b9ef08140bc09bc9c1dd890b704e7f93ee1aa09f"
+  }
+}

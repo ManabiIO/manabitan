@@ -1,0 +1,143 @@
+[
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 25.092764644,
+    "mediaCheck": "sample",
+    "name": "warmup-A",
+    "phaseCounters": "warmup-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-A/summary.json",
+    "totalImportMs": 5941.4000000000015
+  },
+  {
+    "arm": "B",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 22.694156805999995,
+    "mediaCheck": "sample",
+    "name": "warmup-B",
+    "phaseCounters": "warmup-B/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-B/summary.json",
+    "totalImportMs": 5209.400000000009
+  },
+  {
+    "arm": "C",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 23.394419226999986,
+    "mediaCheck": "sample",
+    "name": "warmup-C",
+    "phaseCounters": "warmup-C/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-C/summary.json",
+    "totalImportMs": 5550.5
+  },
+  {
+    "arm": "A",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 22.882014650000002,
+    "mediaCheck": "sample",
+    "name": "block-01-1-A",
+    "phaseCounters": "block-01-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-01-1-A/summary.json",
+    "totalImportMs": 5514.799999999988
+  },
+  {
+    "arm": "B",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 22.306509329000022,
+    "mediaCheck": "sample",
+    "name": "block-01-2-B",
+    "phaseCounters": "block-01-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-01-2-B/summary.json",
+    "totalImportMs": 5236.6999999999825
+  },
+  {
+    "arm": "C",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 22.823103179000015,
+    "mediaCheck": "sample",
+    "name": "block-01-3-C",
+    "phaseCounters": "block-01-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-01-3-C/summary.json",
+    "totalImportMs": 5591.900000000023
+  },
+  {
+    "arm": "C",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 23.031685709000016,
+    "mediaCheck": "sample",
+    "name": "block-02-1-C",
+    "phaseCounters": "block-02-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-02-1-C/summary.json",
+    "totalImportMs": 5427.5
+  },
+  {
+    "arm": "B",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 22.67545124899999,
+    "error": "Correctness receipt differs across arms/observations: storageBytes",
+    "mediaCheck": "sample",
+    "name": "block-02-2-B",
+    "position": 2,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "failed"
+  }
+]

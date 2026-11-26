@@ -1,0 +1,140 @@
+{
+  "name": "activation-corrected-45470204352",
+  "omittedBuiltProducts": [],
+  "originalGithubArtifact": null,
+  "packagerSha256": "d5db8075998fca4e081af09c85609bdebcc11585a54249453c70bb2c2accedd2",
+  "packagingDoesNotQualifyOrReclassifyStudies": true,
+  "recordedStudyState": null,
+  "retainedBytes": 605682,
+  "retainedFiles": [
+    {
+      "bytes": 4977,
+      "path": "activation-receipt.md",
+      "sha256": "548cd5f79e934578dd7d93dc795792b7472abfbcadf8febd7b350feda3b6b319"
+    },
+    {
+      "bytes": 67552,
+      "path": "artifact-14956446688.zip",
+      "sha256": "7822ac53c54913d9b05696099678184b4a34e7024c7464fae96b3ac5981abc33"
+    },
+    {
+      "bytes": 52601,
+      "path": "artifact-14956736581.zip",
+      "sha256": "88fbfc6b059405feaf1f6f28f8e0de8ae60ce80b0e56f51273cab2253954b9b2"
+    },
+    {
+      "bytes": 85822,
+      "path": "artifact-14956967658.zip",
+      "sha256": "5d12544116d6587f8ca5db3238cb2d1b66e0faee1b5a93e1f0e8a82eb9a6867e"
+    },
+    {
+      "bytes": 48657,
+      "path": "artifact-14957926735.zip",
+      "sha256": "086fac74d7b9348bcb48dfd9f6570570f475486a1f03f9838188498118f397c0"
+    },
+    {
+      "bytes": 15566,
+      "path": "github-metadata.json",
+      "sha256": "6798bc72aee3c2c6d28e1b68e2768cdf34a905ad69069be555c28a7b3d3133c8"
+    },
+    {
+      "bytes": 8346,
+      "path": "independent-review.json",
+      "sha256": "e711c75b2004811f40b5be59db69b289466a46ecb94e68dfb0d89de2f117d7af"
+    },
+    {
+      "bytes": 76884,
+      "path": "job-138715794005.log",
+      "sha256": "0d57ae3798a5af4d70e40aa500c657b3f2691eec6f527a98c437ab171aa2902a"
+    },
+    {
+      "bytes": 76995,
+      "path": "job-138715794491.log",
+      "sha256": "25e3194af6b4d4f8aca0b3270cbfbc5fd215a61b59d033e388d8b3593b170b4d"
+    },
+    {
+      "bytes": 76890,
+      "path": "job-138715794533.log",
+      "sha256": "b987486490cc15ed1f37c1933d6282a13c1d7c78edd58f3d5f59c7fb6962da13"
+    },
+    {
+      "bytes": 76983,
+      "path": "job-138715795093.log",
+      "sha256": "e471e7c87124d8f15bc0ef42c191a92642cfba7a1f47a42b979a413e6c3f04a3"
+    },
+    {
+      "bytes": 14409,
+      "path": "reconcile.py",
+      "sha256": "34bea4c58b468e571d99608f02873bd450fc31d426eeeb739c97116264a193fc"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceBytes": 605682,
+  "sourceFileCount": 12,
+  "sourceInventory": [
+    {
+      "bytes": 4977,
+      "path": "activation-receipt.md",
+      "sha256": "548cd5f79e934578dd7d93dc795792b7472abfbcadf8febd7b350feda3b6b319"
+    },
+    {
+      "bytes": 67552,
+      "path": "artifact-14956446688.zip",
+      "sha256": "7822ac53c54913d9b05696099678184b4a34e7024c7464fae96b3ac5981abc33"
+    },
+    {
+      "bytes": 52601,
+      "path": "artifact-14956736581.zip",
+      "sha256": "88fbfc6b059405feaf1f6f28f8e0de8ae60ce80b0e56f51273cab2253954b9b2"
+    },
+    {
+      "bytes": 85822,
+      "path": "artifact-14956967658.zip",
+      "sha256": "5d12544116d6587f8ca5db3238cb2d1b66e0faee1b5a93e1f0e8a82eb9a6867e"
+    },
+    {
+      "bytes": 48657,
+      "path": "artifact-14957926735.zip",
+      "sha256": "086fac74d7b9348bcb48dfd9f6570570f475486a1f03f9838188498118f397c0"
+    },
+    {
+      "bytes": 15566,
+      "path": "github-metadata.json",
+      "sha256": "6798bc72aee3c2c6d28e1b68e2768cdf34a905ad69069be555c28a7b3d3133c8"
+    },
+    {
+      "bytes": 8346,
+      "path": "independent-review.json",
+      "sha256": "e711c75b2004811f40b5be59db69b289466a46ecb94e68dfb0d89de2f117d7af"
+    },
+    {
+      "bytes": 76884,
+      "path": "job-138715794005.log",
+      "sha256": "0d57ae3798a5af4d70e40aa500c657b3f2691eec6f527a98c437ab171aa2902a"
+    },
+    {
+      "bytes": 76995,
+      "path": "job-138715794491.log",
+      "sha256": "25e3194af6b4d4f8aca0b3270cbfbc5fd215a61b59d033e388d8b3593b170b4d"
+    },
+    {
+      "bytes": 76890,
+      "path": "job-138715794533.log",
+      "sha256": "b987486490cc15ed1f37c1933d6282a13c1d7c78edd58f3d5f59c7fb6962da13"
+    },
+    {
+      "bytes": 76983,
+      "path": "job-138715795093.log",
+      "sha256": "e471e7c87124d8f15bc0ef42c191a92642cfba7a1f47a42b979a413e6c3f04a3"
+    },
+    {
+      "bytes": 14409,
+      "path": "reconcile.py",
+      "sha256": "34bea4c58b468e571d99608f02873bd450fc31d426eeeb739c97116264a193fc"
+    }
+  ],
+  "sourceInventorySha256": "0c40bf29632237a244d56dcaaf62dc8e8299fe1662ca10c3fd35c0891d2d92ef",
+  "sourceRoot": "activation-corrected-45470204352",
+  "stage": "supporting",
+  "timingClaim": "none; supporting source/oracle/failure/provenance evidence"
+}

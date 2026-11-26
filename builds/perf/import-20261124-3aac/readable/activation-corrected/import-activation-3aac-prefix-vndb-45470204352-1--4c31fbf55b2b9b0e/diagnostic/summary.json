@@ -1,0 +1,3033 @@
+{
+  "schemaVersion": 3,
+  "dictionary": "vndb",
+  "buildTarget": "chrome",
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true
+  },
+  "authoritativeTiming": true,
+  "traceEnabled": false,
+  "gitSha": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+  "source": {
+    "gitSha": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+    "dirty": true,
+    "sha256": {
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "1ee8cf3f236bca5416c1ceb2753dc8f194a5e99701be8ec084292eae5913f560"
+    }
+  },
+  "hostEnvironment": {
+    "capturedAtIso": "2026-11-24T19:27:34.562Z",
+    "loadAverage": [
+      2.58,
+      0.8,
+      0.28
+    ],
+    "freeMemoryBytes": 15061831680,
+    "nodeVersion": "v22.22.0",
+    "v8Version": "12.4.254.21-node.33",
+    "platform": "linux",
+    "arch": "x64",
+    "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpuCount": 4,
+    "availableParallelism": 4,
+    "totalMemoryBytes": 16759431168,
+    "cgroupCpuMax": null,
+    "cgroupCpuQuotaCores": null,
+    "cgroupMemoryMaxBytes": null,
+    "cgroupMemoryCurrentBytes": null
+  },
+  "browserVersion": "153.0.8010.12",
+  "importFlags": null,
+  "mediaCheck": "sample",
+  "runs": [
+    {
+      "index": 1,
+      "reportPath": "/home/runner/work/_temp/import-activation/diagnostic/run-1.html",
+      "reportJsonPath": "/home/runner/work/_temp/import-activation/diagnostic/run-1.json",
+      "tracePath": null,
+      "browserVersion": "153.0.8010.12",
+      "packageSha256": "1ee8cf3f236bca5416c1ceb2753dc8f194a5e99701be8ec084292eae5913f560",
+      "totalImportMs": 7173.600000000006,
+      "automationObservedImportMs": 7226.6099730000005,
+      "workerImportMs": 7140.5,
+      "stepTimingSummary": {
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "stepDisplay": "Step 1 of 5",
+                "label": "Starting import state",
+                "elapsedMs": 0.3000000000029104,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 2 of 5",
+                "label": "Initializing import",
+                "elapsedMs": 8.89999999999418,
+                "heapDeltaBytes": 0,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 3 of 5",
+                "label": "Loading dictionary",
+                "elapsedMs": 243.40000000000873,
+                "heapDeltaBytes": -724001,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 4 of 5",
+                "label": "Importing data",
+                "elapsedMs": 6810.899999999994,
+                "heapDeltaBytes": 953738,
+                "finalOpenStep": false
+              },
+              {
+                "stepDisplay": "Step 5 of 5",
+                "label": "Finalizing import",
+                "elapsedMs": 95.10000000000582,
+                "heapDeltaBytes": 308008,
+                "finalOpenStep": true
+              }
+            ]
+          }
+        ],
+        "aggregateByStep": [
+          {
+            "stepDisplay": "Step 1 of 5",
+            "count": 1,
+            "totalElapsedMs": 0.3000000000029104
+          },
+          {
+            "stepDisplay": "Step 2 of 5",
+            "count": 1,
+            "totalElapsedMs": 8.89999999999418
+          },
+          {
+            "stepDisplay": "Step 3 of 5",
+            "count": 1,
+            "totalElapsedMs": 243.40000000000873
+          },
+          {
+            "stepDisplay": "Step 4 of 5",
+            "count": 1,
+            "totalElapsedMs": 6810.899999999994
+          },
+          {
+            "stepDisplay": "Step 5 of 5",
+            "count": 1,
+            "totalElapsedMs": 95.10000000000582
+          }
+        ]
+      },
+      "step4Breakdown": {
+        "dictionaries": [
+          {
+            "title": "VNDB Characters by Bee",
+            "termParseMs": 3925,
+            "termSerializationMs": 0,
+            "bulkAddTermsMs": 2529,
+            "bulkAddTagsMetaMs": 1,
+            "mediaResolveMs": 126,
+            "mediaWriteMs": 37,
+            "accountedMs": 6618,
+            "otherMs": 190,
+            "parserWorkerCount": 3,
+            "parserPipelineGroupsPerWorker": 3,
+            "parserGroupCount": 170
+          }
+        ],
+        "aggregate": {
+          "termParseMs": 3925,
+          "termSerializationMs": 0,
+          "bulkAddTermsMs": 2529,
+          "bulkAddTagsMetaMs": 1,
+          "mediaResolveMs": 126,
+          "mediaWriteMs": 37,
+          "accountedMs": 6618,
+          "otherMs": 190
+        }
+      },
+      "importDebug": {
+        "dictionaryTitle": "vndb_characters_by_bee.zip",
+        "hasResult": true,
+        "resultTitle": "VNDB Characters by Bee",
+        "sourceTitle": "VNDB Characters by Bee",
+        "errorCount": 0,
+        "addSettingsErrorCount": 0,
+        "fallbackDatabaseContentBase64Length": null,
+        "usesFallbackStorage": false,
+        "openStorageDiagnostics": {
+          "mode": "opfs-sahpool",
+          "caller": "DictionaryDatabase._openConnection",
+          "runtimeContext": {
+            "href": "chrome-extension://jkgmdnmaomhepfkoimkebaeaniammhnl/js/background/offscreen-dictionary-worker.js",
+            "origin": "chrome-extension://jkgmdnmaomhepfkoimkebaeaniammhnl",
+            "globalConstructor": "DedicatedWorkerGlobalScope",
+            "isWindow": false,
+            "isWorkerGlobalScope": true,
+            "isServiceWorkerGlobalScope": false,
+            "isDedicatedWorkerGlobalScope": true,
+            "crossOriginIsolated": false,
+            "hasSharedArrayBuffer": true,
+            "hasAtomics": true,
+            "hasNavigatorStorage": true,
+            "hasStorageGetDirectory": true,
+            "hasFileSystemHandle": true,
+            "hasFileSystemDirectoryHandle": true,
+            "hasFileSystemFileHandle": true,
+            "hasCreateSyncAccessHandle": true,
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+          },
+          "forceFallback": false,
+          "opfsReadyTimeoutMs": 0,
+          "opfsReadyWait": null,
+          "hasOpfsDbCtor": true,
+          "hasOpfsImportDb": true,
+          "hasWasmfsDir": true,
+          "hasInstallOpfsSAHPoolVfs": true,
+          "hasOpfsVfs": true,
+          "hasOpfsSahpoolVfs": true,
+          "opfsVfsPtr": 786960,
+          "opfsSahpoolVfsPtr": 787088,
+          "opfsSahpoolInstallAttempted": false,
+          "opfsSahpoolInstallResult": null,
+          "opfsSahpoolInstallError": null,
+          "opfsSahpoolDirectory": "/manabitan/sqlite-sahpool-v1",
+          "opfsSahpoolCapacity": 8,
+          "opfsSahpoolFileCount": 1,
+          "opfsSahpoolFileNames": [
+            "/dict.sqlite3"
+          ],
+          "openFailureClass": null,
+          "attempts": [],
+          "lastError": null
+        },
+        "useImportSession": true,
+        "finalizeImportSession": true,
+        "importerPhaseTimings": [
+          {
+            "phase": "archive-and-index",
+            "elapsedMs": 207,
+            "startEpochMs": 1795548434073,
+            "endEpochMs": 1795548434280,
+            "details": {
+              "ok": true,
+              "fileCount": 147237,
+              "catalog": "dense-zip",
+              "indexVersion": 3,
+              "zipMaxWorkers": 2,
+              "zipChunkSize": null,
+              "zipUseWebWorkers": true,
+              "autoZipMaxWorkersForLargeArchive": true,
+              "archiveSizeBytes": 291705969
+            }
+          },
+          {
+            "phase": "term-file-fast-path:term_bank_1.json..term_bank_665.json",
+            "elapsedMs": 6733,
+            "startEpochMs": 1795548434327,
+            "endEpochMs": 1795548441060,
+            "details": {
+              "batchedFileCount": 665,
+              "rows": 6648310,
+              "chunkCount": 170,
+              "importerMaterializationMs": 123,
+              "importerChunkSinkMs": 4600,
+              "sourceArchiveReadMs": 6590.300000000003,
+              "sourceBatchMaxBytes": 201326592,
+              "sourcePrefetchMaxBytes": 100663296,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false,
+              "sourceFirstBatchFileCount": 30,
+              "sourceFirstBatchEstimatedBytes": 200766806,
+              "sourceFirstBatchSizeKnown": true,
+              "parserExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": true,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "parserFusedAttempts": 170,
+              "parserFusedFallbacks": 0,
+              "parserDiscardedFusedMs": 0,
+              "parserDiscardedFusedRows": 0,
+              "parserBankSpanCount": 665,
+              "parserEscapedKeyDecodeCount": 1870,
+              "parserValidatedGlossaryReuseCount": 6490145,
+              "parserGlobalExactContentReuseCount": 0,
+              "parserFastGlossaryNormalizationCount": 0,
+              "parserFastGlossaryNormalizationFallbackCount": 0,
+              "parserFusedSingleBankGroups": 0,
+              "parserNativeLookupScratchReusedBytes": 501936456,
+              "parserNativeLookupScratchReuseGroups": 170,
+              "parserNativeLookupScratchReuseMisses": 0,
+              "parserNativeSegmentedLookupSegments": 0,
+              "parserNativeSegmentedLookupFallbacks": 0,
+              "parserDirectLookupArenaSegments": 0,
+              "parserDirectLookupArenaCopiedBytesAvoided": 0,
+              "parserLookupCompactionSourceValidationPasses": 0,
+              "parserMaxWasmHeapBytes": 45219840,
+              "parserBufferSetupMs": 8980,
+              "parserAllocationMs": 5,
+              "parserCopyJsonMs": 0,
+              "parserParseBankMs": 8883,
+              "parserEncodeContentMs": 0,
+              "parserRecentContentDedupHitCount": 6490301,
+              "parserRowDecodeMs": 447,
+              "parserChunkDispatchMs": 2374,
+              "parserSourcePreparationMs": 5.000000000014552,
+              "parserSourceDeliveryMs": 145,
+              "parserSourceTransferredBytes": 86850424,
+              "parserSourceInflateMs": 1280.2999999999447,
+              "parserSourceCrcMs": 2159.2000000000116,
+              "parserSourceCrcScannedBytes": 568284368,
+              "parserSourceCrcReusedBytes": 3699708599,
+              "parserSourceCrcReusedGlossaryCount": 6490145,
+              "parserSourceCompressedBytes": 86850424,
+              "parserSourceUncompressedBytes": 4267992967,
+              "parserResultCopyMs": 2375.2000000001426,
+              "parserCompactContentMetadataGroups": 170,
+              "parserCompactContentMetadataBytesAvoided": 103847136,
+              "parserResultDeliveryMs": 4812,
+              "parserOrderedSinkWaitMs": 8856.89999999995,
+              "parserBorrowedContentResultCount": 0,
+              "parserLookupIndexPrepareMs": 510.49999999970896,
+              "parserLookupIndexCompactMs": 0,
+              "parserLookupIndexEncodeMs": 510.49999999970896,
+              "parserParallelWorkerCount": 3,
+              "parserParallelPipelineGroupsPerWorker": 3,
+              "parserParallelGroupCount": 170,
+              "parserParallelWorkerWallMs": 6721.800000000003,
+              "parserParallelSourceReadWallMs": 6590.300000000003,
+              "parserParallelOwnedContentBytes": 91670244,
+              "parserParallelPeakQueuedOwnedContentBytes": 4169513,
+              "parserParallelSkipReason": null,
+              "parserMetaCapacity": 6650000,
+              "parserMetaAllocatedBytes": 452200000,
+              "parserEncodedContentBytes": 91670244,
+              "parserContentCapacity": 1276800000,
+              "parserInitialContentBytesPerRow": 48,
+              "parserChunkSize": 0,
+              "parserMinimalDecode": true,
+              "dedupNativeCallCount": 170,
+              "dedupNativeScannedRows": 157864,
+              "dedupNativeBulkPendingRows": 157150,
+              "dedupNativeExactCandidates": 714,
+              "dedupNativeCopiedInputBytes": 5840968,
+              "dedupNativeCopiedOutputBytes": 5712,
+              "dedupNativeSnapshotBytes": 0,
+              "dedupNativeFallbackCount": 0,
+              "dedupNativeFallbackEligibilityCount": 0,
+              "dedupNativeFallbackAssetCount": 0,
+              "dedupNativeFallbackUnsupportedCount": 0,
+              "mediaResolveMs": 89,
+              "mediaWriteMs": 15,
+              "serializationMs": 0,
+              "bulkAddTermsMs": 2529,
+              "contentAppendMs": 986.2999999998865,
+              "dedupScanMs": 468.6999999999389,
+              "dedupCapacityMs": 31.10000000007858,
+              "dedupCanonicalScanMs": 163.2999999998865,
+              "dedupExactCompareMs": 248.90000000006694,
+              "contentStoreMs": 462.2999999999738,
+              "contentPackMs": 147.89999999995052,
+              "contentCompressMs": 234.90000000000873,
+              "contentEnvelopeMs": 0,
+              "contentReferenceMs": 26.199999999982538,
+              "contentOpfsAppendMs": 27.800000000017462,
+              "contentInitialReservationCount": 0,
+              "contentInitialReservationSavingsMissCount": 0,
+              "contentMetadataMs": 52.80000000000291,
+              "contentMetadataStageMs": 0,
+              "contentMetadataPublishMs": 52.80000000000291,
+              "contentMetadataProjectionMs": 30.90000000000873,
+              "contentMetadataIndexPublishMs": 15.600000000034925,
+              "dedupPendingHitCount": 6490446,
+              "dedupPersistedHitCount": 714,
+              "dedupUniqueCount": 157150,
+              "dedupExactFallbackCount": 714,
+              "dedupRecentSourceHitCount": 0,
+              "dedupRecentSourceCacheMs": 1.400000000023283,
+              "dedupRecentSourceCacheBytes": 0,
+              "dedupRecentSourceAdoptedBytes": 0,
+              "termRecordBuildMs": 0.3000000000174623,
+              "termRecordEncodeMs": 559.9999999998254,
+              "termRecordWriteMs": 634.5999999999913,
+              "termsVtabInsertMs": 0,
+              "termRecordInternMs": 0,
+              "termRecordPackLengthsMs": 0,
+              "termRecordHeapCopyMs": 0,
+              "termRecordFieldEncodeMs": 418.1999999998952,
+              "termRecordValidationMs": 41.10000000004948,
+              "termLookupIndexEncodeMs": 649.7999999996973
+            }
+          },
+          {
+            "phase": "import-data-banks",
+            "elapsedMs": 6808,
+            "startEpochMs": 1795548434319,
+            "endEpochMs": 1795548441127,
+            "details": {
+              "terms": 6648310,
+              "termMeta": 0,
+              "kanji": 0,
+              "kanjiMeta": 0,
+              "tagMeta": 5,
+              "media": 146570,
+              "step4TermParseMs": 3925,
+              "step4TermArchiveReadMs": 6590.300000000003,
+              "step4TermSerializationMs": 0,
+              "step4BulkAddTermsMs": 2529,
+              "step4BulkAddTagsMetaMs": 1,
+              "step4MediaResolveMs": 126,
+              "step4MediaWriteMs": 37,
+              "step4MediaZipBatchReadMs": 2016,
+              "step4MediaZipBatchInflateMs": 463,
+              "step4MediaZipBatchCount": 144,
+              "step4MediaZipBatchEntryCount": 146314,
+              "step4MediaZipBatchRangeBytes": 195649882,
+              "step4MediaZipBatchCompressedBytes": 188864129,
+              "step4MediaZipBatchUncompressedBytes": 188131284,
+              "step4SourcePackedMediaEntryCount": 146314,
+              "step4SourcePackedMediaBytes": 195649882,
+              "step4SourcePackedMediaAppendMs": 14,
+              "step4SourcePackedMediaParallel": true,
+              "step4SourcePackedMediaEarlyPayload": true,
+              "step4TermFileNonParseWriteMs": 1292,
+              "step4ArtifactPreloadMs": 0,
+              "step4ArtifactReadBytesMs": 0,
+              "step4ArtifactMetadataRebaseMs": 0,
+              "step4ArtifactMetadataAppendMs": 0,
+              "step4SharedGlossaryAppendMs": 0,
+              "step4TermMetaReadMs": 0,
+              "step4KanjiReadMs": 0,
+              "step4KanjiMetaReadMs": 0,
+              "step4TagReadMs": 1,
+              "step4AccountedMs": 6618,
+              "step4OtherMs": 190,
+              "fastPathChunkCount": 170,
+              "fastPathChunkSinkMs": 4600,
+              "fastPathParserExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "fastPathParserEffectiveExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": true,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "fastPathParserFusedAttempts": 170,
+              "fastPathParserFusedFallbacks": 0,
+              "fastPathParserDiscardedFusedMs": 0,
+              "fastPathParserDiscardedFusedRows": 0,
+              "fastPathParserBankSpanCount": 665,
+              "fastPathParserEscapedKeyDecodeCount": 1870,
+              "fastPathParserValidatedGlossaryReuseCount": 6490145,
+              "fastPathParserGlobalExactContentReuseCount": 0,
+              "fastPathParserFastGlossaryNormalizationCount": 0,
+              "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+              "fastPathParserFusedSingleBankGroups": 0,
+              "fastPathParserNativeLookupScratchReusedBytes": 501936456,
+              "fastPathParserNativeLookupScratchReuseGroups": 170,
+              "fastPathParserNativeLookupScratchReuseMisses": 0,
+              "fastPathParserNativeSegmentedLookupSegments": 0,
+              "fastPathParserNativeSegmentedLookupFallbacks": 0,
+              "fastPathParserDirectLookupArenaSegments": 0,
+              "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+              "fastPathParserLookupCompactionSourceValidationPasses": 0,
+              "fastPathParserMaxWasmHeapBytes": 45219840,
+              "fastPathParserBufferSetupMs": 8980,
+              "fastPathParserAllocationMs": 5,
+              "fastPathParserCopyJsonMs": 0,
+              "fastPathParserParseBankMs": 8883,
+              "fastPathParserEncodeContentMs": 0,
+              "fastPathParserRecentContentDedupHitCount": 6490301,
+              "fastPathParserRowDecodeMs": 447,
+              "fastPathParserStringPlanMs": 0,
+              "fastPathParserChunkDispatchMs": 2374,
+              "fastPathParserSourcePreparationMs": 5.000000000014552,
+              "fastPathParserSourceDeliveryMs": 145,
+              "fastPathParserSourceTransferredBytes": 86850424,
+              "fastPathParserSourceInflateMs": 1280.2999999999447,
+              "fastPathParserSourceCrcMs": 2159.2000000000116,
+              "fastPathParserSourceCrcScannedBytes": 568284368,
+              "fastPathParserSourceCrcReusedBytes": 3699708599,
+              "fastPathParserSourceCrcReusedGlossaryCount": 6490145,
+              "fastPathParserSourceCompressedBytes": 86850424,
+              "fastPathParserSourceUncompressedBytes": 4267992967,
+              "fastPathParserResultCopyMs": 2375.2000000001426,
+              "fastPathParserCompactContentMetadataGroups": 170,
+              "fastPathParserCompactContentMetadataBytesAvoided": 103847136,
+              "fastPathParserResultDeliveryMs": 4812,
+              "fastPathParserOrderedSinkWaitMs": 8856.89999999995,
+              "fastPathParserBorrowedContentResultCount": 0,
+              "fastPathParserLookupIndexPrepareMs": 510.49999999970896,
+              "fastPathParserLookupIndexCompactMs": 0,
+              "fastPathParserLookupIndexEncodeMs": 510.49999999970896,
+              "fastPathParserParallelWorkerCount": 3,
+              "fastPathParserParallelPipelineGroupsPerWorker": 3,
+              "fastPathParserParallelGroupCount": 170,
+              "fastPathParserParallelWorkerWallMs": 6721.800000000003,
+              "fastPathParserParallelSourceReadWallMs": 6590.300000000003,
+              "fastPathParserParallelOwnedContentBytes": 91670244,
+              "fastPathParserParallelPeakQueuedOwnedContentBytes": 4169513,
+              "fastPathParserParallelSkipReason": null,
+              "sourceZipLogicalRangeReadCount": 665,
+              "sourceZipPhysicalRangeReadCount": 163,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false,
+              "sourceFirstBatchFileCount": 30,
+              "sourceFirstBatchEstimatedBytes": 200766806,
+              "sourceFirstBatchSizeKnown": true,
+              "useMediaPipeline": true,
+              "hasArchiveImageMediaFiles": true
+            }
+          },
+          {
+            "phase": "finalize-descriptor",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548441127,
+            "endEpochMs": 1795548441127,
+            "details": {
+              "hasStyles": false
+            }
+          },
+          {
+            "phase": "bulk-finalization",
+            "elapsedMs": 76,
+            "startEpochMs": 1795548441128,
+            "endEpochMs": 1795548441204,
+            "details": {
+              "ok": true,
+              "commitMs": 2.3999999999941792,
+              "termContentEndImportSessionMs": 2.3000000000029104,
+              "termContentEndImportSessionFlushPendingWritesMs": 0,
+              "termContentEndImportSessionAwaitQueuedWritesMs": 0,
+              "termContentEndImportSessionCloseWritableMs": 1.1999999999970896,
+              "termContentDrainCycleCount": 2,
+              "termContentWriteCallCount": 2,
+              "termContentSingleChunkWriteCount": 0,
+              "termContentMergedWriteCount": 2,
+              "termContentTotalWriteBytes": 7533449,
+              "termContentMergedWriteBytes": 7533449,
+              "termContentMaxWriteBytes": 4198700,
+              "termContentMergedGroupChunkCount": 339,
+              "termContentMaxMergedGroupChunkCount": 181,
+              "termContentFlushDueToBytesCount": 0,
+              "termContentFlushDueToChunkCount": 0,
+              "termContentFlushFinalGroupCount": 2,
+              "termContentWriteCoalesceTargetBytes": 67108864,
+              "termContentWriteCoalesceMaxChunks": 8192,
+              "termContentWriteFlushThresholdBytes": 8388608,
+              "termRecordEndImportSessionMs": 69.30000000000291,
+              "termRecordEndImportSessionFlushPendingWritesMs": 4.899999999994179,
+              "termRecordEndImportSessionAwaitQueuedWritesMs": 0.40000000000873115,
+              "termRecordEndImportSessionCloseWritableMs": 63.79999999998836,
+              "termRecordDrainCycleCount": 2,
+              "termRecordWriteCallCount": 2,
+              "termRecordSingleChunkWriteCount": 2,
+              "termRecordMergedWriteCount": 0,
+              "termRecordTotalWriteBytes": 64,
+              "termRecordMergedWriteBytes": 0,
+              "termRecordMaxWriteBytes": 38,
+              "termRecordMergedGroupChunkCount": 0,
+              "termRecordMaxMergedGroupChunkCount": 0,
+              "termRecordWriteCoalesceTargetBytes": 16777216,
+              "termRecordLookupIndexWriteCallCount": 83,
+              "termRecordLookupIndexWriteBytes": 401899752,
+              "compressionExperiments": {
+                "experimentalGenericSpanCompression": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSkipFusedParse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalDirectLookupArena": false,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalTermBankSpans": false,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalValidatedGlossaryReuse": true,
+                "experimentalFusedSingleBank": false,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalFastGlossaryNormalization": false
+              },
+              "termRecordLookupIndexAwaitMs": 0.40000000000873115,
+              "termRecordLookupIndexMaxQueuedBytes": 33232844,
+              "termRecordLookupIndexWorkerFileCount": 2,
+              "termsVirtualTableSyncMs": 0,
+              "createIndexesMs": 0,
+              "createIndexesCheckpointCount": 0,
+              "cacheResetMs": 0,
+              "runtimePragmasMs": 0.10000000000582077,
+              "totalMs": 76,
+              "published": true,
+              "housekeepingErrors": []
+            }
+          },
+          {
+            "phase": "write-summary",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548441204,
+            "endEpochMs": 1795548441204,
+            "details": {
+              "ok": true,
+              "fusedWithBulkFinalization": true
+            }
+          },
+          {
+            "phase": "post-finalization-integrity-sample",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548441204,
+            "endEpochMs": 1795548441204,
+            "details": {
+              "skipped": true,
+              "reason": "transaction-commit-completed",
+              "termCount": 6648310
+            }
+          },
+          {
+            "phase": "activation-diagnostic",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548441204,
+            "endEpochMs": 1795548441204,
+            "details": {
+              "instrumentationOnly": true,
+              "owner": "offscreen",
+              "events": [
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": false,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 503818,
+                  "uncompressedBytes": 503818
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": false,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 524939,
+                  "uncompressedBytes": 524322
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 506166,
+                  "uncompressedBytes": 505545
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 493959,
+                  "uncompressedBytes": 493350
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 516242,
+                  "uncompressedBytes": 515620
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 538696,
+                  "uncompressedBytes": 538074
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 585160,
+                  "uncompressedBytes": 584544
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 490371,
+                  "uncompressedBytes": 489754
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 513980,
+                  "uncompressedBytes": 513356
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 522302,
+                  "uncompressedBytes": 521686
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 539242,
+                  "uncompressedBytes": 538617
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 545724,
+                  "uncompressedBytes": 544650
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 507195,
+                  "uncompressedBytes": 506577
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 522095,
+                  "uncompressedBytes": 521594
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 578923,
+                  "uncompressedBytes": 577846
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 544233,
+                  "uncompressedBytes": 543613
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 507780,
+                  "uncompressedBytes": 506703
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 652990,
+                  "uncompressedBytes": 652373
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 583941,
+                  "uncompressedBytes": 583322
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 554265,
+                  "uncompressedBytes": 553657
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 546237,
+                  "uncompressedBytes": 545174
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 518752,
+                  "uncompressedBytes": 518121
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 497742,
+                  "uncompressedBytes": 497094
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 539210,
+                  "uncompressedBytes": 538593
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 493279,
+                  "uncompressedBytes": 492659
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 496790,
+                  "uncompressedBytes": 496172
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 488153,
+                  "uncompressedBytes": 487532
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 449095,
+                  "uncompressedBytes": 448474
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 498193,
+                  "uncompressedBytes": 497569
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 572805,
+                  "uncompressedBytes": 572185
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 549767,
+                  "uncompressedBytes": 548703
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 500679,
+                  "uncompressedBytes": 500222
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 528843,
+                  "uncompressedBytes": 528345
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 511197,
+                  "uncompressedBytes": 509781
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 584221,
+                  "uncompressedBytes": 583600
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 541185,
+                  "uncompressedBytes": 540560
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 542765,
+                  "uncompressedBytes": 542145
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 528314,
+                  "uncompressedBytes": 527695
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 497551,
+                  "uncompressedBytes": 496931
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 526713,
+                  "uncompressedBytes": 525750
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 527130,
+                  "uncompressedBytes": 526512
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 524601,
+                  "uncompressedBytes": 524099
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 523407,
+                  "uncompressedBytes": 522783
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 552707,
+                  "uncompressedBytes": 552089
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 511754,
+                  "uncompressedBytes": 511133
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 591773,
+                  "uncompressedBytes": 591148
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 497013,
+                  "uncompressedBytes": 496393
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 536980,
+                  "uncompressedBytes": 536374
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 519109,
+                  "uncompressedBytes": 518304
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 556209,
+                  "uncompressedBytes": 555248
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 552517,
+                  "uncompressedBytes": 551896
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 557995,
+                  "uncompressedBytes": 557378
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 508147,
+                  "uncompressedBytes": 507068
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 504404,
+                  "uncompressedBytes": 503940
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 500667,
+                  "uncompressedBytes": 499866
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 492894,
+                  "uncompressedBytes": 491945
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 513019,
+                  "uncompressedBytes": 511937
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 514883,
+                  "uncompressedBytes": 513808
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 558622,
+                  "uncompressedBytes": 558005
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 557155,
+                  "uncompressedBytes": 556538
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 570409,
+                  "uncompressedBytes": 569790
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 526515,
+                  "uncompressedBytes": 525899
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 536885,
+                  "uncompressedBytes": 536262
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 509234,
+                  "uncompressedBytes": 508617
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 529886,
+                  "uncompressedBytes": 529270
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 506062,
+                  "uncompressedBytes": 505103
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 508030,
+                  "uncompressedBytes": 507410
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 517583,
+                  "uncompressedBytes": 516619
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 542736,
+                  "uncompressedBytes": 541182
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 497885,
+                  "uncompressedBytes": 495674
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 552215,
+                  "uncompressedBytes": 550802
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 487683,
+                  "uncompressedBytes": 485336
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 497429,
+                  "uncompressedBytes": 496007
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 506836,
+                  "uncompressedBytes": 505760
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 497638,
+                  "uncompressedBytes": 496681
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 489813,
+                  "uncompressedBytes": 489196
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 530261,
+                  "uncompressedBytes": 529187
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 482159,
+                  "uncompressedBytes": 480285
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 561582,
+                  "uncompressedBytes": 560956
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 537453,
+                  "uncompressedBytes": 536827
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 505678,
+                  "uncompressedBytes": 505336
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 533420,
+                  "uncompressedBytes": 532351
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 515471,
+                  "uncompressedBytes": 515128
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 564712,
+                  "uncompressedBytes": 564248
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 500599,
+                  "uncompressedBytes": 499645
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 518308,
+                  "uncompressedBytes": 517679
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 508261,
+                  "uncompressedBytes": 506454
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 514170,
+                  "uncompressedBytes": 512866
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 567165,
+                  "uncompressedBytes": 566325
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 590384,
+                  "uncompressedBytes": 589760
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 519524,
+                  "uncompressedBytes": 518104
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 572930,
+                  "uncompressedBytes": 571515
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 560470,
+                  "uncompressedBytes": 559332
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 594286,
+                  "uncompressedBytes": 592868
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 543162,
+                  "uncompressedBytes": 541886
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 562371,
+                  "uncompressedBytes": 561062
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 540330,
+                  "uncompressedBytes": 538580
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 553219,
+                  "uncompressedBytes": 550809
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 613385,
+                  "uncompressedBytes": 612431
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 564653,
+                  "uncompressedBytes": 562005
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 543201,
+                  "uncompressedBytes": 540872
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 540478,
+                  "uncompressedBytes": 537598
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 517875,
+                  "uncompressedBytes": 515777
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 592996,
+                  "uncompressedBytes": 590572
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 569162,
+                  "uncompressedBytes": 566972
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 598026,
+                  "uncompressedBytes": 595491
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 631428,
+                  "uncompressedBytes": 630584
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 605183,
+                  "uncompressedBytes": 600622
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 583836,
+                  "uncompressedBytes": 580176
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 554190,
+                  "uncompressedBytes": 552912
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 545628,
+                  "uncompressedBytes": 542288
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 583405,
+                  "uncompressedBytes": 582015
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 521737,
+                  "uncompressedBytes": 520148
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 602058,
+                  "uncompressedBytes": 600418
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 570146,
+                  "uncompressedBytes": 568163
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 559982,
+                  "uncompressedBytes": 557897
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 521753,
+                  "uncompressedBytes": 519561
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 522894,
+                  "uncompressedBytes": 519672
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 576524,
+                  "uncompressedBytes": 573163
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 549556,
+                  "uncompressedBytes": 547795
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 576001,
+                  "uncompressedBytes": 574399
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 537442,
+                  "uncompressedBytes": 534664
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 704594,
+                  "uncompressedBytes": 701129
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 547645,
+                  "uncompressedBytes": 544899
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 495618,
+                  "uncompressedBytes": 492946
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 514777,
+                  "uncompressedBytes": 511344
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 527909,
+                  "uncompressedBytes": 522100
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 506100,
+                  "uncompressedBytes": 501204
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 519073,
+                  "uncompressedBytes": 514621
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 562284,
+                  "uncompressedBytes": 556706
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 485255,
+                  "uncompressedBytes": 482042
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 525990,
+                  "uncompressedBytes": 523565
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 516863,
+                  "uncompressedBytes": 515722
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 573448,
+                  "uncompressedBytes": 570048
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 550304,
+                  "uncompressedBytes": 547542
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 562877,
+                  "uncompressedBytes": 559188
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 465136,
+                  "uncompressedBytes": 463278
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 426684,
+                  "uncompressedBytes": 425136
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 464919,
+                  "uncompressedBytes": 462482
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 569994,
+                  "uncompressedBytes": 564533
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 571868,
+                  "uncompressedBytes": 567529
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 521809,
+                  "uncompressedBytes": 517919
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 592033,
+                  "uncompressedBytes": 586675
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 670542,
+                  "uncompressedBytes": 667223
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 595570,
+                  "uncompressedBytes": 591668
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 616561,
+                  "uncompressedBytes": 611992
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 609711,
+                  "uncompressedBytes": 603227
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 624263,
+                  "uncompressedBytes": 620618
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 644227,
+                  "uncompressedBytes": 636826
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 434351,
+                  "uncompressedBytes": 432382
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 582616,
+                  "uncompressedBytes": 579113
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 429645,
+                  "uncompressedBytes": 426339
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 408070,
+                  "uncompressedBytes": 405980
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 489584,
+                  "uncompressedBytes": 486573
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 622622,
+                  "uncompressedBytes": 617301
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 611542,
+                  "uncompressedBytes": 607986
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 538314,
+                  "uncompressedBytes": 535669
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 490058,
+                  "uncompressedBytes": 486165
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 420159,
+                  "uncompressedBytes": 418976
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 597422,
+                  "uncompressedBytes": 594539
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 629747,
+                  "uncompressedBytes": 627093
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 546886,
+                  "uncompressedBytes": 544686
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 556590,
+                  "uncompressedBytes": 553608
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 510666,
+                  "uncompressedBytes": 508761
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 477693,
+                  "uncompressedBytes": 474938
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 663956,
+                  "uncompressedBytes": 660833
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 496603,
+                  "uncompressedBytes": 495652
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 636389,
+                  "uncompressedBytes": 630793
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 483185,
+                  "uncompressedBytes": 480780
+                },
+                {
+                  "event": "attempt",
+                  "compressionDictName": null,
+                  "force": true,
+                  "sourceKind": "private",
+                  "ownsContent": true,
+                  "sourceBytes": 599301,
+                  "uncompressedBytes": 596660
+                }
+              ]
+            }
+          }
+        ],
+        "localPhaseTimings": [
+          {
+            "phase": "read-archive",
+            "elapsedMs": 0,
+            "startEpochMs": 1795548434066,
+            "endEpochMs": 1795548434066,
+            "details": {
+              "sizeBytes": 291705969,
+              "source": "file-handle"
+            }
+          },
+          {
+            "phase": "worker-import-dictionary",
+            "elapsedMs": 7140.5,
+            "startEpochMs": 1795548434066.5,
+            "endEpochMs": 1795548441207,
+            "details": {
+              "useImportSession": true,
+              "finalizeImportSession": true
+            }
+          },
+          {
+            "phase": "page-side-finalization-queued",
+            "elapsedMs": 0,
+            "details": {
+              "deferred": true
+            }
+          },
+          {
+            "phase": "add-dictionary-settings",
+            "elapsedMs": 7.7000000000116415,
+            "startEpochMs": 1795548441209.3,
+            "endEpochMs": 1795548441217,
+            "details": {
+              "settingsErrorCount": 0,
+              "skipped": false
+            }
+          },
+          {
+            "phase": "trigger-database-updated",
+            "elapsedMs": 0,
+            "details": {
+              "deferred": true
+            }
+          },
+          {
+            "phase": "verify-imported-dictionary-options-batch-read",
+            "elapsedMs": 1.5999999999912689,
+            "startEpochMs": 1795548441220.4,
+            "endEpochMs": 1795548441222,
+            "details": {
+              "dictionaryCount": 1,
+              "batchFinalization": true
+            }
+          },
+          {
+            "phase": "verify-imported-dictionary-visible",
+            "elapsedMs": 0.5,
+            "startEpochMs": 1795548441221.5,
+            "endEpochMs": 1795548441222,
+            "details": {
+              "dictionaryTitle": "VNDB Characters by Bee",
+              "requireEnabledForActiveProfile": true,
+              "batchFinalization": true
+            }
+          }
+        ]
+      },
+      "validation": {
+        "title": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "contentReadable": true,
+        "probeCount": 12,
+        "probeTerms": [
+          "フォーニ",
+          "あいこ先生",
+          "鎧衣 美琴たん",
+          "右代宮金蔵社長",
+          "Kamala Copperheart",
+          "榊亜実先輩",
+          "RestaurantOwnerちゃん",
+          "Osamu博士",
+          "Lynrd Skynrdたん",
+          "霧姫・アイスマン坊",
+          "Tyler博士",
+          "クレイグ・ウァジェト部長"
+        ],
+        "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+        "media": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "storage": {
+          "kind": "OPFS logical file sizes after restart and verification",
+          "bytes": 609553611,
+          "files": [
+            {
+              "path": "manabitan-dictionary-media-v1/14486bb1-cdca-42db-93ab-b8c404ff4910.bin",
+              "bytes": 199563210
+            },
+            {
+              "path": "manabitan-term-content.bin",
+              "bytes": 7533449
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+              "bytes": 38
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+              "bytes": 399513708
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+              "bytes": 26
+            },
+            {
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+              "bytes": 2386124
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2zoihm68sxd",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/64yib0bltir",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/6immki60ub5",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/8e4xr0sr9my",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/hbey1a66i4e",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/jqi967j60u",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/pmrb4q2gj2a",
+              "bytes": 4096
+            },
+            {
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/qzlcrszvnz",
+              "bytes": 528384
+            }
+          ]
+        },
+        "lookup": {
+          "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing",
+          "observations": [
+            {
+              "pass": 0,
+              "term": "フォーニ",
+              "elapsedMs": 2,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 0,
+              "term": "あいこ先生",
+              "elapsedMs": 3.6000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 0,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 3,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 0,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.6000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 0,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.9000000000087311,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 0,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.3000000000029104,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 0,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 3.5,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 0,
+              "term": "Osamu博士",
+              "elapsedMs": 2.7999999999883585,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 0,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1.6999999999970896,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 0,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 0,
+              "term": "Tyler博士",
+              "elapsedMs": 10.900000000008731,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 0,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.9000000000087311,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 1,
+              "term": "フォーニ",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 1,
+              "term": "あいこ先生",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 1,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 1,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 1,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 1,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 1,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.3000000000029104,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 1,
+              "term": "Osamu博士",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 1,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 0.9000000000087311,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 1,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 0.9000000000087311,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 1,
+              "term": "Tyler博士",
+              "elapsedMs": 1.4000000000087311,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 1,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 2,
+              "term": "フォーニ",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 2,
+              "term": "あいこ先生",
+              "elapsedMs": 1.3000000000029104,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 2,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 2,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 0.8999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 2,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 2,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 2,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.0999999999912689,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 2,
+              "term": "Osamu博士",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 2,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 2,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 2,
+              "term": "Tyler博士",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 2,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 3,
+              "term": "フォーニ",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 3,
+              "term": "あいこ先生",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 3,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 3,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 3,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.1999999999970896,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 3,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 3,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.0999999999912689,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 3,
+              "term": "Osamu博士",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 3,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 3,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 3,
+              "term": "Tyler博士",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 3,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 4,
+              "term": "フォーニ",
+              "elapsedMs": 0.8999999999941792,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 4,
+              "term": "あいこ先生",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 4,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 4,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 4,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 4,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 4,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 4,
+              "term": "Osamu博士",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 4,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 4,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 0.9000000000087311,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 4,
+              "term": "Tyler博士",
+              "elapsedMs": 1.3999999999941792,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 4,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            },
+            {
+              "pass": 5,
+              "term": "フォーニ",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 4,
+              "hasExactHeadwordMatch": true,
+              "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+            },
+            {
+              "pass": 5,
+              "term": "あいこ先生",
+              "elapsedMs": 1.2000000000116415,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+            },
+            {
+              "pass": 5,
+              "term": "鎧衣 美琴たん",
+              "elapsedMs": 1.0999999999912689,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+            },
+            {
+              "pass": 5,
+              "term": "右代宮金蔵社長",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+            },
+            {
+              "pass": 5,
+              "term": "Kamala Copperheart",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+            },
+            {
+              "pass": 5,
+              "term": "榊亜実先輩",
+              "elapsedMs": 1.1000000000058208,
+              "results": 1,
+              "originalTextLength": 5,
+              "hasExactHeadwordMatch": true,
+              "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+            },
+            {
+              "pass": 5,
+              "term": "RestaurantOwnerちゃん",
+              "elapsedMs": 1.1999999999970896,
+              "results": 2,
+              "originalTextLength": 18,
+              "hasExactHeadwordMatch": true,
+              "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+            },
+            {
+              "pass": 5,
+              "term": "Osamu博士",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+            },
+            {
+              "pass": 5,
+              "term": "Lynrd Skynrdたん",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 14,
+              "hasExactHeadwordMatch": true,
+              "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+            },
+            {
+              "pass": 5,
+              "term": "霧姫・アイスマン坊",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 9,
+              "hasExactHeadwordMatch": true,
+              "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+            },
+            {
+              "pass": 5,
+              "term": "Tyler博士",
+              "elapsedMs": 1.5,
+              "results": 1,
+              "originalTextLength": 7,
+              "hasExactHeadwordMatch": true,
+              "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+            },
+            {
+              "pass": 5,
+              "term": "クレイグ・ウァジェト部長",
+              "elapsedMs": 1,
+              "results": 1,
+              "originalTextLength": 12,
+              "hasExactHeadwordMatch": true,
+              "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+            }
+          ]
+        },
+        "restart": {
+          "title": "VNDB Characters by Bee",
+          "revision": "395525135651",
+          "termRows": 6648310,
+          "mediaFiles": 146570,
+          "contentReadable": true,
+          "probeCount": 12
+        }
+      }
+    }
+  ],
+  "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+  "timing": {
+    "count": 1,
+    "minMs": 7173.600000000006,
+    "medianMs": 7173.600000000006,
+    "p95Ms": 7173.600000000006,
+    "maxMs": 7173.600000000006
+  },
+  "automationObservedTiming": {
+    "count": 1,
+    "minMs": 7226.6099730000005,
+    "medianMs": 7226.6099730000005,
+    "p95Ms": 7226.6099730000005,
+    "maxMs": 7226.6099730000005
+  },
+  "workerTiming": {
+    "count": 1,
+    "minMs": 7140.5,
+    "medianMs": 7140.5,
+    "p95Ms": 7140.5,
+    "maxMs": 7140.5
+  }
+}

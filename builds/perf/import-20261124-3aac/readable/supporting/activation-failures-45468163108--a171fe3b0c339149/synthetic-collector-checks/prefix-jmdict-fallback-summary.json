@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "timingsAuthoritative": false,
+  "source": "synthetic",
+  "tree": "synthetic",
+  "dictionary": "jmdict",
+  "mode": "prefix",
+  "packageSha256": "94ca2fadb4d8d6e655182f68f914690230e1358c1223a4d31b9b988926d9385b",
+  "browserVersion": "153.0.8010.12",
+  "reportSha256": "bfb31b9ec5bd832f27c2957e90581e08f9adf4011a44e6f61b01ea55cdd0b281",
+  "activationOwner": "fallback",
+  "eventCounts": {
+    "attempt": 1,
+    "begin": 1
+  },
+  "activation": {
+    "attempts": 1,
+    "privateAdmissions": 0,
+    "privatePrefixReservations": 0,
+    "privateSuffixFallbacks": 0,
+    "existingSharedAdmissions": 1,
+    "firstPrivateAttempts": 0,
+    "privateAdmittedContentBytes": 0,
+    "privateAdmittedUniqueCount": 0,
+    "eligibleOwnedSourceBytes": 0
+  },
+  "checks": {
+    "completeImportSucceeded": true,
+    "oneDiagnosticPhase": true,
+    "diagnosticOnly": true,
+    "productionOffscreenOwner": false,
+    "eventsObserved": true,
+    "attemptsObserved": true,
+    "privateAdmissionMatchesOwnedForcedInputs": true,
+    "everyPrivateAdmissionHasOnePlacement": true,
+    "firstPrivateSelectionUnchanged": true,
+    "boundedPrefixCursor": true,
+    "negativeControlHasNoPrivateAdmission": true,
+    "existingSharedRouteActivated": true
+  },
+  "allChecksPass": false,
+  "events": [
+    {
+      "event": "attempt",
+      "compressionDictName": "jmdict",
+      "sourceKind": "shared",
+      "force": false,
+      "ownsContent": true,
+      "sourceBytes": 20,
+      "uncompressedBytes": 20
+    },
+    {
+      "event": "begin",
+      "privateSource": false,
+      "initialSelection": true,
+      "uncompressedBytes": 20,
+      "uniqueCount": 1
+    }
+  ]
+}

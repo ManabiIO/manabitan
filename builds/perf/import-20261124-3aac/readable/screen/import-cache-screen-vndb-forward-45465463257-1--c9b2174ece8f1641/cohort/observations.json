@@ -1,0 +1,71 @@
+[
+  {
+    "arm": "A",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 23.107515502999995,
+    "mediaCheck": "sample",
+    "name": "warmup-A",
+    "phaseCounters": "warmup-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-A/summary.json",
+    "totalImportMs": 7214.5999999999985
+  },
+  {
+    "arm": "B",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 18.862261108,
+    "mediaCheck": "sample",
+    "name": "warmup-B",
+    "phaseCounters": "warmup-B/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+      "tree": "1edef4035041ef848175e3278169daf2260ac34a"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-B/summary.json",
+    "totalImportMs": 4730.800000000003
+  },
+  {
+    "arm": "C",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 20.969551057000004,
+    "mediaCheck": "sample",
+    "name": "warmup-C",
+    "phaseCounters": "warmup-C/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-C/summary.json",
+    "totalImportMs": 4710.5
+  },
+  {
+    "arm": "A",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 18.338058919000005,
+    "error": "Correctness receipt differs across arms/observations: storageBytes",
+    "mediaCheck": "sample",
+    "name": "block-01-1-A",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "failed"
+  }
+]

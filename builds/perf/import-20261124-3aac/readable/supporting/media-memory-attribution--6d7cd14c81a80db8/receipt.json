@@ -1,0 +1,427 @@
+{
+  "schemaVersion": 1,
+  "sourceArtifact": "/workspace/scratch/3aacd533c01f/round2/artifacts/import-memory-3aac-media-jitendex-rep2-45471351138-1",
+  "noNewAcquisition": true,
+  "sourceIdentities": {
+    "A": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "B": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    }
+  },
+  "qualifiedPair": {
+    "maxSampledPrivateKiB": {
+      "baseline": 1050076,
+      "candidate": 1171264,
+      "changePercent": 11.540878945904876
+    },
+    "maxSampledPssKiB": {
+      "baseline": 1281213,
+      "candidate": 1399326,
+      "changePercent": 9.21884183192021
+    },
+    "pair": 1,
+    "qualified": true
+  },
+  "otherPairQualified": false,
+  "conclusion": "Valid first pair fails private-memory bound. No concrete new retention owner identified by bounded source audit. Process-level samples do not identify the cause; do not dismiss as noise or infer a particular GC/allocator cause.",
+  "observations": {
+    "A1": {
+      "memorySha256": "4ee237878c2c05a54b4c2588219dbe8e3cf96dedfdbce3e811a2b60d25a5cef2",
+      "reportSha256": "7d7f29db0a73c6a740116a44500988b8522573ad1affa759cbd716021686fdeb",
+      "maximumPrivateKiB": 1050076,
+      "maximumPssKiB": 1281213,
+      "peakStartMs": 718.529849,
+      "peakEndMs": 821.606307,
+      "peakProcesses": [
+        {
+          "pid": 3543,
+          "startTimeTicks": 12498,
+          "role": "browser",
+          "pssKiB": 132760,
+          "privateKiB": 94768,
+          "threadCount": 35
+        },
+        {
+          "pid": 3550,
+          "startTimeTicks": 12501,
+          "role": "zygote",
+          "pssKiB": 24100,
+          "privateKiB": 748,
+          "threadCount": 1
+        },
+        {
+          "pid": 3551,
+          "startTimeTicks": 12501,
+          "role": "zygote",
+          "pssKiB": 19405,
+          "privateKiB": 664,
+          "threadCount": 1
+        },
+        {
+          "pid": 3572,
+          "startTimeTicks": 12505,
+          "role": "gpu-process",
+          "pssKiB": 40803,
+          "privateKiB": 13268,
+          "threadCount": 15
+        },
+        {
+          "pid": 3575,
+          "startTimeTicks": 12505,
+          "role": "network.mojom.NetworkService",
+          "pssKiB": 46362,
+          "privateKiB": 21440,
+          "threadCount": 9
+        },
+        {
+          "pid": 3587,
+          "startTimeTicks": 12507,
+          "role": "storage.mojom.StorageService",
+          "pssKiB": 9626,
+          "privateKiB": 1536,
+          "threadCount": 8
+        },
+        {
+          "pid": 3616,
+          "startTimeTicks": 12512,
+          "role": "renderer-client-5",
+          "pssKiB": 60569,
+          "privateKiB": 32368,
+          "threadCount": 12
+        },
+        {
+          "pid": 3647,
+          "startTimeTicks": 12530,
+          "role": "extension-renderer",
+          "pssKiB": 923879,
+          "privateKiB": 879308,
+          "threadCount": 25
+        },
+        {
+          "pid": 3702,
+          "startTimeTicks": 12748,
+          "role": "renderer-client-12",
+          "pssKiB": 23709,
+          "privateKiB": 5976,
+          "threadCount": 9
+        }
+      ],
+      "qualifiedTimeline": [
+        {
+          "startMs": 48.759952,
+          "endMs": 123.723579,
+          "wholeTreePssKiB": 647690,
+          "wholeTreePrivateKiB": 417292,
+          "extensionPssKiB": 290283,
+          "extensionPrivateKiB": 246104
+        },
+        {
+          "startMs": 149.004408,
+          "endMs": 246.577074,
+          "wholeTreePssKiB": 788905,
+          "wholeTreePrivateKiB": 557768,
+          "extensionPssKiB": 431051,
+          "extensionPrivateKiB": 386480
+        },
+        {
+          "startMs": 271.870261,
+          "endMs": 401.408085,
+          "wholeTreePssKiB": 938349,
+          "wholeTreePrivateKiB": 707212,
+          "extensionPssKiB": 581043,
+          "extensionPrivateKiB": 536472
+        },
+        {
+          "startMs": 426.733491,
+          "endMs": 541.379743,
+          "wholeTreePssKiB": 1090617,
+          "wholeTreePrivateKiB": 859480,
+          "extensionPssKiB": 733323,
+          "extensionPrivateKiB": 688752
+        },
+        {
+          "startMs": 566.661443,
+          "endMs": 692.300837,
+          "wholeTreePssKiB": 1196773,
+          "wholeTreePrivateKiB": 965636,
+          "extensionPssKiB": 834427,
+          "extensionPrivateKiB": 789856
+        },
+        {
+          "startMs": 718.529849,
+          "endMs": 821.606307,
+          "wholeTreePssKiB": 1281213,
+          "wholeTreePrivateKiB": 1050076,
+          "extensionPssKiB": 923879,
+          "extensionPrivateKiB": 879308
+        },
+        {
+          "startMs": 846.877851,
+          "endMs": 977.292235,
+          "wholeTreePssKiB": 1244477,
+          "wholeTreePrivateKiB": 1011292,
+          "extensionPssKiB": 876583,
+          "extensionPrivateKiB": 832012
+        },
+        {
+          "startMs": 1005.504695,
+          "endMs": 1131.850899,
+          "wholeTreePssKiB": 1225901,
+          "wholeTreePrivateKiB": 994764,
+          "extensionPssKiB": 859767,
+          "extensionPrivateKiB": 815196
+        },
+        {
+          "startMs": 1157.495247,
+          "endMs": 1230.619313,
+          "wholeTreePssKiB": 1237601,
+          "wholeTreePrivateKiB": 1006464,
+          "extensionPssKiB": 870983,
+          "extensionPrivateKiB": 826412
+        },
+        {
+          "startMs": 1255.907312,
+          "endMs": 1337.467211,
+          "wholeTreePssKiB": 1210649,
+          "wholeTreePrivateKiB": 979512,
+          "extensionPssKiB": 852963,
+          "extensionPrivateKiB": 808392
+        },
+        {
+          "startMs": 1362.663611,
+          "endMs": 1431.635219,
+          "wholeTreePssKiB": 1243705,
+          "wholeTreePrivateKiB": 1012568,
+          "extensionPssKiB": 875747,
+          "extensionPrivateKiB": 831176
+        },
+        {
+          "startMs": 1456.896598,
+          "endMs": 1516.803523,
+          "wholeTreePssKiB": 1075741,
+          "wholeTreePrivateKiB": 844604,
+          "extensionPssKiB": 702439,
+          "extensionPrivateKiB": 657868
+        },
+        {
+          "startMs": 1541.933373,
+          "endMs": 1607.486483,
+          "wholeTreePssKiB": 1075725,
+          "wholeTreePrivateKiB": 844588,
+          "extensionPssKiB": 702423,
+          "extensionPrivateKiB": 657852
+        }
+      ],
+      "parserCounters": {
+        "parserMaxWasmHeapBytes": 76087296,
+        "parserParallelOwnedContentBytes": 389707807,
+        "parserParallelPeakQueuedOwnedContentBytes": 142152189,
+        "parserParallelPipelineGroupsPerWorker": 3,
+        "parserParallelWorkerCount": 3
+      },
+      "parserPhaseStartEpochMs": 1795548825817,
+      "parserPhaseEndEpochMs": 1795548827131
+    },
+    "B1": {
+      "memorySha256": "730c7f53a94a9a67ba55f8046295fd37d76c8bc53d7c40a7bc844b94a7a927f9",
+      "reportSha256": "a060e4c681ed7acc743b63cf8ad7b06c1ccfe9bec9a55f4c6e074389a49a1ee5",
+      "maximumPrivateKiB": 1171264,
+      "maximumPssKiB": 1399326,
+      "peakStartMs": 1105.829577,
+      "peakEndMs": 1185.522784,
+      "peakProcesses": [
+        {
+          "pid": 3172,
+          "startTimeTicks": 11673,
+          "role": "browser",
+          "pssKiB": 141846,
+          "privateKiB": 104384,
+          "threadCount": 35
+        },
+        {
+          "pid": 3179,
+          "startTimeTicks": 11676,
+          "role": "zygote",
+          "pssKiB": 23188,
+          "privateKiB": 736,
+          "threadCount": 1
+        },
+        {
+          "pid": 3180,
+          "startTimeTicks": 11677,
+          "role": "zygote",
+          "pssKiB": 18595,
+          "privateKiB": 600,
+          "threadCount": 1
+        },
+        {
+          "pid": 3200,
+          "startTimeTicks": 11695,
+          "role": "gpu-process",
+          "pssKiB": 39703,
+          "privateKiB": 13292,
+          "threadCount": 15
+        },
+        {
+          "pid": 3214,
+          "startTimeTicks": 11706,
+          "role": "network.mojom.NetworkService",
+          "pssKiB": 45137,
+          "privateKiB": 21436,
+          "threadCount": 9
+        },
+        {
+          "pid": 3215,
+          "startTimeTicks": 11708,
+          "role": "storage.mojom.StorageService",
+          "pssKiB": 9357,
+          "privateKiB": 1512,
+          "threadCount": 8
+        },
+        {
+          "pid": 3241,
+          "startTimeTicks": 11712,
+          "role": "renderer-client-5",
+          "pssKiB": 63726,
+          "privateKiB": 32120,
+          "threadCount": 12
+        },
+        {
+          "pid": 3272,
+          "startTimeTicks": 11725,
+          "role": "extension-renderer",
+          "pssKiB": 1034950,
+          "privateKiB": 991180,
+          "threadCount": 24
+        },
+        {
+          "pid": 3330,
+          "startTimeTicks": 11910,
+          "role": "renderer-client-12",
+          "pssKiB": 22824,
+          "privateKiB": 6004,
+          "threadCount": 9
+        }
+      ],
+      "qualifiedTimeline": [
+        {
+          "startMs": 65.86651,
+          "endMs": 134.346404,
+          "wholeTreePssKiB": 647628,
+          "wholeTreePrivateKiB": 420296,
+          "extensionPssKiB": 291657,
+          "extensionPrivateKiB": 248268
+        },
+        {
+          "startMs": 159.621312,
+          "endMs": 231.559179,
+          "wholeTreePssKiB": 785726,
+          "wholeTreePrivateKiB": 557728,
+          "extensionPssKiB": 430666,
+          "extensionPrivateKiB": 386928
+        },
+        {
+          "startMs": 256.795209,
+          "endMs": 400.688455,
+          "wholeTreePssKiB": 959018,
+          "wholeTreePrivateKiB": 730988,
+          "extensionPssKiB": 603982,
+          "extensionPrivateKiB": 560212
+        },
+        {
+          "startMs": 425.956803,
+          "endMs": 529.037599,
+          "wholeTreePssKiB": 1080418,
+          "wholeTreePrivateKiB": 852356,
+          "extensionPssKiB": 725462,
+          "extensionPrivateKiB": 681692
+        },
+        {
+          "startMs": 554.300959,
+          "endMs": 687.519834,
+          "wholeTreePssKiB": 1172850,
+          "wholeTreePrivateKiB": 944788,
+          "extensionPssKiB": 812878,
+          "extensionPrivateKiB": 769108
+        },
+        {
+          "startMs": 712.978079,
+          "endMs": 838.015527,
+          "wholeTreePssKiB": 1220414,
+          "wholeTreePrivateKiB": 992352,
+          "extensionPssKiB": 865454,
+          "extensionPrivateKiB": 821684
+        },
+        {
+          "startMs": 863.296954,
+          "endMs": 971.685428,
+          "wholeTreePssKiB": 1249762,
+          "wholeTreePrivateKiB": 1021700,
+          "extensionPssKiB": 886278,
+          "extensionPrivateKiB": 842508
+        },
+        {
+          "startMs": 996.976941,
+          "endMs": 1080.537929,
+          "wholeTreePssKiB": 1252950,
+          "wholeTreePrivateKiB": 1021496,
+          "extensionPssKiB": 887634,
+          "extensionPrivateKiB": 843864
+        },
+        {
+          "startMs": 1105.829577,
+          "endMs": 1185.522784,
+          "wholeTreePssKiB": 1399326,
+          "wholeTreePrivateKiB": 1171264,
+          "extensionPssKiB": 1034950,
+          "extensionPrivateKiB": 991180
+        },
+        {
+          "startMs": 1211.456787,
+          "endMs": 1284.018618,
+          "wholeTreePssKiB": 1247986,
+          "wholeTreePrivateKiB": 1019924,
+          "extensionPssKiB": 892542,
+          "extensionPrivateKiB": 848772
+        },
+        {
+          "startMs": 1309.274737,
+          "endMs": 1384.05408,
+          "wholeTreePssKiB": 1283826,
+          "wholeTreePrivateKiB": 1055764,
+          "extensionPssKiB": 918198,
+          "extensionPrivateKiB": 874428
+        },
+        {
+          "startMs": 1409.242657,
+          "endMs": 1466.475735,
+          "wholeTreePssKiB": 1114850,
+          "wholeTreePrivateKiB": 886788,
+          "extensionPssKiB": 743918,
+          "extensionPrivateKiB": 700148
+        },
+        {
+          "startMs": 1491.617312,
+          "endMs": 1553.32849,
+          "wholeTreePssKiB": 1113458,
+          "wholeTreePrivateKiB": 885396,
+          "extensionPssKiB": 742526,
+          "extensionPrivateKiB": 698756
+        }
+      ],
+      "parserCounters": {
+        "parserMaxWasmHeapBytes": 76087296,
+        "parserParallelOwnedContentBytes": 389707807,
+        "parserParallelPeakQueuedOwnedContentBytes": 144963118,
+        "parserParallelPipelineGroupsPerWorker": 3,
+        "parserParallelWorkerCount": 3
+      },
+      "parserPhaseStartEpochMs": 1795548817427,
+      "parserPhaseEndEpochMs": 1795548818692
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/jmdict-sidecar",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "d1338550aaff783738daa05cca189810bee807d9",
+  "tree": "1edef4035041ef848175e3278169daf2260ac34a",
+  "files": [
+    {
+      "path": "ext/js/dictionary/dictionary-database.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "141119b60c9c47edd936687f4640212e50cd30b6",
+      "size": 607637
+    },
+    {
+      "path": "test/dictionary-content-publication-range.test.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f177279d3c8cca2ef5ae9a2a5a32b61cbdcd52d",
+      "size": 20331
+    }
+  ],
+  "remoteCommit": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+  "branch": "perf/jmdict-cache-publication-20261124-3aac",
+  "title": "perf: reuse synchronous content publication checks when retaining source bytes",
+  "body": "## Problem\n\nThe term-content cache rescans reservation indexes and published states immediately after the same synchronous call has validated and published a contiguous range. JMdict executes this work for its bounded recent-source cache.\n\n## Change\n\nPass the successful contiguous-publication result directly into the cache step within the same synchronous call. This removes repeated published-state loads and a second contiguous-index scan. The proof is not stored and never crosses an await.\n\nSource bounds, byte sums, average-size admission, backing-allocation accounting, cache capacity, eviction and ownership remain unchanged. Aliased reservation indexes retain the generic path. This builds on the merged immutable-source adoption change in #824.\n\n## Validation\n\n- 184 focused tests across two suites, including nine added semantic parity cases for owned/shared sources, partial coverage, cache budgets, eviction, identifier wrap, aliased indexes and short mapping tables.\n- Main/test TypeScript and scoped ESLint pass.\n- No new source allocations, cache state, production thresholds or persistence formats.\n\n## Qualification\n\nFrozen on develop `bbccabd520972cc351a65d9f545bd5369b6e9747`. Complete-import comparisons will determine whether this reduction is material; the cache's existing phase duration is only an upper bound on potential savings. Full source CI and browser qualification are pending. This remains a draft and no full-import speedup is claimed.\n\nOriginal implementation; no third-party implementation code was copied.",
+  "pr": {
+    "url": "https://github.com/ManabiIO/manabitan/pull/876",
+    "number": 876,
+    "state": "open",
+    "merged": false,
+    "mergeable": false,
+    "draft": true,
+    "body": "## Problem\n\nThe term-content cache rescans reservation indexes and published states immediately after the same synchronous call has validated and published a contiguous range. JMdict executes this work for its bounded recent-source cache.\n\n## Change\n\nPass the successful contiguous-publication result directly into the cache step within the same synchronous call. This removes repeated published-state loads and a second contiguous-index scan. The proof is not stored and never crosses an await.\n\nSource bounds, byte sums, average-size admission, backing-allocation accounting, cache capacity, eviction and ownership remain unchanged. Aliased reservation indexes retain the generic path. This builds on the merged immutable-source adoption change in #824.\n\n## Validation\n\n- 184 focused tests across two suites, including nine added semantic parity cases for owned/shared sources, partial coverage, cache budgets, eviction, identifier wrap, aliased indexes and short mapping tables.\n- Main/test TypeScript and scoped ESLint pass.\n- No new source allocations, cache state, production thresholds or persistence formats.\n\n## Qualification\n\nFrozen on develop `bbccabd520972cc351a65d9f545bd5369b6e9747`. Complete-import comparisons will determine whether this reduction is material; the cache's existing phase duration is only an upper bound on potential savings. Full source CI and browser qualification are pending. This remains a draft and no full-import speedup is claimed.\n\nOriginal implementation; no third-party implementation code was copied.",
+    "title": "perf: reuse synchronous content publication checks when retaining source bytes",
+    "base": "develop",
+    "base_sha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "head": "perf/jmdict-cache-publication-20261124-3aac",
+    "head_sha": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+    "head_repo_id": 1165902460,
+    "head_repo_full_name": "ManabiIO/manabitan",
+    "merge_commit_sha": null,
+    "user": {
+      "login": "aehlke",
+      "name": "aehlke",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/71601?v=4",
+      "id": 71601
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-11-24T18:57:19Z",
+    "updated_at": "2026-11-24T18:57:19Z",
+    "closed_at": null,
+    "merged_at": null,
+    "commits": 1,
+    "changed_files": 2,
+    "additions": 81,
+    "deletions": 6,
+    "display_url": "https://github.com/ManabiIO/manabitan/pull/876",
+    "display_title": "perf: reuse synchronous content publication checks when retaining source bytes"
+  }
+}

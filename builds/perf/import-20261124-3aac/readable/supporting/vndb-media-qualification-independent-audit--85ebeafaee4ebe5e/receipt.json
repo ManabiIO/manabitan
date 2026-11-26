@@ -1,0 +1,1182 @@
+{
+  "schemaVersion": 1,
+  "workflowRun": "45475087387",
+  "allChecksPass": true,
+  "newAcquisition": false,
+  "scope": "Two independent frozen VNDB qualification hosts; all 82 original observations retained. No stages or hosts pooled. Claims apply only to frozen baseline bbccabd, not newer develop.",
+  "packageLimit": "Product archives are not included. Archive and decompressed-entry inventories are reconciled as retained receipts; raw product ZIP bytes could not be independently rehashed.",
+  "storageLimit": "Prospective policy permits only VNDB active SQLite allocation 129-131 x4096 bytes. All other normalized paths/sizes exact; no whole SQLite byte-equivalence claim. Earlier failed cohorts remain failed.",
+  "canonicalScope": "Complete rows and restart; 12 deterministic terms x6 passes. Exhaustive persisted media in the two separate diagnostics per cell. No exhaustive all-row canonical-content claim.",
+  "results": [
+    {
+      "artifact": "import-media-qualification-storage-v1-vndb-forward-45475087387-1",
+      "lane": "media",
+      "schedule": "forward",
+      "orders": [
+        "ABC",
+        "CBA",
+        "BAC",
+        "CAB",
+        "BCA",
+        "ACB",
+        "ACB",
+        "BCA",
+        "CAB",
+        "BAC",
+        "CBA",
+        "ABC"
+      ],
+      "allChecksPass": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "toolingCommit": "2fb6c247852c64be1b836aff60b3eba5eb1acc7e",
+      "runnerSha256": "0b0fe27b8ee57092e412d5194990061ece131a5b7826ef55cae7f4ac3aebe24b",
+      "unchangedHarnessFileCount": 75,
+      "packageHashesReported": {
+        "A": "97e269588eb3fada00cd53b6d68ded92c23cf9ef0f66439b387a039d39efda4d",
+        "B": "f862744f7de8483c8b6d7e7c882a9fc0a5f81714c381114b2e2f431630362438",
+        "C": "97e269588eb3fada00cd53b6d68ded92c23cf9ef0f66439b387a039d39efda4d"
+      },
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "packageEntryCount": 550,
+      "observations": 41,
+      "timed": 36,
+      "warmups": 3,
+      "exhaustiveDiagnostics": 2,
+      "timingsMs": {
+        "A": [
+          4639.700000000012,
+          4508.799999999988,
+          4547.300000000047,
+          4598.799999999988,
+          4687.5,
+          4740.29999999993,
+          4701.300000000047,
+          4697.599999999977,
+          4585.300000000047,
+          4660.20000000007,
+          4539.900000000023,
+          4628.300000000047
+        ],
+        "B": [
+          4357.200000000012,
+          4365.700000000012,
+          4235.899999999965,
+          4323.799999999988,
+          4458.699999999953,
+          4474.800000000047,
+          4413.300000000047,
+          4373.099999999977,
+          4402.099999999977,
+          4430.0,
+          4400.099999999977,
+          4468.099999999977
+        ],
+        "C": [
+          4517.0,
+          4489.0,
+          4655.600000000035,
+          4632.200000000012,
+          4642.400000000023,
+          4713.5,
+          4728.199999999953,
+          4606.800000000047,
+          4685.199999999953,
+          4643.699999999953,
+          4633.900000000023,
+          4674.899999999907
+        ]
+      },
+      "metrics": {
+        "candidate": {
+          "pairs": 12,
+          "fasterPairs": 12,
+          "bestPairPercent": -6.907782697547715,
+          "worstPairPercent": -3.079362981564482,
+          "pairedChangesPercent": [
+            -6.088755738517559,
+            -3.1737934705459825,
+            -6.848019704001896,
+            -5.979820822823356,
+            -4.881066666667655,
+            -5.60091133472328,
+            -6.1259651585730985,
+            -6.907782697547715,
+            -3.9953765293452514,
+            -4.93970215870706,
+            -3.079362981564482,
+            -3.461314089407952
+          ],
+          "pairedMedianPercent": -5.27030674671517,
+          "pairedMedianBootstrap95Percent": [
+            -6.107360448545329,
+            -3.7283453093766017
+          ],
+          "equalWorkPercent": -5.099846943369468,
+          "baselineMedianMs": 4634.000000000029,
+          "candidateMedianMs": 4401.099999999977
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 12,
+          "fasterPairs": 12,
+          "bestPairPercent": -9.014949737951428,
+          "worstPairPercent": -2.7467141902425607,
+          "pairedChangesPercent": [
+            -3.5377462917863256,
+            -2.7467141902425607,
+            -9.014949737951428,
+            -6.657743620742251,
+            -3.9570049974166133,
+            -5.0641773628928295,
+            -6.660039761429504,
+            -5.07293566032968,
+            -6.042431486382216,
+            -4.601933802785618,
+            -5.045426098967298,
+            -4.423624034737306
+          ],
+          "pairedMedianPercent": -5.054801730930064,
+          "pairedMedianBootstrap95Percent": [
+            -6.350087553562234,
+            -4.19031451607696
+          ],
+          "equalWorkPercent": -5.248964445978565,
+          "baselineMedianMs": 4643.049999999988,
+          "candidateMedianMs": 4401.099999999977
+        },
+        "identicalProductControl": {
+          "pairs": 12,
+          "fasterPairs": 6,
+          "bestPairPercent": -2.644567536694431,
+          "worstPairPercent": 2.3816330569785826,
+          "pairedChangesPercent": [
+            -2.644567536694431,
+            -0.43914123491812784,
+            2.3816330569785826,
+            0.7262764199361449,
+            -0.9621333333328375,
+            -0.5653650612815753,
+            0.5721821623786205,
+            -1.9329019073554665,
+            2.1787015026259127,
+            -0.3540620574249198,
+            2.0705301878895854,
+            1.0068491670777613
+          ],
+          "pairedMedianPercent": 0.10906005247685036,
+          "pairedMedianBootstrap95Percent": [
+            -0.7637491973072064,
+            1.5386896774836734
+          ],
+          "equalWorkPercent": 0.1573782299445936,
+          "baselineMedianMs": 4634.000000000029,
+          "candidateMedianMs": 4643.049999999988
+        }
+      },
+      "media": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "termRows": 6648310,
+      "lookupReceiptsPerObservation": 72,
+      "offsetSensitiveDigest": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "nonSahFiles": {
+        "manabitan-dictionary-media-v1/{generation}.bin": 199563210,
+        "manabitan-term-content.bin": 7533449,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 399513708,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2386124
+      },
+      "storageObservations": [
+        {
+          "name": "warmup-A",
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-B",
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-C",
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609561803,
+          "activeSahFileBytes": 536576,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-07-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-07-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-07-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-08-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-08-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-08-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-09-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-09-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-09-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-10-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609561803,
+          "activeSahFileBytes": 536576,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-10-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-10-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-11-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-11-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-11-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-12-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-12-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-12-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-A",
+          "arm": "A",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-B",
+          "arm": "B",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        }
+      ],
+      "rawReportSha256": {
+        "warmup-A": "dac78da29127b71273ca63d792be7bb19ea38fd6c69ad1ff28021c8e19f853d6",
+        "warmup-B": "733369dfe58598ceabf34ca86a4022a103250bd279128bed476a98988a825737",
+        "warmup-C": "00c4ccd9ea14c016426ccedb81e9d50ad278d39373cf7465b2a83801eca6dfda",
+        "block-01-1-A": "8b65a2be82861be7c474fcb36c62e406a3724688b6e1f33c4885a7ecaabc3d64",
+        "block-01-2-B": "66945e2f630f74f8f11632ab6f2ff2ffba64364b9cbfafe4ecd338a239537d61",
+        "block-01-3-C": "a050705b543ad1366c66d370e563e4e64e7ccacf8bcddbb0805df7d785d33656",
+        "block-02-1-C": "765cfcecc8f3d7d9ae7e7fd63cc3ac240366a079c4634faf823f085a6f38bd0c",
+        "block-02-2-B": "515267d8a225ef5ec071fb3bcf098fcc8061d6d17ce427122a3e54225d058b73",
+        "block-02-3-A": "14f2de1aec2d5276c4791a2f4ff0967323858a22724434ee67d5f75ccd157f31",
+        "block-03-1-B": "b403a6510c1d8fbe809f8454c4f2bfbf67183e8e8ac4c99c5c1276f7f3810322",
+        "block-03-2-A": "79501b02a32272e3050fe2a02f4a2ae3ef0b3725090f2a30fe419f16fb9e60a3",
+        "block-03-3-C": "90b8caee2dbb3f38851c529c55c14b9d67f9f9e44a300075e0b4fb679db05d13",
+        "block-04-1-C": "46ea69dec5e75ba2488d98de9a5f581ec3cd237965e83727a0ab12a69416c8d4",
+        "block-04-2-A": "5bb59ce6113d94643fb63e46c8aafba0da5087076910c056d4f5577ab2e7be0b",
+        "block-04-3-B": "a2685b583131d6a24ec0b4f3cb54b58114fdc7c46c35c63596608d2a45f07fee",
+        "block-05-1-B": "70add3a72347bc1b19981b5e06492047287c985262373ce896ffec0aff3c34b7",
+        "block-05-2-C": "1e96c31676006bf529a856c4fc50dfb94614f954ad4487e5fc28dcd058b6c47f",
+        "block-05-3-A": "a63e1190aef3c1c9f12970fdfaa7dbb33ffd4c49f8c45b97c7ac4932c04cf711",
+        "block-06-1-A": "ae390e83249f1dd3923dc93e9d69815ff2cd1e0d4b75bb2cdae365c41c606aba",
+        "block-06-2-C": "f48ca5598b53ae4515dd48ee5212480929443ec5977c5a38f224b9a9030dcf1e",
+        "block-06-3-B": "b69d6304fc49a1bf295dc7aa92a72310b71f9d5280192e3be85d2ddb54a4b036",
+        "block-07-1-A": "b0dd1663f9a672025ef5131a0dfa27572a40a056cf53bcb8ecebf195b2a0ae66",
+        "block-07-2-C": "57988f3d01affec2b28af1626145d1b7dd8657152e6d0de80e7d2fd434dc7fde",
+        "block-07-3-B": "31d837b53a4e2251d9c1be80197d0564ff84a376a3ab9d970c579960e31b688e",
+        "block-08-1-B": "5eda21ed304896f57a2e3e403aa7a374bd65c0457e07210d0e5742494c8200da",
+        "block-08-2-C": "dd40f2bb2a3b14426717e3c3731fd50f5fb514df0167e19895c2e0157854ff51",
+        "block-08-3-A": "088237bb63929f3e8cb1f0cc044b5a9df98b61642c7aa4d1c155a6e911c9af88",
+        "block-09-1-C": "b94d3ba09f77b2452f70ff290343c3abc213bb639573b491c4f5d3870b3ed633",
+        "block-09-2-A": "8e68addd6f539b5cf0928d3d3859516bc9f59addd7f9a3dcf0ecf280c2b40b60",
+        "block-09-3-B": "b52faa92aef876aca9c7958fad6cc7d7daf56d4c45f2761f77c25bb208f30088",
+        "block-10-1-B": "c97cb14131586f793b818e79742f1a8c9bea751564586a6fe00ae29825d692ec",
+        "block-10-2-A": "31c7e4e0590be31b1c71d434f77977ceb1a85ebe71486a421575b38ea6844eaa",
+        "block-10-3-C": "aaaec9aa82e3ab60381398ece5c9292d7649ac95379d5ccf4503d637943a1a4f",
+        "block-11-1-C": "6f9881555fbd2e63339a3865274dc6a1fca58716c2971236f3c5caa9d40199cd",
+        "block-11-2-B": "10c93782e327aa52ccc2840fc97c479ea01c7f20a044f99fe21c5a6558fbfdf5",
+        "block-11-3-A": "a8c4fcbefa4e9606b6a646c50cf9dc37e5d85fd8a17d670261815429d210cf15",
+        "block-12-1-A": "dffc649a5d27a165ee41db529f34ce3d5415703946422ea06fd868ffba9ea68e",
+        "block-12-2-B": "7e3df6b502ab46e671a500324aefd916dc12f721c43a199a70f4d4f039b777ab",
+        "block-12-3-C": "3be951aa3d08fe28a81d3d5e3d4bd1f9f6b6b614e8ffca242f7944ce6a90e58c",
+        "diagnostic-A": "8c286761e34e3affd1f16ff062bffdb66d24bfe87ba9526d5d90f062b3ea6e39",
+        "diagnostic-B": "d698305feaeca2fb2038517bcb5408fd1211f74272cb7783d51196dc625e3964"
+      }
+    },
+    {
+      "artifact": "import-media-qualification-storage-v1-vndb-reverse-45475087387-1",
+      "lane": "media",
+      "schedule": "reverse",
+      "orders": [
+        "CBA",
+        "ABC",
+        "CAB",
+        "BAC",
+        "ACB",
+        "BCA",
+        "BCA",
+        "ACB",
+        "BAC",
+        "CAB",
+        "ABC",
+        "CBA"
+      ],
+      "allChecksPass": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "toolingCommit": "2fb6c247852c64be1b836aff60b3eba5eb1acc7e",
+      "runnerSha256": "0b0fe27b8ee57092e412d5194990061ece131a5b7826ef55cae7f4ac3aebe24b",
+      "unchangedHarnessFileCount": 75,
+      "packageHashesReported": {
+        "A": "b6652c60d3fc0e4845e309cc7432386aa19381f70d5214d6bf324e06de801704",
+        "B": "03ea79bb619d165b051d770e5c99596bbbcb6dcfb28b71fe141edfb996ca61a6",
+        "C": "b6652c60d3fc0e4845e309cc7432386aa19381f70d5214d6bf324e06de801704"
+      },
+      "packageDifferences": [
+        "js/dictionary/term-bank-wasm-parser-worker.js",
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "packageEntryCount": 550,
+      "observations": 41,
+      "timed": 36,
+      "warmups": 3,
+      "exhaustiveDiagnostics": 2,
+      "timingsMs": {
+        "A": [
+          6740.699999999953,
+          6712.700000000012,
+          6669.599999999977,
+          6673.300000000047,
+          6956.199999999953,
+          7076.399999999907,
+          6703.099999999977,
+          6865.800000000047,
+          6735.100000000093,
+          6603.400000000023,
+          6692.699999999953,
+          6666.600000000093
+        ],
+        "B": [
+          6385.099999999977,
+          6254.5,
+          6355.100000000035,
+          6295.300000000047,
+          6434.900000000023,
+          6917.5,
+          6473.20000000007,
+          6225,
+          6444.199999999953,
+          6298.199999999953,
+          6489.899999999907,
+          6557.399999999907
+        ],
+        "C": [
+          6657.8000000000175,
+          6605.700000000012,
+          6666.299999999988,
+          6841.199999999953,
+          6858.0,
+          6753.099999999977,
+          7142.400000000023,
+          6386.400000000023,
+          6774.399999999907,
+          6670.300000000047,
+          6671.700000000186,
+          6929.800000000047
+        ]
+      },
+      "metrics": {
+        "candidate": {
+          "pairs": 12,
+          "fasterPairs": 12,
+          "bestPairPercent": -9.333216813773227,
+          "worstPairPercent": -1.6380163801665737,
+          "pairedChangesPercent": [
+            -5.275416499769747,
+            -6.825867385701889,
+            -4.715425212905466,
+            -5.664363957861884,
+            -7.49403409907613,
+            -2.2454920581073567,
+            -3.4297563813744048,
+            -9.333216813773227,
+            -4.319163783761725,
+            -4.621861465306798,
+            -3.0301671970960564,
+            -1.6380163801665737
+          ],
+          "pairedMedianPercent": -4.668643339106133,
+          "pairedMedianBootstrap95Percent": [
+            -6.245115671781886,
+            -3.2299617892352304
+          ],
+          "equalWorkPercent": -4.889661091354103,
+          "baselineMedianMs": 6707.899999999994,
+          "candidateMedianMs": 6410.0
+        },
+        "candidateVsSecondBaseline": {
+          "pairs": 12,
+          "fasterPairs": 11,
+          "bestPairPercent": -9.369399641576381,
+          "worstPairPercent": 2.4344375175848754,
+          "pairedChangesPercent": [
+            -4.095947610322326,
+            -5.316620494421653,
+            -4.668256754120781,
+            -7.979594223234388,
+            -6.169437153688784,
+            2.4344375175848754,
+            -9.369399641576381,
+            -2.5272453964678476,
+            -4.874232404345147,
+            -5.578459739443364,
+            -2.724942668289554,
+            -5.373892464430963
+          ],
+          "pairedMedianPercent": -5.0954264493834,
+          "pairedMedianBootstrap95Percent": [
+            -5.873948446566073,
+            -3.41044513930594
+          ],
+          "equalWorkPercent": -4.726947976150697,
+          "baselineMedianMs": 6712.4000000000815,
+          "candidateMedianMs": 6410.0
+        },
+        "identicalProductControl": {
+          "pairs": 12,
+          "fasterPairs": 7,
+          "bestPairPercent": -6.98243467622156,
+          "worstPairPercent": 6.553684116305103,
+          "pairedChangesPercent": [
+            -1.229842597948827,
+            -1.5939934750547446,
+            -0.049478229578814314,
+            2.5159965833980946,
+            -1.4116902906752826,
+            -4.5687072522742405,
+            6.553684116305103,
+            -6.98243467622156,
+            0.5835102671053694,
+            1.01311445618959,
+            -0.3137747097549215,
+            3.948039480394061
+          ],
+          "pairedMedianPercent": -0.1816264696668679,
+          "pairedMedianBootstrap95Percent": [
+            -1.5028418828650136,
+            1.7645555197938423
+          ],
+          "equalWorkPercent": -0.17078608457160582,
+          "baselineMedianMs": 6707.899999999994,
+          "candidateMedianMs": 6712.4000000000815
+        }
+      },
+      "media": {
+        "sample": {
+          "mode": "sample",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 64,
+          "bytes": 86256,
+          "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e"
+        },
+        "all": {
+          "mode": "all",
+          "totalFiles": 146570,
+          "totalBytes": 188131284,
+          "files": 146570,
+          "bytes": 188131284,
+          "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+        }
+      },
+      "termRows": 6648310,
+      "lookupReceiptsPerObservation": 72,
+      "offsetSensitiveDigest": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+      "nonSahFiles": {
+        "manabitan-dictionary-media-v1/{generation}.bin": 199563210,
+        "manabitan-term-content.bin": 7533449,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr": 38,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti": 399513708,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr": 26,
+        "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti": 2386124
+      },
+      "storageObservations": [
+        {
+          "name": "warmup-C",
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-B",
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "warmup-A",
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-01-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-02-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-03-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-04-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-05-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-06-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-07-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-07-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-07-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-08-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-08-2-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-08-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-09-1-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-09-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-09-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-10-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-10-2-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-10-3-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-11-1-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-11-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-11-3-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-12-1-C",
+          "arm": "C",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-12-2-B",
+          "arm": "B",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "block-12-3-A",
+          "arm": "A",
+          "cohort": "timed",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-A",
+          "arm": "A",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        },
+        {
+          "name": "diagnostic-B",
+          "arm": "B",
+          "cohort": "exhaustive-diagnostic",
+          "storageBytes": 609553611,
+          "activeSahFileBytes": 528384,
+          "nonSahBytes": 608996555
+        }
+      ],
+      "rawReportSha256": {
+        "warmup-C": "13c7686531af6b19e6c1baac7a115ca92de52ef14ee7706764fc08c107e8c067",
+        "warmup-B": "d21907636570359c7e94681b9a9ed68ee2de91596e680192f8cd163adcd28053",
+        "warmup-A": "9347e93aadff97ed126b16183b07b6984bbed6a3a33bd1bd4539757d69de6067",
+        "block-01-1-C": "f7e53b8de53d727c2ef6fe0b0fe5079d1fdb268a5001bf2bf103e4fa920f8e0a",
+        "block-01-2-B": "8471e37c7c39f7dc461bf802b3bd55c0729726b6a93871f7c6eb970a050a1ce9",
+        "block-01-3-A": "bcfca6b2379879c1e92e23a0123855aa11b236ae1b40097b1cb7f491c5766b49",
+        "block-02-1-A": "62b85811427b0e22ceca5a79ebf4cce522ebd305d1eaf454366d9ac77e197dbe",
+        "block-02-2-B": "153d331fee6fc46025db488aeb5776e2f693b08d010667019eba3487e24820c5",
+        "block-02-3-C": "d1b9eb4314b38dd9cf7decdb4812c54ca1d0df791f6a2376965f4eb9446ca3a0",
+        "block-03-1-C": "6f784aa612da78c5acabf3c8bbcc97831c00c2d3b56df607d7ef9319ee68b414",
+        "block-03-2-A": "649706b3e2d31f4c05594d79916c4cc146d564de78f9561f40c85ea55823d610",
+        "block-03-3-B": "714815b10f90325d216362ebc8467c6137f0ddb66048d4e1782915db91fb37d6",
+        "block-04-1-B": "52b21916bfa4d1891160f009f8e7dc8dbc93fd85dc42d88e6e3cca0ab6b5bc1c",
+        "block-04-2-A": "3b6e98da6f83c4068a5b11146a90ffbb56495a510b6c7fecaaab0a50b035542e",
+        "block-04-3-C": "f695e9dce77ab05984e069593dabe31dd9689c5dc7a24ff2e8e8e518b2c9930c",
+        "block-05-1-A": "6f2e9af61dd9b1b25081d5e3e3fb9465078c5293d6f7e796fe3cb07442d00716",
+        "block-05-2-C": "fc7fadcd6bd4b6e36e06a342bdf1f3d81dca528de4f5db609d3ba243ca259903",
+        "block-05-3-B": "e5e13d17d6d186debc70a5d5f79e6a25d7852c29f58899df2b18d2e356ac5352",
+        "block-06-1-B": "cf58dd39542cfa61b29424955f4cfd80c908930db28aa0bea27a557e3bb63d6f",
+        "block-06-2-C": "b135bcea5b6d507c8049855f44b454d26eb6a03277436e46af74ff614489c71e",
+        "block-06-3-A": "d011de7cb7d34640eae0142266b58f7fcf8ef950fcc237d20b132f64cebe27b4",
+        "block-07-1-B": "ca8b74b3150b151989b61fe0f8099e17ff74125d59a5382b8da3f0929e430eb2",
+        "block-07-2-C": "f3da729e7b4a881c52ad14e6ade246650d5b75533be3b3101d8d2ed257f9b57f",
+        "block-07-3-A": "d9712af494e489fd7ba3f5561d76526882aa2c9c03e6b3a3fba9066889d8be60",
+        "block-08-1-A": "f6b4e289f4a6c861f8ff25ca7303b4757a0376d6252738a988ab7cb9e1b19553",
+        "block-08-2-C": "ca95f97127dda506b90c4476762f5de61e203942119347141f13d8ac381310e7",
+        "block-08-3-B": "25a2ed9c89a5695630c75902c11ed750cf1af2f1928113d6446aea44fab3e27f",
+        "block-09-1-B": "3ea4c0b078cc3e972a6e4849b6ad3f4ee0d5346ec799a92357c8257b4db90242",
+        "block-09-2-A": "2f59a140669a37c0e5cfbace2194c84a94151fd74298322d48802d9ecd739061",
+        "block-09-3-C": "d05ed139adbb3cc22df0e68cc7a4bdd00dab89f7717bd846da8529ae2246069d",
+        "block-10-1-C": "7eb5b84f57d3fcb8685d2a63516d456e040b8f6c907802e1f3a8c4d315d28709",
+        "block-10-2-A": "a00f1d8e1081e0205ddc5ad605f36ef398bdf8e0bd9cad01ef12f428e839d57f",
+        "block-10-3-B": "a2c28ebf90e847911a5814d68443ca8fe09f617027e5cb9b5b058951d459cd6c",
+        "block-11-1-A": "fdcf4a4392726254e803832e0371909cd03246fb4785e311e6ca41a82433ea36",
+        "block-11-2-B": "69daac9bd1b34495a6b007538ff2455ca7b14164b10b2a81eb94eb683a9715b6",
+        "block-11-3-C": "0d4e3eb789e9c4250069da9ac54a1fdb2d0cd861ed531aae22488ac147a2264e",
+        "block-12-1-C": "0e18f6cbe07d7446c98e61d9350bbf55fafd184f669a5c75df3ec319a951e262",
+        "block-12-2-B": "0c59e9a2a4b0a31d63cad0272ab9dc2ac74e6395fad3daf6af9927c733aa95b6",
+        "block-12-3-A": "f3d460d3c3ab4cf2e537f46dc17622e730bf87b012ba6cb8ea7b7a0f733f108a",
+        "diagnostic-A": "729ffc6d6ec2fea09e52ef94b582bcc479ffa231e4df733aaf9f5fc18075e83c",
+        "diagnostic-B": "da796788c6d02cfba8dca7df9ce044cca3036803c205e743737d57c85f8c4651"
+      }
+    }
+  ]
+}

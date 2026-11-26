@@ -1,0 +1,1486 @@
+{
+  "authoritativeTiming": false,
+  "cells": [
+    {
+      "artifact": "import-memory-3aac-media-jitendex-rep1-45471351138-1",
+      "dictionary": "jitendex",
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "label": "Jitendex",
+        "mediaBytes": 4992155,
+        "mediaFiles": 236,
+        "release": "2026.10.03.0",
+        "revision": "2026.10.03.0",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "termRows": 436555,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ],
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+      },
+      "githubArtifactDigest": "sha256:db879a072264ed82ff170f448bfc641555c05a6cd8c4fa3d70b30ac23c6be75d",
+      "githubArtifactId": 14957082437,
+      "inputSha256": {
+        "A-identity.json": "aab5b744e9fa35099febef20799b5631bfd06c46744cf0afc9ebbf9371b8bbd1",
+        "A-package-entries.json": "1e9d3ba8e7d6a0c0201835be65e6ac8444a28a739a86ac1bd2c960096578d8b6",
+        "A1/acquisition.json": "4464da216ddf7999e8c510220a6de2426349fb43cd506839a0714ecc5a954c4b",
+        "A1/correctness.json": "3ee11172c1e5f98cb2feb476a0a0a3bc4783ee6a627033f80fda12032a87e381",
+        "A1/markers.jsonl": "eae5b46fc93fb10004fe04d56e7e4ba64f34211878ba74a5c11580d64446aef1",
+        "A1/memory.json": "c1692b17c27ca3a66cdc4ae25c9aded30655f3e6d5be9da88073ee61106dbea9",
+        "A1/summary.json": "6086499b154ef1758b4bfa2fcc8e5fd121c051fdde0bf1a7821dc41f6a919161",
+        "A2/acquisition.json": "c72f376e7bf3af3b1c1bd20afcb7878c91a7ed7126cc4d4956f3e5d1dbc29ff0",
+        "A2/correctness.json": "c7182564c32613d7fc9aecadcf91494f6a874dff4c010a6d97d9cfda0fcfb46c",
+        "A2/markers.jsonl": "ec2307d80df5a22f831d852d990e25ef1f9db6279b9128cc736db758630a9ccb",
+        "A2/memory.json": "7c7811841dc63e18a41993d4f3422f1517b2c8cefcc6f78cf0c2043fa127b1cb",
+        "A2/summary.json": "94a891747dbb6fb690bb0cc34a648d2ff8e796299f3f23bda64bacab22221936",
+        "B-identity.json": "66cc26d8744522e346c1a3c6bf2df20978d2b80844e02bde75129f927535e27b",
+        "B-package-entries.json": "8f411c6db8ca3ecbdc71303596869aca1eb4d3744ecdb643b72aa9de703f7877",
+        "B1/acquisition.json": "8a451f9d995132837e990ba6ce26cc8b97649117d2da286df2c74d1ff47bba17",
+        "B1/correctness.json": "dcdb1b1cafd0635472f1fb3fa5e2826fa3cd9ce5791ce264a698e1bc1bff0c65",
+        "B1/markers.jsonl": "de6bd009caa83551dde619791a88b29b900c4c93ac8a5e7f9f994032a1a881ef",
+        "B1/memory.json": "6e3f2a8384d8a9d211ed59bab8d3a1ea5f1094ce7abf74bfcc042af73edbcb4b",
+        "B1/summary.json": "aca61f3a5f4fe4531364b2bedaf95dc4554151d0b0450e5db495365f17664ae6",
+        "B2/acquisition.json": "c8fdf1f5626d02463d7266dd5c124325b8495b983ac7bba963498900be13e7b7",
+        "B2/correctness.json": "9ceabf7d7c8e4a59aad13dde997975f1df28a7818e99202b1870d5a5532c35bf",
+        "B2/markers.jsonl": "c680c236800a75b3e5f5877e935f7c24764fccaac035930e557da7d7bac2fb45",
+        "B2/memory.json": "36f303ed3417432ada3bfdae82b06fade08bef899f32a6a78cb826c63b15e173",
+        "B2/summary.json": "ad22c3f189e08378a565b725d05ae881559f883b02c71903bf280c6723d29861",
+        "correctness.json": "73b465c53d61c0847787c8a20659591cd88de58f8ed51c82cdee02aabd503c76",
+        "memory-audit.json": "e7d8985f6a096d4bd432ec1a5d332927454d0156e0c614ecb4cf87a66444e169",
+        "memory-comparison.json": "3c61d25f7d00ec61bab7c36dc9c837917fdfeeab9fcd1b7b1e3e4c07f0d7cc16",
+        "plan.json": "7f667b65c224c87eb822a68dcc31c927aba5370bed45fc6ad01fb10c4d649d7f",
+        "qualification.json": "3561550b134394506c4bcf8c58c166c25a29db56835483754a10c57eba0ec293",
+        "receipt-audit.json": "51180c2e7cc91f3bf252c9cf74bf944d07bcaa8a863cc1b7e3c3b67b06004552",
+        "storage-allocation-summary.json": "e75f6888a546af86eb5d9e7655360cee1dc764b78f9f469b06c280b79a2272f2"
+      },
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 0.8966041393591695,
+            "medianPairedChangePercent": 0.12097880595577926
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 0.5087809897827977,
+            "medianPairedChangePercent": 0.174202965505027
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 348,
+        "schemaVersion": 1
+      },
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 0.8966041393591695,
+          "medianPairedChangePercent": 0.12097880595577926
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 0.5087809897827977,
+          "medianPairedChangePercent": 0.174202965505027
+        }
+      },
+      "observations": [
+        {
+          "allObservedSampleCount": 85,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 16,
+          "index": 1,
+          "maxSampledPrivateKiB": 1093720,
+          "maxSampledPssKiB": 1325019,
+          "maximumCoveredSampleGapMs": 159.081193,
+          "name": "A1",
+          "pair": 1,
+          "postImportBracketGapMs": 2.459739,
+          "preImportBracketGapMs": 9.745095,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 16
+        },
+        {
+          "allObservedSampleCount": 106,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 15,
+          "index": 2,
+          "maxSampledPrivateKiB": 1086560,
+          "maxSampledPssKiB": 1322894,
+          "maximumCoveredSampleGapMs": 165.38854,
+          "name": "B1",
+          "pair": 1,
+          "postImportBracketGapMs": 81.903645,
+          "preImportBracketGapMs": 38.154286,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 15
+        },
+        {
+          "allObservedSampleCount": 80,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 15,
+          "index": 3,
+          "maxSampledPrivateKiB": 1099212,
+          "maxSampledPssKiB": 1329302,
+          "maximumCoveredSampleGapMs": 208.025511,
+          "name": "B2",
+          "pair": 2,
+          "postImportBracketGapMs": 9.759742,
+          "preImportBracketGapMs": 16.29468,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 15
+        },
+        {
+          "allObservedSampleCount": 77,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 13,
+          "index": 4,
+          "maxSampledPrivateKiB": 1089444,
+          "maxSampledPssKiB": 1322573,
+          "maximumCoveredSampleGapMs": 221.738862,
+          "name": "A2",
+          "pair": 2,
+          "postImportBracketGapMs": 64.795643,
+          "preImportBracketGapMs": 36.01252,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 13
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1093720,
+            "candidate": 1086560,
+            "changePercent": -0.654646527447611
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1325019,
+            "candidate": 1322894,
+            "changePercent": -0.16037505877274372
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1089444,
+            "candidate": 1099212,
+            "changePercent": 0.8966041393591695
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1322573,
+            "candidate": 1329302,
+            "changePercent": 0.5087809897827977
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+            "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+          },
+          "B": {
+            "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+            "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+          }
+        }
+      },
+      "replication": 1,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        }
+      },
+      "storageAllocationSummary": {
+        "activeSahFileBytesByArm": {
+          "A": [
+            5459968,
+            5459968
+          ],
+          "B": [
+            5459968,
+            5459968
+          ]
+        },
+        "observations": [
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 1,
+            "name": "A1",
+            "nonSahBytes": 61977692,
+            "pair": 1,
+            "rawStorageBytes": 67466332
+          },
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 2,
+            "name": "B1",
+            "nonSahBytes": 61977692,
+            "pair": 1,
+            "rawStorageBytes": 67466332
+          },
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 3,
+            "name": "B2",
+            "nonSahBytes": 61977692,
+            "pair": 2,
+            "rawStorageBytes": 67466332
+          },
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 4,
+            "name": "A2",
+            "nonSahBytes": 61977692,
+            "pair": 2,
+            "rawStorageBytes": 67466332
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawStorageBytesByArm": {
+          "A": [
+            67466332,
+            67466332
+          ],
+          "B": [
+            67466332,
+            67466332
+          ]
+        }
+      }
+    },
+    {
+      "artifact": "import-memory-3aac-media-jitendex-rep2-45471351138-1",
+      "dictionary": "jitendex",
+      "fixture": {
+        "cacheFile": "jitendex-yomitan.zip",
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "label": "Jitendex",
+        "mediaBytes": 4992155,
+        "mediaFiles": 236,
+        "release": "2026.10.03.0",
+        "revision": "2026.10.03.0",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "termRows": 436555,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ],
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+      },
+      "githubArtifactDigest": "sha256:294068348a040a453c7882d53132d290d11a473e85129758a9c7142d9f396b5c",
+      "githubArtifactId": 14957122291,
+      "inputSha256": {
+        "A-identity.json": "7f850dcc935c3d1f6780aea2f46f8e2233b2fa8d3d6880ad1677e1f85a8ccd6e",
+        "A-package-entries.json": "1e9d3ba8e7d6a0c0201835be65e6ac8444a28a739a86ac1bd2c960096578d8b6",
+        "A1/acquisition.json": "387910f911d2d2b073f67fe180d91d05852cd4e1fa7a24af937e88de2d59c360",
+        "A1/correctness.json": "61eaea9084015dac8a0abe25f21703df7f5bf294b48d5aae2ddc472a11322950",
+        "A1/markers.jsonl": "c5ed056d9d3526eaffe531b19fc26858baef00165a5cb0142fec621ef17f60d7",
+        "A1/memory.json": "4ee237878c2c05a54b4c2588219dbe8e3cf96dedfdbce3e811a2b60d25a5cef2",
+        "A1/summary.json": "05af28eaffdd0f61ad0dade0ea18b30d2f98b66463b005047fa1f4a7499422cc",
+        "A2/acquisition.json": "8cfeab94ce2a726ba92f3a80f33ccb67af7b9f2a9d9efcaaaea774a1e0ab5889",
+        "A2/correctness.json": "19c2082fddaefcec3e329f8d4d21a62b908e8f8452048ae850e85a5b91f9c29b",
+        "A2/markers.jsonl": "e8d609b5921a1e709a8fef24d39d5ae293c53b01527a38debbea0fec3b9dd7cc",
+        "A2/memory.json": "36927509e1a498ec32782a2699b30cdcfd460dfe013c17a91ad14f4491fd1266",
+        "A2/summary.json": "063ee52769a3a453522bdfabe2fedd9e2382331e80acd4b50c8870ffef3812e4",
+        "B-identity.json": "8d3f544cee2d6a2db01210ffd9dd6fe2e472a160eed8993a63b9b242abd8aa0c",
+        "B-package-entries.json": "8f411c6db8ca3ecbdc71303596869aca1eb4d3744ecdb643b72aa9de703f7877",
+        "B1/acquisition.json": "7e190a6da1fe89082b6b4d1137ab096c54985b6a90ce642c767dffd5a68ff0c6",
+        "B1/correctness.json": "19fc214df6250eda393115c29932bb8d14c55fe923c0be28e5adf460962f8e94",
+        "B1/markers.jsonl": "28918594ea39a46fe3ea6720fc73daf0081d501010f1cff2aa7f0bad4f80f4e9",
+        "B1/memory.json": "730c7f53a94a9a67ba55f8046295fd37d76c8bc53d7c40a7bc844b94a7a927f9",
+        "B1/summary.json": "5b24237f8aa68463c05533b4f6177eb9482b8a45deb71a7e356fc840bd61a90e",
+        "B2/acquisition.json": "5443fcb4aa5d1b6e6be146be87dc01c4dd0d634631ee00bad8033ce20a93be1c",
+        "B2/correctness.json": "4d9fb636d05cab15bc138b7325cb11ea658c993f435c87ceccc359335073b18f",
+        "B2/markers.jsonl": "3706caf9da151dd8050d51471cd9b0fde639afa2fa836eb4ba195df0ebbb810a",
+        "B2/memory.json": "a5ea63200d3104389f2d932a5cb1d69597e9afb339caf7b6ad1fedcdd486362c",
+        "B2/summary.json": "c53d2d4bb7db14d04a5d28445255864ce25fe646abff935f00b94bd568039ddf",
+        "correctness.json": "fdeefa1a3c15c7dd173907fa683f5b061cccc754c953becf9445c4a9bd2839b2",
+        "memory-audit.json": "9d749dae8bf1ec3db10d3ce5fed88a2a05862b41b3762bb5f65115abe9e68fab",
+        "memory-comparison.json": "c4cad8c0c196ccda40c8d2d03b9fc42b1ec6f184643cb1b251c85998d6368651",
+        "plan.json": "a52f0e750fd515fd874e713d3e4c979acdffa94e559676540325e6dc5428c4a5",
+        "qualification.json": "639bd5250037b1eaf5b677e2a320ddb4e2f06b3f10b8f331d8ebb8f3cf5f15b0",
+        "receipt-audit.json": "51180c2e7cc91f3bf252c9cf74bf944d07bcaa8a863cc1b7e3c3b67b06004552",
+        "storage-allocation-summary.json": "a43325d3be5d573dad8ccb67cacb674cace73f8f95a9096579effb5ac89e1159"
+      },
+      "memoryAudit": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 311,
+        "schemaVersion": 1
+      },
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "observations": [
+        {
+          "allObservedSampleCount": 75,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 13,
+          "index": 1,
+          "maxSampledPrivateKiB": 1171264,
+          "maxSampledPssKiB": 1399326,
+          "maximumCoveredSampleGapMs": 154.586407,
+          "name": "B1",
+          "pair": 1,
+          "postImportBracketGapMs": 12.659463,
+          "preImportBracketGapMs": 45.090477,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "qualifiedPeakRoleBreakdown": {
+            "privateKiB": {
+              "rawSampleIndex": 68,
+              "sumByProcessRoleKiB": {
+                "browser": 104384,
+                "gpu-process": 13292,
+                "renderer": 1029304,
+                "utility": 22948,
+                "zygote": 1336
+              },
+              "valueKiB": 1171264
+            },
+            "pssKiB": {
+              "rawSampleIndex": 68,
+              "sumByProcessRoleKiB": {
+                "browser": 141846,
+                "gpu-process": 39703,
+                "renderer": 1121500,
+                "utility": 54494,
+                "zygote": 41783
+              },
+              "valueKiB": 1399326
+            }
+          },
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 13
+        },
+        {
+          "allObservedSampleCount": 74,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 13,
+          "index": 2,
+          "maxSampledPrivateKiB": 1050076,
+          "maxSampledPssKiB": 1281213,
+          "maximumCoveredSampleGapMs": 156.592754,
+          "name": "A1",
+          "pair": 1,
+          "postImportBracketGapMs": 94.0798,
+          "preImportBracketGapMs": 61.802205,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "qualifiedPeakRoleBreakdown": {
+            "privateKiB": {
+              "rawSampleIndex": 63,
+              "sumByProcessRoleKiB": {
+                "browser": 94768,
+                "gpu-process": 13268,
+                "renderer": 917652,
+                "utility": 22976,
+                "zygote": 1412
+              },
+              "valueKiB": 1050076
+            },
+            "pssKiB": {
+              "rawSampleIndex": 63,
+              "sumByProcessRoleKiB": {
+                "browser": 132760,
+                "gpu-process": 40803,
+                "renderer": 1008157,
+                "utility": 55988,
+                "zygote": 43505
+              },
+              "valueKiB": 1281213
+            }
+          },
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 13
+        },
+        {
+          "allObservedSampleCount": 72,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 7,
+          "coverageGapDetails": {
+            "leftPoint": 62,
+            "maximumCoveredGapMs": 253.166629,
+            "rightPoint": 64,
+            "scansAcrossMaximumGap": [
+              {
+                "qualificationFailures": [],
+                "rawSampleIndex": 62,
+                "relativeMidpointMs": 897.673952,
+                "scanDurationMs": 113.762383,
+                "stableObservedProcessTree": true,
+                "unreadableAddressSpaces": []
+              },
+              {
+                "qualificationFailures": [
+                  "process-tree-changed-during-scan",
+                  "unreadable-discovered-process-smaps"
+                ],
+                "rawSampleIndex": 63,
+                "relativeMidpointMs": 1031.707937,
+                "scanDurationMs": 103.632835,
+                "stableObservedProcessTree": false,
+                "unreadableAddressSpaces": [
+                  {
+                    "executable": null,
+                    "metadataReadErrors": [
+                      {
+                        "errno": 2,
+                        "error": "FileNotFoundError",
+                        "field": "executable",
+                        "message": "[Errno 2] No such file or directory: '/proc/4064/exe'",
+                        "pid": 4064
+                      }
+                    ],
+                    "pid": 4064,
+                    "role": "descendant-unknown",
+                    "samePidPresentAfterScan": false,
+                    "smapsReadError": {
+                      "errno": 2,
+                      "error": "FileNotFoundError",
+                      "field": "smaps_rollup",
+                      "message": "[Errno 2] No such file or directory: '/proc/4064/smaps_rollup'",
+                      "pid": 4064
+                    },
+                    "startTimeTicks": 13535,
+                    "state": "Z",
+                    "threadCount": 1
+                  }
+                ]
+              },
+              {
+                "qualificationFailures": [],
+                "rawSampleIndex": 64,
+                "relativeMidpointMs": 1150.840581,
+                "scanDurationMs": 84.043941,
+                "stableObservedProcessTree": true,
+                "unreadableAddressSpaces": []
+              }
+            ]
+          },
+          "fullyContainedImportSampleCount": 14,
+          "index": 3,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 253.166629,
+          "name": "A2",
+          "pair": 2,
+          "postImportBracketGapMs": 21.38013,
+          "preImportBracketGapMs": 22.260656,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "samplesWithUnreadableAddressSpaces": 1,
+          "stableFullyReadImportSampleCount": 13
+        },
+        {
+          "allObservedSampleCount": 90,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 14,
+          "index": 4,
+          "maxSampledPrivateKiB": 1114428,
+          "maxSampledPssKiB": 1343375,
+          "maximumCoveredSampleGapMs": 162.931359,
+          "name": "B2",
+          "pair": 2,
+          "postImportBracketGapMs": 21.648908,
+          "preImportBracketGapMs": 101.808192,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 14
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1050076,
+            "candidate": 1171264,
+            "changePercent": 11.540878945904876
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1281213,
+            "candidate": 1399326,
+            "changePercent": 9.21884183192021
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": 1114428,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": 1343375,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+            "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+          },
+          "B": {
+            "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+            "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+          }
+        }
+      },
+      "replication": 2,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        }
+      },
+      "storageAllocationSummary": {
+        "activeSahFileBytesByArm": {
+          "A": [
+            5459968,
+            5459968
+          ],
+          "B": [
+            5459968,
+            5459968
+          ]
+        },
+        "observations": [
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 1,
+            "name": "B1",
+            "nonSahBytes": 61977692,
+            "pair": 1,
+            "rawStorageBytes": 67466332
+          },
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 2,
+            "name": "A1",
+            "nonSahBytes": 61977692,
+            "pair": 1,
+            "rawStorageBytes": 67466332
+          },
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 3,
+            "name": "A2",
+            "nonSahBytes": 61977692,
+            "pair": 2,
+            "rawStorageBytes": 67466332
+          },
+          {
+            "activeSahFileBytes": 5459968,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 4,
+            "name": "B2",
+            "nonSahBytes": 61977692,
+            "pair": 2,
+            "rawStorageBytes": 67466332
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawStorageBytesByArm": {
+          "A": [
+            67466332,
+            67466332
+          ],
+          "B": [
+            67466332,
+            67466332
+          ]
+        }
+      }
+    },
+    {
+      "artifact": "import-memory-3aac-media-vndb-rep1-45471351138-1",
+      "dictionary": "vndb",
+      "fixture": {
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "expectedTitle": "VNDB Characters by Bee",
+        "label": "VNDB",
+        "mediaBytes": 188131284,
+        "mediaFiles": 146570,
+        "mediaRows": 146570,
+        "optional": true,
+        "release": "1.0.0",
+        "revision": "395525135651",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+      },
+      "githubArtifactDigest": "sha256:51a8ba6bad8cc1219c9bf0e253a69601b3776c40aaa9fe2177312d5959084aa2",
+      "githubArtifactId": 14957888466,
+      "inputSha256": {
+        "A-identity.json": "7810d53933ad28d746bd8804506869d91f64f2d7af6905d91187bbcf5321074e",
+        "A-package-entries.json": "1e9d3ba8e7d6a0c0201835be65e6ac8444a28a739a86ac1bd2c960096578d8b6",
+        "A1/acquisition.json": "ec00b7554a281322b7281c82d4ef5c5b57366aba5e2b6b7d0d7188cfb69f47f2",
+        "A1/correctness.json": "f29d508be6861147ada53f375d5f30b6d2e710f436deea22b2170c58b26a3e2f",
+        "A1/markers.jsonl": "c9f03fd6164ef8aef92ba642af49772111f61bbddb35a8bc111bfae5fe593fc6",
+        "A1/memory.json": "277c4bb0578377b9013971ac322cf25f695c16cc406b5c23c9695ff29abbf6a6",
+        "A1/summary.json": "db0fa49b85dd5e835ee849ac58b4bfc715b1bf14482eb6ed5dca43e06d5b4da3",
+        "A2/acquisition.json": "ec68660b56442c558b3d6e0a689a79a83b4f11c3f4c366cd5312956efea61589",
+        "A2/correctness.json": "b3bac11604ce751b22764c1e4b3e7e0f02b4b1bde19fcaf6fff22b2b9a844b83",
+        "A2/markers.jsonl": "7c092e1b5557eb9bb4e22c9212ae469403714420bb1f4e99282a890dbe0219bf",
+        "A2/memory.json": "ec03c46d049953efd4367e8a10c1773cd0b1a702cedd65af3f2c370c9931d7d6",
+        "A2/summary.json": "2256c171e9e04e95a288a48a81d53dffbb4c770937896cc2aee542e8b3eb87d9",
+        "B-identity.json": "d906ea81317c5ff0140eaa42d37119905a0ec279465c770f7692b7f645b1d728",
+        "B-package-entries.json": "8f411c6db8ca3ecbdc71303596869aca1eb4d3744ecdb643b72aa9de703f7877",
+        "B1/acquisition.json": "ab48831c2fa6e5ca68038e7ae00445f7ac199d5a8748c84dec5f09013485f1b8",
+        "B1/correctness.json": "686463110ca58b8b0171be70cec3781fe7891b8b43523fa5485c2cf640f77424",
+        "B1/markers.jsonl": "7419feb4f620d265cd24219807f7a88dad768898ad15b59ba85a758dfdac4a6b",
+        "B1/memory.json": "0120213007da02b7000b769f1dc659eda8f5f4fa271c316abcf30822383e2cbf",
+        "B1/summary.json": "9f509f1fc754ef75f8f369917f69061adb7adbc6d92f7a599c2780dc670ce0be",
+        "B2/acquisition.json": "d2bce8d2acd98d397fef2c3c2381f0df06a357d7166fd903349cdb761e83fc6c",
+        "B2/correctness.json": "331b70c0bd32d8742b95986d469418039ea124973e441b4c888b6221f2774b77",
+        "B2/markers.jsonl": "cccc69805496cb503f8f0980815f1c53f3541cbcd79985eeeb3202d78878593f",
+        "B2/memory.json": "0fa942041e9174c2aca7a2001e1da2dd222027b335c7af478616d85119fd2b35",
+        "B2/summary.json": "d5d7d59cf034a1554df1ef1bfd2d7135397a740404eaff8c91bdc8271b22cd94",
+        "correctness.json": "d75740dc7f2465acc56991a67ed3e460a1df5b2bab930726d032bd442fff923b",
+        "memory-audit.json": "b15da3e766f8367cfbedd9ed92bf6f2c6e865acc029135ac28188e3b6adb169a",
+        "memory-comparison.json": "cf1aecce50e8c95ee9b242fa6001da2955a70328a2dec836506f7c99f62f12fc",
+        "plan.json": "5e506945220cdb39824fc51123594b4df6b49d452485084da4eb36e3834e7519",
+        "qualification.json": "639bd5250037b1eaf5b677e2a320ddb4e2f06b3f10b8f331d8ebb8f3cf5f15b0",
+        "receipt-audit.json": "51180c2e7cc91f3bf252c9cf74bf944d07bcaa8a863cc1b7e3c3b67b06004552",
+        "storage-allocation-summary.json": "47e493ad71bb458c3198c75ff7f5a91cfabc5ada7007d74dfb2c15102561e36a"
+      },
+      "memoryAudit": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": false,
+        "rawScanCount": 555,
+        "schemaVersion": 1
+      },
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": null,
+          "medianPairedChangePercent": null
+        }
+      },
+      "observations": [
+        {
+          "allObservedSampleCount": 196,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 6,
+          "coverageGapDetails": {
+            "leftPoint": 128,
+            "maximumCoveredGapMs": 353.233063,
+            "rightPoint": 130,
+            "scansAcrossMaximumGap": [
+              {
+                "qualificationFailures": [],
+                "rawSampleIndex": 128,
+                "relativeMidpointMs": 586.443602,
+                "scanDurationMs": 134.68753,
+                "stableObservedProcessTree": true,
+                "unreadableAddressSpaces": []
+              },
+              {
+                "qualificationFailures": [
+                  "process-tree-changed-during-scan",
+                  "unreadable-discovered-process-smaps"
+                ],
+                "rawSampleIndex": 129,
+                "relativeMidpointMs": 772.157895,
+                "scanDurationMs": 186.180093,
+                "stableObservedProcessTree": false,
+                "unreadableAddressSpaces": [
+                  {
+                    "executable": null,
+                    "metadataReadErrors": [
+                      {
+                        "errno": 2,
+                        "error": "FileNotFoundError",
+                        "field": "executable",
+                        "message": "[Errno 2] No such file or directory: '/proc/3393/exe'",
+                        "pid": 3393
+                      }
+                    ],
+                    "pid": 3393,
+                    "role": "descendant-unknown",
+                    "samePidPresentAfterScan": false,
+                    "smapsReadError": {
+                      "errno": 2,
+                      "error": "FileNotFoundError",
+                      "field": "smaps_rollup",
+                      "message": "[Errno 2] No such file or directory: '/proc/3393/smaps_rollup'",
+                      "pid": 3393
+                    },
+                    "startTimeTicks": 71623,
+                    "state": "Z",
+                    "threadCount": 1
+                  }
+                ]
+              },
+              {
+                "qualificationFailures": [],
+                "rawSampleIndex": 130,
+                "relativeMidpointMs": 939.676665,
+                "scanDurationMs": 98.312727,
+                "stableObservedProcessTree": true,
+                "unreadableAddressSpaces": []
+              }
+            ]
+          },
+          "fullyContainedImportSampleCount": 69,
+          "index": 1,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 353.233063,
+          "name": "A1",
+          "pair": 1,
+          "postImportBracketGapMs": 32.840699,
+          "preImportBracketGapMs": 39.038967,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "samplesWithUnreadableAddressSpaces": 1,
+          "stableFullyReadImportSampleCount": 68
+        },
+        {
+          "allObservedSampleCount": 117,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 48,
+          "index": 2,
+          "maxSampledPrivateKiB": 1160328,
+          "maxSampledPssKiB": 1392463,
+          "maximumCoveredSampleGapMs": 219.913687,
+          "name": "B1",
+          "pair": 1,
+          "postImportBracketGapMs": 16.919279,
+          "preImportBracketGapMs": 31.339461,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 48
+        },
+        {
+          "allObservedSampleCount": 125,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 48,
+          "index": 3,
+          "maxSampledPrivateKiB": 1185512,
+          "maxSampledPssKiB": 1416161,
+          "maximumCoveredSampleGapMs": 197.828484,
+          "name": "B2",
+          "pair": 2,
+          "postImportBracketGapMs": 82.980578,
+          "preImportBracketGapMs": 46.983582,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 48
+        },
+        {
+          "allObservedSampleCount": 117,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 8,
+          "coverageGapDetails": {
+            "leftPoint": 74,
+            "maximumCoveredGapMs": 275.115924,
+            "rightPoint": 76,
+            "scansAcrossMaximumGap": [
+              {
+                "qualificationFailures": [],
+                "rawSampleIndex": 74,
+                "relativeMidpointMs": 831.40189,
+                "scanDurationMs": 144.18545,
+                "stableObservedProcessTree": true,
+                "unreadableAddressSpaces": []
+              },
+              {
+                "qualificationFailures": [
+                  "process-tree-changed-during-scan",
+                  "unreadable-discovered-process-smaps"
+                ],
+                "rawSampleIndex": 75,
+                "relativeMidpointMs": 970.201517,
+                "scanDurationMs": 82.9044,
+                "stableObservedProcessTree": false,
+                "unreadableAddressSpaces": [
+                  {
+                    "executable": null,
+                    "metadataReadErrors": [
+                      {
+                        "errno": 2,
+                        "error": "FileNotFoundError",
+                        "field": "executable",
+                        "message": "[Errno 2] No such file or directory: '/proc/4494/exe'",
+                        "pid": 4494
+                      }
+                    ],
+                    "pid": 4494,
+                    "role": "descendant-unknown",
+                    "samePidPresentAfterScan": false,
+                    "smapsReadError": {
+                      "errno": 2,
+                      "error": "FileNotFoundError",
+                      "field": "smaps_rollup",
+                      "message": "[Errno 2] No such file or directory: '/proc/4494/smaps_rollup'",
+                      "pid": 4494
+                    },
+                    "startTimeTicks": 79370,
+                    "state": "Z",
+                    "threadCount": 1
+                  }
+                ]
+              },
+              {
+                "qualificationFailures": [],
+                "rawSampleIndex": 76,
+                "relativeMidpointMs": 1106.517814,
+                "scanDurationMs": 139.21796,
+                "stableObservedProcessTree": true,
+                "unreadableAddressSpaces": []
+              }
+            ]
+          },
+          "fullyContainedImportSampleCount": 47,
+          "index": 4,
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 275.115924,
+          "name": "A2",
+          "pair": 2,
+          "postImportBracketGapMs": 106.09512,
+          "preImportBracketGapMs": 60.34149,
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false,
+          "samplesWithUnreadableAddressSpaces": 1,
+          "stableFullyReadImportSampleCount": 46
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": 1160328,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": 1392463,
+            "changePercent": null
+          },
+          "pair": 1,
+          "qualified": false
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": null,
+            "candidate": 1185512,
+            "changePercent": null
+          },
+          "maxSampledPssKiB": {
+            "baseline": null,
+            "candidate": 1416161,
+            "changePercent": null
+          },
+          "pair": 2,
+          "qualified": false
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": false,
+        "retriedObservations": 0,
+        "status": "failed"
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+            "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+          },
+          "B": {
+            "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+            "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+          }
+        }
+      },
+      "replication": 1,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        }
+      },
+      "storageAllocationSummary": {
+        "activeSahFileBytesByArm": {
+          "A": [
+            528384,
+            528384
+          ],
+          "B": [
+            528384,
+            528384
+          ]
+        },
+        "observations": [
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 1,
+            "name": "A1",
+            "nonSahBytes": 608996555,
+            "pair": 1,
+            "rawStorageBytes": 609553611
+          },
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 2,
+            "name": "B1",
+            "nonSahBytes": 608996555,
+            "pair": 1,
+            "rawStorageBytes": 609553611
+          },
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 3,
+            "name": "B2",
+            "nonSahBytes": 608996555,
+            "pair": 2,
+            "rawStorageBytes": 609553611
+          },
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 4,
+            "name": "A2",
+            "nonSahBytes": 608996555,
+            "pair": 2,
+            "rawStorageBytes": 609553611
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawStorageBytesByArm": {
+          "A": [
+            609553611,
+            609553611
+          ],
+          "B": [
+            609553611,
+            609553611
+          ]
+        }
+      }
+    },
+    {
+      "artifact": "import-memory-3aac-media-vndb-rep2-45471351138-1",
+      "dictionary": "vndb",
+      "fixture": {
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "expectedTitle": "VNDB Characters by Bee",
+        "label": "VNDB",
+        "mediaBytes": 188131284,
+        "mediaFiles": 146570,
+        "mediaRows": 146570,
+        "optional": true,
+        "release": "1.0.0",
+        "revision": "395525135651",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "termRows": 6648310,
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip"
+      },
+      "githubArtifactDigest": "sha256:95b073cb1867758867bc5d3d5d9cfcbb1d21eb7e10c75f33c3e73b60d6dd9f81",
+      "githubArtifactId": 14958256213,
+      "inputSha256": {
+        "A-identity.json": "8ec48d3d5ba3e7976349bb99e98879d95f1d94fe3364243e718f682d2ae40f13",
+        "A-package-entries.json": "1e9d3ba8e7d6a0c0201835be65e6ac8444a28a739a86ac1bd2c960096578d8b6",
+        "A1/acquisition.json": "da59a792d224d87b7970a0da7658f1e0f79338f2f01602368636d18081fee1c6",
+        "A1/correctness.json": "f7f61fb7fe0c04be3ae6bb0241e20146f04affa3abd5dbd6001061b379e83e21",
+        "A1/markers.jsonl": "5952fc6185c46c617a05a79a36fcb67afa5fc8dd0ef6226fc00052304c73663a",
+        "A1/memory.json": "98449866e3427c7ab124645c12496c4d4bb1e65ee961a92ca5423cf05ad40558",
+        "A1/summary.json": "a4c5257fb2a19ff49ce008ef3ca2260d830195459909ef5ab3347a00036caf70",
+        "A2/acquisition.json": "52c5e767e7d007f43846282df9b3dc4aee2352967f0078cd31e7ed7481ee6359",
+        "A2/correctness.json": "1bfd1017afd816b6b3daf5800414ee048722411bb7bc92055b85c918af1ce2c4",
+        "A2/markers.jsonl": "48815cf19ab381915147d488c502050958e066a4d0f9d3a2b3147ad4262b3689",
+        "A2/memory.json": "d489e888aa0435f30c660c56ea32390b66bedfde3a5d5da3b41a4d9155bb64cf",
+        "A2/summary.json": "3201c897fb47e8af2e935195ff93a73fc358e2ad4134c4f711b66b831cea7dbd",
+        "B-identity.json": "08a8fb2c53823f5aafcc37574a678820b6aa81195733ac8edc3ee3dce4f0148b",
+        "B-package-entries.json": "8f411c6db8ca3ecbdc71303596869aca1eb4d3744ecdb643b72aa9de703f7877",
+        "B1/acquisition.json": "8956ee6925e3cd668227355b101a7acca96e72e3994597edb568df0e71d7427f",
+        "B1/correctness.json": "b8b6adffa9855173d58e6dd516eb92b4b1a16bfc849633d2198fc82575639935",
+        "B1/markers.jsonl": "9032bd6df3fffe32371f585006f4b044090290b94c42d66f6841fe18f8d460a2",
+        "B1/memory.json": "dc1ca4093a032b6bb865901bcb69692c00ae3d89cb3db6b2861bdc19548fb796",
+        "B1/summary.json": "e31b977cbcbcabadb9c215b88fbb77719d4f208910939e20207fa163c7e14386",
+        "B2/acquisition.json": "20ad4e28f01a323c800ccb1f39ddec858bd6620a9e0267ccde10cd1b6bc4f1d8",
+        "B2/correctness.json": "f14dc67e73c96af0943a8b6e6ea2a94e959dca64b0ea875e404b537325751740",
+        "B2/markers.jsonl": "752da6f829e9ca12a5fe6279edd781425acaa7029767622ff20c6d12de4bc4bd",
+        "B2/memory.json": "a074936968b33f53d3b051b6ff7e8fcf1482ef7a8defa724cecafe06134a4564",
+        "B2/summary.json": "832f255f4075459ae97cd2998fdaabed36e84bd837a26c1fc9cf5baf9eb7cd70",
+        "correctness.json": "5dfc13b2a7e97c1f39d7630b307f97e608b95b20200f46c06d36c81c4f086176",
+        "memory-audit.json": "70cc0664087476ba0ff45b7b5dcfcb09044361f8e01f8fd0e2b6eb24cf9d7851",
+        "memory-comparison.json": "baabb7661825f77e8af6e7d6b9d95455f729ee81c241732c4aeca8d160b42fe3",
+        "plan.json": "351bc5c9ea29884e347690a3c8a0f69b19b6d18292938e6377ac6c5c7070d412",
+        "qualification.json": "3561550b134394506c4bcf8c58c166c25a29db56835483754a10c57eba0ec293",
+        "receipt-audit.json": "51180c2e7cc91f3bf252c9cf74bf944d07bcaa8a863cc1b7e3c3b67b06004552",
+        "storage-allocation-summary.json": "82e7f6449464df01f9feb52781e09dde64bc2b09d7f3ca305b9a0352286cef91"
+      },
+      "memoryAudit": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.1054864955915473,
+            "medianPairedChangePercent": 0.42737976613534956
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.687876500662223,
+            "medianPairedChangePercent": 0.3489130152310227
+          }
+        },
+        "observations": 4,
+        "passesProspectiveMemoryScreen": true,
+        "rawScanCount": 470,
+        "schemaVersion": 1
+      },
+      "metrics": {
+        "maxSampledPrivateKiB": {
+          "maximumPairedChangePercent": 3.1054864955915473,
+          "medianPairedChangePercent": 0.42737976613534956
+        },
+        "maxSampledPssKiB": {
+          "maximumPairedChangePercent": 2.687876500662223,
+          "medianPairedChangePercent": 0.3489130152310227
+        }
+      },
+      "observations": [
+        {
+          "allObservedSampleCount": 131,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 58,
+          "index": 1,
+          "maxSampledPrivateKiB": 1211972,
+          "maxSampledPssKiB": 1442128,
+          "maximumCoveredSampleGapMs": 168.010099,
+          "name": "B1",
+          "pair": 1,
+          "postImportBracketGapMs": 87.523674,
+          "preImportBracketGapMs": 44.124756,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 58
+        },
+        {
+          "allObservedSampleCount": 105,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 40,
+          "index": 2,
+          "maxSampledPrivateKiB": 1175468,
+          "maxSampledPssKiB": 1404380,
+          "maximumCoveredSampleGapMs": 184.763104,
+          "name": "A1",
+          "pair": 1,
+          "postImportBracketGapMs": 6.449221,
+          "preImportBracketGapMs": 45.568203,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 40
+        },
+        {
+          "allObservedSampleCount": 129,
+          "arm": "A",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 41,
+          "index": 3,
+          "maxSampledPrivateKiB": 1154116,
+          "maxSampledPssKiB": 1383985,
+          "maximumCoveredSampleGapMs": 181.911037,
+          "name": "A2",
+          "pair": 2,
+          "postImportBracketGapMs": 46.402729,
+          "preImportBracketGapMs": 24.973024,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 41
+        },
+        {
+          "allObservedSampleCount": 105,
+          "arm": "B",
+          "benchmarkExitCode": 0,
+          "confirmedExitedZombieObservationCount": 0,
+          "coverageGapDetails": null,
+          "fullyContainedImportSampleCount": 39,
+          "index": 4,
+          "maxSampledPrivateKiB": 1128140,
+          "maxSampledPssKiB": 1356443,
+          "maximumCoveredSampleGapMs": 193.30008,
+          "name": "B2",
+          "pair": 2,
+          "postImportBracketGapMs": 79.31342,
+          "preImportBracketGapMs": 57.441239,
+          "qualificationFailures": [],
+          "qualifiedForWholeTreePss": true,
+          "samplesWithUnreadableAddressSpaces": 0,
+          "stableFullyReadImportSampleCount": 39
+        }
+      ],
+      "pairs": [
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1175468,
+            "candidate": 1211972,
+            "changePercent": 3.1054864955915473
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1404380,
+            "candidate": 1442128,
+            "changePercent": 2.687876500662223
+          },
+          "pair": 1,
+          "qualified": true
+        },
+        {
+          "maxSampledPrivateKiB": {
+            "baseline": 1154116,
+            "candidate": 1128140,
+            "changePercent": -2.250726963320848
+          },
+          "maxSampledPssKiB": {
+            "baseline": 1383985,
+            "candidate": 1356443,
+            "changePercent": -1.9900504702001776
+          },
+          "pair": 2,
+          "qualified": true
+        }
+      ],
+      "qualification": {
+        "authoritativeTiming": false,
+        "bothIndependentReplicationsRequired": true,
+        "correctnessPassed": true,
+        "memoryScreenPassed": true,
+        "retriedObservations": 0,
+        "status": "passed"
+      },
+      "receiptAudit": {
+        "allCorrectnessPassed": true,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "packageDifferences": [
+          "js/dictionary/term-bank-wasm-parser-worker.js",
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "schemaVersion": 1,
+        "sourceIdentities": {
+          "A": {
+            "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+            "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+          },
+          "B": {
+            "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+            "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+          }
+        }
+      },
+      "replication": 2,
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        }
+      },
+      "storageAllocationSummary": {
+        "activeSahFileBytesByArm": {
+          "A": [
+            528384,
+            528384
+          ],
+          "B": [
+            528384,
+            528384
+          ]
+        },
+        "observations": [
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 1,
+            "name": "B1",
+            "nonSahBytes": 608996555,
+            "pair": 1,
+            "rawStorageBytes": 609553611
+          },
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 2,
+            "name": "A1",
+            "nonSahBytes": 608996555,
+            "pair": 1,
+            "rawStorageBytes": 609553611
+          },
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "A",
+            "correctnessStatus": "passed",
+            "index": 3,
+            "name": "A2",
+            "nonSahBytes": 608996555,
+            "pair": 2,
+            "rawStorageBytes": 609553611
+          },
+          {
+            "activeSahFileBytes": 528384,
+            "arm": "B",
+            "correctnessStatus": "passed",
+            "index": 4,
+            "name": "B2",
+            "nonSahBytes": 608996555,
+            "pair": 2,
+            "rawStorageBytes": 609553611
+          }
+        ],
+        "policyVersion": "pinned-import-storage-20261124-v1",
+        "rawStorageBytesByArm": {
+          "A": [
+            609553611,
+            609553611
+          ],
+          "B": [
+            609553611,
+            609553611
+          ]
+        }
+      }
+    }
+  ],
+  "decision": {
+    "correctness": "All 16 original commands exited 0 and all source/package/semantic sampled-media/lookup/restart receipts recompute successfully.",
+    "coverageCause": "All three invalid observations have one scan during which an observed single-thread zombie disappears before rediscovery; smaps returns ENOENT, so the frozen ESRCH plus stable Z-to-Z exception does not apply. Skipping that uncovered scan yields the recorded gap violation. No relaxation or replacement is applied.",
+    "interpretation": "The qualified Jitendex private-memory pair is a measured gate breach, not a demonstrated repeatable causal effect. Sampled whole-tree maxima are non-atomic observations and do not establish exact peaks. Neither dictionary satisfies the required two independent replications.",
+    "jitendex": "Not qualified: replication 1 passes; replication 2 has a baseline A2 coverage failure and a qualified first-pair private-memory increase of 11.540878945904876%, exceeding the fixed 10% individual gate. No valid replication-2 aggregate estimate exists.",
+    "vndb": "Not qualified: replication 2 passes; replication 1 loses both baseline observations to covered-scan gaps above 250 ms, leaving no qualified pairs. This is an unresolved coverage result, not evidence of a RAM regression."
+  },
+  "githubArtifactMetadataSha256": "f4caaf96b50120f6386a5e6e2dd755b0e2e63100b78c2680ef65752ae0a1b378",
+  "newAcquisitions": 0,
+  "rawEvidenceModified": false,
+  "rerunsOrReplacements": 0,
+  "reviewerScriptSha256": "27a1c8b0f825cdb14bd6beb8588ca5c509c856ee190836294d58011e139b22c1",
+  "schemaVersion": 1,
+  "scope": "Read-only recomputation of original raw scans, marker bytes, package/source receipts, and sampled-media/restart correctness. This is not another memory acquisition or timing cohort.",
+  "sourceIdentities": {
+    "A": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "B": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    }
+  },
+  "toolingCommit": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc",
+  "workflowAttempt": 1,
+  "workflowRun": 45471351138,
+  "workflowUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45471351138"
+}

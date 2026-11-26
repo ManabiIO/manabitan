@@ -1,0 +1,84 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "runId": 45471351138,
+  "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45471351138",
+  "retrieval": "GitHub fetch_workflow_run_artifacts; first page; all current artifact records returned",
+  "artifacts": [
+    {
+      "id": 14958256213,
+      "name": "import-memory-3aac-media-vndb-rep2-45471351138-1",
+      "size_in_bytes": 34294746,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14958256213",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14958256213/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:35:06Z",
+      "expires_at": "2026-12-24T19:35:05Z",
+      "updated_at": "2026-11-24T19:35:06Z",
+      "digest": "sha256:95b073cb1867758867bc5d3d5d9cfcbb1d21eb7e10c75f33c3e73b60d6dd9f81",
+      "workflow_run": {
+        "id": 45471351138,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-media-memory-20261124-3aac",
+        "head_sha": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc"
+      }
+    },
+    {
+      "id": 14957888466,
+      "name": "import-memory-3aac-media-vndb-rep1-45471351138-1",
+      "size_in_bytes": 34353719,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957888466",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957888466/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:35:59Z",
+      "expires_at": "2026-12-24T19:35:57Z",
+      "updated_at": "2026-11-24T19:35:59Z",
+      "digest": "sha256:51a8ba6bad8cc1219c9bf0e253a69601b3776c40aaa9fe2177312d5959084aa2",
+      "workflow_run": {
+        "id": 45471351138,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-media-memory-20261124-3aac",
+        "head_sha": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc"
+      }
+    },
+    {
+      "id": 14957122291,
+      "name": "import-memory-3aac-media-jitendex-rep2-45471351138-1",
+      "size_in_bytes": 34143794,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957122291",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957122291/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:34:11Z",
+      "expires_at": "2026-12-24T19:34:10Z",
+      "updated_at": "2026-11-24T19:34:11Z",
+      "digest": "sha256:294068348a040a453c7882d53132d290d11a473e85129758a9c7142d9f396b5c",
+      "workflow_run": {
+        "id": 45471351138,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-media-memory-20261124-3aac",
+        "head_sha": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc"
+      }
+    },
+    {
+      "id": 14957082437,
+      "name": "import-memory-3aac-media-jitendex-rep1-45471351138-1",
+      "size_in_bytes": 34180505,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957082437",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14957082437/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:34:32Z",
+      "expires_at": "2026-12-24T19:34:31Z",
+      "updated_at": "2026-11-24T19:34:32Z",
+      "digest": "sha256:db879a072264ed82ff170f448bfc641555c05a6cd8c4fa3d70b30ac23c6be75d",
+      "workflow_run": {
+        "id": 45471351138,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-media-memory-20261124-3aac",
+        "head_sha": "df1e9f4ac1e4c4e2e02b96de90bfe63d3ff359dc"
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "runId": 45472377306,
+  "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45472377306",
+  "retrieval": "Original GitHub artifact metadata, extended with verified final VNDB acquisition; frozen earlier metadata versions remain content-addressed.",
+  "artifacts": [
+    {
+      "id": 14958521703,
+      "name": "import-canonical-screen-storage-v1-jitendex-forward-45472377306-1",
+      "size_in_bytes": 1058191,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14958521703",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14958521703/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:43:45Z",
+      "expires_at": "2026-12-24T19:43:45Z",
+      "updated_at": "2026-11-24T19:43:45Z",
+      "digest": "sha256:e7cfd7e3e7408359b87926a9e8ba6bf7ecd01d55a27763e6371a1b28ed492be5",
+      "workflow_run": {
+        "id": 45472377306,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-studies-20261124-3aac",
+        "head_sha": "8774a1cebe9974e5353af48453159413350d9a6a"
+      }
+    },
+    {
+      "id": 14956699764,
+      "name": "import-canonical-screen-storage-v1-jmdict-forward-45472377306-1",
+      "size_in_bytes": 1045562,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956699764",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956699764/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:42:39Z",
+      "expires_at": "2026-12-24T19:42:38Z",
+      "updated_at": "2026-11-24T19:42:39Z",
+      "digest": "sha256:76169e1545336313f8b3393f1612d5c09a3f8c12175667fca25a719737a08330",
+      "workflow_run": {
+        "id": 45472377306,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-studies-20261124-3aac",
+        "head_sha": "8774a1cebe9974e5353af48453159413350d9a6a"
+      }
+    },
+    {
+      "id": 14960175867,
+      "name": "import-canonical-screen-storage-v1-vndb-forward-45472377306-1",
+      "size_in_bytes": 1079476,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14960175867",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14960175867/zip",
+      "expired": false,
+      "created_at": "2026-11-24T20:02:58Z",
+      "expires_at": "2026-12-24T20:02:57Z",
+      "updated_at": "2026-11-24T20:02:58Z",
+      "digest": "sha256:cbb6ec528241f0074b9618017db489b12e2bb0a30554da994b103b451ec97e9b",
+      "workflow_run": {
+        "id": 45472377306,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "perf/import-studies-20261124-3aac",
+        "head_sha": "8774a1cebe9974e5353af48453159413350d9a6a"
+      }
+    }
+  ],
+  "finalVndbMetadataSha256": "2cf2e5297266f47694623e6ae5fcc0eda9b82232e875b93a5d83776769516484"
+}

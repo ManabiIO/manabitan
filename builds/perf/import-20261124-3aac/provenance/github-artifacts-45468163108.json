@@ -1,0 +1,84 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "runId": 45468163108,
+  "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45468163108",
+  "retrieval": "GitHub fetch_workflow_run_artifacts; first page; all current artifact records returned",
+  "artifacts": [
+    {
+      "id": 14956350395,
+      "name": "import-activation-3aac-prefix-vndb-45468163108-1",
+      "size_in_bytes": 46566,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956350395",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14956350395/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:16:51Z",
+      "expires_at": "2026-12-24T19:16:50Z",
+      "updated_at": "2026-11-24T19:16:51Z",
+      "digest": "sha256:e2fcd6ee2a6675ca4a64ccefc05562ce7c36674d6b6713b8aa714725939bb62f",
+      "workflow_run": {
+        "id": 45468163108,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "81ebec7d94cea24c0b2b1ec88af78187b193905b"
+      }
+    },
+    {
+      "id": 14955817640,
+      "name": "import-activation-3aac-prefix-jitendex-45468163108-1",
+      "size_in_bytes": 12337,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955817640",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955817640/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:17:49Z",
+      "expires_at": "2026-12-24T19:17:49Z",
+      "updated_at": "2026-11-24T19:17:49Z",
+      "digest": "sha256:8db4405f1c0386b583e370d0c3989fa541f0dffc08b74b9d699f8c97b52724df",
+      "workflow_run": {
+        "id": 45468163108,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "81ebec7d94cea24c0b2b1ec88af78187b193905b"
+      }
+    },
+    {
+      "id": 14955703235,
+      "name": "import-activation-3aac-cache-jmdict-45468163108-1",
+      "size_in_bytes": 44334,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955703235",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14955703235/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:16:00Z",
+      "expires_at": "2026-12-24T19:16:00Z",
+      "updated_at": "2026-11-24T19:16:00Z",
+      "digest": "sha256:8e78fa217abf3931f25ede0f31f4c9e464deb3602709e9d292e7d94a22cc973f",
+      "workflow_run": {
+        "id": 45468163108,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "81ebec7d94cea24c0b2b1ec88af78187b193905b"
+      }
+    },
+    {
+      "id": 14954079813,
+      "name": "import-activation-3aac-prefix-jmdict-45468163108-1",
+      "size_in_bytes": 45547,
+      "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14954079813",
+      "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/14954079813/zip",
+      "expired": false,
+      "created_at": "2026-11-24T19:15:52Z",
+      "expires_at": "2026-12-24T19:15:52Z",
+      "updated_at": "2026-11-24T19:15:52Z",
+      "digest": "sha256:13aa0c8a5d3bcbdb23d5b60ca4a072029647f9022ed2cb74b9dbe3f45da1855a",
+      "workflow_run": {
+        "id": 45468163108,
+        "repository_id": 1165902460,
+        "head_repository_id": 1165902460,
+        "head_branch": "codex/import-activation-20261124-3aac",
+        "head_sha": "81ebec7d94cea24c0b2b1ec88af78187b193905b"
+      }
+    }
+  ]
+}

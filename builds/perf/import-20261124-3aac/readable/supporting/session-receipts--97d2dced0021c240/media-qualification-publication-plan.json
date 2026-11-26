@@ -1,0 +1,16 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/study-tooling",
+  "base": "66a3fe7f39875f01a10385f971898dbb2aca54af",
+  "baseTree": "c72ef04775649cc573b660b75ccb25c3db06dbb9",
+  "localCommit": "5f513f81c53d92a3bc5a4694c125087e5b5ff2e3",
+  "tree": "3c89bee8ea5dac410dfd0eb1ab46a9cd262f4f61",
+  "files": [
+    {
+      "path": ".github/workflows/import-studies-20261124-3aac.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa5eca57b7a7e18ed01d27a5256caf5305abff69",
+      "size": 3814
+    }
+  ]
+}

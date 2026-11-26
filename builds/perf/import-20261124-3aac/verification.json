@@ -1,0 +1,9 @@
+{
+  "archives": 56,
+  "compressedArchiveBytes": 31987123,
+  "failedCohortsReclassified": false,
+  "missingExpectedArtifacts": [],
+  "retainedBytesVerified": 314341429,
+  "retainedFilesVerified": 5542,
+  "status": "passed"
+}

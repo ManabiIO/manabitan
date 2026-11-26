@@ -1,0 +1,22 @@
+{
+  "allCorrectnessPassed": true,
+  "authoritativeTiming": false,
+  "observations": 4,
+  "packageDifferences": [
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "schemaVersion": 1,
+  "sourceIdentities": {
+    "A": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "B": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    }
+  }
+}

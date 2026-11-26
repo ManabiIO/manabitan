@@ -1,0 +1,822 @@
+[
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 23.459531414000026,
+    "mediaCheck": "sample",
+    "name": "warmup-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "warmup-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-A/summary.json",
+    "totalImportMs": 5655.600000000006
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 19.44045467799998,
+    "mediaCheck": "sample",
+    "name": "warmup-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "warmup-B/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-B/summary.json",
+    "totalImportMs": 4363.299999999988
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": null,
+    "cohort": "excluded-warmup",
+    "commandElapsedSeconds": 19.533171272000004,
+    "mediaCheck": "sample",
+    "name": "warmup-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "warmup-C/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "warmup-C/summary.json",
+    "totalImportMs": 4595.800000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.57512001599997,
+    "mediaCheck": "sample",
+    "name": "block-01-1-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-01-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-01-1-A/summary.json",
+    "totalImportMs": 4639.700000000012
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.153737389000014,
+    "mediaCheck": "sample",
+    "name": "block-01-2-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-01-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-01-2-B/summary.json",
+    "totalImportMs": 4357.200000000012
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 1,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.443823497999972,
+    "mediaCheck": "sample",
+    "name": "block-01-3-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-01-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-01-3-C/summary.json",
+    "totalImportMs": 4517
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.36540008100002,
+    "mediaCheck": "sample",
+    "name": "block-02-1-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-02-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-02-1-C/summary.json",
+    "totalImportMs": 4489
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.38919169799999,
+    "mediaCheck": "sample",
+    "name": "block-02-2-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-02-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-02-2-B/summary.json",
+    "totalImportMs": 4365.700000000012
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 2,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.569851468000024,
+    "mediaCheck": "sample",
+    "name": "block-02-3-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-02-3-A/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-02-3-A/summary.json",
+    "totalImportMs": 4508.799999999988
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 3,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.159082447999992,
+    "mediaCheck": "sample",
+    "name": "block-03-1-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-03-1-B/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-03-1-B/summary.json",
+    "totalImportMs": 4235.899999999965
+  },
+  {
+    "activeSahFileBytes": 536576,
+    "arm": "A",
+    "block": 3,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.65192192699999,
+    "mediaCheck": "sample",
+    "name": "block-03-2-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-03-2-A/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609561803,
+    "summary": "block-03-2-A/summary.json",
+    "totalImportMs": 4547.300000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 3,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.83401949299997,
+    "mediaCheck": "sample",
+    "name": "block-03-3-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-03-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-03-3-C/summary.json",
+    "totalImportMs": 4655.600000000035
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 4,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.916036093000002,
+    "mediaCheck": "sample",
+    "name": "block-04-1-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-04-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-04-1-C/summary.json",
+    "totalImportMs": 4632.200000000012
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 4,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.55443287899999,
+    "mediaCheck": "sample",
+    "name": "block-04-2-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-04-2-A/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-04-2-A/summary.json",
+    "totalImportMs": 4598.799999999988
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 4,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.32177573299998,
+    "mediaCheck": "sample",
+    "name": "block-04-3-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-04-3-B/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-04-3-B/summary.json",
+    "totalImportMs": 4323.799999999988
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 5,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.761426088999997,
+    "mediaCheck": "sample",
+    "name": "block-05-1-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-05-1-B/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-05-1-B/summary.json",
+    "totalImportMs": 4458.699999999953
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 5,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.88561826099999,
+    "mediaCheck": "sample",
+    "name": "block-05-2-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-05-2-C/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-05-2-C/summary.json",
+    "totalImportMs": 4642.400000000023
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 5,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.800173203999975,
+    "mediaCheck": "sample",
+    "name": "block-05-3-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-05-3-A/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-05-3-A/summary.json",
+    "totalImportMs": 4687.5
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 6,
+    "cohort": "timed",
+    "commandElapsedSeconds": 20.01397715799999,
+    "mediaCheck": "sample",
+    "name": "block-06-1-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-06-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-06-1-A/summary.json",
+    "totalImportMs": 4740.29999999993
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 6,
+    "cohort": "timed",
+    "commandElapsedSeconds": 20.080970655999977,
+    "mediaCheck": "sample",
+    "name": "block-06-2-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-06-2-C/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-06-2-C/summary.json",
+    "totalImportMs": 4713.5
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 6,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.839155065,
+    "mediaCheck": "sample",
+    "name": "block-06-3-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-06-3-B/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-06-3-B/summary.json",
+    "totalImportMs": 4474.800000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 7,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.99490464099995,
+    "mediaCheck": "sample",
+    "name": "block-07-1-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-07-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-07-1-A/summary.json",
+    "totalImportMs": 4701.300000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 7,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.943437249,
+    "mediaCheck": "sample",
+    "name": "block-07-2-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-07-2-C/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-07-2-C/summary.json",
+    "totalImportMs": 4728.199999999953
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 7,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.760409227999958,
+    "mediaCheck": "sample",
+    "name": "block-07-3-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-07-3-B/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-07-3-B/summary.json",
+    "totalImportMs": 4413.300000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 8,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.80401442799996,
+    "mediaCheck": "sample",
+    "name": "block-08-1-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-08-1-B/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-08-1-B/summary.json",
+    "totalImportMs": 4373.099999999977
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 8,
+    "cohort": "timed",
+    "commandElapsedSeconds": 20.010338561000026,
+    "mediaCheck": "sample",
+    "name": "block-08-2-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-08-2-C/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-08-2-C/summary.json",
+    "totalImportMs": 4606.800000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 8,
+    "cohort": "timed",
+    "commandElapsedSeconds": 20.09907418299997,
+    "mediaCheck": "sample",
+    "name": "block-08-3-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-08-3-A/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-08-3-A/summary.json",
+    "totalImportMs": 4697.599999999977
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 9,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.95674301200006,
+    "mediaCheck": "sample",
+    "name": "block-09-1-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-09-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-09-1-C/summary.json",
+    "totalImportMs": 4685.199999999953
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 9,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.728017410999996,
+    "mediaCheck": "sample",
+    "name": "block-09-2-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-09-2-A/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-09-2-A/summary.json",
+    "totalImportMs": 4585.300000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 9,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.48647061600002,
+    "mediaCheck": "sample",
+    "name": "block-09-3-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-09-3-B/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-09-3-B/summary.json",
+    "totalImportMs": 4402.099999999977
+  },
+  {
+    "activeSahFileBytes": 536576,
+    "arm": "B",
+    "block": 10,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.575923268999986,
+    "mediaCheck": "sample",
+    "name": "block-10-1-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-10-1-B/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609561803,
+    "summary": "block-10-1-B/summary.json",
+    "totalImportMs": 4430
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 10,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.710507957000004,
+    "mediaCheck": "sample",
+    "name": "block-10-2-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-10-2-A/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-10-2-A/summary.json",
+    "totalImportMs": 4660.20000000007
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 10,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.603839274999928,
+    "mediaCheck": "sample",
+    "name": "block-10-3-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-10-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-10-3-C/summary.json",
+    "totalImportMs": 4643.699999999953
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 11,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.75443611700007,
+    "mediaCheck": "sample",
+    "name": "block-11-1-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-11-1-C/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-11-1-C/summary.json",
+    "totalImportMs": 4633.900000000023
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 11,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.557682230999944,
+    "mediaCheck": "sample",
+    "name": "block-11-2-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-11-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-11-2-B/summary.json",
+    "totalImportMs": 4400.099999999977
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 11,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.43587513,
+    "mediaCheck": "sample",
+    "name": "block-11-3-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-11-3-A/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-11-3-A/summary.json",
+    "totalImportMs": 4539.900000000023
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": 12,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.708468175999997,
+    "mediaCheck": "sample",
+    "name": "block-12-1-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-12-1-A/phase-counters.json",
+    "position": 1,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-12-1-A/summary.json",
+    "totalImportMs": 4628.300000000047
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": 12,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.72642254599998,
+    "mediaCheck": "sample",
+    "name": "block-12-2-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-12-2-B/phase-counters.json",
+    "position": 2,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-12-2-B/summary.json",
+    "totalImportMs": 4468.099999999977
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "C",
+    "block": 12,
+    "cohort": "timed",
+    "commandElapsedSeconds": 19.969096420000028,
+    "mediaCheck": "sample",
+    "name": "block-12-3-C",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "block-12-3-C/phase-counters.json",
+    "position": 3,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "block-12-3-C/summary.json",
+    "totalImportMs": 4674.899999999907
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "A",
+    "block": null,
+    "cohort": "exhaustive-diagnostic",
+    "commandElapsedSeconds": 221.43983174200002,
+    "mediaCheck": "all",
+    "name": "diagnostic-A",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "diagnostic-A/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+      "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "diagnostic-A/summary.json",
+    "totalImportMs": 4648.599999999977
+  },
+  {
+    "activeSahFileBytes": 528384,
+    "arm": "B",
+    "block": null,
+    "cohort": "exhaustive-diagnostic",
+    "commandElapsedSeconds": 217.16851338899983,
+    "mediaCheck": "all",
+    "name": "diagnostic-B",
+    "nonSahBytes": 608996555,
+    "phaseCounters": "diagnostic-B/phase-counters.json",
+    "position": null,
+    "source": {
+      "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+      "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+    },
+    "status": "success",
+    "storageBytes": 609553611,
+    "summary": "diagnostic-B/summary.json",
+    "totalImportMs": 4406.899999999907
+  }
+]

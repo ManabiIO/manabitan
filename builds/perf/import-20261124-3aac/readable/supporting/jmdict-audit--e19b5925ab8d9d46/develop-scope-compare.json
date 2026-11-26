@@ -1,0 +1,38 @@
+{
+  "repository_full_name": "ManabiIO/manabitan",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "head": "9a677aec40f81256dd84233de84ff6a0c43aed43",
+  "status": "ahead",
+  "ahead_by": 2,
+  "behind_by": 0,
+  "total_commits": 2,
+  "too_large": null,
+  "base_commit": {
+    "sha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "html_url": "https://github.com/ManabiIO/manabitan/commit/bbccabd520972cc351a65d9f545bd5369b6e9747"
+  },
+  "merge_base_commit": {
+    "sha": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "url": "https://api.github.com/repos/ManabiIO/manabitan/commits/bbccabd520972cc351a65d9f545bd5369b6e9747",
+    "html_url": "https://github.com/ManabiIO/manabitan/commit/bbccabd520972cc351a65d9f545bd5369b6e9747"
+  },
+  "files": [
+    {
+      "filename": "ext/js/dictionary/term-record-import-index-writer.js",
+      "status": "modified",
+      "additions": 45,
+      "deletions": 1,
+      "changes": 46,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/term-record-import-index-writer.test.js",
+      "status": "modified",
+      "additions": 72,
+      "deletions": 7,
+      "changes": 79,
+      "previous_filename": null
+    }
+  ]
+}

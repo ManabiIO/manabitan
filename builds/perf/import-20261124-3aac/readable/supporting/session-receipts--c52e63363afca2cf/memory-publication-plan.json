@@ -1,0 +1,86 @@
+{
+  "root": "/workspace/scratch/3aacd533c01f/round2/memory-study",
+  "base": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+  "baseTree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07",
+  "localCommit": "20a9be91160d2ef6d438ece46c68efedaefba041",
+  "tree": "24dd26eda0d64d184710876cb3c2eb87fa83961e",
+  "files": [
+    {
+      "path": ".github/workflows/import-memory-20261124-3aac.yml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42cc99ab2706111eedc48a4ef00117df62aab81a",
+      "size": 3470
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "810ca939f2ec45c5887173bdb5266c363bfcede7",
+      "size": 4609
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/audit_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6428b2a49f5034a3b4040b24180f494b433cc0ad",
+      "size": 5362
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/chromium_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6814a39b87ffc5b8dd7205be80fcbc429152d05d",
+      "size": 18389
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/protocol.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61325512463c335506396d0d6ebfaf9ff57247a1",
+      "size": 10329
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/run_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "daacc8a9fc103fc6b76dd60d1761649bf496bebe",
+      "size": 15108
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_chromium_memory.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "218bb2984e3d66ff0c413e324d4c9a239277b6c5",
+      "size": 13354
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_import_window.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6e0bcd9143aa62d9d9feb501a7ff11dd6c17812b",
+      "size": 9406
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_protocol.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fae2748c4af03fece42a430b1517850671451505",
+      "size": 8517
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/test_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ac0733e6128ba1b0e746cac0095d839ba5d1f9d",
+      "size": 5836
+    },
+    {
+      "path": "dev/perf/import-memory-20261124-3aac/verify_receipts.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02ff93720e34a322951fe18242b26482438a5873",
+      "size": 4700
+    }
+  ]
+}

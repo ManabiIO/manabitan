@@ -1,0 +1,2788 @@
+{
+  "allNativeImportsSucceeded": true,
+  "cells": [
+    {
+      "acquiredObservations": 12,
+      "activeSahBytesByArm": {
+        "A": [
+          528384,
+          528384,
+          528384,
+          528384
+        ],
+        "B": [
+          528384,
+          528384,
+          528384,
+          528384
+        ],
+        "C": [
+          528384,
+          528384,
+          528384,
+          536576
+        ]
+      },
+      "artifact": "import-prefix-screen-vndb-forward-45465463257-1",
+      "fullMediaDiagnosticsAcquired": false,
+      "label": "prefix",
+      "originalCohortComplete": false,
+      "originalState": {
+        "buildComplete": true,
+        "dictionary": "vndb",
+        "error": "Correctness receipt differs across arms/observations: storageBytes",
+        "stage": "screen",
+        "status": "failed"
+      },
+      "plannedTimedObservations": 18,
+      "protocolSha256": "81c17d2ddd3cdb3bc19016f80cb4e58c6569f6a471eb412002eb94a9e5397445",
+      "records": [
+        {
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "d0b640668e9507137057c7a88b8d9cb0062ba24a728941fb0af310d66850fa15",
+          "name": "warmup-A",
+          "nativeReportSha256": "74ec1adc3e866f109e11bd37d5639506217854e4c1e24493296f52d6705f9e95",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/11e0a525-9b54-4ea0-8eab-c508001fefcb.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5sr58c72upj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/6cgmrkbemfj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/7zaewnyvjgq"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/9lr11i9j3bc"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/p8glfnd40sa"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/pz2il5gw4nk"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ut1xb10zy98"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/zaov2o9hdxt"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "248e1d5e4b65dc87a4feec1a278901ebcbb1f204b0a25ab399f2522cd866b7ed",
+          "totalImportMsRetainedNotAnalyzed": 7873
+        },
+        {
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "1d4f0ddabbb3cc3b66919c1cef25eb9cdcd65b1f3b311dee3e1e65e1de302af3",
+          "name": "warmup-B",
+          "nativeReportSha256": "4d56473a18df6de255f48e163598ed5048012c038ac20ea3093c8af5c910f452",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/8b226ee1-4dac-4d0a-a4bf-1272ace38434.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/00ssuiiutvj9"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5mus9xrif58"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5wksp7bcp5i"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/9vud1aq99yo"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/bjjbwlxhc"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/l4ar9ud9f9i"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/rkkr9lcyjgh"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/tzfgpokpf"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "ed6ab52e09b33d6798566730df0b51dca32cef090f192ff4269e726c8ce7cbc3",
+          "totalImportMsRetainedNotAnalyzed": 6907
+        },
+        {
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "54320458b587607263c66faf6a367763bcbb059e0ece9f06cfa07a70d339d9b0",
+          "name": "warmup-C",
+          "nativeReportSha256": "19f1ea2706cbbb4866df2d44835a39b3954080d36027b1a7aab078428ba9f7bd",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/cef1b27d-9d96-4039-a55a-d0994882476c.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/92haix8z30q"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/cm0e07ey6hd"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/e1o4qvy36xd"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/eshlsf4z94f"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/g7u2lizvhzb"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/lp6tljyibv"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/nlm2t2v98og"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xdnnivjuuc"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "1bd9b2bb12b5473fafcb9e52bf32d4af9949ac0815b604562db97fb436a2d158",
+          "totalImportMsRetainedNotAnalyzed": 6453.799999999988
+        },
+        {
+          "arm": "A",
+          "cohort": "timed",
+          "commandLogSha256": "179ce98de0dda145534c5cf269c8f850ad999adf050987fdca89ee16c21e62e1",
+          "name": "block-01-1-A",
+          "nativeReportSha256": "3bff873d1e76fec81d98dd310e361e652cb225866abca86482127e63bd2a404f",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/2a0afb1f-0625-4962-9af7-951259552199.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/1992p3t3n7c"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/6xf3wztjwb"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/7llgmvylrw5"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/kzpsnk3gy2g"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/olvuous4yls"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/s93gdr5kl6"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/tqy984ijpya"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/uizo8ywdq6q"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "d6201d14dac98167b1908b3b13595c46b7918be2d9d6324bdfe81ff26ba8f32c",
+          "totalImportMsRetainedNotAnalyzed": 6615.300000000047
+        },
+        {
+          "arm": "B",
+          "cohort": "timed",
+          "commandLogSha256": "35008f0192946c34e58a7534c183b6f5a265b9f5aa7822e286f86aac58d09c82",
+          "name": "block-01-2-B",
+          "nativeReportSha256": "460463a290f9db2a851edb501e5842a77d926fd37aed160fb72c85aca90bf84b",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/f58dbaef-2b17-431b-988e-d1fa49c6097e.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0pzbrose1mr"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5hi0oj22z85"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/64dd6j8d9j6"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/74n233uhlb9"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/aogak0fs0ce"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/e01x1ax1esm"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/urf5pel3q1"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xa9sc165wkj"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "8701e093a7d3d9a3a7c9606437c096ab3476adff6e97687d98a5a0590b3922d3",
+          "totalImportMsRetainedNotAnalyzed": 6477.800000000047
+        },
+        {
+          "arm": "C",
+          "cohort": "timed",
+          "commandLogSha256": "b79a927eed1c334ba38a85b429cf2ab4944a8133cf1bb7925e76c97212bbaa1f",
+          "name": "block-01-3-C",
+          "nativeReportSha256": "50793aac205a1276020cd7ef9567d1f52c7b4076aa2fdbab002dfead713496f3",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/798161ff-19fa-425e-af8b-9d82c7aabdf6.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0ew4jjwz6ak"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/1yo77tp0gcbj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/fm4z5spnxba"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/g5usr1rmbfb"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/hyxnm85v3mh"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/iy3xcxywga"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/sluctotbkod"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ziu9xwf614"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "587746d734fe3b4a98365c31d77b949e6f8f847b4d10a8a84a6d26573314d02e",
+          "totalImportMsRetainedNotAnalyzed": 6633.300000000047
+        },
+        {
+          "arm": "C",
+          "cohort": "timed",
+          "commandLogSha256": "78596dcd34292d0b105ad8c65540203bb1f665d8333ff2d6ff8811daa3f29292",
+          "name": "block-02-1-C",
+          "nativeReportSha256": "8c7011bdb7cca23c538a4af75261c56bd8e8d333a5c2f414d7b14bdb0ae9e6b8",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/5bf85a63-64d8-46f8-bfd0-128490a535df.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/7h385uotntn"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/g5ib7w9tds"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/iuljhagung"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ljvi5nivroj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/qdstvvbz05b"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/tfzl9vm1xir"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/utcymrpw1qr"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/z7tzbh4rgbq"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "4cad0c9cc1f5721e8be6b0cc8b7eceb31ab42074608914c0cb1134f7de6551c1",
+          "totalImportMsRetainedNotAnalyzed": 6729.700000000012
+        },
+        {
+          "arm": "B",
+          "cohort": "timed",
+          "commandLogSha256": "b728be453705cf808d612fab45c3f1180f71618dfe2dfe7b79ab16518a285ca6",
+          "name": "block-02-2-B",
+          "nativeReportSha256": "61b74e51740c0c78c8f9ddf7cba5464156d6665be29b612d97d96da65b261a6f",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/91e6c2f4-ddba-4812-83d6-c95d99f26df5.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/76mvil51hda"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/8qlhw5ys4b7"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/973cn68wwj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/b8qkxj74i9e"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/deuphe06c9e"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/fip1ymg578b"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/kjrwhu263em"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ztwh0ub6ol"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "30ac5218fd76485344b528edccfb13d9ff603c5d380d9259f99e3a4bafcf6d08",
+          "totalImportMsRetainedNotAnalyzed": 6549.900000000023
+        },
+        {
+          "arm": "A",
+          "cohort": "timed",
+          "commandLogSha256": "79919b061b55105161420741e71b6a56f8b16ef150a1fe94c924798db6f1db32",
+          "name": "block-02-3-A",
+          "nativeReportSha256": "35d9e0e67517d0667b173536372710ad27590d4a5697d63574f05712263a1a20",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/a2310359-76b8-4991-86c5-3a1d121c7e91.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0rxxs38c4gok"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5aybl35q8jc"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/6k4t28ze60c"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/bm6ga7e8u26"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ektk5xbyvy"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/jfn1228by3f"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/msyloi2xfa"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/z8qy0vtp28"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "da2664edcdcc9fca92faf8fc76bf189f7e63a9ce4655af6687620ee3f26b4fc3",
+          "totalImportMsRetainedNotAnalyzed": 6404.899999999907
+        },
+        {
+          "arm": "B",
+          "cohort": "timed",
+          "commandLogSha256": "1f499b39913b58ce8ca9f22c51245d2da5263ebeb0e7b188cbdec0858579c7cb",
+          "name": "block-03-1-B",
+          "nativeReportSha256": "30080219d72e82bbab9ac68aede135aed26392e05bcca50f20125669fbce4fb8",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/4082b691-6163-46b3-ae0e-8465a75d3379.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/48ux5w5btdf"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/4y7g70ylh4c"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/8m69qamepl4"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/fua7gpnd8y"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/hqxv334t64g"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/nflfuy4unor"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/p4gcbfuww9r"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/rucybmq2ap"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "f68556abbb3157c84bc175174b8547284c6b1a25fac99fdf08b5250f12b56494",
+          "totalImportMsRetainedNotAnalyzed": 6637.5
+        },
+        {
+          "arm": "A",
+          "cohort": "timed",
+          "commandLogSha256": "02e518b7c3fd9482d500df518ceb60789211496b48a90a58d44426a92e62c9af",
+          "name": "block-03-2-A",
+          "nativeReportSha256": "c5c04af0634752882950bb2a6f5e57ad5be151e06419169de5df27727544e941",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/03be8b63-48a9-4a0c-ab45-e805fb9d0b2a.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2ifzgrq5obu"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5o4hztovatv"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/g03y9z9063"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/k2umvdidpxc"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/qsgbla88r9"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/rg3kqupbso"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/te6m5ml1xh8"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/z86871qsc9o"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "2318ac43b6ba64ed0b0b5744459e4200328cb243a9cf5a596740fecd6b020b96",
+          "totalImportMsRetainedNotAnalyzed": 6525.100000000093
+        },
+        {
+          "arm": "C",
+          "cohort": "timed",
+          "commandLogSha256": "667e7269693a906e6a32180bd8c79ae4825efaf69bbba140528c38d3172584a1",
+          "name": "block-03-3-C",
+          "nativeReportSha256": "fe7cd9b14b2c6daa39cdc70064c12deb790b29fe0d95bff579f16e226845fb53",
+          "nativeStatus": "success",
+          "originalStudyStatus": "failed",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/9beabd87-f365-42f2-b701-3455eb79d79a.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/18lfuhlopw2"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/bhxz2908kda"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/dfht3lzjv29"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/g1rjka7m7k"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/igtosuodyaj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/q078j2aod6d"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/s0t7y859xa"
+            },
+            {
+              "bytes": 536576,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/zmnc4bdbkos"
+            }
+          ],
+          "rawTotalBytes": 609561803,
+          "sahPool": {
+            "activeAllocationUnits": 131,
+            "activeFileBytes": 536576,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              536576
+            ],
+            "totalBytes": 565248
+          },
+          "summarySha256": "c3fcfa530998f65aadba978617f3b2d39aea24926316155debec38be8bea220e",
+          "totalImportMsRetainedNotAnalyzed": 6535.600000000093
+        }
+      ],
+      "runnerSha256": "764ac3dcfe9aba82346e925cee606ec84672c7df097f9fe417749f41258a1230",
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "ebb1da8d2cc2b28901400968891b632605f1b3f0",
+          "tree": "243ab638da9cb73e08d84609c41dcdfdf08475cd"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "stateSha256": "e1b736fbb7a4a13f386a1e185015f7374edc6c66a5fc96202c9f34dd44c71f0a",
+      "timedObservationsAttempted": 9
+    },
+    {
+      "acquiredObservations": 8,
+      "activeSahBytesByArm": {
+        "A": [
+          528384,
+          528384
+        ],
+        "B": [
+          528384,
+          528384,
+          536576
+        ],
+        "C": [
+          528384,
+          528384,
+          528384
+        ]
+      },
+      "artifact": "import-media-screen-vndb-forward-45465463257-1",
+      "fullMediaDiagnosticsAcquired": false,
+      "label": "media",
+      "originalCohortComplete": false,
+      "originalState": {
+        "buildComplete": true,
+        "dictionary": "vndb",
+        "error": "Correctness receipt differs across arms/observations: storageBytes",
+        "stage": "screen",
+        "status": "failed"
+      },
+      "plannedTimedObservations": 18,
+      "protocolSha256": "41ad2c6faa3304202f2bc0c946f4634945f6a2b7803e5c4236e6243fe6bbe889",
+      "records": [
+        {
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "853bba4f4bcb229c01eb4fc5a0d8c589be239126abbdd72c756e4a821f40bc85",
+          "name": "warmup-A",
+          "nativeReportSha256": "bb60c1c1b68aef7a971160cb2784c3c468cee8335a8319c2f19a486debb59d87",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/7ef35fa1-4b82-42ba-bcac-dff7dce760a0.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2560trt89zz"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/csezzk5gyra"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/csukemmo7d"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/dtrf03cyavd"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/fc13sdzezas"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/jjr1t46n6ic"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/mjixfgt77q"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/yi3m6kho8d"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "bd9f50d354a4a2f804b6b8606cc24c3e6d67f22b125eeb2cdf03b29f98418ac0",
+          "totalImportMsRetainedNotAnalyzed": 5941.4000000000015
+        },
+        {
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "2112a9bfe2098b59ecbe322eb6e7138f19bc6fc53c3626aefbc967f275d8bb50",
+          "name": "warmup-B",
+          "nativeReportSha256": "040682717662360bd69df9ddec131ec9ed78a4f59bd60b99d1490ebf81fc390c",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/ed92a9b6-e218-4d18-8590-fef89489f825.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0994ar8d0klr"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0f835aqbbpav"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/988hpm3xri"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/efrabl4t6te"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/emmxq5vt2rq"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/jmsu5qfvt5"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/n1og34o642n"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/uz5nw05l2rm"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "9b12f4d897d87f6766ba8b440a8d13cfaab71fbfdfba62e3c5bb3a888ca5b5fa",
+          "totalImportMsRetainedNotAnalyzed": 5209.400000000009
+        },
+        {
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "a8ec4a2dc3e305c228dea0fb1aaf064d5022ceeed15fb3a83c74fb1a3a61b904",
+          "name": "warmup-C",
+          "nativeReportSha256": "62290ad278b49af9f03b58909f423d665cde32168a2d3d481b82c65196341232",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/3317bdce-8dc7-484c-a717-59a26325ab0a.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/24xvwhilual"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5wj9j4cqv1d"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/b3gjblylwgp"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/gdemqq2638"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/jah87mh9orp"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/jqh8qn8uo8n"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/rykhb2athg"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/x2cypzejmt"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "5fa21a972799640f73dc6f22e224f0a188d88b7404256e9415361c954850358e",
+          "totalImportMsRetainedNotAnalyzed": 5550.5
+        },
+        {
+          "arm": "A",
+          "cohort": "timed",
+          "commandLogSha256": "c0cfad41bc04a25872c088ddd0d2da3ded8c25be08dcabbc24e6292ed8d12c8a",
+          "name": "block-01-1-A",
+          "nativeReportSha256": "34b2d6e5265deb442778ae7a9fa79e8067462d9cc3e0ddb918a8625eb5f2395e",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/9bc14583-c8dc-4dee-aa33-aaf39b64b840.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0vqmca02ne0o"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2cft8qmewtn"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/3to1wy9oxtm"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/g9u6qenis2v"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/lm2a3bvu09l"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/n3rjh5nhmmb"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/vefwpkwwzd"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/zf2bf505e5n"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "c56a321d1c09213e121cb34a92b737b4971bea13cd747c1a5edd4516a029d99a",
+          "totalImportMsRetainedNotAnalyzed": 5514.799999999988
+        },
+        {
+          "arm": "B",
+          "cohort": "timed",
+          "commandLogSha256": "d04da45d638c8e060e01413e5d3e0601a5289a334427b289d02ef9e5104a7882",
+          "name": "block-01-2-B",
+          "nativeReportSha256": "651e7181557d8679d18c11e789e2a89365325eb9f870f7bb7e6ff91ba1a05d17",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/63176f7c-2699-4a75-b382-3b482749612a.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/1hyzmmafrqni"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2lrp3knwt3g"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/dqvrg9qipwp"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/elfxd6trlw"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ksenpdowik9"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/u99yyg2h0t"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/v65ua8b3f8q"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/wa0eguyj7q"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "76a04af9f57198d6d84bc147121a2ac4986faeeda8ec23dcfbd3cf7a8ac51e1b",
+          "totalImportMsRetainedNotAnalyzed": 5236.6999999999825
+        },
+        {
+          "arm": "C",
+          "cohort": "timed",
+          "commandLogSha256": "d8ae8f1da2e0cd0cf5e6ad827f28be24a1c40c6d09b225cc78e3a0bbba8b8dff",
+          "name": "block-01-3-C",
+          "nativeReportSha256": "3a2a118d33b364a81ceccc74fe06e36a73f5a52ebe4ef3b6468b75c3bb43cb3d",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/d8ea0558-722e-4a60-af68-b1939357efcf.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/19ona4vwvt3"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/aq889eywlx6"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/c7i6218jtzv"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/hch8ztckzdp"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/p7f5umeq7l8"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/pnhoazfghgn"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/u1i8pzudhki"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xopk69xg6r"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "8f6067d7480e657f778bc437dffe8bf99e34d5c0f22a198df24a931baf23d74f",
+          "totalImportMsRetainedNotAnalyzed": 5591.900000000023
+        },
+        {
+          "arm": "C",
+          "cohort": "timed",
+          "commandLogSha256": "0556c4223800b3fa85a67a666026e825753ffffae6fcd004a1be53211d2a9078",
+          "name": "block-02-1-C",
+          "nativeReportSha256": "ea7cfc2ecc0816d960aca6d25d574c02082a0d50bc18bc67fc328a50bd81db68",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/2cdb8e71-6e2b-4e47-8a66-7b929ffb8cf7.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/1gk9nwsxu2x"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/4zg8vcxjgip"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5w1y78mfgcb"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/a5uv20j7mp"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/aib01hq57vh"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/iuios3r9qp"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/qjsmf7r34x"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xlb760n610r"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "b36e0a9b9d6ad4a5df8d44494a9c587fd44a2ce09792cfb6c0e26f86fabafaae",
+          "totalImportMsRetainedNotAnalyzed": 5427.5
+        },
+        {
+          "arm": "B",
+          "cohort": "timed",
+          "commandLogSha256": "73df79f41836fd9750c49d03fa8bd5f38a96c90a07a57c646fdc4503b9125e9a",
+          "name": "block-02-2-B",
+          "nativeReportSha256": "debd8e6fa0c11af5bea88446090c12425cfc74071cee812e3cc0a8ce48672df3",
+          "nativeStatus": "success",
+          "originalStudyStatus": "failed",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/e0044407-1af6-4fcd-a793-3e83bbb23e87.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/1tysijefrvs"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/60tucepe36f"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/84l7pbx6ey7"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/8rjvrsqvw5"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/c6fen7zy2c7"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/fzjdxspk08b"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ti0nsvmh4i"
+            },
+            {
+              "bytes": 536576,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xm2l5t9gyvs"
+            }
+          ],
+          "rawTotalBytes": 609561803,
+          "sahPool": {
+            "activeAllocationUnits": 131,
+            "activeFileBytes": 536576,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              536576
+            ],
+            "totalBytes": 565248
+          },
+          "summarySha256": "30d54859421e6bd073dd7e70f71df720b8c4e5e8906c61d3b4a130f353e87049",
+          "totalImportMsRetainedNotAnalyzed": 5578
+        }
+      ],
+      "runnerSha256": "764ac3dcfe9aba82346e925cee606ec84672c7df097f9fe417749f41258a1230",
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "fb71a03f4611bcfa71e135693bebd1fe778153bf",
+          "tree": "0939bd1eec85dc0b3f15ef002a8f0f5111c80103"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "stateSha256": "e1b736fbb7a4a13f386a1e185015f7374edc6c66a5fc96202c9f34dd44c71f0a",
+      "timedObservationsAttempted": 5
+    },
+    {
+      "acquiredObservations": 4,
+      "activeSahBytesByArm": {
+        "A": [
+          528384,
+          536576
+        ],
+        "B": [
+          528384
+        ],
+        "C": [
+          528384
+        ]
+      },
+      "artifact": "import-cache-screen-vndb-forward-45465463257-1",
+      "fullMediaDiagnosticsAcquired": false,
+      "label": "cache",
+      "originalCohortComplete": false,
+      "originalState": {
+        "buildComplete": true,
+        "dictionary": "vndb",
+        "error": "Correctness receipt differs across arms/observations: storageBytes",
+        "stage": "screen",
+        "status": "failed"
+      },
+      "plannedTimedObservations": 18,
+      "protocolSha256": "346aa4dbe0a8c96d55344f083706001b0bd1e27105f5e8d84c4a878e901df2dd",
+      "records": [
+        {
+          "arm": "A",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "e529bdf5ba7ce1f0d27e595f4fcc6b485d598ffbe87cc52cdb32d556ce74b9cd",
+          "name": "warmup-A",
+          "nativeReportSha256": "7f1e9eab762ffcfb3d41b7196feed1f5a5bd3cfc2e9b86977271b6537116df97",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/497f26b8-319a-40ce-b4ab-94681e1573d3.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/0hfr5ieojfw9"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/7qokdkxv0zt"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/m0p1vsoami"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/qa23qxk4pp9"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/rdneh0f3m4h"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/sz0jomx87eo"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/w7c8g2en9l"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xyumns7y6z"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "058fdde73a043a7670cc0f752c512a0dc8a46ca3fa3fb6cbac4cfd809c77e422",
+          "totalImportMsRetainedNotAnalyzed": 7214.5999999999985
+        },
+        {
+          "arm": "B",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "b2540da8fc6d7425044e5a35e404f3b34084aae325607b91fe2eeca030aca715",
+          "name": "warmup-B",
+          "nativeReportSha256": "169c6144426d664d7b40a16585f665a42e0bedf4425c788e8310e799bbe58ae2",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/7fa7fa0e-e920-4fb4-87f7-5b587726f534.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/406fg8uctue"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ayngnmtma4"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/d7hztrxtpfq"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/e3k0yrfntx"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/m7gv8figiof"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/wdjvmnp3qk"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/wx5oa0vc06i"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/z6ya8x761xq"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "d697a09c232813d647022ac69a1c8bbac3aadd8df1de077fc56be4f3afa520ee",
+          "totalImportMsRetainedNotAnalyzed": 4730.800000000003
+        },
+        {
+          "arm": "C",
+          "cohort": "excluded-warmup",
+          "commandLogSha256": "7dcaaaa5291d7c03f1ba25cbd64239b79a3bd977227a30aa611ca4406603f25e",
+          "name": "warmup-C",
+          "nativeReportSha256": "fd6597046c2742fc62c76df717dc423421dbb2874a9247fb4ed7f9348d9d643d",
+          "nativeStatus": "success",
+          "originalStudyStatus": "success",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/9bf9e881-971e-4cba-b38d-d847a32ac6d2.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2jiblv31qfv"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/3mrsokkf9i3"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/luru3hwi6n"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/p91w0mzduer"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/rg7bh9pz7oi"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/xnre1yxx9s"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/y8q00brft5f"
+            },
+            {
+              "bytes": 528384,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ywxe7y0b27"
+            }
+          ],
+          "rawTotalBytes": 609553611,
+          "sahPool": {
+            "activeAllocationUnits": 129,
+            "activeFileBytes": 528384,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              528384
+            ],
+            "totalBytes": 557056
+          },
+          "summarySha256": "2c01f7087a61f8ea521221fe854bc5b2d5ea6ce6aec32c4dff6d8eec1fe85438",
+          "totalImportMsRetainedNotAnalyzed": 4710.5
+        },
+        {
+          "arm": "A",
+          "cohort": "timed",
+          "commandLogSha256": "24db4345bec7218c6d62f8676027462acea21c206a0beb648c3bd4ff114838f3",
+          "name": "block-01-1-A",
+          "nativeReportSha256": "bc625752583691139e868363fce7827b53f281cf7261cd5854ad233291e770c7",
+          "nativeStatus": "success",
+          "originalStudyStatus": "failed",
+          "rawFiles": [
+            {
+              "bytes": 199563210,
+              "path": "manabitan-dictionary-media-v1/5e87e3c4-b7bb-4426-9991-de1a5291ea36.bin"
+            },
+            {
+              "bytes": 7533449,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 38,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+            },
+            {
+              "bytes": 399513708,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+            },
+            {
+              "bytes": 26,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+            },
+            {
+              "bytes": 2386124,
+              "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/57qkyty08r"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/5nzeuw0dazy"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/dy0tx0onoae"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/eqfehu71d5f"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/l631p84feo"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/lql4krte91g"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/lwin0xmy5tr"
+            },
+            {
+              "bytes": 536576,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/s22skdqk45o"
+            }
+          ],
+          "rawTotalBytes": 609561803,
+          "sahPool": {
+            "activeAllocationUnits": 131,
+            "activeFileBytes": 536576,
+            "allocationUnitBytes": 4096,
+            "emptyFileBytes": 4096,
+            "emptyFileCount": 7,
+            "fileCount": 8,
+            "sortedFileBytes": [
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              4096,
+              536576
+            ],
+            "totalBytes": 565248
+          },
+          "summarySha256": "280f155110aa4f3fba9227e7d9a93370156f9327e56c268e63db5177d5a0fc9f",
+          "totalImportMsRetainedNotAnalyzed": 4607
+        }
+      ],
+      "runnerSha256": "764ac3dcfe9aba82346e925cee606ec84672c7df097f9fe417749f41258a1230",
+      "sourceIdentities": {
+        "A": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        },
+        "B": {
+          "commit": "cdb23a11d991a72f860e400d0d81bb0747a5b4f9",
+          "tree": "1edef4035041ef848175e3278169daf2260ac34a"
+        },
+        "C": {
+          "commit": "bbccabd520972cc351a65d9f545bd5369b6e9747",
+          "tree": "f81fc2c29b58f1c2329de6b8fa6b2a91015b6b07"
+        }
+      },
+      "stateSha256": "e1b736fbb7a4a13f386a1e185015f7374edc6c66a5fc96202c9f34dd44c71f0a",
+      "timedObservationsAttempted": 1
+    }
+  ],
+  "fullPersistedByteEqualityProved": false,
+  "nonSahFiles": [
+    {
+      "bytes": 199563210,
+      "path": "manabitan-dictionary-media-v1/{generation}.bin"
+    },
+    {
+      "bytes": 7533449,
+      "path": "manabitan-term-content.bin"
+    },
+    {
+      "bytes": 38,
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr"
+    },
+    {
+      "bytes": 399513708,
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti"
+    },
+    {
+      "bytes": 26,
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr"
+    },
+    {
+      "bytes": 2386124,
+      "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti"
+    }
+  ],
+  "observationCount": 24,
+  "observedActiveSahBytes": [
+    528384,
+    536576
+  ],
+  "observedRawTotals": [
+    609553611,
+    609561803
+  ],
+  "originalCohortsRemainFailed": true,
+  "sampledSemanticReceiptsEqual": true,
+  "schemaVersion": 1,
+  "scope": "Read-only failure reconciliation, not promotion or timing analysis",
+  "semanticReceipt": {
+    "lookup": [
+      [
+        0,
+        "Kamala Copperheart",
+        1,
+        "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+      ],
+      [
+        0,
+        "Lynrd Skynrd\u305f\u3093",
+        1,
+        "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+      ],
+      [
+        0,
+        "Osamu\u535a\u58eb",
+        1,
+        "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+      ],
+      [
+        0,
+        "RestaurantOwner\u3061\u3083\u3093",
+        2,
+        "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+      ],
+      [
+        0,
+        "Tyler\u535a\u58eb",
+        1,
+        "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+      ],
+      [
+        0,
+        "\u3042\u3044\u3053\u5148\u751f",
+        1,
+        "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+      ],
+      [
+        0,
+        "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+        1,
+        "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+      ],
+      [
+        0,
+        "\u30d5\u30a9\u30fc\u30cb",
+        1,
+        "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+      ],
+      [
+        0,
+        "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+        1,
+        "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+      ],
+      [
+        0,
+        "\u698a\u4e9c\u5b9f\u5148\u8f29",
+        1,
+        "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+      ],
+      [
+        0,
+        "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+        1,
+        "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+      ],
+      [
+        0,
+        "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+        1,
+        "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+      ],
+      [
+        1,
+        "Kamala Copperheart",
+        1,
+        "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+      ],
+      [
+        1,
+        "Lynrd Skynrd\u305f\u3093",
+        1,
+        "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+      ],
+      [
+        1,
+        "Osamu\u535a\u58eb",
+        1,
+        "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+      ],
+      [
+        1,
+        "RestaurantOwner\u3061\u3083\u3093",
+        2,
+        "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+      ],
+      [
+        1,
+        "Tyler\u535a\u58eb",
+        1,
+        "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+      ],
+      [
+        1,
+        "\u3042\u3044\u3053\u5148\u751f",
+        1,
+        "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+      ],
+      [
+        1,
+        "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+        1,
+        "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+      ],
+      [
+        1,
+        "\u30d5\u30a9\u30fc\u30cb",
+        1,
+        "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+      ],
+      [
+        1,
+        "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+        1,
+        "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+      ],
+      [
+        1,
+        "\u698a\u4e9c\u5b9f\u5148\u8f29",
+        1,
+        "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+      ],
+      [
+        1,
+        "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+        1,
+        "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+      ],
+      [
+        1,
+        "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+        1,
+        "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+      ],
+      [
+        2,
+        "Kamala Copperheart",
+        1,
+        "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+      ],
+      [
+        2,
+        "Lynrd Skynrd\u305f\u3093",
+        1,
+        "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+      ],
+      [
+        2,
+        "Osamu\u535a\u58eb",
+        1,
+        "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+      ],
+      [
+        2,
+        "RestaurantOwner\u3061\u3083\u3093",
+        2,
+        "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+      ],
+      [
+        2,
+        "Tyler\u535a\u58eb",
+        1,
+        "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+      ],
+      [
+        2,
+        "\u3042\u3044\u3053\u5148\u751f",
+        1,
+        "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+      ],
+      [
+        2,
+        "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+        1,
+        "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+      ],
+      [
+        2,
+        "\u30d5\u30a9\u30fc\u30cb",
+        1,
+        "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+      ],
+      [
+        2,
+        "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+        1,
+        "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+      ],
+      [
+        2,
+        "\u698a\u4e9c\u5b9f\u5148\u8f29",
+        1,
+        "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+      ],
+      [
+        2,
+        "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+        1,
+        "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+      ],
+      [
+        2,
+        "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+        1,
+        "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+      ],
+      [
+        3,
+        "Kamala Copperheart",
+        1,
+        "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+      ],
+      [
+        3,
+        "Lynrd Skynrd\u305f\u3093",
+        1,
+        "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+      ],
+      [
+        3,
+        "Osamu\u535a\u58eb",
+        1,
+        "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+      ],
+      [
+        3,
+        "RestaurantOwner\u3061\u3083\u3093",
+        2,
+        "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+      ],
+      [
+        3,
+        "Tyler\u535a\u58eb",
+        1,
+        "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+      ],
+      [
+        3,
+        "\u3042\u3044\u3053\u5148\u751f",
+        1,
+        "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+      ],
+      [
+        3,
+        "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+        1,
+        "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+      ],
+      [
+        3,
+        "\u30d5\u30a9\u30fc\u30cb",
+        1,
+        "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+      ],
+      [
+        3,
+        "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+        1,
+        "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+      ],
+      [
+        3,
+        "\u698a\u4e9c\u5b9f\u5148\u8f29",
+        1,
+        "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+      ],
+      [
+        3,
+        "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+        1,
+        "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+      ],
+      [
+        3,
+        "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+        1,
+        "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+      ],
+      [
+        4,
+        "Kamala Copperheart",
+        1,
+        "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+      ],
+      [
+        4,
+        "Lynrd Skynrd\u305f\u3093",
+        1,
+        "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+      ],
+      [
+        4,
+        "Osamu\u535a\u58eb",
+        1,
+        "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+      ],
+      [
+        4,
+        "RestaurantOwner\u3061\u3083\u3093",
+        2,
+        "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+      ],
+      [
+        4,
+        "Tyler\u535a\u58eb",
+        1,
+        "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+      ],
+      [
+        4,
+        "\u3042\u3044\u3053\u5148\u751f",
+        1,
+        "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+      ],
+      [
+        4,
+        "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+        1,
+        "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+      ],
+      [
+        4,
+        "\u30d5\u30a9\u30fc\u30cb",
+        1,
+        "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+      ],
+      [
+        4,
+        "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+        1,
+        "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+      ],
+      [
+        4,
+        "\u698a\u4e9c\u5b9f\u5148\u8f29",
+        1,
+        "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+      ],
+      [
+        4,
+        "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+        1,
+        "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+      ],
+      [
+        4,
+        "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+        1,
+        "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+      ],
+      [
+        5,
+        "Kamala Copperheart",
+        1,
+        "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+      ],
+      [
+        5,
+        "Lynrd Skynrd\u305f\u3093",
+        1,
+        "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+      ],
+      [
+        5,
+        "Osamu\u535a\u58eb",
+        1,
+        "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+      ],
+      [
+        5,
+        "RestaurantOwner\u3061\u3083\u3093",
+        2,
+        "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+      ],
+      [
+        5,
+        "Tyler\u535a\u58eb",
+        1,
+        "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+      ],
+      [
+        5,
+        "\u3042\u3044\u3053\u5148\u751f",
+        1,
+        "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+      ],
+      [
+        5,
+        "\u30af\u30ec\u30a4\u30b0\u30fb\u30a6\u30a1\u30b8\u30a7\u30c8\u90e8\u9577",
+        1,
+        "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+      ],
+      [
+        5,
+        "\u30d5\u30a9\u30fc\u30cb",
+        1,
+        "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+      ],
+      [
+        5,
+        "\u53f3\u4ee3\u5bae\u91d1\u8535\u793e\u9577",
+        1,
+        "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+      ],
+      [
+        5,
+        "\u698a\u4e9c\u5b9f\u5148\u8f29",
+        1,
+        "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+      ],
+      [
+        5,
+        "\u93a7\u8863 \u7f8e\u7434\u305f\u3093",
+        1,
+        "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+      ],
+      [
+        5,
+        "\u9727\u59eb\u30fb\u30a2\u30a4\u30b9\u30de\u30f3\u574a",
+        1,
+        "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+      ]
+    ],
+    "media": {
+      "bytes": 86256,
+      "files": 64,
+      "mode": "sample",
+      "sha256": "3c5f6aa94c3d7c79e4c8a8568c774e247da7ff09e5bd66df8f7265b57683d62e",
+      "totalBytes": 188131284,
+      "totalFiles": 146570
+    },
+    "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+    "restart": {
+      "contentReadable": true,
+      "mediaFiles": 146570,
+      "probeCount": 12,
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "title": "VNDB Characters by Bee"
+    }
+  },
+  "workflowRun": "45465463257"
+}
