@@ -16,6 +16,11 @@
             "sha256": "1bfd673fe0f7e069486bc4afb3c0bf95e5fa8d06e7ea45b8eaaf2320b2894a14"
         },
         {
+            "path": "borrowed-content/SHA256SUMS",
+            "sizeBytes": 1431,
+            "sha256": "302ad70a66daee81a34ee7b5a0ba7f80cab15e8a28ff7efb9ae2e84f735db72f"
+        },
+        {
             "path": "borrowed-content/audit-qualification.py",
             "sizeBytes": 5264,
             "sha256": "a80833bbb6fc954d3a8d8e2404b17900d7eac4727ebc7839d04faf583f497e00"
@@ -24,6 +29,16 @@
             "path": "borrowed-content/failed-and-incomplete-attempts.json",
             "sizeBytes": 2619,
             "sha256": "466bbb471c865777cd224ed02319e41541156aa78d850fd968480d6e2640f48a"
+        },
+        {
+            "path": "borrowed-content/hosted-correction-validation.json",
+            "sizeBytes": 2896,
+            "sha256": "8559367a88e76c5624cea3ef905226f5e01ad940081b27c160d8d933405aafe1"
+        },
+        {
+            "path": "borrowed-content/hosted-test-types-140059595840.log",
+            "sizeBytes": 22264,
+            "sha256": "63db48a57fdca243e970a03a25e312f391513e19d7f43d3cafc9bd51cfa25969"
         },
         {
             "path": "borrowed-content/lifetime-notes.json",
@@ -46,9 +61,29 @@
             "sha256": "fe2fe406ceba824c47464816ec4dae1b75d6f9c51738a2758dd9423f741a2de4"
         },
         {
+            "path": "borrowed-content/targeted-test-types-after-ci-fix.log",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "borrowed-content/targeted-test-types-config-location-error.log",
+            "sizeBytes": 1066,
+            "sha256": "0cab0bde9e25c66a498ff44d3b6e6a538cca9b881bd6a702f80cd11d8e409999"
+        },
+        {
+            "path": "borrowed-content/targeted-test-types.json",
+            "sizeBytes": 535,
+            "sha256": "1c60d83a20f14eccb56cb40d721a64edd5cb645563aceffcf64d46094c492a8e"
+        },
+        {
             "path": "borrowed-content/test-build-tool-transcript.log",
             "sizeBytes": 384,
             "sha256": "f27dd24a6f80cdaf716613190c775a17995101cc137ad5b172b8eab332c4d1eb"
+        },
+        {
+            "path": "borrowed-content/unit-150-after-ci-fix.log",
+            "sizeBytes": 590,
+            "sha256": "a22829be5fd78cde50aa65085f3533094358f9412e32ae72ae9be4fb3c729355"
         },
         {
             "path": "borrowed-content/unit-150-tool-transcript.log",

@@ -1,0 +1,64 @@
+{
+  "localCommit": "bf925bd449c938e549d3f18e6f04441db4557bb2",
+  "localParent": "7dfce35862d4ee6dc9bd91a6ebd7f967d747586b",
+  "tree": "d35788ca209636090de99cb9c0fdb7c3e98baec0",
+  "publishedParent": "1a234772a0be1001ca63ce9d320d218123bd9449",
+  "failure": {
+    "runId": 45863295752,
+    "jobId": 140059595840,
+    "jobUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45863295752/job/140059595840",
+    "message": "TS2322: optional getMeta result passed as required primary at lines2573 and2574.",
+    "log": "hosted-test-types-140059595840.log",
+    "logCapture": "Decoded GitHub Actions job log saved directly from connector response; no manual reconstruction."
+  },
+  "fix": "One-line test-only assertion that published metadata exists before descriptor construction. No production changes.",
+  "productionSha256": "70032ee6c16a95641e13b6c1de15527340b0c82bcb02fabc812eccbf1326992b",
+  "testSha256": "276c3eff1ad2ced005d3d1a0be6fca10e965f35e18d2ff8f0d9006b17b18ad09",
+  "checks": [
+    {
+      "name": "targeted test TypeScript",
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=768",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "builds/perf/jitendex-handoff/test-types.json"
+      ],
+      "cwd": "/workspace/scratch/fbc366eaf75c/manabitan-jitendex",
+      "exitCode": 0,
+      "execSessionId": 14244,
+      "log": "targeted-test-types-after-ci-fix.log",
+      "capture": "Direct stdout/stderr redirection; empty successful output.",
+      "scope": "Original strict test compiler settings, changed test and type declarations as entry points, production imports checked transitively. Not a full test-project type check."
+    },
+    {
+      "name": "targeted dedup suite",
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=768",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/dictionary-database-content-dedup.test.js",
+        "--maxWorkers=1"
+      ],
+      "cwd": "/workspace/scratch/fbc366eaf75c/manabitan-jitendex",
+      "exitCode": 0,
+      "execSessionId": 6952,
+      "log": "unit-150-after-ci-fix.log",
+      "capture": "Direct stdout/stderr redirection.",
+      "testsPassed": 150,
+      "durationSeconds": 4.38
+    },
+    {
+      "name": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "failedCheckSetup": {
+    "exitCode": 2,
+    "log": "targeted-test-types-config-location-error.log",
+    "message": "Initial temporary config was outside repository dependency discovery, producing TS2688 missing type-library errors. Same config relocated into this worktree builds/perf; no compiler flags relaxed."
+  },
+  "hostedFollowup": "Root will publish test-only update and rerun hosted full gates. Frozen study product remains unchanged."
+}

@@ -1,0 +1,18 @@
+error TS2688: Cannot find type definition file for 'chrome'.
+  The file is in the program because:
+    Entry point of type library 'chrome' specified in compilerOptions
+error TS2688: Cannot find type definition file for 'dom-webcodecs'.
+  The file is in the program because:
+    Entry point of type library 'dom-webcodecs' specified in compilerOptions
+error TS2688: Cannot find type definition file for 'firefox-webext-browser'.
+  The file is in the program because:
+    Entry point of type library 'firefox-webext-browser' specified in compilerOptions
+error TS2688: Cannot find type definition file for 'handlebars'.
+  The file is in the program because:
+    Entry point of type library 'handlebars' specified in compilerOptions
+error TS2688: Cannot find type definition file for 'jszip'.
+  The file is in the program because:
+    Entry point of type library 'jszip' specified in compilerOptions
+error TS2688: Cannot find type definition file for 'parse5'.
+  The file is in the program because:
+    Entry point of type library 'parse5' specified in compilerOptions

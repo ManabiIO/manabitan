@@ -1,0 +1,19 @@
+{
+    "studyCommit": "6cc320916e5cbef6108c4c86cf851813e836a038",
+    "studyRun": "https://github.com/ManabiIO/manabitan/actions/runs/45865729451",
+    "scope": "Test-only follow-ups; frozen study product bytes unchanged. No new benchmark observations.",
+    "native": {
+        "frozenHead": "3dab279bb671f4a4f26d145209b6415159410bd3",
+        "currentHead": "964fa0395533343eb3e44d80d3bbb0bb889bd778",
+        "currentTree": "659fcb1d86f96f2f7687488801d1ada226a1882a",
+        "change": "Only whitespace in inherited malformed-byte test vectors; scoped ESLint passed.",
+        "ciRun": 45866182687
+    },
+    "borrowedContent": {
+        "frozenHead": "1a234772a0be1001ca63ce9d320d218123bd9449",
+        "currentHead": "bc94ee31a5dbfc1b29766cb9dee3a6fe6b54ea54",
+        "currentTree": "d35788ca209636090de99cb9c0fdb7c3e98baec0",
+        "change": "One explicit metadata fixture-presence guard; all 150 tests and targeted strict TypeScript passed.",
+        "ciRun": 45866573892
+    }
+}

@@ -51,6 +51,10 @@ The local host was heavily contended. Elapsed values retained in the raw parity 
 
 ## Running the registered study
 
+The initial published study is [PR #963](https://github.com/ManabiIO/manabitan/pull/963), commit `6cc320916e5cbef6108c4c86cf851813e836a038`. Its first registered hosted run is [45865729451](https://github.com/ManabiIO/manabitan/actions/runs/45865729451).
+
+Hosted source CI subsequently found two test-only issues. PR #941 follow-up `964fa0395533343eb3e44d80d3bbb0bb889bd778` formats inherited malformed-byte vectors; both Unicode suites now pass scoped ESLint. PR #955 follow-up `bc94ee31a5dbfc1b29766cb9dee3a6fe6b54ea54` adds an explicit fixture metadata guard; all 150 tests and targeted strict test TypeScript pass. The product files are byte-identical to their frozen study heads, so the registered source arms and observation schedule remain unchanged. Failed hosted logs and correction receipts are preserved in the evidence directory.
+
 The workflow installs dependencies and the lockfile browser, then runs:
 
 ```sh

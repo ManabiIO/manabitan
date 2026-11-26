@@ -1,0 +1,266 @@
+﻿2026-11-26T17:13:04.0991325Z Current runner version: '2.338.2'
+2026-11-26T17:13:04.1026225Z ##[group]Runner Image Provisioner
+2026-11-26T17:13:04.1026883Z Hosted Compute Agent
+2026-11-26T17:13:04.1027283Z Version: 20261111.635
+2026-11-26T17:13:04.1027739Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-26T17:13:04.1028245Z Build Date: 2026-11-11T01:49:01Z
+2026-11-26T17:13:04.1028682Z Worker ID: {3969bcfe-8b6e-437a-bbdb-bfaaa60e8034}
+2026-11-26T17:13:04.1029159Z Region: centralus
+2026-11-26T17:13:04.1029530Z Cloud: Azure
+2026-11-26T17:13:04.1029910Z ##[endgroup]
+2026-11-26T17:13:04.1030821Z ##[group]Operating System
+2026-11-26T17:13:04.1031207Z Ubuntu
+2026-11-26T17:13:04.1032763Z 26.04.1
+2026-11-26T17:13:04.1033288Z LTS
+2026-11-26T17:13:04.1033853Z ##[endgroup]
+2026-11-26T17:13:04.1034261Z ##[group]Runner Image
+2026-11-26T17:13:04.1034673Z Image: ubuntu-26.04
+2026-11-26T17:13:04.1035029Z Version: 20261122.9.1
+2026-11-26T17:13:04.1035948Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261122.9/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-26T17:13:04.1036884Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261122.9
+2026-11-26T17:13:04.1037467Z ##[endgroup]
+2026-11-26T17:13:04.1038293Z ##[group]GITHUB_TOKEN Permissions
+2026-11-26T17:13:04.1040063Z Contents: read
+2026-11-26T17:13:04.1040421Z Metadata: read
+2026-11-26T17:13:04.1040840Z ##[endgroup]
+2026-11-26T17:13:04.1042452Z Secret source: Actions
+2026-11-26T17:13:04.1043134Z Cache mode: write
+2026-11-26T17:13:04.1043974Z Prepare workflow directory
+2026-11-26T17:13:04.1516004Z Prepare all required actions
+2026-11-26T17:13:04.1565849Z Getting action download info
+2026-11-26T17:13:04.3727010Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-26T17:13:04.5270738Z Complete job name: TypeScript (test)
+2026-11-26T17:13:04.5933757Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-26T17:13:04.5934771Z with:
+2026-11-26T17:13:04.5935132Z   repository: ManabiIO/manabitan
+2026-11-26T17:13:04.5937435Z   token: ***
+2026-11-26T17:13:04.5937694Z   ssh-strict: true
+2026-11-26T17:13:04.5937959Z   ssh-user: git
+2026-11-26T17:13:04.5938231Z   persist-credentials: true
+2026-11-26T17:13:04.5938524Z   clean: true
+2026-11-26T17:13:04.5938794Z   sparse-checkout-cone-mode: true
+2026-11-26T17:13:04.5939105Z   fetch-depth: 1
+2026-11-26T17:13:04.5939365Z   fetch-tags: false
+2026-11-26T17:13:04.5939635Z   show-progress: true
+2026-11-26T17:13:04.5939908Z   lfs: false
+2026-11-26T17:13:04.5940160Z   submodules: false
+2026-11-26T17:13:04.5940429Z   set-safe-directory: true
+2026-11-26T17:13:04.5940733Z   allow-unsafe-pr-checkout: false
+2026-11-26T17:13:04.5941179Z env:
+2026-11-26T17:13:04.5941433Z   MANABITAN_RELEASE_VERSION: 
+2026-11-26T17:13:04.5942344Z ##[endgroup]
+2026-11-26T17:13:04.8552108Z Syncing repository: ManabiIO/manabitan
+2026-11-26T17:13:04.8554538Z ##[group]Getting Git version info
+2026-11-26T17:13:04.8555275Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-26T17:13:04.8556315Z [command]/usr/bin/git version
+2026-11-26T17:13:04.8556801Z git version 2.56.1
+2026-11-26T17:13:04.8565874Z ##[endgroup]
+2026-11-26T17:13:04.8576743Z Temporarily overriding HOME='/home/runner/work/_temp/a3a1dbe2-fc8a-49ef-b4fd-552d7a9710cf' before making global git config changes
+2026-11-26T17:13:04.8578067Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-26T17:13:04.8607475Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-26T17:13:04.8650036Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-26T17:13:04.8659757Z ##[group]Determining repository object format
+2026-11-26T17:13:04.8660974Z ##[endgroup]
+2026-11-26T17:13:04.8661742Z ##[group]Initializing the repository
+2026-11-26T17:13:04.8662794Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-26T17:13:04.8778469Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-26T17:13:04.8780222Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-26T17:13:04.8781263Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-26T17:13:04.8782094Z hint: call:
+2026-11-26T17:13:04.8782602Z hint:
+2026-11-26T17:13:04.8783252Z hint: 	git config --global init.defaultBranch <name>
+2026-11-26T17:13:04.8784070Z hint:
+2026-11-26T17:13:04.8784742Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-26T17:13:04.8785779Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-26T17:13:04.8786602Z hint:
+2026-11-26T17:13:04.8787111Z hint: 	git branch -m <name>
+2026-11-26T17:13:04.8787676Z hint:
+2026-11-26T17:13:04.8788430Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-26T17:13:04.8789611Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-26T17:13:04.8797648Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-26T17:13:04.8854536Z ##[endgroup]
+2026-11-26T17:13:04.8855338Z ##[group]Disabling automatic garbage collection
+2026-11-26T17:13:04.8860678Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-26T17:13:04.8892403Z ##[endgroup]
+2026-11-26T17:13:04.8893529Z ##[group]Setting up auth
+2026-11-26T17:13:04.8894194Z Removing SSH command configuration
+2026-11-26T17:13:04.8898917Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-26T17:13:04.8954735Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-26T17:13:04.9547689Z Removing HTTP extra header
+2026-11-26T17:13:04.9557431Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-26T17:13:04.9586868Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-26T17:13:04.9821954Z Removing includeIf entries pointing to credentials config files
+2026-11-26T17:13:04.9826992Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-26T17:13:04.9856661Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-26T17:13:05.0105761Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-26T17:13:05.0142891Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:05.0172747Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:05.0211000Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:05.0239437Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:05.0265119Z ##[endgroup]
+2026-11-26T17:13:05.0265834Z ##[group]Fetching the repository
+2026-11-26T17:13:05.0271827Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +94fd92aa4790005b2b296ed40a410d9e2d92db6b:refs/remotes/pull/955/merge
+2026-11-26T17:13:07.5705152Z From https://github.com/ManabiIO/manabitan
+2026-11-26T17:13:07.5706397Z  * [new ref]         94fd92aa4790005b2b296ed40a410d9e2d92db6b -> pull/955/merge
+2026-11-26T17:13:07.5715459Z ##[endgroup]
+2026-11-26T17:13:07.5716154Z ##[group]Determining the checkout info
+2026-11-26T17:13:07.5716929Z ##[endgroup]
+2026-11-26T17:13:07.5718628Z [command]/usr/bin/git sparse-checkout disable
+2026-11-26T17:13:07.5786166Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-26T17:13:07.5824852Z ##[group]Checking out the ref
+2026-11-26T17:13:07.5826651Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/955/merge
+2026-11-26T17:13:08.1477425Z Note: switching to 'refs/remotes/pull/955/merge'.
+2026-11-26T17:13:08.1478240Z 
+2026-11-26T17:13:08.1478774Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-26T17:13:08.1479948Z changes and commit them, and you can discard any commits you make in this
+2026-11-26T17:13:08.1481219Z state without impacting any branches by switching back to a branch.
+2026-11-26T17:13:08.1481919Z 
+2026-11-26T17:13:08.1482410Z If you want to create a new branch to retain commits you create, you may
+2026-11-26T17:13:08.1483563Z do so (now or later) by using -c with the switch command. Example:
+2026-11-26T17:13:08.1484406Z 
+2026-11-26T17:13:08.1484698Z   git switch -c <new-branch-name>
+2026-11-26T17:13:08.1485128Z 
+2026-11-26T17:13:08.1506433Z Or undo this operation with:
+2026-11-26T17:13:08.1507023Z 
+2026-11-26T17:13:08.1507440Z   git switch -
+2026-11-26T17:13:08.1507770Z 
+2026-11-26T17:13:08.1508347Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-26T17:13:08.1509112Z 
+2026-11-26T17:13:08.1509935Z HEAD is now at 94fd92a Merge 1a234772a0be1001ca63ce9d320d218123bd9449 into 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+2026-11-26T17:13:08.1534474Z ##[endgroup]
+2026-11-26T17:13:08.1576045Z [command]/usr/bin/git log -1 --format=%H
+2026-11-26T17:13:08.1616390Z 94fd92aa4790005b2b296ed40a410d9e2d92db6b
+2026-11-26T17:13:08.1977805Z Prepare all required actions
+2026-11-26T17:13:08.1979153Z Getting action download info
+2026-11-26T17:13:08.2942096Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-26T17:13:08.4120725Z ##[group]Run ./.github/actions/setup
+2026-11-26T17:13:08.4120958Z with:
+2026-11-26T17:13:08.4121118Z   node-version: 22.22.0
+2026-11-26T17:13:08.4121284Z env:
+2026-11-26T17:13:08.4121465Z   MANABITAN_RELEASE_VERSION: 
+2026-11-26T17:13:08.4121644Z ##[endgroup]
+2026-11-26T17:13:08.4162854Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-26T17:13:08.4235483Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-26T17:13:08.4235778Z with:
+2026-11-26T17:13:08.4235941Z   node-version: 22.22.0
+2026-11-26T17:13:08.4236111Z   cache: npm
+2026-11-26T17:13:08.4236260Z   always-auth: false
+2026-11-26T17:13:08.4236429Z   check-latest: false
+2026-11-26T17:13:08.4238152Z   token: ***
+2026-11-26T17:13:08.4238320Z env:
+2026-11-26T17:13:08.4238491Z   MANABITAN_RELEASE_VERSION: 
+2026-11-26T17:13:08.4238687Z ##[endgroup]
+2026-11-26T17:13:08.5412383Z Attempting to download 22.22.0...
+2026-11-26T17:13:08.5638581Z (node:2208) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-26T17:13:08.5639284Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-26T17:13:09.3970133Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-26T17:13:09.9718097Z Extracting ...
+2026-11-26T17:13:09.9827329Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/9db8ec77-37bd-40f5-9003-372efa8d8f5d -f /home/runner/work/_temp/1788caa4-ef7d-4a3c-a0d3-96ffc222164e
+2026-11-26T17:13:10.6944529Z Adding to the cache ...
+2026-11-26T17:13:13.4824067Z ##[group]Environment details
+2026-11-26T17:13:13.6591515Z node: v22.22.0
+2026-11-26T17:13:13.6591760Z npm: 10.9.4
+2026-11-26T17:13:13.6591885Z yarn: 1.22.22
+2026-11-26T17:13:13.6592876Z ##[endgroup]
+2026-11-26T17:13:13.6607359Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-26T17:13:13.7304098Z /home/runner/.npm
+2026-11-26T17:13:13.8585868Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-26T17:13:13.8662012Z (node:2208) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-26T17:13:14.7326655Z Received 63143556 of 63143556 (100.0%), 86.1 MBs/sec
+2026-11-26T17:13:14.7326956Z Cache Size: ~60 MB (63143556 B)
+2026-11-26T17:13:14.7445641Z [command]/usr/bin/tar -xf /home/runner/work/_temp/587ee6fc-a991-4be8-98b7-9d3552e6f901/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-26T17:13:15.0108145Z Cache restored successfully
+2026-11-26T17:13:15.0147358Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-26T17:13:15.0347118Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=6618]
+2026-11-26T17:13:15.0350285Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-26T17:13:15.0356368Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-26T17:13:15.0357819Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-26T17:13:15.0393506Z ##[group]Run npm ci
+2026-11-26T17:13:15.0394054Z [36;1mnpm ci[0m
+2026-11-26T17:13:15.0441357Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-26T17:13:15.0441598Z env:
+2026-11-26T17:13:15.0441739Z   MANABITAN_RELEASE_VERSION: 
+2026-11-26T17:13:15.0441894Z ##[endgroup]
+2026-11-26T17:13:15.5505308Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-26T17:13:19.4985548Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-26T17:13:20.4050939Z 
+2026-11-26T17:13:20.4051479Z > yomitan@0.0.0 prepare
+2026-11-26T17:13:20.4051726Z > husky
+2026-11-26T17:13:20.4051796Z 
+2026-11-26T17:13:20.4628607Z 
+2026-11-26T17:13:20.4634689Z added 670 packages, and audited 671 packages in 5s
+2026-11-26T17:13:20.4635069Z 
+2026-11-26T17:13:20.4635302Z 232 packages are looking for funding
+2026-11-26T17:13:20.4636062Z   run `npm fund` for details
+2026-11-26T17:13:20.4640224Z 
+2026-11-26T17:13:20.4640539Z found 0 vulnerabilities
+2026-11-26T17:13:20.5328608Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=5496]
+2026-11-26T17:13:20.5332282Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-26T17:13:20.5353405Z ##[group]Run npm run build:libs
+2026-11-26T17:13:20.5353865Z [36;1mnpm run build:libs[0m
+2026-11-26T17:13:20.5354130Z [36;1mnpm run license-report:html[0m
+2026-11-26T17:13:20.5390242Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-26T17:13:20.5390459Z env:
+2026-11-26T17:13:20.5390597Z   MANABITAN_RELEASE_VERSION: 
+2026-11-26T17:13:20.5390745Z ##[endgroup]
+2026-11-26T17:13:20.6194896Z 
+2026-11-26T17:13:20.6195761Z > yomitan@0.0.0 build:libs
+2026-11-26T17:13:20.6196190Z > node ./dev/bin/build-libs.js
+2026-11-26T17:13:20.6196394Z 
+2026-11-26T17:13:21.1155279Z 
+2026-11-26T17:13:21.1156787Z > yomitan@0.0.0 license-report:html
+2026-11-26T17:13:21.1157890Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-26T17:13:21.1158524Z 
+2026-11-26T17:13:21.4083798Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=875]
+2026-11-26T17:13:21.4128593Z ##[group]Run npm run test:ts:test
+2026-11-26T17:13:21.4128800Z [36;1mnpm run test:ts:test[0m
+2026-11-26T17:13:21.4163751Z shell: /usr/bin/bash -e {0}
+2026-11-26T17:13:21.4163930Z env:
+2026-11-26T17:13:21.4164059Z   MANABITAN_RELEASE_VERSION: 
+2026-11-26T17:13:21.4164219Z ##[endgroup]
+2026-11-26T17:13:21.4869112Z 
+2026-11-26T17:13:21.4869888Z > yomitan@0.0.0 test:ts:test
+2026-11-26T17:13:21.4870270Z > npx tsc --noEmit --project test/jsconfig.typecheck.json
+2026-11-26T17:13:21.4870446Z 
+2026-11-26T17:13:43.7044304Z ##[error]test/dictionary-database-content-dedup.test.js(2573,77): error TS2322: Type 'TermContentMeta | undefined' is not assignable to type 'TermContentMeta'.
+2026-11-26T17:13:43.7049889Z   Type 'undefined' is not assignable to type 'TermContentMeta'.
+2026-11-26T17:13:43.7050874Z ##[error]test/dictionary-database-content-dedup.test.js(2574,78): error TS2322: Type 'TermContentMeta | undefined' is not assignable to type 'TermContentMeta'.
+2026-11-26T17:13:43.7051682Z   Type 'undefined' is not assignable to type 'TermContentMeta'.
+2026-11-26T17:13:43.8572179Z ##[error]Process completed with exit code 2.
+2026-11-26T17:13:43.8674438Z Post job cleanup.
+2026-11-26T17:13:43.8677196Z ##[start-action display=Setup node;id=__12dfab56-2b0f-4123-8bf1-b403e7b3be78.__actions_setup-node]
+2026-11-26T17:13:43.8678865Z ##[end-action id=__12dfab56-2b0f-4123-8bf1-b403e7b3be78.__actions_setup-node;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-26T17:13:43.8742982Z Post job cleanup.
+2026-11-26T17:13:43.9415372Z [command]/usr/bin/git version
+2026-11-26T17:13:43.9450924Z git version 2.56.1
+2026-11-26T17:13:43.9481453Z Temporarily overriding HOME='/home/runner/work/_temp/e67d1169-100c-416c-ba1f-f08279161261' before making global git config changes
+2026-11-26T17:13:43.9482314Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-26T17:13:43.9484698Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-26T17:13:43.9525843Z Removing SSH command configuration
+2026-11-26T17:13:43.9530744Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-26T17:13:43.9563516Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-26T17:13:43.9910892Z Removing HTTP extra header
+2026-11-26T17:13:43.9911533Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-26T17:13:43.9948226Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-26T17:13:44.0242808Z Removing includeIf entries pointing to credentials config files
+2026-11-26T17:13:44.0252917Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-26T17:13:44.0275207Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-26T17:13:44.0275775Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-26T17:13:44.0276237Z includeif.gitdir:/github/workspace/.git.path
+2026-11-26T17:13:44.0276498Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-26T17:13:44.0294121Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-26T17:13:44.0347285Z /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0355833Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0391030Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-26T17:13:44.0411727Z /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0419652Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0459297Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-26T17:13:44.0480245Z /github/runner_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0487028Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0517740Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-26T17:13:44.0537961Z /github/runner_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0544020Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config
+2026-11-26T17:13:44.0575414Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-26T17:13:44.0820604Z Removing credentials config '/home/runner/work/_temp/git-credentials-2fc32033-5301-444a-8092-6404cba2ccfd.config'
+2026-11-26T17:13:44.0976299Z Cleaning up orphan processes
+2026-11-26T17:13:44.1273039Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -1,0 +1,11 @@
+{
+  "runtimeBytesUnchanged": true,
+  "sha256": {
+    "ext/js/dictionary/wasm/term-bank-parser.c": "20b595bb858258ee6bbafda345ba5c2e80fa9016b235e9ad523870ec7acfba7f",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "68d4584e47cc6371a6b0d1d1bf56bdfcdc45e8f8b138ef172e2013b7cd23f13f",
+    "dev/data/dictionary-wasm/manifest.json": "6041a76f03acd85110d30e41c68c33cdf6f8aa77def67b4fb2e738d2490d0d2f"
+  },
+  "change": "Only line breaks between inherited malformed-UTF8 test vectors",
+  "frozenStudyHead": "3dab279bb671f4a4f26d145209b6415159410bd3",
+  "failedCIJob": 140058397141
+}
