@@ -1,0 +1,5 @@
+{
+  "ext/js/dictionary/wasm/term-bank-parser.c": "6362ba5274008f2bd84ab38ba14d0ceb7b6b53986e75527e1a4730a415e1cdcd",
+  "dev/data/dictionary-wasm/manifest.json": "eec9e304901fe8260903fde42babdf33fccd661a5b820c154c50a4534120e602",
+  "dev/data/dictionary-wasm/term-bank-parser.wasm": "650b567a2a31f095cb816fe7cbac15c0db4ac5072d03a1f1ae5bed26aa968132"
+}

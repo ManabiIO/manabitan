@@ -1,0 +1,13 @@
+(node:8) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+file:///tmp/manabitan-4362/jitendex-stream-screen.mjs:287
+                if (child.status !== 0) { throw new Error(`Child failed (${child.status}): ${child.error ?? ''}\n${child.stderr}`) }
+                                                ^
+
+Error: Child failed (null): Error: spawnSync /tmp/manabitan-9175611d1a4c/runtime-node22/node_modules/node/bin/node ETIMEDOUT
+(node:19) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+    at file:///tmp/manabitan-4362/jitendex-stream-screen.mjs:287:49
+
+Node.js v22.22.0

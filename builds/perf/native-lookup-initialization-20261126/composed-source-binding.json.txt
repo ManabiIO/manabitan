@@ -1,0 +1,12 @@
+{
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "sourceDigest": "4f215158086de0bb0e27823e8e47d09085cc34138e1fe81bbff063d361090885",
+  "parserSha256": "354a71c2adb4692a9304a14274f2b277d819b9929a10057ad04af61d6f41bd3e",
+  "parserBytes": 67997,
+  "baselineParserBytes": 67550,
+  "parserGrowthBytes": 447,
+  "tests": [
+    "test/term-lookup-output-initialization.test.js",
+    "test/term-bank-content-container-open.test.js"
+  ]
+}

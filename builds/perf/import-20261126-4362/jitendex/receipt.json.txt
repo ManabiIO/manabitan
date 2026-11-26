@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "scope": "Literal structured-content key with adjacent colon and array/object opener; preserve required-field checks, depth limits and normalization hints.",
+  "baseline": {
+    "parserC": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+    "parserWasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+  },
+  "candidate": {
+    "parserC": "b8b8c7f79f86059ddea23bb73efef7c0002dba2c43ef6e30f067a94332003fe3",
+    "parserWasm": "216b6168771be149baf5bafcd631dcd7633d7386634914934aa153487efb04b3",
+    "parserWasmBytes": 67891,
+    "regressionTest": "e1a60130c04cfe6a79a5820d2fd62c8046f13167708a5f50a6717daf8110f45a"
+  },
+  "benchmark": {
+    "status": "failed-before-first-observation",
+    "dictionary": "jitendex",
+    "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "observations": 0,
+    "resultPercent": null,
+    "reason": "First baseline subprocess exceeded unchanged 180s timeout during host resource pressure; no retry or timeout extension.",
+    "grouping": "Stream 10 term banks per group; fixture decode excluded; two warmup passes per arm; intended two alternating AB/BA pairs",
+    "runtime": "Node 22.22.0",
+    "flags": {},
+    "strictGlossaryValidation": true
+  },
+  "validation": {
+    "focusedExisting": {
+      "files": 3,
+      "testsPassed": 1144
+    },
+    "newRegression": {
+      "files": 1,
+      "testsPassed": 25,
+      "testDurationSeconds": 1.34,
+      "transformImportStartupSeconds": 67.02
+    },
+    "stoppedAttempt": "First and second changed-test ESLint attempts interrupted without results during host stalls; third attempt used a temporary dependency location removed to free RAM and failed MODULE_NOT_FOUND. The existing matching dependency link was restored; no further local retry. Hosted lint/types remain pending.",
+    "nativeToolchain": "Clang/LLD 21.1.8 pinned regeneration completed"
+  },
+  "artifacts": {
+    "lint-missing-dependency.log": {
+      "sha256": "e82797897b656f4948dc5b907bdda86d3da462914a716ea44f43c0cd3b097184",
+      "bytes": 789
+    },
+    "post-environment.json.txt": {
+      "sha256": "d37ea286e14654460cb9c4020f30ff0a73d0e77872e1cd53a9a5009dc7647743",
+      "bytes": 1628
+    },
+    "pre-environment.json.txt": {
+      "sha256": "8a4e202aa052236f31e164f1fde5b7f689e73ebe3498c223fb7cdc0fb5dec9c1",
+      "bytes": 2126
+    },
+    "screen-failure.json.txt": {
+      "sha256": "5da52b1f58cae5debc346621fb8656d6f3785a28e6aa9f47c1caca635c517fb8",
+      "bytes": 600
+    },
+    "screen-failure.log": {
+      "sha256": "b5a3ada791b1d88389790b9add8102d434300035e7550ff03025c4bd176051bf",
+      "bytes": 803
+    },
+    "stream-screen.mjs.txt": {
+      "sha256": "e4b3b85004af947056612be2476ddceaf65c779b445d65ba09f385df944473af",
+      "bytes": 18754
+    }
+  }
+}

@@ -1,0 +1,7 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jmdict 1/12: 50000 rows, 1 native indexes, 1366868 repeated initialization bytes removed
+jmdict 2/12: 40000 rows, 1 native indexes, 1264780 repeated initialization bytes removed
+jmdict 3/12: 40000 rows, 1 native indexes, 1265582 repeated initialization bytes removed
+jmdict 4/12: 40000 rows, 1 native indexes, 1029590 repeated initialization bytes removed
+jmdict 5/12: 50000 rows, 1 native indexes, 1727405 repeated initialization bytes removed

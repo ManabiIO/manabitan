@@ -1,0 +1,13 @@
+{
+  "capturedAt": 1795710894.437629,
+  "loadavg": [
+    46.2431640625,
+    31.66259765625,
+    14.13623046875
+  ],
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "meminfo": "MemTotal:       10206468 kB\nMemFree:          897132 kB\nMemAvailable:    1513520 kB\nBuffers:           58972 kB\nCached:          3187968 kB\nSwapCached:            0 kB\nActive:          1167636 kB\nInactive:        6603160 kB\nActive(anon):    1063124 kB\nInactive(anon):  6397668 kB\nActive(file):     104512 kB\nInactive(file):   205492 kB\nUnevictable:       29944 kB\nMlocked:               0 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nDirty:               272 kB\nWriteback:             0 kB\nAnonPages:       4554748 kB\nMapped:           285032 kB\nShmem:           2906460 kB\nKReclaimable:     620084 kB\nSlab:             820812 kB\nSReclaimable:     620084 kB\nSUnreclaim:       200728 kB\nKernelStack:       14284 kB\nPageTables:       130076 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     5103232 kB\nCommitted_AS:   10337156 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       15776 kB\nVmallocChunk:          0 kB\nPercpu:             6528 kB\nAnonHugePages:     45056 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nBalloon:               0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      669696 kB\nDirectMap2M:    11816960 kB\nDirectMap1G:    14680064 kB\n",
+  "runnerSha256": "e4b3b85004af947056612be2476ddceaf65c779b445d65ba09f385df944473af",
+  "scope": "Two fixed alternating AB/BA pairs, two warmup passes before each measured all-bank parser+lookup replay; streamed ten-bank groups; fixture I/O excluded; no browser import claim",
+  "incompleteAttempt": "ESLint interrupted after host stalls; prior 1144 regression tests passed; new25 regression tests passed with 67s transform/import startup"
+}

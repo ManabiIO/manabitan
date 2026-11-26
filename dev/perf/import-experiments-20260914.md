@@ -687,3 +687,79 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## November 26: content-key child-container dispatch
+
+This independent candidate starts from develop
+`0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. A validated literal `content`
+key and its adjacent colon already establish the parent object state. The
+native parser now enters an immediately following array or object at that
+point, preserving the existing nesting limit, parent-stack state,
+required-field bookkeeping, and whitespace-normalization hints. Other keys,
+escaped spellings, scalar values, and extra whitespace retain the existing
+dispatch. Stored formats, worker policy, compression, and lookup behavior are
+unchanged. The pinned Clang/LLD 21.1.8 parser module grows by 341 bytes.
+
+The existing string-scanner, glossary-semantics, and importer glossary-type
+suites pass all 1,144 tests. A separate 25-test suite covers both fused and
+fallback parsing, nested media, whitespace and escaped keys, required-field
+ordering and duplicate keys, malformed child grammar, logical input boundaries,
+cross-bank truncation, and the exact 256-level nesting limit. Those tests pass.
+
+**No performance result is available.** The fixed two-pair AB/BA component
+screen failed in its first baseline subprocess at the unchanged 180-second
+timeout, before producing any observation. No timing was discarded, no timeout
+was extended, and the acquisition was not repeated. The screen used Node
+22.22.0, the pinned Jitendex archive, strict glossary validation, normal parser
+flags, streamed ten-bank groups, and two excluded warmup passes before each
+measured pass. Fixture decoding was outside the intended parser/lookup timer.
+Host pressure also delayed test-module transformation and caused an earlier
+changed-file lint attempt to be interrupted. None of this supplies complete
+browser-import, peak-memory, or lookup-latency evidence.
+
+The [failure and provenance receipt](../../builds/perf/import-20261126-4362/jitendex/receipt.json.txt)
+preserves source/module/test identities, the empty-observation failure report,
+raw log, environment receipts, and exact frozen streaming runner. The archived
+runner retains its execution paths and is a record of this failed attempt,
+not a portable benchmark CLI. Keep this source candidate as a draft pending
+normal hosted correctness checks and a separately specified performance study.
+
+## November 26: native lookup output initialization
+
+This change shares one parser module with the content-key child-container
+change above, based on develop `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`.
+Native lookup construction previously cleared the entire output container,
+then overwrote its headers, keys, posting rows, and hash chains. The encoder
+now initializes only reserved and alignment bytes, prefix-sum accumulators,
+and hash heads. Every other output byte is assigned before success. Required
+validation and negative return codes are retained; failed output remains
+unpublished. No allocation sizes, grouping policy, compression, or persisted
+formats change.
+
+The standalone lookup source passes 31 differential dirty-output cases against
+the JavaScript v7 encoder and all 86 existing lookup/index preparation tests.
+The new cases cover every key alignment, odd/even row counts, absent and present
+reading/sequence postings, changing data in reused memory, hash cardinalities,
+long keys, and guards around output capacity. Source-bound Clang/LLD 21.1.8
+regeneration succeeds for the composed source. Full composed validation and
+bounded three-corpus correctness receipts will be appended when completed.
+
+No complete-import timing or peak-memory improvement is claimed. The first
+correctness replay was interrupted after five JMdict groups because it started
+while the composed build was still running: its candidate C source contained
+both changes, but its packaged module was the earlier standalone lookup
+binary. That incomplete attempt cannot establish composed correctness. Its
+original runner, report, log, and invalid disposition remain in
+`builds/perf/native-lookup-initialization-20261126/`. The replay now validates
+the native source/manifest binding and packaged module hash before processing
+any archive, and rechecks source identities at completion. A prior standalone
+lint run also exited 137 under host pressure; it is not a passing lint receipt.
+
+The portable corpus runner is
+`test/perf/native-lookup-initialization-20261126/replay.mjs`. It reads bounded
+groups from checksum-verified archives and compares complete canonical slabs,
+all row descriptors and unique IDs, media projections, semantic key plans,
+and every prepared lookup byte. Native output layouts provide source-level
+redundant initialization-byte counts, not hardware store counts or measured
+memory savings. Keep the composed candidate in draft pending hosted correctness
+checks and separate complete-import performance qualification.

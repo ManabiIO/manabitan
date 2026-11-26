@@ -1,0 +1,12 @@
+{
+  "dictionary": "jitendex",
+  "pairs": 2,
+  "flags": {},
+  "validateGlossaryTypes": true,
+  "initialOrder": "AB",
+  "baselineRoot": "/workspace/scratch/436268d51129/manabitan",
+  "sourceRoot": "/workspace/scratch/436268d51129/jitendex",
+  "complete": false,
+  "error": "Error: Child failed (null): Error: spawnSync /tmp/manabitan-9175611d1a4c/runtime-node22/node_modules/node/bin/node ETIMEDOUT\n(node:19) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.\n(Use `node --trace-warnings ...` to show where the warning was created)\n",
+  "observations": []
+}

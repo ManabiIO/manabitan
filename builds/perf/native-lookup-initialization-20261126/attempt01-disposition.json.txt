@@ -1,0 +1,6 @@
+{
+  "valid": false,
+  "complete": false,
+  "exitCode": 130,
+  "reason": "Replay started while the composed pinned build was still running. The candidate C source included both changes but its packaged WASM remained the earlier standalone lookup-initialization binary. Interrupted after five JMdict groups; no composed-correctness or performance conclusion is drawn. The runner now checks native source/manifest binding and packaged WASM identity before any corpus work. Original partial report, log and exact runner are preserved."
+}

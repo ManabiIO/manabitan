@@ -1,0 +1,17 @@
+{
+  "mode": "write",
+  "toolchain": {
+    "compilerVersion": "21.1.8",
+    "linkerVersion": "21.1.8"
+  },
+  "targets": [
+    {
+      "name": "term-content-canonical-scan-v1.wasm",
+      "sha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af"
+    },
+    {
+      "name": "term-bank-parser.wasm",
+      "sha256": "354a71c2adb4692a9304a14274f2b277d819b9929a10057ad04af61d6f41bd3e"
+    }
+  ]
+}

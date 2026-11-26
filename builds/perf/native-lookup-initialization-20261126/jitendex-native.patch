@@ -1,0 +1,25 @@
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index 86cb9e18..a69091a0 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -999,6 +999,20 @@ static int parse_composite_span_impl(
+                 if (s_end < len && src[s_end] == ':') {
+                     state = OBJECT_VALUE;
+                     i = advance_glossary_delimiter(src, len, s_end, normalization_hint);
++                    // A literal content key and its colon already establish
++                    // the parent state. Enter an adjacent child here without
++                    // dispatching its opener through the general token loop.
++                    if (common_key_kind == COMMON_STRUCTURED_KEY_CONTENT &&
++                        i < len && (src[i] == '[' || src[i] == '{')) {
++                        if (depth >= MAX_JSON_NESTING) { return 0; }
++                        if (validate_top_level_objects && depth == 2u) {
++                            glossary_valid_fields |= GLOSSARY_CONTENT_FIELD;
++                        }
++                        parents[depth - 1u] = OBJECT_AFTER_VALUE;
++                        ++depth;
++                        state = src[i] == '[' ? ARRAY_FIRST : OBJECT_FIRST;
++                        ++i;
++                    }
+                     continue;
+                 }
+                 state = OBJECT_COLON;
