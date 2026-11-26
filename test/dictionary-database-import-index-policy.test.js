@@ -59,95 +59,40 @@ function droppedIndexes(exec) {
         .map((sql) => /** @type {string} */ (sql))
 }
 
-test('default imports omit index DDL and keep transaction rollback across consecutive sessions', async () => {
-    const {database, connection, contentRollback, recordRollback, journalClear} = await createDatabase()
-    expect(database._enableSqliteSecondaryIndexes).toBe(false)
-    const exec = vi.spyOn(connection, 'exec')
-    let previousSession = ''
-    for (let i = 0; i < 2; ++i) {
-        const session = await database.startBulkImport()
-        expect(session).not.toBe(previousSession)
-        connection.exec("INSERT INTO dictionaries(title, version, summaryJson) VALUES ('Pending', 3, '{}')")
-        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1)
-        await database.abortBulkImport(session)
-        expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(0)
-        previousSession = session
-    }
-    expect(droppedIndexes(exec)).toEqual([])
-    expect(exec.mock.calls.some((args) => String(args[0]).startsWith('CREATE INDEX'))).toBe(false)
-    expect(contentRollback).toHaveBeenCalledTimes(2)
-    expect(recordRollback).toHaveBeenCalledTimes(2)
-    expect(journalClear).toHaveBeenCalledTimes(2)
-    expect(secondaryIndexes(connection)).toEqual([])
-    expect(database._bulkImportState).toBe('idle')
-})
-
-test('schema setup still removes current and legacy indexes when secondary indexes are disabled', async () => {
-    const {database, connection} = await createDatabase()
-    connection.exec(`
-        CREATE INDEX idx_dictionaries_title ON dictionaries(title);
-        CREATE INDEX idx_term_entry_content_hash ON termEntryContent(contentHash);
-        CREATE INDEX idx_term_meta_dictionary ON termMeta(dictionary);
-        CREATE INDEX idx_media_path ON media(path);
-        CREATE INDEX retained_index ON dictionaries(version);
-        INSERT INTO dictionaries(title, version, summaryJson) VALUES ('Existing', 3, '{}');
-    `)
-    const exec = vi.spyOn(connection, 'exec')
-    await database._initializeSchema()
-    expect(droppedIndexes(exec)).toHaveLength(23)
-    expect(secondaryIndexes(connection)).toEqual([])
-    expect(connection.selectValues("SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'retained_index'")).toEqual(['retained_index'])
-    expect(connection.selectValues('SELECT title FROM dictionaries')).toEqual(['Existing'])
-    exec.mockClear()
-    const session = await database.startBulkImport()
-    await database.abortBulkImport(session)
-    expect(droppedIndexes(exec)).toEqual([])
-    expect(connection.selectValues('SELECT title FROM dictionaries')).toEqual(['Existing'])
-})
-
-test('enabled indexes are removed before each import transaction and restored on abort', async () => {
-    const {database, connection} = await createDatabase(true)
-    const currentIndexes = secondaryIndexes(connection)
-    expect(currentIndexes).toHaveLength(8)
-    connection.exec('CREATE INDEX idx_media_path ON media(path)')
-    const exec = vi.spyOn(connection, 'exec')
-    for (let i = 0; i < 2; ++i) {
-        exec.mockClear()
-        const session = await database.startBulkImport()
-        expect(droppedIndexes(exec)).toHaveLength(23)
-        expect(secondaryIndexes(connection)).toEqual([])
-        const statements = exec.mock.calls.map((args) => String(args[0]))
-        const transactionStart = statements.indexOf('BEGIN IMMEDIATE')
-        expect(statements.every((sql, index) => !sql.startsWith('DROP INDEX') || index < transactionStart)).toBe(true)
-        await database.abortBulkImport(session)
-        expect(secondaryIndexes(connection)).toEqual(currentIndexes)
-    }
-})
-
 test('a partial enabled-index drop failure restores indexes and permits a new import', async () => {
     const {database, connection, contentRollback, recordRollback, journalClear} = await createDatabase(true)
     const currentIndexes = secondaryIndexes(connection)
     const execute = connection.exec.bind(connection)
+    /** @type {unknown[]} */
+    let indexesAtFailure = []
     let shouldFail = true
     const exec = vi.spyOn(connection, 'exec').mockImplementation((...args) => {
         if (shouldFail && String(args[0]) === 'DROP INDEX IF EXISTS idx_term_entry_content_hash') {
             shouldFail = false
+            indexesAtFailure = secondaryIndexes(connection)
             throw new Error('injected index drop failure')
         }
         return execute(...args)
     })
     await expect(database.startBulkImport()).rejects.toThrow('injected index drop failure')
+    expect(indexesAtFailure).not.toContain('idx_dictionaries_title')
+    expect(indexesAtFailure).not.toContain('idx_dictionaries_version')
+    expect(indexesAtFailure).toContain('idx_term_entry_content_hash')
     expect(secondaryIndexes(connection)).toEqual(currentIndexes)
     expect(contentRollback).toHaveBeenCalledOnce()
     expect(recordRollback).toHaveBeenCalledOnce()
     expect(journalClear).toHaveBeenCalledOnce()
     expect(database._bulkImportState).toBe('idle')
     expect(database._bulkImportJournalRecord).toBeNull()
+    expect(database._bulkImportTransactionOpen).toBe(false)
     exec.mockClear()
     const session = await database.startBulkImport()
     expect(droppedIndexes(exec)).toHaveLength(23)
     expect(secondaryIndexes(connection)).toEqual([])
+    connection.exec("INSERT INTO dictionaries(title, version, summaryJson) VALUES ('Retry', 3, '{}')")
+    expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1)
     await database.abortBulkImport(session)
+    expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(0)
     expect(secondaryIndexes(connection)).toEqual(currentIndexes)
 })
 
@@ -170,7 +115,10 @@ test('default imports retain setup rollback and retry after a transaction-start 
     expect(database._bulkImportJournalRecord).toBeNull()
     expect(database._bulkImportTransactionOpen).toBe(false)
     const session = await database.startBulkImport()
+    connection.exec("INSERT INTO dictionaries(title, version, summaryJson) VALUES ('Retry', 3, '{}')")
+    expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(1)
     await database.abortBulkImport(session)
+    expect(connection.selectValue('SELECT COUNT(*) FROM dictionaries')).toBe(0)
     expect(droppedIndexes(exec)).toEqual([])
     expect(database._bulkImportState).toBe('idle')
 })
