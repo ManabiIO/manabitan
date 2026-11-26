@@ -1,0 +1,404 @@
+{
+  "schemaVersion": 1,
+  "capturedAtUtc": "2026-11-26T17:10:20.722789+00:00",
+  "baseline": {
+    "commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "tree": "004fa8fde0055379ffbf22f9bbb60ae50f99114a"
+  },
+  "candidate": {
+    "commit": "39b09bb51c4bb04f369d37fd4701e36aa04019e2",
+    "tree": "5e5171dd70b194dd93ffa90e73a37073c667afd3",
+    "branch": "perf-jmdict-import-20261126-3b76",
+    "identityKind": "local-measured-source; published GitHub commit/tree mapping is recorded separately in the PR"
+  },
+  "checks": [
+    {
+      "name": "metadata-growth-regressions",
+      "node": "v22.22.0",
+      "command": "node node_modules/vitest/vitest.mjs run test/term-content-metadata-growth.test.js --maxWorkers=1 --testTimeout=60000 --reporter=verbose",
+      "status": "passed",
+      "exitCode": 0,
+      "testFiles": 1,
+      "testsPassed": 14,
+      "testsFailed": 0,
+      "log": "growth-tests.log",
+      "measuredLocalSourceCommit": "39b09bb51c4bb04f369d37fd4701e36aa04019e2"
+    },
+    {
+      "name": "library-preparation",
+      "node": "v24.22.3",
+      "command": "npm run build:libs",
+      "status": "passed",
+      "exitCode": 0,
+      "log": null
+    },
+    {
+      "name": "patch-whitespace",
+      "command": "git diff --check",
+      "status": "passed",
+      "exitCode": 0,
+      "log": null
+    },
+    {
+      "name": "initial-focused-lint-and-types",
+      "status": "interrupted-without-complete-results",
+      "observations": "initial-attempts.json"
+    },
+    {
+      "name": "serial-changed-file-lint",
+      "node": "v22.22.0",
+      "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-content-metadata-arena.js test/term-content-metadata-growth.test.js",
+      "status": "interrupted-without-result",
+      "exitCode": 130,
+      "log": "source-lint.log"
+    },
+    {
+      "name": "integration-initial-lint",
+      "status": "failed-with-new-test-formatting-and-jsdoc-errors",
+      "reportedBy": "root integration",
+      "log": "integration-lint-initial.log"
+    },
+    {
+      "name": "test-types-initial",
+      "status": "failed-with-new-test-excess-property-diagnostic",
+      "reportedBy": "root integration",
+      "log": "test-types-initial.log"
+    },
+    {
+      "name": "source-lint-cleanup-first",
+      "status": "failed",
+      "node": "v22.22.0",
+      "exitCode": 1,
+      "log": "source-lint-cleanup-first.log",
+      "note": "Intermediate JSDoc layout needed correction; runtime files emitted no lint diagnostics."
+    },
+    {
+      "name": "source-lint-autofix",
+      "status": "passed",
+      "node": "v22.22.0",
+      "exitCode": 0,
+      "log": "source-lint-autofix.log",
+      "note": "Test-only formatting repair, followed by a readable named callback and final strict lint."
+    },
+    {
+      "name": "source-lint-formatting",
+      "status": "passed",
+      "node": "v22.22.0",
+      "exitCode": 0,
+      "log": "source-lint-formatting.log",
+      "note": "Completed before the inferred-metadata-variable cleanup."
+    },
+    {
+      "name": "source-lint-final",
+      "status": "passed",
+      "node": "v22.22.0",
+      "exitCode": 0,
+      "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-content-metadata-arena.js test/term-content-metadata-growth.test.js",
+      "log": "source-lint-final.log",
+      "sourceIdentity": "finalValidationFiles"
+    },
+    {
+      "name": "test-types-final",
+      "status": "passed",
+      "node": "v22.22.0",
+      "exitCode": 0,
+      "command": "node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json",
+      "log": "test-types-final.log",
+      "sourceIdentity": "finalValidationFiles"
+    }
+  ],
+  "logs": {
+    "initial-attempts.json": {
+      "sha256": "bc561e63f490881bf001ea59df5d7c846b0c05ef902ec4e29717e908e45fa540",
+      "sizeBytes": 1611
+    },
+    "growth-tests.log": {
+      "sha256": "cfa338c756835e277ad4eb929d6c1c59000281b122a39692cdb266d7acc2a1d5",
+      "sizeBytes": 2862
+    },
+    "source-lint.log": {
+      "sha256": "0c8400c8937231a3cfa99215fceb9b9be788be606e33e4c29edf62aaae43aa67",
+      "sizeBytes": 1042
+    },
+    "integration-lint-initial.log": {
+      "sha256": "3b44d8eb7ce938cff38976bbd7d19db83894f15264b5c61123ac1758324122ea",
+      "sizeBytes": 3179
+    },
+    "test-types-initial.log": {
+      "sha256": "dc172708577004cddbe6708094a15fce36a2f37e8d53895b4d397261a37dbb99",
+      "sizeBytes": 251
+    },
+    "source-lint-cleanup-first.log": {
+      "sha256": "51b9ef164a04601e6aaa716acb0cbb900631a16ceb2b0e7e5e5495d1417a9ff6",
+      "sizeBytes": 1670
+    },
+    "source-lint-autofix.log": {
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+      "sizeBytes": 1042
+    },
+    "source-lint-formatting.log": {
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+      "sizeBytes": 1042
+    },
+    "source-lint-final.log": {
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+      "sizeBytes": 1042
+    },
+    "test-types-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sizeBytes": 0
+    }
+  },
+  "corpusParity": {
+    "status": "complete-for-all-pinned-rows-at-component-boundary",
+    "evidenceCommit": "7d83f9e296df29bc783c94111aefb56bcbf5e3cf",
+    "dictionaries": [
+      "jmdict",
+      "jitendex",
+      "vndb"
+    ],
+    "completedReceipts": [
+      {
+        "dictionary": "jmdict",
+        "status": "complete-component-parity",
+        "report": "builds/perf/metadata-growth-20261126/raw/jmdict-bounded.json.gz",
+        "fixture": {
+          "label": "JMdict",
+          "cacheFile": "JMdict.zip",
+          "release": "2026-11-22",
+          "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+          "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+          "sizeBytes": 15645766,
+          "expectedTitle": "JMdict [2026-11-22]",
+          "revision": "JMdict.2026-11-22",
+          "termRows": 528299,
+          "mediaFiles": 0,
+          "mediaBytes": 0
+        },
+        "summary": {
+          "rows": 528299,
+          "groups": 12,
+          "growthEvents": 1,
+          "parentCopiedBytes": 0,
+          "candidateCopiedBytes": 0,
+          "parentFilledBytes": 4194304,
+          "candidateFilledBytes": 0,
+          "contentBytes": 100300626,
+          "parentReadCount": 0,
+          "candidateReadCount": 0,
+          "copyBytesAvoided": 0,
+          "explicitFillBytesAvoided": 4194304
+        },
+        "contentSha256": "24ecc0fee1a9063320349ee82497eea910a65db95e1834c97a4b1f443882acd2",
+        "recordIndexSha256": "63c78b28234045da6d189f3cc65c430b7a53529636f916da7aba485916ff1b87",
+        "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "parserWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+        "canonicalWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "contentEncoding": "gzip",
+        "uncompressedSha256": "a82f96b04ea88bd6355786fe4cf1960a208d0f0782cd7641fd7121122a4ecc3c",
+        "uncompressedSizeBytes": 41952,
+        "archiveSha256": "2cac59e2826fe98abc0ff978cbafff7195fd65c1edf31d3496e5007ffd8ba4a6",
+        "archiveSizeBytes": 4976
+      },
+      {
+        "dictionary": "jitendex",
+        "status": "complete-component-parity",
+        "report": "builds/perf/metadata-growth-20261126/raw/jitendex-bounded.json.gz",
+        "fixture": {
+          "label": "Jitendex",
+          "cacheFile": "jitendex-yomitan.zip",
+          "release": "2026.10.03.0",
+          "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+          "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+          "sizeBytes": 38831822,
+          "expectedTitle": "Jitendex.org [2026-10-03]",
+          "revision": "2026.10.03.0",
+          "termRows": 436555,
+          "mediaFiles": 236,
+          "mediaBytes": 4992155,
+          "unreferencedMediaPaths": [
+            "jitendex/HanaMinA/05167.svg",
+            "jitendex/HanaMinA/05641.svg",
+            "jitendex/HanaMinA/0576b.svg",
+            "jitendex/HanaMinA/05bda.svg",
+            "jitendex/HanaMinA/06207.svg",
+            "jitendex/HanaMinA/07055.svg",
+            "jitendex/HanaMinA/07575.svg",
+            "jitendex/HanaMinA/076a5.svg",
+            "jitendex/HanaMinA/0793d.svg",
+            "jitendex/HanaMinA/080ed.svg",
+            "jitendex/HanaMinA/09093.svg",
+            "jitendex/HanaMinA/09c81.svg",
+            "jitendex/HanaMinA/20bb7.svg"
+          ]
+        },
+        "summary": {
+          "rows": 436555,
+          "groups": 22,
+          "growthEvents": 2,
+          "parentCopiedBytes": 14155776,
+          "candidateCopiedBytes": 13699692,
+          "parentFilledBytes": 6291456,
+          "candidateFilledBytes": 0,
+          "contentBytes": 389687485,
+          "parentReadCount": 34,
+          "candidateReadCount": 34,
+          "copyBytesAvoided": 456084,
+          "explicitFillBytesAvoided": 6291456
+        },
+        "contentSha256": "18f65afa7943882619206ace937ce2ead9e18a8bf9aa3268355d479e8633e636",
+        "recordIndexSha256": "81592d7327b5a0d8539ca14792902010874b1f9627d13001edf17c48eaf82451",
+        "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "parserWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+        "canonicalWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "contentEncoding": "gzip",
+        "uncompressedSha256": "9ce5ab4318f2bcaad885af3c133271fe3d276136481005ae71c7bd8a0cd4f61e",
+        "uncompressedSizeBytes": 79020,
+        "archiveSha256": "df8964661f04232dcad9ce8c4d8207db7b41f6b111637466405e45aeb03733e1",
+        "archiveSizeBytes": 7963
+      },
+      {
+        "dictionary": "vndb",
+        "status": "complete-component-parity",
+        "report": "builds/perf/metadata-growth-20261126/raw/vndb-streamed.json.gz",
+        "fixture": {
+          "label": "VNDB",
+          "cacheFile": "vndb_characters_by_bee.zip",
+          "release": "1.0.0",
+          "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+          "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+          "sizeBytes": 291705969,
+          "expectedTitle": "VNDB Characters by Bee",
+          "revision": "395525135651",
+          "termRows": 6648310,
+          "mediaFiles": 146570,
+          "mediaBytes": 188131284,
+          "mediaRows": 146570,
+          "optional": true
+        },
+        "summary": {
+          "rows": 6648310,
+          "groups": 170,
+          "growthEvents": 2,
+          "parentCopiedBytes": 7077888,
+          "candidateCopiedBytes": 7026426,
+          "parentFilledBytes": 3145728,
+          "candidateFilledBytes": 0,
+          "contentBytes": 91366785,
+          "parentReadCount": 714,
+          "candidateReadCount": 714,
+          "copyBytesAvoided": 51462,
+          "explicitFillBytesAvoided": 3145728
+        },
+        "contentSha256": "2bffb5a78229756dfcbe1c618cef2d8552b525c1cbd2d3f57728343533ae1900",
+        "recordIndexSha256": "4ca1223855e20d9fcdd00d81d976dc9bec1b600cd776edf065b0b4ae72b717fa",
+        "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+        "parserWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+        "canonicalWasmSha256": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+        "contentEncoding": "gzip",
+        "uncompressedSha256": "b52fa5c5377bdf001ab9c9e5a103ec5ef3c58fb7e25fdb2055dc6d35114a4370",
+        "uncompressedSizeBytes": 517442,
+        "archiveSha256": "46104fa68ceaa266741772130a34b7de1cdd7a8f0a7f02214b3ecb3a24b1d8c7",
+        "archiveSizeBytes": 30109
+      }
+    ],
+    "sourceIdentities": {
+      "parent": {
+        "ext/js/dictionary/dictionary-database.js": "c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51",
+        "ext/js/dictionary/term-content-metadata-arena.js": "9aa2d546bb46cd0073b33bd31c43d76f421f158b529995dc94ee583dee54e14c",
+        "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+        "ext/js/dictionary/term-record-opfs-store.js": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8"
+      },
+      "candidate": {
+        "ext/js/dictionary/dictionary-database.js": "e45ca4795755acfc4ef2b2e80f4ef61f6dd5e208b430c31288c2969925ea7eb7",
+        "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+        "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+        "ext/js/dictionary/term-record-opfs-store.js": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+        "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8"
+      }
+    },
+    "scope": "Actual source-group decisions captured from the production scheduler with planning-only empty worker replies; every group is then actually inflated, CRC-checked, parsed and encoded sequentially in one native heap. Production native canonical metadata resolution, publication, and record/index encoding run in both arms. Compression, media normalization, SQLite, OPFS, real worker transport, and UI are excluded. Raw content persistence is intercepted at deterministic uncompressed offsets. Optional explicit GC bounds harness memory between groups. No elapsed-time, complete-import, or full-persisted-database claim.",
+    "artifactManifest": "builds/perf/metadata-growth-20261126/evidence.json",
+    "evidenceCommitKind": "local independent corpus evidence commit",
+    "appliedEvidenceCommit": "2c96017afbb04bc52d4e79377e31103220cc358a",
+    "artifactManifestSha256": "7e83000f9de70e0a2cf932f89fc9f96777d4478b65dc3b15451ba6e5ca595127",
+    "artifactManifestSizeBytes": 13893
+  },
+  "remainingGates": [
+    "broad unit suites on final assembled source",
+    "remaining TypeScript projects and final hosted CI",
+    "browser lifecycle",
+    "complete-import latency",
+    "whole-browser peak memory",
+    "complete persisted-database parity"
+  ],
+  "claims": {
+    "wholeImportSpeedup": false,
+    "peakMemoryReduction": false,
+    "completePersistedDatabaseParity": false,
+    "completeComponentCorpusParity": true,
+    "measuredMetadataWrites": {
+      "jmdict": {
+        "copyBytesAvoided": 0,
+        "explicitFillBytesAvoided": 4194304
+      },
+      "jitendex": {
+        "copyBytesAvoided": 456084,
+        "explicitFillBytesAvoided": 6291456
+      },
+      "vndb": {
+        "copyBytesAvoided": 51462,
+        "explicitFillBytesAvoided": 3145728
+      }
+    }
+  },
+  "scope": "Focused correctness validation plus complete pinned-corpus metadata component parity and deterministic typed-array write accounting. No complete-import timing, peak-memory, or full-persisted-database inference.",
+  "measuredSourceFiles": {
+    "ext/js/dictionary/dictionary-database.js": {
+      "sha256": "e45ca4795755acfc4ef2b2e80f4ef61f6dd5e208b430c31288c2969925ea7eb7",
+      "sizeBytes": 609567
+    },
+    "ext/js/dictionary/term-content-metadata-arena.js": {
+      "sha256": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+      "sizeBytes": 5580
+    },
+    "test/term-content-metadata-growth.test.js": {
+      "sha256": "4b5df629e206a0f7a1b7e1503c21117f49504ca376d430d35f11ec45c6211ca5",
+      "sizeBytes": 9124
+    },
+    "test/perf/dictionaries.lock.json": {
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "sizeBytes": 3047
+    }
+  },
+  "finalValidationFiles": {
+    "ext/js/dictionary/dictionary-database.js": {
+      "sha256": "e45ca4795755acfc4ef2b2e80f4ef61f6dd5e208b430c31288c2969925ea7eb7",
+      "sizeBytes": 609567
+    },
+    "ext/js/dictionary/term-content-metadata-arena.js": {
+      "sha256": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+      "sizeBytes": 5580
+    },
+    "test/term-content-metadata-growth.test.js": {
+      "sha256": "ec079b1b26481ca9b0e3448123e64bee5254d4c2303de7c2283d167cd31262b3",
+      "sizeBytes": 9316
+    },
+    "test/perf/dictionaries.lock.json": {
+      "sha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+      "sizeBytes": 3047
+    }
+  },
+  "testSourceCleanup": "After the original 14-test pass, test-only cleanup expanded formatting, documented mock callback arguments, preserved typed-array snapshots with explicit copy forms and passed an inferred metadata variable to satisfy structural typing. Assertions and runtime source are unchanged.",
+  "rootIntegrationReports": {
+    "scope": "Reported by root; exact final integration/published-tree mapping and logs remain in the PR integration record.",
+    "mainTypecheck": "passed",
+    "allTargetDryBuild": "passed-all-seven-targets",
+    "chromeReleasePackage": "passed-after-retained-transient-ENOSPC-attempt",
+    "browserLifecycle": "blocked-before-launch-by-process-singleton-socket-EPERM; no imports started",
+    "wholeUnitSuite": "pending"
+  }
+}

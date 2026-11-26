@@ -1,0 +1,27 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/3b76e685bf40/jmdict
+
+(node:24) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > keeps the complete-column and same-capacity slot-copy defaults 195ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > copies exactly the allocated dense prefix of 0 IDs and leaves slots to the caller 179ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > copies exactly the allocated dense prefix of 3 IDs and leaves slots to the caller 28ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > copies exactly the allocated dense prefix of 17 IDs and leaves slots to the caller 15ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > rejects invalid prefix -1 before any destination write 61ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > rejects invalid prefix 0.5 before any destination write 45ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > rejects invalid prefix NaN before any destination write 46ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > rejects invalid prefix Infinity before any destination write 9ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > rejects invalid prefix 18 before any destination write 18ms
+ ✓ test/term-content-metadata-growth.test.js > bounded metadata arena copies > rejects a destination that cannot contain the requested prefix before copying any column 39ms
+ ✓ test/term-content-metadata-growth.test.js > metadata growth with reusable dense IDs > preserves sparse high IDs, pending entries and collision chains during dense replacement 239ms
+ ✓ test/term-content-metadata-growth.test.js > metadata growth with reusable dense IDs > preserves sparse high IDs, pending entries and collision chains during slots replacement 171ms
+ ✓ test/term-content-metadata-growth.test.js > metadata growth with reusable dense IDs > preserves sparse high IDs, pending entries and collision chains during same-capacity rehash replacement 82ms
+ ✓ test/term-content-metadata-growth.test.js > metadata growth with reusable dense IDs > keeps all old columns and probe chains after a replacement copy fails 146ms
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  11:40:34
+   Duration  105.91s (transform 54.97s, setup 945ms, import 70.17s, tests 1.32s, environment 0ms)
+

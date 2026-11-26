@@ -1,0 +1,48 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+/workspace/scratch/3b76e685bf40/integration/ext/js/dictionary/term-bank-source-pipeline.js
+  190:5  error  Missing JSDoc comment  jsdoc/require-jsdoc
+
+/workspace/scratch/3b76e685bf40/integration/test/perf/zip-batch-snapshots-20261126/worker.mjs
+  14:36  error  Unsafe call to import for argument 0                no-unsanitized/method
+  26:43  error  Unexpected unnamed async function                   func-names
+  26:57  error  Unexpected space before function parentheses        @stylistic/space-before-function-paren
+  65:16  error  '_readMs' is assigned a value but never used        no-unused-vars
+  65:39  error  '_validationMs' is assigned a value but never used  no-unused-vars
+
+/workspace/scratch/3b76e685bf40/integration/test/raw-zip-range-reader.test.js
+  504:54  error  This line has 3 statements. Maximum allowed is 2  @stylistic/max-statements-per-line
+
+/workspace/scratch/3b76e685bf40/integration/test/term-content-metadata-growth.test.js
+   12:13   error  There should be a linebreak after this element   @stylistic/array-element-newline
+   12:22   error  There should be a linebreak after this element   @stylistic/array-element-newline
+   12:31   error  There should be a linebreak after this element   @stylistic/array-element-newline
+   13:24   error  There should be a linebreak after this element   @stylistic/array-element-newline
+   13:38   error  There should be a linebreak after this element   @stylistic/array-element-newline
+   13:52   error  There should be a linebreak after this element   @stylistic/array-element-newline
+   58:68   error  Unexpected newline after '('                     @stylistic/function-paren-newline
+   60:5    error  Unexpected newline before ')'                    @stylistic/function-paren-newline
+  169:55   error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+  170:41   error  Prefer the spread operator over `Array#slice()`  unicorn/prefer-spread
+  173:103  error  Missing JSDoc @param "args" declaration          jsdoc/require-param
+
+✖ 18 problems (18 errors, 0 warnings)
+  13 errors and 0 warnings potentially fixable with the `--fix` option.
+

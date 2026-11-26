@@ -1,0 +1,76 @@
+import hashlib
+import gzip
+import json
+from pathlib import Path
+import sys
+
+root = Path(sys.argv[1] if len(sys.argv) > 1 else 'builds/perf/metadata-growth-20261126')
+names = ['jmdict-bounded.json', 'jitendex-bounded.json', 'vndb-streamed.json']
+reports = [json.loads(gzip.decompress((root / 'raw' / (name + '.gz')).read_bytes())) for name in names]
+rows = []
+identities = reports[0]['identities']
+for name, report in zip(names, reports):
+    assert report['complete'] is True and report['error'] is None
+    assert report['identities'] == identities
+    for key in ['lockSha256', 'parserWasmSha256', 'canonicalWasmSha256']:
+        assert report[key] == reports[0][key]
+    summary = report['summary']
+    assert summary['rows'] == report['fixture']['termRows']
+    assert summary['rows'] == sum(group['rows'] for group in report['groups'])
+    assert summary['groups'] == len(report['groups']) == len(report['sourceGroups'])
+    assert summary['parentReadCount'] == summary['candidateReadCount']
+    assert report['parentScanner'] == report['candidateScanner']
+    assert report['candidateScanner']['calls'] > 0
+    assert len(report['parentGrowth']) == len(report['candidateGrowth']) == summary['growthEvents']
+    for before_event, after_event in zip(report['parentGrowth'], report['candidateGrowth']):
+        for key in ['arguments', 'before', 'after']:
+            assert before_event[key] == after_event[key]
+        before, after = before_event['before'], before_event['after']
+        dense, old_capacity, old_slots = before['dense'], before['capacity'], before['slots']
+        growing_dense = old_capacity != after['capacity']
+        rehash = bool(before_event['arguments'][2]) or old_slots != after['slots']
+        old_copy = old_capacity * (26 + (28 if growing_dense else 0))
+        new_copy = dense * (26 + (28 if growing_dense else 0))
+        if old_slots == after['slots']:
+            old_copy += old_slots * 4
+            if not rehash:
+                new_copy += old_slots * 4
+        assert before_event['copiedBytes'] == old_copy
+        assert after_event['copiedBytes'] == new_copy
+        assert before_event['filledBytes'] == (after['slots'] * 4 if rehash else 0)
+        assert after_event['filledBytes'] == 0
+    for arm in ['parent', 'candidate']:
+        for field, event_field in [('CopiedBytes', 'copiedBytes'), ('FilledBytes', 'filledBytes')]:
+            assert summary[arm + field] == sum(event[event_field] for event in report[arm + 'Growth'])
+    assert summary['copyBytesAvoided'] == summary['parentCopiedBytes'] - summary['candidateCopiedBytes']
+    assert summary['explicitFillBytesAvoided'] == summary['parentFilledBytes'] - summary['candidateFilledBytes']
+    rows.append({'report': 'raw/' + name + '.gz', 'dictionary': report['dictionary'], **summary,
+                 'contentSha256': report['contentSha256'], 'recordIndexSha256': report['recordIndexSha256'],
+                 'finalMetadataSha256': report['groups'][-1]['metadataSha256']})
+
+artifacts = {}
+raw_artifacts = {}
+for path in sorted(root.rglob('*')):
+    if path.is_file() and path.name != 'evidence.json':
+        data = path.read_bytes()
+        artifacts[str(path.relative_to(root))] = {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
+        if path.parent.name == 'raw' and path.suffix == '.gz':
+            raw = gzip.decompress(data)
+            raw_artifacts[path.name[:-3]] = {'archive': str(path.relative_to(root)), 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+
+result = {
+    'auditPassed': True,
+    'parentCommit': '0143e9596cd8f790d5e166d4ba6a2425fbc57f14',
+    'candidateRuntimeCommit': '39b09bb51c4bb04f369d37fd4701e36aa04019e2',
+    'candidateRevisionKind': 'Local measured source commit; the publishing receipt maps its exact tree to the remote PR commit.',
+    'sourceIdentities': identities,
+    'scope': reports[0]['scope'],
+    'comparisonMethod': 'The replay asserts exact equality of full allocated hot/cold metadata columns, slot tables, counters, free IDs, dictionary names and collisions after every group. It also asserts exact raw content, encoded record and index bytes and identical growth schedules. This audit checks receipt arithmetic and derives each observed set/fill byte count from the actual growth capacities and high-water marks.',
+    'timingClaim': False,
+    'fullPersistedDatabaseParityClaim': False,
+    'results': rows,
+    'artifacts': artifacts,
+    'rawArtifacts': raw_artifacts,
+}
+(root / 'evidence.json').write_text(json.dumps(result, indent=2) + '\n')
+print(json.dumps({'auditPassed': True, 'dictionaries': len(rows), 'rows': sum(row['rows'] for row in rows), 'artifacts': len(artifacts)}))

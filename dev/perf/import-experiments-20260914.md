@@ -687,3 +687,67 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## 2026-11-26: copy allocated metadata during arena replacement
+
+**Status: draft; complete-import performance is unqualified.** This change reduces redundant metadata writes during import table replacement. It does not establish a complete-import speedup or a reduction in peak process memory.
+
+The frozen baseline is `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. The **local measured source** is commit `39b09bb51c4bb04f369d37fd4701e36aa04019e2`, tree `5e5171dd70b194dd93ffa90e73a37073c667afd3`, on local branch `perf-jmdict-import-20261126-3b76`. These are local measurement identities, not a claim about the published GitHub commit SHA; the PR records the published commit/tree mapping. The two production changes are in `dictionary-database.js` and `term-content-metadata-arena.js`; exact source and fixture-lock hashes are recorded in the [validation receipt](../../builds/perf/metadata-growth-20261126/validation.json).
+
+### Change and ownership constraints
+
+Replacement copies stop at the allocated dense-ID high-water mark. This bound includes empty IDs retained for reuse after rollback; published and pending entry counts are insufficient because a live entry can have a higher sparse ID. Both the hot WASM columns and the five independently allocated metadata columns preserve that prefix. Capacities, IDs, probe chains and pending/publication state remain unchanged.
+
+When the slot table must be rebuilt, the replacement does not copy the old slots. New WASM memory already contains zeroes, so the former full-table zero-fill is removed. Growth that preserves slot coordinates still copies those slots. The previous arena remains installed until every replacement allocation, copy and rehash succeeds, and its retained views remain attached.
+
+`TermContentMetadataArena.copyFrom(previous)` retains its full-column and same-capacity slot-copy defaults. The optional allocated-prefix bound is checked against both arenas before any destination write. The native scanner's unaccepted synchronous rollback clears its new suffix before restoring the earlier high-water mark; accepted IDs continue through the existing outer rollback and free-ID reuse path.
+
+### Completed local validation and retained attempts
+
+The new growth suite passed **14/14 tests under Node 22.22.0**. It covers default copying, zero and bounded prefixes, invalid bounds, destination capacity, sparse IDs, pending entries, colliding probe chains, dense-only growth, slot-only growth, same-capacity rehash and failure atomicity. The [complete successful log](../../builds/perf/metadata-growth-20261126/growth-tests.log) is retained. Library preparation and `git diff --check` also passed.
+
+The initial six-file focused attempt under Node 24.22.3 emitted a Vitest fork-termination timeout and was interrupted without an assertion report. Concurrent lint and main-type attempts were also interrupted without results. A subsequent serial Node 22 lint attempt was stopped before a result to avoid competing with corpus validation. These attempts are not passes; their [captured observations](../../builds/perf/metadata-growth-20261126/initial-attempts.json) and [serial lint output](../../builds/perf/metadata-growth-20261126/source-lint.log) remain available. The overloaded local host supplies no timing evidence.
+
+A subsequent integration lint run found formatting and JSDoc issues in the new test, and the test-project type check found an excess-property diagnostic in its metadata fixture. Test-only cleanup preserves typed-array snapshots, documents the failure-injection callback and passes an inferred metadata variable; no assertion or product source changed. The original [integration lint output](../../builds/perf/metadata-growth-20261126/integration-lint-initial.log), [type diagnostic](../../builds/perf/metadata-growth-20261126/test-types-initial.log) and [intermediate cleanup lint output](../../builds/perf/metadata-growth-20261126/source-lint-cleanup-first.log) are retained. Final scoped ESLint passed for both production files and the corrected test, and the Node 22.22.0 test-project type check passed. Their [lint log](../../builds/perf/metadata-growth-20261126/source-lint-final.log), [type-check log](../../builds/perf/metadata-growth-20261126/test-types-final.log), exit statuses and exact final test-file hash are in the validation receipt. The 14-test result above belongs to the original measured test revision.
+
+With Node 22.22.0 and the frozen candidate checked out, reproduce the focused validation using:
+
+```sh
+npm ci
+npm run build:libs
+node node_modules/vitest/vitest.mjs run \
+  test/term-content-metadata-growth.test.js \
+  --maxWorkers=1 --testTimeout=60000 --reporter=verbose
+```
+
+### Real-corpus component parity and write accounting
+
+Independent source review found no blocker. The completed component replays cover all rows of the three pinned dictionaries. Each group checks exact equality of every allocated hot and cold metadata column, the slot table, publication state, emitted content bytes and encoded record/index payloads. Allocation schedules and exact-read fallback counts also agree. The archive, fixture-lock, native-binary and product-source identities are checked; product sources are checked again at completion.
+
+| Dictionary |      Rows | Groups | Growth events | Baseline copy bytes | Candidate copy bytes | Baseline explicit fill bytes | Candidate explicit fill bytes |
+| ---------- | --------: | -----: | ------------: | ------------------: | -------------------: | ---------------------------: | ----------------------------: |
+| JMdict     |   528,299 |     12 |             1 |                   0 |                    0 |                    4,194,304 |                             0 |
+| Jitendex   |   436,555 |     22 |             2 |          14,155,776 |           13,699,692 |                    6,291,456 |                             0 |
+| VNDB       | 6,648,310 |    170 |             2 |           7,077,888 |            7,026,426 |                    3,145,728 |                             0 |
+
+The fresh JMdict replay allocates its metadata once, so its measured saving is the **4 MiB redundant zero-fill**; it does not demonstrate a prefix-copy saving. Jitendex avoids **456,084 copied bytes and 6 MiB of explicit zero-fill**. VNDB avoids **51,462 copied bytes and 3 MiB of explicit zero-fill**. Jitendex and VNDB perform 34 and 714 exact fallback reads respectively in each arm. These are deterministic counts of synchronous typed-array writes during arena replacement, not a measurement of complete-import time or peak memory.
+
+The harness captures the production scheduler's source-group decisions using planning-only empty worker replies, then actually inflates, CRC-checks, parses and encodes every group sequentially in one native heap. Both arms run the production native canonical resolver, metadata publication and record/index encoding. Raw-content persistence uses deterministic uncompressed scratch-file offsets. Compression, media normalization, SQLite, OPFS, actual worker transport and UI are excluded. Explicit GC between groups and a 256 MiB V8 heap limit bound harness memory; neither represents a production runtime change.
+
+The [compact corpus receipt](../../builds/perf/metadata-growth-20261126/evidence.json) records exact compressed and original artifact hashes. Compressed completed reports are [JMdict](../../builds/perf/metadata-growth-20261126/raw/jmdict-bounded.json.gz), [Jitendex](../../builds/perf/metadata-growth-20261126/raw/jitendex-bounded.json.gz) and [VNDB](../../builds/perf/metadata-growth-20261126/raw/vndb-streamed.json.gz). The [run ledger](../../builds/perf/metadata-growth-20261126/runs.json) preserves unsuccessful attempts separately: concurrent-worker termination, a corrected planning fixture, a sequential run with no final receipt, and a VNDB harness heap exhaustion while retaining all ZIP entry objects. The completed VNDB run streams ZIP enumeration and retains term-bank entries only. No failed or incomplete attempt contributes to the work-saving totals.
+
+With the frozen baseline and candidate in separate prepared worktrees, the retained bounded runner accepts explicit paths:
+
+```sh
+MANABITAN_PERF_NODE=/absolute/path/to/node-22.22.0 \
+  bash test/perf/metadata-growth-20261126/run-bounded.sh \
+  /absolute/path/to/baseline /absolute/path/to/candidate \
+  /absolute/path/to/dictionary-cache /absolute/path/to/fresh-report.json \
+  jmdict
+```
+
+Use `jitendex` or `vndb` for the other dictionary. The run ledger records the exact harness hash for each attempt; the successful JMdict/Jitendex runs precede the ZIP-enumeration change used by VNDB. Full reports retain source and fixture identities and group-level observations. The [validation receipt](../../builds/perf/metadata-growth-20261126/validation.json) links the completed reports to the frozen product source and focused-test evidence.
+
+### Pending qualification
+
+The broader unit suites, remaining TypeScript projects, all-target build and browser lifecycle gates remain separate qualifications. Root integration reported successful main type checking and all seven dry builds with unchanged metadata runtime source; their final-tree receipts belong to the integration/PR record. The local browser launch was blocked by a process-singleton socket permission error before any imports started, so browser lifecycle remains a hosted-CI gate. Hosted CI results must be reconciled against unchanged product source before promotion. Complete-import latency, concurrent peak memory and complete persisted-database parity remain unqualified by this component replay. No runtime default, scheduling policy, storage format, compiler pin or feature flag changes in this candidate.

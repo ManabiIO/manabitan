@@ -7219,26 +7219,33 @@ void 0 :
         let capacity = Math.max(16, oldCapacity);
         while (capacity < requiredCount) { capacity *= 2; }
         const arena = new TermContentMetadataArena(capacity, slotCapacity);
+        /* eslint-disable @stylistic/semi */
+        // The high-water mark includes empty IDs retained for reuse after
+        // rollback. Never truncate to the published/pending entry count.
+        const denseCount = this._termEntryContentMetaDenseCount
+        const rehash = forceRehash || oldSlotTable.length !== slotCapacity
         if (this._termContentMetadataArena !== null) {
-            arena.copyFrom(this._termContentMetadataArena);
+            arena.copyFrom(this._termContentMetadataArena, denseCount, !rehash)
         }
+        /* eslint-enable @stylistic/semi */
         const growDense = capacity !== oldCapacity;
         const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
         const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
+        /* eslint-disable @stylistic/semi */
         if (growDense) {
-            idTable.set(this._termEntryContentMetaIdTable);
-            offsetTable.set(this._termEntryContentMetaOffsetTable);
-            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
-            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
-            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+            idTable.set(this._termEntryContentMetaIdTable.subarray(0, denseCount))
+            offsetTable.set(this._termEntryContentMetaOffsetTable.subarray(0, denseCount))
+            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable.subarray(0, denseCount))
+            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable.subarray(0, denseCount))
+            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable.subarray(0, denseCount))
         }
-        if (forceRehash || oldSlotTable.length !== slotCapacity) {
-            arena.slots.fill(0);
+        /* eslint-enable @stylistic/semi */
+        if (rehash) {
+            // A fresh WASM memory is already zeroed; no old slots were copied.
             const mask = slotCapacity - 1;
-            const denseCount = this._termEntryContentMetaDenseCount;
             const useDense = denseCount <= oldSlotTable.length;
             const scanLength = useDense ? denseCount : oldSlotTable.length;
             for (let i = 0; i < scanLength; ++i) {

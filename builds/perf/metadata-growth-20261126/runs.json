@@ -1,0 +1,113 @@
+{
+  "parentCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidateRuntimeCommit": "39b09bb51c4bb04f369d37fd4701e36aa04019e2",
+  "node": "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+  "parent": "/workspace/scratch/3b76e685bf40/manabitan",
+  "candidate": "/workspace/scratch/3b76e685bf40/jmdict",
+  "cache": "/workspace/scratch/21d3ef023f32/manabitan/builds/e2e-dictionary-cache",
+  "scope": "Deterministic operation accounting and exact byte parity. No timing or full-import claim.",
+  "attempts": [
+    {
+      "dictionary": "jmdict",
+      "kind": "concurrent-parser-workers",
+      "log": "jmdict-initial.log",
+      "session": 61143,
+      "exit": 137,
+      "complete": false
+    },
+    {
+      "dictionary": "jmdict",
+      "kind": "sequential-groups-initial-planning-fixture",
+      "log": "jmdict-sequential-1.log",
+      "report": "jmdict-sequential-1.json",
+      "session": 91462,
+      "exit": 1,
+      "complete": false,
+      "reason": "Planning-only synthetic result omitted a required timestamp; corrected before the next attempt."
+    },
+    {
+      "dictionary": "jmdict",
+      "kind": "sequential-groups-no-explicit-gc",
+      "log": "jmdict-sequential-2.log",
+      "session": null,
+      "exit": null,
+      "complete": false,
+      "completedRowsLogged": 480000,
+      "reason": "No final receipt. Exec result containing session ID was context-truncated; final exit status unavailable. No success or savings admitted."
+    },
+    {
+      "dictionary": "jmdict",
+      "kind": "sequential-groups-explicit-gc",
+      "log": "jmdict-bounded.log",
+      "report": "jmdict-bounded.json",
+      "status": "jmdict-bounded.exit",
+      "session": 58476,
+      "exit": 0,
+      "complete": true,
+      "arguments": [
+        "--expose-gc",
+        "--max-old-space-size=256"
+      ],
+      "timeoutSeconds": null,
+      "harnessSha256AtRun": "77a4cfb7fa0307004a02407a2357ac5eeedcafeca2975f7ce59dda561fc4d839"
+    },
+    {
+      "dictionary": "jitendex",
+      "kind": "sequential-groups-explicit-gc",
+      "log": "jitendex-bounded.json.log",
+      "report": "jitendex-bounded.json",
+      "status": "jitendex-bounded.json.exit",
+      "session": 47258,
+      "exit": 0,
+      "complete": true,
+      "arguments": [
+        "--expose-gc",
+        "--max-old-space-size=256"
+      ],
+      "timeoutSeconds": 600,
+      "command": "MANABITAN_PERF_NODE=/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node bash test/perf/metadata-growth-20261126/run-bounded.sh /workspace/scratch/3b76e685bf40/manabitan /workspace/scratch/3b76e685bf40/jmdict /workspace/scratch/21d3ef023f32/manabitan/builds/e2e-dictionary-cache dev/perf/metadata-growth-20261126/jitendex-bounded.json jitendex",
+      "harnessSha256AtRun": "77a4cfb7fa0307004a02407a2357ac5eeedcafeca2975f7ce59dda561fc4d839"
+    },
+    {
+      "dictionary": "vndb",
+      "kind": "sequential-groups-explicit-gc",
+      "log": "vndb-bounded.json.log",
+      "report": "vndb-bounded.json",
+      "status": "vndb-bounded.json.exit",
+      "session": 86549,
+      "exit": 134,
+      "complete": false,
+      "arguments": [
+        "--expose-gc",
+        "--max-old-space-size=256"
+      ],
+      "timeoutSeconds": 600,
+      "command": "MANABITAN_PERF_NODE=/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node bash test/perf/metadata-growth-20261126/run-bounded.sh /workspace/scratch/3b76e685bf40/manabitan /workspace/scratch/3b76e685bf40/jmdict /workspace/scratch/21d3ef023f32/manabitan/builds/e2e-dictionary-cache dev/perf/metadata-growth-20261126/vndb-bounded.json vndb",
+      "harnessSha256AtRun": "77a4cfb7fa0307004a02407a2357ac5eeedcafeca2975f7ce59dda561fc4d839",
+      "completedRowsLogged": 0,
+      "reason": "256MiB V8 heap exhausted while retaining all ZIP media entry objects before parsing a bank. Harness entry enumeration changed to retain only term-bank entries."
+    },
+    {
+      "dictionary": "vndb",
+      "kind": "sequential-groups-explicit-gc-streamed-zip-entries",
+      "log": "vndb-streamed.json.log",
+      "report": "vndb-streamed.json",
+      "status": "vndb-streamed.json.exit",
+      "session": 92397,
+      "exit": 0,
+      "complete": true,
+      "arguments": [
+        "--expose-gc",
+        "--max-old-space-size=256"
+      ],
+      "timeoutSeconds": 600,
+      "harnessSha256AtRun": "5a022d8a0c1b65bf999d5d0321af20b0ca8b74f38633f3381a8372fd4b9a9236",
+      "command": "MANABITAN_PERF_NODE=/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node bash test/perf/metadata-growth-20261126/run-bounded.sh /workspace/scratch/3b76e685bf40/manabitan /workspace/scratch/3b76e685bf40/jmdict /workspace/scratch/21d3ef023f32/manabitan/builds/e2e-dictionary-cache dev/perf/metadata-growth-20261126/vndb-streamed.json vndb"
+    }
+  ],
+  "artifactDirectory": "builds/perf/metadata-growth-20261126",
+  "priorArtifactDirectory": "dev/perf/metadata-growth-20261126",
+  "reproduction": "Use test/perf/metadata-growth-20261126/run-bounded.sh with MANABITAN_PERF_NODE set to Node22.22.0, the parent and candidate checkouts, pinned fixture cache, a new output JSON path, and jmdict, jitendex, or vndb. The final harness streams ZIP entries to retain only term-bank wrappers. Initial JMdict/Jitendex success used identical metadata logic with all ZIP entries enumerated first; both exact sources are retained.",
+  "candidateRevisionKind": "Local measured source commit; the publishing receipt maps its exact tree to the remote PR commit.",
+  "archiveMapping": "Attempt filenames are original observation names. evidence.json rawArtifacts maps each to its byte-preserving gzip under raw/."
+}

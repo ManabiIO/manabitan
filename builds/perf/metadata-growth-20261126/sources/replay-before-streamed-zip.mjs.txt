@@ -1,0 +1,392 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+/* eslint @stylistic/semi: ["error", "never"] */
+
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {createReadStream, openAsBlob} from 'node:fs'
+import {mkdtemp, open, readFile, rm, writeFile} from 'node:fs/promises'
+import {tmpdir} from 'node:os'
+import {join, resolve} from 'node:path'
+import {pathToFileURL} from 'node:url'
+import {BlobReader, Uint8ArrayWriter, ZipReader} from '@zip.js/zip.js'
+
+// This is an accounting and equality replay, never a timing benchmark. The
+// production planner/parser, canonical scanner, metadata publication,
+// and record/index encoders run unchanged. The storage boundary is intercepted:
+// uncompressed content goes to one scratch file at deterministic offsets, while
+// record/index payloads are checked before their normal persistence wrapper.
+const [parentPath, candidatePath, cachePath, outputPath, dictionary = 'jmdict'] = process.argv.slice(2)
+assert(parentPath && candidatePath && cachePath && outputPath)
+const parentRoot = resolve(parentPath)
+const candidateRoot = resolve(candidatePath)
+// Both repository paths are explicit local CLI inputs.
+// eslint-disable-next-line no-unsanitized/method
+const localImport = (root, filename) => import(pathToFileURL(join(root, filename)))
+const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const sourceFiles = ['ext/js/dictionary/dictionary-database.js', 'ext/js/dictionary/term-content-metadata-arena.js', 'ext/js/dictionary/term-content-canonical-scan.js', 'ext/js/dictionary/term-record-opfs-store.js', 'ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-bank-source-pipeline.js']
+async function sourceIdentities() {
+    const result = {}
+    for (const [name, root] of [['parent', parentRoot], ['candidate', candidateRoot]]) {
+        result[name] = {}
+        for (const file of sourceFiles) { result[name][file] = sha(await readFile(join(root, file))) }
+    }
+    return result
+}
+const identities = await sourceIdentities()
+const parser = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-wasm-parser.js')
+const pipelineModule = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-source-pipeline.js')
+const preparation = await localImport(candidateRoot, 'ext/js/dictionary/term-lookup-index-preparation.js')
+const {snapshotTermBankExperiments} = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-experiments.js')
+const lockBytes = await readFile(join(candidateRoot, 'test/perf/dictionaries.lock.json'))
+assert.deepEqual(lockBytes, await readFile(join(parentRoot, 'test/perf/dictionaries.lock.json')))
+const fixture = JSON.parse(lockBytes).dictionaries[dictionary]
+assert(fixture)
+const archivePath = join(cachePath, fixture.cacheFile)
+const archiveHash = createHash('sha256')
+for await (const bytes of createReadStream(archivePath)) { archiveHash.update(bytes) }
+assert.equal(archiveHash.digest('hex'), fixture.sha256)
+const archive = await openAsBlob(archivePath)
+assert.equal(archive.size, fixture.sizeBytes)
+const wasm = await readFile(join(candidateRoot, 'ext/lib/term-bank-parser.wasm'))
+assert.deepEqual(wasm, await readFile(join(parentRoot, 'ext/lib/term-bank-parser.wasm')))
+parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
+const canonicalWasm = await readFile(join(candidateRoot, 'ext/lib/term-content-canonical-scan-v1.wasm'))
+assert.deepEqual(canonicalWasm, await readFile(join(parentRoot, 'ext/lib/term-content-canonical-scan-v1.wasm')))
+const canonicalModule = await WebAssembly.compile(canonicalWasm)
+
+const sourceGroups = []
+let plannedGroups = []
+// Capture the real scheduler's group decisions without allocating worker
+// heaps. Empty synthetic replies are used ONLY for planning. Every captured
+// source group is then actually inflated, validated, parsed and encoded below,
+// serially with one reusable native heap. No synthetic reply counts as data.
+class BrowserWorker extends EventTarget {
+    postMessage(data) {
+        if (data.type === 'parse') {
+            plannedGroups.push({id: data.id, files: data.sourceMetadata.map(({filename}) => filename), bytes: data.sourceBuffers.map((buffer) => buffer.byteLength)})
+            queueMicrotask(() => this.dispatchEvent(new MessageEvent('message', {data: {type: 'result', id: data.id, rowCount: 0, resultSentEpochMs: Date.now(), chunk: null, profile: {rowCount: 0}, borrowsWorkerMemory: false, ownsContentBytes: false}})))
+        } else {
+            assert.equal(data.type, 'initialize')
+            queueMicrotask(() => this.dispatchEvent(new MessageEvent('message', {data: {type: 'ready'}})))
+        }
+    }
+
+    terminate() {}
+}
+globalThis.Worker = BrowserWorker
+Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {hardwareConcurrency: 4, deviceMemory: 8}})
+
+const temp = await mkdtemp(join(tmpdir(), 'manabitan-metadata-growth-'))
+const contentFile = await open(join(temp, 'content.bin'), 'wx+')
+const fields = [
+    'HashPairTable',
+    'Hash1Table',
+    'Hash2Table',
+    'StateTable',
+    'LengthTable',
+    'SignaturePresentTable',
+    'Signature1Table',
+    'Signature2Table',
+    'Signature3Table',
+    'IdTable',
+    'OffsetTable',
+    'DictNameIdTable',
+    'RecentSourceBatchIdTable',
+    'RecentSourceOffsetTable',
+]
+const countFields = ['DenseCount', 'HashPairCount', 'HashPairPendingCount', 'FreeIndexes', 'DictNames']
+const asBytes = (view) => Buffer.from(view.buffer, view.byteOffset, view.byteLength)
+const payloadDigest = createHash('sha256')
+const recordDigest = createHash('sha256')
+const groups = []
+const profiles = []
+let rowCount = 0
+
+function trackGrowth(database) {
+    const original = database._resizeTermContentMetadataArena.bind(database)
+    const events = []
+    database._resizeTermContentMetadataArena = (...args) => {
+        const previous = database._termContentMetadataArena
+        const before = {dense: database._termEntryContentMetaDenseCount, capacity: database._termEntryContentMetaHash1Table.length, slots: database._termEntryContentMetaHashPairTable.length}
+        const work = {copiedBytes: 0, filledBytes: 0}
+        const restore = []
+        // Only the synchronous growth method is instrumented. Worker threads
+        // have independent prototypes; all methods are restored before awaits.
+
+        for (const constructor of [Uint8Array, Uint32Array, Float64Array]) {
+            const set = constructor.prototype.set
+            const fill = constructor.prototype.fill
+            constructor.prototype.set = function countSet(source, offset) {
+                work.copiedBytes += source.length * constructor.BYTES_PER_ELEMENT
+                return set.call(this, source, offset)
+            }
+            constructor.prototype.fill = function countFill(value, start = 0, end = this.length) {
+                assert(start >= 0 && end >= start && end <= this.length)
+                work.filledBytes += (end - start) * constructor.BYTES_PER_ELEMENT
+                return fill.call(this, value, start, end)
+            }
+            restore.push(() => {
+                constructor.prototype.set = set
+                constructor.prototype.fill = fill
+            })
+        }
+        try { return original(...args) } finally {
+            for (const fn of restore) { fn() }
+            if (database._termContentMetadataArena !== previous) {
+                events.push({arguments: args, before, after: {capacity: database._termEntryContentMetaHash1Table.length, slots: database._termEntryContentMetaHashPairTable.length}, ...work})
+            } else {
+                assert.equal(work.copiedBytes, 0)
+                assert.equal(work.filledBytes, 0)
+            }
+        }
+    }
+    return events
+}
+
+async function makeArm(root, isParent) {
+    const {DictionaryDatabase} = await localImport(root, 'ext/js/dictionary/dictionary-database.js')
+    const {TermRecordOpfsStore} = await localImport(root, 'ext/js/dictionary/term-record-opfs-store.js')
+    const {NativeCanonicalScanner} = await localImport(root, 'ext/js/dictionary/term-content-canonical-scan.js')
+    const db = new DictionaryDatabase()
+    db._bulkImportTransactionOpen = true
+    db._deferTermsVirtualTableSync = true
+    db._termContentZstdInitialized = true
+    db._nativeCanonicalScanner = new NativeCanonicalScanner({loadModule: async () => canonicalModule})
+    const growth = trackGrowth(db)
+    const arm = {db, growth, offset: 0, emittedContent: [], emittedRecords: [], reads: 0}
+    // Keep production metadata resolution/publication and remove only the
+    // compression/storage boundary. Both arms use identical source offsets.
+    db._tryBeginPersistArtifactTermContent = () => null
+    db._persistArtifactTermContent = async (_dictionary, contentBytes, contentDictNames, uniformContentDictName, spans) => {
+        assert.equal(contentDictNames, null)
+        assert(spans !== null)
+        assert.equal(contentBytes.length, 0)
+        const offsets = new Float64Array(spans.lengths.length)
+        let total = 0
+        for (const length of spans.lengths) { total += length }
+        const output = Buffer.allocUnsafe(total)
+        let cursor = 0
+        for (let i = 0; i < spans.lengths.length; ++i) {
+            const length = spans.lengths[i]
+            offsets[i] = arm.offset + cursor
+            output.set(spans.buffer.subarray(spans.offsets[i], spans.offsets[i] + length), cursor)
+            cursor += length
+        }
+        if (isParent) {
+            for (let written = 0; written < output.length;) {
+                const {bytesWritten} = await contentFile.write(output, written, output.length - written, arm.offset + written)
+                assert(bytesWritten > 0)
+                written += bytesWritten
+            }
+        }
+        arm.emittedContent.push(output)
+        arm.offset += total
+        return {pendingOffsets: offsets, pendingLengths: spans.lengths, pendingResolvedDictNames: uniformContentDictName, blockProfile: null}
+    }
+    const read = async (offset, length) => {
+        ++arm.reads
+        const bytes = Buffer.allocUnsafe(length)
+        for (let received = 0; received < length;) {
+            const {bytesRead} = await contentFile.read(bytes, received, length - received, offset + received)
+            assert(bytesRead > 0, 'Component content read reached EOF')
+            received += bytesRead
+        }
+        return {status: 'ok', bytes}
+    }
+    db._readTermEntryContentBytesDetailed = read
+    db._readTermEntryContentBytesDetailedBatch = (requests) => Promise.all(requests.map(({contentOffset, contentLength}) => read(contentOffset, contentLength)))
+    const recordStore = new TermRecordOpfsStore()
+    recordStore._appendEncodedChunk = async (...args) => { arm.emittedRecords.push([args[2], Buffer.from(args[5]), Buffer.from(args[6])]) }
+    db._appendResolvedArtifactTermRecords = async (chunk, offsets, lengths, dictNames) => {
+        assert.equal(typeof dictNames, 'string')
+        await recordStore._encodeAndAppendArtifactChunkForState({}, chunk, rowCount + 1, offsets, lengths, chunk.termRecordPreinternedPlan, dictNames, chunk.preparedLookupIndexes)
+    }
+    return arm
+}
+
+const before = await makeArm(parentRoot, true)
+const after = await makeArm(candidateRoot, false)
+const reader = new ZipReader(new BlobReader(archive), {useWebWorkers: false})
+const entries = await reader.getEntries()
+const termFiles = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const rawReader = new pipelineModule.RawZipPayloadReader(archive)
+const sourcePipeline = new pipelineModule.TermBankSourcePipeline({
+    termFiles,
+    enabled: true,
+    read: async (file) => await file.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}),
+    readCompressed: async (file, signal) => await rawReader.read(file, signal),
+})
+
+async function consume(source, progress) {
+    const group = {rows: source.rowCount, totalRowsEstimate: progress.totalRows, uniqueContents: source.contentDedupPlan.uniqueCount}
+    for (const arm of [before, after]) {
+        const chunk = {
+            ...source,
+            dictionary: fixture.expectedTitle,
+            dictionaryTotalRows: progress.totalRows,
+            contentDedupPlan: structuredClone(source.contentDedupPlan),
+            releaseBorrowedContent: undefined,
+            uniformContentDictName: 'raw-v6',
+            contentDictNameList: null,
+            useResolvedContentReferences: true,
+        }
+        await arm.db._bulkAddArtifactTermsChunkWithContentDedup(chunk)
+    }
+    assert.equal(after.offset, before.offset)
+    assert.deepEqual(after.emittedContent, before.emittedContent)
+    assert.deepEqual(after.emittedRecords, before.emittedRecords)
+    for (const bytes of after.emittedContent) { payloadDigest.update(bytes) }
+    for (const [, records, index] of after.emittedRecords) {
+        recordDigest.update(records)
+        recordDigest.update(index)
+    }
+    before.emittedContent.length = 0
+    after.emittedContent.length = 0
+    before.emittedRecords.length = 0
+    after.emittedRecords.length = 0
+    const metadataDigest = createHash('sha256')
+    for (const field of fields) {
+        const a = asBytes(before.db['_termEntryContentMeta' + field])
+        const b = asBytes(after.db['_termEntryContentMeta' + field])
+        assert.deepEqual(b, a, `${field} differs after group ${groups.length}`)
+        metadataDigest.update(field)
+        metadataDigest.update(b)
+    }
+    for (const field of countFields) { assert.deepEqual(after.db['_termEntryContentMeta' + field], before.db['_termEntryContentMeta' + field]) }
+    assert.deepEqual(after.db._termEntryContentMetaCollisionsByHashPair, before.db._termEntryContentMetaCollisionsByHashPair)
+    const schedule = (events) => events.map(({copiedBytes: _copied, filledBytes: _filled, ...event}) => event)
+    assert.deepEqual(schedule(after.growth), schedule(before.growth))
+    groups.push({...group, dense: after.db._termEntryContentMetaDenseCount, published: after.db._termEntryContentMetaHashPairCount, contentBytes: after.offset, metadataSha256: metadataDigest.digest('hex')})
+    rowCount += source.rowCount
+    process.stderr.write(`${dictionary}: ${rowCount}/${fixture.termRows} rows\n`)
+}
+
+const media = fixture.mediaFiles > 0
+const options = {
+    emitTermByteLists: false,
+    computeContentHashes: true,
+    emitContentSlab: true,
+    emitTokenBinaryContent: true,
+    mediaHintFastScan: media,
+    projectImagePaths: media,
+    validateGlossaryTypes: true,
+    prepareLookupIndexes: true,
+    maxPendingChunks: 2,
+}
+const experiments = snapshotTermBankExperiments(options)
+const fileByName = new Map(termFiles.map((file) => [file.filename, file]))
+async function replayGroups(captured, totalBytes) {
+    let estimatedRows = 0
+    let processedRows = 0
+    for (let index = 0; index < captured.length; ++index) {
+        const group = captured[index]
+        const sources = []
+        for (const filename of group.files) {
+            const file = fileByName.get(filename)
+            assert(file, `Unknown source bank ${filename}`)
+            const bytes = await rawReader.read(file, new AbortController().signal)
+            sources.push({bytes, filename, compressionMethod: file.compressionMethod, compressedSize: file.compressedSize, uncompressedSize: file.uncompressedSize, signature: file.signature})
+        }
+        const sourceBytes = sources.reduce((total, source) => total + source.uncompressedSize, 0)
+        const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, experiments, true)
+        let emitted = false
+        await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, async (chunk) => {
+            assert.equal(emitted, false)
+            emitted = true
+            const owned = parser.copyWasmBackedColumnChunk(chunk, true, media, true, preloadedSource)
+            owned.preparedLookupIndexes ??= preparation.prepareTermLookupIndexesFromPreinternedPlan(owned, null, experiments)?.indexes
+            assert(preparation.hasCompletePreparedTermLookupIndexes(owned.preparedLookupIndexes, owned.rowCount))
+            if (index === 0) { estimatedRows = Math.max(chunk.rowCount, Math.round(chunk.rowCount * totalBytes / sourceBytes)) }
+            processedRows += chunk.rowCount
+            await consume(owned, {totalRows: index + 1 === captured.length ? processedRows : Math.max(processedRows, estimatedRows)})
+        }, 2048, {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, compactContentMetadata: true, preloadedSource})
+        assert.equal(emitted, true)
+        profiles.push(parser.consumeLastTermBankWasmParseProfile())
+        // Collection is outside production operation accounting. It bounds
+        // the two-arm replay without changing cache or metadata decisions.
+        globalThis.gc?.()
+        await writeReport(`${outputPath}.checkpoint`, false, null)
+    }
+}
+async function writeReport(path, complete, error, flag = 'w') {
+    const sum = (events, key) => events.reduce((result, event) => result + event[key], 0)
+    const summary = {
+        rows: rowCount,
+        groups: groups.length,
+        growthEvents: before.growth.length,
+        parentCopiedBytes: sum(before.growth, 'copiedBytes'),
+        candidateCopiedBytes: sum(after.growth, 'copiedBytes'),
+        parentFilledBytes: sum(before.growth, 'filledBytes'),
+        candidateFilledBytes: sum(after.growth, 'filledBytes'),
+        contentBytes: after.offset,
+        parentReadCount: before.reads,
+        candidateReadCount: after.reads,
+    }
+    summary.copyBytesAvoided = summary.parentCopiedBytes - summary.candidateCopiedBytes
+    summary.explicitFillBytesAvoided = summary.parentFilledBytes - summary.candidateFilledBytes
+    const report = {
+        complete,
+        error,
+        node: process.version,
+        dictionary,
+        fixture,
+        hardwareConcurrency: 4,
+        deviceMemory: 8,
+        lockSha256: sha(lockBytes),
+        parserWasmSha256: sha(wasm),
+        canonicalWasmSha256: sha(canonicalWasm),
+        identities,
+        scope: 'Actual source-group decisions captured from the production scheduler with planning-only empty worker replies; every group is then actually inflated, CRC-checked, parsed and encoded sequentially in one native heap. Production native canonical metadata resolution, publication, and record/index encoding run in both arms. Compression, media normalization, SQLite, OPFS, real worker transport, and UI are excluded. Raw content persistence is intercepted at deterministic uncompressed offsets. Optional explicit GC bounds harness memory between groups. No elapsed-time, complete-import, or full-persisted-database claim.',
+        summary,
+        contentSha256: payloadDigest.copy().digest('hex'),
+        recordIndexSha256: recordDigest.copy().digest('hex'),
+        parentGrowth: before.growth,
+        candidateGrowth: after.growth,
+        parentScanner: before.db._nativeCanonicalScanner.stats,
+        candidateScanner: after.db._nativeCanonicalScanner.stats,
+        groups,
+        sourceGroups,
+        profiles,
+        memory: process.memoryUsage(),
+    }
+    await writeFile(path, `${JSON.stringify(report, null, 2)}\n`, {flag})
+    return summary
+}
+
+let complete = false
+let error = null
+try {
+    for (let start = 0; start < termFiles.length;) {
+        const compressedPlan = sourcePipeline.createCompressedImportRunPlan(start)
+        assert(compressedPlan !== null, 'The locked fixture requires its ordinary compressed planner route')
+        plannedGroups = []
+        const unexpectedData = () => { throw new Error('Planning worker unexpectedly emitted data') }
+        assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(compressedPlan.loaders, compressedPlan.estimatedByteLengths, 3, unexpectedData, options), true)
+        parser.consumeLastTermBankWasmParseProfile()
+        sourcePipeline.releaseBatch(compressedPlan.files)
+        plannedGroups.sort((a, b) => a.id - b.id)
+        assert.equal(plannedGroups.flatMap(({files}) => files).length, compressedPlan.files.length)
+        sourceGroups.push(...plannedGroups)
+        await replayGroups(plannedGroups, compressedPlan.estimatedByteLengths.reduce((sum, bytes) => sum + bytes, 0))
+        start += compressedPlan.files.length
+    }
+    assert.equal(rowCount, fixture.termRows)
+    assert(before.db._nativeCanonicalScanner.stats.calls > 0)
+    assert.equal(after.db._nativeCanonicalScanner.stats.calls, before.db._nativeCanonicalScanner.stats.calls)
+    complete = true
+} catch (failure) {
+    error = failure.stack ?? String(failure)
+    throw failure
+} finally {
+    await sourcePipeline.dispose()
+    await parser.disposeParallelTermBankParser()
+    await reader.close()
+    await contentFile.close()
+    await rm(temp, {recursive: true})
+    assert.deepEqual(await sourceIdentities(), identities, 'Source files changed during the component replay')
+    const summary = await writeReport(outputPath, complete, error, 'wx')
+    console.log(JSON.stringify({complete, error, ...summary}))
+}

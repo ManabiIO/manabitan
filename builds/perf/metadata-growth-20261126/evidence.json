@@ -1,0 +1,318 @@
+{
+  "auditPassed": true,
+  "parentCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidateRuntimeCommit": "39b09bb51c4bb04f369d37fd4701e36aa04019e2",
+  "candidateRevisionKind": "Local measured source commit; the publishing receipt maps its exact tree to the remote PR commit.",
+  "sourceIdentities": {
+    "parent": {
+      "ext/js/dictionary/dictionary-database.js": "c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51",
+      "ext/js/dictionary/term-content-metadata-arena.js": "9aa2d546bb46cd0073b33bd31c43d76f421f158b529995dc94ee583dee54e14c",
+      "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "ext/js/dictionary/term-record-opfs-store.js": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8"
+    },
+    "candidate": {
+      "ext/js/dictionary/dictionary-database.js": "e45ca4795755acfc4ef2b2e80f4ef61f6dd5e208b430c31288c2969925ea7eb7",
+      "ext/js/dictionary/term-content-metadata-arena.js": "5dd8848ed6ca2a1a03c788d600e5b109d030b6238beb6b856e89516e35061200",
+      "ext/js/dictionary/term-content-canonical-scan.js": "5fb67d6dc15b0ac2a60c3f6c620961baa26f1aa90160679c82d3b3f6fd6e0338",
+      "ext/js/dictionary/term-record-opfs-store.js": "dad0317f3fd6e84866d2b2a6db65676f94f4e3d23d5b29f0c73a793586634bd1",
+      "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+      "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8"
+    }
+  },
+  "scope": "Actual source-group decisions captured from the production scheduler with planning-only empty worker replies; every group is then actually inflated, CRC-checked, parsed and encoded sequentially in one native heap. Production native canonical metadata resolution, publication, and record/index encoding run in both arms. Compression, media normalization, SQLite, OPFS, real worker transport, and UI are excluded. Raw content persistence is intercepted at deterministic uncompressed offsets. Optional explicit GC bounds harness memory between groups. No elapsed-time, complete-import, or full-persisted-database claim.",
+  "comparisonMethod": "The replay asserts exact equality of full allocated hot/cold metadata columns, slot tables, counters, free IDs, dictionary names and collisions after every group. It also asserts exact raw content, encoded record and index bytes and identical growth schedules. This audit checks receipt arithmetic and derives each observed set/fill byte count from the actual growth capacities and high-water marks.",
+  "timingClaim": false,
+  "fullPersistedDatabaseParityClaim": false,
+  "results": [
+    {
+      "report": "raw/jmdict-bounded.json.gz",
+      "dictionary": "jmdict",
+      "rows": 528299,
+      "groups": 12,
+      "growthEvents": 1,
+      "parentCopiedBytes": 0,
+      "candidateCopiedBytes": 0,
+      "parentFilledBytes": 4194304,
+      "candidateFilledBytes": 0,
+      "contentBytes": 100300626,
+      "parentReadCount": 0,
+      "candidateReadCount": 0,
+      "copyBytesAvoided": 0,
+      "explicitFillBytesAvoided": 4194304,
+      "contentSha256": "24ecc0fee1a9063320349ee82497eea910a65db95e1834c97a4b1f443882acd2",
+      "recordIndexSha256": "63c78b28234045da6d189f3cc65c430b7a53529636f916da7aba485916ff1b87",
+      "finalMetadataSha256": "ae9158171128ca76b790da581d3a7029de96af47302d68521f0b60b7b41def41"
+    },
+    {
+      "report": "raw/jitendex-bounded.json.gz",
+      "dictionary": "jitendex",
+      "rows": 436555,
+      "groups": 22,
+      "growthEvents": 2,
+      "parentCopiedBytes": 14155776,
+      "candidateCopiedBytes": 13699692,
+      "parentFilledBytes": 6291456,
+      "candidateFilledBytes": 0,
+      "contentBytes": 389687485,
+      "parentReadCount": 34,
+      "candidateReadCount": 34,
+      "copyBytesAvoided": 456084,
+      "explicitFillBytesAvoided": 6291456,
+      "contentSha256": "18f65afa7943882619206ace937ce2ead9e18a8bf9aa3268355d479e8633e636",
+      "recordIndexSha256": "81592d7327b5a0d8539ca14792902010874b1f9627d13001edf17c48eaf82451",
+      "finalMetadataSha256": "0346c80da100f028c40dbe551b636c882dd68dfcbd12789e2bb965d02967dc2b"
+    },
+    {
+      "report": "raw/vndb-streamed.json.gz",
+      "dictionary": "vndb",
+      "rows": 6648310,
+      "groups": 170,
+      "growthEvents": 2,
+      "parentCopiedBytes": 7077888,
+      "candidateCopiedBytes": 7026426,
+      "parentFilledBytes": 3145728,
+      "candidateFilledBytes": 0,
+      "contentBytes": 91366785,
+      "parentReadCount": 714,
+      "candidateReadCount": 714,
+      "copyBytesAvoided": 51462,
+      "explicitFillBytesAvoided": 3145728,
+      "contentSha256": "2bffb5a78229756dfcbe1c618cef2d8552b525c1cbd2d3f57728343533ae1900",
+      "recordIndexSha256": "4ca1223855e20d9fcdd00d81d976dc9bec1b600cd776edf065b0b4ae72b717fa",
+      "finalMetadataSha256": "d1da6df62d91dea7d88855b5ad65984804490ab959cd18ab272b326fcb12c1c6"
+    }
+  ],
+  "artifacts": {
+    "raw/harness-lint-initial.json.gz": {
+      "bytes": 6865,
+      "sha256": "bec0841c956d844f503da9ac9f3ea80bf484c5092e55be505b103ff293497f73"
+    },
+    "raw/harness-lint-initial.log.gz": {
+      "bytes": 522,
+      "sha256": "08304d87e8b0ecc605ce950cc13f15bd27af2c05abba5e0c7f5f802f040467ca"
+    },
+    "raw/harness-lint.exit.gz": {
+      "bytes": 22,
+      "sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf"
+    },
+    "raw/harness-lint.json.gz": {
+      "bytes": 336,
+      "sha256": "db524f53129e71256ea96ef94d937218596f42aee82d46fe6d0f4b9e099109c8"
+    },
+    "raw/harness-lint.log.gz": {
+      "bytes": 522,
+      "sha256": "08304d87e8b0ecc605ce950cc13f15bd27af2c05abba5e0c7f5f802f040467ca"
+    },
+    "raw/jitendex-bounded.json.checkpoint.gz": {
+      "bytes": 7965,
+      "sha256": "783eee1e9173de118aba82dd3e171314c8691d2c7be78af40967fa74f8f12902"
+    },
+    "raw/jitendex-bounded.json.exit.gz": {
+      "bytes": 22,
+      "sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf"
+    },
+    "raw/jitendex-bounded.json.gz": {
+      "bytes": 7963,
+      "sha256": "df8964661f04232dcad9ce8c4d8207db7b41f6b111637466405e45aeb03733e1"
+    },
+    "raw/jitendex-bounded.json.log.gz": {
+      "bytes": 420,
+      "sha256": "5aa8d8914de3cd7303223dcb7299b737a13723a7badf37756cb1387469d2b567"
+    },
+    "raw/jmdict-bounded.exit.gz": {
+      "bytes": 22,
+      "sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf"
+    },
+    "raw/jmdict-bounded.json.checkpoint.gz": {
+      "bytes": 4982,
+      "sha256": "8f89928efddd51b18f9e72c5d3307e11e37cf4c2d3bbcca5c09d02ca7d4bb74d"
+    },
+    "raw/jmdict-bounded.json.gz": {
+      "bytes": 4976,
+      "sha256": "2cac59e2826fe98abc0ff978cbafff7195fd65c1edf31d3496e5007ffd8ba4a6"
+    },
+    "raw/jmdict-bounded.log.gz": {
+      "bytes": 359,
+      "sha256": "112a242ec2c713f4e78e4db040469a562a4a1c076e3cb7d6eac0eff1a1752598"
+    },
+    "raw/jmdict-initial.log.gz": {
+      "bytes": 169,
+      "sha256": "d21d23603744987f4a16136f808635102204179a473a853e9f08b054e093d770"
+    },
+    "raw/jmdict-sequential-1.json.gz": {
+      "bytes": 2007,
+      "sha256": "29012b4f3f3057dfd13b6740a4b3b96b6a93c53c4740cb26c862ff15dd12de02"
+    },
+    "raw/jmdict-sequential-1.log.gz": {
+      "bytes": 678,
+      "sha256": "cf3665b2cca769553ba504ee4ef82c5b31cd9d35fcf21be6440aa2fe2a8df272"
+    },
+    "raw/jmdict-sequential-2.log.gz": {
+      "bytes": 212,
+      "sha256": "fa691f72ebf7144494cf902c660b2df39993a3eeadad68a7afd4e7c8b5b73377"
+    },
+    "raw/vndb-bounded.json.exit.gz": {
+      "bytes": 24,
+      "sha256": "274d0035164388b09930d35c6a9c7ae1d48fc64fd5ba4a18c6471e18dbb47a4a"
+    },
+    "raw/vndb-bounded.json.log.gz": {
+      "bytes": 991,
+      "sha256": "364ed4b6ac3abc4d87c02780c2b223a140f074aba9c09e38825d00fca27a1142"
+    },
+    "raw/vndb-streamed.json.checkpoint.gz": {
+      "bytes": 30113,
+      "sha256": "ebe618db35a35e6e566ca45baeb39a08aa3b2ad0879565c5e849cc5483b0aed3"
+    },
+    "raw/vndb-streamed.json.exit.gz": {
+      "bytes": 22,
+      "sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf"
+    },
+    "raw/vndb-streamed.json.gz": {
+      "bytes": 30109,
+      "sha256": "46104fa68ceaa266741772130a34b7de1cdd7a8f0a7f02214b3ecb3a24b1d8c7"
+    },
+    "raw/vndb-streamed.json.log.gz": {
+      "bytes": 781,
+      "sha256": "13bf859ac91525746b1acd3b651f06ab85e98c4998630afedb0ba38a2a8a832f"
+    },
+    "runs.json": {
+      "bytes": 5662,
+      "sha256": "9a5bd4440049abe242fc82d0d6bf754a717fc73c3fe7df7ae3422c2d8c003cac"
+    },
+    "sources/audit.py.txt": {
+      "bytes": 4687,
+      "sha256": "35e92068e614ae65a973368d0c76c8737f9107936f29756d0c83a829e3722133"
+    },
+    "sources/replay-before-streamed-zip.mjs.txt": {
+      "bytes": 21200,
+      "sha256": "77a4cfb7fa0307004a02407a2357ac5eeedcafeca2975f7ce59dda561fc4d839"
+    },
+    "sources/replay-streamed-zip.mjs.txt": {
+      "bytes": 21397,
+      "sha256": "5a022d8a0c1b65bf999d5d0321af20b0ca8b74f38633f3381a8372fd4b9a9236"
+    },
+    "sources/run-bounded-executed.sh.txt": {
+      "bytes": 600,
+      "sha256": "f6778e432d4919d59fab1a13408e49074c5b77eed28de15f9a3d5c5e93018889"
+    }
+  },
+  "rawArtifacts": {
+    "harness-lint-initial.json": {
+      "archive": "raw/harness-lint-initial.json.gz",
+      "bytes": 21987,
+      "sha256": "83ff7cc4a15a3ed77aced32ceabb34055f0b6bc3117b5c6d0bd325a8bc219cfc"
+    },
+    "harness-lint-initial.log": {
+      "archive": "raw/harness-lint-initial.log.gz",
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "harness-lint.exit": {
+      "archive": "raw/harness-lint.exit.gz",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "harness-lint.json": {
+      "archive": "raw/harness-lint.json.gz",
+      "bytes": 498,
+      "sha256": "31f386cb8a4ded3eb304b7786954cca24bbc425346b96a70ebddc4a815d13fc9"
+    },
+    "harness-lint.log": {
+      "archive": "raw/harness-lint.log.gz",
+      "bytes": 1042,
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    "jitendex-bounded.json.checkpoint": {
+      "archive": "raw/jitendex-bounded.json.checkpoint.gz",
+      "bytes": 79021,
+      "sha256": "ebbe91706938454b3eceac59db3bb6766625658565b41b0d019df9a0eb8e9401"
+    },
+    "jitendex-bounded.json.exit": {
+      "archive": "raw/jitendex-bounded.json.exit.gz",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "jitendex-bounded.json": {
+      "archive": "raw/jitendex-bounded.json.gz",
+      "bytes": 79020,
+      "sha256": "9ce5ab4318f2bcaad885af3c133271fe3d276136481005ae71c7bd8a0cd4f61e"
+    },
+    "jitendex-bounded.json.log": {
+      "archive": "raw/jitendex-bounded.json.log.gz",
+      "bytes": 1126,
+      "sha256": "6f685639bdd9e2954b205cda6cbed3301fe1c0c01776fe89296923ef207efc35"
+    },
+    "jmdict-bounded.exit": {
+      "archive": "raw/jmdict-bounded.exit.gz",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "jmdict-bounded.json.checkpoint": {
+      "archive": "raw/jmdict-bounded.json.checkpoint.gz",
+      "bytes": 41953,
+      "sha256": "1ce2987d69ed8a3634f2b551d5593cfa84b1c1c0ced8d54b87f7bda2b16d2281"
+    },
+    "jmdict-bounded.json": {
+      "archive": "raw/jmdict-bounded.json.gz",
+      "bytes": 41952,
+      "sha256": "a82f96b04ea88bd6355786fe4cf1960a208d0f0782cd7641fd7121122a4ecc3c"
+    },
+    "jmdict-bounded.log": {
+      "archive": "raw/jmdict-bounded.log.gz",
+      "bytes": 794,
+      "sha256": "c23886ac39913f1a81df6ee8049940293f43797b3abeb5f426023d95e8fbebc8"
+    },
+    "jmdict-initial.log": {
+      "archive": "raw/jmdict-initial.log.gz",
+      "bytes": 696,
+      "sha256": "b005d021f85ca2e98e1007b806410103bed5afffcbeb627cef1f8afc27eb4255"
+    },
+    "jmdict-sequential-1.json": {
+      "archive": "raw/jmdict-sequential-1.json.gz",
+      "bytes": 5372,
+      "sha256": "429ddbe9c1810b1373315aa73b8bd9f66d680c7b81209a39471fa15c0169ea03"
+    },
+    "jmdict-sequential-1.log": {
+      "archive": "raw/jmdict-sequential-1.log.gz",
+      "bytes": 1819,
+      "sha256": "78b80a38fd07fb28246336fb5013fede997a2e96740e81a63f5240049355891c"
+    },
+    "jmdict-sequential-2.log": {
+      "archive": "raw/jmdict-sequential-2.log.gz",
+      "bytes": 469,
+      "sha256": "ee293d0c163c3f0737824ad7258c3722b6e52e0b58473c02e969639205001f06"
+    },
+    "vndb-bounded.json.exit": {
+      "archive": "raw/vndb-bounded.json.exit.gz",
+      "bytes": 4,
+      "sha256": "e726b440cc164001999e718b51780d80314709efe06e7857282377be9111127b"
+    },
+    "vndb-bounded.json.log": {
+      "archive": "raw/vndb-bounded.json.log.gz",
+      "bytes": 3181,
+      "sha256": "224fc7a29362f2905f64c5ee9713831f2156233f056fa74f8cc7ee9f3f831d85"
+    },
+    "vndb-streamed.json.checkpoint": {
+      "archive": "raw/vndb-streamed.json.checkpoint.gz",
+      "bytes": 517443,
+      "sha256": "48be1612a1f154b9fee05071acb928f46f549b20f9733eb430bf6f9d5b2c827c"
+    },
+    "vndb-streamed.json.exit": {
+      "archive": "raw/vndb-streamed.json.exit.gz",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    "vndb-streamed.json": {
+      "archive": "raw/vndb-streamed.json.gz",
+      "bytes": 517442,
+      "sha256": "b52fa5c5377bdf001ab9c9e5a103ec5ef3c58fb7e25fdb2055dc6d35114a4370"
+    },
+    "vndb-streamed.json.log": {
+      "archive": "raw/vndb-streamed.json.log.gz",
+      "bytes": 5057,
+      "sha256": "11a473746eefde3465a0d8857e2f67c87944207a6250106b0e651340317a6c9d"
+    }
+  }
+}

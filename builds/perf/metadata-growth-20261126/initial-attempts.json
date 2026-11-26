@@ -1,0 +1,25 @@
+{
+  "focusedTests": {
+    "node": "v24.22.3",
+    "command": "node node_modules/vitest/vitest.mjs run test/term-content-metadata-growth.test.js test/term-content-metadata-arena.test.js test/dictionary-database-content-dedup.test.js test/dictionary-database-metadata-publication.test.js test/dictionary-database-canonical-epoch.test.js test/term-content-canonical-scan.test.js --maxWorkers=1 --testTimeout=60000",
+    "observedOutput": "\n RUN  v4.1.12 /workspace/scratch/3b76e685bf40/jmdict\n\n[vitest-pool]: Timeout terminating forks worker for test files /workspace/scratch/3b76e685bf40/jmdict/test/dictionary-database-content-dedup.test.js.\n",
+    "status": "Interrupted by operator after the worker-termination timeout; no assertion report was emitted",
+    "exitCode": 130
+  },
+  "concurrentLint": {
+    "node": "v24.22.3",
+    "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-database.js ext/js/dictionary/term-content-metadata-arena.js test/term-content-metadata-growth.test.js",
+    "observedOutput": "",
+    "status": "Interrupted without a result to sequence checks under host load",
+    "exitCode": 130
+  },
+  "concurrentMainTypes": {
+    "node": "v22.22.0",
+    "command": "node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json",
+    "observedOutput": "",
+    "status": "Interrupted without a result to sequence checks under host load",
+    "exitCode": 130
+  },
+  "hostLoadSnapshot": "76.67 58.19 29.79 100/1250 5",
+  "timingQualification": "No performance timing inference; the snapshot and durations diagnose local verification availability only"
+}

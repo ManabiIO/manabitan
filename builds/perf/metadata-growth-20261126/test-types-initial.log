@@ -1,0 +1,1 @@
+test/term-content-metadata-growth.test.js(53,13): error TS2353: Object literal may only specify known properties, and 'signature1' does not exist in type '{ id: number; offset: number; length: number; dictName: string; hash2?: number | undefined; }'.
