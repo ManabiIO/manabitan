@@ -1,0 +1,13 @@
+{
+  "baselinePath": "/workspace/scratch/fe1144369b6e/structured-screen/baseline.wasm",
+  "candidatePath": "/workspace/scratch/fe1144369b6e/manabitan-structured/dev/data/dictionary-wasm/term-bank-parser.wasm",
+  "wasmSha256": [
+    "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "051373ece6336a53091094fe1ee37a96ff3d771d6906a72f99ea6b7ee14137d6"
+  ],
+  "comparisons": 58126,
+  "accepted": 5556,
+  "digest": "441539473dcea19be2e4042046223f7394541910031b62c782743c82f26d06f9",
+  "node": "v24.22.3",
+  "scope": "Strict native hinted/unhinted parser acceptance and all row metadata; byte mutations and logical truncation across eight alignments. No performance measurement."
+}

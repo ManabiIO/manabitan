@@ -1,0 +1,261 @@
+{
+  "kind": "File-backed bounded full-corpus output parity replay; not an import benchmark",
+  "node": "v22.22.0",
+  "dictionary": "jmdict",
+  "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+  "wasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+  "groupSize": 2,
+  "termBanks": 53,
+  "sourceBytes": 171617523,
+  "rowCount": 528299,
+  "mediaRows": 17,
+  "corpusDigest": "b1b537982e67949983915d618c0657eb2f21554705a3ec16e1a81dc5b5c7c7b9",
+  "copiedOutputInsideLease": true,
+  "skippedOutputFields": [
+    "preparedLookupIndexEncodeMs"
+  ],
+  "groups": [
+    {
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 1,
+      "digest": "f8d0f8813e26480df7534c6c9a93bb2880ff4d787c09d861f109c81c7f03b871"
+    },
+    {
+      "banks": [
+        "term_bank_3.json",
+        "term_bank_4.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "60c00a64c7d991b66cc2336263b46351cfad5545a8b53ccae95a9cfd8c01f115"
+    },
+    {
+      "banks": [
+        "term_bank_5.json",
+        "term_bank_6.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 1,
+      "digest": "7bc3789727cc40021d0ca5c18d737c2850684e6370817dbad27815e79f86aff6"
+    },
+    {
+      "banks": [
+        "term_bank_7.json",
+        "term_bank_8.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 3,
+      "digest": "f4c395c86e94c2511535a28035b96fca91656c9eaa551f34c505d299647c8d16"
+    },
+    {
+      "banks": [
+        "term_bank_9.json",
+        "term_bank_10.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 2,
+      "digest": "3d85a1f62716310ec70790fb536329428296f0fec126b2d7d544ff538eea8ce3"
+    },
+    {
+      "banks": [
+        "term_bank_11.json",
+        "term_bank_12.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 2,
+      "digest": "9b3e85d2fb2bd65fbf3660e37520467ae55b79a36f853671106f3faf07dbe997"
+    },
+    {
+      "banks": [
+        "term_bank_13.json",
+        "term_bank_14.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "e592a23943602ff69a64bd611dd8ef2ce5711d7b3dc98d42816a27d56c845920"
+    },
+    {
+      "banks": [
+        "term_bank_15.json",
+        "term_bank_16.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 2,
+      "digest": "1b46c756ce59af170ee5457ece368e4db98c98c6d4540704a2f8288ed2577deb"
+    },
+    {
+      "banks": [
+        "term_bank_17.json",
+        "term_bank_18.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 1,
+      "digest": "0d7eeb17ba4b843b643752c5766f551aac19701e41dc3f19477903140ab072aa"
+    },
+    {
+      "banks": [
+        "term_bank_19.json",
+        "term_bank_20.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "a48df95f85344ffa699d5e9ec4ac35c0893e67ea62b8f382a0f460d7cd4a5c76"
+    },
+    {
+      "banks": [
+        "term_bank_21.json",
+        "term_bank_22.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 2,
+      "digest": "294dc8d66e22a1f18f65f63b9b307d3ba865121496509fd3541cac9affe734c1"
+    },
+    {
+      "banks": [
+        "term_bank_23.json",
+        "term_bank_24.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "e4bac2765db00936d350ddcc464d245a471173fc8bce398c79119eb2eb4d2b75"
+    },
+    {
+      "banks": [
+        "term_bank_25.json",
+        "term_bank_26.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "63300b3c4c5feb541b81b2c75af49716479f887dbe488fbc729bbf9553f85e9b"
+    },
+    {
+      "banks": [
+        "term_bank_27.json",
+        "term_bank_28.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "f9b675244a0121a1a59c28b156feb45504b67f47f23df4d1addf9ab28b28ceaf"
+    },
+    {
+      "banks": [
+        "term_bank_29.json",
+        "term_bank_30.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "8befb51a82fda830711f90bedb1d0e758da33838135a9db4aa4d1061b1df2962"
+    },
+    {
+      "banks": [
+        "term_bank_31.json",
+        "term_bank_32.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "c21e267f2e46d14b387f4439842d89c5e4a9efb1d998c7953ae232ffc8c3ce0b"
+    },
+    {
+      "banks": [
+        "term_bank_33.json",
+        "term_bank_34.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 2,
+      "digest": "82444dc9eb4bf273a8738c7f68376b78253af2ee169368e468265b8760102e0e"
+    },
+    {
+      "banks": [
+        "term_bank_35.json",
+        "term_bank_36.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "3a8fe52a2354767a0f62bf7155f6d9937864f51ed6bbd58771bb198a6eb3f2e7"
+    },
+    {
+      "banks": [
+        "term_bank_37.json",
+        "term_bank_38.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "a572b003e7e5481681f843db61b2a7896496da5aa31a6d9423096fcaae649c2b"
+    },
+    {
+      "banks": [
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 1,
+      "digest": "a711ffeda9c5675181feee8d37b0f09f48e0d28ef7e498ada8d34575b6430bce"
+    },
+    {
+      "banks": [
+        "term_bank_41.json",
+        "term_bank_42.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "602761ccf6ebb5195df7206f2ecd5c9629e6ca762f9dd4aeef24fcdde6205320"
+    },
+    {
+      "banks": [
+        "term_bank_43.json",
+        "term_bank_44.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "bb9d1ff2626bc2608aa798a5e22a39d65a7d316b9cf259cf1343231f177ee75f"
+    },
+    {
+      "banks": [
+        "term_bank_45.json",
+        "term_bank_46.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "db9ed339fa39ac74894c4bdba367b3a1afb3da1c9e1c907e30567cb8897bd1d5"
+    },
+    {
+      "banks": [
+        "term_bank_47.json",
+        "term_bank_48.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "436ac16d802a2bacda8ff972c9271e3b4fcc8e01d51f0823cd161b3e18d7a071"
+    },
+    {
+      "banks": [
+        "term_bank_49.json",
+        "term_bank_50.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "ca8f887c8013e93fcdf93cc2aa871c376a8f040ab097087249cc40e3b83d55ae"
+    },
+    {
+      "banks": [
+        "term_bank_51.json",
+        "term_bank_52.json"
+      ],
+      "rowCount": 20000,
+      "mediaRows": 0,
+      "digest": "b03521303523d4896e5e7fbf9f4d01244e324a030d5981ecef45cf2385fc4f39"
+    },
+    {
+      "banks": [
+        "term_bank_53.json"
+      ],
+      "rowCount": 8299,
+      "mediaRows": 0,
+      "digest": "db8f9359217921e31a4039222e97138eaa4075f0029c8c79ea9c84d09bf17d32"
+    }
+  ]
+}

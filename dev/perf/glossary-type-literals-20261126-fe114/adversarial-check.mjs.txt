@@ -1,0 +1,79 @@
+import assert from 'node:assert/strict'
+import {readFile, writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+
+const baselinePath = '/workspace/scratch/fe1144369b6e/structured-screen/baseline.wasm'
+const candidatePath = '/workspace/scratch/fe1144369b6e/manabitan-structured/dev/data/dictionary-wasm/term-bank-parser.wasm'
+const blobs = await Promise.all([baselinePath, candidatePath].map((path) => readFile(path)))
+const parsers = await Promise.all(blobs.map(async (bytes) => (await WebAssembly.instantiate(bytes)).instance.exports))
+const encoder = new TextEncoder()
+const digest = createHash('sha256')
+let comparisons = 0
+let accepted = 0
+
+function parse(parser, bytes, hints, logicalLength = bytes.length, alignment = 0) {
+    parser.wasm_reset_heap()
+    const input = parser.wasm_alloc(bytes.length + alignment + 32) + alignment
+    const output = parser.wasm_alloc(17 * 4)
+    const heap = new Uint8Array(parser.memory.buffer)
+    heap.fill(0x22, input, input + bytes.length + 32)
+    heap.set(bytes, input)
+    const fn = hints ? parser.parse_term_bank_with_media_hints : parser.parse_term_bank
+    const count = fn(input, logicalLength, output, 1, 0, 0, 1)
+    return {count, metadata: count > 0 ? [...new Uint32Array(parser.memory.buffer, output, 17)] : null}
+}
+
+function compare(bytes, logicalLength = bytes.length, alignment = 0) {
+    for (const hints of [false, true]) {
+        const expected = parse(parsers[0], bytes, hints, logicalLength, alignment)
+        const actual = parse(parsers[1], bytes, hints, logicalLength, alignment)
+        assert.deepEqual(actual, expected, JSON.stringify({bytes: Buffer.from(bytes).toString('base64'), logicalLength, alignment, hints}))
+        ++comparisons
+        if (actual.count > 0) { ++accepted }
+        digest.update(JSON.stringify(actual))
+    }
+}
+
+const glossaries = [
+    '[{"type":"structured-content","content":[]}]',
+    '[{"type": "structured-content", "content": "text"}]',
+    '[{"content":{"tag":"img","path":"image.png"},"type":"structured-content"}]',
+    '[{"type":"structured-content","content":{"tag":"div","content":[{"type":"text","text":"text"},{"tag":"img","path":"image.png"}]}}]',
+    '[{"type":"structured-content","content":[],"type":"text","text":"text"}]',
+    '[{"type":"structured-content","content":[],"type":"image","path":"image.png"}]',
+    '[{"type":"image","content":[],"type":"structured-content"}]',
+    '[{"type":"structured-content","content":[],"content":null}]',
+    '[{"type":"structured-content","content":null,"content":[]}]',
+    '[{"type":"structured-content","content":[],"type":null}]',
+    '[{"type":"structured-content","content":{"type":"unknown"}}]',
+    String.raw`[{"ty\u0070e":"structured-content","content":[]}]`,
+    String.raw`[{"type":"structured\u002dcontent","content":[]}]`,
+    '[{"type":"structured-content"}]',
+]
+const replacements = [0, 9, 10, 13, 32, 34, 44, 58, 91, 92, 93, 123, 125, 0x80, 0xff]
+for (const glossary of glossaries) {
+    const source = encoder.encode(`[["entry","","","",1,${glossary},1,""]]`)
+    compare(source)
+    for (let offset = 0; offset < source.length; ++offset) {
+        const changed = source.slice()
+        for (const replacement of replacements) {
+            changed[offset] = replacement
+            compare(changed)
+        }
+        for (let alignment = 0; alignment < 8; ++alignment) {
+            compare(source, offset, alignment)
+        }
+    }
+}
+const receipt = {
+    baselinePath,
+    candidatePath,
+    wasmSha256: blobs.map((bytes) => createHash('sha256').update(bytes).digest('hex')),
+    comparisons,
+    accepted,
+    digest: digest.digest('hex'),
+    node: process.version,
+    scope: 'Strict native hinted/unhinted parser acceptance and all row metadata; byte mutations and logical truncation across eight alignments. No performance measurement.',
+}
+await writeFile('/workspace/scratch/fe1144369b6e/structured-screen/adversarial-receipt.json', JSON.stringify(receipt, null, 2) + '\n')
+process.stdout.write(JSON.stringify(receipt) + '\n')
