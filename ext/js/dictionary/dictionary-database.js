@@ -9521,6 +9521,16 @@ null :
             return null;
         }
         const compressionDictName = resolveTermContentZstdDictName(dictionary);
+        // Reservation requires shared JMdict content. Ordinary persistence
+        // validates ineligible spans; do not scan them for a rejected attempt.
+        if (
+            compressionDictName !== 'jmdict' ||
+            typeof SharedArrayBuffer !== 'function' ||
+            !(pendingContentSpans.buffer.buffer instanceof SharedArrayBuffer)
+        ) {
+            // eslint-disable-next-line @stylistic/semi
+            return null
+        }
         const operation = this._termContentBlockImportSession.tryBeginAppendSpans(
             dictionary,
             pendingContentSpans.buffer,
