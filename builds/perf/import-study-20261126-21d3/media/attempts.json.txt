@@ -1,0 +1,78 @@
+{
+  "attempts": [
+    {
+      "attempt": "Initial Node24 focused tests before generated libraries were present",
+      "outcome": "2 suites failed setup; 2 passed; 120 tests passed and 30 skipped",
+      "reason": "Missing resvg-wasm.js and term-bank-parser.wasm",
+      "rawLog": "Not captured as a file; outcome retained from tool transcript"
+    },
+    {
+      "attempt": "Node22 focused tests",
+      "outcome": "Interrupted with exit 130 after startup without assertion results",
+      "rawLog": "focused-tests.log",
+      "timingObservation": false
+    },
+    {
+      "attempt": "Node22 parity startup",
+      "outcome": "Interrupted with exit 130 without an output JSON or parity result",
+      "rawLog": "No file log retained; outcome retained from tool transcript",
+      "timingObservation": false
+    },
+    {
+      "attempt": "Node24 broad focused tests",
+      "outcome": "188 passed, 1 timed out under 15000 ms limit; no assertion mismatch",
+      "rawLog": "focused-tests-node24.log",
+      "concurrency": "Overlapped full-media parity"
+    },
+    {
+      "attempt": "Isolated rotated-input timeout test",
+      "outcome": "1 passed, 27 excluded, under the same 15000 ms limit",
+      "rawLog": "rotated-isolated.log",
+      "testsMs": 3930
+    },
+    {
+      "attempt": "Node24 new writer focused tests",
+      "outcome": "69 passed",
+      "rawLog": "followup-focused.log"
+    },
+    {
+      "attempt": "Scoped lint",
+      "outcome": "Process killed with exit 137; no lint pass; chained type-check did not start",
+      "rawLog": "followup-lint.log"
+    },
+    {
+      "attempt": "Node24 baseline and candidate parity",
+      "outcome": "Both complete; byte hashes and every-image oracle passed",
+      "rawLogs": [
+        "baseline-parity-node24.json.txt",
+        "candidate-parity-node24.json.txt",
+        "candidate-parity-node24.log",
+        "media-source-verification.json.txt",
+        "media-source-verification.log"
+      ],
+      "timingObservation": false
+    },
+    {
+      "attempt": "Fixed six-process allocation cohort",
+      "outcome": "6 passed, no failures or retries",
+      "rawLog": "allocation-cohort/cohort.json.txt",
+      "timingObservation": false
+    },
+    {
+      "attempt": "Hosted JavaScript lint for initial PR #943 head",
+      "runId": 45861913807,
+      "jobId": 140054830464,
+      "source": "e1266a28c73b5178aa1657289eef0cd79a2ba067",
+      "outcome": "Failed with two test-only style errors: unicorn/new-for-builtins and @stylistic/no-confusing-arrow",
+      "rawLog": "hosted-lint-140054830464.log"
+    },
+    {
+      "attempt": "Focused Node24 ESLint after test-only fixes",
+      "command": "node --max-old-space-size=768 node_modules/eslint/bin/eslint.js test/generation-media-index-writer.test.js",
+      "outcome": "Passed, exit 0",
+      "rawLog": "test-style-eslint.log",
+      "changedRuntimeFiles": []
+    }
+  ],
+  "requiredIntegrationGates": "Run normal CI for the published runtime PR; these component records do not replace full unit/build/type or hosted browser gates."
+}

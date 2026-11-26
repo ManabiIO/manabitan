@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/21d3ef023f32/media-work
+
+
+ Test Files  1 passed (1)
+      Tests  69 passed (69)
+   Start at  11:44:04
+   Duration  14.13s (transform 9.97s, setup 9.14s, import 1.42s, tests 233ms, environment 0ms)
+

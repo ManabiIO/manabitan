@@ -1,0 +1,14 @@
+[
+  {
+    "file": "baseline-parity-node24.json.index.bin",
+    "bytes": 3912816,
+    "sha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+    "omitted": true
+  },
+  {
+    "file": "candidate-parity-node24.json.index.bin",
+    "bytes": 3912816,
+    "sha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+    "omitted": true
+  }
+]

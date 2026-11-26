@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 /workspace/scratch/21d3ef023f32/media-work
+
+ ❯ test/source-zip-media-entry-pack.test.js (28 tests | 1 failed) 52337ms
+     × writes the same sealed index and source span for rotated input without retaining media records 20133ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > writes the same sealed index and source span for rotated input without retaining media records
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/source-zip-media-entry-pack.test.js:107:50
+    105|
+    106| describe('direct source ZIP media entries', () => {
+    107|     test.each(['physical', 'reverse', 'rotated'])('writes the same sea…
+       |                                                  ^
+    108|         const {archive, files} = fixture()
+    109|         if (order === 'reverse') { files.reverse() }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 188 passed (189)
+   Start at  11:46:01
+   Duration  82.59s (transform 7.99s, setup 284ms, import 10.38s, tests 67.70s, environment 1ms)
+
