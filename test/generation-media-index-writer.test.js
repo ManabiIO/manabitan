@@ -139,7 +139,7 @@ describe('direct generation media index writer', () => {
         expect(writer.finish(4)).toBeNull()
     })
 
-    test.each([null, undefined, 1, true, Object('img/cc1.webp'), {startsWith() { throw new Error('Must not inspect non-string paths') }}])('rejects a non-string write path without coercion: %s', (path) => {
+    test.each([null, undefined, 1, true, new Object('img/cc1.webp'), {startsWith() { throw new Error('Must not inspect non-string paths') }}])('rejects a non-string write path without coercion: %s', (path) => {
         const writer = createGenerationMediaIndexWriter(1, () => 'img/cc1.webp')
         if (writer === null) { throw new Error('Expected index writer') }
         expect(writer.write(0, /** @type {string} */ (/** @type {unknown} */ (path)), 0, 4, 4, 0, 0)).toBe(false)
@@ -148,7 +148,7 @@ describe('direct generation media index writer', () => {
 
     test('retains the final checked callback identity when an early read changes', () => {
         let calls = 0
-        const writer = createGenerationMediaIndexWriter(1, () => ++calls < 3 ? 'img/cc1.webp' : 'img/cc4294967295.webp')
+        const writer = createGenerationMediaIndexWriter(1, () => (++calls < 3 ? 'img/cc1.webp' : 'img/cc4294967295.webp'))
         if (writer === null) { throw new Error('Expected index writer') }
         expect(writer.write(0, 'img/cc4294967295.webp', 0, 4, 4, 0, 123)).toBe(true)
         expect(writer.finish(4)).toEqual(createGenerationMediaIndex([{...range('img/cc4294967295.webp'), signature: 123}], 4))
