@@ -148,9 +148,9 @@ describe('dictionary import secondary-index cleanup', () => {
         const session = await database.startBulkImport()
         expect(secondaryIndexes(sql)).toEqual([])
         await addTag(database, 'Jitendex', finish)
-        finish === 'abort'
-            ? await database.abortBulkImport(session)
-            : await database.finishBulkImport(null, null, session)
+        await (finish === 'abort' ?
+            database.abortBulkImport(session) :
+            database.finishBulkImport(null, null, session))
 
         expect(secondaryIndexes(sql)).toEqual(initial)
         expect(sql.selectValues('SELECT name FROM tagMeta')).toEqual(finish === 'abort' ? [] : ['finish'])
