@@ -67,7 +67,7 @@ describe('compact score validation before sidecar publication', () => {
         for (const shared of [false, true]) {
             for (const byteOffset of [0, 4, 12]) {
                 const fields = moveToView(data.fields, shared, byteOffset)
-                const before = new Uint8Array(fields.buffer).slice()
+                const before = Uint8Array.from(new Uint8Array(fields.buffer))
                 expect(createSidecar(data, fields)).toEqual(expected)
                 expect(new Uint8Array(fields.buffer)).toEqual(before)
             }
@@ -105,7 +105,7 @@ describe('compact score validation before sidecar publication', () => {
 
     test('rejects a mismatched row count and incomplete or oversized fields', () => {
         const data = fixture(9)
-        const badCount = data.fields.slice()
+        const badCount = Uint8Array.from(data.fields)
         new DataView(badCount.buffer).setUint32(4, data.count + 1, true)
         expect(() => createSidecar(data, badCount)).toThrow('Invalid compact term-record fields dimensions')
         expect(() => createSidecar(data, data.fields.subarray(0, 15))).toThrow('Invalid compact term-record fields header')
