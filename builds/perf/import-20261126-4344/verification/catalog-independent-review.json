@@ -1,0 +1,93 @@
+{
+  "purpose": "Correctness and deterministic regex work comparison only; no timing or whole-import performance claim",
+  "node": "v24.22.3",
+  "baselineSource": {
+    "root": "/workspace/scratch/4344255ab4f9/manabitan",
+    "commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "importerSha256": "f8e3e7e55425c181c19e0c0060b2b6aea0c26ca7e64855feeb544c44914c2074",
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "candidateSource": {
+    "root": "/workspace/scratch/4344255ab4f9/manabitan-orchestration",
+    "commit": "95b618519cfed201db4c603154dadedea9bfe41f",
+    "importerSha256": "ed3627edb3eaf4b574194a917d6ac4527949231c0ac4c836488d326b8ad9d0a4",
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "runnerSha256": "af51a834643adc5175117915a09463094a7d025dd52d294b34df3ed3f1c6b04d",
+  "cases": [
+    {
+      "name": "jmdict",
+      "files": 55,
+      "classified": {
+        "termFiles": 53,
+        "termArtifactFiles": 0,
+        "termMetaFiles": 0,
+        "kanjiFiles": 0,
+        "kanjiMetaFiles": 0,
+        "tagFiles": 1
+      },
+      "orderedOutputSha256": "aaaf6e647bfaf9cbf53bbe8f3d099d19ff1683147171312db1450fd7704bc7c4",
+      "skippedEntries": 1,
+      "builtinRegexTestsAvoided": 6,
+      "defaultExplicitUndefinedCustomAndPrunedParity": true,
+      "preservedEntryIdentity": true,
+      "archiveSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "archiveBytes": 15645766
+    },
+    {
+      "name": "jitendex",
+      "files": 475,
+      "classified": {
+        "termFiles": 219,
+        "termArtifactFiles": 0,
+        "termMetaFiles": 0,
+        "kanjiFiles": 0,
+        "kanjiMetaFiles": 0,
+        "tagFiles": 1
+      },
+      "orderedOutputSha256": "84155b908daff9557feb44f27bc68e2933ef91ec4e735f659931b59b53c22989",
+      "skippedEntries": 255,
+      "builtinRegexTestsAvoided": 1530,
+      "defaultExplicitUndefinedCustomAndPrunedParity": true,
+      "preservedEntryIdentity": true,
+      "archiveSha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "archiveBytes": 38831822
+    },
+    {
+      "name": "vndb",
+      "files": 147237,
+      "classified": {
+        "termFiles": 665,
+        "termArtifactFiles": 0,
+        "termMetaFiles": 0,
+        "kanjiFiles": 0,
+        "kanjiMetaFiles": 0,
+        "tagFiles": 1
+      },
+      "orderedOutputSha256": "38c0813e6e6c76d79de110e786e0e3a8497f88c12b7cd057b70bf4ab5dad0db8",
+      "skippedEntries": 146571,
+      "builtinRegexTestsAvoided": 879426,
+      "defaultExplicitUndefinedCustomAndPrunedParity": true,
+      "preservedEntryIdentity": true,
+      "archiveSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "archiveBytes": 291705969
+    },
+    {
+      "name": "adversarial",
+      "files": 15023,
+      "classified": {
+        "termFiles": 1006,
+        "termArtifactFiles": 1,
+        "termMetaFiles": 1001,
+        "kanjiFiles": 1001,
+        "kanjiMetaFiles": 1,
+        "tagFiles": 1001
+      },
+      "orderedOutputSha256": "a2ed68328ad9171aead4516e63b65b74513554ada66e6548f9ffa68e1d880116",
+      "skippedEntries": 3005,
+      "builtinRegexTestsAvoided": 18030,
+      "defaultExplicitUndefinedCustomAndPrunedParity": true,
+      "preservedEntryIdentity": true
+    }
+  ]
+}

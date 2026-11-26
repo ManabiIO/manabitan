@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 /workspace/scratch/4344255ab4f9/manabitan-storage
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-pool]: Failed to start forks worker for test files /workspace/scratch/4344255ab4f9/manabitan-storage/test/term-record-compact-score-validation.test.js.
+ ❯ ../manabitan/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:3532:94
+ ❯ Pool.schedule ../manabitan/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:3532:5
+
+Caused by: Error: [vitest-pool-runner]: Timeout waiting for worker to respond
+ ❯ Timeout.<anonymous> ../manabitan/node_modules/vitest/dist/chunks/cli-api.B0Pz1_R7.js:3108:58
+ ❯ listOnTimeout node:internal/timers:685:17
+ ❯ processTimers node:internal/timers:618:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  1 error
+   Start at  11:42:35
+   Duration  65.21s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

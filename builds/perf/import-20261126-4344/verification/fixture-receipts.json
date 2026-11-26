@@ -1,0 +1,47 @@
+{
+  "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "fixtures": [
+    {
+      "id": "jmdict",
+      "archivePath": "/workspace/scratch/4344255ab4f9/fixtures/JMdict.zip",
+      "archiveBytes": 15645766,
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "title": "JMdict [2026-11-22]",
+      "revision": "JMdict.2026-11-22",
+      "termBanks": 53,
+      "termRows": 528299,
+      "termJsonBytes": 171617523,
+      "archiveFiles": 55,
+      "expectedReferencedMediaFiles": 0,
+      "expectedReferencedMediaBytes": 0
+    },
+    {
+      "id": "jitendex",
+      "archivePath": "/workspace/scratch/4344255ab4f9/fixtures/jitendex-yomitan.zip",
+      "archiveBytes": 38831822,
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "title": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termBanks": 219,
+      "termRows": 436555,
+      "termJsonBytes": 538927310,
+      "archiveFiles": 475,
+      "expectedReferencedMediaFiles": 236,
+      "expectedReferencedMediaBytes": 4992155
+    },
+    {
+      "id": "vndb",
+      "archivePath": "/workspace/scratch/4344255ab4f9/fixtures/vndb_characters_by_bee.zip",
+      "archiveBytes": 291705969,
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "title": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termBanks": 665,
+      "termRows": 6648310,
+      "termJsonBytes": 4267992967,
+      "archiveFiles": 147237,
+      "expectedReferencedMediaFiles": 146570,
+      "expectedReferencedMediaBytes": 188131284
+    }
+  ]
+}

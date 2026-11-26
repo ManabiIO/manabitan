@@ -1,0 +1,221 @@
+{
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "fixtureLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+  "runtimeIdentities": [
+    {
+      "role": "archive classification",
+      "sourcePath": "ext/js/dictionary/dictionary-importer.js",
+      "measuredSourceSha256": "ed3627edb3eaf4b574194a917d6ac4527949231c0ac4c836488d326b8ad9d0a4",
+      "frozenSourceSha256": "ed3627edb3eaf4b574194a917d6ac4527949231c0ac4c836488d326b8ad9d0a4",
+      "unchangedRuntime": true,
+      "measuredLocalCommit": "95b618519cfed201db4c603154dadedea9bfe41f",
+      "frozenLocalCommit": "95b618519cfed201db4c603154dadedea9bfe41f",
+      "frozenTree": "ce9d574df46be5c8f8f223ba311a07f7e9197771"
+    },
+    {
+      "role": "compact score validation",
+      "sourcePath": "ext/js/dictionary/term-record-opfs-store.js",
+      "measuredSourceSha256": "a7b080fa3d7fd3f6c38d81f04d95bfe22d105af12b21c98812cdccba736fa315",
+      "frozenSourceSha256": "a7b080fa3d7fd3f6c38d81f04d95bfe22d105af12b21c98812cdccba736fa315",
+      "unchangedRuntime": true,
+      "measuredLocalCommit": "8fb8acb08e7374678ad0f45bb0a88bb3c0472261",
+      "frozenLocalCommit": "4d2316c97587fca1736fbace07901c4965c74483",
+      "frozenTree": "6a68b5724de33799e77f2ae68690612913621bd8"
+    }
+  ],
+  "fixtureIdentities": [
+    {
+      "id": "jmdict",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "archiveBytes": 15645766,
+      "termRows": 528299,
+      "termBanks": 53
+    },
+    {
+      "id": "jitendex",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "archiveBytes": 38831822,
+      "termRows": 436555,
+      "termBanks": 219
+    },
+    {
+      "id": "vndb",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "archiveBytes": 291705969,
+      "termRows": 6648310,
+      "termBanks": 665
+    }
+  ],
+  "localOutcomes": {
+    "catalogReview": {
+      "exitCode": 0,
+      "cases": 4,
+      "kind": "independent correctness and deterministic work counts"
+    },
+    "compactScoreReview": {
+      "exitCode": 0,
+      "cases": 42,
+      "kind": "independent single-process correctness"
+    },
+    "fullFixtureRows": {
+      "exitCode": 0,
+      "count": 7613164,
+      "kind": "complete JSON extraction and row counting"
+    },
+    "focusedVitest": {
+      "exitCode": 1,
+      "executedTests": 0,
+      "reason": "fork worker startup timeout"
+    },
+    "initialScoreLint": {
+      "exitCode": 1,
+      "errors": 6,
+      "correction": "test-only formatting and typed-array copy changes in frozen candidate"
+    },
+    "finalScoreLint": {
+      "exitCode": 137,
+      "result": "process killed before lint result"
+    },
+    "browserInstall": {
+      "exitCode": 1,
+      "reason": "HTTP 403 download response"
+    },
+    "systemBrowser": {
+      "exitCode": 127,
+      "reason": "/usr/bin/chromium wrapper points to absent /usr/lib/chromium/chromium"
+    },
+    "baselineBrowserAttempt": {
+      "exitCode": 1,
+      "imports": 0,
+      "reason": "ENOSPC during release ZIP creation"
+    }
+  },
+  "artifactFiles": {
+    "README.md": {
+      "bytes": 6241,
+      "sha256": "cbe949b113b5cb8f40fc7fee3c34aef9aa3eda604dfc8a27b40f527cc21b164d"
+    },
+    "audit-storage-evidence.py": {
+      "bytes": 10244,
+      "sha256": "1539320877cc4bf59739fdd028c46ba06451bec7c5de8fb58694af4d3fbee389"
+    },
+    "catalog-independent-review.json": {
+      "bytes": 3341,
+      "sha256": "5a5b851ea5a1cb5f45ea1b894d071f64fb0be73dcc78aae323f9b282b6b5ab82"
+    },
+    "catalog-independent-review.mjs": {
+      "bytes": 5761,
+      "sha256": "af51a834643adc5175117915a09463094a7d025dd52d294b34df3ed3f1c6b04d"
+    },
+    "combined/catalog-review.json": {
+      "bytes": 3336,
+      "sha256": "7e7782714527f786087629b256f9656b53ba49fd7cb875d391da357005aa442c"
+    },
+    "combined/catalog-review.log": {
+      "bytes": 68,
+      "sha256": "70776b1c2b2f93e57f435873b9dd5391493fdb901c010a26163aeab3ddaf14ab"
+    },
+    "combined/score-review.json": {
+      "bytes": 8263,
+      "sha256": "7d418a29bf547e7b74d6979dd9d0a443289c41a430fb8d575e301aa93af865fb"
+    },
+    "combined/score-review.log": {
+      "bytes": 51,
+      "sha256": "ce36a27edb27522f1cf52bc0c27914dea563ff7a02be86aa65a585899707dd06"
+    },
+    "compact-score-independent-review.json": {
+      "bytes": 8262,
+      "sha256": "f408fa9dd64612c616a2ae605a23790535503bcc2d969ac9f8a4cf7dcaab2e70"
+    },
+    "compact-score-independent-review.mjs": {
+      "bytes": 6665,
+      "sha256": "a63b9c0234378c248243175401b549511b825c63f1c97e19c040b98818f694d9"
+    },
+    "count-fixture-rows.py": {
+      "bytes": 2146,
+      "sha256": "d34165b28e94c630d8cb1c9689d544cc601e2390008e0d695de99f2b58b28e57"
+    },
+    "fixture-receipts.json": {
+      "bytes": 1645,
+      "sha256": "b50eb6de1bd1239de6ba57e9c0d26b9fc89099c34cede2c191d4f93539177e9f"
+    },
+    "logs/catalog-review.log": {
+      "bytes": 68,
+      "sha256": "70776b1c2b2f93e57f435873b9dd5391493fdb901c010a26163aeab3ddaf14ab"
+    },
+    "logs/failed-baseline-build.log": {
+      "bytes": 2367,
+      "sha256": "fcb7066f441015389bf61297e88bede9bc07631c6bf6aa8ba6620881b024a29d"
+    },
+    "logs/failed-browser-install.log": {
+      "bytes": 4567,
+      "sha256": "abff368bcd790d791f0e00324ad44d390a5998801f7e2b3af7db1482265bd6d4"
+    },
+    "logs/failed-vitest-startup.log": {
+      "bytes": 1214,
+      "sha256": "9456b0a54478f9edc11a2477827cd2ddb6213b35d578c5a199bb57a39f3a56b3"
+    },
+    "logs/final-score-lint.log": {
+      "bytes": 694,
+      "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+    },
+    "logs/fixture-acquisition.log": {
+      "bytes": 604,
+      "sha256": "e808be782e792184db040c24c8e96f5f40d53a685d63380dd830b0951694ff67"
+    },
+    "logs/initial-score-lint.log": {
+      "bytes": 1478,
+      "sha256": "654f3948c018bdb1e60f7a0e7a6b1b8d513085e839e203b14ddb02a131012264"
+    },
+    "logs/score-review.log": {
+      "bytes": 51,
+      "sha256": "ce36a27edb27522f1cf52bc0c27914dea563ff7a02be86aa65a585899707dd06"
+    },
+    "storage-evidence-audit.json": {
+      "bytes": 4652,
+      "sha256": "546f366f776f2c0726c2a2f10718227354741b7a2221cb8d0fe3e15e4599b8f3"
+    }
+  },
+  "composedSource": {
+    "commit": "feac5eeb8a058b976a5f49448a870ec2be6ad183",
+    "tree": "378638700e03c64fadcaa87624bc0726d68f3fe2",
+    "catalogCases": 4,
+    "scoreCases": 42,
+    "unchangedMeasuredRuntimeHashes": true,
+    "scope": "independent changed-function correctness; no browser/full-suite/timing execution"
+  },
+  "remoteSourceBindings": [
+    {
+      "pullRequest": 931,
+      "url": "https://github.com/ManabiIO/manabitan/pull/931",
+      "head": "752706ebbc0156096cf2727ba6651d223a9132fd",
+      "tree": "ce9d574df46be5c8f8f223ba311a07f7e9197771",
+      "matchingLocalCommit": "95b618519cfed201db4c603154dadedea9bfe41f"
+    },
+    {
+      "pullRequest": 944,
+      "url": "https://github.com/ManabiIO/manabitan/pull/944",
+      "head": "fbc49eb08c00097b91ddf9c90ab94e90b9da799b",
+      "tree": "6a68b5724de33799e77f2ae68690612913621bd8",
+      "matchingLocalCommit": "4d2316c97587fca1736fbace07901c4965c74483"
+    }
+  ],
+  "storageEvidenceAudit": {
+    "indexSha256": "737120c401ad5396f40c48c9e0b34e6bfbe84e68ea53009033f3b8ecf8192414",
+    "archiveSha256": "187260302565eb61bd93a35d5e2c05e749c8666dd42a833e62beb3d41eea1890",
+    "archiveMembersVerified": 23,
+    "receipt": "storage-evidence-audit.json",
+    "runner": "audit-storage-evidence.py",
+    "totals": {
+      "rows": 7613164,
+      "runs": 937,
+      "compactScoreEntries": 7613164
+    },
+    "scope": "Read-only artifact/hash/count/statistic audit, with compressed fixture SHA and ZIP directory reconciliation; no native or timed reexecution.",
+    "encodedDigestLimit": "Encoded-byte digests reconcile between index and source-bound acquisition receipts; encoded output bytes were not archived, so these output digests were not independently recomputed."
+  },
+  "manifestExclusions": {
+    "provenance.json": "Self-reference omitted.",
+    "handoff-addition.md": "Scratch fragment appended by publisher to the existing shared handoff; do not publish this duplicate fragment."
+  }
+}
