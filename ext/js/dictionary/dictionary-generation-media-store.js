@@ -81,8 +81,8 @@ export function createGenerationMediaIndex(records, dataBytes) {
 
 /* eslint-disable @stylistic/semi */
 /**
- * Reserve a bounded index before ZIP reads. Retain path identities only until
- * preparation finishes; the caller's callback is never retained.
+ * Reserve a bounded index before ZIP reads. Canonical paths are identified by
+ * their shared namespace and IDs; the caller's callback is never retained.
  * The caller supplies each verified payload range exactly once, then seals
  * the index against the actual immutable source span.
  * @param {number} count
@@ -90,13 +90,7 @@ export function createGenerationMediaIndex(records, dataBytes) {
  * @returns {{write: (index: number, path: string, offset: number, length: number, outputLength: number, method: number, signature: number) => boolean, finish: (dataBytes: number) => GenerationMediaIndex|null}|null}
  */
 export function createGenerationMediaIndexWriter(count, getPath) {
-    /** @type {string[]} */
-    const paths = []
-    const layout = createGenerationMediaIndexLayout(count, (i) => {
-        const path = getPath(i)
-        paths[i] = path
-        return path
-    })
+    const layout = createGenerationMediaIndexLayout(count, getPath)
     if (layout === null) { return null }
     const {prefix, suffix, ids, firstId, slotCount, index} = layout
     const view = new DataView(index.buffer)
@@ -114,9 +108,8 @@ export function createGenerationMediaIndexWriter(count, getPath) {
             if (settled || !Number.isInteger(i) || i < 0 || i >= count ||
             !isMediaRange(offset, length, outputLength, method, MAX_DATA_BYTES) ||
             !Number.isInteger(signature) || signature < 0 || signature > 0xffffffff ||
-            path !== paths[i]) {
+            typeof path !== 'string' || getPathId(path, prefix, suffix) !== ids[i]) {
                 settled = true
-                paths.length = 0
                 return false
             }
             const row = (ids[i] - firstId) * ROW_BYTES
@@ -124,7 +117,6 @@ export function createGenerationMediaIndexWriter(count, getPath) {
             // occupied and empty rows with their final identity and checksum.
             if (view.getUint32(row + ROW_CRC_OFFSET, true) !== 0) {
                 settled = true
-                paths.length = 0
                 return false
             }
             view.setUint32(row, offset + 1, true)
@@ -139,7 +131,6 @@ export function createGenerationMediaIndexWriter(count, getPath) {
         finish(dataBytes) {
             if (settled) { return null }
             settled = true
-            paths.length = 0
             if (written !== count || !Number.isSafeInteger(dataBytes) || dataBytes < end || dataBytes <= 0 || dataBytes > MAX_DATA_BYTES) { return null }
             for (let i = 0; i < slotCount; ++i) {
                 const row = i * ROW_BYTES
