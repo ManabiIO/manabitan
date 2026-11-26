@@ -365,12 +365,16 @@ describe('compact media catalog deferral', () => {
         const path = 'img/card1.webp'
         const bytes = Uint8Array.of(19, 23, 29)
         if (mode === 'replacement') {
-            f.fileMap.set(path, {filename: path, bytes})
+            // Keep the size metadata required by bounded inline prefetch.
+            const replacement = {filename: path, bytes, uncompressedSize: bytes.byteLength}
+            f.fileMap.set(path, replacement)
         } else {
             const entry = f.fileMap.get(path)
             if (typeof entry === 'undefined') { throw new Error('Missing fixture image') }
             Reflect.set(entry, 'bytes', bytes)
         }
+        const catalog = /** @type {DenseZipFileMap} */ (f.fileMap)
+        expect(catalog.hasUnmaterializedEntry(path)).toBe(false)
         state.settle(f.prepared)
         const result = await f.run()
         expect(result.errors).toEqual([])
