@@ -11,11 +11,13 @@ permissions:
 
 concurrency:
   group: import-uniform-score-${{ github.event.pull_request.number }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   qualify:
-    if: github.head_ref == 'diagnostic/import-private-span-20261126-c951' && github.event.pull_request.head.repo.full_name == github.repository
+    # Candidate #949 was withdrawn after the full source census found no
+    # established uniform-score reach in the requested dictionaries.
+    if: github.head_ref == 'diagnostic/import-private-span-20261126-c951' && github.event.pull_request.head.sha == 'af14a5b04e40563c76012b8d969e0ea32f7f06a8' && github.event.pull_request.head.repo.full_name == github.repository
     name: ${{ matrix.dictionary }} (${{ matrix.order }})
     runs-on: ubuntu-latest
     timeout-minutes: 45

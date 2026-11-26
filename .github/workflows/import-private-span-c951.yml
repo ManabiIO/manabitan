@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   qualify:
-    if: github.head_ref == 'diagnostic/import-private-span-20261126-c951' && github.event.pull_request.head.repo.full_name == github.repository
+    if: github.head_ref == 'diagnostic/import-private-span-20261126-c951' && github.event.pull_request.head.sha == '7e6dda05470da6e29af2b06bc50dde26f14633fb' && github.event.pull_request.head.repo.full_name == github.repository
     name: ${{ matrix.dictionary }} (${{ matrix.order }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
