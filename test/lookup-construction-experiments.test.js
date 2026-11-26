@@ -87,7 +87,9 @@ function digestIndexes(indexes) {
             plan.stringOffsets ?? offsets,
             plan.stringHashes ?? hashes,
             plan.stringsBuffer,
-            plan.expressionIndexes,
+            // Owned compact expression columns have the same values as the
+            // uint32 source plan. Persisted bytes remain compared above.
+            Uint32Array.from(plan.expressionIndexes),
             plan.readingIndexes]) {
             hash.update(new Uint8Array(view.buffer, view.byteOffset, view.byteLength))
         }
@@ -225,14 +227,15 @@ describe('lookup construction experiments', () => {
             expect(preinternedPlan.stringLengths.buffer).toBe(bytes.buffer)
             expect(preinternedPlan.stringLengths.byteOffset).toBe(bytes.byteOffset + 48 + Math.ceil(preinternedPlan.stringsBuffer.byteLength / 4) * 4)
             expect(preinternedPlan.stringOffsets).toBeUndefined()
+            expect(preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
+            expect(preinternedPlan.expressionIndexes.buffer).toBe(bytes.buffer)
+            expect(preinternedPlan.expressionIndexes.byteOffset).toBe(preinternedPlan.stringLengths.byteOffset + preinternedPlan.stringLengths.byteLength)
             for (const view of [preinternedPlan.stringHashes,
-                preinternedPlan.expressionIndexes,
                 preinternedPlan.readingIndexes]) {
                 expect(view).toBeInstanceOf(Uint32Array)
             }
             for (const view of [bytes,
                 preinternedPlan.stringHashes,
-                preinternedPlan.expressionIndexes,
                 preinternedPlan.readingIndexes]) {
                 if (!ArrayBuffer.isView(view)) { throw new Error('Missing owned lookup column') }
                 expect(view.buffer).toBeInstanceOf(ArrayBuffer)
@@ -426,6 +429,8 @@ describe('lookup construction experiments', () => {
             expect(value.preinternedPlan.expressionIndexes.length).toBe(count)
             expect(value.preinternedPlan.stringsBuffer.buffer).toBe(value.bytes.buffer)
             expect(value.preinternedPlan.stringLengths.buffer).toBe(value.bytes.buffer)
+            expect(value.preinternedPlan.expressionIndexes.buffer).toBe(value.bytes.buffer)
+            expect(value.preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
             expect(value.preinternedPlan.stringOffsets).toBeUndefined()
             expect(value.bytes.buffer).toBeInstanceOf(ArrayBuffer)
             // A sink can re-encode any subset if content-offset or dictionary
@@ -461,6 +466,7 @@ describe('lookup construction experiments', () => {
         const late = transferred.get('60000:30000')
         if (!late) { throw new Error('Missing late segment') }
         expect(late.preinternedPlan.stringLengths.buffer).toBe(late.bytes.buffer)
+        expect(late.preinternedPlan.expressionIndexes.buffer).toBe(late.bytes.buffer)
         const lengths = late.preinternedPlan.stringLengths
         const lastLength = lengths[lengths.length - 1]
         lengths[lengths.length - 1] = lastLength + 1
@@ -569,6 +575,8 @@ describe('lookup construction experiments', () => {
                     for (const {bytes, preinternedPlan} of reply.chunk.preparedLookupIndexes?.values() ?? []) {
                         expect(preinternedPlan.stringLengths.buffer).toBe(bytes.buffer)
                         expect(preinternedPlan.stringsBuffer.buffer).toBe(bytes.buffer)
+                        expect(preinternedPlan.expressionIndexes).toBeInstanceOf(Uint16Array)
+                        expect(preinternedPlan.expressionIndexes.buffer).toBe(bytes.buffer)
                         expect(preinternedPlan.stringOffsets).toBeUndefined()
                     }
                 }

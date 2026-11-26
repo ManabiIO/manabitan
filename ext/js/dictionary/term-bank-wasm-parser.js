@@ -1546,6 +1546,7 @@ function encodeNativeTermLookupIndex(wasm, plan, readingEqualsExpressionList, se
     const memory = wasm.memory.buffer;
     if (
         !(sequenceList instanceof Int32Array) ||
+        !(plan.expressionIndexes instanceof Uint32Array) ||
         plan.stringLengths.buffer !== memory ||
         plan.stringOffsets.buffer !== memory ||
         plan.stringHashes?.buffer !== memory ||
@@ -1631,7 +1632,8 @@ allocator(n, 'segmented lookup compaction'));
 function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, indexScratch, scratch) {
     const compact = wasm.compact_term_lookup_keys;
     const memory = wasm.memory.buffer;
-    if (!(sequences instanceof Int32Array) || typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
+    if (!(sequences instanceof Int32Array) || !(plan.expressionIndexes instanceof Uint32Array) ||
+    typeof compact !== 'function' || plan.stringHashes?.buffer !== memory ||
     plan.stringsBuffer.buffer !== memory || plan.stringLengths.buffer !== memory ||
     plan.stringOffsets.buffer !== memory || plan.expressionIndexes.buffer !== memory ||
     plan.readingIndexes.buffer !== memory || equals.buffer !== memory) { return null; }
@@ -1680,14 +1682,16 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
         if (bytes === null) { return null; }
         /* eslint-disable @stylistic/semi */
         // The owned v7 base already contains the compact lengths immediately
-        // after its padded key arena. Reuse that column; offsets are optional
-        // and can be reconstructed from lengths if a later split needs them.
+        // after its padded key arena, followed by the expression IDs. Reuse
+        // both owned columns; optional offsets can be reconstructed for splits.
         const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(length / 4) * 4, keys)
         const ownedPlan = {stringLengths,
             stringHashes: new Uint32Array(runPlan.stringHashes),
             // v7: 16-byte container header, then the 32-byte base header.
             stringsBuffer: bytes.subarray(48, 48 + length),
-            expressionIndexes: new Uint32Array(runPlan.expressionIndexes),
+            expressionIndexes: new Uint16Array(bytes.buffer, stringLengths.byteOffset + stringLengths.byteLength, rows),
+            // The persisted reading column uses a sentinel for equal readings;
+            // the plan still requires their actual interned string IDs.
             readingIndexes: new Uint32Array(runPlan.readingIndexes)}
         indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan})
         /* eslint-enable @stylistic/semi */
