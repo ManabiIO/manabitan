@@ -1,0 +1,79 @@
+{
+    "schemaVersion": 1,
+    "base": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "browserVersion": "153.0.8010.12",
+    "orders": [
+        [
+            "ABC",
+            "BCA",
+            "CAB",
+            "ACB",
+            "CBA",
+            "BAC"
+        ],
+        [
+            "BAC",
+            "CBA",
+            "ACB",
+            "CAB",
+            "BCA",
+            "ABC"
+        ]
+    ],
+    "warmups": [
+        "ABC",
+        "CBA"
+    ],
+    "thresholds": {
+        "targetMinimumReductionPercent": 5,
+        "targetMinimumFasterPairs": 5,
+        "nonTargetMaximumRegressionPercent": 3
+    },
+    "criterion": {
+        "primary": "Browser monotonic file-input change to visible import completion",
+        "target": "Screen requires at least 5% median paired reduction against both A and identical C, and at least five of six faster pairs against each control on the single host for this candidate and dictionary",
+        "nonTarget": "Screen requires no more than 3% median paired regression against either control on the single host; report every result even if this screen fails",
+        "correctness": "Every import passes original production-default validation; all 72 public lookup hashes match across arms, passes and restart; full media payload verification in A/B after timed observations on replica 0",
+        "observations": "All scheduled observations retained; no exclusions, replacements or outcome-dependent reruns; warmups and validation observations excluded from timing by schedule",
+        "memory": "Timing observations have process sampling disabled. Changes affecting retained buffers require a separate prospectively specified process-tree memory qualification",
+        "qualification": "One independent host per candidate and dictionary. A passing screen requires independent replication before claiming qualified performance."
+    },
+    "candidates": {
+        "integer-fields": {
+            "commit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+            "targetDictionaries": [
+                "jmdict"
+            ],
+            "packagedDelta": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ],
+            "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/899"
+        },
+        "structured-metadata-keys": {
+            "commit": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+            "targetDictionaries": [
+                "jitendex"
+            ],
+            "packagedDelta": [
+                "js/dictionary/wasm/term-bank-parser.c",
+                "lib/term-bank-parser.wasm"
+            ],
+            "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/895",
+            "sourceProvenance": "Existing concurrent candidate; this work measures its frozen runtime without authoring or updating that runtime."
+        },
+        "single-image-projection": {
+            "commit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+            "targetDictionaries": [
+                "vndb"
+            ],
+            "packagedDelta": [
+                "js/dictionary/term-bank-wasm-parser.js",
+                "js/dictionary/validated-image-path-projector.js"
+            ],
+            "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/905"
+        }
+    },
+    "stage": "single-host-screen",
+    "replicasPerCandidateDictionary": 1
+}

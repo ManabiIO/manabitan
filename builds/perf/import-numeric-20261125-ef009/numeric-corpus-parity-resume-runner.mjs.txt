@@ -1,0 +1,217 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {execFileSync} from 'node:child_process'
+import {createReadStream, openAsBlob} from 'node:fs'
+import {readFile, rename, writeFile} from 'node:fs/promises'
+import {fileURLToPath, pathToFileURL} from 'node:url'
+import {BlobReader, Uint8ArrayWriter, ZipReader} from './manabitan/node_modules/@zip.js/zip.js/index.js'
+import {getDictionaryWasmSourceIdentity, loadDictionaryWasm} from './manabitan/dev/dictionary-wasm.js'
+
+const [dictionary, output, resume] = process.argv.slice(2)
+const baselineRoot = '/workspace/scratch/ef009a302ea8/manabitan'
+const candidateRoot = '/workspace/scratch/ef009a302ea8/jmdict-work'
+const maxFiles = {jmdict: 7, jitendex: 10, vndb: 8}[dictionary]
+assert(maxFiles && output, 'Use a supported dictionary and output path')
+const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const updateView = (hash, view) => hash.update(new Uint8Array(view.buffer, view.byteOffset, view.byteLength))
+const lockPath = `${baselineRoot}/test/perf/dictionaries.lock.json`
+const lockBytes = await readFile(lockPath)
+const lock = JSON.parse(lockBytes).dictionaries[dictionary]
+const archivePath = `${baselineRoot}/builds/e2e-dictionary-cache/${lock.cacheFile}`
+const archiveDigest = createHash('sha256')
+let archiveBytes = 0
+for await (const bytes of createReadStream(archivePath)) {
+    archiveBytes += bytes.length
+    archiveDigest.update(bytes)
+}
+const archiveSha256 = archiveDigest.digest('hex')
+assert.equal(archiveSha256, lock.sha256)
+assert.equal(archiveBytes, lock.sizeBytes)
+const sourceFiles = [
+    'ext/js/dictionary/term-bank-wasm-parser.js', 'ext/js/dictionary/term-bank-experiments.js',
+    'ext/js/dictionary/term-lookup-scratch.js', 'ext/js/dictionary/term-lookup-index-preparation.js',
+    'ext/js/dictionary/term-lookup-index.js', 'ext/js/dictionary/term-record-preinterned-plan.js',
+    'ext/js/dictionary/wasm/term-bank-parser.c', 'dev/data/dictionary-wasm/manifest.json',
+]
+async function sourceIdentity(root) {
+    const [commit, tree] = execFileSync('git', ['rev-parse', 'HEAD', 'HEAD^{tree}'], {cwd: root, encoding: 'utf8'}).trim().split('\n')
+    const hashes = {}
+    for (const file of sourceFiles) { hashes[file] = sha(await readFile(`${root}/${file}`)) }
+    return {root, commit, tree, nativeSources: getDictionaryWasmSourceIdentity(root), hashes}
+}
+const arms = {}
+for (const [name, root] of [['A', baselineRoot], ['B', candidateRoot]]) {
+    const modules = loadDictionaryWasm(root)
+    const wasm = await readFile(`${root}/ext/lib/term-bank-parser.wasm`)
+    assert(wasm.equals(modules.get('term-bank-parser.wasm')), 'Built WASM differs from source-bound module')
+    const parser = await import(pathToFileURL(`${root}/ext/js/dictionary/term-bank-wasm-parser.js`).href)
+    const prep = await import(pathToFileURL(`${root}/ext/js/dictionary/term-lookup-index-preparation.js`).href)
+    parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
+    arms[name] = {parser, prep, identity: {...await sourceIdentity(root), wasmSha256: sha(wasm)}}
+}
+const options = {singleChunk: true, emitTermByteLists: false, computeContentHashes: true,
+    emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true,
+    validateGlossaryTypes: true, prepareLookupIndexes: true}
+async function parseGroup(arm, sources) {
+    const {parser, prep} = arms[arm]
+    const hash = createHash('sha256')
+    let rows = 0
+    let indexBytes = 0
+    let mediaRows = 0
+    await parser.parseTermBankWithWasmColumnChunks(sources, 3, (chunk) => {
+        const indexes = chunk.preparedLookupIndexes ?? prep.prepareTermLookupIndexesFromPreinternedPlan(chunk, null, {})?.indexes
+        assert(indexes && prep.hasCompletePreparedTermLookupIndexes(indexes, chunk.rowCount), 'Incomplete lookup indexes')
+        rows += chunk.rowCount
+        for (const [key, entry] of indexes) {
+            hash.update(key)
+            hash.update(entry.bytes)
+            indexBytes += entry.bytes.byteLength
+            for (const view of [entry.preinternedPlan.stringLengths, entry.preinternedPlan.stringOffsets,
+                entry.preinternedPlan.stringHashes, entry.preinternedPlan.stringsBuffer,
+                entry.preinternedPlan.expressionIndexes, entry.preinternedPlan.readingIndexes]) {
+                if (view) { updateView(hash, view) }
+            }
+        }
+        updateView(hash, chunk.readingEqualsExpressionList)
+        updateView(hash, chunk.scoreList)
+        updateView(hash, chunk.sequenceList)
+        const {contentMetaList, contentBytesBuffer, contentBytesBaseOffset} = chunk
+        assert(contentMetaList && contentBytesBuffer && typeof contentBytesBaseOffset === 'number', 'Missing content slab')
+        for (let i = 0; i < chunk.rowCount; ++i) {
+            const offset = contentBytesBaseOffset + contentMetaList[i * 4]
+            hash.update(contentBytesBuffer.subarray(offset, offset + contentMetaList[i * 4 + 1]))
+            updateView(hash, contentMetaList.subarray(i * 4 + 1, i * 4 + 4))
+        }
+        for (const {index, row} of chunk.mediaRows) {
+            ++mediaRows
+            hash.update(JSON.stringify({index, expression: row.expression, reading: row.reading,
+                definitionTags: row.definitionTags, rules: row.rules, score: row.score,
+                sequence: row.sequence, termTags: row.termTags, glossaryJson: row.glossaryJson,
+                glossaryMayContainMedia: row.glossaryMayContainMedia,
+                termEntryContentHash1: row.termEntryContentHash1, termEntryContentHash2: row.termEntryContentHash2}))
+            for (const view of [row.glossaryJsonBytes, row.termEntryContentBytes, row.expressionBytes, row.readingBytes]) {
+                if (view) { updateView(hash, view) }
+            }
+        }
+    }, 2048, options)
+    const profile = parser.consumeLastTermBankWasmParseProfile()
+    assert(profile, 'Missing parser profile')
+    return {rows, indexBytes, mediaRows, digest: hash.digest('hex'),
+        fusedParseAttempts: profile.fusedParseAttempts ?? 0,
+        fusedParseFallbacks: profile.fusedParseFallbacks ?? 0,
+        maxWasmHeapBytes: profile.maxWasmHeapBytes ?? null}
+}
+const report = {dictionary, node: process.version, complete: false,
+    authoritativeTiming: false, timingClaim: 'Correctness-only run; no timings recorded.',
+    boundary: 'Complete production parser, term columns, token-content bytes/hashes, media row projection, prepared lookup bytes and plans. Excludes worker IPC, Zstd, persistence, browser restart and media byte readback.',
+    baseline: arms.A.identity, candidate: arms.B.identity,
+    dictionaryLockSha256: sha(lockBytes), archiveSha256, archiveBytes,
+    runnerSha256: sha(await readFile(fileURLToPath(import.meta.url))),
+    options, maxFilesPerGroup: maxFiles, maxSourceGroupBytes: 64 * 1024 * 1024,
+    groups: []}
+if (resume) {
+    assert.equal(resume, '--resume')
+    const previous = JSON.parse(await readFile(output, 'utf8'))
+    assert.equal(previous.complete, false)
+    for (const key of ['dictionary', 'baseline', 'candidate', 'dictionaryLockSha256', 'archiveSha256', 'archiveBytes', 'options', 'maxFilesPerGroup', 'maxSourceGroupBytes']) {
+        assert.deepEqual(previous[key], report[key], `Resume identity changed: ${key}`)
+    }
+    assert(previous.interruption, 'Resume requires the recorded interruption')
+    report.interruption = previous.interruption
+    report.groups = previous.groups.map((group) => ({...group, runnerSha256: group.runnerSha256 ?? previous.runnerSha256}))
+    report.attempts = [
+        ...(previous.attempts ?? [{runnerSha256: previous.runnerSha256, status: 'interrupted-enospc', recordedGroups: previous.groups.length}]),
+        {runnerSha256: report.runnerSha256, status: 'running', resumedAfterGroups: previous.groups.length},
+    ]
+} else {
+    report.attempts = [{runnerSha256: report.runnerSha256, status: 'running', resumedAfterGroups: 0}]
+}
+const save = async () => {
+    await writeFile(`${output}.tmp`, JSON.stringify(report, null, 2) + '\n')
+    await rename(`${output}.tmp`, output)
+}
+await save()
+const reader = new ZipReader(new BlobReader(await openAsBlob(archivePath)), {useWebWorkers: false})
+try {
+    const entries = (await reader.getEntries()).filter((entry) => /^term_bank_\d+\.json$/.test(entry.filename))
+        .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+    let totalRows = 0
+    let totalIndexBytes = 0
+    let totalSourceBytes = 0
+    const aggregate = createHash('sha256')
+    let completedBanks = 0
+    for (const group of report.groups) {
+        assert(group.equal && group.baseline.digest === group.candidate.digest)
+        assert.equal(group.baseline.rows, group.candidate.rows)
+        assert.equal(group.baseline.indexBytes, group.candidate.indexBytes)
+        assert.equal(group.baseline.mediaRows, group.candidate.mediaRows)
+        assert(group.sourceBanks.length > 0 && group.sourceBanks.length <= maxFiles)
+        for (const bank of group.sourceBanks) {
+            assert.equal(bank.filename, entries[completedBanks]?.filename, 'Nonconsecutive resumed bank coverage')
+            assert.equal(bank.bytes, entries[completedBanks].uncompressedSize)
+            assert.match(bank.sha256, /^[0-9a-f]{64}$/)
+            ++completedBanks
+        }
+        totalRows += group.baseline.rows
+        totalIndexBytes += group.baseline.indexBytes
+        totalSourceBytes += group.sourceBytes
+        aggregate.update(JSON.stringify({sourceBanks: group.sourceBanks, rows: group.baseline.rows,
+            indexBytes: group.baseline.indexBytes, digest: group.baseline.digest}) + '\n')
+    }
+    for (let start = completedBanks; start < entries.length;) {
+        let end = start
+        let sourceBytes = 0
+        while (end < entries.length && end - start < maxFiles) {
+            const size = entries[end].uncompressedSize
+            if (end > start && sourceBytes + size > report.maxSourceGroupBytes) { break }
+            sourceBytes += size
+            ++end
+        }
+        const group = entries.slice(start, end)
+        const sources = []
+        const sourceBanks = []
+        for (const entry of group) {
+            const source = await entry.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true})
+            sources.push(source)
+            sourceBanks.push({filename: entry.filename, bytes: source.byteLength, sha256: sha(source)})
+        }
+        const a = await parseGroup('A', sources)
+        const b = await parseGroup('B', sources)
+        for (const [i, source] of sources.entries()) { assert.equal(sha(source), sourceBanks[i].sha256, 'Parser mutated source') }
+        assert.equal(a.rows, b.rows)
+        assert.equal(a.indexBytes, b.indexBytes)
+        assert.equal(a.mediaRows, b.mediaRows)
+        assert.equal(a.digest, b.digest, `Output mismatch in banks ${start + 1}..${end}`)
+        totalRows += a.rows
+        totalIndexBytes += a.indexBytes
+        totalSourceBytes += sourceBytes
+        const observation = {sourceBanks, sourceBytes, baseline: a, candidate: b, equal: true, runnerSha256: report.runnerSha256}
+        report.groups.push(observation)
+        aggregate.update(JSON.stringify({sourceBanks, rows: a.rows, indexBytes: a.indexBytes, digest: a.digest}) + '\n')
+        await save()
+        console.log(JSON.stringify({dictionary, banks: `${start + 1}..${end}`, rows: a.rows, totalRows, equal: true}))
+        start = end
+    }
+    assert.equal(totalRows, lock.termRows, 'Row count differs from dictionary lock')
+    assert.deepEqual(report.groups.flatMap((group) => group.sourceBanks.map((bank) => bank.filename)), entries.map((entry) => entry.filename), 'Incomplete or nonconsecutive bank coverage')
+    assert.equal(totalSourceBytes, entries.reduce((sum, entry) => sum + entry.uncompressedSize, 0))
+    for (const name of ['A', 'B']) {
+        const {wasmSha256, ...expected} = arms[name].identity
+        assert.deepEqual(await sourceIdentity(expected.root), expected, 'Source changed during validation')
+        assert.equal(sha(await readFile(`${expected.root}/ext/lib/term-bank-parser.wasm`)), wasmSha256)
+    }
+    assert.equal(sha(await readFile(lockPath)), report.dictionaryLockSha256, 'Lock changed during validation')
+    assert.equal(sha(await readFile(fileURLToPath(import.meta.url))), report.runnerSha256, 'Runner changed during validation')
+    report.complete = true
+    report.attempts.at(-1).status = 'complete'
+    report.summary = {banks: entries.length, groups: report.groups.length, rows: totalRows,
+        sourceBytes: totalSourceBytes, indexBytes: totalIndexBytes, digest: aggregate.digest('hex'), allEqual: true,
+        consecutiveBankCoverageVerified: true}
+    await save()
+    console.log(JSON.stringify(report.summary))
+} catch (error) {
+    report.error = String(error)
+    report.attempts.at(-1).status = 'failed'
+    try { await save() } catch (saveError) { console.error(`Checkpoint failed; prior atomic checkpoint retained: ${saveError}`) }
+    throw error
+} finally { await reader.close() }

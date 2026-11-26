@@ -1,0 +1,55 @@
+{
+    "schemaVersion": 1,
+    "fixCommit": "aff68acdf767e3888ea79b87d893894bee50ec95",
+    "fixPublished": false,
+    "changedFiles": [
+        "test/data/json.json"
+    ],
+    "addedRegistryEntries": [
+        "dev/perf/import-memory-ef009/protocol.json",
+        "dev/perf/import-memory-ef009/provenance.json"
+    ],
+    "protocolObserverWorkflowBytesUnchanged": true,
+    "localFullGate": {
+        "passed": false,
+        "exitCode": 1,
+        "passedTests": 151,
+        "failedTests": 5,
+        "failureKind": "60000ms timeouts in existing TypeScript schema cases; cause not established",
+        "log": "local-full-json-gate.log"
+    },
+    "narrowRegistryGate": {
+        "passed": true,
+        "passedTests": 77,
+        "skippedTests": 79,
+        "log": "local-registry-focused.log"
+    },
+    "originalRemoteJsonJob": {
+        "runId": 45646484532,
+        "jobId": 139318750265,
+        "status": "failure",
+        "log": "original-remote-json-job.log",
+        "passedTests": 154,
+        "failedTests": 2,
+        "failureKind": "Unregistered protocol.json and provenance.json membership assertions; all other tests passed in this hosted run"
+    },
+    "publicationPlan": "Keep separate and unpublished until original memory acquisition is preserved and temporary PR #916 is closed; no active study rerun or threshold change.",
+    "files": {
+        "local-registry-focused.log": {
+            "bytes": 591,
+            "sha256": "a0a22ca927acddc0a4818ffc4f88956f9475ca8fd9702828c5bcb0c3ea3d8b6e"
+        },
+        "local-full-json-gate.log": {
+            "bytes": 2429,
+            "sha256": "547ad7076ff9af7f3d66519304eacb8a16d35642e827267556db035540c38e24"
+        },
+        "original-remote-json-job.log": {
+            "bytes": 48840,
+            "sha256": "0d1624a039764a88f1b8a46d12497926685e9a43668496381139bed4b965df7e"
+        },
+        "registry-only.patch": {
+            "bytes": 907,
+            "sha256": "b73c84c584133ea55f90ec5eee7981850367566e92403ff38be3d43b40073fbc"
+        }
+    }
+}

@@ -381,6 +381,26 @@ describe('TermContentBlockStore', () => {
         expect(append).not.toHaveBeenCalled();
     });
 
+    test.each([
+        {name: 'empty', starts: []},
+        {name: 'missing first end', starts: [0]},
+        {name: 'nonzero first start', starts: [1, 2, 4]},
+        {name: 'repeated first start', starts: [0, 0, 4]},
+        {name: 'missing later end', starts: [0, 2]},
+        {name: 'backward later end', starts: [0, 2, 1]},
+        {name: 'repeated later end', starts: [0, 2, 2]},
+        {name: 'out-of-bounds later end', starts: [0, 2, 5]},
+    ])('rejects $name block boundaries before appending content', async ({starts}) => {
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {referencePackTargetBytes: 20});
+        const append = vi.spyOn(contentStore, '_appendBatchInternal');
+        await expect(blockStore._tryAppendPacked(() => ({
+            packedChunks: [Uint8Array.of(1, 2), Uint8Array.of(3, 4)],
+            blockStartIndexes: Uint32Array.from(starts),
+        }), Uint32Array.of(1, 1, 1, 1), null, true)).rejects.toThrow(new RangeError('Invalid compact term-content block reference'));
+        expect(append).not.toHaveBeenCalled();
+    });
+
     test.each([-1, 0.5, Number.NaN, Number.MAX_SAFE_INTEGER - 2])('rejects an invalid later block prefix (%s)', async (laterOffset) => {
         const contentStore = new TermContentOpfsStore();
         const blockStore = new TermContentBlockStore(contentStore, {blockTargetBytes: 1, minInputBytes: 0});
@@ -467,6 +487,86 @@ describe('TermContentBlockStore', () => {
         expect(await blockStore.tryAppendSpans(source, offsets, lengths, 'jmdict', true)).toBeNull();
         expect(blockStore.tryBeginAppendSpans(source, offsets, lengths, 'jmdict', true)).toBeNull();
         expect(append).not.toHaveBeenCalled();
+    });
+
+    test.each([1, 2, 3, 255, 257, 2048])('preserves scalar references across %i-entry slabs and long block runs', async (entriesPerSlab) => {
+        const compress = vi.mocked(compressWrappedTermContentZstdSpansBatch);
+        compress.mockClear();
+        const contentStore = new TermContentOpfsStore();
+        const blockStore = new TermContentBlockStore(contentStore, {
+            blockTargetBytes: 511,
+            referencePackTargetBytes: entriesPerSlab * 20 + 7,
+            minInputBytes: 0,
+        });
+        const lengths = Uint32Array.from({length: 1031}, (_, index) => (
+            index % 17 === 0 || index === 1030 ? 0 : (index === 517 ? 800 : 3)
+        ));
+        const offsets = new Uint32Array(lengths.length);
+        let sourceBytes = 0;
+        for (let i = 0; i < lengths.length; ++i) {
+            offsets[i] = sourceBytes;
+            sourceBytes += lengths[i];
+        }
+        const source = new Uint8Array(new SharedArrayBuffer(sourceBytes));
+        source.fill(7);
+        /** @type {number[]} */
+        let blockOffsets = [];
+        /** @type {number[]} */
+        let storedLengths = [];
+        /** @type {Uint8Array[]} */
+        let references = [];
+        vi.spyOn(contentStore, 'appendBatchWithDerivedChunks').mockImplementation(async (primary, createDerived) => {
+            let position = 2 ** 32 + 37;
+            storedLengths = primary.map(({byteLength}) => byteLength);
+            blockOffsets = primary.map(({byteLength}) => {
+                const offset = position;
+                position += byteLength;
+                return offset;
+            });
+            references = await createDerived(blockOffsets, storedLengths);
+            const derivedOffsets = references.map(({byteLength}) => {
+                const offset = position;
+                position += byteLength;
+                return offset;
+            });
+            return {
+                primaryOffsets: blockOffsets,
+                primaryLengths: storedLengths,
+                derivedOffsets,
+                derivedLengths: references.map(({byteLength}) => byteLength),
+            };
+        });
+
+        const result = await blockStore.tryAppendSpans(source, offsets, lengths, 'jmdict', true);
+
+        if (result === null) { throw new Error('Expected compressed content'); }
+        expect(compress).toHaveBeenCalledOnce();
+        const blockStarts = compress.mock.calls[0][3];
+        const blockLengths = compress.mock.calls[0][4];
+        const actual = new Uint8Array(lengths.length * 20);
+        let outputOffset = 0;
+        for (const bytes of references) {
+            expect(bytes.byteLength).toBeLessThanOrEqual(entriesPerSlab * 20);
+            actual.set(bytes, outputOffset);
+            outputOffset += bytes.byteLength;
+        }
+        expect(outputOffset).toBe(actual.byteLength);
+        for (let blockIndex = 0; blockIndex < blockLengths.length; ++blockIndex) {
+            let entryOffset = 0;
+            for (let index = blockStarts[blockIndex]; index < blockStarts[blockIndex + 1]; ++index) {
+                expect(actual.subarray(index * 20, (index + 1) * 20)).toStrictEqual(
+                    encodeRawTermContentCompactBlockReference(
+                        blockOffsets[blockIndex],
+                        storedLengths[blockIndex],
+                        blockLengths[blockIndex],
+                        entryOffset === blockLengths[blockIndex] ? 0 : entryOffset,
+                    ),
+                );
+                entryOffset += lengths[index];
+            }
+            expect(entryOffset).toBe(blockLengths[blockIndex]);
+        }
+        expect(result.contentLengths).toStrictEqual(lengths);
     });
 
     test('compresses shared parser spans without a main-thread packing copy', async () => {

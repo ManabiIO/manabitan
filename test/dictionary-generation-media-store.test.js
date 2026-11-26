@@ -132,6 +132,78 @@ function createStagingDatabase() {
 afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('Dictionary generation media storage', () => {
+    test('reuses an unchanged immutable index with holes and nonphysical reference order', async () => {
+        stubOpfs();
+        const {blob, records, plan, inline, deflated} = createPack();
+        const before = new Uint8Array(plan.index);
+        const selected = restrictGenerationMediaIndex(plan, records.map(({path}) => path).reverse());
+        if (selected === null) { throw new Error('Complete image selection was declined'); }
+        expect(selected.index).toBe(plan.index);
+        expect(selected.index).toEqual(before);
+        expect(selected.descriptor).toEqual(plan.descriptor);
+
+        const writer = new DictionaryGenerationMediaStore();
+        await writer.write(generation, blob, selected);
+        const reopened = new DictionaryGenerationMediaStore();
+        for (const {path} of records) {
+            const stored = await reopened.read(generation, selected.descriptor, path);
+            expect(stored === null ? null : new Uint8Array(stored.content)).toEqual(path.endsWith('4.webp') ? deflated : inline);
+        }
+        await expect(reopened.read(generation, selected.descriptor, 'img/card3.webp')).resolves.toBeNull();
+    });
+
+    test('copies only selected index bytes before removing an occupied slot', () => {
+        const {records, plan} = createPack();
+        const backing = new Uint8Array(plan.index.length + 17).fill(0xa5);
+        backing.set(plan.index, 7);
+        const index = backing.subarray(7, 7 + plan.index.length);
+        const source = {...plan, index};
+        const before = new Uint8Array(backing);
+        const complete = restrictGenerationMediaIndex(source, records.map(({path}) => path));
+        const subset = restrictGenerationMediaIndex(source, ['img/card1.webp', 'img/card4.webp']);
+        if (complete === null || subset === null) { throw new Error('Image selection was declined'); }
+        expect(complete.index).toBe(index);
+        expect(subset.index.buffer).not.toBe(backing.buffer);
+        expect(subset.index.byteOffset).toBe(0);
+        expect(subset.index.byteLength).toBe(index.byteLength);
+        expect(subset.descriptor.count).toBe(2);
+        expect(backing).toEqual(before);
+        expect(complete.index).toEqual(plan.index);
+    });
+
+    test('snapshots a reused complete index when selecting a staged payload', async () => {
+        stubOpfs();
+        const {blob, records, plan, inline} = createPack();
+        const sourceBytes = new Uint8Array(plan.index);
+        const store = new DictionaryGenerationMediaStore();
+        const staged = store.stage(generation, blob, plan);
+        const selected = restrictGenerationMediaIndex(plan, records.map(({path}) => path));
+        if (selected === null) { throw new Error('Complete image selection was declined'); }
+        expect(selected.index).toBe(plan.index);
+        staged.select(selected);
+        expect(plan.index).toEqual(sourceBytes);
+        plan.index.fill(0);
+        await staged.promise;
+        const reopened = new DictionaryGenerationMediaStore();
+        const stored = await reopened.read(generation, selected.descriptor, 'img/card1.webp');
+        expect(stored === null ? null : new Uint8Array(stored.content)).toEqual(inline);
+    });
+
+    test('does not reuse an index with an unselected occupied slot even if the declared count matches', async () => {
+        stubOpfs();
+        const {blob, plan, inline} = createPack();
+        const selected = restrictGenerationMediaIndex({...plan, descriptor: {...plan.descriptor, count: 1}}, ['img/card1.webp']);
+        if (selected === null) { throw new Error('Image selection was declined'); }
+        expect(selected.index).not.toBe(plan.index);
+        const store = new DictionaryGenerationMediaStore();
+        await store.write(generation, blob, selected);
+        const first = await store.read(generation, selected.descriptor, 'img/card1.webp');
+        expect(first === null ? null : new Uint8Array(first.content)).toEqual(inline);
+        for (const id of [2, 3, 4, 5]) {
+            await expect(store.read(generation, selected.descriptor, `img/card${id}.webp`)).resolves.toBeNull();
+        }
+    });
+
     test('terminates speculative work on cancellation even if a result arrives later', async () => {
         vi.useFakeTimers();
         try {

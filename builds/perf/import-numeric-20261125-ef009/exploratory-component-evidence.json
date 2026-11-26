@@ -1,0 +1,140 @@
+{
+    "schemaVersion": 1,
+    "purpose": "Preserve exploratory local JMdict component observations and the excluded contaminated screen; not browser performance qualification",
+    "authoritativeTiming": false,
+    "performanceClaim": null,
+    "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "candidatePublishedCommit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+    "candidatePublishedTree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5",
+    "parserLookupRunner": {
+        "path": "dev/perf/import-lookup-screen.js",
+        "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "sha256": "3d1a1fabd0b7827f279ec7d39d88c96ab830bc214a40cdbdee35773892a4119a",
+        "matchesEveryCleanObservation": true
+    },
+    "nativeRunner": {
+        "artifact": "native-parser-screen.mjs",
+        "sha256": "95d3f6994419bd2e5f7173e410b15d147b61c87d6cc71d41f8ea03441d7fd082",
+        "limitation": "Preserved current source retains original absolute worktree paths. Native reports did not record a contemporaneous runner hash."
+    },
+    "archive": {
+        "cacheFile": "JMdict.zip",
+        "bytes": 15645766,
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f"
+    },
+    "dictionaryLockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+    "observations": {
+        "initialParserLookup": {
+            "artifact": "jmdict-numeric-screen-initial.json",
+            "disposition": "excluded",
+            "reason": "Overlapped baseline full-unit validation; timings are contaminated and excluded from performance conclusions."
+        },
+        "cleanParserLookup": {
+            "artifact": "jmdict-numeric-screen-clean.json",
+            "pairs": 3,
+            "rowsPerObservation": 528299,
+            "allOutputDigestsEqual": true,
+            "digest": "824881eada22d2d2f9ac8feddb66322e2bab124fe6af634ef5ded7c303c40b9b",
+            "medianPairedChangePercent": 3.1651893432371736,
+            "fasterPairs": 1,
+            "disposition": "inconclusive exploratory component observation"
+        },
+        "nativeCandidate": {
+            "artifact": "jmdict-native-numbers-initial.json",
+            "pairs": 8,
+            "rowsPerObservation": 528299,
+            "allOutputDigestsEqual": true,
+            "medianWallChangePercent": -26.10437719130066,
+            "medianCpuChangePercent": -16.27719878460063
+        },
+        "nativeIdenticalCodeControl": {
+            "artifact": "jmdict-native-control.json",
+            "pairs": 8,
+            "rowsPerObservation": 528299,
+            "allOutputDigestsEqual": true,
+            "medianWallChangePercent": -11.94175069205012,
+            "medianCpuChangePercent": -8.537064452440003
+        }
+    },
+    "limitations": [
+        "Shared-host exploratory component timings have inconsistent direction and large identical-code drift",
+        "Native-only timing excludes allocation, input copying, inflation and lookup construction",
+        "All component timings exclude worker IPC, compression, persistence, browser restart and visible completion",
+        "Post-verification RSS and individual WASM heap are not whole-process peak memory",
+        "No favorable observations are discarded or substituted; the contaminated initial screen is retained and explicitly excluded"
+    ],
+    "artifacts": {
+        "jmdict-numeric-screen-initial.json": {
+            "path": "raw/jmdict-numeric-screen-initial.json.gz",
+            "encoding": "gzip",
+            "originalBytes": 14015,
+            "originalSha256": "c94f893c495ab579d979d3a91e58126f4c4ecc2004dac1fae2107981fde8d1a9",
+            "compressedBytes": 1877,
+            "compressedSha256": "43c52da67f4eaf4658cfca399f19d8c71f36f22b79b1555a14a887d38c55007c"
+        },
+        "jmdict-numeric-screen-clean.json": {
+            "path": "raw/jmdict-numeric-screen-clean.json.gz",
+            "encoding": "gzip",
+            "originalBytes": 13869,
+            "originalSha256": "d2b6b048603fb9f8faa0d8741a7e5e8107e6c772a11067e58be5aef06cab42e1",
+            "compressedBytes": 1714,
+            "compressedSha256": "c7e988d990af2b4bb183eac5a6a60f3d1ce184e21b2320ee1e1364f980aac577"
+        },
+        "jmdict-native-numbers-initial.json": {
+            "path": "raw/jmdict-native-numbers-initial.json.gz",
+            "encoding": "gzip",
+            "originalBytes": 5806,
+            "originalSha256": "5cc6725fde85b0c897bdceefe815e3838e2d0a6af8fa87832f3a06d7356926e2",
+            "compressedBytes": 1256,
+            "compressedSha256": "9daa0ea13a784ed4fbb756862a7ea87be2964fbbcaebcc922f320f846452e0e4"
+        },
+        "jmdict-native-control.json": {
+            "path": "raw/jmdict-native-control.json.gz",
+            "encoding": "gzip",
+            "originalBytes": 5765,
+            "originalSha256": "6600d7da132f0374cc44effdf85d6abe74aaf031349f19dc0b2db76509190e10",
+            "compressedBytes": 1188,
+            "compressedSha256": "e1f5b22b1ff25c1ebacef71b387d3fd7de29e67149f0bb76bbe3e940093528d3"
+        },
+        "jmdict-screen.log": {
+            "path": "raw/jmdict-screen.log.gz",
+            "encoding": "gzip",
+            "originalBytes": 463,
+            "originalSha256": "db78717eeb80135e431cee2550d25793d03ab927228a960bb6ae78aa211cad9a",
+            "compressedBytes": 306,
+            "compressedSha256": "eb742acdd70ea943c8e45c05ccff66d5350bafb7dc36518259566b376c92fa68"
+        },
+        "jmdict-screen-clean.log": {
+            "path": "raw/jmdict-screen-clean.log.gz",
+            "encoding": "gzip",
+            "originalBytes": 456,
+            "originalSha256": "8feac4f1f7d71db0adc5c2d7b49c55b069c827a7dd871326b6e7ea9a84f6c399",
+            "compressedBytes": 303,
+            "compressedSha256": "9b65aea411e613f046d10629643903fe841af64b08a8fe6302649c1a0b42de55"
+        },
+        "jmdict-native-numbers.log": {
+            "path": "raw/jmdict-native-numbers.log.gz",
+            "encoding": "gzip",
+            "originalBytes": 1460,
+            "originalSha256": "fcb450f26b3c443e3899f3891ffdbc26d1b6071c3656fc6424f659a48512cf89",
+            "compressedBytes": 607,
+            "compressedSha256": "416a9dd620ef64f0989dd57c0a4610ffda4a7d8557217a88da35d0d729728903"
+        },
+        "jmdict-native-control.log": {
+            "path": "raw/jmdict-native-control.log.gz",
+            "encoding": "gzip",
+            "originalBytes": 1429,
+            "originalSha256": "3f13843447c83bc6add7f03a2445e3c6a727d85e3eae81ba12075cc834872cc5",
+            "compressedBytes": 593,
+            "compressedSha256": "b291cb7092377d6854dd422276e8e0cb5365db3a6596c35efc8c1414044754c9"
+        },
+        "native-parser-screen.mjs": {
+            "path": "raw/native-parser-screen.mjs.gz",
+            "encoding": "gzip",
+            "originalBytes": 8305,
+            "originalSha256": "95d3f6994419bd2e5f7173e410b15d147b61c87d6cc71d41f8ea03441d7fd082",
+            "compressedBytes": 2893,
+            "compressedSha256": "39a4b11c8b410eb88954961bc8f04f29b4cc4a93af5203ba781175850078ed9f"
+        }
+    }
+}

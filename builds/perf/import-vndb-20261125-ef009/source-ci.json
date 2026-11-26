@@ -1,0 +1,979 @@
+{
+    "schemaVersion": 1,
+    "asOfUtc": "2026-11-25 15:54:54 UTC",
+    "runId": 45644919029,
+    "runUrl": "https://github.com/ManabiIO/manabitan/actions/runs/45644919029",
+    "head": "f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9",
+    "sourceTree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "createdAt": "2026-11-25T15:25:02Z",
+    "updatedAt": "2026-11-25T15:53:02Z",
+    "complete": true,
+    "jobs": [
+        {
+            "id": 139313198807,
+            "name": "Full Extension E2E (Chromium)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Build Chromium test package",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Retain tested Chromium release package",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                    "number": 5
+                },
+                {
+                    "name": "Install Playwright Chromium",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 6
+                },
+                {
+                    "name": "Restore Chromium E2E dictionary cache",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Run Chromium extension E2E",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Enforce Chromium extension E2E success",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                },
+                {
+                    "name": "Summarize Chromium extension E2E",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 10
+                },
+                {
+                    "name": "Upload Chromium extension E2E JSON",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 11
+                },
+                {
+                    "name": "Upload Chromium extension E2E report",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                    "number": 12
+                },
+                {
+                    "name": "Post Restore Chromium E2E dictionary cache",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 22
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 23
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 24
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 25
+                }
+            ]
+        },
+        {
+            "id": 139313199316,
+            "name": "Unit Tests",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run Unit Tests tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199318,
+            "name": "JavaScript",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run JavaScript tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199364,
+            "name": "HTML",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run HTML tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199412,
+            "name": "Markdown",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run Markdown tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199414,
+            "name": "Anki Deduplication Matrix (Chromium)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Install Playwright Chromium",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Run Chromium Anki deduplication matrix",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 5
+                },
+                {
+                    "name": "Enforce Chromium Anki matrix success",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 6
+                },
+                {
+                    "name": "Upload Chromium Anki deduplication report",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 13
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 14
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 15
+                }
+            ]
+        },
+        {
+            "id": 139313199426,
+            "name": "Test Build",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Install pinned dictionary WASM toolchain",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Verify pinned dictionary WASM rebuild",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 5
+                },
+                {
+                    "name": "Build",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 6
+                },
+                {
+                    "name": "Retain versioned release packages",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                    "number": 7
+                },
+                {
+                    "name": "Validate manifest.json of the extension",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 15
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 16
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 17
+                }
+            ]
+        },
+        {
+            "id": 139313199454,
+            "name": "Unit Tests (options)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run Unit Tests (options) tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199571,
+            "name": "TypeScript (dev)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run TypeScript (dev) tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199655,
+            "name": "Full Extension E2E (Firefox)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Build Firefox test package",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Retain tested Firefox release package",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                    "number": 5
+                },
+                {
+                    "name": "Install Firefox Developer Edition",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 6
+                },
+                {
+                    "name": "Restore Firefox E2E dictionary cache",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Run Firefox extension E2E",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Enforce Firefox extension E2E success",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                },
+                {
+                    "name": "Upload Firefox extension E2E JSON",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 10
+                },
+                {
+                    "name": "Upload Firefox extension E2E report",
+                    "status": "completed",
+                    "conclusion": "skipped",
+                    "number": 11
+                },
+                {
+                    "name": "Post Restore Firefox E2E dictionary cache",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 20
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 21
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 22
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 23
+                }
+            ]
+        },
+        {
+            "id": 139313199674,
+            "name": "TypeScript (main)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run TypeScript (main) tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199692,
+            "name": "TypeScript (test)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run TypeScript (test) tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199710,
+            "name": "TypeScript (bench)",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run TypeScript (bench) tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313199817,
+            "name": "CSS",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run CSS tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313200119,
+            "name": "JSON",
+            "status": "completed",
+            "conclusion": "success",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": [
+                {
+                    "name": "Set up job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 1
+                },
+                {
+                    "name": "Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 2
+                },
+                {
+                    "name": "Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 3
+                },
+                {
+                    "name": "Run JSON tests",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 4
+                },
+                {
+                    "name": "Post Run ./.github/actions/setup",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 7
+                },
+                {
+                    "name": "Post Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 8
+                },
+                {
+                    "name": "Complete job",
+                    "status": "completed",
+                    "conclusion": "success",
+                    "number": 9
+                }
+            ]
+        },
+        {
+            "id": 139313201431,
+            "name": "Full Extension E2E (Edge)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": null
+        },
+        {
+            "id": 139313201679,
+            "name": "Published release upgrade and reimport",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": null
+        },
+        {
+            "id": 139313261998,
+            "name": "Firefox Android Installation Smoke (blocking)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": null
+        },
+        {
+            "id": 139313269063,
+            "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+            "status": "completed",
+            "conclusion": "skipped",
+            "run_id": 45644919029,
+            "logs_url": null,
+            "steps": null
+        }
+    ],
+    "allActiveWorkflowJobsSucceeded": true,
+    "successfulJobCount": 15,
+    "skippedJobCount": 4
+}

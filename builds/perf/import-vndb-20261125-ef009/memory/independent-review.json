@@ -1,0 +1,938 @@
+{
+  "schemaVersion": 1,
+  "authoritativeTiming": false,
+  "workflowCommit": "57590f5eaee359d721ba9d5d8bde28728a8d172e",
+  "workflowTree": "1be0798152baa751fd22a4bbd8f4b6a48c21be08",
+  "workflowRunId": "45646484626",
+  "workflowAttempt": 1,
+  "auditRunnerSha256": "b30b0defee67bcc3c5981697ae8152d1a05eaf879e94bab78ed3dcdfa8f738dd",
+  "protocolSha256": "0880cf10e13635bddd64a4d0848db13c4f46b06684e92f826a643086d213bc42",
+  "retrievalMetadataSha256": {
+    "retrieved-artifacts.json": "82dd062405c1cabd4ac0b034a73297febddf5e3e9ebc96bec5b7bac7b692e627",
+    "full-evidence-index.json": "b2d612aae9553acd241051d2c6441bfd7a17ffad8fd5902d392fdba5e5c522da"
+  },
+  "observerSha256": {
+    "audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "overlay_helpers.py": "52e0be6c75b6e5d93c8edd5be9ac3ee824a22a1a423919c4f05d3f7136f60a6a",
+    "packaging_helpers.py": "500efcf5538e185717e97754de5df221648f982976ea27fae7e063621cd358c1",
+    "run_memory.py": "07e3873c1ce6526ce859b5a289b34cfda462203c8ecfdc8180189f85660fc1d7",
+    "test_chromium_memory.py": "82c890d6e0e024bbae4b99381dc4752c2fdce63318d1add3308582d7897c4bd6",
+    "test_import_window.py": "def8e71a8b527bc330e930c8077e6dceba92c16267c7c5f027e7a30ac1c83dce",
+    "test_protocol.py": "cdfb6c17bf3ebb12a1150de05c81ec1efa7b9291dc40acfaebabbfb0a6cc4f25"
+  },
+  "completeIndependentAudit": true,
+  "passesFrozenSixCellMemoryGate": false,
+  "receivedSummaries": 6,
+  "receivedFullBundles": 6,
+  "auditedCells": 6,
+  "observationsVerified": 24,
+  "publicLookupObservationsVerified": 1728,
+  "coverageQualifiedObservations": 23,
+  "memoryGatePassedCells": 5,
+  "memoryGateFailedCells": [
+    [
+      "vndb",
+      1
+    ]
+  ],
+  "rawScansRecomputed": 2399,
+  "distinctBootIds": 6,
+  "distinctHostnames": 2,
+  "distinctRunnerNames": 6,
+  "hostnameReuseObserved": true,
+  "primaryUnchangedAuditorReexecutionReceiptSha256": "bc5cfc56cd391d48f6371b9e2d3a44cdf00a1800d9345f0c1b7b6c99969c8716",
+  "packageMemberMapsIdenticalAcrossCells": {
+    "A": true,
+    "B": true
+  },
+  "errors": [],
+  "missingCells": [],
+  "cells": [
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "summarySha256": "10f9552764211499e53a216fe12c65e4fb972285a04830e5871c5c911142179b",
+      "archiveSha256": "8f5c98fc1648831db9007edfce8df564eba5ef0e5c76914a9ebbc315d79bd8c0",
+      "retainedMembersVerified": 71,
+      "hostIdentity": {
+        "hostname": "runnervm0hi8g",
+        "bootId": "04403733-128b-4c73-a694-0c327ec90b8f",
+        "runnerName": "GitHub Actions 1000088097",
+        "runnerEnvironment": "github-hosted"
+      },
+      "observerLineageAndSourceHashesVerified": true,
+      "sourcePackageAndIdenticalOverlayVerified": true,
+      "originalRawScanAuditorReceiptVerified": true,
+      "rawProcessIdentityAndSumChecksVerified": true,
+      "directCoverageAndMaximaRecomputationVerified": true,
+      "rawScans": 311,
+      "observations": [
+        {
+          "index": 1,
+          "arm": "A",
+          "name": "A1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 80,
+          "coveredScans": 12,
+          "maximumCoveredGapMs": 148.91454,
+          "preImportBracketGapMs": 46.312453,
+          "postImportBracketGapMs": 28.751146,
+          "maxSampledPssKiB": 1048390,
+          "maxSampledPrivateKiB": 815444
+        },
+        {
+          "index": 2,
+          "arm": "B",
+          "name": "B1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 74,
+          "coveredScans": 14,
+          "maximumCoveredGapMs": 140.488478,
+          "preImportBracketGapMs": 2.942807,
+          "postImportBracketGapMs": 6.080354,
+          "maxSampledPssKiB": 1029212,
+          "maxSampledPrivateKiB": 795948
+        },
+        {
+          "index": 3,
+          "arm": "B",
+          "name": "B2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 85,
+          "coveredScans": 14,
+          "maximumCoveredGapMs": 138.041472,
+          "preImportBracketGapMs": 2.827592,
+          "postImportBracketGapMs": 74.482295,
+          "maxSampledPssKiB": 1025520,
+          "maxSampledPrivateKiB": 795944
+        },
+        {
+          "index": 4,
+          "arm": "A",
+          "name": "A2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 72,
+          "coveredScans": 13,
+          "maximumCoveredGapMs": 135.792121,
+          "preImportBracketGapMs": 40.08936,
+          "postImportBracketGapMs": 10.524862,
+          "maxSampledPssKiB": 1057109,
+          "maxSampledPrivateKiB": 826704
+        }
+      ],
+      "pairs": [
+        {
+          "pair": 1,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1048390,
+            "candidate": 1029212,
+            "changePercent": -1.8292810881446742
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 815444,
+            "candidate": 795948,
+            "changePercent": -2.3908447422508528
+          }
+        },
+        {
+          "pair": 2,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1057109,
+            "candidate": 1025520,
+            "changePercent": -2.9882443532313174
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 826704,
+            "candidate": 795944,
+            "changePercent": -3.720799705819733
+          }
+        }
+      ],
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -2.408762720687996,
+          "maximumPairedChangePercent": -1.8292810881446742
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -3.0558222240352926,
+          "maximumPairedChangePercent": -2.3908447422508528
+        }
+      },
+      "passesFrozenMemoryGate": true,
+      "everyObservationQualified": true,
+      "recordedStatus": "passed",
+      "recordedError": null,
+      "semanticObservations": 4,
+      "publicLookupObservations": 288,
+      "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+      "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+      "fullMedia": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      },
+      "packageMemberMapSha256": {
+        "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+        "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+      },
+      "packageBytes": {
+        "A": 16790986,
+        "B": 16793851
+      },
+      "authoritativeTiming": false
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "summarySha256": "2ad4af1961f205990f8a7dab9657850663b5a09de3f40c8256e0855bb8bbd639",
+      "archiveSha256": "7bf7f4670b1695cc55c3d5abc81a723d5d762398c03450cbe8c707e013718ba9",
+      "retainedMembersVerified": 71,
+      "hostIdentity": {
+        "hostname": "ip-10-0-140-160",
+        "bootId": "df909984-faf1-49de-8466-03a7fa1aa3f8",
+        "runnerName": "GitHub Actions 1000088061",
+        "runnerEnvironment": "github-hosted"
+      },
+      "observerLineageAndSourceHashesVerified": true,
+      "sourcePackageAndIdenticalOverlayVerified": true,
+      "originalRawScanAuditorReceiptVerified": true,
+      "rawProcessIdentityAndSumChecksVerified": true,
+      "directCoverageAndMaximaRecomputationVerified": true,
+      "rawScans": 472,
+      "observations": [
+        {
+          "index": 1,
+          "arm": "B",
+          "name": "B1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 215,
+          "coveredScans": 16,
+          "maximumCoveredGapMs": 103.326845,
+          "preImportBracketGapMs": 42.278856,
+          "postImportBracketGapMs": 11.22791,
+          "maxSampledPssKiB": 1066179,
+          "maxSampledPrivateKiB": 834824
+        },
+        {
+          "index": 2,
+          "arm": "A",
+          "name": "A1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 90,
+          "coveredScans": 18,
+          "maximumCoveredGapMs": 133.035291,
+          "preImportBracketGapMs": 6.70845,
+          "postImportBracketGapMs": 2.557774,
+          "maxSampledPssKiB": 1062436,
+          "maxSampledPrivateKiB": 829600
+        },
+        {
+          "index": 3,
+          "arm": "A",
+          "name": "A2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 83,
+          "coveredScans": 15,
+          "maximumCoveredGapMs": 106.768525,
+          "preImportBracketGapMs": 55.802182,
+          "postImportBracketGapMs": 29.817515,
+          "maxSampledPssKiB": 1058194,
+          "maxSampledPrivateKiB": 830392
+        },
+        {
+          "index": 4,
+          "arm": "B",
+          "name": "B2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 84,
+          "coveredScans": 15,
+          "maximumCoveredGapMs": 143.196499,
+          "preImportBracketGapMs": 37.609172,
+          "postImportBracketGapMs": 28.355858,
+          "maxSampledPssKiB": 1050313,
+          "maxSampledPrivateKiB": 818372
+        }
+      ],
+      "pairs": [
+        {
+          "pair": 1,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1062436,
+            "candidate": 1066179,
+            "changePercent": 0.3523035740505831
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 829600,
+            "candidate": 834824,
+            "changePercent": 0.6297010607521747
+          }
+        },
+        {
+          "pair": 2,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1058194,
+            "candidate": 1050313,
+            "changePercent": -0.7447594675456526
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 830392,
+            "candidate": 818372,
+            "changePercent": -1.44750912821896
+          }
+        }
+      ],
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -0.19622794674753474,
+          "maximumPairedChangePercent": 0.3523035740505831
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -0.4089040337333927,
+          "maximumPairedChangePercent": 0.6297010607521747
+        }
+      },
+      "passesFrozenMemoryGate": true,
+      "everyObservationQualified": true,
+      "recordedStatus": "passed",
+      "recordedError": null,
+      "semanticObservations": 4,
+      "publicLookupObservations": 288,
+      "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+      "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+      "fullMedia": {
+        "mode": "all",
+        "totalFiles": 236,
+        "totalBytes": 4992155,
+        "files": 236,
+        "bytes": 4992155,
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+      },
+      "packageMemberMapSha256": {
+        "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+        "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+      },
+      "packageBytes": {
+        "A": 16790986,
+        "B": 16793851
+      },
+      "authoritativeTiming": false
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "summarySha256": "394865f3b4ddec3e814dfea1789ad2842f0e939192f70e5a88b8746c032dcbd6",
+      "archiveSha256": "fbe66937418c4344857ebbe30a7a4db0d20f220c6be86316790fd2a77f0812f0",
+      "retainedMembersVerified": 71,
+      "hostIdentity": {
+        "hostname": "runnervm0hi8g",
+        "bootId": "231dafb1-57a6-43cd-bb95-f9831ebe2295",
+        "runnerName": "GitHub Actions 1000088077",
+        "runnerEnvironment": "github-hosted"
+      },
+      "observerLineageAndSourceHashesVerified": true,
+      "sourcePackageAndIdenticalOverlayVerified": true,
+      "originalRawScanAuditorReceiptVerified": true,
+      "rawProcessIdentityAndSumChecksVerified": true,
+      "directCoverageAndMaximaRecomputationVerified": true,
+      "rawScans": 297,
+      "observations": [
+        {
+          "index": 1,
+          "arm": "A",
+          "name": "A1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 89,
+          "coveredScans": 8,
+          "maximumCoveredGapMs": 126.138767,
+          "preImportBracketGapMs": 4.506417,
+          "postImportBracketGapMs": 43.111633,
+          "maxSampledPssKiB": 1034784,
+          "maxSampledPrivateKiB": 805856
+        },
+        {
+          "index": 2,
+          "arm": "B",
+          "name": "B1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 65,
+          "coveredScans": 8,
+          "maximumCoveredGapMs": 122.699174,
+          "preImportBracketGapMs": 24.985637,
+          "postImportBracketGapMs": 26.635588,
+          "maxSampledPssKiB": 1030982,
+          "maxSampledPrivateKiB": 798304
+        },
+        {
+          "index": 3,
+          "arm": "B",
+          "name": "B2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 67,
+          "coveredScans": 9,
+          "maximumCoveredGapMs": 127.879816,
+          "preImportBracketGapMs": 81.673717,
+          "postImportBracketGapMs": 84.939552,
+          "maxSampledPssKiB": 997833,
+          "maxSampledPrivateKiB": 764640
+        },
+        {
+          "index": 4,
+          "arm": "A",
+          "name": "A2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 76,
+          "coveredScans": 14,
+          "maximumCoveredGapMs": 119.093876,
+          "preImportBracketGapMs": 10.141246,
+          "postImportBracketGapMs": 87.79248,
+          "maxSampledPssKiB": 1022834,
+          "maxSampledPrivateKiB": 792240
+        }
+      ],
+      "pairs": [
+        {
+          "pair": 1,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1034784,
+            "candidate": 1030982,
+            "changePercent": -0.3674196740575786
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 805856,
+            "candidate": 798304,
+            "changePercent": -0.937140134217529
+          }
+        },
+        {
+          "pair": 2,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1022834,
+            "candidate": 997833,
+            "changePercent": -2.444287147279034
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 792240,
+            "candidate": 764640,
+            "changePercent": -3.4837927900636223
+          }
+        }
+      ],
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": -1.4058534106683063,
+          "maximumPairedChangePercent": -0.3674196740575786
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": -2.210466462140576,
+          "maximumPairedChangePercent": -0.937140134217529
+        }
+      },
+      "passesFrozenMemoryGate": true,
+      "everyObservationQualified": true,
+      "recordedStatus": "passed",
+      "recordedError": null,
+      "semanticObservations": 4,
+      "publicLookupObservations": 288,
+      "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+      "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+      "fullMedia": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "packageMemberMapSha256": {
+        "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+        "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+      },
+      "packageBytes": {
+        "A": 16790986,
+        "B": 16793851
+      },
+      "authoritativeTiming": false
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "summarySha256": "c5ced52b9140a731ae9ed999788ac82e51a4c7ce56333a8ed408b014d2a72707",
+      "archiveSha256": "fb209a54869dc815db0c1ee408c1b3062fb8009aefd60d66866c4ac03dcc2474",
+      "retainedMembersVerified": 71,
+      "hostIdentity": {
+        "hostname": "runnervm0hi8g",
+        "bootId": "e2e610a8-7945-484b-9264-e57f92b772eb",
+        "runnerName": "GitHub Actions 1000088075",
+        "runnerEnvironment": "github-hosted"
+      },
+      "observerLineageAndSourceHashesVerified": true,
+      "sourcePackageAndIdenticalOverlayVerified": true,
+      "originalRawScanAuditorReceiptVerified": true,
+      "rawProcessIdentityAndSumChecksVerified": true,
+      "directCoverageAndMaximaRecomputationVerified": true,
+      "rawScans": 359,
+      "observations": [
+        {
+          "index": 1,
+          "arm": "B",
+          "name": "B1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 94,
+          "coveredScans": 8,
+          "maximumCoveredGapMs": 166.592898,
+          "preImportBracketGapMs": 25.889403,
+          "postImportBracketGapMs": 25.309787,
+          "maxSampledPssKiB": 1018708,
+          "maxSampledPrivateKiB": 782860
+        },
+        {
+          "index": 2,
+          "arm": "A",
+          "name": "A1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 91,
+          "coveredScans": 10,
+          "maximumCoveredGapMs": 160.616372,
+          "preImportBracketGapMs": 93.45927,
+          "postImportBracketGapMs": 18.355259,
+          "maxSampledPssKiB": 1009575,
+          "maxSampledPrivateKiB": 778184
+        },
+        {
+          "index": 3,
+          "arm": "A",
+          "name": "A2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 100,
+          "coveredScans": 9,
+          "maximumCoveredGapMs": 174.602852,
+          "preImportBracketGapMs": 77.804016,
+          "postImportBracketGapMs": 19.382282,
+          "maxSampledPssKiB": 1022152,
+          "maxSampledPrivateKiB": 790484
+        },
+        {
+          "index": 4,
+          "arm": "B",
+          "name": "B2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 74,
+          "coveredScans": 9,
+          "maximumCoveredGapMs": 162.647379,
+          "preImportBracketGapMs": 34.866869,
+          "postImportBracketGapMs": 23.334469,
+          "maxSampledPssKiB": 1018034,
+          "maxSampledPrivateKiB": 785852
+        }
+      ],
+      "pairs": [
+        {
+          "pair": 1,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1009575,
+            "candidate": 1018708,
+            "changePercent": 0.9046380902855145
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 778184,
+            "candidate": 782860,
+            "changePercent": 0.6008861657397224
+          }
+        },
+        {
+          "pair": 2,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1022152,
+            "candidate": 1018034,
+            "changePercent": -0.4028755018823049
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 790484,
+            "candidate": 785852,
+            "changePercent": -0.5859701145121243
+          }
+        }
+      ],
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.25088129420160477,
+          "maximumPairedChangePercent": 0.9046380902855145
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 0.007458025613799046,
+          "maximumPairedChangePercent": 0.6008861657397224
+        }
+      },
+      "passesFrozenMemoryGate": true,
+      "everyObservationQualified": true,
+      "recordedStatus": "passed",
+      "recordedError": null,
+      "semanticObservations": 4,
+      "publicLookupObservations": 288,
+      "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+      "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+      "fullMedia": {
+        "mode": "all",
+        "totalFiles": 0,
+        "totalBytes": 0,
+        "files": 0,
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "packageMemberMapSha256": {
+        "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+        "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+      },
+      "packageBytes": {
+        "A": 16790986,
+        "B": 16793851
+      },
+      "authoritativeTiming": false
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 1,
+      "summarySha256": "7b02a9ecd8f625479592edc31cefbfa08ec1b085fe5c205c67d7f786ad2e82cd",
+      "archiveSha256": "4dc212c65a781ccc391b2de0b0502988049322f8c541a5f05a20fa8d3a4dcb31",
+      "retainedMembersVerified": 72,
+      "hostIdentity": {
+        "hostname": "runnervm0hi8g",
+        "bootId": "913bab4b-446d-438a-8d0b-fa95542f74e1",
+        "runnerName": "GitHub Actions 1000088084",
+        "runnerEnvironment": "github-hosted"
+      },
+      "observerLineageAndSourceHashesVerified": true,
+      "sourcePackageAndIdenticalOverlayVerified": true,
+      "originalRawScanAuditorReceiptVerified": true,
+      "rawProcessIdentityAndSumChecksVerified": true,
+      "directCoverageAndMaximaRecomputationVerified": true,
+      "rawScans": 480,
+      "observations": [
+        {
+          "index": 1,
+          "arm": "A",
+          "name": "A1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 128,
+          "coveredScans": 52,
+          "maximumCoveredGapMs": 214.17341,
+          "preImportBracketGapMs": 49.803338,
+          "postImportBracketGapMs": 109.153628,
+          "maxSampledPssKiB": 1384928,
+          "maxSampledPrivateKiB": 1152756
+        },
+        {
+          "index": 2,
+          "arm": "B",
+          "name": "B1",
+          "pair": 1,
+          "qualified": false,
+          "failures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "rawScans": 117,
+          "coveredScans": 47,
+          "maximumCoveredGapMs": 254.99874,
+          "preImportBracketGapMs": 50.889574,
+          "postImportBracketGapMs": 82.624832,
+          "maxSampledPssKiB": null,
+          "maxSampledPrivateKiB": null
+        },
+        {
+          "index": 3,
+          "arm": "B",
+          "name": "B2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 118,
+          "coveredScans": 49,
+          "maximumCoveredGapMs": 167.492684,
+          "preImportBracketGapMs": 65.002952,
+          "postImportBracketGapMs": 38.790964,
+          "maxSampledPssKiB": 1406352,
+          "maxSampledPrivateKiB": 1176660
+        },
+        {
+          "index": 4,
+          "arm": "A",
+          "name": "A2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 117,
+          "coveredScans": 48,
+          "maximumCoveredGapMs": 173.921793,
+          "preImportBracketGapMs": 47.88178,
+          "postImportBracketGapMs": 29.739677,
+          "maxSampledPssKiB": 1464711,
+          "maxSampledPrivateKiB": 1234352
+        }
+      ],
+      "pairs": [
+        {
+          "pair": 1,
+          "qualified": false,
+          "maxSampledPssKiB": {
+            "baseline": 1384928,
+            "candidate": null,
+            "changePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 1152756,
+            "candidate": null,
+            "changePercent": null
+          }
+        },
+        {
+          "pair": 2,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1464711,
+            "candidate": 1406352,
+            "changePercent": -3.9843354764182104
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 1234352,
+            "candidate": 1176660,
+            "changePercent": -4.673869366274774
+          }
+        }
+      ],
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": null,
+          "maximumPairedChangePercent": null
+        }
+      },
+      "passesFrozenMemoryGate": false,
+      "everyObservationQualified": false,
+      "recordedStatus": "failed",
+      "recordedError": "Memory coverage, prospective memory gate, or semantic validation failed; no observations replaced",
+      "semanticObservations": 4,
+      "publicLookupObservations": 288,
+      "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+      "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+      "fullMedia": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      },
+      "packageMemberMapSha256": {
+        "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+        "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+      },
+      "packageBytes": {
+        "A": 16790986,
+        "B": 16793851
+      },
+      "authoritativeTiming": false
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "summarySha256": "4f5ebeec3ae68a0bcac5e959de74cad00f664b92e5dc8e38210d1f7a7d6a4c6f",
+      "archiveSha256": "516552e529f95ea1e8681d200225b41751d9fbc3756ccf6f0c72af9acaf37fb3",
+      "retainedMembersVerified": 71,
+      "hostIdentity": {
+        "hostname": "runnervm0hi8g",
+        "bootId": "1933ffc9-7728-426c-b17f-c23688b88792",
+        "runnerName": "GitHub Actions 1000088062",
+        "runnerEnvironment": "github-hosted"
+      },
+      "observerLineageAndSourceHashesVerified": true,
+      "sourcePackageAndIdenticalOverlayVerified": true,
+      "originalRawScanAuditorReceiptVerified": true,
+      "rawProcessIdentityAndSumChecksVerified": true,
+      "directCoverageAndMaximaRecomputationVerified": true,
+      "rawScans": 480,
+      "observations": [
+        {
+          "index": 1,
+          "arm": "B",
+          "name": "B1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 151,
+          "coveredScans": 45,
+          "maximumCoveredGapMs": 216.756057,
+          "preImportBracketGapMs": 42.536152,
+          "postImportBracketGapMs": 19.082757,
+          "maxSampledPssKiB": 1412714,
+          "maxSampledPrivateKiB": 1179096
+        },
+        {
+          "index": 2,
+          "arm": "A",
+          "name": "A1",
+          "pair": 1,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 109,
+          "coveredScans": 43,
+          "maximumCoveredGapMs": 169.992678,
+          "preImportBracketGapMs": 35.520258,
+          "postImportBracketGapMs": 53.97424,
+          "maxSampledPssKiB": 1399713,
+          "maxSampledPrivateKiB": 1170340
+        },
+        {
+          "index": 3,
+          "arm": "A",
+          "name": "A2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 110,
+          "coveredScans": 42,
+          "maximumCoveredGapMs": 172.287283,
+          "preImportBracketGapMs": 43.848551,
+          "postImportBracketGapMs": 76.14015,
+          "maxSampledPssKiB": 1419380,
+          "maxSampledPrivateKiB": 1187376
+        },
+        {
+          "index": 4,
+          "arm": "B",
+          "name": "B2",
+          "pair": 2,
+          "qualified": true,
+          "failures": [],
+          "rawScans": 110,
+          "coveredScans": 44,
+          "maximumCoveredGapMs": 160.001697,
+          "preImportBracketGapMs": 8.295459,
+          "postImportBracketGapMs": 84.956626,
+          "maxSampledPssKiB": 1430123,
+          "maxSampledPrivateKiB": 1200480
+        }
+      ],
+      "pairs": [
+        {
+          "pair": 1,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1399713,
+            "candidate": 1412714,
+            "changePercent": 0.9288332679627809
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 1170340,
+            "candidate": 1179096,
+            "changePercent": 0.7481586547499086
+          }
+        },
+        {
+          "pair": 2,
+          "qualified": true,
+          "maxSampledPssKiB": {
+            "baseline": 1419380,
+            "candidate": 1430123,
+            "changePercent": 0.7568797644041725
+          },
+          "maxSampledPrivateKiB": {
+            "baseline": 1187376,
+            "candidate": 1200480,
+            "changePercent": 1.103609976957598
+          }
+        }
+      ],
+      "metrics": {
+        "maxSampledPssKiB": {
+          "medianPairedChangePercent": 0.8428565161834767,
+          "maximumPairedChangePercent": 0.9288332679627809
+        },
+        "maxSampledPrivateKiB": {
+          "medianPairedChangePercent": 0.9258843158537533,
+          "maximumPairedChangePercent": 1.103609976957598
+        }
+      },
+      "passesFrozenMemoryGate": true,
+      "everyObservationQualified": true,
+      "recordedStatus": "passed",
+      "recordedError": null,
+      "semanticObservations": 4,
+      "publicLookupObservations": 288,
+      "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+      "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+      "fullMedia": {
+        "mode": "all",
+        "totalFiles": 146570,
+        "totalBytes": 188131284,
+        "files": 146570,
+        "bytes": 188131284,
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+      },
+      "packageMemberMapSha256": {
+        "A": "9820007b6d9630c15c440befe12ea1b5e9e9bde5f4f58ff828e456ef937102d5",
+        "B": "405596a7d1d6bce33a8611465397bbc072a09ecc270ce9c03c119395f7c9365f"
+      },
+      "packageBytes": {
+        "A": 16790986,
+        "B": 16793851
+      },
+      "authoritativeTiming": false
+    }
+  ],
+  "limitations": [
+    "Sampled non-atomic process-tree PSS/private maxima within the marked import window, not exact peaks.",
+    "Startup, media readback and restart are excluded from maxima; their semantics are checked separately.",
+    "Instrumented timing is explicitly non-authoritative; these results do not establish import speed.",
+    "Preserved package payload hashes/member maps identify the releases; large ZIP bytes remain in the original CI artifacts.",
+    "Distinct boot IDs and runner assignments establish distinct hosted instances, not physical hardware independence. Hostnames may be reused across those instances."
+  ]
+}

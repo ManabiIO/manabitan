@@ -479,17 +479,24 @@ export async function initializeTermContentZstd() {
         }
         let nextDctx = 0;
         try {
-            nextDctx = Number(createDCtx());
-            if (nextDctx === 0) {
-                throw new Error('Failed to create zstd decompression context');
+            // Compression workers never decode import blocks. Keep their native
+            // decoder allocation lazy, while preserving ordinary initialization.
+            /* eslint-disable @stylistic/semi */
+            if (Reflect.get(globalThis, '__manabitanTermContentCompressionWorker') !== true) {
+                nextDctx = Number(createDCtx())
+                if (nextDctx === 0) {
+                    throw new Error('Failed to create zstd decompression context')
+                }
             }
+            /* eslint-enable @stylistic/semi */
         } catch (error) {
             if (nextDctx !== 0) { freeDCtx(nextDctx); }
             freeCCtx(nextCctx);
             throw error;
         }
         cctx = nextCctx;
-        dctx = nextDctx;
+        // eslint-disable-next-line @stylistic/semi
+        dctx = nextDctx === 0 ? null : nextDctx
         jmdictDict = loadedJmdictDict;
         isInitialized = true;
         // Prewarm workers while archive/index preparation continues.
@@ -970,10 +977,19 @@ export function finishWrappedTermContentZstdSpans(prepared) {
  * @throws {Error}
  */
 export function decompressTermContentZstd(content, dictName, options = {}) {
-    if (!isInitialized || dctx === null) {
+    if (!isInitialized) {
         throw new Error('Term content zstd not initialized');
     }
     if (dictName === 'jmdict' && jmdictDict !== null) {
+        /* eslint-disable @stylistic/semi */
+        if (dctx === null) {
+            const context = Number(createDCtx())
+            if (context === 0) {
+                throw new Error('Failed to create zstd decompression context')
+            }
+            dctx = context
+        }
+        /* eslint-enable @stylistic/semi */
         return decompressUsingDict(dctx, content, jmdictDict, options);
     }
     return decompress(content, options);
