@@ -118,21 +118,10 @@ It retains the content output digest, all inventory/restart fields, and all
 lookup observation fields except `elapsedMs`; observations are ordered by
 pass and term. Storage keeps its exact total and sorted complete file sizes.
 Only valid generation-media UUID basenames and SAH opaque basenames are
-normalized. Nonrandom paths remain exact. The eight-file SAH structure remains
-required. Historical callers retain the VNDB active-allocation bound of 129–131
-units of 4096 bytes. Even a change within the selected bound fails
-cross-observation equality because actual sizes are retained.
-
-New cohorts can declare a different prospective VNDB allocation range with
-`--vndb-sah-allocation-units MIN MAX` on
-`dev/perf/import-qualification-20261125-a7f7.py`. The runner validates the range
-before acquisition and records the unit size, range, and explicit or legacy
-origin in `registered-plan.json` alongside the frozen source commits. It passes
-that same range to every warmup, timing, exhaustive-media, and memory receipt
-check. Direct callers pass `vndb_sah_allocation_units=(minimum, maximum)` to
-`validate_import_summary`. Establish and register a new range before its
-cohort; preserve failed historical cohorts with their original policy and
-qualification status. The range never replaces exact file-size comparisons.
+normalized. Nonrandom paths remain exact. The eight-file SAH structure and
+the existing VNDB 129–131 active-page bound remain checks, and even a change
+within that bound fails cross-observation equality because actual sizes are
+retained. No additional storage allowance is introduced.
 
 Exhaustive media uses `media_check='all'`. Compare its common receipt to the
 timed reference with `compare_media=False`, then compare the exhaustive A/B
