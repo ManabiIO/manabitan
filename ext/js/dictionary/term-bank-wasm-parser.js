@@ -104,8 +104,8 @@ const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
-/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number}} TermBankExperimentProfile */
-/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
+/** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number, mediaHintRowsSkipped?: number}} TermBankExperimentProfile */
+/** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, mediaHintPresent?: boolean, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
 const wasmCache = new RetryablePromiseCache();
 const wasmModuleCache = new RetryablePromiseCache();
 /** @type {WebAssembly.Module|null} */
@@ -958,6 +958,7 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
         const scoresPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const sequencesPtr = wasm.wasm_alloc(fusedMetaCapacity * 4);
         const recentContentHitsPtr = wasm.wasm_alloc(4);
+        const mediaHintPresentPtr = wasm.wasm_alloc(4);
         const normalizedInitialContentBytesPerRow = Number.isFinite(initialContentBytesPerRow) ? Math.max(16, Math.min(512, Math.trunc(initialContentBytesPerRow))) : 48;
         const contentOutCapacity = Math.min(
             0x7fffffff,
@@ -982,7 +983,7 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
             stringOffsetsPtr === 0 || stringHashesPtr === 0 || expressionIndexesPtr === 0 ||
             readingIndexesPtr === 0 || stringHashTablePtr === 0 || stringUniqueCountPtr === 0 ||
             stringBytesCountPtr === 0 || readingEqualsPtr === 0 || scoresPtr === 0 ||
-            sequencesPtr === 0 || recentContentHitsPtr === 0 || contentOutPtr === 0
+            sequencesPtr === 0 || recentContentHitsPtr === 0 || mediaHintPresentPtr === 0 || contentOutPtr === 0
         ) {
             throw new TermBankWasmResourceError('Failed to allocate fused term-bank parser buffers');
         }
@@ -996,6 +997,9 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
         new Uint32Array(wasm.memory.buffer, stringUniqueCountPtr, 1)[0] = 0;
         new Uint32Array(wasm.memory.buffer, stringBytesCountPtr, 1)[0] = 0;
         new Uint32Array(wasm.memory.buffer, recentContentHitsPtr, 1)[0] = 0;
+        // Older WASM ignores the optional output argument. Only an explicit
+        // native absence result can suppress JavaScript media-hint projection.
+        new Uint32Array(wasm.memory.buffer, mediaHintPresentPtr, 1)[0] = 1;
         tStart = Date.now();
         const encodedContentBytes = wasm.parse_and_encode_term_bank_token_binary_dedup(
             jsonPtr,
@@ -1036,6 +1040,7 @@ async function parseTermBankWasmBuffersUnchecked(contentBytes, includeContentMet
             rawContentHashesPtr,
             validateGlossaryTypes ? 1 : 0,
             glossaryWitnessesPtr,
+            mediaHintPresentPtr,
         );
         verifyTermBankSourceCrc(
             preloadedSource,
@@ -1108,6 +1113,7 @@ Array.from({length: bankSpanCount}, (_, i) => owned.subarray(spans[i * 2], spans
         const heap = new Uint8Array(wasm.memory.buffer);
         return {
             wasm,
+            mediaHintPresent: new Uint32Array(wasm.memory.buffer, mediaHintPresentPtr, 1)[0] !== 0,
             bankSpanCount,
             jsonPtr,
             jsonLength,
@@ -2262,9 +2268,13 @@ null :
     // Exact canonical-content IDs already include glossary, rules and tags.
     // A media requirement needs one representative of that content, while all
     // term rows and their individual expression/reading/score remain intact.
-    const seenMediaContent = mediaHintFastScan && contentDedupPlan !== null ?
+    const mediaHintPresent = parsed.mediaHintPresent !== false;
+    const seenMediaContent = mediaHintFastScan && mediaHintPresent && contentDedupPlan !== null ?
         new Uint8Array(contentDedupPlan.uniqueCount) :
         null;
+    const projectMediaHintsOnly = fusedStringPlan !== null && !emitTermByteLists && emitContentSlab;
+    const needsRowProjection = !projectMediaHintsOnly || (mediaHintFastScan && mediaHintPresent);
+    const mediaHintRowsSkipped = projectMediaHintsOnly && mediaHintFastScan && !mediaHintPresent ? rowCount : 0;
     let rowDecodeMs = 0;
     let nativeStringPlanMs = 0;
     let nativeStringPlanChunkCount = 0;
@@ -2345,8 +2355,6 @@ null :
             /** @type {Array<{index: number, row: ReturnType<typeof decodeParsedTermRowMinimal>}>} */
             const mediaRows = [];
 
-            const projectMediaHintsOnly = fusedStringPlan !== null && !emitTermByteLists && emitContentSlab;
-            const needsRowProjection = !projectMediaHintsOnly || mediaHintFastScan;
             const tRowDecodeStart = needsRowProjection ? Date.now() : 0;
             for (let sourceIndex = start, i = 0; needsRowProjection && sourceIndex < end; ++sourceIndex, ++i) {
                 const o = sourceIndex * META_U32_FIELDS;
@@ -2616,6 +2624,7 @@ null :
         encodeContentMs: parsed.encodeContentMs,
         recentContentDedupHitCount: parsed.recentContentDedupHitCount ?? 0,
         rowDecodeMs,
+        mediaHintRowsSkipped,
         nativeStringPlanMs,
         nativeStringPlanChunkCount,
         nativeStringPlanFallbackChunkCount,
@@ -4210,6 +4219,7 @@ function aggregateSequentialParseProfiles(profiles, rowCount, chunkDispatchMs) {
         encodeContentMs: sum('encodeContentMs'),
         recentContentDedupHitCount: sum('recentContentDedupHitCount'),
         rowDecodeMs: sum('rowDecodeMs'),
+        mediaHintRowsSkipped: sum('mediaHintRowsSkipped'),
         nativeStringPlanMs: sum('nativeStringPlanMs'),
         nativeStringPlanChunkCount: sum('nativeStringPlanChunkCount'),
         nativeStringPlanFallbackChunkCount: sum('nativeStringPlanFallbackChunkCount'),
