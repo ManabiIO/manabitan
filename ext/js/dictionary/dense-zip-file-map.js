@@ -107,6 +107,14 @@ export class DenseZipFileMap {
     has(key) { return this._entries.has(key) }
 
     /**
+     * Only untouched checked directory slots can skip entry materialization.
+     * Obtained or replaced entries may have acquired inline bytes or mutations.
+     * @param {string} key
+     * @returns {boolean}
+     */
+    hasUnmaterializedEntry(key) { return typeof this._entries.get(key) === 'number' }
+
+    /**
      * @param {string} key
      * @param {import('dictionary-importer').ImportFileEntry} value
      * @returns {this}

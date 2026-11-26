@@ -83,6 +83,23 @@ describe('compact dense ZIP file map', () => {
         expect(map.has('changed.png')).toBe(false)
     })
 
+    test('recognizes only untouched directory slots without materializing their metadata', () => {
+        const map = fixture()
+        expect(map.hasUnmaterializedEntry('first.png')).toBe(true)
+        expect(map.hasUnmaterializedEntry('missing.png')).toBe(false)
+        expect(materializedCount(map)).toBe(0)
+        const first = map.get('first.png')
+        expect(map.hasUnmaterializedEntry('first.png')).toBe(false)
+        expect(first).toMatchObject({filename: 'first.png', compressedSize: 10})
+        map.set('second.png', owned('second.png'))
+        expect(map.hasUnmaterializedEntry('second.png')).toBe(false)
+        map.delete('third.png')
+        expect(map.hasUnmaterializedEntry('third.png')).toBe(false)
+        map.clear()
+        expect(map.hasUnmaterializedEntry('first.png')).toBe(false)
+        expect(Reflect.get(map, '_metadata')).toHaveLength(0)
+    })
+
     test('preserves set, delete and reinsert order without decoding replaced entries', () => {
         const map = fixture()
         const replacement = owned('replacement.png')
