@@ -192,11 +192,18 @@ export function restrictGenerationMediaIndex({descriptor, index}, paths) {
         ++count;
     }
     if (count === 0 || count > descriptor.count) { return null; }
-    const selected = new Uint8Array(index);
-    const target = new DataView(selected.buffer);
+    // Reuse the immutable index when all occupied slots remain. Copy only
+    // before dropping the first occupied slot so the prepared source stays
+    // unchanged while avoiding an unnecessary full-index allocation.
+    let selected = index;
+    let target = source;
     for (let slot = 0; slot < keep.length; ++slot) {
         const row = slot * ROW_BYTES;
-        if (keep[slot] !== 0 || target.getUint32(row, true) === 0) { continue; }
+        if (keep[slot] !== 0 || source.getUint32(row, true) === 0) { continue; }
+        if (selected === index) {
+            selected = new Uint8Array(index);
+            target = new DataView(selected.buffer);
+        }
         selected.fill(0, row, row + ROW_ID_OFFSET);
         target.setUint32(row + ROW_CRC_OFFSET, computeGenerationMediaCrc(selected, row, row + ROW_CRC_OFFSET), true);
     }
