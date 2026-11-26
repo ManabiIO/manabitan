@@ -75,17 +75,32 @@ describe('DictionaryImporter built-in bank prefix filtering', () => {
 
     test('leaves full filename acceptance to the original case-sensitive bank patterns', () => {
         const names = [
-            '', 't', 'k', 'TERM_BANK_1.JSON', 'Kanji_bank_1.json',
-            'nested/term_bank_1.json', 'img/kanji_bank_1.json',
-            '\ufeffterm_bank_1.json', 'term_bank_１.json',
-            'term_bank_-1.json', 'term_bank_1e2.json', 'term_bank_.json',
-            'term_bank_1.json.bak', 'term_bank_1.JSON', 'term_bank_1.mbtb.bak',
-            'tag_bank_1.json/', 'kanji_meta_bank_1.mbtb',
+            '',
+            't',
+            'k',
+            'TERM_BANK_1.JSON',
+            'Kanji_bank_1.json',
+            'nested/term_bank_1.json',
+            'img/kanji_bank_1.json',
+            '\ufeffterm_bank_1.json',
+            'term_bank_１.json',
+            'term_bank_-1.json',
+            'term_bank_1e2.json',
+            'term_bank_.json',
+            'term_bank_1.json.bak',
+            'term_bank_1.JSON',
+            'term_bank_1.mbtb.bak',
+            'tag_bank_1.json/',
+            'kanji_meta_bank_1.mbtb',
             ...['\n', '\r', '\r\n', '\u2028', '\u2029'].map((suffix) => `term_bank_1.json${suffix}`),
         ]
         expect(filenames(importer._getArchiveFiles(createFileMap(names)))).toEqual({
-            termFiles: [], termArtifactFiles: [], termMetaFiles: [],
-            kanjiFiles: [], kanjiMetaFiles: [], tagFiles: [],
+            termFiles: [],
+            termArtifactFiles: [],
+            termMetaFiles: [],
+            kanjiFiles: [],
+            kanjiMetaFiles: [],
+            tagFiles: [],
         })
     })
 
