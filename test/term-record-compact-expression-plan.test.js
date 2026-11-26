@@ -122,10 +122,10 @@ describe('compact expression columns in prepared term plans', () => {
         const expressions = new Uint16Array(buffer, 2, 4)
         expressions.set(plan.expressionIndexes)
         plan.expressionIndexes = expressions
-        const before = new Uint8Array(buffer).slice()
+        const before = [...new Uint8Array(buffer)]
         expect(() => getOwnedCompactionScratch(plan, new Uint32Array(buffer, 0, 5), equals))
             .toThrow('Preinterned plan compaction scratch overlaps source storage')
-        expect(new Uint8Array(buffer)).toEqual(before)
+        expect([...new Uint8Array(buffer)]).toEqual(before)
     })
 
     test('rejects detached compact columns and retains transferred values', () => {
