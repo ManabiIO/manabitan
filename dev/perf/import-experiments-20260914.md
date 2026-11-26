@@ -687,3 +687,27 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## 2026-11-26 structured-content type-field screen (513d)
+
+This is a new native parser hypothesis against develop `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. It does not reimplement the held common-metadata-key or numeric-token candidates. The candidate consumes the complete literal `"type":"structured-content"`, with zero or one ASCII space after its colon, without rescanning the value as a generic JSON string. Escaped spellings, other whitespace and other types keep the existing parser. Required content fields, last-property semantics, media and normalization hints, nesting limits and delimiter validation remain authoritative.
+
+The implementation branch is `perf/structured-type-field-20261126-513d`. Its native source identity is `3468cf7339aa2504d687ea79c9300462e7c56f376a27e70a895e7b39c829388e`; the pinned Clang/LLD 21.1.8 artifact has SHA-256 `54934f7f2f9ab86c156ed86b38488bbc0296e0da05bcedc52a49335422a6d0b6`. The parser WASM grows from 67,550 to 67,998 bytes. This 448-byte native-module increase is not an extension ZIP size measurement. The unchanged canonical scanner reproduces its existing hash.
+
+The locked source archives contain 406,212 compact occurrences in JMdict and 436,555 spaced occurrences in Jitendex. These are source occurrence counts, not executed fast-path counts: glossary reuse may avoid parsing some of them. Neither these counts nor fewer parser operations establish an import speedup.
+
+### Local correctness and limitations
+
+Pinned native regeneration and its subsequent `--check` pass, as does `npm run build:libs`. The focused parser suite passes 176 tests but retains an existing 5-second differential-fuzz timeout. A second attempt retains a fork-worker startup timeout with zero executed tests. A supported single-thread-pool run then passes all 37 tests from the new semantic suite and the same 60-case differential fuzz seed `20261018`, using an invocation-only 60-second test timeout. The new coverage exercises property order, escaped spellings, duplicate and invalid types, missing or replaced content, nested hints, malformed delimiters and logical source truncation. No fuzz cases or assertions were removed.
+
+Scoped lint passes after fixing one unnecessary escape in a test string. An earlier lint retry was killed with exit 137 under host memory pressure; that is not recorded as a passing check. No local timing screen was acquired. Shared-host load and memory pressure prevented a useful component comparison, and local Chromium startup is blocked before extension loading. Full unit/build CI and the prospective browser screen remain separate gates.
+
+### Prospective browser screen
+
+`.github/workflows/import-structured-type-513d.yml` acquires once, on opening the same-repository draft PR for this exact branch. The candidate is the opening event's complete head SHA; the baseline remains the full SHA above. Evidence-only updates do not trigger replacement acquisitions. The existing `dev/perf/import-qualification-20261125-a7f7.py` runner, fixture locks, browser harness, defaults and memory thresholds remain unchanged.
+
+The fixed matrix is JMdict, Jitendex and VNDB, each on two independent hosts with initial orders AB and BA. Each host has four excluded warmup observations, six alternating adjacent A/B pairs and two interleaved A/C control pairs. C uses A's exact source, package, runtime and flags. Timed observations use fresh profiles and the complete file-input-through-visible-completion boundary. Each cell then performs two separate exhaustive-media observations and its prescribed four-observation ABBA or BAAB process-tree memory cohort. The complete successful schedule contains 26 imports per cell, 156 across the six cells; failed acquisition remains a failure rather than a replacement slot.
+
+Both source revisions build independently with Node 22.22.0 and the lockfile-pinned Chromium. The expected changed package members are exactly `lib/term-bank-parser.wasm` and `js/dictionary/wasm/term-bank-parser.c`; the release package includes the C source as well as the binary. The runner rejects any other package delta and retains exact package entries and hashes. Every observation retains canonical output, lookup, restart, storage and media receipts. Descriptive paired medians, equal-work changes and the existing bootstrap intervals are reported per host without pooling; instrumented memory observations never supply timing evidence.
+
+This is a screen, not a completed performance qualification or a promotion decision. No complete-import speedup has been established. Retain every observation, failure and negative result, keep previous held hypotheses and their failed cohorts unchanged, and do not rerun the unchanged candidate to replace an unfavorable result. Any later qualification must prospectively state its distinct purpose and preserve this screen.
