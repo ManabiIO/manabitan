@@ -65,3 +65,24 @@ The mutation suite preserves the historical digest, raw binding, inventory,
 lookup, browser, source, and package checks. New cases reject neighboring and
 historical SAH allocations, and reject changed baseline, flags, pair count,
 or worker policy before creating evidence or opening a browser.
+
+## Original cohort outcome
+
+The original cohort `45863377198` subsequently started and both jobs stopped
+at their first warmup, exactly at the preserved 129–131-page admission check.
+The A-first job and B-first job each recorded the same 37-page active SQLite
+allocation and 609,176,779 bytes of total logical storage.
+
+`historical-failure.tar.gz` preserves all original text artifacts, including the
+unchanged raw first-warmup reports, native summaries, logs, registered plans,
+source/package member identities, and runtime identities. The two reproducible
+package ZIPs from each job are omitted from this small bundle; their hashes and
+full member maps remain recorded and the original Actions artifacts retain them.
+`historical-failure-audit.json.txt` records both original artifact hashes and
+every preserved raw-member hash.
+
+A retrospective check with the new prospective validator accepts both unchanged
+semantic receipts and finds identical content, lookup, sampled-media and exact
+storage results. This is a correctness diagnostic only. Both original jobs
+remain failed, and their timing values are not admitted to the new cohort.
+Neither job completed a paired timing, exhaustive-media, or memory cohort.
