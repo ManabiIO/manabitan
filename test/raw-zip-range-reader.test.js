@@ -442,6 +442,111 @@ describe('bounded large ZIP entry reads', () => {
         expect(batch?.sources.map(({bytes}) => bytes)).toEqual([first.payload, second.payload]);
     });
 
+    /* eslint-disable @stylistic/semi */
+    test.each([
+        {borrowed: false, reversed: false, retry: false},
+        {borrowed: false, reversed: true, retry: false},
+        {borrowed: true, reversed: false, retry: false},
+        {borrowed: true, reversed: true, retry: true},
+    ])('preserves batch snapshots across metadata replacement: %j', async ({borrowed, reversed, retry}) => {
+        const sources = retry ? entriesWithTrailingExtra(65535) : contiguousEntries(3)
+        const expected = sources.map(({file, header, payload}) => ({
+            file,
+            archiveOffset: file.offset + header.length,
+            bytes: payload,
+            compressionMethod: file.compressionMethod,
+            compressedSize: file.compressedSize,
+            uncompressedSize: file.uncompressedSize,
+            signature: file.signature,
+            filename: file.filename,
+        }))
+        const files = sources.map(({file}) => file)
+        if (reversed) { files.reverse() }
+        const {archive, started, release} = delayedArchive([...sources.flatMap(({header, payload}) => [header, payload]), padding], retry ? 1 : 0)
+        const pending = new RawZipPayloadReader(archive).readBatch(files, signal(), () => false, borrowed)
+        await started
+        try {
+            for (const file of files) {
+                Object.assign(file, {offset: -1, compressedSize: 0, uncompressedSize: 0, compressionMethod: 99, signature: -1, filename: 'changed', rawFilename: new Uint8Array(0)})
+            }
+            files.length = 0
+        } finally {
+            release()
+        }
+        const batch = await pending
+        expect(batch?.sources).toEqual(expected)
+        expect(batch?.rangeReadCount).toBe(retry ? 2 : 1)
+        if (borrowed) {
+            expect(batch?.sources[0].bytes.buffer).toBe(batch?.sources[1].bytes.buffer)
+        } else {
+            expect(batch?.sources[0].bytes.buffer).not.toBe(batch?.sources[1].bytes.buffer)
+        }
+    })
+
+    test.each([false, true])('preserves stable equal-offset order and distinct sources (borrowed=%s)', async (borrowed) => {
+        const sources = contiguousEntries(2)
+        const duplicate = {...sources[0].file, signature: 123}
+        const files = [sources[1].file, duplicate, sources[0].file]
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])
+        const batch = await new RawZipPayloadReader(archive).readBatch(files, signal(), () => false, borrowed)
+        expect(batch?.sources.map(({file}) => file)).toEqual([duplicate, sources[0].file, sources[1].file])
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual([sources[0].payload, sources[0].payload, sources[1].payload])
+        expect(batch?.sources.map(({signature}) => signature)).toEqual([123, sources[0].file.signature, sources[1].file.signature])
+        expect(batch?.sources[0]).not.toBe(batch?.sources[1])
+    })
+
+    test.each([false, true])('keeps synchronous metadata getters aligned with the observed file list (append=%s)', async (append) => {
+        const sources = contiguousEntries(2)
+        const [first, last] = sources.map(({file}) => file)
+        const files = append ? [last] : [last, first]
+        const offset = last.offset
+        Object.defineProperty(last, 'offset', {get() {
+            if (append) {
+                files.push(first)
+            } else {
+                files.length = 1
+            }
+            return offset
+        }})
+        const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])
+        const batch = await new RawZipPayloadReader(archive).readBatch(files, signal(), () => false, true)
+        expect(batch?.sources.map(({file}) => file)).toEqual(append ? [first, last] : [last])
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(append ? sources.map(({payload}) => payload) : [sources[1].payload])
+    })
+
+    test('preserves local offsets above uint32 in a virtually positioned Blob', async () => {
+        const sources = contiguousEntries(2)
+        const offset = 2 ** 32 + 257
+        // Node's Blob implementation cannot slice above uint32. Position a
+        // real bounded Blob at the large offset without allocating that gap.
+        class PositionedBlob extends Blob {
+            /** @type {number[][]} */
+            ranges = []
+            /** @override */
+            get size() { return offset + super.size }
+            /**
+             * @override
+             * @param {number} [start]
+             * @param {number} [end]
+             * @param {string} [type]
+             * @returns {Blob}
+             */
+            slice(start = 0, end = this.size, type = '') {
+                this.ranges.push([start, end])
+                expect(start).toBeGreaterThanOrEqual(offset)
+                return super.slice(start - offset, end - offset, type)
+            }
+        }
+        for (const source of sources) { source.file.offset += offset }
+        const archive = new PositionedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])
+        const batch = await new RawZipPayloadReader(archive).readBatch(sources.map(({file}) => file).reverse(), signal(), () => false, true)
+        expect(batch?.sources.map(({archiveOffset}) => archiveOffset)).toEqual(sources.map(({file, header}) => file.offset + header.length))
+        expect(batch?.sources.map(({bytes}) => bytes)).toEqual(sources.map(({payload}) => payload))
+        expect(archive.ranges[0][0]).toBe(offset)
+        expect(batch?.rangeReadCount).toBe(1)
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('borrows payload subviews only from bounded large-Blob ranges', async () => {
         const first = entry(8, 4);
         const second = entry(0, 2);

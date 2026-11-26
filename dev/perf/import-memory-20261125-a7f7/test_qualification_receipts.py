@@ -5,12 +5,15 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
+import tempfile
 import unittest
 
 from qualification_receipts import (
     EMPTY_SHA256, EXPECTED_PRODUCT_PATHS, LOOKUP_BOUNDARY,
     SOURCE_HASH_FIELDS, STORAGE_KIND, TIMING_BOUNDARY, canonicalize_storage,
-    require_matching_receipts, validate_import_summary,
+    require_matching_receipts, validate_import_summary, validate_vndb_sah_allocation_units,
 )
 
 
@@ -92,6 +95,13 @@ def change_validation(summary, report, change):
     report['benchmark']['validation'] = deepcopy(summary['runs'][0]['validation'])
 
 
+def set_active_sah_units(validation, units):
+    storage = validation['storage']
+    active = next(item for item in storage['files'] if '/.opaque/' in item['path'] and item['bytes'] > 4096)
+    storage['bytes'] += units * 4096 - active['bytes']
+    active['bytes'] = units * 4096
+
+
 class QualificationReceiptWitness(unittest.TestCase):
     def test_all_three_frozen_fixture_shapes_pass_without_mutating_inputs(self):
         for dictionary in ('jmdict', 'jitendex', 'vndb'):
@@ -163,6 +173,90 @@ class QualificationReceiptWitness(unittest.TestCase):
             changed = validate(summary, report)
             with self.subTest(is_sah=is_sah), self.assertRaises(ValueError):
                 require_matching_receipts(reference, changed)
+
+    def test_legacy_vndb_allocation_bounds_remain_the_default(self):
+        self.assertEqual(validate_vndb_sah_allocation_units(), (129, 131))
+        for units in (129, 130, 131):
+            summary, report = observation()
+            change_validation(summary, report, lambda value: set_active_sah_units(value, units))
+            with self.subTest(units=units):
+                self.assertEqual(validate(summary, report),
+                                 validate(summary, report, vndb_sah_allocation_units=(129, 131)))
+        for units in (37, 128, 132):
+            summary, report = observation()
+            change_validation(summary, report, lambda value: set_active_sah_units(value, units))
+            with self.subTest(units=units), self.assertRaises(ValueError):
+                validate(summary, report)
+
+    def test_explicit_vndb_allocation_range_accepts_only_declared_units(self):
+        for units in (36, 37, 38):
+            summary, report = observation()
+            change_validation(summary, report, lambda value: set_active_sah_units(value, units))
+            original = deepcopy((summary, report))
+            with self.subTest(units=units):
+                if units == 37:
+                    validate(summary, report, vndb_sah_allocation_units=(37, 37))
+                else:
+                    with self.assertRaises(ValueError):
+                        validate(summary, report, vndb_sah_allocation_units=(37, 37))
+                self.assertEqual((summary, report), original)
+
+    def test_explicit_range_preserves_exact_cross_observation_storage_equality(self):
+        summary, report = observation()
+        change_validation(summary, report, lambda value: set_active_sah_units(value, 37))
+        reference = validate(summary, report, vndb_sah_allocation_units=(37, 38))
+        change_validation(summary, report, lambda value: set_active_sah_units(value, 38))
+        changed = validate(summary, report, vndb_sah_allocation_units=(37, 38))
+        with self.assertRaises(ValueError):
+            require_matching_receipts(reference, changed)
+
+    def test_explicit_range_applies_to_full_media_and_marker_overlay_receipts(self):
+        summary, report = observation()
+        change_validation(summary, report, lambda value: set_active_sah_units(value, 37))
+        sample = validate(summary, report, vndb_sah_allocation_units=(37, 37))
+        summary['source']['dirty'] = True
+        marker_receipt = validate(summary, report, source_dirty=True, source_hashes={HARNESS: 'e' * 64},
+                                  vndb_sah_allocation_units=(37, 37))
+        require_matching_receipts(sample, marker_receipt)
+        summary['source']['dirty'] = False
+        summary['mediaCheck'] = report['benchmark']['mediaCheck'] = 'all'
+        def full(validation):
+            media = validation['media']
+            media.update(mode='all', files=media['totalFiles'], bytes=media['totalBytes'])
+        change_validation(summary, report, full)
+        complete = validate(summary, report, media_check='all', vndb_sah_allocation_units=(37, 37))
+        require_matching_receipts(sample, complete, compare_media=False)
+        change_validation(summary, report, lambda value: set_active_sah_units(value, 38))
+        with self.assertRaises(ValueError):
+            validate(summary, report, media_check='all', vndb_sah_allocation_units=(37, 37))
+
+    def test_invalid_explicit_allocation_policies_fail_closed(self):
+        invalid = (37, '37,37', {}, [], [37], [37, 37, 37], [False, 37], [37, True],
+                   [37.0, 37], [37, 37.0], [0, 37], [-1, 37], [1, 37], [38, 37],
+                   [37, 2 ** 53], [37, (2 ** 53 - 1) // 4096 + 1])
+        for policy in invalid:
+            summary, report = observation()
+            with self.subTest(policy=policy), self.assertRaises(ValueError):
+                validate(summary, report, vndb_sah_allocation_units=policy)
+        mutable = [37, 37]
+        frozen = validate_vndb_sah_allocation_units(mutable)
+        mutable[1] = 38
+        self.assertEqual(frozen, (37, 37))
+
+    def test_invalid_cli_policy_stops_before_acquisition(self):
+        for dictionary, bounds in (('vndb', ['38', '37']), ('jmdict', ['37', '37'])):
+            with self.subTest(dictionary=dictionary), tempfile.TemporaryDirectory() as directory:
+                evidence = Path(directory) / 'evidence'
+                completed = subprocess.run([
+                    sys.executable, str(ROOT / 'dev/perf/import-qualification-20261125-a7f7.py'),
+                    '--baseline', SOURCE, '--candidate', SOURCE, '--dictionary', dictionary,
+                    '--initial-order', 'AB', '--evidence', str(evidence),
+                    '--expected-package-entry', 'js/dictionary/dictionary-database.js',
+                    '--vndb-sah-allocation-units', *bounds,
+                ], text=True, capture_output=True)
+                self.assertEqual(completed.returncode, 2, completed.stderr)
+                self.assertIn('SAH allocation', completed.stderr)
+                self.assertFalse(evidence.exists())
 
     def test_malformed_unknown_duplicate_and_out_of_bound_storage_fail_closed(self):
         def out_of_bound(storage):

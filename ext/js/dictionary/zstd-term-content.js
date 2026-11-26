@@ -22,7 +22,6 @@ import {
     createDCtx,
     compressUsingDict,
     compressUsingDictWithPrefix,
-    decompress,
     decompressUsingDict,
     finishPreparedSpanCompression,
     freeCCtx,
@@ -980,19 +979,18 @@ export function decompressTermContentZstd(content, dictName, options = {}) {
     if (!isInitialized) {
         throw new Error('Term content zstd not initialized');
     }
-    if (dictName === 'jmdict' && jmdictDict !== null) {
-        /* eslint-disable @stylistic/semi */
-        if (dctx === null) {
-            const context = Number(createDCtx())
-            if (context === 0) {
-                throw new Error('Failed to create zstd decompression context')
-            }
-            dctx = context
+    /* eslint-disable @stylistic/semi */
+    if (dctx === null) {
+        const context = Number(createDCtx())
+        if (context === 0) {
+            throw new Error('Failed to create zstd decompression context')
         }
-        /* eslint-enable @stylistic/semi */
-        return decompressUsingDict(dctx, content, jmdictDict, options);
+        dctx = context
     }
-    return decompress(content, options);
+    // Generic frames can use the existing decoder without allocating another
+    // native context. A null dictionary also clears any preceding dictionary.
+    return decompressUsingDict(dctx, content, dictName === 'jmdict' ? jmdictDict : null, options)
+    /* eslint-enable @stylistic/semi */
 }
 
 /**

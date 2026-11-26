@@ -89,22 +89,33 @@ export class TermContentMetadataArena {
         this.signature3 = new Uint32Array(buffer, signature3, denseCapacity);
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Copies dense columns while preserving stable IDs. Slot coordinates are
      * valid only at the same capacity; callers rebuild them when it changes.
      * @param {TermContentMetadataArena} previous
+     * @param {number} [denseCount=previous.state.length] Allocated ID high-water mark, including reusable empty IDs.
+     * @param {boolean} [preserveSlots=true]
+     * @throws {RangeError} If the live prefix exceeds either arena.
      */
-    copyFrom(previous) {
-        this.hash1.set(previous.hash1);
-        this.hash2.set(previous.hash2);
-        this.state.set(previous.state);
-        this.length.set(previous.length);
-        this.signaturePresent.set(previous.signaturePresent);
-        this.signature1.set(previous.signature1);
-        this.signature2.set(previous.signature2);
-        this.signature3.set(previous.signature3);
-        if (this.slots.length === previous.slots.length) {
-            this.slots.set(previous.slots);
+    copyFrom(previous, denseCount = previous.state.length, preserveSlots = true) {
+        if (
+            !Number.isSafeInteger(denseCount) || denseCount < 0 ||
+            denseCount > previous.state.length || denseCount > this.state.length
+        ) {
+            throw new RangeError('Invalid term content metadata dense count')
+        }
+        this.hash1.set(previous.hash1.subarray(0, denseCount))
+        this.hash2.set(previous.hash2.subarray(0, denseCount))
+        this.state.set(previous.state.subarray(0, denseCount))
+        this.length.set(previous.length.subarray(0, denseCount))
+        this.signaturePresent.set(previous.signaturePresent.subarray(0, denseCount))
+        this.signature1.set(previous.signature1.subarray(0, denseCount))
+        this.signature2.set(previous.signature2.subarray(0, denseCount))
+        this.signature3.set(previous.signature3.subarray(0, denseCount))
+        if (preserveSlots && this.slots.length === previous.slots.length) {
+            this.slots.set(previous.slots)
         }
     }
+    /* eslint-enable @stylistic/semi */
 }

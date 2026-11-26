@@ -7,9 +7,9 @@
 import {Buffer} from 'node:buffer'
 import {readFile} from 'node:fs/promises'
 import {crc32, deflateRawSync} from 'node:zlib'
-import {beforeAll, describe, expect, test} from 'vitest'
+import {beforeAll, describe, expect, test, vi} from 'vitest'
 import {createGenerationMediaIndex} from '../ext/js/dictionary/dictionary-generation-media-store.js'
-import {preparePackedSourceZipMedia, preparePackedSourceZipMediaEntries} from '../ext/js/dictionary/source-zip-media-pack.js'
+import {preparePackedSourceZipMedia, preparePackedSourceZipMediaEntries, preparePackedSourceZipMediaIndex} from '../ext/js/dictionary/source-zip-media-pack.js'
 import {setTermBankWasmModule} from '../ext/js/dictionary/term-bank-wasm-parser.js'
 import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
 
@@ -104,6 +104,71 @@ function prepare(mode, archive, files, checkCancellation = () => {}) {
 }
 
 describe('direct source ZIP media entries', () => {
+    test.each(['physical', 'reverse', 'rotated'])('writes the same sealed index and source span for %s input without retaining media records', async (order) => {
+        const {archive, files} = fixture()
+        if (order === 'reverse') { files.reverse() }
+        if (order === 'rotated') { files.push(...files.splice(0, 100)) }
+        const packed = await prepare('entries', archive, files)
+        if (packed === null) { throw new Error('Expected packed source media') }
+        const ranges = [...archive.ranges]
+        archive.ranges.length = 0
+        for (const file of files) { Object.freeze(file) }
+        Object.freeze(files)
+        const indexed = await preparePackedSourceZipMediaIndex(archive, files, new RawZipPayloadReader(archive), () => {})
+        if (indexed === null) { throw new Error('Expected directly indexed source media') }
+        expect(indexed).not.toHaveProperty('records')
+        expect(indexed.plan).toEqual(createGenerationMediaIndex(packed.records, packed.blob.size))
+        expect(archive.ranges).toEqual(ranges)
+        expect(Buffer.from(await indexed.blob.arrayBuffer()).equals(Buffer.from(await packed.blob.arrayBuffer()))).toBe(true)
+        expect(indexed.rangeReadBytes).toBe(packed.rangeReadBytes)
+        expect(indexed.rangeReadCount).toBe(packed.rangeReadCount)
+        expect(indexed.compressedBytes).toBe(packed.compressedBytes)
+        expect(indexed.uncompressedBytes).toBe(packed.uncompressedBytes)
+    })
+
+    test.each(['duplicate-name', 'duplicate-offset', 'wrong-namespace', 'sparse-namespace'])('declines a %s direct index before payload reads', async (mode) => {
+        const {archive, files} = fixture({duplicate: mode === 'duplicate-name'})
+        if (mode === 'duplicate-offset') { files[1].offset = files[0].offset }
+        if (mode === 'wrong-namespace' || mode === 'sparse-namespace') {
+            const file = files[files.length - 1]
+            file.filename = mode === 'wrong-namespace' ? 'different/cc8192.webp' : 'img/cc100000.webp'
+            file.rawFilename = encoder.encode(file.filename)
+        }
+        expect(await preparePackedSourceZipMediaIndex(archive, files, new RawZipPayloadReader(archive), () => {})).toBeNull()
+        expect(archive.ranges).toEqual([])
+    })
+
+    test('preserves an earlier CRC failure before a later invalid header on the direct path', async () => {
+        const {archive, files} = fixture({badHeader: FILE_COUNT - 1})
+        files[0].signature = (checksum ^ 1) >>> 0
+        await expect(preparePackedSourceZipMediaIndex(archive, files, new RawZipPayloadReader(archive), () => {})).rejects.toMatchObject({
+            name: 'DictionarySourceIntegrityError', message: expect.stringContaining('CRC32'),
+        })
+        expect(archive.ranges).toHaveLength(1)
+    })
+
+    test('joins a cancelled direct-index read without starting another batch', async () => {
+        const {archive, files} = fixture()
+        const error = new DOMException('Cancelled direct source media', 'AbortError')
+        await expect(preparePackedSourceZipMediaIndex(archive, files, new RawZipPayloadReader(archive), () => {
+            if (archive.ranges.length > 0) { throw error }
+        })).rejects.toBe(error)
+        expect(archive.ranges).toHaveLength(1)
+    })
+
+    test('does not associate a replaced batch path with a reserved numeric index slot', async () => {
+        const {archive, files} = fixture()
+        const reader = new RawZipPayloadReader(archive)
+        const readBatch = reader.readBatch.bind(reader)
+        vi.spyOn(reader, 'readBatch').mockImplementation(async (...args) => {
+            const result = await readBatch(...args)
+            if (result !== null) { result.sources[0].filename = 'img/cc2.webp' }
+            return result
+        })
+        expect(await preparePackedSourceZipMediaIndex(archive, files, reader, () => {})).toBeNull()
+        expect(archive.ranges).toHaveLength(1)
+    })
+
     test('preserves every record, byte and index slot in nonphysical request order', async () => {
         const {archive, files} = fixture()
         const selected = files.reverse()

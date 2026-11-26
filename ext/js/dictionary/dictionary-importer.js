@@ -72,6 +72,8 @@ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipFileMap} from './dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from './dense-zip-file-map.js'
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
 import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
@@ -1160,12 +1162,11 @@ export class DictionaryImporter {
         );
 
         // Files
-        /* eslint-disable @stylistic/semi */
-        const archiveFiles = Object.fromEntries(this._getArchiveFiles(
-            fileMap,
-            usePrunedArtifactAuxFastPath ? ARCHIVE_BANK_QUERY_DETAILS.slice(0, 2) : void 0,
-        ))
-        /* eslint-enable @stylistic/semi */
+        /** @type {import('dictionary-importer').QueryDetails} */
+        const queryDetails = usePrunedArtifactAuxFastPath ?
+            ARCHIVE_BANK_QUERY_DETAILS.slice(0, 2) :
+            ARCHIVE_BANK_QUERY_DETAILS;
+        const archiveFiles = Object.fromEntries(this._getArchiveFiles(fileMap, queryDetails));
         const termFiles = archiveFiles.termFiles ?? [];
         const termArtifactFiles = incompleteTermArtifactManifest ? [] : archiveFiles.termArtifactFiles ?? [];
         const termMetaFiles = archiveFiles.termMetaFiles ?? [];
@@ -2001,6 +2002,21 @@ export class DictionaryImporter {
                                     deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
+                                /* eslint-disable @stylistic/semi */
+                                // Prepared media owns its own checked catalog. Keep
+                                // unopened image entries compact in this owner until
+                                // a real payload fallback needs their metadata.
+                                if (
+                                    deferArchiveImages &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                    fileMap instanceof DenseZipFileMap &&
+                                    fileMap.hasUnmaterializedEntry(requirement.source.path) &&
+                                    getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                ) {
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement))
+                                    continue
+                                }
+                                /* eslint-enable @stylistic/semi */
                                 const file = fileMap.get(requirement.source.path);
                                 if (
                                     deferArchiveImages &&
@@ -4399,16 +4415,14 @@ export class DictionaryImporter {
             results.set(fileType, []);
         }
 
-        /* eslint-disable @stylistic/semi */
-        const standardBankQueries = queryDetails === ARCHIVE_BANK_QUERY_DETAILS
+        const standardBankQueries = queryDetails === ARCHIVE_BANK_QUERY_DETAILS;
         for (const fileName of fileMap.keys()) {
             // Every built-in bank pattern starts with "t" or "k". Most media
             // names cannot match; keep custom patterns on their original path.
             if (standardBankQueries) {
-                const firstCharacter = fileName.charCodeAt(0)
-                if (firstCharacter !== 0x74 && firstCharacter !== 0x6b) { continue }
+                const firstCharacter = fileName.charCodeAt(0);
+                if (firstCharacter !== 0x74 && firstCharacter !== 0x6b) { continue; }
             }
-            /* eslint-enable @stylistic/semi */
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);
