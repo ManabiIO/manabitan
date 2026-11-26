@@ -27,9 +27,10 @@ import {safePerformance} from '../core/safe-performance.js'
  * @param {number} [metasPtr]
  * @param {number} [rowCount]
  * @param {number} [witnessesPtr]
+ * @param {boolean} [compactMetadata]
  * @throws {Error} If source integrity or verifier metadata is invalid.
  */
-export function verifyTermBankSourceCrc(source, metasPtr = 0, rowCount = 0, witnessesPtr = 0) {
+export function verifyTermBankSourceCrc(source, metasPtr = 0, rowCount = 0, witnessesPtr = 0, compactMetadata = false) {
     if (source === null || !source.crcSignaturesPtr || source.crcVerified) { return }
     if (source.crcError instanceof Error) { throw source.crcError }
     const verify = source.wasm.verify_term_bank_source_crcs
@@ -47,6 +48,7 @@ export function verifyTermBankSourceCrc(source, metasPtr = 0, rowCount = 0, witn
             rowCount,
             witnessesPtr,
             source.crcStatsPtr ?? 0,
+            compactMetadata ? 1 : 0,
         )
     } catch (error) {
         source.crcError = error instanceof Error ? error : new Error('Term-bank source CRC verification failed', {cause: error})

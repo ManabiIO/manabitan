@@ -37,6 +37,9 @@
 #ifndef RECENT_CONTENT_DEDUP_WINDOW
 #define RECENT_CONTENT_DEDUP_WINDOW 4u
 #endif
+#define FUSED_META_FIELDS 7u
+#define FUSED_META_SEQUENCE_NEGATIVE_ZERO 2u
+#define FUSED_RECENT_ROWS ((RECENT_CONTENT_DEDUP_WINDOW > 0u ? RECENT_CONTENT_DEDUP_WINDOW : 1u) + 1u)
 
 extern unsigned char __heap_base;
 
@@ -496,14 +499,17 @@ int32_t verify_term_bank_source_crcs(
     uint32_t metas_ptr,
     uint32_t row_count,
     uint32_t glossary_witnesses_ptr,
-    uint32_t stats_ptr
+    uint32_t stats_ptr,
+    uint32_t compact_metas
 ) {
     if (json_ptr == 0u || bank_spans_ptr == 0u || bank_count == 0u || signatures_ptr == 0u ||
         (row_count != 0u && (metas_ptr == 0u || glossary_witnesses_ptr == 0u))) { return -1; }
     const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
     const uint32_t* spans = (const uint32_t*)(uintptr_t)bank_spans_ptr;
     const uint32_t* signatures = (const uint32_t*)(uintptr_t)signatures_ptr;
-    const TermRowMeta* rows = (const TermRowMeta*)(uintptr_t)metas_ptr;
+    const uint32_t* rows = (const uint32_t*)(uintptr_t)metas_ptr;
+    const uint32_t row_fields = compact_metas != 0u ? FUSED_META_FIELDS : sizeof(TermRowMeta) / sizeof(uint32_t);
+    const uint32_t glossary_field = compact_metas != 0u ? 4u : 9u;
     uint32_t* witnesses = (uint32_t*)(uintptr_t)glossary_witnesses_ptr;
     uint32_t* stats = (uint32_t*)(uintptr_t)stats_ptr;
     uint32_t next_row = 0u;
@@ -525,9 +531,9 @@ int32_t verify_term_bank_source_crcs(
         } else {
             uint32_t cursor = start;
             crc = 0u;
-            while (next_row < row_count && rows[next_row].glossary_start < bank_end) {
-                const uint32_t glossary_start = rows[next_row].glossary_start;
-                const uint32_t glossary_length = rows[next_row].glossary_length;
+            while (next_row < row_count && rows[next_row * row_fields + glossary_field] < bank_end) {
+                const uint32_t glossary_start = rows[next_row * row_fields + glossary_field];
+                const uint32_t glossary_length = rows[next_row * row_fields + glossary_field + 1u];
                 if (glossary_start < cursor || glossary_length == 0u || glossary_length > bank_end - glossary_start) { return -1; }
                 crc = crc32_update_gap(crc, src + cursor, glossary_start - cursor);
                 const uint32_t witness = witnesses[next_row];
@@ -535,7 +541,7 @@ int32_t verify_term_bank_source_crcs(
                 if (witness == 0xffffffffu) {
                     glossary_crc = crc32_bytes(src + glossary_start, glossary_length);
                 } else {
-                    if (witness >= next_row || rows[witness].glossary_length != glossary_length) { return -1; }
+                    if (witness >= next_row || rows[witness * row_fields + glossary_field + 1u] != glossary_length) { return -1; }
                     glossary_crc = witnesses[witness];
                     reused_bytes += glossary_length;
                     ++reused_glossaries;
@@ -1428,12 +1434,14 @@ static int content_bytes_equal_between(const uint8_t*, uint32_t, const uint8_t*,
 static int reuse_validated_glossary(
     const uint8_t* src, uint32_t end, uint32_t start,
     const TermRowMeta* rows, uint32_t row_count,
-    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness, uint32_t lookback
+    TermRowMeta* meta, uint32_t* value_end, uint32_t* witness, uint32_t lookback,
+    uint32_t row_storage_count
 ) {
     if (start >= end || (src[start] != '[' && src[start] != '{')) { return 0; }
     const uint32_t first = row_count > lookback ? row_count - lookback : 0u;
     for (uint32_t k = row_count; k > first;) {
-        const TermRowMeta* prior = &rows[--k];
+        --k;
+        const TermRowMeta* prior = &rows[row_storage_count == 0u ? k : k % row_storage_count];
         const uint32_t n = prior->glossary_length;
         const uint32_t p = prior->glossary_start;
         if (n == 0u || n > end - start || src[start] != src[p]) { continue; }
@@ -1475,7 +1483,8 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    uint32_t row_storage_count
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     uint32_t i = skip_ws(src, len, row_start + 1u);
@@ -1524,7 +1533,7 @@ static int parse_format3_row(
     meta->glossary_requires_text_normalization = 0u;
     if (
         !(glossary_witness != 0 && reuse_validated_glossary(
-            src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
+            src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback, row_storage_count
         )) &&
         !parse_value_span_with_glossary_hints(
             src, len, i, &end,
@@ -1569,12 +1578,13 @@ static int parse_row_single_pass(
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
     int validate_glossary_types,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    uint32_t row_storage_count
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask, row_storage_count
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -1607,7 +1617,7 @@ static int parse_row_single_pass(
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
             if (
                 !(glossary_witness != 0 && reuse_validated_glossary(
-                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness, glossary_lookback
+                    src, len, i, prior_rows, prior_count, out_meta, &value_end, glossary_witness, glossary_lookback, row_storage_count
                 )) &&
                 !parse_value_span_with_glossary_hints(
                     src,
@@ -2215,7 +2225,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0u)) {
             return -1;
         }
         ++row_count;
@@ -2253,7 +2263,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0u)) {
             return -1;
         }
         ++row_count;
@@ -3252,7 +3262,8 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
     uint32_t raw_content_hash_table_size,
     uint32_t raw_content_hashes_ptr,
     uint32_t validate_glossary_types,
-    uint32_t glossary_witnesses_ptr
+    uint32_t glossary_witnesses_ptr,
+    uint32_t compact_metas
 ) {
     if (
         json_ptr == 0u || json_len == 0u || metas_ptr == 0u || metas_capacity == 0u ||
@@ -3276,12 +3287,19 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         raw_content_hash_table_size == 0u ||
         (raw_content_hash_table_size & (raw_content_hash_table_size - 1u)) != 0u
     )) { return -1; }
+    // Distant raw-content reuse requires the complete historic rows. Compact
+    // strict parsing retains only the unchanged bounded lookback window.
+    if (compact_metas != 0u && (validate_glossary_types == 0u ||
+        (experiment_mask & EXPERIMENT_GLOBAL_EXACT_CONTENT_REUSE) != 0u)) { return -1; }
     uint32_t* experiment_stats = (uint32_t*)(uintptr_t)experiment_stats_ptr;
     if (experiment_stats != 0) {
         for (uint32_t i = 0u; i < 5u; ++i) { experiment_stats[i] = 0u; }
     }
     const uint8_t* src = (const uint8_t*)(uintptr_t)json_ptr;
-    TermRowMeta* rows = (TermRowMeta*)(uintptr_t)metas_ptr;
+    TermRowMeta recent_rows[FUSED_RECENT_ROWS];
+    TermRowMeta* rows = compact_metas != 0u ? recent_rows : (TermRowMeta*)(uintptr_t)metas_ptr;
+    const uint32_t row_storage_count = compact_metas != 0u ? FUSED_RECENT_ROWS : 0u;
+    uint32_t* retained_metas = (uint32_t*)(uintptr_t)metas_ptr;
     uint8_t* out = (uint8_t*)(uintptr_t)out_ptr;
     uint32_t* row_meta = (uint32_t*)(uintptr_t)row_meta_ptr;
     uint32_t* hash_table = (uint32_t*)(uintptr_t)hash_table_ptr;
@@ -3332,15 +3350,16 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         if (validated_glossary_reuse_enabled && row_count > 0u) {
             if (glossary_reuse_probe_budget > 0u) {
                 glossary_lookback = RECENT_CONTENT_DEDUP_WINDOW;
-            } else if (rows[row_count - 1u].glossary_length >= VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES) {
+            } else if (rows[compact_metas != 0u ? (row_count - 1u) % FUSED_RECENT_ROWS : row_count - 1u].glossary_length >= VALIDATED_GLOSSARY_REUSE_MIN_PREVIOUS_BYTES) {
                 // Adjacent spelling variants can have different tags yet
                 // reuse the same long glossary and its validation result.
                 glossary_lookback = 1u;
             }
         }
         uint32_t key_escape_mask;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+        TermRowMeta* parsed_row = &rows[compact_metas != 0u ? row_count % FUSED_RECENT_ROWS : row_count];
+        if (!parse_row_single_pass(src, source.end, source.position, parsed_row, media_hints != 0u, &row_end,
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask, row_storage_count)) {
             return -1;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
@@ -3353,7 +3372,6 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         }
 
-        const TermRowMeta* parsed_row = &rows[row_count];
         const uint32_t token_starts[2] = {
             parsed_row->expression_start,
             parsed_row->reading_start,
@@ -3390,7 +3408,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             const uint32_t token_length = token_lengths[field];
             // Cap the extra equality scan at 32 raw token-body bytes.
             if (row_count > 0u && token_length >= 2u && token_length <= 34u) {
-                const TermRowMeta* previous_row = &rows[row_count - 1u];
+                const TermRowMeta* previous_row = &rows[compact_metas != 0u ? (row_count - 1u) % FUSED_RECENT_ROWS : row_count - 1u];
                 const uint32_t previous_start = field == 0u ?
                     previous_row->expression_start : previous_row->reading_start;
                 const uint32_t previous_length = field == 0u ?
@@ -3529,7 +3547,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             // remaining fields match too, it is the newest full-content match.
             if (
                 glossary_witness != 0xffffffffu &&
-                raw_term_content_tokens_equal(src, parsed_row, &rows[glossary_witness], 1)
+                raw_term_content_tokens_equal(src, parsed_row, &rows[compact_metas != 0u ? glossary_witness % FUSED_RECENT_ROWS : glossary_witness], 1)
             ) {
                 recent_match = glossary_witness;
                 recent_content_signatures[row_count % RECENT_CONTENT_DEDUP_WINDOW] =
@@ -3543,7 +3561,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
                     --candidate;
                     if (
                         recent_content_signatures[candidate % RECENT_CONTENT_DEDUP_WINDOW] == raw_content_signature &&
-                        raw_term_content_tokens_equal(src, parsed_row, &rows[candidate], candidate == glossary_witness)
+                        raw_term_content_tokens_equal(src, parsed_row, &rows[compact_metas != 0u ? candidate % FUSED_RECENT_ROWS : candidate], candidate == glossary_witness)
                     ) {
                         recent_match = candidate;
                         break;
@@ -3576,7 +3594,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             uint32_t hash2 = 0u;
             while (!encode_term_content_token_binary_row(
                 src,
-                &rows[row_count],
+                parsed_row,
                 out,
                 out_capacity,
                 &cursor,
@@ -3635,6 +3653,21 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         }
 
+        if (compact_metas != 0u) {
+            // These are the only source fields used after fused content/key
+            // encoding. Numeric values already have their final native columns.
+            uint32_t* retained = retained_metas + row_count * FUSED_META_FIELDS;
+            retained[0] = parsed_row->expression_start;
+            retained[1] = parsed_row->expression_length;
+            retained[2] = parsed_row->reading_start;
+            retained[3] = parsed_row->reading_length;
+            retained[4] = parsed_row->glossary_start;
+            retained[5] = parsed_row->glossary_length;
+            // Diagnostic media rows preserve a source -0 sequence even though
+            // the native index's integer sequence column stores it as zero.
+            retained[6] = parsed_row->glossary_may_contain_media |
+                (sequence == 0 && src[parsed_row->sequence_start] == '-' ? FUSED_META_SEQUENCE_NEGATIVE_ZERO : 0u);
+        }
         ++row_count;
         status = next_term_row(&source, row_end);
     }
