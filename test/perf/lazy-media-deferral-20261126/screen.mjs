@@ -26,7 +26,11 @@ if (arm === 'baseline' || arm === 'candidate') {
     assert(catalog)
     const paths = []
     for (const filename of catalog.keys()) {
-        if (getImageMediaTypeFromFileName(filename) === null) { catalog.get(filename) } else { paths.push(filename) }
+        if (getImageMediaTypeFromFileName(filename) === null) {
+            catalog.get(filename)
+        } else {
+            paths.push(filename)
+        }
     }
     const countMaterializedImages = () => paths.reduce((count, filename) => count + Number(typeof catalog._entries.get(filename) !== 'number'), 0)
     const beforeMaterialized = countMaterializedImages()
@@ -52,8 +56,14 @@ if (arm === 'baseline' || arm === 'candidate') {
     assert.equal(afterMaterialized, arm === 'candidate' ? 0 : paths.length)
     const pathsSha256 = createHash('sha256').update(JSON.stringify(paths)).digest('hex')
     console.log(JSON.stringify({
-        arm, elapsedMs, entries: catalog.size, images: paths.length, admitted, pathsSha256,
-        beforeMaterialized, afterMaterialized,
+        arm,
+        elapsedMs,
+        entries: catalog.size,
+        images: paths.length,
+        admitted,
+        pathsSha256,
+        beforeMaterialized,
+        afterMaterialized,
         retainedHeapDelta: after.heapUsed - before.heapUsed,
         retainedArrayBufferDelta: after.arrayBuffers - before.arrayBuffers,
         retainedTotalDelta: after.heapUsed + after.arrayBuffers - before.heapUsed - before.arrayBuffers,
@@ -62,7 +72,10 @@ if (arm === 'baseline' || arm === 'candidate') {
     const fixture = JSON.parse(await readFile(new URL('../../../test/perf/dictionaries.lock.json', import.meta.url), 'utf8')).dictionaries.vndb
     const digest = createHash('sha256')
     let sizeBytes = 0
-    for await (const chunk of createReadStream(archivePath)) { digest.update(chunk); sizeBytes += chunk.length }
+    for await (const chunk of createReadStream(archivePath)) {
+        digest.update(chunk)
+        sizeBytes += chunk.length
+    }
     assert.equal(sizeBytes, fixture.sizeBytes)
     assert.equal(digest.digest('hex'), fixture.sha256)
     const sourceFiles = ['ext/js/dictionary/dictionary-importer.js', 'ext/js/dictionary/dense-zip-file-map.js', 'ext/js/dictionary/dense-zip-directory.js']
@@ -86,8 +99,13 @@ if (arm === 'baseline' || arm === 'candidate') {
     }))
     console.log(JSON.stringify({
         boundary: 'Production dense ZIP catalog on the locked archive; compare the previous get/bytes membership probe with the nonmaterializing predicate used during speculative image deferral. Non-image entries are opened before measurement. Measures one complete membership pass and post-GC retained Node heap plus ArrayBuffer deltas, not browser peak memory or complete-import latency. No image payload is read or validation bypassed by this component screen.',
-        node: process.version, v8: process.versions.v8, fixture, sourceSha256,
+        node: process.version,
+        v8: process.versions.v8,
+        fixture,
+        sourceSha256,
         runnerSha256: createHash('sha256').update(await readFile(runner)).digest('hex'),
-        schedule: 'ABBAABBAABBA', observations, summaries,
+        schedule: 'ABBAABBAABBA',
+        observations,
+        summaries,
     }, null, 2))
 }

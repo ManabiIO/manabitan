@@ -37,7 +37,9 @@ form a physical ZIP archive. Actual browser import coverage is still required.
 ## Recorded component result
 
 `observations.json.txt` contains all twelve completed observations and the
-fixture, source, and runner hashes. Every arm admitted the same 146,570 pinned
+fixture, source, and runner hashes. `measured-screen.mjs.txt` preserves the
+exact measured runner matching that hash; the executable `screen.mjs` has only
+formatting corrections required by ESLint. Every arm admitted the same 146,570 pinned
 VNDB image paths. The previous membership probe materialized 146,570 entries;
 the candidate materialized none.
 
