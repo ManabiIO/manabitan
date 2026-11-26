@@ -35,6 +35,9 @@ export function getFileNameExtension(path) {
  *   otherwise `null`.
  */
 export function getImageMediaTypeFromFileName(path) {
+    // Canonical WebP paths need no temporary extension or case conversion.
+    if (path.endsWith('.webp')) { return 'image/webp'; }
+
     // The longest supported image extension is ".pjpeg" (6 code units).
     // Avoid scanning the complete path or running the generic extension regex
     // for this import-hot classifier.
