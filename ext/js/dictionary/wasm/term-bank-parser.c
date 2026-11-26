@@ -714,6 +714,13 @@ static __attribute__((always_inline)) inline int parse_string_span_with_escape(
 ) {
     if (start >= len || src[start] != '"') { return 0; }
     uint32_t i = start + 1u;
+    // Empty fields are complete JSON strings; avoid classifying the following
+    // row or glossary bytes when the closing quote is already adjacent.
+    if (i < len && src[i] == '"') {
+        *out_end = i + 1u;
+        if (out_has_escape != 0) { *out_has_escape = 0u; }
+        return 1;
+    }
     uint32_t has_escape = 0u;
     while (i < len) {
         while (i + 8u <= len) {
