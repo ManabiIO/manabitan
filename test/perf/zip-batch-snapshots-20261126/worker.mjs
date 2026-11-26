@@ -11,6 +11,8 @@ import path from 'node:path'
 import {pathToFileURL} from 'node:url'
 
 const [root, archivePath] = process.argv.slice(2)
+// The CLI selects a local checkout root; callers below use fixed source paths.
+// eslint-disable-next-line no-unsanitized/method
 const load = async (file) => await import(pathToFileURL(path.join(root, file)))
 const parser = await load('ext/js/dictionary/term-bank-wasm-parser.js')
 parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(path.join(root, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))))
@@ -23,7 +25,7 @@ let sourceCount = 0
 let sourceBytes = 0
 let rangeReadCount = 0
 let rangeReadBytes = 0
-RawZipPayloadReader.prototype.readBatch = async function (files, ...args) {
+RawZipPayloadReader.prototype.readBatch = async function readBatchWithOracle(files, ...args) {
     const result = await readBatch.call(this, files, ...args)
     assert(result)
     const expectedFiles = [...files].sort((a, b) => a.offset - b.offset)
@@ -62,7 +64,9 @@ const result = await done
 assert(result, 'Production worker declined the locked media archive')
 const blobDigest = createHash('sha256')
 for await (const bytes of result.blob.stream()) { blobDigest.update(bytes) }
-const {readMs: _readMs, validationMs: _validationMs, ...metrics} = result.metrics
+const metrics = {...result.metrics}
+delete metrics.readMs
+delete metrics.validationMs
 console.log(JSON.stringify({
     descriptor: result.plan.descriptor,
     indexBytes: result.plan.index.byteLength,

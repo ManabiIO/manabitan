@@ -501,7 +501,11 @@ describe('bounded large ZIP entry reads', () => {
         const files = append ? [last] : [last, first]
         const offset = last.offset
         Object.defineProperty(last, 'offset', {get() {
-            if (append) { files.push(first) } else { files.length = 1 }
+            if (append) {
+                files.push(first)
+            } else {
+                files.length = 1
+            }
             return offset
         }})
         const archive = new TrackedBlob([...sources.flatMap(({header, payload}) => [header, payload]), padding])

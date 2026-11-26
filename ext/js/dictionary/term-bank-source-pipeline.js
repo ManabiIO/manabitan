@@ -176,6 +176,7 @@ export class RawZipPayloadReader {
         return Uint8Array.from(archiveBytes.subarray(dataOffset, dataOffset + compressedSize));
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Reads nearby ZIP entries through a bounded number of coalesced archive
      * ranges. Returned byte arrays own their storage unless the media pack
@@ -186,7 +187,6 @@ export class RawZipPayloadReader {
      * @param {boolean} [borrowPayloadViews]
      * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>, rangeReadCount: number, rangeReadBytes: number}|null>}
      */
-    /* eslint-disable @stylistic/semi */
     async readBatch(files, signal = new AbortController().signal, isCancelled = () => false, borrowPayloadViews = false) {
         if (!Array.isArray(files) || files.length === 0) { return {sources: [], rangeReadCount: 0, rangeReadBytes: 0}; }
         if (files.length > RAW_ZIP_BATCH_MAX_FILES) { return null; }
