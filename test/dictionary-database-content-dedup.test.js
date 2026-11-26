@@ -609,15 +609,22 @@ describe('DictionaryDatabase term content dedup metadata cache', () => {
         expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
     });
 
-    test('does not retain batches dominated by large definitions', () => {
+    /* eslint-disable @stylistic/semi */
+    test('retains a detached boundary snapshot for a large definition', () => {
         const database = new DictionaryDatabase();
         const source = new Uint8Array(513);
 
         const {meta} = publishSlabMeta(database, source, 0, source.length, 10, 20);
 
-        expect(Reflect.get(database, '_recentTermContentSourceBatches').size).toBe(0);
-        expect(Reflect.get(database, '_findRecentTermContentSource').call(database, meta)).toBeUndefined();
-    });
+        const retained = Reflect.get(database, '_findRecentTermContentSource').call(database, meta)
+        expect(retained?.length).toBe(source.length)
+        expect(retained?.buffer).toEqual(source)
+        expect(retained?.buffer.buffer).not.toBe(source.buffer)
+        source.fill(99)
+        expect(retained?.buffer).toEqual(new Uint8Array(513))
+        expect(Reflect.get(database, '_recentTermContentSourceBatchBytes')).toBe(513)
+    })
+    /* eslint-enable @stylistic/semi */
 
     test('fails fast when metadata insertion is attempted without reserved capacity', () => {
         const database = new DictionaryDatabase();
