@@ -35,6 +35,19 @@ Both runtime revisions build clean product packages first. The same measurement-
 
 These failed attempts remain failed and are excluded from every timing cohort. Offline revalidation diagnoses their stale gates; it does not synthesize a replacement completed cohort, add a timing sample, or establish candidate performance.
 
+## Current-policy hosted acquisition
+
+The four-cell current-policy acquisition completed in [run 45867461352](https://github.com/ManabiIO/manabitan/actions/runs/45867461352). Its raw reports, logs, identities, plans, receipts, timing observations, and memory observations are retained in `hosted-run-45867461352/raw-results.tar.zst` (904 KiB; SHA-256 `e09d2cf129b07bb4ea4df1ca8649cf02a64cd3df5be939035638a52222d35f60`). Downloaded product packages and HTML reports are excluded; product package identities remain recorded by hash in the run records.
+
+| Cell                | Qualification gate            | Median paired change | Faster pairs | Descriptive interval |
+| ------------------- | ----------------------------- | -------------------: | -----------: | -------------------- |
+| Glossary / Jitendex | Correctness and memory passed |             +0.1512% |          3/6 | [−3.8865%, +2.8515%] |
+| Glossary / VNDB     | Memory coverage failed        |             +1.1764% |          1/6 | [−0.2273%, +5.3344%] |
+| Zstd / Jitendex     | Correctness and memory passed |             −0.3304% |          3/6 | [−1.5363%, +2.0662%] |
+| Zstd / VNDB         | Correctness and memory passed |             −0.6783% |          3/6 | [−5.9437%, +5.9927%] |
+
+The glossary/VNDB cell's four memory observations had covered-scan gaps of 255.118839, 271.612014, 281.214175, and 294.404872 ms, above the unchanged 250 ms limit. The memory gate failed; its timing row is retained as exploratory evidence only. All cells come from one host and one cohort, and each descriptive interval spans zero. These measurements establish no speedup.
+
 ## Validation
 
 ```sh
