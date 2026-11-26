@@ -1,5 +1,13 @@
 # Codex instructions: import optimization experiments
 
+## November 26, 2026: redundant import index setup
+
+The `perf/import-index-setup-20261126-513d` candidate starts from `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. When SQLite secondary indexes are disabled, schema initialization already removes all 23 current and legacy index names. Import startup now skips repeating those no-op statements. The enabled-index path still drops its indexes before insertion, and schema initialization still cleans up legacy databases. No worker, batching, cache, compression, dictionary threshold, or persistent format changes are involved.
+
+The new SQLite tests cover legacy-schema cleanup, enabled-index deferral and restoration, rollback, and reuse after failures. Local Chromium qualification could not start: the container rejected the browser's process-singleton socket with `EPERM`, before extension loading or import. This is not a timing observation.
+
+The prospective hosted screen is `.github/workflows/import-index-startup-513d.yml`. It runs only when this draft PR is first opened, freezing its event head against the baseline above. Each locked JMdict, Jitendex, and VNDB fixture gets six complete-import pairs on each of two independent hosts with opposite initial orders. The unchanged `import-qualification-20261125-a7f7.py` runner preserves identical-code controls, package and fixture identities, persisted-result checks, exhaustive media validation, and separate memory observations. Every prescribed failure is retained. This screening cohort is smaller than the full qualification prescribed below, and a green workflow is not a timing acceptance gate. Removing 23 statements is a work-count claim; no complete-import speedup is established by the implementation alone.
+
 ## Goal, baseline and rules
 
 Qualify the implemented default-off experiments in `ManabiIO/manabitan`. Optimize full dictionary import completion time first and lookup latency second. Memory, extension package size and stored dictionary size are non-regression gates, not resources to spend freely for throughput. Do not tune worker counts, batch sizes, cache capacities, compression levels or dictionary-specific thresholds.
