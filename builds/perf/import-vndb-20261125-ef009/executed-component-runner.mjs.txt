@@ -1,0 +1,210 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {openAsBlob} from 'node:fs'
+import {readFile, writeFile, mkdir} from 'node:fs/promises'
+import path from 'node:path'
+import {pathToFileURL} from 'node:url'
+
+const parent = '/workspace/scratch/ef009a302ea8'
+const candidateRoot = path.join(parent, 'vndb-work')
+const baselineRoot = path.join(parent, 'manabitan')
+const output = path.join(parent, 'vndb-evidence')
+await mkdir(output, {recursive: true})
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
+const parser = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/term-bank-wasm-parser.js')))
+const baseline = await import(pathToFileURL(path.join(baselineRoot, 'ext/js/dictionary/term-bank-wasm-parser.js')))
+const {readDenseZipDirectory} = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/dense-zip-directory.js')))
+const {RawZipPayloadReader} = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/term-bank-source-pipeline.js')))
+const {ValidatedImagePathProjector} = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/validated-image-path-projector.js')))
+const {tryCollectGlossaryImagePaths} = await import(pathToFileURL(path.join(candidateRoot, 'ext/js/dictionary/dictionary-image-references.js')))
+const fixture = JSON.parse(await readFile(path.join(candidateRoot, 'test/perf/dictionaries.lock.json'))).dictionaries.vndb
+const archivePath = path.join(baselineRoot, 'builds/e2e-dictionary-cache', fixture.cacheFile)
+const archiveIdentity = await readFile(archivePath).then(bytes => ({sha256: sha256(bytes), bytes: bytes.length}))
+assert.equal(archiveIdentity.sha256, fixture.sha256)
+assert.equal(archiveIdentity.bytes, fixture.sizeBytes)
+const wasm = await readFile(path.join(candidateRoot, 'ext/lib/term-bank-parser.wasm'))
+assert.equal(sha256(wasm), sha256(await readFile(path.join(baselineRoot, 'ext/lib/term-bank-parser.wasm'))))
+parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
+const archive = await openAsBlob(archivePath)
+const allEntries = await readDenseZipDirectory(archive)
+assert(allEntries)
+const entries = allEntries.filter(entry => /^term_bank_\d+[.]json$/.test(entry.filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const totalBytes = entries.reduce((sum, entry) => sum + entry.uncompressedSize, 0)
+const requestedGroupCount = Math.max(5 * 3, Math.ceil(totalBytes / (24 * 1024 * 1024)))
+const groupCount = Math.min(requestedGroupCount, entries.length)
+const groups = []
+let first = 0
+let consumed = 0
+for (let i = 0; i < groupCount - 1; ++i) {
+    const remaining = groupCount - i
+    const target = (totalBytes - consumed) / remaining
+    let end = first + 1
+    let bytes = entries[first].uncompressedSize
+    const maxEnd = entries.length - (remaining - 1)
+    while (end < maxEnd) {
+        const next = bytes + entries[end].uncompressedSize
+        if (Math.abs(next - target) > Math.abs(bytes - target)) { break }
+        bytes = next
+        ++end
+    }
+    groups.push(entries.slice(first, end))
+    first = end
+    consumed += bytes
+}
+groups.push(entries.slice(first))
+const options = {
+    computeContentHashes: true,
+    emitContentSlab: true,
+    emitTokenBinaryContent: true,
+    emitTermByteLists: false,
+    mediaHintFastScan: true,
+    validateGlossaryTypes: true,
+    singleChunk: true,
+    compactContentMetadata: true,
+    prepareLookupIndexes: true,
+    prepareLookupRoute: true,
+    experimentalNativeEscapedKeys: true,
+}
+const report = {
+    schemaVersion: 1,
+    complete: false,
+    node: process.version,
+    baselineCommit: '7d1643e6147a10cb2165e9744cf0e63b59e46632',
+    source: {},
+    fixture: {...fixture, ...archiveIdentity},
+    protocol: {
+        oracle: 'Every locked VNDB production-sized source group is CRC-validated and parsed by the unchanged native producer. A and B copy the same borrowed chunk synchronously; complete nested outputs are deep-equal before the next heap reuse. Raw source bytes and borrowed semantics are unchanged.',
+        timingBoundary: 'Shared validated glossary bytes through returned image path strings only. Excludes source inflate/parse, remaining chunk copies, worker IPC, OPFS, and UI. This is not a complete-import or process-memory benchmark.',
+        warmup: 'ABC',
+        timed: ['ABC', 'BCA', 'CAB', 'ACB', 'CBA', 'BAC'],
+        controls: 'A and C call the exact same existing JSON collector and private SharedArrayBuffer snapshot path. B attempts the new projector then the same fallback.',
+        noRetriesOrTailExclusions: true,
+    },
+    sourceBanks: entries.length,
+    sourceBytes: totalBytes,
+    groups: [],
+    rows: 0,
+    mediaRows: 0,
+    accepted: 0,
+    fallback: 0,
+    glossaryBytes: 0,
+    baselineDecode: {calls: 0, bytes: 0, shared: 0},
+    candidateDecode: {calls: 0, bytes: 0, shared: 0},
+    observations: [],
+}
+for (const [name, file] of Object.entries({baselineParser: path.join(baselineRoot, 'ext/js/dictionary/term-bank-wasm-parser.js'), candidateParser: path.join(candidateRoot, 'ext/js/dictionary/term-bank-wasm-parser.js'), projector: path.join(candidateRoot, 'ext/js/dictionary/validated-image-path-projector.js'), wasm: path.join(candidateRoot, 'ext/lib/term-bank-parser.wasm'), runner: new URL(import.meta.url)})) {
+    report.source[name] = sha256(await readFile(file))
+}
+const save = () => writeFile(path.join(output, 'component-results.json'), JSON.stringify(report, null, 2) + '\n')
+let samples = []
+const expectedPaths = new Set()
+const digest = createHash('sha256')
+const originalDecode = TextDecoder.prototype.decode
+const decodeStats = (stats, fn) => {
+    TextDecoder.prototype.decode = function(input, options) {
+        if (input instanceof Uint8Array) {
+            ++stats.calls
+            stats.bytes += input.byteLength
+            if (input.buffer instanceof SharedArrayBuffer) ++stats.shared
+        }
+        return originalDecode.call(this, input, options)
+    }
+    try { return fn() } finally { TextDecoder.prototype.decode = originalDecode }
+}
+const projector = new ValidatedImagePathProjector()
+const reader = new RawZipPayloadReader(archive)
+try {
+    for (let group = 0; group < groups.length; ++group) {
+        const sources = await Promise.all(groups[group].map(async file => ({...file, bytes: await reader.read(file, new AbortController().signal)})))
+        const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, options, true)
+        let groupRows = 0
+        let groupMedia = 0
+        await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, chunk => {
+            const a = decodeStats(report.baselineDecode, () => baseline.copyWasmBackedColumnChunk(chunk, false, true, true))
+            const b = decodeStats(report.candidateDecode, () => parser.copyWasmBackedColumnChunk(chunk, false, true, true))
+            assert.deepEqual(b, a)
+            groupRows += chunk.rowCount
+            groupMedia += chunk.mediaRows.length
+            for (let i = 0; i < chunk.mediaRows.length; ++i) {
+                const bytes = chunk.mediaRows[i].row.glossaryJsonBytes
+                assert(bytes instanceof Uint8Array && bytes.buffer instanceof SharedArrayBuffer)
+                const projected = projector.project(bytes)
+                if (projected === null) ++report.fallback
+                else {
+                    ++report.accepted
+                    assert.deepEqual(projected, a.mediaRows[i].imagePaths)
+                }
+                report.glossaryBytes += bytes.length
+                samples.push(Uint8Array.from(bytes))
+                for (const imagePath of a.mediaRows[i].imagePaths ?? []) expectedPaths.add(imagePath)
+                digest.update(JSON.stringify(a.mediaRows[i].imagePaths))
+            }
+            const transferred = structuredClone(b)
+            assert.deepEqual(transferred, a)
+        }, undefined, {...options, preloadedSource})
+        const profile = parser.consumeLastTermBankWasmParseProfile()
+        report.rows += groupRows
+        report.mediaRows += groupMedia
+        report.groups.push({group, banks: groups[group].map(x => x.filename), rows: groupRows, mediaRows: groupMedia, fusedAttempts: profile.fusedParseAttempts, fusedFallbacks: profile.fusedParseFallbacks})
+        if ((group + 1) % 20 === 0 || group + 1 === groups.length) {
+            await save()
+            console.log(JSON.stringify({stage: 'oracle', groups: group + 1, of: groups.length, rows: report.rows, mediaRows: report.mediaRows, accepted: report.accepted}))
+        }
+    }
+    assert.equal(report.rows, fixture.termRows)
+    assert.equal(expectedPaths.size, fixture.mediaFiles)
+    report.uniqueMediaPaths = expectedPaths.size
+    report.imagePathSha256 = digest.digest('hex')
+    const shared = new Uint8Array(new SharedArrayBuffer(report.glossaryBytes))
+    const views = []
+    let cursor = 0
+    for (const bytes of samples) {
+        shared.set(bytes, cursor)
+        views.push(shared.subarray(cursor, cursor + bytes.length))
+        cursor += bytes.length
+    }
+    samples = null
+    globalThis.gc?.()
+    await save()
+    const decoder = new TextDecoder()
+    const original = bytes => tryCollectGlossaryImagePaths(decoder.decode(new Uint8Array(bytes)))
+    const candidate = bytes => projector.project(bytes) ?? original(bytes)
+    const arms = {A: original, B: candidate, C: original}
+    const observe = (arm, phase, block) => {
+        let checksum = 0
+        const cpu = process.cpuUsage()
+        const start = performance.now()
+        for (const bytes of views) {
+            const paths = arms[arm](bytes)
+            for (const value of paths) checksum = (checksum + value.length + value.charCodeAt(0)) >>> 0
+        }
+        const elapsedMs = performance.now() - start
+        const used = process.cpuUsage(cpu)
+        const observation = {arm, phase, block, elapsedMs, cpuUserMs: used.user / 1000, cpuSystemMs: used.system / 1000, checksum}
+        report.observations.push(observation)
+        console.log(JSON.stringify(observation))
+    }
+    for (const arm of report.protocol.warmup) observe(arm, 'warmup', -1)
+    for (let block = 0; block < report.protocol.timed.length; ++block) {
+        for (const arm of report.protocol.timed[block]) observe(arm, 'timed', block)
+        await save()
+    }
+    assert.equal(new Set(report.observations.map(x => x.checksum)).size, 1)
+    const median = values => { const s=[...values].sort((a,b)=>a-b); return (s[(s.length-1)>>1]+s[s.length>>1])/2 }
+    report.comparisons = {}
+    for (const [label, numerator, denominator] of [['BA','B','A'],['BC','B','C'],['CA','C','A']]) {
+        const pairs = report.protocol.timed.map((_,block)=> {
+            const n = report.observations.find(x=>x.phase==='timed' && x.block===block && x.arm===numerator).elapsedMs
+            const d = report.observations.find(x=>x.phase==='timed' && x.block===block && x.arm===denominator).elapsedMs
+            return {block,numeratorMs:n,denominatorMs:d,changePercent:(n/d-1)*100}
+        })
+        report.comparisons[label]={pairs,pairedMedianPercent:median(pairs.map(x=>x.changePercent)),equalWorkPercent:(pairs.reduce((s,x)=>s+x.numeratorMs,0)/pairs.reduce((s,x)=>s+x.denominatorMs,0)-1)*100}
+    }
+    report.complete = true
+    await save()
+    console.log(JSON.stringify({complete:true,rows:report.rows,mediaRows:report.mediaRows,accepted:report.accepted,fallback:report.fallback,glossaryBytes:report.glossaryBytes,baselineDecode:report.baselineDecode,candidateDecode:report.candidateDecode,comparisons:report.comparisons}))
+} catch(error) {
+    report.error={message:String(error),stack:error.stack}
+    await save()
+    throw error
+}

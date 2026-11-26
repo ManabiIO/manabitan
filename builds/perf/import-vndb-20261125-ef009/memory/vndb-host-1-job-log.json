@@ -1,0 +1,11 @@
+{
+    "repository": "ManabiIO/manabitan",
+    "runId": 45646484626,
+    "jobId": 139318749050,
+    "rawBytes": 283553,
+    "rawSha256": "e301d6a3df1cc0967297f90e14481ceb86ccd297cf5fd16491dd3330beb5e8c2",
+    "compressedPath": "vndb-host-1-job.log.gz",
+    "compressedBytes": 45329,
+    "compressedSha256": "787b62c5fdb5dec8983e7fbc26ec8e6536fd2d493e5c8969a9ec8ff745953249",
+    "source": "Decoded GitHub connector workflow job log; exact returned UTF-8 text preserved."
+}

@@ -1,0 +1,497 @@
+﻿2026-11-25T16:01:54.0753162Z Current runner version: '2.338.2'
+2026-11-25T16:01:54.0769493Z ##[group]Runner Image Provisioner
+2026-11-25T16:01:54.0770006Z Hosted Compute Agent
+2026-11-25T16:01:54.0770445Z Version: 20261111.635
+2026-11-25T16:01:54.0770806Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-25T16:01:54.0771206Z Build Date: 2026-11-11T01:49:01Z
+2026-11-25T16:01:54.0771662Z Worker ID: {eee8baa1-424a-4174-8f5b-c6811a6a3a88}
+2026-11-25T16:01:54.0772097Z Region: southcentralus
+2026-11-25T16:01:54.0772581Z Cloud: Azure
+2026-11-25T16:01:54.0772891Z ##[endgroup]
+2026-11-25T16:01:54.0773621Z ##[group]Operating System
+2026-11-25T16:01:54.0774016Z Ubuntu
+2026-11-25T16:01:54.0774312Z 26.04.1
+2026-11-25T16:01:54.0774660Z LTS
+2026-11-25T16:01:54.0774985Z ##[endgroup]
+2026-11-25T16:01:54.0775297Z ##[group]Runner Image
+2026-11-25T16:01:54.0775697Z Image: ubuntu-26.04
+2026-11-25T16:01:54.0776050Z Version: 20261116.202.1
+2026-11-25T16:01:54.0776834Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261116.202/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-25T16:01:54.0777658Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261116.202
+2026-11-25T16:01:54.0778225Z ##[endgroup]
+2026-11-25T16:01:54.0778869Z ##[group]GITHUB_TOKEN Permissions
+2026-11-25T16:01:54.0780024Z Contents: read
+2026-11-25T16:01:54.0780349Z Metadata: read
+2026-11-25T16:01:54.0780704Z ##[endgroup]
+2026-11-25T16:01:54.0781920Z Secret source: Actions
+2026-11-25T16:01:54.0782817Z Cache mode: write
+2026-11-25T16:01:54.0783226Z Prepare workflow directory
+2026-11-25T16:01:54.1120443Z Prepare all required actions
+2026-11-25T16:01:54.1150399Z Getting action download info
+2026-11-25T16:01:54.3719005Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-25T16:01:54.5118005Z Complete job name: JSON
+2026-11-25T16:01:54.5590144Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-25T16:01:54.5590659Z with:
+2026-11-25T16:01:54.5590921Z   repository: ManabiIO/manabitan
+2026-11-25T16:01:54.5593107Z   token: ***
+2026-11-25T16:01:54.5593342Z   ssh-strict: true
+2026-11-25T16:01:54.5593593Z   ssh-user: git
+2026-11-25T16:01:54.5593842Z   persist-credentials: true
+2026-11-25T16:01:54.5594104Z   clean: true
+2026-11-25T16:01:54.5594415Z   sparse-checkout-cone-mode: true
+2026-11-25T16:01:54.5594737Z   fetch-depth: 1
+2026-11-25T16:01:54.5594972Z   fetch-tags: false
+2026-11-25T16:01:54.5595214Z   show-progress: true
+2026-11-25T16:01:54.5595464Z   lfs: false
+2026-11-25T16:01:54.5595691Z   submodules: false
+2026-11-25T16:01:54.5595936Z   set-safe-directory: true
+2026-11-25T16:01:54.5596209Z   allow-unsafe-pr-checkout: false
+2026-11-25T16:01:54.5596739Z env:
+2026-11-25T16:01:54.5596984Z   MANABITAN_RELEASE_VERSION: 
+2026-11-25T16:01:54.5597255Z ##[endgroup]
+2026-11-25T16:01:54.7361276Z Syncing repository: ManabiIO/manabitan
+2026-11-25T16:01:54.7362771Z ##[group]Getting Git version info
+2026-11-25T16:01:54.7363270Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-25T16:01:54.7363852Z [command]/usr/bin/git version
+2026-11-25T16:01:54.7364165Z git version 2.56.1
+2026-11-25T16:01:54.7374569Z ##[endgroup]
+2026-11-25T16:01:54.7386912Z Temporarily overriding HOME='/home/runner/work/_temp/1d4186da-70d3-495f-a961-d848d57ac883' before making global git config changes
+2026-11-25T16:01:54.7388142Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-25T16:01:54.7390369Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-25T16:01:54.7443367Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-25T16:01:54.7450313Z ##[group]Determining repository object format
+2026-11-25T16:01:54.7451072Z ##[endgroup]
+2026-11-25T16:01:54.7460296Z ##[group]Initializing the repository
+2026-11-25T16:01:54.7461281Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-25T16:01:54.7526741Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-25T16:01:54.7528496Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-25T16:01:54.7529580Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-25T16:01:54.7530411Z hint: call:
+2026-11-25T16:01:54.7531057Z hint:
+2026-11-25T16:01:54.7531551Z hint: 	git config --global init.defaultBranch <name>
+2026-11-25T16:01:54.7531921Z hint:
+2026-11-25T16:01:54.7532493Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-25T16:01:54.7533304Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-25T16:01:54.7533944Z hint:
+2026-11-25T16:01:54.7534313Z hint: 	git branch -m <name>
+2026-11-25T16:01:54.7534731Z hint:
+2026-11-25T16:01:54.7535314Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-25T16:01:54.7536268Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-25T16:01:54.7546167Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-25T16:01:54.7592234Z ##[endgroup]
+2026-11-25T16:01:54.7592714Z ##[group]Disabling automatic garbage collection
+2026-11-25T16:01:54.7596244Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-25T16:01:54.7627599Z ##[endgroup]
+2026-11-25T16:01:54.7628239Z ##[group]Setting up auth
+2026-11-25T16:01:54.7628732Z Removing SSH command configuration
+2026-11-25T16:01:54.7634259Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-25T16:01:54.7665640Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-25T16:01:54.8045667Z Removing HTTP extra header
+2026-11-25T16:01:54.8051422Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-25T16:01:54.8079775Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-25T16:01:54.8285891Z Removing includeIf entries pointing to credentials config files
+2026-11-25T16:01:54.8291083Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-25T16:01:54.8318302Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-25T16:01:54.8530333Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-25T16:01:54.8561132Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:01:54.8587652Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:01:54.8677974Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:01:54.8703274Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:01:54.8773514Z ##[endgroup]
+2026-11-25T16:01:54.8774236Z ##[group]Fetching the repository
+2026-11-25T16:01:54.8780626Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +52e575785bfd10dfc635b76f13d3fc33397052e8:refs/remotes/pull/916/merge
+2026-11-25T16:01:56.3745121Z From https://github.com/ManabiIO/manabitan
+2026-11-25T16:01:56.3746603Z  * [new ref]         52e575785bfd10dfc635b76f13d3fc33397052e8 -> pull/916/merge
+2026-11-25T16:01:56.3750556Z ##[endgroup]
+2026-11-25T16:01:56.3751773Z ##[group]Determining the checkout info
+2026-11-25T16:01:56.3753268Z ##[endgroup]
+2026-11-25T16:01:56.3754081Z [command]/usr/bin/git sparse-checkout disable
+2026-11-25T16:01:56.3797425Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-25T16:01:56.3822231Z ##[group]Checking out the ref
+2026-11-25T16:01:56.3824294Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/916/merge
+2026-11-25T16:01:56.5825623Z Note: switching to 'refs/remotes/pull/916/merge'.
+2026-11-25T16:01:56.5826909Z 
+2026-11-25T16:01:56.5828571Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-11-25T16:01:56.5830043Z changes and commit them, and you can discard any commits you make in this
+2026-11-25T16:01:56.5831544Z state without impacting any branches by switching back to a branch.
+2026-11-25T16:01:56.5832532Z 
+2026-11-25T16:01:56.5833138Z If you want to create a new branch to retain commits you create, you may
+2026-11-25T16:01:56.5834438Z do so (now or later) by using -c with the switch command. Example:
+2026-11-25T16:01:56.5835161Z 
+2026-11-25T16:01:56.5835506Z   git switch -c <new-branch-name>
+2026-11-25T16:01:56.5836086Z 
+2026-11-25T16:01:56.5836549Z Or undo this operation with:
+2026-11-25T16:01:56.5837225Z 
+2026-11-25T16:01:56.5837643Z   git switch -
+2026-11-25T16:01:56.5838161Z 
+2026-11-25T16:01:56.5838949Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-11-25T16:01:56.5839997Z 
+2026-11-25T16:01:56.5841186Z HEAD is now at 52e5757 Merge 57590f5eaee359d721ba9d5d8bde28728a8d172e into 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T16:01:56.5845495Z ##[endgroup]
+2026-11-25T16:01:56.5883573Z [command]/usr/bin/git log -1 --format=%H
+2026-11-25T16:01:56.5908835Z 52e575785bfd10dfc635b76f13d3fc33397052e8
+2026-11-25T16:01:56.6128579Z Prepare all required actions
+2026-11-25T16:01:56.6129024Z Getting action download info
+2026-11-25T16:01:56.7455431Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-25T16:01:56.8446713Z ##[group]Run ./.github/actions/setup
+2026-11-25T16:01:56.8446924Z with:
+2026-11-25T16:01:56.8447071Z   node-version: 22.22.0
+2026-11-25T16:01:56.8447221Z env:
+2026-11-25T16:01:56.8447385Z   MANABITAN_RELEASE_VERSION: 
+2026-11-25T16:01:56.8447548Z ##[endgroup]
+2026-11-25T16:01:56.8485040Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-25T16:01:56.8541014Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-25T16:01:56.8541269Z with:
+2026-11-25T16:01:56.8541417Z   node-version: 22.22.0
+2026-11-25T16:01:56.8541577Z   cache: npm
+2026-11-25T16:01:56.8541721Z   always-auth: false
+2026-11-25T16:01:56.8541871Z   check-latest: false
+2026-11-25T16:01:56.8543354Z   token: ***
+2026-11-25T16:01:56.8543490Z env:
+2026-11-25T16:01:56.8543634Z   MANABITAN_RELEASE_VERSION: 
+2026-11-25T16:01:56.8543820Z ##[endgroup]
+2026-11-25T16:01:56.9469074Z Attempting to download 22.22.0...
+2026-11-25T16:01:56.9566514Z (node:2199) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-25T16:01:56.9567109Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-25T16:01:57.8950785Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-25T16:01:58.3843645Z Extracting ...
+2026-11-25T16:01:58.3955401Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/732a9371-c36a-4912-99a1-e2a1d7824aad -f /home/runner/work/_temp/868b698e-4b28-48ca-b11a-b91a6f7e542e
+2026-11-25T16:01:58.9607622Z Adding to the cache ...
+2026-11-25T16:02:00.7986263Z ##[group]Environment details
+2026-11-25T16:02:00.9547042Z node: v22.22.0
+2026-11-25T16:02:00.9547364Z npm: 10.9.4
+2026-11-25T16:02:00.9547528Z yarn: 1.22.22
+2026-11-25T16:02:00.9550241Z ##[endgroup]
+2026-11-25T16:02:00.9559638Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-25T16:02:01.0141902Z /home/runner/.npm
+2026-11-25T16:02:01.1682901Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-25T16:02:01.1757335Z (node:2199) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-25T16:02:02.1422673Z Received 63143556 of 63143556 (100.0%), 75.3 MBs/sec
+2026-11-25T16:02:02.1423278Z Cache Size: ~60 MB (63143556 B)
+2026-11-25T16:02:02.1522967Z [command]/usr/bin/tar -xf /home/runner/work/_temp/8faf6a20-6083-4d48-861f-07c65d956e14/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-25T16:02:02.3406347Z Cache restored successfully
+2026-11-25T16:02:02.3440778Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-25T16:02:02.3606682Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=5512]
+2026-11-25T16:02:02.3609062Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-25T16:02:02.3614233Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-25T16:02:02.3615557Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-25T16:02:02.3641841Z ##[group]Run npm ci
+2026-11-25T16:02:02.3642043Z [36;1mnpm ci[0m
+2026-11-25T16:02:02.3674603Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-25T16:02:02.3674811Z env:
+2026-11-25T16:02:02.3674942Z   MANABITAN_RELEASE_VERSION: 
+2026-11-25T16:02:02.3675086Z ##[endgroup]
+2026-11-25T16:02:02.7535043Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-25T16:02:05.7445795Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-25T16:02:06.4543255Z 
+2026-11-25T16:02:06.4543903Z > yomitan@0.0.0 prepare
+2026-11-25T16:02:06.4544128Z > husky
+2026-11-25T16:02:06.4544195Z 
+2026-11-25T16:02:06.4980429Z 
+2026-11-25T16:02:06.4981456Z added 670 packages, and audited 671 packages in 4s
+2026-11-25T16:02:06.4981718Z 
+2026-11-25T16:02:06.4981880Z 232 packages are looking for funding
+2026-11-25T16:02:06.4982262Z   run `npm fund` for details
+2026-11-25T16:02:06.4992802Z 
+2026-11-25T16:02:06.4993449Z found 0 vulnerabilities
+2026-11-25T16:02:06.5561627Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=4194]
+2026-11-25T16:02:06.5563998Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-25T16:02:06.5579282Z ##[group]Run npm run build:libs
+2026-11-25T16:02:06.5579473Z [36;1mnpm run build:libs[0m
+2026-11-25T16:02:06.5579636Z [36;1mnpm run license-report:html[0m
+2026-11-25T16:02:06.5606097Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-25T16:02:06.5606278Z env:
+2026-11-25T16:02:06.5606402Z   MANABITAN_RELEASE_VERSION: 
+2026-11-25T16:02:06.5606541Z ##[endgroup]
+2026-11-25T16:02:06.6198340Z 
+2026-11-25T16:02:06.6198756Z > yomitan@0.0.0 build:libs
+2026-11-25T16:02:06.6199096Z > node ./dev/bin/build-libs.js
+2026-11-25T16:02:06.6199256Z 
+2026-11-25T16:02:06.9596058Z 
+2026-11-25T16:02:06.9597001Z > yomitan@0.0.0 license-report:html
+2026-11-25T16:02:06.9597869Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-25T16:02:06.9598360Z 
+2026-11-25T16:02:07.3337742Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=777]
+2026-11-25T16:02:07.3366445Z ##[group]Run npm run test:json
+2026-11-25T16:02:07.3366625Z [36;1mnpm run test:json[0m
+2026-11-25T16:02:07.3393468Z shell: /usr/bin/bash -e {0}
+2026-11-25T16:02:07.3393605Z env:
+2026-11-25T16:02:07.3393723Z   MANABITAN_RELEASE_VERSION: 
+2026-11-25T16:02:07.3393861Z ##[endgroup]
+2026-11-25T16:02:07.3970756Z 
+2026-11-25T16:02:07.3971144Z > yomitan@0.0.0 test:json
+2026-11-25T16:02:07.3971409Z > npm run test:json:format && npm run test:json:types
+2026-11-25T16:02:07.3971542Z 
+2026-11-25T16:02:07.4559324Z 
+2026-11-25T16:02:07.4560019Z > yomitan@0.0.0 test:json:format
+2026-11-25T16:02:07.4560336Z > node ./dev/bin/lint-json.js
+2026-11-25T16:02:07.4560442Z 
+2026-11-25T16:02:08.5384063Z ▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+2026-11-25T16:02:08.5412483Z 
+2026-11-25T16:02:08.5438540Z     ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+2026-11-25T16:02:08.5439374Z       2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+2026-11-25T16:02:08.5439737Z         ╵                                 ~~~~~~
+2026-11-25T16:02:08.5439942Z 
+2026-11-25T16:02:08.5440481Z   This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+2026-11-25T16:02:08.5440869Z 
+2026-11-25T16:02:08.5440961Z     package.json:11:12:
+2026-11-25T16:02:08.5441179Z       11 │     "type": "module",
+2026-11-25T16:02:08.5441405Z          ╵             ~~~~~~~~
+2026-11-25T16:02:08.5441507Z 
+2026-11-25T16:02:08.5441713Z   Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+2026-11-25T16:02:08.5441923Z 
+2026-11-25T16:02:13.2317186Z 
+2026-11-25T16:02:13.2318005Z > yomitan@0.0.0 test:json:types
+2026-11-25T16:02:13.2318331Z > vitest run --config test/data/vitest.json.config.json
+2026-11-25T16:02:13.2318473Z 
+2026-11-25T16:02:13.3965120Z 
+2026-11-25T16:02:13.3966850Z [1m[30m[46m RUN [49m[39m[22m [36mv4.1.12 [39m[90m/home/runner/work/manabitan/manabitan[39m
+2026-11-25T16:02:13.3967394Z 
+2026-11-25T16:02:28.3283712Z  [31m❯[39m test/json.test.js [2m([22m[2m156 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 14626[2mms[22m[39m
+2026-11-25T16:02:28.3284258Z      [32m✓[39m Each item in json.json must have a unique path[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3284708Z      [32m✓[39m File must exist in project: 'test/perf/dictionaries.lock.json'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3285124Z      [32m✓[39m File must exist in project: 'dev/data/dictionary-wasm/manifest.json'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3285523Z      [32m✓[39m File must exist in project: 'dev/data/manifest-variants.json'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3285915Z      [32m✓[39m File must exist in project: 'ext/data/pronunciation-style.json'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3286359Z      [32m✓[39m File must exist in project: 'ext/data/structured-content-style.json'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3286792Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-index-sch…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3288343Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-kanji-ban…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3289028Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-kanji-ban…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3289723Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-kanji-met…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3290413Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-tag-bank-…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3291101Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-term-bank…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3291779Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-term-bank…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3293125Z      [32m✓[39m File must exist in project: 'ext/data/schemas/dictionary-term-meta…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3293907Z      [32m✓[39m File must exist in project: 'ext/data/schemas/custom-audio-list-sc…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3294554Z      [32m✓[39m File must exist in project: 'ext/data/schemas/options-schema.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3295198Z      [32m✓[39m File must exist in project: 'ext/data/schemas/recommended-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3295845Z      [32m✓[39m File must exist in project: 'ext/data/schemas/recommended-settings…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3296325Z      [32m✓[39m File must exist in project: 'test/data/translator-test-inputs.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3296723Z      [32m✓[39m File must exist in project: 'test/data/translator-test-results.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3297135Z      [32m✓[39m File must exist in project: 'test/data/translator-test-results-not…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3297610Z      [32m✓[39m File must exist in project: 'test/data/anki-note-builder-test-resu…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3298282Z      [32m✓[39m File must exist in project: 'test/data/database-test-cases.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3298900Z      [32m✓[39m File must exist in project: 'test/data/json.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3299546Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3300249Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3300941Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3301623Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3318710Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3319307Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3319550Z 
+2026-11-25T16:02:28.3319743Z [31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+2026-11-25T16:02:28.3319890Z 
+2026-11-25T16:02:28.3320248Z [41m[1m FAIL [22m[49m test/json.test.js[2m > [22mJSON validation[2m > [22mFile must exist in json.json: 'dev/perf/import-memory-ef009/protocol…'
+2026-11-25T16:02:28.3320845Z [41m[1m FAIL [22m[49m test/json.test.js[2m > [22mJSON validation[2m > [22mFile must exist in json.json: 'dev/perf/import-memory-ef009/provenan…'
+2026-11-25T16:02:28.3321299Z [31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+2026-11-25T16:02:28.3321470Z 
+2026-11-25T16:02:28.3321550Z [32m- Expected[39m
+2026-11-25T16:02:28.3321708Z [31m+ Received[39m
+2026-11-25T16:02:28.3321787Z 
+2026-11-25T16:02:28.3321846Z [32m- true[39m
+2026-11-25T16:02:28.3321986Z [31m+ false[39m
+2026-11-25T16:02:28.3322060Z 
+2026-11-25T16:02:28.3323240Z [36m [2m❯[22m test/json.test.js:[2m154:39[22m[39m
+2026-11-25T16:02:28.3323597Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3324013Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3324410Z      [32m✓[39m File must exist in project: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3324812Z      [32m✓[39m File must exist in project: 'ext/data/recommended-dictionaries.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3325213Z      [32m✓[39m File must exist in project: 'ext/data/recommended-settings.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3325874Z      [32m✓[39m File must exist in json.json: '.htmlvalidate.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3326217Z      [32m✓[39m File must exist in json.json: '.stylelintrc.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3326704Z      [32m✓[39m File must exist in json.json: 'jsconfig.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3327030Z      [32m✓[39m File must exist in json.json: 'package-lock.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3327350Z      [32m✓[39m File must exist in json.json: 'package.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3327700Z      [32m✓[39m File must exist in json.json: '.github/actionlint-matcher.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3328063Z      [32m✓[39m File must exist in json.json: '.vscode/extensions.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3328404Z      [32m✓[39m File must exist in json.json: '.vscode/launch.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3328742Z      [32m✓[39m File must exist in json.json: '.vscode/settings.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3329084Z      [32m✓[39m File must exist in json.json: 'benches/jsconfig.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3329414Z      [32m✓[39m File must exist in json.json: 'dev/jsconfig.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3329742Z      [32m✓[39m File must exist in json.json: 'test/jsconfig.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3330095Z      [32m✓[39m File must exist in json.json: 'test/jsconfig.typecheck.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3330435Z      [32m✓[39m File must exist in json.json: 'web/tsconfig.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3330798Z      [32m✓[39m File must exist in json.json: 'dev/data/chrome-manifest-schema.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3331190Z      [32m✓[39m File must exist in json.json: 'dev/data/manifest-variants.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3331593Z      [32m✓[39m File must exist in json.json: 'dev/perf/mdict-checksum-overhead-abba…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3332015Z      [32m✓[39m File must exist in json.json: 'dev/perf/mdict-record-cache-abba-2026…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3332780Z      [32m✓[39m File must exist in json.json: 'dev/perf/native-lookup-qualification-…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3333463Z      [32m✓[39m File must exist in json.json: 'ext/data/pronunciation-style.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3333885Z      [32m✓[39m File must exist in json.json: 'ext/data/recommended-dictionaries.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3334517Z      [32m✓[39m File must exist in json.json: 'ext/data/recommended-settings.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3334914Z      [32m✓[39m File must exist in json.json: 'ext/data/structured-content-style.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3335318Z      [32m✓[39m File must exist in json.json: 'test/data/anki-note-builder-test-resu…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3335721Z      [32m✓[39m File must exist in json.json: 'test/data/database-test-cases.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3336082Z      [32m✓[39m File must exist in json.json: 'test/data/json.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3336462Z      [32m✓[39m File must exist in json.json: 'test/data/translator-test-inputs.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3336865Z      [32m✓[39m File must exist in json.json: 'test/data/translator-test-results-not…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3337267Z      [32m✓[39m File must exist in json.json: 'test/data/translator-test-results.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3337655Z      [32m✓[39m File must exist in json.json: 'test/data/vitest.json.config.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3338047Z      [32m✓[39m File must exist in json.json: 'test/data/vitest.options.config.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3338431Z      [32m✓[39m File must exist in json.json: 'test/data/vitest.write.config.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3338983Z      [32m✓[39m File must exist in json.json: 'test/perf/dictionaries.lock.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3339449Z      [32m✓[39m File must exist in json.json: 'dev/data/dictionary-wasm/manifest.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3340043Z      [32m✓[39m File must exist in json.json: 'dev/perf/direct-media-entries-2026112…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3340587Z      [32m✓[39m File must exist in json.json: 'dev/perf/direct-media-entries-2026112…'[32m 4[2mms[22m[39m
+2026-11-25T16:02:28.3341063Z      [32m✓[39m File must exist in json.json: 'dev/perf/direct-media-entries-2026112…'[32m 4[2mms[22m[39m
+2026-11-25T16:02:28.3341460Z      [32m✓[39m File must exist in json.json: 'dev/perf/direct-media-entries-2026112…'[32m 4[2mms[22m[39m
+2026-11-25T16:02:28.3341863Z      [32m✓[39m File must exist in json.json: 'dev/perf/direct-media-entries-2026112…'[32m 4[2mms[22m[39m
+2026-11-25T16:02:28.3342473Z [31m     [31m×[31m File must exist in json.json: 'dev/perf/import-memory-ef009/protocol…'[39m[32m 4[2mms[22m[39m
+2026-11-25T16:02:28.3342946Z [31m     [31m×[31m File must exist in json.json: 'dev/perf/import-memory-ef009/provenan…'[39m[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3343446Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/custom-audio-list-sc…'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3343848Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-index-sch…'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3344248Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-kanji-ban…'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3344641Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-kanji-ban…'[32m 1[2mms[22m[39m
+2026-11-25T16:02:28.3345036Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-kanji-met…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3345438Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-tag-bank-…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3345902Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-term-bank…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3346407Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-term-bank…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3346878Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/dictionary-term-meta…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3347330Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/options-schema.json'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3347725Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/recommended-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3348121Z      [32m✓[39m File must exist in json.json: 'ext/data/schemas/recommended-settings…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3348582Z      [32m✓[39m File must exist in json.json: 'test/data/anki-note-types/contracts.j…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3348981Z      [32m✓[39m File must exist in json.json: 'test/data/anki-note-types/upstream-sn…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3349386Z      [32m✓[39m File must exist in json.json: 'test/data/manabitan-lookup-regression…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3349790Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3350187Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3350586Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3350976Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3351371Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3351899Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3352508Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3352988Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3353377Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3353775Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3354170Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/invalid-dictio…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3354562Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3354962Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3355354Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3355757Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3356149Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3356541Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3356940Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3357331Z      [32m✓[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…'[32m 0[2mms[22m[39m
+2026-11-25T16:02:28.3357767Z      [33m[2m✓[22m[39m File must exist in json.json: 'test/data/dictionaries/valid-dictiona…' [33m 1996[2mms[22m[39m
+2026-11-25T16:02:28.3358226Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/perf/dictionaries.lock.json' [33m 1996[2mms[22m[39m
+2026-11-25T16:02:28.3358702Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'dev/data/dictionary-wasm/manifest.json' [33m 1996[2mms[22m[39m
+2026-11-25T16:02:28.3359165Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'dev/data/manifest-variants.json' [33m 1996[2mms[22m[39m
+2026-11-25T16:02:28.3359618Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/pronunciation-style.json' [33m 1996[2mms[22m[39m
+2026-11-25T16:02:28.3360405Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/structured-content-style.json' [33m 1813[2mms[22m[39m
+2026-11-25T16:02:28.3361085Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-index-sch…' [33m 1813[2mms[22m[39m
+2026-11-25T16:02:28.3361644Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-kanji-ban…' [33m 1813[2mms[22m[39m
+2026-11-25T16:02:28.3362417Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-kanji-ban…' [33m 1813[2mms[22m[39m
+2026-11-25T16:02:28.3363203Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-kanji-met…' [33m 1813[2mms[22m[39m
+2026-11-25T16:02:28.3363985Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-tag-bank-…' [33m 1774[2mms[22m[39m
+2026-11-25T16:02:28.3364761Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-term-bank…' [33m 1774[2mms[22m[39m
+2026-11-25T16:02:28.3365537Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-term-bank…' [33m 1774[2mms[22m[39m
+2026-11-25T16:02:28.3366442Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/dictionary-term-meta…' [33m 1774[2mms[22m[39m
+2026-11-25T16:02:28.3366916Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/custom-audio-list-sc…' [33m 1774[2mms[22m[39m
+2026-11-25T16:02:28.3367463Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/options-schema.json' [33m 1905[2mms[22m[39m
+2026-11-25T16:02:28.3367933Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/recommended-dictiona…' [33m 1905[2mms[22m[39m
+2026-11-25T16:02:28.3368406Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/schemas/recommended-settings…' [33m 1905[2mms[22m[39m
+2026-11-25T16:02:28.3368981Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/translator-test-inputs.json' [33m 1905[2mms[22m[39m
+2026-11-25T16:02:28.3369453Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/translator-test-results.json' [33m 1905[2mms[22m[39m
+2026-11-25T16:02:28.3369938Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/translator-test-results-not…' [33m 1927[2mms[22m[39m
+2026-11-25T16:02:28.3370413Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/anki-note-builder-test-resu…' [33m 1927[2mms[22m[39m
+2026-11-25T16:02:28.3370883Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/database-test-cases.json' [33m 1927[2mms[22m[39m
+2026-11-25T16:02:28.3371312Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/json.json' [33m 1927[2mms[22m[39m
+2026-11-25T16:02:28.3371752Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 1927[2mms[22m[39m
+2026-11-25T16:02:28.3372394Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 1684[2mms[22m[39m
+2026-11-25T16:02:28.3373184Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 1684[2mms[22m[39m
+2026-11-25T16:02:28.3373945Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 1684[2mms[22m[39m
+2026-11-25T16:02:28.3374722Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 1684[2mms[22m[39m
+2026-11-25T16:02:28.3375485Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 1684[2mms[22m[39m
+2026-11-25T16:02:28.3376257Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 3427[2mms[22m[39m
+2026-11-25T16:02:28.3377002Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 3427[2mms[22m[39m
+2026-11-25T16:02:28.3377838Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'test/data/dictionaries/valid-dictiona…' [33m 3427[2mms[22m[39m
+2026-11-25T16:02:28.3378685Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/recommended-dictionaries.json' [33m 3427[2mms[22m[39m
+2026-11-25T16:02:28.3379470Z      [33m[2m✓[22m[39m Validating file against TypeScript: 'ext/data/recommended-settings.json' [33m 3427[2mms[22m[39m
+2026-11-25T16:02:28.3380188Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 24[2mms[22m[39m
+2026-11-25T16:02:28.3380627Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 24[2mms[22m[39m
+2026-11-25T16:02:28.3381046Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 24[2mms[22m[39m
+2026-11-25T16:02:28.3381465Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 24[2mms[22m[39m
+2026-11-25T16:02:28.3381878Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 24[2mms[22m[39m
+2026-11-25T16:02:28.3382834Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 56[2mms[22m[39m
+2026-11-25T16:02:28.3383252Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 56[2mms[22m[39m
+2026-11-25T16:02:28.3383749Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 56[2mms[22m[39m
+2026-11-25T16:02:28.3384169Z      [32m✓[39m Validating file against schema: 'test/data/dictionaries/valid-dictiona…'[32m 56[2mms[22m[39m
+2026-11-25T16:02:28.3384585Z      [32m✓[39m Validating file against schema: 'ext/data/recommended-dictionaries.json'[32m 56[2mms[22m[39m
+2026-11-25T16:02:28.3385000Z      [32m✓[39m Validating file against schema: 'ext/data/recommended-settings.json'[32m 8[2mms[22m[39m
+2026-11-25T16:02:28.3385408Z     [90m152|[39m     const existingJsonFiles2 = existingJsonFiles.map((path) => ({path:…
+2026-11-25T16:02:28.3385759Z     [90m153|[39m     test.each(existingJsonFiles2)(`File must exist in ${jsonFileName}:…
+2026-11-25T16:02:28.3386196Z     [90m154|[39m         [34mexpect[39m(jsonFileMap[33m.[39m[34mhas[39m(path))[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+2026-11-25T16:02:28.3386550Z     [90m   |[39m                                       [31m^[39m
+2026-11-25T16:02:28.3386803Z     [90m155|[39m     }[33m,[39m [34m15000[39m)[33m;[39m
+2026-11-25T16:02:28.3386994Z     [90m156|[39m
+2026-11-25T16:02:28.3387071Z 
+2026-11-25T16:02:28.3387203Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+2026-11-25T16:02:28.3387318Z 
+2026-11-25T16:02:28.3387321Z 
+2026-11-25T16:02:28.3387474Z [2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+2026-11-25T16:02:28.3387860Z [2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m154 passed[39m[22m[90m (156)[39m
+2026-11-25T16:02:28.3388129Z [2m   Start at [22m 16:02:13
+2026-11-25T16:02:28.3388474Z [2m   Duration [22m 14.93s[2m (transform 23ms, setup 0ms, import 221ms, tests 14.63s, environment 0ms)[22m
+2026-11-25T16:02:28.3388672Z 
+2026-11-25T16:02:28.3388676Z 
+2026-11-25T16:02:28.3409514Z ##[error]AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/json.test.js:154:39
+
+
+2026-11-25T16:02:28.3414864Z 
+2026-11-25T16:02:28.3415929Z ##[error]AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/json.test.js:154:39
+
+
+2026-11-25T16:02:28.4077570Z ##[error]Process completed with exit code 1.
+2026-11-25T16:02:28.4150228Z Post job cleanup.
+2026-11-25T16:02:28.4152760Z ##[start-action display=Setup node;id=__90c6bd83-f4b9-4651-bbff-40aa7cb88d84.__actions_setup-node]
+2026-11-25T16:02:28.4154134Z ##[end-action id=__90c6bd83-f4b9-4651-bbff-40aa7cb88d84.__actions_setup-node;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-25T16:02:28.4203338Z Post job cleanup.
+2026-11-25T16:02:28.4745497Z [command]/usr/bin/git version
+2026-11-25T16:02:28.4782771Z git version 2.56.1
+2026-11-25T16:02:28.4838461Z Temporarily overriding HOME='/home/runner/work/_temp/097d390e-0ab4-4176-a107-7611f16fd9bb' before making global git config changes
+2026-11-25T16:02:28.4839182Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-25T16:02:28.4840966Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-25T16:02:28.5385245Z Removing SSH command configuration
+2026-11-25T16:02:28.5391910Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-25T16:02:28.5428145Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-25T16:02:28.5646660Z Removing HTTP extra header
+2026-11-25T16:02:28.5647300Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-25T16:02:28.5673967Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-25T16:02:28.5882246Z Removing includeIf entries pointing to credentials config files
+2026-11-25T16:02:28.5887269Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-25T16:02:28.5906754Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-25T16:02:28.5907241Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-25T16:02:28.5907512Z includeif.gitdir:/github/workspace/.git.path
+2026-11-25T16:02:28.5907737Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-25T16:02:28.5913894Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-25T16:02:28.5932863Z /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.5940876Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6173779Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-25T16:02:28.6190316Z /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6196720Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6372900Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-25T16:02:28.6391681Z /github/runner_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6398883Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6469392Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-25T16:02:28.6488390Z /github/runner_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6495414Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config
+2026-11-25T16:02:28.6977149Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-25T16:02:28.7202071Z Removing credentials config '/home/runner/work/_temp/git-credentials-3ba14cd6-28fd-4594-8aae-71991bbcc9ef.config'
+2026-11-25T16:02:28.7580069Z Cleaning up orphan processes
+2026-11-25T16:02:28.7813854Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
