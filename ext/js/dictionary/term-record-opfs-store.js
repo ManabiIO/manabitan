@@ -204,8 +204,8 @@ function parseCompactRecordFields(bytes, count) {
     const lengths = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);
     cursor += count * 2;
     const scoreKeys = new Uint16Array(bytes.buffer, bytes.byteOffset + cursor, count);
-    for (const scoreKey of scoreKeys) {
-        if (scoreKey >= scoreCount) {
+    for (let i = 0; i < scoreKeys.length; ++i) {
+        if (scoreKeys[i] >= scoreCount) {
             throw new Error('Compact term-record score key is invalid');
         }
     }
