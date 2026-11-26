@@ -78,6 +78,14 @@ function secondaryIndexes(sql) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function isIndexDrop(value) {
+    return typeof value === 'string' && value.startsWith('DROP INDEX')
+}
+
+/**
  * @param {DictionaryDatabase} database
  * @param {string} dictionary
  * @param {string} name
@@ -104,7 +112,7 @@ describe('dictionary import secondary-index cleanup', () => {
             await database.finishBulkImport(null, null, session)
         }
 
-        const drops = exec.mock.calls.filter(([value]) => typeof value === 'string' && value.startsWith('DROP INDEX'))
+        const drops = exec.mock.calls.filter(([value]) => isIndexDrop(value))
         expect(drops).toEqual([])
         expect(database._createDropIndexesSql()).toHaveLength(23)
         expect(secondaryIndexes(sql)).toEqual([])
@@ -129,7 +137,7 @@ describe('dictionary import secondary-index cleanup', () => {
 
         expect(sql.selectValues('SELECT name FROM tagMeta')).toEqual(['retry'])
         expect(secondaryIndexes(sql)).toEqual([])
-        expect(exec.mock.calls.some(([value]) => typeof value === 'string' && value.startsWith('DROP INDEX'))).toBe(false)
+        expect(exec.mock.calls.some(([value]) => isIndexDrop(value))).toBe(false)
     })
 
     test.each(['abort', 'finish'])('enabled indexes still drop before writes and rebuild after %s', async (finish) => {
@@ -148,7 +156,7 @@ describe('dictionary import secondary-index cleanup', () => {
 
         expect(secondaryIndexes(sql)).toEqual(initial)
         expect(sql.selectValues('SELECT name FROM tagMeta')).toEqual(finish === 'abort' ? [] : ['finish'])
-        const drops = exec.mock.calls.filter(([value]) => typeof value === 'string' && value.startsWith('DROP INDEX'))
+        const drops = exec.mock.calls.filter(([value]) => isIndexDrop(value))
         expect(drops).toHaveLength(23)
     })
 })
