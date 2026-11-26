@@ -1,0 +1,24 @@
+(node:4) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-11-26T16:52:15.815Z start
+2026-11-26T16:52:15.863Z hashing fixture
+2026-11-26T16:52:16.042Z fixture hash verified
+2026-11-26T16:52:16.043Z reading directory
+2026-11-26T16:52:16.177Z directory loaded
+2026-11-26T16:52:16.219Z initializing workers
+(node:4) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-11-26T16:52:16.844Z workers initialized
+2026-11-26T16:52:17.388Z compressed group loaded
+2026-11-26T16:52:17.388Z parsing arm 0
+2026-11-26T16:52:17.909Z parsed arm 0
+2026-11-26T16:52:17.950Z hashed arm 0
+2026-11-26T16:52:17.950Z parsing arm 1
+2026-11-26T16:52:18.451Z parsed arm 1
+2026-11-26T16:52:18.516Z hashed arm 1
+{"groups":10,"rows":176000}
+{"groups":20,"rows":392000}
+{"groups":22,"rows":436555}
+{"complete":true,"rows":436555,"groups":22,"projectedMediaRows":339,"uniqueMediaPaths":[0,0]}

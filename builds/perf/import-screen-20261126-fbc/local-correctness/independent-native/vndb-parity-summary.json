@@ -1,0 +1,32 @@
+{
+  "complete": true,
+  "modules": [
+    "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+    "68d4584e47cc6371a6b0d1d1bf56bdfcdc45e8f8b138ef172e2013b7cd23f13f"
+  ],
+  "fixtureSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+  "sourceBytes": 4267992967,
+  "groups": 170,
+  "banks": 665,
+  "rows": 6648310,
+  "projectedMediaRows": 146725,
+  "uniqueMediaPaths": [
+    146570,
+    146570
+  ],
+  "fusedAttempts": 170,
+  "fusedFallbacks": 0,
+  "escapedKeyDecodeCount": 1870,
+  "ownedGroups": 170,
+  "borrowedGroups": 0,
+  "ownedBufferReuseChecks": 338,
+  "maxWasmHeapBytes": 45219840,
+  "sourceCompressedBytes": 86850424,
+  "sourceUncompressedBytes": 4267992967,
+  "sourceCrcScannedBytes": 568284368,
+  "sourceCrcReusedBytes": 3699708599,
+  "orderedOutputHashesSha256": "9a4445239e4c891ed13ae2d706be52c297964d5f09d27e539297b93d67ea6864",
+  "sourceHashesReverifiedAfterRun": true,
+  "timingClaim": false,
+  "browserMemoryClaim": false
+}

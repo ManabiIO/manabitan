@@ -1,0 +1,76 @@
+{
+  "captureMethod": "Transcribed from recorded exec tool output after execution. The original commands did not redirect stdout/stderr to disk. These are tool-transcript copies, not original filesystem-captured logs.",
+  "localCommit": "7dfce35862d4ee6dc9bd91a6ebd7f967d747586b",
+  "publishedCommit": "1a234772a0be1001ca63ce9d320d218123bd9449",
+  "tree": "1d412301069b061ae6db7aa9c65a1fc1feaf01c6",
+  "cwd": "/workspace/scratch/fbc366eaf75c/manabitan-jitendex",
+  "nodeVersion": "v22.22.0",
+  "checks": [
+    {
+      "name": "exact committed-head targeted dedup suite",
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=768",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "test/dictionary-database-content-dedup.test.js",
+        "--maxWorkers=1"
+      ],
+      "execSessionId": 91344,
+      "exitCode": 0,
+      "testsPassed": 150,
+      "durationSeconds": 7.7,
+      "stdout": "unit-150-tool-transcript.log",
+      "sourceIdentity": "Exact local commit above"
+    },
+    {
+      "name": "main TypeScript",
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "jsconfig.json"
+      ],
+      "execSessionId": 20182,
+      "exitCode": 0,
+      "stdout": "main-typescript-tool-transcript.log",
+      "sourceIdentity": "Production source matches the committed source; subsequent edits affected tests only. No stdout/stderr was emitted."
+    },
+    {
+      "name": "all-target dry build",
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=768",
+        "./dev/bin/build.js",
+        "--dryRun",
+        "--all"
+      ],
+      "execSessionId": 28129,
+      "exitCode": 0,
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "stdout": "test-build-tool-transcript.log",
+      "sourceIdentity": "Production source matches the committed source."
+    },
+    {
+      "name": "git diff --check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "productionFileSha256": "70032ee6c16a95641e13b6c1de15527340b0c82bcb02fabc812eccbf1326992b",
+  "testFileSha256": "a172caadccfcbaaea03f707a372f66d072db8c925dd8e97deab662a4a9fc3ef5",
+  "browserQualification": "Not performed locally; no elapsed-time or peak-memory improvement claim."
+}

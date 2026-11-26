@@ -1,0 +1,59 @@
+diff --git a/dev/perf/benchmark-support.js b/dev/perf/benchmark-support.js
+index 4b68c3268..077dbc03d 100644
+--- a/dev/perf/benchmark-support.js
++++ b/dev/perf/benchmark-support.js
+@@ -111,9 +111,11 @@ function validateExperimentReceipts(debug, importFlags) {
+             const prefix = key === 'parserExperiments' ? 'parser' : 'fastPathParser';
+             const sourceBytes = details[`${prefix}SourceUncompressedBytes`];
+             const workerCount = details[`${prefix}ParallelWorkerCount`];
+-            // ParallelTermBankPipelineRun enables this key for image projection
+-            // at >=512 MiB. Establish that production path from independent
+-            // media/source/native receipts, never from the flag being checked.
++            // The importer permits native image projection at >=1 GiB. This
++            // also satisfies the parser's >=512 MiB owned-projection threshold.
++            // A media pipeline alone is insufficient: Jitendex uses one below
++            // 1 GiB without projecting image paths or enabling escaped keys.
++            // Establish eligibility independently of the flag being checked.
+             const largeProjectedNativeImport = (
+                 effective &&
+                 bankDetails?.useMediaPipeline === true &&
+@@ -122,7 +124,7 @@ function validateExperimentReceipts(debug, importFlags) {
+                 flags.skipMediaImport !== true &&
+                 Number.isSafeInteger(workerCount) && Number(workerCount) > 0 &&
+                 details[`${prefix}ParallelSkipReason`] === null &&
+-                Number.isSafeInteger(sourceBytes) && Number(sourceBytes) >= 512 * 1024 * 1024
++                Number.isSafeInteger(sourceBytes) && Number(sourceBytes) >= 1024 * 1024 * 1024
+             );
+             const roleExpected = largeProjectedNativeImport ? {...expected, experimentalNativeEscapedKeys: true} : expected;
+             if (!isDeepStrictEqual(details[key], roleExpected)) {
+diff --git a/test/perf-experiment-receipts.test.js b/test/perf-experiment-receipts.test.js
+index 39753ef3e..30542b695 100644
+--- a/test/perf-experiment-receipts.test.js
++++ b/test/perf-experiment-receipts.test.js
+@@ -8,7 +8,7 @@ import {loadDictionaryFixtures} from '../dev/perf/dictionary-fixtures.js'
+ import {snapshotTermBankExperiments} from '../ext/js/dictionary/term-bank-experiments.js'
+ 
+ const fixture = (await loadDictionaryFixtures()).jmdict
+-const threshold = 512 * 1024 * 1024
++const threshold = 1024 * 1024 * 1024
+ const probeTerms = Array.from({length: 12}, (_, index) => `term-${index}`)
+ 
+ /**
+@@ -107,9 +107,16 @@ const invalidContexts = [
+ ]
+ 
+ describe('requested versus effective parser receipt policy', () => {
+-    test.each([threshold - 1, threshold, threshold + 1, 537538792])('accepts the exact production policy at %i source bytes', (bytes) => {
++    test.each([512 * 1024 * 1024 - 1, 512 * 1024 * 1024, 512 * 1024 * 1024 + 1, 538927310, threshold - 1, threshold, threshold + 1])('accepts the exact production policy at %i source bytes', (bytes) => {
+         expect(extract(report(bytes)).totalImportMs).toBe(200)
+     })
++    test.each(['parserExperiments', 'fastPathParserEffectiveExperiments'])('rejects native projection inferred from Jitendex media alone: %s', (key) => {
++        const value = report(538927310)
++        const entry = details(value).find((item) => key in item)
++        if (typeof entry === 'undefined') { throw new Error(`Missing fixture receipt ${key}`) }
++        entry[key].experimentalNativeEscapedKeys = true
++        expect(() => extract(value)).toThrow(`receipt mismatch: ${key}`)
++    })
+     test('rejects an unexpected escaped-key switch on the small JMdict source', () => {
+         const value = report(171092992)
+         details(value)[0].parserExperiments.experimentalNativeEscapedKeys = true

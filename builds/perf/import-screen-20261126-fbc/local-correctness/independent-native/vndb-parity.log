@@ -1,0 +1,38 @@
+(node:3) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-11-26T16:46:07.408Z start
+2026-11-26T16:46:07.690Z hashing fixture
+2026-11-26T16:46:09.550Z fixture hash verified
+2026-11-26T16:46:09.550Z reading directory
+2026-11-26T16:46:10.592Z directory loaded
+2026-11-26T16:46:10.844Z initializing workers
+(node:3) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-11-26T16:46:13.152Z workers initialized
+2026-11-26T16:46:13.188Z compressed group loaded
+2026-11-26T16:46:13.188Z parsing arm 0
+2026-11-26T16:46:17.965Z parsed arm 0
+2026-11-26T16:46:18.183Z hashed arm 0
+2026-11-26T16:46:18.200Z parsing arm 1
+2026-11-26T16:46:19.545Z parsed arm 1
+2026-11-26T16:46:19.683Z hashed arm 1
+{"groups":10,"rows":400000}
+{"groups":20,"rows":800000}
+{"groups":30,"rows":1200000}
+{"groups":40,"rows":1600000}
+{"groups":50,"rows":2000000}
+{"groups":60,"rows":2400000}
+{"groups":70,"rows":2800000}
+{"groups":80,"rows":3200000}
+{"groups":90,"rows":3600000}
+{"groups":100,"rows":4000000}
+{"groups":110,"rows":4400000}
+{"groups":120,"rows":4800000}
+{"groups":130,"rows":5200000}
+{"groups":140,"rows":5570000}
+{"groups":150,"rows":5960000}
+{"groups":160,"rows":6300000}
+{"groups":170,"rows":6648310}
+{"complete":true,"rows":6648310,"groups":170,"projectedMediaRows":146725,"uniqueMediaPaths":[146570,146570]}

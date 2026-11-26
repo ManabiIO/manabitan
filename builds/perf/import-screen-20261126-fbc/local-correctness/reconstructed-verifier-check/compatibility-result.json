@@ -1,0 +1,15 @@
+{
+  "basis": "Native summary reconstructed from actual raw report with exact adopted extractImportResult; source provenance reconstructed for this validator test, not an original successful benchmark summary",
+  "negativeChecks": {
+    "incomplete_lookups": "Summary/raw validation mismatch",
+    "source_hash": "Source provenance hash mismatch",
+    "wrong_runtime": "Summary browserVersion mismatch"
+  },
+  "positive": {
+    "mediaSha256": "6bdc45208d27fea9cbfe7ed2c514882596ed08c5304f922b38efb24a23dba3db",
+    "physicalSha256": "b5e226dd3d1982aeb1123eed2ae0ec23be452ee43a1d91f2b4906f1a9b245737",
+    "publicSha256": "5bb0b3eb0b6bbdfb1532277d993cc98baf41fe383565421a3ff247c156f60f96",
+    "totalImportMs": 1422.300000000003
+  },
+  "status": "passed"
+}

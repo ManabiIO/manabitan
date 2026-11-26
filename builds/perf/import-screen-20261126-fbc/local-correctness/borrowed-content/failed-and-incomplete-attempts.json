@@ -1,0 +1,58 @@
+{
+  "captureMethod": "Execution status and retained excerpts from tool transcript. Full failed-attempt stdout/stderr was not saved to disk.",
+  "attempts": [
+    {
+      "name": "combined changed-file ESLint",
+      "execSessionId": 9994,
+      "exitCode": 137,
+      "result": "Terminated before lint diagnostics; no passing lint claim."
+    },
+    {
+      "name": "test TypeScript",
+      "execSessionId": 42185,
+      "exitCode": 137,
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/jsconfig.typecheck.json"
+      ],
+      "result": "Terminated before diagnostics; no passing test-project type-check claim."
+    },
+    {
+      "name": "single-source ESLint with 1536 MiB heap",
+      "execSessionId": 36599,
+      "exitCode": 137,
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "ext/js/dictionary/dictionary-database.js"
+      ],
+      "result": "Terminated before lint diagnostics; stopped local heap tuning and deferred to hosted CI."
+    },
+    {
+      "name": "initial all-target dry build with generated-lib symlink",
+      "execSessionId": 52254,
+      "exitCode": 1,
+      "error": "Unexpected dictionary WASM output directory: /workspace/scratch/fbc366eaf75c/manabitan-jitendex/ext/lib",
+      "resolution": "Replaced only this checkout's generated-lib symlink with a local 9.7 MiB copied directory. Kept the build guard unchanged. Subsequent all-target dry build passed."
+    },
+    {
+      "name": "full unit attempt, two workers",
+      "execSessionId": 88192,
+      "exitCode": 130,
+      "argv": [
+        "/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--maxWorkers=2"
+      ],
+      "result": "Interrupted after coordination requested stopping concurrent resource-heavy checks; incomplete and not a passing full suite.",
+      "observedFailureLine": "test/raw-zip-range-reader.test.js: keeps media batches with local extras on one original range read (13123ms)",
+      "classification": "Detailed assertion/timeout report was not emitted before interruption. The duration suggested a timeout, but that classification was not verified.",
+      "otherObservedStderr": "keyboard-shortcut-integration.test.js reported jsdom MutationObserver ReferenceError: Node is not defined in selector-observer.js."
+    }
+  ]
+}

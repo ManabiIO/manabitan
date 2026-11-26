@@ -1,0 +1,29 @@
+{
+  "scope": "Borrowed parser heap handoff in dictionary-database.js; no settings, format, or native binary changes.",
+  "sourceCommit": "7dfce35862d4ee6dc9bd91a6ebd7f967d747586b",
+  "publishedCommit": "1a234772a0be1001ca63ce9d320d218123bd9449",
+  "tree": "1d412301069b061ae6db7aa9c65a1fc1feaf01c6",
+  "ordering": [
+    "Parser worker publishes copied row/key/media columns and a borrowed shared glossary span, then waits for its consume callback.",
+    "Database resolves deduplication, stages signatures, starts shared compression/persistence, and obtains fixed metadata reservations.",
+    "Database synchronously publishes resolved references, metadata and any retained-source cache copy, then prepares and starts record append.",
+    "Only a real releaseBorrowedContent callback enables early handoff. sourceConsumed confirms every compressor has gathered its input.",
+    "Handoff first replaces registry contentSpans/contentBytes with the already-started persistence completion promise, then calls consume idempotently.",
+    "Raw source comparisons before handoff are synchronous. After handoff, scalar/batched exact verification and public content reads await persistence and use exact persisted bytes.",
+    "Ordered sink still joins content persistence, record append and source-release processing before accepting the next sink group.",
+    "Failures drain started operations before metadata/plan rollback. Terminal cleanup unregisters reservations and releases the borrowed source idempotently."
+  ],
+  "noDependencyCycle": "Parser can begin the next group while writes finish. It cannot begin the next ordered database sink before the current one completes. Waiting readers await independent, already-started persistence, not another parser or sink operation.",
+  "regressionCoverage": [
+    "shared source overwritten immediately after release",
+    "exact duplicate and deliberate hash collision",
+    "concurrent public content retrieval",
+    "persistence failure after handoff",
+    "source-consumption failure before drain",
+    "record-append failure while persistence remains pending",
+    "duplicate reservation rejection after source handoff",
+    "multi-reservation error drain"
+  ],
+  "review": "Independent VNDB agent completed a static lifecycle review with no blocker; it did not independently rerun the 150 tests.",
+  "performanceLimit": "Controlled lifetime tests establish the overlap boundary and byte safety. Browser elapsed time and peak memory remain unqualified."
+}

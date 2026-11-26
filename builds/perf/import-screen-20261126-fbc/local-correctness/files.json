@@ -1,0 +1,216 @@
+{
+    "kind": "local-correctness-evidence-and-labeled-tool-transcripts",
+    "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "nativeCandidateCommit": "3dab279bb671f4a4f26d145209b6415159410bd3",
+    "timingClaim": false,
+    "browserMemoryClaim": false,
+    "files": [
+        {
+            "path": "README.md",
+            "sizeBytes": 3189,
+            "sha256": "be6f3a3ebccb09aa21ddbd93258fada0d7e5493672dbac5f4849257ec27aba8b"
+        },
+        {
+            "path": "borrowed-content/README.txt",
+            "sizeBytes": 599,
+            "sha256": "1bfd673fe0f7e069486bc4afb3c0bf95e5fa8d06e7ea45b8eaaf2320b2894a14"
+        },
+        {
+            "path": "borrowed-content/audit-qualification.py",
+            "sizeBytes": 5264,
+            "sha256": "a80833bbb6fc954d3a8d8e2404b17900d7eac4727ebc7839d04faf583f497e00"
+        },
+        {
+            "path": "borrowed-content/failed-and-incomplete-attempts.json",
+            "sizeBytes": 2619,
+            "sha256": "466bbb471c865777cd224ed02319e41541156aa78d850fd968480d6e2640f48a"
+        },
+        {
+            "path": "borrowed-content/lifetime-notes.json",
+            "sizeBytes": 2503,
+            "sha256": "2b10f214307c1d39daa57f659d08a481e2bdfafc4b16b810942bc3c5c6367626"
+        },
+        {
+            "path": "borrowed-content/main-typescript-tool-transcript.log",
+            "sizeBytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+            "path": "borrowed-content/qualification-audit.json",
+            "sizeBytes": 2851,
+            "sha256": "d7c80770fa0ef42ac12d4c33fd812beb2e0b4cd1ef85df4613e3d2df4da6b3be"
+        },
+        {
+            "path": "borrowed-content/successful-validation.json",
+            "sizeBytes": 2630,
+            "sha256": "fe2fe406ceba824c47464816ec4dae1b75d6f9c51738a2758dd9423f741a2de4"
+        },
+        {
+            "path": "borrowed-content/test-build-tool-transcript.log",
+            "sizeBytes": 384,
+            "sha256": "f27dd24a6f80cdaf716613190c775a17995101cc137ad5b172b8eab332c4d1eb"
+        },
+        {
+            "path": "borrowed-content/unit-150-tool-transcript.log",
+            "sizeBytes": 589,
+            "sha256": "d85f2470826a05241212d03820be6203f7b5644cf465f9eceaa8f462a0bb5674"
+        },
+        {
+            "path": "independent-native/README.md",
+            "sizeBytes": 6907,
+            "sha256": "d17011eabcd0b5ffb3449186fd8256ea34ed44908650721e38fe46745cf8a422"
+        },
+        {
+            "path": "independent-native/jitendex-parity-summary.json",
+            "sizeBytes": 973,
+            "sha256": "5e22177daea8e06e6a074a2bcb725c730fe75ddcbaccba50ba691e1f861b78c1"
+        },
+        {
+            "path": "independent-native/jitendex-parity.json",
+            "sizeBytes": 21232,
+            "sha256": "97e4ae20c682977f246e5dc6e760f3aa22f0de00a933609675ac809adcdc7df0"
+        },
+        {
+            "path": "independent-native/jitendex-parity.log",
+            "sizeBytes": 1274,
+            "sha256": "df3e917ed8291ce9212c96fdded3f9f32d412529989a06b5edfe8348df29fcce"
+        },
+        {
+            "path": "independent-native/native-differential.json",
+            "sizeBytes": 1449,
+            "sha256": "8f249d6d0dd4d303bfc90c8eb09be04fe42195a3afa4749df308db77a1ffaaec"
+        },
+        {
+            "path": "independent-native/native-differential.log",
+            "sizeBytes": 229,
+            "sha256": "45bdf4fdd2c015b4de5252c639b56e9e2d9dbc5a68180f1c15859ef21c091e3d"
+        },
+        {
+            "path": "independent-native/native-differential.py",
+            "sizeBytes": 6368,
+            "sha256": "71b1d135e1592b8e5f9531d99296b7f8d2dae381602bcc2c4d777dd526ac59d1"
+        },
+        {
+            "path": "independent-native/replay.mjs",
+            "sizeBytes": 12150,
+            "sha256": "19de65bde3caed0518341d108c4ffc538a28a57a0202b1bfa1b725f4f153c879"
+        },
+        {
+            "path": "independent-native/vndb-parity-summary.json",
+            "sizeBytes": 978,
+            "sha256": "d490e7bd6e5f54bed407b5c478ca4cbedad3f6f2f95f66351ee13c66c95eff2a"
+        },
+        {
+            "path": "independent-native/vndb-parity.json",
+            "sizeBytes": 116704,
+            "sha256": "651354a315577c4a04fff417860a7ba89976d16ecb22e020f6f4a767ff616568"
+        },
+        {
+            "path": "independent-native/vndb-parity.log",
+            "sizeBytes": 1704,
+            "sha256": "e90fe35f5716def355fd8ec0125c84bc74d2b1d68c46ca3b33aa08e03b6b6241"
+        },
+        {
+            "path": "independent-native/worker-adapter.mjs",
+            "sizeBytes": 529,
+            "sha256": "36af88d159641fecced0836dc19334d1178445ecefadef2a9cbf2a4661adbd33"
+        },
+        {
+            "path": "jmdict-parser/build.log",
+            "sizeBytes": 430,
+            "sha256": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d"
+        },
+        {
+            "path": "jmdict-parser/compare-parsers.mjs",
+            "sizeBytes": 5543,
+            "sha256": "b8e6cf7e55deb9e90cf557a50df538ac4e53f183b9ff9d74159d234f03ae8775"
+        },
+        {
+            "path": "jmdict-parser/corpus.json",
+            "sizeBytes": 9504,
+            "sha256": "dd3a2686208aafa0405869ae6a2f1e18bcaf668a13abe239a131a49180df115a"
+        },
+        {
+            "path": "jmdict-parser/focused-tests.log",
+            "sizeBytes": 2378,
+            "sha256": "4ac5dcee0b8e24e1d0d3f220b521ec893832d7f98e7beea54bec4014a4dd3482"
+        },
+        {
+            "path": "jmdict-parser/lint.log",
+            "sizeBytes": 694,
+            "sha256": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111"
+        },
+        {
+            "path": "jmdict-parser/parity.log",
+            "sizeBytes": 468,
+            "sha256": "0c1e6a2e07dece9a406acad230d534829cf5151dd39ef45b253302d526e5920e"
+        },
+        {
+            "path": "jmdict-parser/stacked-utf8-tests.log",
+            "sizeBytes": 763,
+            "sha256": "7f7907aa72be3ba4dc9388134318cb11dd1849b46a61bb29210aec0777f674bd"
+        },
+        {
+            "path": "jmdict-parser/utf8-tests.log",
+            "sizeBytes": 592,
+            "sha256": "45ec557010f7231806c7df25bcae5c732694454cc788e27d9ff9ddf5481257e6"
+        },
+        {
+            "path": "prior-jitendex-revalidation.json",
+            "sizeBytes": 25158,
+            "sha256": "30f1b3fd98f0db6dec479e41d49006c1bbcee1aaef8e392e9c06d6fceb1da971"
+        },
+        {
+            "path": "qualification-adopted-tests.log",
+            "sizeBytes": 771,
+            "sha256": "6b2b1f52bfecdda8b201a7754a39a5f2214914d1078713e40cbad46c10ea3381"
+        },
+        {
+            "path": "qualification-lint.log",
+            "sizeBytes": 1044,
+            "sha256": "d01111ec91e073e1265668b2528b813e9513cb649641bd0b613eea5d7fe04d14"
+        },
+        {
+            "path": "qualification-tests.log",
+            "sizeBytes": 769,
+            "sha256": "5436c13755fdfd4486f954d9f6c5d5491bd65ea35781700564943956f37205b3"
+        },
+        {
+            "path": "reconstructed-verifier-check/canonical-receipts.json",
+            "sizeBytes": 22652,
+            "sha256": "067d233130865a45352065292dcf85e817a1dd6edfd53814fa8227fe3fbd458c"
+        },
+        {
+            "path": "reconstructed-verifier-check/compatibility-result.json",
+            "sizeBytes": 755,
+            "sha256": "6add8854d3ae5e67a297d80a1750379fa35ec2ff5ca66b3681290c72f2533216"
+        },
+        {
+            "path": "reconstructed-verifier-check/extracted.json",
+            "sizeBytes": 34368,
+            "sha256": "401523bedeecb341cdd3c74544e026b8361fabaffb93ee7f38db820e33e32897"
+        },
+        {
+            "path": "reconstructed-verifier-check/run-1.json",
+            "sizeBytes": 151389,
+            "sha256": "5f0e8c09e527198001e1cbc18c591805b22ad4f4a2bc07bd798e203676143705"
+        },
+        {
+            "path": "reconstructed-verifier-check/summary.json",
+            "sizeBytes": 59874,
+            "sha256": "1c20b6e0d2d0427a897fb80082edd2118129bf66743a3b95aa485ed68e9e0a0d"
+        },
+        {
+            "path": "superseded-local-receipt-policy.patch",
+            "sizeBytes": 3815,
+            "sha256": "67b9a35bae55be60337c81bb7895e8c5db297d3a801d2e16a33f133226881039"
+        },
+        {
+            "path": "validator-compatibility.json",
+            "sizeBytes": 755,
+            "sha256": "6add8854d3ae5e67a297d80a1750379fa35ec2ff5ca66b3681290c72f2533216"
+        }
+    ],
+    "borrowedContentCandidateCommit": "1a234772a0be1001ca63ce9d320d218123bd9449",
+    "adoptedCheckerCommit": "439a1c9b6d40452061cda094b0727005553c1d1d"
+}

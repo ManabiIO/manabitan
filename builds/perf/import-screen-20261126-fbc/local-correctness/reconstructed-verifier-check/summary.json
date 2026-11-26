@@ -1,0 +1,1478 @@
+{
+  "authoritativeTiming": true,
+  "browserVersion": "153.0.8010.12",
+  "buildTarget": "chrome",
+  "dictionary": "jitendex",
+  "fixture": {
+    "cacheFile": "jitendex-yomitan.zip",
+    "expectedTitle": "Jitendex.org [2026-10-03]",
+    "label": "Jitendex",
+    "mediaBytes": 4992155,
+    "mediaFiles": 236,
+    "release": "2026.10.03.0",
+    "revision": "2026.10.03.0",
+    "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+    "sizeBytes": 38831822,
+    "termRows": 436555,
+    "unreferencedMediaPaths": [
+      "jitendex/HanaMinA/05167.svg",
+      "jitendex/HanaMinA/05641.svg",
+      "jitendex/HanaMinA/0576b.svg",
+      "jitendex/HanaMinA/05bda.svg",
+      "jitendex/HanaMinA/06207.svg",
+      "jitendex/HanaMinA/07055.svg",
+      "jitendex/HanaMinA/07575.svg",
+      "jitendex/HanaMinA/076a5.svg",
+      "jitendex/HanaMinA/0793d.svg",
+      "jitendex/HanaMinA/080ed.svg",
+      "jitendex/HanaMinA/09093.svg",
+      "jitendex/HanaMinA/09c81.svg",
+      "jitendex/HanaMinA/20bb7.svg"
+    ],
+    "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip"
+  },
+  "gitSha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "hostEnvironment": {
+    "arch": "x64",
+    "availableParallelism": 4,
+    "capturedAtIso": "2026-11-26T16:38:07.532Z",
+    "cgroupCpuMax": null,
+    "cgroupCpuQuotaCores": null,
+    "cgroupMemoryCurrentBytes": null,
+    "cgroupMemoryMaxBytes": null,
+    "cpuModel": "AMD EPYC 9V74 80-Core Processor",
+    "freeMemoryBytes": 15355613184,
+    "loadAverage": [
+      1.24,
+      0.36,
+      0.13
+    ],
+    "logicalCpuCount": 4,
+    "nodeVersion": "v22.22.0",
+    "platform": "linux",
+    "totalMemoryBytes": 16759431168,
+    "v8Version": "12.4.254.21-node.33"
+  },
+  "importFlags": null,
+  "mediaCheck": "sample",
+  "runs": [
+    {
+      "automationObservedImportMs": 1460.0561559999996,
+      "browserVersion": "153.0.8010.12",
+      "importDebug": {
+        "addSettingsErrorCount": 0,
+        "dictionaryTitle": "jitendex-yomitan.zip",
+        "errorCount": 0,
+        "fallbackDatabaseContentBase64Length": null,
+        "finalizeImportSession": true,
+        "hasResult": true,
+        "importerPhaseTimings": [
+          {
+            "details": {
+              "archiveSizeBytes": 38831822,
+              "autoZipMaxWorkersForLargeArchive": false,
+              "catalog": "zip.js",
+              "fileCount": 475,
+              "indexVersion": 3,
+              "ok": true,
+              "zipChunkSize": null,
+              "zipMaxWorkers": 4,
+              "zipUseWebWorkers": true
+            },
+            "elapsedMs": 15,
+            "endEpochMs": 1795711093727,
+            "phase": "archive-and-index",
+            "startEpochMs": 1795711093712
+          },
+          {
+            "details": {
+              "batchedFileCount": 219,
+              "bulkAddTermsMs": 678,
+              "chunkCount": 22,
+              "contentAppendMs": 659.899999999936,
+              "contentCompressMs": 466.20000000001164,
+              "contentEnvelopeMs": 0,
+              "contentInitialReservationCount": 1,
+              "contentInitialReservationSavingsMissCount": 0,
+              "contentMetadataIndexPublishMs": 24.30000000000291,
+              "contentMetadataMs": 51.79999999997381,
+              "contentMetadataProjectionMs": 0.09999999999126885,
+              "contentMetadataPublishMs": 51.79999999997381,
+              "contentMetadataStageMs": 0,
+              "contentOpfsAppendMs": 48.89999999997963,
+              "contentPackMs": 2.300000000032014,
+              "contentReferenceMs": 10,
+              "contentStoreMs": 532.9999999999709,
+              "dedupCanonicalScanMs": 58.59999999999127,
+              "dedupCapacityMs": 19.5,
+              "dedupExactCompareMs": 45.80000000001746,
+              "dedupExactFallbackCount": 34,
+              "dedupNativeBulkPendingRows": 363243,
+              "dedupNativeCallCount": 22,
+              "dedupNativeCopiedInputBytes": 14906809,
+              "dedupNativeCopiedOutputBytes": 272,
+              "dedupNativeExactCandidates": 34,
+              "dedupNativeFallbackAssetCount": 0,
+              "dedupNativeFallbackCount": 0,
+              "dedupNativeFallbackEligibilityCount": 0,
+              "dedupNativeFallbackUnsupportedCount": 0,
+              "dedupNativeScannedRows": 363277,
+              "dedupNativeSnapshotBytes": 0,
+              "dedupPendingHitCount": 73278,
+              "dedupPersistedHitCount": 34,
+              "dedupRecentSourceAdoptedBytes": 0,
+              "dedupRecentSourceCacheBytes": 0,
+              "dedupRecentSourceCacheMs": 3.3000000000029104,
+              "dedupRecentSourceHitCount": 0,
+              "dedupScanMs": 126.89999999996508,
+              "dedupUniqueCount": 363243,
+              "importerChunkSinkMs": 683,
+              "importerMaterializationMs": 11,
+              "mediaResolveMs": 0,
+              "mediaWriteMs": 1,
+              "parserAllocationMs": 4,
+              "parserBankSpanCount": 219,
+              "parserBorrowedContentResultCount": 22,
+              "parserBufferSetupMs": 1133,
+              "parserChunkDispatchMs": 44,
+              "parserChunkSize": 0,
+              "parserCompactContentMetadataBytesAvoided": 0,
+              "parserCompactContentMetadataGroups": 0,
+              "parserContentCapacity": 481920000,
+              "parserCopyJsonMs": 0,
+              "parserDirectLookupArenaCopiedBytesAvoided": 0,
+              "parserDirectLookupArenaSegments": 0,
+              "parserDiscardedFusedMs": 0,
+              "parserDiscardedFusedRows": 0,
+              "parserEncodeContentMs": 0,
+              "parserEncodedContentBytes": 389707807,
+              "parserEscapedKeyDecodeCount": 0,
+              "parserExperiments": {
+                "experimentalDirectLookupArena": false,
+                "experimentalFastGlossaryNormalization": false,
+                "experimentalFusedSingleBank": false,
+                "experimentalGenericSpanCompression": true,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalSkipFusedParse": false,
+                "experimentalTermBankSpans": false,
+                "experimentalValidatedGlossaryReuse": true
+              },
+              "parserFastGlossaryNormalizationCount": 0,
+              "parserFastGlossaryNormalizationFallbackCount": 0,
+              "parserFusedAttempts": 22,
+              "parserFusedFallbacks": 0,
+              "parserFusedSingleBankGroups": 0,
+              "parserGlobalExactContentReuseCount": 0,
+              "parserInitialContentBytesPerRow": 48,
+              "parserLookupCompactionSourceValidationPasses": 0,
+              "parserLookupIndexCompactMs": 0,
+              "parserLookupIndexEncodeMs": 29.69999999999709,
+              "parserLookupIndexPrepareMs": 29.69999999999709,
+              "parserMaxWasmHeapBytes": 76087296,
+              "parserMetaAllocatedBytes": 43350000,
+              "parserMetaCapacity": 637500,
+              "parserMinimalDecode": true,
+              "parserNativeLookupScratchReuseGroups": 22,
+              "parserNativeLookupScratchReuseMisses": 0,
+              "parserNativeLookupScratchReusedBytes": 28790800,
+              "parserNativeSegmentedLookupFallbacks": 0,
+              "parserNativeSegmentedLookupSegments": 0,
+              "parserOrderedSinkWaitMs": 200.40000000000873,
+              "parserParallelGroupCount": 22,
+              "parserParallelOwnedContentBytes": 0,
+              "parserParallelPeakQueuedOwnedContentBytes": 0,
+              "parserParallelPipelineGroupsPerWorker": 3,
+              "parserParallelSkipReason": null,
+              "parserParallelSourceReadWallMs": 759.1999999999971,
+              "parserParallelWorkerCount": 3,
+              "parserParallelWorkerWallMs": 1104.0999999999913,
+              "parserParseBankMs": 1120,
+              "parserRecentContentDedupHitCount": 73242,
+              "parserResultCopyMs": 43.79999999998836,
+              "parserResultDeliveryMs": 86,
+              "parserRowDecodeMs": 18,
+              "parserSourceCompressedBytes": 33829614,
+              "parserSourceCrcMs": 0,
+              "parserSourceCrcReusedBytes": 0,
+              "parserSourceCrcReusedGlossaryCount": 0,
+              "parserSourceCrcScannedBytes": 0,
+              "parserSourceDeliveryMs": 23,
+              "parserSourceInflateMs": 719.0999999999913,
+              "parserSourcePreparationMs": 0.19999999999708962,
+              "parserSourceTransferredBytes": 33829614,
+              "parserSourceUncompressedBytes": 538927310,
+              "parserValidatedGlossaryReuseCount": 85996,
+              "rows": 436555,
+              "serializationMs": 0,
+              "sourceArchiveReadMs": 759.1999999999971,
+              "sourceBatchMaxBytes": 201326592,
+              "sourceFirstBatchEstimatedBytes": 200417836,
+              "sourceFirstBatchFileCount": 67,
+              "sourceFirstBatchSizeKnown": true,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourcePrefetchMaxBytes": 100663296,
+              "termLookupIndexEncodeMs": 29.69999999999709,
+              "termRecordBuildMs": 0,
+              "termRecordEncodeMs": 38.60000000002037,
+              "termRecordFieldEncodeMs": 36.70000000001164,
+              "termRecordHeapCopyMs": 0,
+              "termRecordInternMs": 0,
+              "termRecordPackLengthsMs": 0,
+              "termRecordValidationMs": 16.299999999959255,
+              "termRecordWriteMs": 78.30000000000291,
+              "termsVtabInsertMs": 0,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false
+            },
+            "elapsedMs": 1126,
+            "endEpochMs": 1795711094863,
+            "phase": "term-file-fast-path:term_bank_1.json..term_bank_219.json",
+            "startEpochMs": 1795711093737
+          },
+          {
+            "details": {
+              "fastPathChunkCount": 22,
+              "fastPathChunkSinkMs": 683,
+              "fastPathParserAllocationMs": 4,
+              "fastPathParserBankSpanCount": 219,
+              "fastPathParserBorrowedContentResultCount": 22,
+              "fastPathParserBufferSetupMs": 1133,
+              "fastPathParserChunkDispatchMs": 44,
+              "fastPathParserCompactContentMetadataBytesAvoided": 0,
+              "fastPathParserCompactContentMetadataGroups": 0,
+              "fastPathParserCopyJsonMs": 0,
+              "fastPathParserDirectLookupArenaCopiedBytesAvoided": 0,
+              "fastPathParserDirectLookupArenaSegments": 0,
+              "fastPathParserDiscardedFusedMs": 0,
+              "fastPathParserDiscardedFusedRows": 0,
+              "fastPathParserEffectiveExperiments": {
+                "experimentalDirectLookupArena": false,
+                "experimentalFastGlossaryNormalization": false,
+                "experimentalFusedSingleBank": false,
+                "experimentalGenericSpanCompression": true,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalSkipFusedParse": false,
+                "experimentalTermBankSpans": false,
+                "experimentalValidatedGlossaryReuse": true
+              },
+              "fastPathParserEncodeContentMs": 0,
+              "fastPathParserEscapedKeyDecodeCount": 0,
+              "fastPathParserExperiments": {
+                "experimentalDirectLookupArena": false,
+                "experimentalFastGlossaryNormalization": false,
+                "experimentalFusedSingleBank": false,
+                "experimentalGenericSpanCompression": true,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalSkipFusedParse": false,
+                "experimentalTermBankSpans": false,
+                "experimentalValidatedGlossaryReuse": true
+              },
+              "fastPathParserFastGlossaryNormalizationCount": 0,
+              "fastPathParserFastGlossaryNormalizationFallbackCount": 0,
+              "fastPathParserFusedAttempts": 22,
+              "fastPathParserFusedFallbacks": 0,
+              "fastPathParserFusedSingleBankGroups": 0,
+              "fastPathParserGlobalExactContentReuseCount": 0,
+              "fastPathParserLookupCompactionSourceValidationPasses": 0,
+              "fastPathParserLookupIndexCompactMs": 0,
+              "fastPathParserLookupIndexEncodeMs": 29.69999999999709,
+              "fastPathParserLookupIndexPrepareMs": 29.69999999999709,
+              "fastPathParserMaxWasmHeapBytes": 76087296,
+              "fastPathParserNativeLookupScratchReuseGroups": 22,
+              "fastPathParserNativeLookupScratchReuseMisses": 0,
+              "fastPathParserNativeLookupScratchReusedBytes": 28790800,
+              "fastPathParserNativeSegmentedLookupFallbacks": 0,
+              "fastPathParserNativeSegmentedLookupSegments": 0,
+              "fastPathParserOrderedSinkWaitMs": 200.40000000000873,
+              "fastPathParserParallelGroupCount": 22,
+              "fastPathParserParallelOwnedContentBytes": 0,
+              "fastPathParserParallelPeakQueuedOwnedContentBytes": 0,
+              "fastPathParserParallelPipelineGroupsPerWorker": 3,
+              "fastPathParserParallelSkipReason": null,
+              "fastPathParserParallelSourceReadWallMs": 759.1999999999971,
+              "fastPathParserParallelWorkerCount": 3,
+              "fastPathParserParallelWorkerWallMs": 1104.0999999999913,
+              "fastPathParserParseBankMs": 1120,
+              "fastPathParserRecentContentDedupHitCount": 73242,
+              "fastPathParserResultCopyMs": 43.79999999998836,
+              "fastPathParserResultDeliveryMs": 86,
+              "fastPathParserRowDecodeMs": 18,
+              "fastPathParserSourceCompressedBytes": 33829614,
+              "fastPathParserSourceCrcMs": 0,
+              "fastPathParserSourceCrcReusedBytes": 0,
+              "fastPathParserSourceCrcReusedGlossaryCount": 0,
+              "fastPathParserSourceCrcScannedBytes": 0,
+              "fastPathParserSourceDeliveryMs": 23,
+              "fastPathParserSourceInflateMs": 719.0999999999913,
+              "fastPathParserSourcePreparationMs": 0.19999999999708962,
+              "fastPathParserSourceTransferredBytes": 33829614,
+              "fastPathParserSourceUncompressedBytes": 538927310,
+              "fastPathParserStringPlanMs": 0,
+              "fastPathParserValidatedGlossaryReuseCount": 85996,
+              "hasArchiveImageMediaFiles": true,
+              "kanji": 0,
+              "kanjiMeta": 0,
+              "media": 236,
+              "sourceFirstBatchEstimatedBytes": 200417836,
+              "sourceFirstBatchFileCount": 67,
+              "sourceFirstBatchSizeKnown": true,
+              "sourceInitialPrefetchEstimatedBytes": 0,
+              "sourceInitialPrefetchFileCount": 0,
+              "sourceZipLogicalRangeReadCount": 0,
+              "sourceZipPhysicalRangeReadCount": 0,
+              "step4AccountedMs": 1179,
+              "step4ArtifactMetadataAppendMs": 0,
+              "step4ArtifactMetadataRebaseMs": 0,
+              "step4ArtifactPreloadMs": 0,
+              "step4ArtifactReadBytesMs": 0,
+              "step4BulkAddTagsMetaMs": 0,
+              "step4BulkAddTermsMs": 678,
+              "step4KanjiMetaReadMs": 0,
+              "step4KanjiReadMs": 0,
+              "step4MediaResolveMs": 33,
+              "step4MediaWriteMs": 21,
+              "step4MediaZipBatchCompressedBytes": 4913668,
+              "step4MediaZipBatchCount": 7,
+              "step4MediaZipBatchEntryCount": 236,
+              "step4MediaZipBatchInflateMs": 26,
+              "step4MediaZipBatchRangeBytes": 7964965,
+              "step4MediaZipBatchReadMs": 23,
+              "step4MediaZipBatchUncompressedBytes": 4992155,
+              "step4OtherMs": 28,
+              "step4SharedGlossaryAppendMs": 0,
+              "step4SourcePackedMediaAppendMs": 0,
+              "step4SourcePackedMediaBytes": 0,
+              "step4SourcePackedMediaEarlyPayload": false,
+              "step4SourcePackedMediaEntryCount": 0,
+              "step4SourcePackedMediaParallel": false,
+              "step4TagReadMs": 19,
+              "step4TermArchiveReadMs": 759.1999999999971,
+              "step4TermFileNonParseWriteMs": 0,
+              "step4TermMetaReadMs": 0,
+              "step4TermParseMs": 447,
+              "step4TermSerializationMs": 0,
+              "tagMeta": 8,
+              "termMeta": 0,
+              "terms": 436555,
+              "useMediaPipeline": true,
+              "zipUseWebWorkers": true,
+              "zipWebWorkersAutoDisabled": false
+            },
+            "elapsedMs": 1207,
+            "endEpochMs": 1795711094938,
+            "phase": "import-data-banks",
+            "startEpochMs": 1795711093731
+          },
+          {
+            "details": {
+              "hasStyles": true
+            },
+            "elapsedMs": 3,
+            "endEpochMs": 1795711094941,
+            "phase": "finalize-descriptor",
+            "startEpochMs": 1795711094938
+          },
+          {
+            "details": {
+              "cacheResetMs": 0,
+              "commitMs": 12.89999999999418,
+              "compressionExperiments": {
+                "experimentalDirectLookupArena": false,
+                "experimentalFastGlossaryNormalization": false,
+                "experimentalFusedSingleBank": false,
+                "experimentalGenericSpanCompression": true,
+                "experimentalGlobalExactContentReuse": false,
+                "experimentalLookupScratchReuse": true,
+                "experimentalNativeEscapedKeys": false,
+                "experimentalNativeSegmentedLookup": true,
+                "experimentalParserWorkers3": true,
+                "experimentalSinglePassLookupCompaction": false,
+                "experimentalSkipFusedParse": false,
+                "experimentalTermBankSpans": false,
+                "experimentalValidatedGlossaryReuse": true
+              },
+              "createIndexesCheckpointCount": 0,
+              "createIndexesMs": 0,
+              "housekeepingErrors": [],
+              "ok": true,
+              "published": true,
+              "runtimePragmasMs": 0,
+              "termContentDrainCycleCount": 5,
+              "termContentEndImportSessionAwaitQueuedWritesMs": 0,
+              "termContentEndImportSessionCloseWritableMs": 1.8000000000029104,
+              "termContentEndImportSessionFlushPendingWritesMs": 0,
+              "termContentEndImportSessionMs": 3,
+              "termContentFlushDueToBytesCount": 0,
+              "termContentFlushDueToChunkCount": 0,
+              "termContentFlushFinalGroupCount": 5,
+              "termContentMaxMergedGroupChunkCount": 106,
+              "termContentMaxWriteBytes": 9918389,
+              "termContentMergedGroupChunkCount": 407,
+              "termContentMergedWriteBytes": 38386795,
+              "termContentMergedWriteCount": 5,
+              "termContentSingleChunkWriteCount": 0,
+              "termContentTotalWriteBytes": 38386795,
+              "termContentWriteCallCount": 5,
+              "termContentWriteCoalesceMaxChunks": 8192,
+              "termContentWriteCoalesceTargetBytes": 67108864,
+              "termContentWriteFlushThresholdBytes": 8388608,
+              "termRecordDrainCycleCount": 1,
+              "termRecordEndImportSessionAwaitQueuedWritesMs": 0.5,
+              "termRecordEndImportSessionCloseWritableMs": 137.5,
+              "termRecordEndImportSessionFlushPendingWritesMs": 4,
+              "termRecordEndImportSessionMs": 142,
+              "termRecordLookupIndexAwaitMs": 0.5999999999912689,
+              "termRecordLookupIndexMaxQueuedBytes": 5099976,
+              "termRecordLookupIndexWorkerFileCount": 0,
+              "termRecordLookupIndexWriteBytes": 23590812,
+              "termRecordLookupIndexWriteCallCount": 6,
+              "termRecordMaxMergedGroupChunkCount": 0,
+              "termRecordMaxWriteBytes": 45,
+              "termRecordMergedGroupChunkCount": 0,
+              "termRecordMergedWriteBytes": 0,
+              "termRecordMergedWriteCount": 0,
+              "termRecordSingleChunkWriteCount": 1,
+              "termRecordTotalWriteBytes": 45,
+              "termRecordWriteCallCount": 1,
+              "termRecordWriteCoalesceTargetBytes": 16777216,
+              "termsVirtualTableSyncMs": 0,
+              "totalMs": 158
+            },
+            "elapsedMs": 159,
+            "endEpochMs": 1795711095100,
+            "phase": "bulk-finalization",
+            "startEpochMs": 1795711094941
+          },
+          {
+            "details": {
+              "fusedWithBulkFinalization": true,
+              "ok": true
+            },
+            "elapsedMs": 0,
+            "endEpochMs": 1795711095100,
+            "phase": "write-summary",
+            "startEpochMs": 1795711095100
+          },
+          {
+            "details": {
+              "reason": "transaction-commit-completed",
+              "skipped": true,
+              "termCount": 436555
+            },
+            "elapsedMs": 0,
+            "endEpochMs": 1795711095100,
+            "phase": "post-finalization-integrity-sample",
+            "startEpochMs": 1795711095100
+          }
+        ],
+        "localPhaseTimings": [
+          {
+            "details": {
+              "sizeBytes": 38831822,
+              "source": "file-handle"
+            },
+            "elapsedMs": 0,
+            "endEpochMs": 1795711093708,
+            "phase": "read-archive",
+            "startEpochMs": 1795711093708
+          },
+          {
+            "details": {
+              "finalizeImportSession": true,
+              "useImportSession": true
+            },
+            "elapsedMs": 1394.1000000000058,
+            "endEpochMs": 1795711095102,
+            "phase": "worker-import-dictionary",
+            "startEpochMs": 1795711093707.9
+          },
+          {
+            "details": {
+              "deferred": true
+            },
+            "elapsedMs": 0,
+            "phase": "page-side-finalization-queued"
+          },
+          {
+            "details": {
+              "settingsErrorCount": 0,
+              "skipped": false
+            },
+            "elapsedMs": 6.599999999991269,
+            "endEpochMs": 1795711095111,
+            "phase": "add-dictionary-settings",
+            "startEpochMs": 1795711095104.4
+          },
+          {
+            "details": {
+              "deferred": true
+            },
+            "elapsedMs": 0,
+            "phase": "trigger-database-updated"
+          },
+          {
+            "details": {
+              "batchFinalization": true,
+              "dictionaryCount": 1
+            },
+            "elapsedMs": 1.1999999999970896,
+            "endEpochMs": 1795711095115,
+            "phase": "verify-imported-dictionary-options-batch-read",
+            "startEpochMs": 1795711095113.8
+          },
+          {
+            "details": {
+              "batchFinalization": true,
+              "dictionaryTitle": "Jitendex.org [2026-10-03]",
+              "requireEnabledForActiveProfile": true
+            },
+            "elapsedMs": 0.39999999999417923,
+            "endEpochMs": 1795711095115,
+            "phase": "verify-imported-dictionary-visible",
+            "startEpochMs": 1795711095114.6
+          }
+        ],
+        "openStorageDiagnostics": {
+          "attempts": [],
+          "caller": "DictionaryDatabase._openConnection",
+          "forceFallback": false,
+          "hasInstallOpfsSAHPoolVfs": true,
+          "hasOpfsDbCtor": true,
+          "hasOpfsImportDb": true,
+          "hasOpfsSahpoolVfs": true,
+          "hasOpfsVfs": true,
+          "hasWasmfsDir": true,
+          "lastError": null,
+          "mode": "opfs-sahpool",
+          "openFailureClass": null,
+          "opfsReadyTimeoutMs": 0,
+          "opfsReadyWait": null,
+          "opfsSahpoolCapacity": 8,
+          "opfsSahpoolDirectory": "/manabitan/sqlite-sahpool-v1",
+          "opfsSahpoolFileCount": 1,
+          "opfsSahpoolFileNames": [
+            "/dict.sqlite3"
+          ],
+          "opfsSahpoolInstallAttempted": false,
+          "opfsSahpoolInstallError": null,
+          "opfsSahpoolInstallResult": null,
+          "opfsSahpoolVfsPtr": 787088,
+          "opfsVfsPtr": 786960,
+          "runtimeContext": {
+            "crossOriginIsolated": false,
+            "globalConstructor": "DedicatedWorkerGlobalScope",
+            "hasAtomics": true,
+            "hasCreateSyncAccessHandle": true,
+            "hasFileSystemDirectoryHandle": true,
+            "hasFileSystemFileHandle": true,
+            "hasFileSystemHandle": true,
+            "hasNavigatorStorage": true,
+            "hasSharedArrayBuffer": true,
+            "hasStorageGetDirectory": true,
+            "href": "chrome-extension://odahnponeiadpcbcdbbldolmeokjdnkh/js/background/offscreen-dictionary-worker.js",
+            "isDedicatedWorkerGlobalScope": true,
+            "isServiceWorkerGlobalScope": false,
+            "isWindow": false,
+            "isWorkerGlobalScope": true,
+            "origin": "chrome-extension://odahnponeiadpcbcdbbldolmeokjdnkh",
+            "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36"
+          }
+        },
+        "resultTitle": "Jitendex.org [2026-10-03]",
+        "sourceTitle": "Jitendex.org [2026-10-03]",
+        "useImportSession": true,
+        "usesFallbackStorage": false
+      },
+      "index": 1,
+      "packageSha256": "53677c6d86276edc2dc1e2630839f1c011d558fa25df457526d77d3b7a8d7e3a",
+      "reportJsonPath": "/workspace/scratch/fbc366eaf75c/screen-validation/run-1.json",
+      "reportPath": "/workspace/scratch/fbc366eaf75c/screen-validation/run-1.html",
+      "step4Breakdown": {
+        "aggregate": {
+          "accountedMs": 1179,
+          "bulkAddTagsMetaMs": 0,
+          "bulkAddTermsMs": 678,
+          "mediaResolveMs": 33,
+          "mediaWriteMs": 21,
+          "otherMs": 28,
+          "termParseMs": 447,
+          "termSerializationMs": 0
+        },
+        "dictionaries": [
+          {
+            "accountedMs": 1179,
+            "bulkAddTagsMetaMs": 0,
+            "bulkAddTermsMs": 678,
+            "mediaResolveMs": 33,
+            "mediaWriteMs": 21,
+            "otherMs": 28,
+            "parserGroupCount": 22,
+            "parserPipelineGroupsPerWorker": 3,
+            "parserWorkerCount": 3,
+            "termParseMs": 447,
+            "termSerializationMs": 0,
+            "title": "Jitendex.org [2026-10-03]"
+          }
+        ]
+      },
+      "stepTimingSummary": {
+        "aggregateByStep": [
+          {
+            "count": 1,
+            "stepDisplay": "Step 1 of 5",
+            "totalElapsedMs": 0.20000000001164153
+          },
+          {
+            "count": 1,
+            "stepDisplay": "Step 2 of 5",
+            "totalElapsedMs": 6.5
+          },
+          {
+            "count": 1,
+            "stepDisplay": "Step 3 of 5",
+            "totalElapsedMs": 16.59999999999127
+          },
+          {
+            "count": 1,
+            "stepDisplay": "Step 4 of 5",
+            "totalElapsedMs": 1209.4000000000087
+          },
+          {
+            "count": 1,
+            "stepDisplay": "Step 5 of 5",
+            "totalElapsedMs": 176.79999999998836
+          }
+        ],
+        "dictionaries": [
+          {
+            "dictionaryIndex": 1,
+            "steps": [
+              {
+                "elapsedMs": 0.20000000001164153,
+                "finalOpenStep": false,
+                "heapDeltaBytes": 0,
+                "label": "Starting import state",
+                "stepDisplay": "Step 1 of 5"
+              },
+              {
+                "elapsedMs": 6.5,
+                "finalOpenStep": false,
+                "heapDeltaBytes": 0,
+                "label": "Initializing import",
+                "stepDisplay": "Step 2 of 5"
+              },
+              {
+                "elapsedMs": 16.59999999999127,
+                "finalOpenStep": false,
+                "heapDeltaBytes": 0,
+                "label": "Loading dictionary",
+                "stepDisplay": "Step 3 of 5"
+              },
+              {
+                "elapsedMs": 1209.4000000000087,
+                "finalOpenStep": false,
+                "heapDeltaBytes": -90975,
+                "label": "Importing data",
+                "stepDisplay": "Step 4 of 5"
+              },
+              {
+                "elapsedMs": 176.79999999998836,
+                "finalOpenStep": true,
+                "heapDeltaBytes": 365376,
+                "label": "Finalizing import",
+                "stepDisplay": "Step 5 of 5"
+              }
+            ]
+          }
+        ]
+      },
+      "totalImportMs": 1422.300000000003,
+      "tracePath": null,
+      "validation": {
+        "contentReadable": true,
+        "lookup": {
+          "observations": [
+            {
+              "elapsedMs": 3.6999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 1,
+              "pass": 0,
+              "results": 1,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+              "term": "\u30fd"
+            },
+            {
+              "elapsedMs": 5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 0,
+              "results": 1,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+              "term": "\u304a\u574a\u3063\u3061\u3083\u3093"
+            },
+            {
+              "elapsedMs": 26.10000000000582,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 0,
+              "results": 1,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+              "term": "\u5403\u9006"
+            },
+            {
+              "elapsedMs": 11.80000000000291,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 0,
+              "results": 1,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+              "term": "\u3069\u3046\u3084\u3089"
+            },
+            {
+              "elapsedMs": 19.5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 0,
+              "results": 1,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+              "term": "\u920e\u722a"
+            },
+            {
+              "elapsedMs": 9.30000000000291,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 0,
+              "results": 1,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+              "term": "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a"
+            },
+            {
+              "elapsedMs": 10.30000000000291,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 0,
+              "results": 2,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+              "term": "\u5c45\u6b8b\u308a\u624b\u7576\u3066"
+            },
+            {
+              "elapsedMs": 4.600000000005821,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 0,
+              "results": 2,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+              "term": "\u6c34\ufa3a\u5c71\u6c34"
+            },
+            {
+              "elapsedMs": 14.200000000011642,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 0,
+              "results": 2,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+              "term": "\u91ce\u72ac"
+            },
+            {
+              "elapsedMs": 6.599999999991269,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 0,
+              "results": 2,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+              "term": "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea"
+            },
+            {
+              "elapsedMs": 3.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 3,
+              "pass": 0,
+              "results": 2,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+              "term": "\u6c17\u307e\uff3a"
+            },
+            {
+              "elapsedMs": 5.80000000000291,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 0,
+              "results": 1,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+              "term": "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+            },
+            {
+              "elapsedMs": 4.600000000005821,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 1,
+              "pass": 1,
+              "results": 1,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+              "term": "\u30fd"
+            },
+            {
+              "elapsedMs": 2.2000000000116415,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 1,
+              "results": 1,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+              "term": "\u304a\u574a\u3063\u3061\u3083\u3093"
+            },
+            {
+              "elapsedMs": 2.5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 1,
+              "results": 1,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+              "term": "\u5403\u9006"
+            },
+            {
+              "elapsedMs": 2.6999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 1,
+              "results": 1,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+              "term": "\u3069\u3046\u3084\u3089"
+            },
+            {
+              "elapsedMs": 4.600000000005821,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 1,
+              "results": 1,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+              "term": "\u920e\u722a"
+            },
+            {
+              "elapsedMs": 3.099999999991269,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 1,
+              "results": 1,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+              "term": "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a"
+            },
+            {
+              "elapsedMs": 3.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 1,
+              "results": 2,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+              "term": "\u5c45\u6b8b\u308a\u624b\u7576\u3066"
+            },
+            {
+              "elapsedMs": 2.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 1,
+              "results": 2,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+              "term": "\u6c34\ufa3a\u5c71\u6c34"
+            },
+            {
+              "elapsedMs": 3.5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 1,
+              "results": 2,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+              "term": "\u91ce\u72ac"
+            },
+            {
+              "elapsedMs": 3.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 1,
+              "results": 2,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+              "term": "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea"
+            },
+            {
+              "elapsedMs": 2,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 3,
+              "pass": 1,
+              "results": 2,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+              "term": "\u6c17\u307e\uff3a"
+            },
+            {
+              "elapsedMs": 2.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 1,
+              "results": 1,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+              "term": "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+            },
+            {
+              "elapsedMs": 2.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 1,
+              "pass": 2,
+              "results": 1,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+              "term": "\u30fd"
+            },
+            {
+              "elapsedMs": 2.599999999991269,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 2,
+              "results": 1,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+              "term": "\u304a\u574a\u3063\u3061\u3083\u3093"
+            },
+            {
+              "elapsedMs": 1.6000000000058208,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 2,
+              "results": 1,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+              "term": "\u5403\u9006"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 2,
+              "results": 1,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+              "term": "\u3069\u3046\u3084\u3089"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 2,
+              "results": 1,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+              "term": "\u920e\u722a"
+            },
+            {
+              "elapsedMs": 1.2000000000116415,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 2,
+              "results": 1,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+              "term": "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 2,
+              "results": 2,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+              "term": "\u5c45\u6b8b\u308a\u624b\u7576\u3066"
+            },
+            {
+              "elapsedMs": 1.4000000000087311,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 2,
+              "results": 2,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+              "term": "\u6c34\ufa3a\u5c71\u6c34"
+            },
+            {
+              "elapsedMs": 1.2999999999883585,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 2,
+              "results": 2,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+              "term": "\u91ce\u72ac"
+            },
+            {
+              "elapsedMs": 1.3999999999941792,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 2,
+              "results": 2,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+              "term": "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 3,
+              "pass": 2,
+              "results": 2,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+              "term": "\u6c17\u307e\uff3a"
+            },
+            {
+              "elapsedMs": 1.0999999999912689,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 2,
+              "results": 1,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+              "term": "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+            },
+            {
+              "elapsedMs": 1.6000000000058208,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 1,
+              "pass": 3,
+              "results": 1,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+              "term": "\u30fd"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 3,
+              "results": 1,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+              "term": "\u304a\u574a\u3063\u3061\u3083\u3093"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 3,
+              "results": 1,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+              "term": "\u5403\u9006"
+            },
+            {
+              "elapsedMs": 1.2000000000116415,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 3,
+              "results": 1,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+              "term": "\u3069\u3046\u3084\u3089"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 3,
+              "results": 1,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+              "term": "\u920e\u722a"
+            },
+            {
+              "elapsedMs": 1.3999999999941792,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 3,
+              "results": 1,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+              "term": "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 3,
+              "results": 2,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+              "term": "\u5c45\u6b8b\u308a\u624b\u7576\u3066"
+            },
+            {
+              "elapsedMs": 1.4000000000087311,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 3,
+              "results": 2,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+              "term": "\u6c34\ufa3a\u5c71\u6c34"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 3,
+              "results": 2,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+              "term": "\u91ce\u72ac"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 3,
+              "results": 2,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+              "term": "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea"
+            },
+            {
+              "elapsedMs": 1.5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 3,
+              "pass": 3,
+              "results": 2,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+              "term": "\u6c17\u307e\uff3a"
+            },
+            {
+              "elapsedMs": 1,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 3,
+              "results": 1,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+              "term": "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 1,
+              "pass": 4,
+              "results": 1,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+              "term": "\u30fd"
+            },
+            {
+              "elapsedMs": 1.4000000000087311,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 4,
+              "results": 1,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+              "term": "\u304a\u574a\u3063\u3061\u3083\u3093"
+            },
+            {
+              "elapsedMs": 1.3999999999941792,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 4,
+              "results": 1,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+              "term": "\u5403\u9006"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 4,
+              "results": 1,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+              "term": "\u3069\u3046\u3084\u3089"
+            },
+            {
+              "elapsedMs": 1.5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 4,
+              "results": 1,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+              "term": "\u920e\u722a"
+            },
+            {
+              "elapsedMs": 1.3999999999941792,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 4,
+              "results": 1,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+              "term": "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a"
+            },
+            {
+              "elapsedMs": 1.0999999999912689,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 4,
+              "results": 2,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+              "term": "\u5c45\u6b8b\u308a\u624b\u7576\u3066"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 4,
+              "results": 2,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+              "term": "\u6c34\ufa3a\u5c71\u6c34"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 4,
+              "results": 2,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+              "term": "\u91ce\u72ac"
+            },
+            {
+              "elapsedMs": 1.2999999999883585,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 4,
+              "results": 2,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+              "term": "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea"
+            },
+            {
+              "elapsedMs": 1.6000000000058208,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 3,
+              "pass": 4,
+              "results": 2,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+              "term": "\u6c17\u307e\uff3a"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 4,
+              "results": 1,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+              "term": "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 1,
+              "pass": 5,
+              "results": 1,
+              "sha256": "00dc5c6eb5e5f9d80c2f3fc135c29a58ade50549d2f4c7b1fda341b5e4105140",
+              "term": "\u30fd"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 5,
+              "results": 1,
+              "sha256": "b6489638303715a2b788e94a3212493d5718ddf4c8da27068030f073497a2eda",
+              "term": "\u304a\u574a\u3063\u3061\u3083\u3093"
+            },
+            {
+              "elapsedMs": 1.3999999999941792,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 5,
+              "results": 1,
+              "sha256": "522ac8ca8189a81bed64ea25d8009e015d2ad8a2b08182db1934b1e058022610",
+              "term": "\u5403\u9006"
+            },
+            {
+              "elapsedMs": 1.2999999999883585,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 5,
+              "results": 1,
+              "sha256": "5aff9f4f6a6ed991aff2c0a92ae33863bca1fc8fe837cb25cf534dff88aa5e91",
+              "term": "\u3069\u3046\u3084\u3089"
+            },
+            {
+              "elapsedMs": 1.2000000000116415,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 5,
+              "results": 1,
+              "sha256": "26e2f5555b4a2deafe0cee7958127dcd570ea8930560c7ffaa76fff2233ecf2d",
+              "term": "\u920e\u722a"
+            },
+            {
+              "elapsedMs": 1.5,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 5,
+              "results": 1,
+              "sha256": "05d0bff6e23b09314ae8d2eb81d139fba9921a0c693ee87ee121bffdc6c1a08b",
+              "term": "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a"
+            },
+            {
+              "elapsedMs": 1.6000000000058208,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 5,
+              "results": 2,
+              "sha256": "1e1320cc0241ed4812d01d2eb08dea74874bc98075aa26c95372a2de62b6d849",
+              "term": "\u5c45\u6b8b\u308a\u624b\u7576\u3066"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 4,
+              "pass": 5,
+              "results": 2,
+              "sha256": "fa1687a34418c3490f6a4dee7979c6cfe532ce9383a7872f184c1d9723cc9c92",
+              "term": "\u6c34\ufa3a\u5c71\u6c34"
+            },
+            {
+              "elapsedMs": 1.2999999999883585,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 2,
+              "pass": 5,
+              "results": 2,
+              "sha256": "17e2ae8b3b4d7a3f96953767e4ebffa4980b5312e9d225764ccef385a60c9fc7",
+              "term": "\u91ce\u72ac"
+            },
+            {
+              "elapsedMs": 1.1999999999970896,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 7,
+              "pass": 5,
+              "results": 2,
+              "sha256": "72a61996937cad78cd2d25af8bb637430b1b0595839b907c7deacb6d18dea7e9",
+              "term": "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea"
+            },
+            {
+              "elapsedMs": 1.3000000000029104,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 3,
+              "pass": 5,
+              "results": 2,
+              "sha256": "fda6acc03cc614c19211cbea6b781bdaad603501ff0f0d7ad53d7677e0c02061",
+              "term": "\u6c17\u307e\uff3a"
+            },
+            {
+              "elapsedMs": 1.0999999999912689,
+              "hasExactHeadwordMatch": true,
+              "originalTextLength": 6,
+              "pass": 5,
+              "results": 1,
+              "sha256": "b694553509d8a0d47e261a34c45d6c7892e3dae6ff9ddffb3e9e68f408b7192e",
+              "term": "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+            }
+          ],
+          "timingBoundary": "settings-page termsFind RPC; first pass after restart, then five warm passes; excludes result hashing"
+        },
+        "media": {
+          "bytes": 1302012,
+          "files": 64,
+          "mode": "sample",
+          "sha256": "1276a73e9d4ff5fd8c6f4d7de9d1d87747575d98c9b45894ecf06ba2fcdea087",
+          "totalBytes": 4992155,
+          "totalFiles": 236
+        },
+        "outputDigestSha256": "754fc8c99cea76757778abe6b30f16a293c91bba3d45a68dcb9e3e9bac3ca215",
+        "probeCount": 12,
+        "probeTerms": [
+          "\u30fd",
+          "\u304a\u574a\u3063\u3061\u3083\u3093",
+          "\u5403\u9006",
+          "\u3069\u3046\u3084\u3089",
+          "\u920e\u722a",
+          "\u5fc3\u3053\u3053\u306b\u5728\u3089\u305a",
+          "\u5c45\u6b8b\u308a\u624b\u7576\u3066",
+          "\u6c34\ufa3a\u5c71\u6c34",
+          "\u91ce\u72ac",
+          "\u5beb\u771f\u52a0\u5de5\u30a2\u30d7\u30ea",
+          "\u6c17\u307e\uff3a",
+          "\uff2a\uff2d\uff44\uff49\uff43\uff54"
+        ],
+        "restart": {
+          "contentReadable": true,
+          "mediaFiles": 236,
+          "probeCount": 12,
+          "revision": "2026.10.03.0",
+          "termRows": 436555,
+          "title": "Jitendex.org [2026-10-03]"
+        },
+        "revision": "2026.10.03.0",
+        "storage": {
+          "bytes": 67466332,
+          "files": [
+            {
+              "bytes": 38386795,
+              "path": "manabitan-term-content.bin"
+            },
+            {
+              "bytes": 45,
+              "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr"
+            },
+            {
+              "bytes": 23590852,
+              "path": "manabitan-term-records/dict-31|Jitendex.org%20%5B2026-10-03%5Draw-block-v2%3Ajmdict.mbtr.mbti"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/03e51ygb234i"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/2sjg4glmpv4"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/3av9log9obd"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/i3q1as5qygr"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/knw86oo6nl"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/ub8kbep7kj"
+            },
+            {
+              "bytes": 4096,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/v40ubr8ll7i"
+            },
+            {
+              "bytes": 5459968,
+              "path": "manabitan/sqlite-sahpool-v1/.opaque/zposz9mme5"
+            }
+          ],
+          "kind": "OPFS logical file sizes after restart and verification"
+        },
+        "termRows": 436555,
+        "title": "Jitendex.org [2026-10-03]"
+      },
+      "workerImportMs": 1394.1000000000058
+    }
+  ],
+  "schemaVersion": 3,
+  "source": {
+    "dirty": true,
+    "gitSha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "sha256": {
+      "builds/manabitan-chrome-dev.zip": null,
+      "builds/manabitan-chrome.zip": "53677c6d86276edc2dc1e2630839f1c011d558fa25df457526d77d3b7a8d7e3a",
+      "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+      "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+      "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+      "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+      "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+      "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+      "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+      "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+      "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    }
+  },
+  "timing": {
+    "count": 1,
+    "maxMs": 1422.300000000003,
+    "medianMs": 1422.300000000003,
+    "minMs": 1422.300000000003,
+    "p95Ms": 1422.300000000003
+  },
+  "timingBoundary": "page file-input change event to post-UI import-complete event; browser monotonic clock",
+  "traceEnabled": false
+}

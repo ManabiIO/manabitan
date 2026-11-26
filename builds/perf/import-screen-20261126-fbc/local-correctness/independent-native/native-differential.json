@@ -1,0 +1,41 @@
+{
+  "sources": {
+    "baseline": {
+      "path": "/workspace/scratch/fbc366eaf75c/manabitan/ext/js/dictionary/wasm/term-bank-parser.c",
+      "sourceSha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+      "functionSha256": "62c99ef5219da8bb9e6a132b8519509157b41a135b117aec003df28b4c574c8e"
+    },
+    "candidate": {
+      "path": "/workspace/scratch/fbc366eaf75c/manabitan-jmdict/ext/js/dictionary/wasm/term-bank-parser.c",
+      "sourceSha256": "20b595bb858258ee6bbafda345ba5c2e80fa9016b235e9ad523870ec7acfba7f",
+      "functionSha256": "0208dc892de74dda52efb429b82f72c5f57bbbd0ca12f1ba2254009b3102d021"
+    }
+  },
+  "compile": [
+    "gcc",
+    "-std=c11",
+    "-O1",
+    "-g",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "/workspace/scratch/fbc366eaf75c/vndb-review/native-differential.c",
+    "-o",
+    "/workspace/scratch/fbc366eaf75c/vndb-review/native-differential"
+  ],
+  "sanitizerOptions": {
+    "ASAN_OPTIONS": "detect_leaks=0",
+    "reason": "LeakSanitizer cannot run under sandbox ptrace; ASan and UBSan bounds checks remain enabled"
+  },
+  "result": {
+    "allByteStringsThroughThreeBytes": 16843009,
+    "unicodeScalarCases": 2224128,
+    "randomByteStrings": 1000000,
+    "guardedTailCases": 5120,
+    "totalCases": 20072257,
+    "parity": true
+  },
+  "stderrLog": "/workspace/scratch/fbc366eaf75c/vndb-review/native-differential.log"
+}

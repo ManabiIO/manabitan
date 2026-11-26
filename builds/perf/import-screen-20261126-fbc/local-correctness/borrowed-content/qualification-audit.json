@@ -1,0 +1,56 @@
+{
+  "automationPhaseDurationMs": 1460.0561559999996,
+  "browserDurationMs": 1422.300000000003,
+  "incompatibilitiesFound": [],
+  "inputSha256": {
+    "current-jitendex-baseline/ordinary-1.json": "faa4047e78a1f66acc19e3a210adedd0d4bbaa967f72a3375d1c278b444a421e",
+    "current-jitendex-baseline/revalidation.json": "30f1b3fd98f0db6dec479e41d49006c1bbcee1aaef8e392e9c06d6fceb1da971",
+    "manabitan-qualification/dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "manabitan-qualification/dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "manabitan-qualification/dev/perf/import-screen-20261126-fbc.py": "b94ce429337656e093ca80da194263f35d0e4d5cac7ea104674ed5721d381a72",
+    "manabitan-qualification/test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "originalReportFailure": "",
+  "originalReportStatus": "success",
+  "parserContexts": {
+    "fastPathParser": {
+      "BankSpanCount": 219,
+      "ParallelGroupCount": 22,
+      "ParallelPipelineGroupsPerWorker": 3,
+      "ParallelWorkerCount": 3,
+      "SourceCompressedBytes": 33829614,
+      "SourceUncompressedBytes": 538927310
+    },
+    "parser": {
+      "BankSpanCount": 219,
+      "ParallelGroupCount": 22,
+      "ParallelPipelineGroupsPerWorker": 3,
+      "ParallelWorkerCount": 3,
+      "SourceCompressedBytes": 33829614,
+      "SourceUncompressedBytes": 538927310
+    }
+  },
+  "receiptFingerprints": {
+    "media": "6bdc45208d27fea9cbfe7ed2c514882596ed08c5304f922b38efb24a23dba3db",
+    "physical": "b5e226dd3d1982aeb1123eed2ae0ec23be452ee43a1d91f2b4906f1a9b245737",
+    "public": "5bb0b3eb0b6bbdfb1532277d993cc98baf41fe383565421a3ff247c156f60f96"
+  },
+  "scope": "Independent receipt replay and raw/schema inspection; no new browser observation and no timing qualification.",
+  "sourceProvenanceKeyCheck": "Exact ordered match with getSourceProvenance, including nullable chrome-dev ZIP.",
+  "sourceProvenanceKeys": [
+    "package-lock.json",
+    "test/perf/dictionaries.lock.json",
+    "dev/perf/benchmark-support.js",
+    "dev/perf/dictionary-fixtures.js",
+    "dev/perf/import-benchmark.js",
+    "test/chromium/import-flags-ab-benchmark.js",
+    "test/chromium/extension-two-dictionary-import.e2e.js",
+    "test/e2e/import-timing.js",
+    "ext/js/pages/settings/dictionary-import-controller.js",
+    "builds/manabitan-chrome-dev.zip",
+    "builds/manabitan-chrome.zip"
+  ],
+  "status": "passed",
+  "summaryLimitation": "The supplied original failed run has no summary.json. Full Screen.validate was not replayed. Summary key/type expectations were inspected against the native summary producer.",
+  "timingCheck": "Screen.validate uses browser completedAtMs minus startedAtMs; it does not substitute phase.durationMs."
+}
