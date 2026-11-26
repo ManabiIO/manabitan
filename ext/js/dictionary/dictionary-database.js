@@ -1643,8 +1643,10 @@ export class DictionaryDatabase {
                     this._importJournalRecoveryPending = true;
                     commitMs = safePerformance.now() - tCommitStart;
                     if (publication !== null) {
-                        this._termRecordGenerationByStorage.set(this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title), sessionId);
+                        const storageName = this._getSummaryTermRecordStorageName(publication.summary, publication.summary.title);
+                        this._termRecordGenerationByStorage.set(storageName, sessionId);
                         this._setGenerationMediaDescriptor(publication.summary.title, publication.summary.generationMedia);
+                        this._termRecordStore.publishExactLookupRoute?.(storageName);
                     }
                     try {
                         await this._importJournal.clear();
@@ -3210,7 +3212,23 @@ null;
                 dictionaryNames: requestedDictionaryNames,
             }));
         }
-        await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames);
+        const routeOwner = matchType === 'exact' ? this._termRecordStore.getExactLookupRouteOwner?.() ?? null : null;
+        const routedName = routeOwner === null ?
+void 0 :
+            requestedDictionaryNames.find((name) => this._getTermRecordStorageName(name) === routeOwner);
+        /** @type {import('./term-record-opfs-store.js').ExactLookupView|null} */
+        let view = null;
+        if (typeof routedName === 'undefined') {
+            await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames);
+        } else {
+            if (requestedDictionaryNames.length > 1) {
+                // Publish the other owners first so the scoped read checks
+                // every active dictionary for overlapping record IDs.
+                await this._ensureDirectTermIndexesLoaded(requestedDictionaryNames.filter((name) => name !== routedName));
+            }
+            view = await this._termRecordStore.prepareExactLookupView(this._getTermRecordStorageName(routedName), termList);
+            if (view === null) { await this._ensureDirectTermIndexesLoaded([routedName]); }
+        }
         this._assertTermLookupGeneration(generation);
         if (typeof observedAvailability !== 'undefined') {
             observedAvailability.push(...this.getDictionaryAvailability(requestedDictionaryNames));
@@ -3256,7 +3274,7 @@ null;
             for (let i = 0; i < termList.length; ++i) {
                 const term = termList[i];
                 const termPresenceKey = this._createTermExactPresenceCacheKey(dictionaryCacheKey, term);
-                const cachedPresence = this._termExactPresenceCache.get(termPresenceKey);
+                const cachedPresence = view === null ? this._termExactPresenceCache.get(termPresenceKey) : void 0;
                 if (cachedPresence === false) {
                     continue;
                 }
@@ -3283,24 +3301,30 @@ null;
                 const cacheableReadingIds = [];
                 const termPresenceKey = this._createTermExactPresenceCacheKey(dictionaryCacheKey, term);
                 const termMatchKey = this._createTermExactMatchCacheKey(dictionaryNames, term);
-                const cachedMatches = shouldReportDiagnostics ? void 0 : this._termExactMatchCache.get(termMatchKey);
+                const cachedMatches = shouldReportDiagnostics || view !== null ? void 0 : this._termExactMatchCache.get(termMatchKey);
                 if (typeof cachedMatches !== 'undefined') {
                     found = cachedMatches.expression.length > 0 || cachedMatches.reading.length > 0;
                     appendExactMatches(cachedMatches.expression, 'term', itemIndexes, visitedExpressionIds, cacheableExpressionIds);
                     appendExactMatches(cachedMatches.reading, 'reading', itemIndexes, visitedReadingIds, cacheableReadingIds);
                 } else {
                     const directFindForDictionaries = Reflect.get(this._termRecordStore, 'findTermIdMatchesForDictionaries');
-                    const dictionaryMatches = typeof directFindForDictionaries === 'function' ?
-                        /** @type {(dictionaryNames: string[], query: string) => Array<{expression: number[], reading: number[]}>} */ (
-                            directFindForDictionaries
-                        ).call(
-                            this._termRecordStore,
+                    const dictionaryMatches = view !== null ?
+                        this._termRecordStore.findTermIdMatchesForDictionaries(
                             dictionaryNames.map((name) => this._getTermRecordStorageName(name)),
                             term,
+                            view,
                         ) :
+                        (typeof directFindForDictionaries === 'function' ?
+                        /** @type {(dictionaryNames: string[], query: string) => Array<{expression: number[], reading: number[]}>} */ (
+                                directFindForDictionaries
+                            ).call(
+                                this._termRecordStore,
+                                dictionaryNames.map((name) => this._getTermRecordStorageName(name)),
+                                term,
+                            ) :
                         dictionaryNames.map(
                             (dictionaryName) => this._findDirectTermIdMatches(dictionaryName, term),
-                        );
+                        ));
                     for (let dictionaryIndex = 0; dictionaryIndex < dictionaryNames.length; ++dictionaryIndex) {
                         const dictionaryName = dictionaryNames[dictionaryIndex];
                         const expressionIds = dictionaryMatches[dictionaryIndex].expression;
@@ -3324,7 +3348,7 @@ null;
                         appendExactMatches(readingIds, 'reading', itemIndexes, visitedReadingIds, cacheableReadingIds);
                     }
                     if (
-                        found &&
+                        view === null && found &&
                         cacheableExpressionIds.length + cacheableReadingIds.length <= TERM_EXACT_MATCH_CACHE_MAX_IDS_PER_TERM
                     ) {
                         this._termExactMatchCache.set(termMatchKey, {
@@ -3333,11 +3357,11 @@ null;
                         });
                     }
                 }
-                this._setTermExactPresenceCached(termPresenceKey, found);
+                if (view === null) { this._setTermExactPresenceCached(termPresenceKey, found); }
             }
 
             if (idMatches.size === 0) {
-                this._assertTermLookupAvailability(generation, dictionaryNames);
+                this._assertTermLookupAvailability(generation, dictionaryNames, view);
                 if (shouldReportDiagnostics) {
                     reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                         stage: 'findTermsBulk-exact',
@@ -3354,8 +3378,8 @@ null;
                 return [];
             }
 
-            const rowsById = await this._fetchTermRowsByIds(idMatches.keys());
-            this._assertTermLookupAvailability(generation, dictionaryNames);
+            const rowsById = await this._fetchTermRowsByIds(idMatches.keys(), view);
+            this._assertTermLookupAvailability(generation, dictionaryNames, view);
             if (shouldReportDiagnostics) {
                 reportDiagnosticsLazy('dictionary-lookup-db-query', () => ({
                     stage: 'findTermsBulk-exact',
@@ -11263,10 +11287,14 @@ null :
      * a selected owner becomes unavailable while rows are being hydrated.
      * @param {number} generation
      * @param {string[]} dictionaryNames
+     * @param {import('./term-record-opfs-store.js').ExactLookupView|null} [view=null]
      * @throws {TermContentLookupReadError}
      */
-    _assertTermLookupAvailability(generation, dictionaryNames) {
+    _assertTermLookupAvailability(generation, dictionaryNames, view = null) {
         this._assertTermLookupGeneration(generation, dictionaryNames);
+        if (view !== null && !view.isCurrent()) {
+            throw new TermContentLookupReadError('temporarilyUnavailable', 'Dictionary lookup data changed while the lookup was running');
+        }
         const isDictionaryAvailable = Reflect.get(this._termRecordStore, 'isDictionaryAvailable');
         if (typeof isDictionaryAvailable !== 'function') { return; }
         for (const name of dictionaryNames) {
@@ -11309,9 +11337,10 @@ null :
 
     /**
      * @param {Iterable<number>} ids
+     * @param {import('./term-record-opfs-store.js').ExactLookupView|null} [view=null]
      * @returns {Promise<Map<number, import('dictionary-database').DatabaseTermEntryWithId>>}
      */
-    async _fetchTermRowsByIds(ids) {
+    async _fetchTermRowsByIds(ids, view = null) {
         const generation = this._directTermIndexGeneration;
         try {
             await this._termContentStore.ensureLoadedForRead();
@@ -11327,7 +11356,7 @@ null :
         /** @type {number[]} */
         const uncachedIds = [];
         for (const id of ids) {
-            const cached = this._getCachedTermRow(id);
+            const cached = view === null ? this._getCachedTermRow(id) : void 0;
             if (typeof cached !== 'undefined') {
                 rowsById.set(id, cached);
             } else {
@@ -11338,9 +11367,14 @@ null :
             return rowsById;
         }
         const getByIdsAsync = /** @type {unknown} */ (Reflect.get(this._termRecordStore, 'getByIdsAsync'));
-        const recordsById = typeof getByIdsAsync === 'function' ?
-            await /** @type {(ids: Iterable<number>) => Promise<Map<number, import('./term-record-opfs-store.js').TermRecord>>} */ (getByIdsAsync).call(this._termRecordStore, uncachedIds) :
-            this._termRecordStore.getByIds(uncachedIds);
+        let recordsById;
+        if (view !== null) {
+            recordsById = await this._termRecordStore.getByIdsAsync(uncachedIds, view);
+        } else if (typeof getByIdsAsync === 'function') {
+            recordsById = await /** @type {(ids: Iterable<number>) => Promise<Map<number, import('./term-record-opfs-store.js').TermRecord>>} */ (getByIdsAsync).call(this._termRecordStore, uncachedIds);
+        } else {
+            recordsById = this._termRecordStore.getByIds(uncachedIds);
+        }
         this._assertTermLookupGeneration(generation);
         const warmSlices = /** @type {unknown} */ (Reflect.get(this._termContentStore, 'warmSlices'));
         if (typeof warmSlices === 'function') {
@@ -11389,7 +11423,7 @@ null :
                         if (failed) { return; }
                         this._assertTermLookupGeneration(generation, row.dictionary);
                         rowsById.set(id, row);
-                        this._setCachedTermRow(id, row);
+                        if (view === null) { this._setCachedTermRow(id, row); }
                     }
                 }
             } catch (error) {

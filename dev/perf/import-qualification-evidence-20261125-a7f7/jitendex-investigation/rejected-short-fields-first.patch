@@ -1,0 +1,99 @@
+diff --git a/dev/data/dictionary-wasm/manifest.json b/dev/data/dictionary-wasm/manifest.json
+index 2566b8ef2..e0857f0cc 100644
+--- a/dev/data/dictionary-wasm/manifest.json
++++ b/dev/data/dictionary-wasm/manifest.json
+@@ -4,7 +4,7 @@
+         "compilerVersion": "21.1.8",
+         "linkerVersion": "21.1.8"
+     },
+-    "sourceDigest": "51253be7b58d1481097e0a27a1f69183c6dd763dc22bc32de3238b71982efa20",
++    "sourceDigest": "9c53756e8171c5a14f7d44a7e6da4563ed9ff5b5274b78d41b505a26c21951a8",
+     "sourceFileCount": 14,
+     "targets": [
+         {
+@@ -58,7 +58,7 @@
+                 "-Wl,--export=encode_term_content_token_binary_dedup",
+                 "-Wl,--strip-all"
+             ],
+-            "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
++            "sha256": "eda9946ba5209ef14c26d331a3d09f121c376433017b3ea126b6688603133004"
+         }
+     ]
+ }
+diff --git a/dev/data/dictionary-wasm/term-bank-parser.wasm b/dev/data/dictionary-wasm/term-bank-parser.wasm
+index f5ff40c4353962128b8245ddfdb8db0c00b433f9..cce646d87de88ecc6f29d00b318e8972728aaa3a 100644
+GIT binary patch
+delta 1565
+zcmbW1O=ule6vywm_s++=GdFK66+&srnK6y8#nzI<x)L%A`wU5qp-{n1)U<;0T2lIf
+zEu~H<BDgHGQ_(^+nwMH5gD%{;EtGB)QP6@LH!WRNM0n!4_r5$MLKj)QIdk8cIrsPf
+zpL^!Rd*aSLvB4po7-ztR^q3z6VZ#R=sxXX{lCd7rp7!H9gBt)?-Qg`rt3UbEPiDi5
+zOQ+Agws?Nw{K>PY7fvlLbuOG)=$yQCjvWYr#Q^I4pT&6nqL={qs=g|VJrwSz&y2$7
+z)e}d?VXZ!XWD%fSecQeS-Fotc=K$90v(v9|Sg&r+3_rfIyu8ew*9;kQj9Wa+RMM^f
+zni-+|uGtwX^TzCcxKUl3op5i!O7-jPiLC41g9rr<9p+DAjOs9tsSIG8$3?PUpE!Dd
+z|6^<Bxn^Yl=O~h!_3IaJC*|KDM9JUgmvfeSCRt>D3WOkvEJy{P;!}ctDA6nOkr~al
+zt^-=<482YUD5o{gfj02+iv^Vu`xr|@1QQwvd00?cVS>O0hVz=mGKxwug+6V1fH4eQ
+zY-^DNJp?(iP~AB#V-`iUPKuPcOd!r4qrwV>jV6n30}6r|UNsENB$1nIZyqC5z4_it
+zy<_BZ6p>y*uZjBLdmrq9kLz2j*ZHn~69A2SV=XT8632)+`J{Shtp%S}U#z_atJU7_
+z%XGcceHK2ezV04{)mp4y3(Bj32*^uOQf*0|L5sIC4>^T4HI|mUGv6$Cn<as@_;4nR
+zG%(wldorg%?<(uKkIFetS$arPpnN#!h|RkWq>{Rz%1)-xpVK1dB-M05p)~eK7@81c
+zXzUMBnjq<*MAQW`q8U*a8nm73f{kr0sRng`N=_TU4B^f!Fwi^Onmhc&B0Kz~%yf|s
+z4fumC{B~Q0l-C1(o8QWB@Pq&2TkZ(8#W${^Htc#+iIWfqkx@_%^(FMBv^81eBm@Hq
+zlTN~<(PukwXp4kH+g5<8la<@WZ$y!qD*PWm4EX0XH$z~0#ivlv3AVFl&&{Y4GFqaS
+zd}O9Pm9cLIo$PK>Aj5nzj0Phl`zUBCOY@<up+3!%9g}ANh9<>#f4I5nPfYC58F*yP
+zavMd3Eoxh8PkECLClSg`UI&VsY{c(q39@M+^}mpTnQL;W{_UH072K@f{O-pc^xe(B
+l|6S4-ci&IfC2Z8Ueo-7Ysvqu-z{bkMy9s<*|M6hV{|DI<DSZF{
+
+delta 1467
+zcmbtUT}TvB6u#%)ncX{owS~e$%HA=tQHuPfr(g%lO?Jg3NQl5<lVDd-(nwz%A?l&G
+znzxV;&D350V4xm)>NzSOg6JXgtsX3TjacZ+PHRc)qWCiB%*;LCx!-rbd*5xb=`FTS
+zLA16IpiGiUC>-WW2q;%M*Hl%~jYEcPguLUh3=nfSs0G6PNl%|Jqv_$Hk?ZNP{;`2u
+zL;Zup!`a&-{n>$uQF4+4(E-%2A6bjn!`cAWy}MGT7Q=V5qaGIA`p#BZ^!hr}088%6
+z!~`sP9T(05<h;?YD-?3>+hnwQc4}&hoHvLdf(qTDyiScQxxbPz{C_N!M3|eYCdj*w
+zQf)y6%(|abHxTh$w?L?Y?r%*;7JZPz8e#yVu*iy+9)A<@njbu_g(u$Yg&B%fgSjZo
+zx%YAwJat!dcVOOa$oJuMGJgi1xzF?6Fz-pr55vv|XCa49f@2d?qHzHhwd!O+F(eE^
+z<M@dM8@6bD#tivwi&+>8n2=4*{59N;B@JQ|!LlY7A;B`HBEo)PG+taG3!bsV!6Kfm
+z!_po@)*Y&0?RW-@ltw~KRWLtjg4rBvh2jTAXhQ8Zh%Rdyix*)}5mM}eF=0r!8ZrSS
+z(}|`9ot0o8IySiGH(<8#A$2>FDG;nzFme2>&@1%dOYl~>Sh$2!(kUV#*_uF)nuGxY
+z2WQdfwhox>Lx=yBFdYdsE6KsI<H6OCx7Fw}d@YbcRluMsVX%Nfq{P6Xm>!J6o*4M<
+zDmPPy=)C+;(L8^Kx=o`!pwXT%<bXzVi3Y`NA1wYF(%Iq2E`!>DN2{D8cVj?wWfuZA
+z6giii$;&y@`PZ7o7CY=&$(^CfKHnSI<&xK>%4j=JO@(b~n%~%~esN!g6>s|0hog8c
+lj=ldP;e~kh<BSArUg48UVa?^6F<6_kHY2d=HU4M_{RT*P7x@4H
+
+diff --git a/ext/js/dictionary/wasm/term-bank-parser.c b/ext/js/dictionary/wasm/term-bank-parser.c
+index dcd89b567..742c121df 100644
+--- a/ext/js/dictionary/wasm/term-bank-parser.c
++++ b/ext/js/dictionary/wasm/term-bank-parser.c
+@@ -2315,15 +2315,10 @@ static int raw_term_content_tokens_equal(
+     const TermRowMeta* second,
+     int glossary_equal
+ ) {
++    // Same-length spelling-variant tags can pass the quick signature. Reject
++    // those short fields before scanning a long structured glossary again.
+     return (
+         first->glossary_length == second->glossary_length &&
+-        (glossary_equal || content_bytes_equal_between(
+-            src,
+-            first->glossary_start,
+-            src,
+-            second->glossary_start,
+-            first->glossary_length
+-        )) &&
+         first->rules_length == second->rules_length &&
+         content_bytes_equal_between(
+             src,
+@@ -2347,7 +2342,14 @@ static int raw_term_content_tokens_equal(
+             src,
+             second->term_tags_start,
+             first->term_tags_length
+-        )
++        ) &&
++        (glossary_equal || content_bytes_equal_between(
++            src,
++            first->glossary_start,
++            src,
++            second->glossary_start,
++            first->glossary_length
++        ))
+     );
+ }
+ 

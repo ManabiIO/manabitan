@@ -232,6 +232,236 @@ For every flag, return an accept/hold/reject decision based on its actual execut
 
 Update this same Markdown with exact source/build identities, completed commands, immutable evidence locations, quantitative results with boundaries, and remaining lanes. Leave all defaults false until those gates pass.
 
+## 2026-11-25: numeric scalar candidate (#899), correctness evidence
+
+**Hold.** The frozen [numeric scalar parser candidate, PR #899](https://github.com/ManabiIO/manabitan/pull/899), matched the baseline across every locked Jitendex and VNDB term bank at the parser and prepared-lookup boundary. These are correctness-only observations; no timings were recorded. The completed browser study below separately records the failed target speed gate. This evidence follow-up changes only the shared handoff and archived observations.
+
+### Frozen source and fixture identities
+
+| Source                        | Commit                                     | Tree                                       |
+| ----------------------------- | ------------------------------------------ | ------------------------------------------ |
+| Baseline `develop`            | `7d1643e6147a10cb2165e9744cf0e63b59e46632` | `99d23f16e973c7ae9feba77ca3643d1c27dfb93d` |
+| Executed local numeric source | `cc750d34d7672a25e8adb8660ab71cdfa6ba66a6` | `f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5` |
+| Published numeric source #899 | `6d3d06408280e0f5d4437186c07b1d93429e2180` | `f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5` |
+
+Node was `v22.22.0`. The source-bound native manifests pin Clang and LLD `21.1.8`; each arm's loaded module was checked against its own manifest and source identity before parsing. Source files, the module, the dictionary lock and the executing runner were checked again at completion. Exact C, JavaScript and manifest hashes are retained in the [machine-readable evidence index](../../builds/perf/import-numeric-20261125-ef009/evidence.json) and the original reports.
+
+| Native identity                       | Baseline                                                           | Candidate                                                          |
+| ------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `term-bank-parser.wasm` SHA-256       | `913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c` | `b91dc90f9f42fe09f922d62cfc9f7788246d4c53c74d5373db4c671a174c5e0d` |
+| Complete 14-file native source digest | `51253be7b58d1481097e0a27a1f69183c6dd763dc22bc32de3238b71982efa20` | `1eee8c0e70d8850796b705e72448d2016e26fdedf2f702746015781a3cbfd437` |
+
+The dictionary-lock SHA-256 is `60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89`. The complete archive size and hash were verified before parsing. These are the current locked corpus counts for this observation; the older counts earlier in this handoff describe their historical round.
+
+| Dictionary | Archive bytes | Archive SHA-256                                                    |
+| ---------- | ------------: | ------------------------------------------------------------------ |
+| Jitendex   |    38,831,822 | `e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356` |
+| VNDB       |   291,705,969 | `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` |
+
+### Complete-corpus observations and boundary
+
+| Dictionary | Consecutive banks | Groups | Term rows | Decoded source bytes | Prepared lookup bytes | Result           |
+| ---------- | ----------------: | -----: | --------: | -------------------: | --------------------: | ---------------- |
+| Jitendex   |             1–219 |     22 |   436,555 |          538,927,310 |            20,078,148 | All groups equal |
+| VNDB       |             1–665 |     84 | 6,648,310 |        4,267,992,967 |           353,523,608 | All groups equal |
+
+The runner streamed ZIP entries in bounded groups, at most 64 MiB of decoded source and ten Jitendex or eight VNDB banks per group. These fixed component groups do not assert that production admission creates the same partitions. Both arms used the same parser options, including strict glossary validation, content hashes, token content, media hints and prepared lookup indexes; the exact options are in every report. Each source bank's decoded hash and immutability were checked.
+
+SHA-256 covered all emitted prepared lookup bytes and compact plans, reading-equality flags, scores, sequences, per-row token-content bytes and hashes, and the projected media-row fields and typed byte arrays. Row, lookup-byte and projected-media-row counts were also compared directly. The reports retain digests rather than the complete emitted arrays. A separate post-run check verified every expected bank name in order, the exact locked row totals, group source-byte totals and the recomputed aggregate output digest.
+
+| Dictionary | Aggregate output digest                                            | Fused attempts / fallbacks, each arm | Projected media rows, each arm |
+| ---------- | ------------------------------------------------------------------ | -----------------------------------: | -----------------------------: |
+| Jitendex   | `1d18ee585ea4f2e3ac9720d6ec0f578390408d9ccf35dffae0fb3e84e83d6e3f` |                               22 / 0 |                            339 |
+| VNDB       | `05942aee301c1f8e7bb434c701132d1856353a8e692d083b3163cb32396c494a` |                              83 / 24 |                        146,645 |
+
+Projected media rows are term rows, not unique image counts. The recorded maximum individual parser WASM heaps matched (89,063,424 bytes for Jitendex and 88,801,280 bytes for VNDB), but those diagnostics do not measure concurrent browser/process-tree memory. This comparison excludes worker IPC, compression, persistence/OPFS, browser restart and image-payload readback. It establishes no complete-import speedup or whole-process memory non-regression, and does not replace browser functionality, lookup, storage or reliability gates.
+
+### VNDB interruption, resume and runner provenance gap
+
+The first VNDB attempt exhausted the shared filesystem while writing its report checkpoint. The exact truncated 36,864-byte artifact is preserved, SHA-256 `a21cdb5902c80df8f53d92f1558f4306cb860f6377e7ef1fe1b5d83c17235cc4`. Recovery accepted only the fifteen fully recorded matching groups: banks 1–120, totaling 1,200,000 rows. Their complete objects were compared with the preserved partial artifact after the resumed pass. The incomplete group was processed again; the resume completed banks 121–665, totaling 5,448,310 rows, then required all 665 consecutive banks and all 6,648,310 locked rows before setting `complete: true`.
+
+Resume support added atomic checkpoint writes, identity checks, per-group runner provenance and final consecutive-coverage checks. It required the same baseline/candidate source identities, modules, archive and lock hashes, parser options and grouping bounds. The reports retain both attempts rather than presenting an uninterrupted run.
+
+| Runner use                                           | SHA-256                                                            | Source preservation                                                                                                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| All Jitendex groups and the first 15 VNDB groups     | `63999e7f071c99b8ca4efdf5344b4e0dc38fa8c8126e9e0cec7461b363f1ec0b` | Hash recorded by the original reports; original runner source unavailable                                                                                           |
+| Remaining 69 VNDB groups and final resume validation | `2fa14d162d57557000516cb00635889781a975d3dbd364bc58591e01683777b5` | Exact source archived as [numeric-corpus-parity-resume-runner.mjs.txt](../../builds/perf/import-numeric-20261125-ef009/numeric-corpus-parity-resume-runner.mjs.txt) |
+
+The original runner source was overwritten when resume support was added. A search limited to `/workspace/scratch/ef009a302ea8`, including ignored numeric/parity files but excluding dependencies and Git internals, found only the resume runner and its exact copy. No source file is supplied under the original hash. This is a provenance limitation for all Jitendex observations and the recovered VNDB groups. The archived resume source retains its original absolute worktree paths and relative imports; it is execution evidence rather than a relocatable CLI. Changing those paths would create a new runner identity.
+
+### Durable artifacts and review
+
+The [evidence index](../../builds/perf/import-numeric-20261125-ef009/evidence.json) maps every report and log to a byte-preserving gzip file under `builds/perf/import-numeric-20261125-ef009/raw/`, with both compressed and original byte sizes and SHA-256 values. It includes the failed attempt, truncated checkpoint and resume log. The complete raw report SHA-256 values are `748b175373a6861aa49206d04e748aa94b65d44a56dec524f5a88f1d962ae191` for Jitendex and `10131ec18947e822fc9b71add6c21ee118c1ec8cf7d7da2c0d1cd40d446b59cf` for VNDB. No decoded corpus or complete emitted arrays are committed.
+
+Verify the archived bytes from the repository root without running an import:
+
+```sh
+python3 - <<'PY'
+import gzip
+import hashlib
+import json
+from pathlib import Path
+
+root = Path('builds/perf/import-numeric-20261125-ef009')
+evidence = json.loads((root / 'evidence.json').read_text())
+for artifact in evidence['artifacts'].values():
+    packed = (root / artifact['path']).read_bytes()
+    assert len(packed) == artifact['compressedBytes']
+    assert hashlib.sha256(packed).hexdigest() == artifact['compressedSha256']
+    raw = gzip.decompress(packed)
+    assert len(raw) == artifact['originalBytes']
+    assert hashlib.sha256(raw).hexdigest() == artifact['originalSha256']
+runner = evidence['runner']
+source = (root / runner['preservedPath']).read_bytes()
+assert hashlib.sha256(source).hexdigest() == runner['preservedSha256']
+print('All archived artifact and preserved-runner hashes match')
+PY
+```
+
+The decision remains **hold**. These observations add full locked-corpus parser/lookup correctness coverage for the numeric change. Browser timing and other promotion gates are separate; the completed browser study below records their relevant results. Prior exploratory component timings provide no qualified speed claim here.
+
+### Local JMdict component observations
+
+The earlier JMdict observations are preserved separately in the [exploratory evidence index](../../builds/perf/import-numeric-20261125-ef009/exploratory-component-evidence.json). The clean parser/lookup run contains six observations over all 528,299 locked rows; every output digest is `824881eada22d2d2f9ac8feddb66322e2bab124fe6af634ef5ded7c303c40b9b`. Its existing repository runner is retained at baseline `7d1643e6147a10cb2165e9744cf0e63b59e46632`, with SHA-256 `3d1a1fabd0b7827f279ec7d39d88c96ab830bc214a40cdbdee35773892a4119a`, matching every clean observation. The archive is 15,645,766 bytes with SHA-256 `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f`.
+
+| Component observation         | Pairs | Median wall change | Median process CPU change | Interpretation                                   |
+| ----------------------------- | ----: | -----------------: | ------------------------: | ------------------------------------------------ |
+| Parser plus lookup, clean run |     3 |             +3.17% |              Not recorded | Inconclusive; one of three faster pairs          |
+| Native fused parser only      |     8 |            −26.10% |                   −16.28% | Exploratory; contradicted by large control drift |
+| Native identical-code control |     8 |            −11.94% |                    −8.54% | Demonstrates shared-host variability             |
+
+Both native cohorts contain sixteen observations over all 528,299 rows, with matching outputs in each cohort. The first parser/lookup screen overlapped a baseline unit-test run; its timing is excluded and the report and log remain archived with that reason. All nine original reports, logs and the current native runner source are preserved byte-for-byte as gzip artifacts. The native reports did not record a contemporaneous runner hash; the preserved current runner is identified separately and retains its original absolute paths. These observations exclude complete browser imports and do not justify promotion. The browser study below supersedes their timing interpretation.
+
+## 2026-11-25: complete-import screen for numeric fields, metadata keys and image projection
+
+**Decision: hold all three runtime candidates.** All three designated target cells missed the prospective material-performance gate. All six non-target cells passed their non-regression screens. The successful workflow conclusion records complete acquisition and correctness; it does not mean that a performance gate passed. No runtime default is promoted by this evidence update.
+
+### Frozen candidates and acquisition
+
+| Candidate                | Source PR                                              | Frozen commit                              | Frozen tree                                |
+| ------------------------ | ------------------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
+| Integer fields           | [#899](https://github.com/ManabiIO/manabitan/pull/899) | `6d3d06408280e0f5d4437186c07b1d93429e2180` | `f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5` |
+| Structured metadata keys | [#895](https://github.com/ManabiIO/manabitan/pull/895) | `36fd7a27b7aa631fc8aa20bd70a9f125850499cb` | `f0d5739c8344b4d14d6b51e0e740e0908e444400` |
+| Single-image projection  | [#905](https://github.com/ManabiIO/manabitan/pull/905) | `2af6593a6e3631cbddff736bf2280f0fd40c2a69` | `02f97bf86278a702ab14236323bbd5eaaa71ac90` |
+
+All candidates compare against `develop` commit `7d1643e6147a10cb2165e9744cf0e63b59e46632`, tree `99d23f16e973c7ae9feba77ca3643d1c27dfb93d`. The later #905 CI retry `f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9` is an empty commit with the same frozen product tree. The implementation originally proposed in #893 was retired in favor of the concurrent #895 implementation; [#893](https://github.com/ManabiIO/manabitan/pull/893) now contains only additional regression tests stacked on #895. Earlier measurements of the retired implementation are not evidence for #895.
+
+[Temporary measurement PR #911](https://github.com/ManabiIO/manabitan/pull/911) acquired all nine cells in [workflow run 45644488882](https://github.com/ManabiIO/manabitan/actions/runs/45644488882), attempt 1, at workflow commit `863bda45046ba0bf0c778008d0fb30e65b7f0669`, tree `3418f3b5f3daffed97b10dd19cd6a2070d51d83f`. Each candidate ran against each locked dictionary on a separately assigned GitHub runner. Each cell used three warmups, all six ABC permutation blocks (18 timed imports), and two exhaustive A/B media validations: 23 fresh-profile imports per cell. C used the exact A release ZIP. No browser observation was excluded, replaced or rerun.
+
+The timer is the existing browser-monotonic interval from the file-input change through visible import completion. Original reports confirm Node `v22.22.0`, Chromium `153.0.8010.12`, Chrome release packages, production defaults, and disabled tracing, profiling, screenshots and process sampling. Every observation required source/package/harness/fixture identity, original import validation, public lookup and restart verification. Exact protocol, runner and workflow bytes are archived with the observations.
+
+The prospective target requirement was at least a 5% median paired reduction against both A and C, with at least five of six faster pairs against each. Non-target medians could regress by no more than 3% against either control. A passing single-host screen would still require independent replication before a qualified performance claim. No candidate reached that next stage.
+
+### All nine results
+
+Negative percentages mean lower import duration. Every row uses all six predetermined timed cohorts.
+
+| Candidate        | Dictionary | Role       | Median B/A | Median B/C | Faster B/A | Faster B/C | Gate |
+| ---------------- | ---------- | ---------- | ---------: | ---------: | ---------: | ---------: | ---- |
+| Integer fields   | JMdict     | Target     |    −1.940% |    −1.228% |        4/6 |        4/6 | Fail |
+| Integer fields   | Jitendex   | Non-target |    −2.077% |    −0.987% |        5/6 |        5/6 | Pass |
+| Integer fields   | VNDB       | Non-target |    +0.454% |    −0.158% |        2/6 |        3/6 | Pass |
+| Metadata keys    | JMdict     | Non-target |    −3.895% |    −0.153% |        6/6 |        3/6 | Pass |
+| Metadata keys    | Jitendex   | Target     |    +0.015% |    +0.322% |        3/6 |        3/6 | Fail |
+| Metadata keys    | VNDB       | Non-target |    +1.844% |    +1.536% |        2/6 |        1/6 | Pass |
+| Image projection | JMdict     | Non-target |    +0.448% |    −0.349% |        2/6 |        3/6 | Pass |
+| Image projection | Jitendex   | Non-target |    −0.380% |    +0.060% |        3/6 |        3/6 | Pass |
+| Image projection | VNDB       | Target     |    −0.805% |    −1.479% |        4/6 |        4/6 | Fail |
+
+These observations do not establish a material complete-import speedup. Identical-code controls varied, and there is only one assigned runner per candidate/dictionary cell. The archive retains every paired ratio, control variation, equal-work total and descriptive uncertainty result; it does not select favorable subsets or transfer a component reduction to the complete import.
+
+### Correctness, stored bytes and package size
+
+Independent recomputation verified all 207 successful imports and semantic proofs, including 162 timed observations, 14,904 public lookup observations and 18 exhaustive media validations. Each import includes twelve probe terms across six passes. A/B results, restart checks, media counts, bytes and digests match. Each exhaustive VNDB validation reads 146,570 images totaling 188,131,284 payload bytes; the shared media digest is `ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb`.
+
+| Dictionary | Observed logical OPFS bytes after restart and verification |
+| ---------- | ---------------------------------------------------------: |
+| JMdict     |                            43,520,477 in every observation |
+| Jitendex   |                            67,466,332 in every observation |
+| VNDB       |                                    609,553,611–609,561,803 |
+
+The only VNDB variation is in metadata-keys `cohort-1-B` and `cohort-1-C`: both add 8,192 bytes in one opaque SQLite pool file (536,576 instead of 528,384 bytes). The identical-source C control shares that increase. Content, term/index and media archive lengths are unchanged. This establishes the reported logical-size range, not complete persisted-byte equality or physical disk allocation.
+
+The baseline release ZIP is 16,790,986 bytes. Numeric fields add 607 bytes, metadata keys add 486 bytes, and image projection adds 2,865 bytes. The native modules grow by 340 and 345 bytes respectively. Package-member hashes for each frozen source match across its dictionary hosts; only the declared two production members differ between each candidate and its baseline.
+
+The raw reports mark `source.dirty: true`; preparation creates an untracked dependency symlink. The audit uses explicit source, native, harness and package hashes and does not claim clean worktrees. Nine distinct assigned runner IDs were verified, but the timing study did not record boot IDs or physical-host identities. The separate memory study retains its own host identities and does not supply latency evidence.
+
+### Evidence, verification and scaffold repair
+
+The [machine-readable aggregate](../../builds/perf/import-screen-20261125-ef009/evidence.json) is the entry point. It retains all compact observations and points to nine compressed full bundles containing 1,818 original reports, host snapshots, receipts, schedules and logs. Original GitHub artifact ZIP digests and all eighteen nested release ZIP hashes were verified. The large release ZIP payloads are omitted from the durable bundles after verification; their source identities, member maps and hashes remain archived, and the original CI artifacts retain the payloads.
+
+The [independent audit](../../builds/perf/import-screen-20261125-ef009/independent-audit.json) has SHA-256 `3c256f93a30addf7815db848a9204a0c9286c6d85c54bb025cbe131b44c5fc69`. Its [exact auditor source](../../builds/perf/import-screen-20261125-ef009/independent-audit.py.txt) has SHA-256 `7259c6f64a1dfb6193df5cecc0f6f0baf8a7172e4c06ed36013c63ecfe0ecf6a`. It independently checked archived member bytes, observation counts, raw browser configuration, source/package/harness identities, semantic evidence, paired arithmetic, gates, stored sizes and cross-cell consistency. Preserve the archived bytes when inspecting them; do not rewrite original observations to match a new script or schema.
+
+The temporary scaffold's general CI found one bookkeeping failure: its new protocol JSON was absent from `test/data/json.json`. The other 154 JSON tests passed. A one-entry registration repair passed the exact local `npm run test:json` gate (155 tests) without changing any executed protocol, runner or workflow bytes. The original failure and passing remediation logs are retained. This repair does not replace the completed observations or turn the failed performance gates into passes.
+
+All fifteen enabled source-CI jobs passed for [numeric fields](https://github.com/ManabiIO/manabitan/actions/runs/45641722087), [image projection](https://github.com/ManabiIO/manabitan/actions/runs/45644919029), the [metadata-key implementation](https://github.com/ManabiIO/manabitan/actions/runs/45640793230), and its [test-only follow-up](https://github.com/ManabiIO/manabitan/actions/runs/45642650714). These include full unit tests, Chromium and Firefox extension E2E, Anki deduplication, pinned build, lint and types. Their four intentionally skipped optional jobs are not counted as passes. Source correctness CI and failed performance promotion gates are reported separately.
+
+### VNDB image projection: component evidence and its boundary
+
+The [image-projection evidence index](../../builds/perf/import-vndb-20261125-ef009/evidence-index.json) retains the complete local component report, executed runner, consistency audit, logs and source CI receipt. It compares synchronous owned chunk copying from the same native-validated borrowed input. All 6,648,310 rows across 665 term banks and 170 production-sized groups produced equal complete nested chunk outputs before the next native heap reuse and again after `structuredClone`. The native producer was unchanged; separate regression tests exercise actual compressed worker transport and reuse.
+
+All 146,725 projected media rows took the new path with zero projection fallbacks on this pinned corpus, preserving 146,570 distinct image paths. The cumulative glossary decoder and corresponding snapshot input fell from 84,398,732 to 2,684,628 bytes: 81,714,104 bytes, or 96.82%, avoided. This counts work and copying over the corpus. It is not a peak-memory measurement or a browser latency result.
+
+The local component schedule retained three ABC warmups and eighteen timed observations in all six permutations. Its paired medians were −32.59% against A and −29.02% against C, but one candidate pair was +59.05% and an identical-code control pair was +157.73%. All tails remain in the report. The shared host had competing work; this exploratory result cannot qualify a complete-import improvement. The frozen browser VNDB target subsequently measured only −0.805% / −1.479% and failed its prospective gate.
+
+The executed projector source has SHA-256 `e0ba54af2c7595e72d5840ff6b32759b90470d27fe278c1c9620507d09dad658` and is byte-identical to the published candidate. The component parser hash is `d57f716ab26ea3e5c032f534ec2b0ee607510511f3e9ed8ec93e7377883c508d`; the final parser hash is `23f99cd19db8b4d562bf57e73a9b3bbe43e55f22df8fa33b4055d219f0e1569d`. Reversing exactly one leading-indentation edit reproduces the measured hash. That distinction is preserved rather than assigning final-source identity to the earlier component run. The archived runner is exact execution evidence with its original absolute paths.
+
+Local validation passed 276 tests across five focused suites (94 new cases), changed-file ESLint, main/test types and seven target dry builds. The local full unit run was interrupted with exit 130 and is retained as incomplete. The later complete source CI passed all fifteen enabled jobs. Correctness and copy-volume results support retaining the candidate for review; the failed whole-import performance gate keeps it on hold.
+
+## 2026-11-25: separate image-projection memory qualification
+
+**Decision: hold; the complete six-cell memory requirement is unqualified.** Five cells passed the original coverage and memory limits. VNDB host 1 failed coverage in candidate observation B1. All acquisition and functional checks completed, but that missing qualified observation prevents a complete memory non-regression claim.
+
+[Temporary memory PR #916](https://github.com/ManabiIO/manabitan/pull/916) acquired the study in [run 45646484626](https://github.com/ManabiIO/manabitan/actions/runs/45646484626), attempt 1, at workflow commit `57590f5eaee359d721ba9d5d8bde28728a8d172e`, tree `1be0798152baa751fd22a4bbd8f4b6a48c21be08`. It compares the exact frozen #905 image-projection tree with baseline `7d1643e6147a10cb2165e9744cf0e63b59e46632`. Protocol SHA-256 is `0880cf10e13635bddd64a4d0848db13c4f46b06684e92f826a643086d213bc42`.
+
+Each dictionary used two separate hosted instances, with four fresh-profile imports per instance in fixed ABBA and BAAB order. The original Chromium-process-tree observer, auditor and their tests remain byte-identical to the declared earlier measurement source. Sampling retains 25 ms waits between scans, at least five fully covered import scans, and at most 250 ms covered gaps and import-window brackets. Both sampled PSS and private-memory maxima must have a median paired increase no greater than 5% and no individual-pair increase greater than 10%, with every observation qualified. No observation was rerun, replaced or judged under revised limits.
+
+Identical test-only overlays mark the original automation import window and label browser reports, benchmark summaries and memory receipts as non-authoritative for timing. Exact original and applied harness hashes are retained. Product packages, their own native modules and source identities are unchanged by instrumentation. Startup, subsequent semantic/media readback and restart are excluded from the sampled maxima. These are non-atomic sampled process-tree maxima, not exact peaks or complete-import latency observations.
+
+### Complete six-cell result
+
+Negative percentages indicate smaller sampled maxima. Both values in each metric column are the median paired change and the largest individual paired change.
+
+| Dictionary / host | PSS median / worst pair | Private median / worst pair | Result           |
+| ----------------- | ----------------------: | --------------------------: | ---------------- |
+| JMdict 1          |       −1.406% / −0.367% |           −2.210% / −0.937% | Pass             |
+| JMdict 2          |       +0.251% / +0.905% |           +0.007% / +0.601% | Pass             |
+| Jitendex 1        |       −2.409% / −1.829% |           −3.056% / −2.391% | Pass             |
+| Jitendex 2        |       −0.196% / +0.352% |           −0.409% / +0.630% | Pass             |
+| VNDB 1            |             Unqualified |                 Unqualified | Coverage failure |
+| VNDB 2            |       +0.843% / +0.929% |           +0.926% / +1.104% | Pass             |
+
+VNDB host 1 B1 has a maximum covered-scan gap of **254.998740 ms**, exceeding the frozen **250 ms** limit. Both audits recomputed it from the original raw scans and import markers. Its qualified PSS/private maxima, pair-1 changes and cell aggregates correctly remain null. The remaining qualified pair cannot replace it. This coverage failure does not establish a memory regression or a memory saving for the unavailable comparison.
+
+All 24 imports exited successfully and passed their semantic checks, including 1,728 public lookup observations, restart validation and complete media readback. The audits verified all 2,399 raw scans, process identities and read sums, clocks, brackets, coverage, maxima, pair arithmetic, source/package/observer lineage, identical instrumentation and cross-host semantics. There are zero evidence discrepancies. Twenty-three observations qualify for memory maxima; the full study requires twenty-four.
+
+Six distinct boot IDs and runner assignments establish separate hosted instances. Hostname labels are reused and do not establish physical-hardware independence. Both A and B package-member maps match across all six cells and match the corresponding timing-study releases. The instrumentation does not supply latency evidence for the failed complete-import speed gate.
+
+### Evidence and maintenance
+
+The [final decision summary](../../builds/perf/import-vndb-20261125-ef009/memory/decision-summary.json) links all six exact compact summaries, six full raw bundles, marker files, original receipts and the failed VNDB job log. The [unchanged-auditor re-execution](../../builds/perf/import-vndb-20261125-ef009/memory/independent-reaudit.json) and [separate direct audit](../../builds/perf/import-vndb-20261125-ef009/memory/independent-review.json) agree. The separate audit output has SHA-256 `b21a3df2528f8ffdb773ae5285b01aaa2c1edc1a20b73fad9ce435034a5f2a2d`; its exact archived source has SHA-256 `b30b0defee67bcc3c5981697ae8152d1a05eaf879e94bab78ed3dcdfa8f738dd`. The [bundle inventory](../../builds/perf/import-vndb-20261125-ef009/bundle-integrity.json) records retained file sizes and hashes.
+
+Original artifact ZIP sizes and digests were checked on retrieval. Release ZIP payloads were omitted from the durable bundles only after their hashes, all member hashes, native bytes and frozen parser/projector source were verified; the original linked CI artifacts retain those payloads. Retained raw logs and archived execution source preserve their original bytes, including original whitespace. A refreshed signed URL was required for one already-completed artifact download; this did not rerun any observation.
+
+The memory scaffold's general JSON CI found exactly two missing file registrations; 154 other tests passed. A two-entry registration repair leaves protocol, observer and workflow bytes unchanged. Its targeted local registry gate passed 77 tests, with 79 unrelated schema tests skipped by that targeted invocation. The full local JSON gate separately recorded 151 passes and five 60-second schema-test timeouts with cause unestablished. Original failure, timeout, targeted-check logs and the exact patch remain archived; the full local run is not counted as a pass.
+
+### Executed commands and final disposition
+
+The original workflows provide the full dependency, browser, archive and frozen-source setup. In a fresh isolated checkout of each recorded workflow commit, their per-cell commands were:
+
+```sh
+# Timing workflow 863bda45046ba0bf0c778008d0fb30e65b7f0669
+python3 dev/perf/qualify-import-ef009.py integer-fields jmdict 0
+
+# Memory workflow 57590f5eaee359d721ba9d5d8bde28728a8d172e
+python3 dev/perf/import-memory-ef009/run_memory.py jmdict 1
+```
+
+The timing matrix used all three named candidates and all three dictionaries at replica 0. The memory matrix used all three dictionaries at replications 1 and 2. Each workflow job had its own fresh checkout and output directories; these example commands identify the executed entry points rather than instructions to overwrite an existing evidence directory. The evidence-only PR does not install these temporary workflows or alter product code.
+
+The temporary measurement PRs are closed after acquisition and preservation. The bookkeeping-only registry repairs are retained separately at [timing repair commit `3cec8e1`](https://github.com/ManabiIO/manabitan/commit/3cec8e1c1dd158964ab3aa0cc567ec6285e5a698) and [memory repair commit `4b4f7e2`](https://github.com/ManabiIO/manabitan/commit/4b4f7e280067f3eaa2f5555b822b0b33d8db8d2e), preserving the exact executed study heads and avoiding another acquisition. They do not change any result.
+
+The numeric and image-projection PRs remain on hold, and the measured metadata-key candidate does not meet the target speed gate. The extra parser boundary tests remain a separate reviewable follow-up. Further runtime promotion needs a new material complete-import result under a prospectively fixed comparison; image-projection memory qualification additionally needs a complete covered cohort. No favorable component percentage, unchanged-control fluctuation or incomplete memory observation is substituted for those requirements.
 ## 2026-11-24: frozen import source qualification (3aac)
 
 ### Scope, source identities and disposition

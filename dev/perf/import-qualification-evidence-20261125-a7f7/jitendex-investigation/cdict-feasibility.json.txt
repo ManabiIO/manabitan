@@ -1,0 +1,83 @@
+[
+  {
+    "input": 100,
+    "rawBytes": 71,
+    "cdictBytes": 71,
+    "equal": true,
+    "rawContextBytes": 42439,
+    "cdictContextBytes": 27079,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 1024,
+    "rawBytes": 442,
+    "cdictBytes": 443,
+    "equal": false,
+    "rawContextBytes": 45848,
+    "cdictContextBytes": 37656,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 16384,
+    "rawBytes": 2001,
+    "cdictBytes": 1999,
+    "equal": false,
+    "rawContextBytes": 103448,
+    "cdictContextBytes": 103448,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 65536,
+    "rawBytes": 5635,
+    "cdictBytes": 5612,
+    "equal": false,
+    "rawContextBytes": 287768,
+    "cdictContextBytes": 287768,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 131072,
+    "rawBytes": 9624,
+    "cdictBytes": 9624,
+    "equal": true,
+    "rawContextBytes": 549912,
+    "cdictContextBytes": 549912,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 262144,
+    "rawBytes": 11856,
+    "cdictBytes": 11856,
+    "equal": true,
+    "rawContextBytes": 549912,
+    "cdictContextBytes": 549912,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 524288,
+    "rawBytes": 29647,
+    "cdictBytes": 29647,
+    "equal": true,
+    "rawContextBytes": 549912,
+    "cdictContextBytes": 549912,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 1048576,
+    "rawBytes": 63264,
+    "cdictBytes": 63264,
+    "equal": true,
+    "rawContextBytes": 549912,
+    "cdictContextBytes": 549912,
+    "cdictBytesRetained": 47680
+  },
+  {
+    "input": 4919597,
+    "rawBytes": 290316,
+    "cdictBytes": 290316,
+    "equal": true,
+    "rawContextBytes": 549912,
+    "cdictContextBytes": 549912,
+    "cdictBytesRetained": 47680
+  }
+]

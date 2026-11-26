@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+"""Audit frozen hosted JMdict observations without executing any benchmark.
+
+Usage: python audit-statistics.py [artifact-root]
+The root must contain artifacts.json, the original downloaded ZIPs, and their
+unchanged AB/BA extractions. Output is independent-statistical-audit.json.
+This implementation does not import or execute the qualification runner.
+"""
+
+from collections import Counter
+from datetime import datetime
+import hashlib
+import json
+import math
+from pathlib import Path
+import random
+import statistics
+import sys
+import zipfile
+
+
+ROOT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parent
+BASELINE = "7d1643e6147a10cb2165e9744cf0e63b59e46632"
+CANDIDATE = "475d351ff07c1b5cfc5651d7f59c624629e4fdc5"
+WORKFLOW_SHA = "b1a0c5b78295def8cc91e4fca5e831d2248c7d01"
+FLAGS = {"experimentalParserWorkers3": False}
+BOUNDARY = "page file-input change event to post-UI import-complete event; browser monotonic clock"
+EXPECTED_ARTIFACTS = {
+    "AB": (15040500276, 35510052, "dc60f4f96653cbc6cc7709610027f8054834e2ec2606fcbae42664ecf4f161a9"),
+    "BA": (15039683170, 35558026, "ebb2ef69aa49a824f030b4e627adceb6cdc1af8f1c318bb4ad9dce44b56a8b0f"),
+}
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def digest(path):
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def check(test, message):
+    if not test:
+        raise AssertionError(message)
+
+
+def equal_float(actual, expected, message):
+    check(math.isclose(actual, expected, rel_tol=1e-13, abs_tol=1e-10), message)
+
+
+def expected_schedule(order):
+    result = []
+    for pair, arms in ((1, order), (2, order[::-1])):
+        result.extend({"kind": "warmup", "pair": pair, "arm": arm, "id": f"warmup-{pair}-{arm}"} for arm in arms)
+    control = 0
+    for pair in range(1, 13):
+        arms = order if pair % 2 else order[::-1]
+        result.extend({"kind": "candidate", "pair": pair, "arm": arm, "id": f"pair-{pair:02}-{arm}"} for arm in arms)
+        if pair % 3 == 0:
+            control += 1
+            control_order = "AC" if order == "AB" else "CA"
+            if control % 2 == 0:
+                control_order = control_order[::-1]
+            result.extend({"kind": "control", "pair": control, "arm": arm, "id": f"control-{control:02}-{arm}"} for arm in control_order)
+    return result
+
+
+def summarize(rows, kind, right):
+    selected = [row for row in rows if row["kind"] == kind]
+    pair_numbers = sorted({row["pair"] for row in selected})
+    detail = []
+    for number in pair_numbers:
+        pair = [row for row in selected if row["pair"] == number]
+        check(len(pair) == 2 and {row["arm"] for row in pair} == {"A", right}, "Duplicate or incomplete pair")
+        values = {row["arm"]: row["totalImportMs"] for row in pair}
+        detail.append({"pair": number, "order": "".join(row["arm"] for row in pair), "Ams": values["A"], f"{right}ms": values[right], "ratio": values[right] / values["A"]})
+    ratios = [pair["ratio"] for pair in detail]
+    rng = random.Random(897)
+    bootstrapped = []
+    for _ in range(10000):
+        sample = rng.choices(ratios, k=len(ratios))
+        bootstrapped.append(statistics.median(sample))
+    bootstrapped.sort()
+    total_a = sum(pair["Ams"] for pair in detail)
+    total_right = sum(pair[f"{right}ms"] for pair in detail)
+    result = {
+        "count": len(detail),
+        "ratios": ratios,
+        "medianPairedChangePercent": (statistics.median(ratios) - 1) * 100,
+        "equalWorkChangePercent": (total_right / total_a - 1) * 100,
+        "worstPairChangePercent": (max(ratios) - 1) * 100,
+        "descriptiveBootstrap95Percent": [(bootstrapped[i] - 1) * 100 for i in (249, 9749)],
+        "fasterPairs": sum(ratio < 1 for ratio in ratios),
+    }
+    extra = {"pairs": detail, "AmedianMs": statistics.median(pair["Ams"] for pair in detail), f"{right}medianMs": statistics.median(pair[f"{right}ms"] for pair in detail), "AtotalMs": total_a, f"{right}totalMs": total_right}
+    return result, extra
+
+
+def verify_recorded(actual, expected, prefix):
+    check(actual.keys() == expected.keys(), f"{prefix}: result fields differ")
+    for key, expected_value in expected.items():
+        actual_value = actual[key]
+        if isinstance(expected_value, list):
+            check(len(actual_value) == len(expected_value), f"{prefix}.{key}: length")
+            for index, (left, right) in enumerate(zip(actual_value, expected_value)):
+                equal_float(left, right, f"{prefix}.{key}[{index}]")
+        else:
+            equal_float(actual_value, expected_value, f"{prefix}.{key}")
+
+
+artifacts = read(ROOT / "artifacts.json")["artifacts"]
+check(len(artifacts) == 2, "Expected exactly two original artifacts")
+results = {}
+for order in ("AB", "BA"):
+    expected_id, expected_size, expected_digest = EXPECTED_ARTIFACTS[order]
+    artifact = next(item for item in artifacts if item["name"] == f"jmdict-two-workers-{order}-a7f7")
+    check(artifact["id"] == expected_id and artifact["size_in_bytes"] == expected_size, f"{order}: artifact identity")
+    check(artifact["digest"] == f"sha256:{expected_digest}", f"{order}: published artifact digest")
+    check(artifact["workflow_run"]["id"] == 45646399468 and artifact["workflow_run"]["head_sha"] == WORKFLOW_SHA, f"{order}: workflow identity")
+    archive = ROOT / f"jmdict-two-workers-{order}-a7f7.zip"
+    check(archive.stat().st_size == expected_size and digest(archive) == expected_digest, f"{order}: downloaded artifact identity")
+    cell = ROOT / order
+    with zipfile.ZipFile(archive) as zipped:
+        names = zipped.namelist()
+        check(len(names) == len(set(names)), f"{order}: duplicate archive entries")
+        expected_files = {info.filename for info in zipped.infolist() if not info.is_dir()}
+        actual_files = {str(path.relative_to(cell)) for path in cell.rglob("*") if path.is_file()}
+        check(expected_files == actual_files, f"{order}: extraction file set changed")
+        for name in sorted(expected_files):
+            check(hashlib.sha256(zipped.read(name)).hexdigest() == digest(cell / name), f"{order}: extracted file changed: {name}")
+
+    plan = read(cell / "registered-plan.json")
+    expected = expected_schedule(order)
+    check(plan["initialOrder"] == order and plan["pairs"] == 12, f"{order}: registered design")
+    check(plan["baseline"] == BASELINE and plan["candidate"] == CANDIDATE, f"{order}: source revisions")
+    check(plan["dictionary"] == "jmdict" and plan["flags"] == FLAGS and plan["expectedWorkers"] == 2, f"{order}: runtime configuration")
+    check(plan["schedule"] == expected, f"{order}: frozen schedule mismatch")
+    check(plan["failurePolicy"] == "Stop on first failed observation; retain all completed and failed evidence", f"{order}: failure policy")
+    check(plan["statistics"] == "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.", f"{order}: statistical policy")
+    observations = read(cell / "observations.json")
+    check(len(observations) == 36, f"{order}: completed timing observation count")
+    actual_plan = [{key: row[key] for key in ("kind", "pair", "arm", "id")} for row in observations]
+    check(actual_plan == expected, f"{order}: execution schedule differs from frozen design")
+    check(Counter(row["kind"] for row in observations) == {"warmup": 4, "candidate": 24, "control": 8}, f"{order}: observation kinds")
+    check(len({row["id"] for row in observations}) == 36, f"{order}: duplicate observation identifiers")
+
+    previous_end = None
+    timing_checks = []
+    for row in observations:
+        output = cell / row["id"]
+        summary = read(output / "summary.json")
+        report = read(output / "run-1.json")
+        before = read(output / "host-before.json")
+        after = read(output / "host-after.json")
+        before_time = datetime.fromisoformat(before["capturedAtIso"])
+        after_time = datetime.fromisoformat(after["capturedAtIso"])
+        report_time = datetime.fromisoformat(report["startedAtIso"])
+        check(before_time < report_time < after_time, f"{order}/{row['id']}: execution timestamps")
+        check(previous_end is None or before_time > previous_end, f"{order}/{row['id']}: execution order")
+        previous_end = after_time
+        check(report["status"] == "success" and not report["failureReason"] and not report["skippedVerification"], f"{order}/{row['id']}: failed or skipped import")
+        benchmark = report["benchmark"]
+        check(benchmark["authoritativeTiming"] is True and summary["authoritativeTiming"] is True, f"{order}/{row['id']}: timing qualification")
+        for key in ("traceEnabled", "phaseProfiling", "phaseScreenshots", "processSampling"):
+            check(benchmark[key] is False, f"{order}/{row['id']}: timing instrumentation enabled: {key}")
+        check(summary["traceEnabled"] is False and summary["timingBoundary"] == BOUNDARY, f"{order}/{row['id']}: timing boundary")
+        check(summary["importFlags"] == FLAGS and benchmark["importFlags"] == FLAGS, f"{order}/{row['id']}: flags")
+        check(len(summary["runs"]) == 1, f"{order}/{row['id']}: replaced or repeated run")
+        check(summary["mediaCheck"] == "sample" and benchmark["mediaCheck"] == "sample", f"{order}/{row['id']}: verification mode")
+        run = summary["runs"][0]
+        check(run["tracePath"] is None, f"{order}/{row['id']}: trace output")
+        check(run["step4Breakdown"]["dictionaries"][0]["parserWorkerCount"] == 2, f"{order}/{row['id']}: parser worker count")
+        duration = row["totalImportMs"]
+        check(math.isfinite(duration) and duration > 0, f"{order}/{row['id']}: invalid duration")
+        equal_float(run["totalImportMs"], duration, f"{order}/{row['id']}: summary duration")
+        phases = [phase for phase in report["phases"] if (phase.get("data") or {}).get("kind") == "dictionary-import"]
+        check(len(phases) == 1, f"{order}/{row['id']}: browser import count")
+        browser_timing = phases[0]["data"]["browserTiming"]
+        check(browser_timing["sequenceBefore"] == 0 and browser_timing["sequence"] == 1 and browser_timing["errorCount"] == 0, f"{order}/{row['id']}: browser sequence or errors")
+        check(browser_timing["trigger"] == "file-input-change", f"{order}/{row['id']}: import trigger")
+        equal_float(browser_timing["completedAtMs"] - browser_timing["startedAtMs"], duration, f"{order}/{row['id']}: raw browser duration")
+        check(browser_timing["nextFrameAtMs"] >= browser_timing["completedAtMs"], f"{order}/{row['id']}: completion ordering")
+        timing_checks.append({"id": row["id"], "reportStartedAtIso": report["startedAtIso"], "durationMs": duration})
+
+    expected_output_dirs = {row["id"] for row in observations} | {"exhaustive-media-A", "exhaustive-media-B", "memory"}
+    check({path.name for path in cell.iterdir() if path.is_dir()} == expected_output_dirs, f"{order}: unexpected observation/retry directory")
+    exhaustive_starts = [datetime.fromisoformat(read(cell / f"exhaustive-media-{arm}" / "run-1.json")["startedAtIso"]) for arm in order]
+    check(previous_end < exhaustive_starts[0] < exhaustive_starts[1], f"{order}: exhaustive verification entered timed sequence")
+    memory_observations = read(cell / "memory" / "observations.json")
+    check(len(memory_observations) == 4, f"{order}: separate memory observation count")
+    check([{key: row[key] for key in ("name", "pair", "arm", "index")} for row in memory_observations] == plan["memorySchedule"], f"{order}: memory schedule")
+    memory_starts = [datetime.fromisoformat(read(cell / "memory" / row["name"] / "run-1.json")["startedAtIso"]) for row in memory_observations]
+    check(exhaustive_starts[1] < memory_starts[0] and memory_starts == sorted(memory_starts), f"{order}: instrumented observation order")
+    check(read(cell / "memory" / "semantic-failures.json") == [], f"{order}: semantic failures")
+    failure_files = [str(path.relative_to(cell)) for path in cell.rglob("*") if path.is_file() and ("failure" in path.name or "failed" in path.name) and path.name != "semantic-failures.json"]
+    check(not failure_files, f"{order}: preserved failure files: {failure_files}")
+
+    recorded_analysis = read(cell / "analysis.json")
+    recomputed = {}
+    for kind, right, key in (("candidate", "B", "candidateVsBaseline"), ("control", "C", "identicalCodeControl")):
+        comparison, detail = summarize(observations, kind, right)
+        verify_recorded(recorded_analysis[key], comparison, f"{order}/{key}")
+        check(Counter(pair["order"] for pair in detail["pairs"]) == ({"AB": 6, "BA": 6} if kind == "candidate" else {"AC": 2, "CA": 2}), f"{order}: order imbalance")
+        recomputed[key] = {**comparison, **detail}
+    check(recorded_analysis["status"] == "correctness-memory-passed" and recorded_analysis["memoryPassed"] is True, f"{order}: cohort final status")
+    results[order] = {
+        "artifactId": expected_id, "artifactSha256": expected_digest,
+        "registeredPlanSha256": digest(cell / "registered-plan.json"),
+        "observationsSha256": digest(cell / "observations.json"),
+        "analysisSha256": digest(cell / "analysis.json"),
+        "unchangedArchiveEntries": len(names), "timedPathObservations": 36,
+        "excludedWarmups": 4, "candidatePairs": 12, "identicalCodeControlPairs": 4,
+        "excludedSeparateMediaObservations": 2, "excludedSeparateMemoryObservations": 4,
+        "failureFiles": failure_files, "scheduleMatchesRegisteredPlan": True,
+        "chronologyMatchesPlan": True, "rawBrowserDurationsMatch": True,
+        "allTimingUninstrumented": True, "analysisMatchesIndependentRecalculation": True,
+        "timingReceipts": timing_checks, **recomputed,
+    }
+
+for kind in ("candidateVsBaseline", "identicalCodeControl"):
+    check([pair["order"] for pair in results["AB"][kind]["pairs"]] == [pair["order"][::-1] for pair in results["BA"][kind]["pairs"]], "Replications do not reverse every corresponding pair")
+report = {
+    "status": "passed-independent-statistical-audit",
+    "workflowRunId": 45646399468, "workflowSourceSha": WORKFLOW_SHA,
+    "frozenRunnerSha256": "42a5bbaf9ee7f08079d7f4a150fd96b11c7d237c8ad2eefc82ce29aae7640e56",
+    "frozenWorkflowSha256": "71c934989aa3e4225d3c44d2a23532e1f7d1e43cacc5aa0914595adb60b0da91",
+    "auditorSha256": digest(Path(__file__)), "baseline": BASELINE, "candidate": CANDIDATE,
+    "configuration": {"dictionary": "jmdict", "flags": FLAGS, "parserWorkers": 2},
+    "ratioOrientation": "B/A for candidate comparisons; C/A for identical-code controls; negative change is faster",
+    "bootstrap": {"resamples": 10000, "seed": 897, "unit": "complete paired ratio", "statistic": "median", "sortedZeroBasedIndices": [249, 9749], "interpretation": "descriptive percentile interval"},
+    "cohortsPooled": False, "failedObservationsOmitted": 0, "replacementObservations": 0,
+    "cohorts": results,
+    "conclusion": "No reproducible end-to-end latency improvement demonstrated. Both descriptive intervals include zero, both equal-work changes are positive, and identical-code controls show substantial host variation. Correctness and memory qualification have separate independent audits. The measured allocation saving remains conditional on split-record groups and is not a whole-import latency claim.",
+    "limits": ["Two hosted cohorts on the explicit existing two-worker policy; no claim for ordinary three-worker JMdict or real two-CPU hardware.", "Bootstrap intervals are descriptive within each cohort and do not resolve host drift or cross-host variation.", "No additional timing observations, exclusions, replacements, reruns, or pooled statistic were introduced by this audit."],
+}
+destination = ROOT / "independent-statistical-audit.json"
+destination.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+print(json.dumps({"status": report["status"], "output": str(destination), "cohorts": {order: {key: {name: result[name] for name in ("medianPairedChangePercent", "equalWorkChangePercent", "descriptiveBootstrap95Percent", "fasterPairs")} for key, result in results[order].items() if key in ("candidateVsBaseline", "identicalCodeControl")} for order in ("AB", "BA")}}, indent=2))

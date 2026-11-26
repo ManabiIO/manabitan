@@ -1,0 +1,701 @@
+﻿2026-11-25T15:14:20.0846507Z Current runner version: '2.338.2'
+2026-11-25T15:14:20.0870992Z ##[group]Runner Image Provisioner
+2026-11-25T15:14:20.0872053Z Hosted Compute Agent
+2026-11-25T15:14:20.0872721Z Version: 20261111.635
+2026-11-25T15:14:20.0873364Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-25T15:14:20.0874059Z Build Date: 2026-11-11T01:49:01Z
+2026-11-25T15:14:20.0874753Z Worker ID: {b4dd802e-19db-4e82-b94f-1c4e29afece6}
+2026-11-25T15:14:20.0875434Z Region: southcentralus
+2026-11-25T15:14:20.0875962Z Cloud: Azure
+2026-11-25T15:14:20.0876509Z ##[endgroup]
+2026-11-25T15:14:20.0878214Z ##[group]Operating System
+2026-11-25T15:14:20.0879153Z Ubuntu
+2026-11-25T15:14:20.0879695Z 26.04.1
+2026-11-25T15:14:20.0880204Z LTS
+2026-11-25T15:14:20.0880746Z ##[endgroup]
+2026-11-25T15:14:20.0881268Z ##[group]Runner Image
+2026-11-25T15:14:20.0882043Z Image: ubuntu-26.04
+2026-11-25T15:14:20.0882703Z Version: 20261116.202.1
+2026-11-25T15:14:20.0883962Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261116.202/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-25T15:14:20.0885542Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261116.202
+2026-11-25T15:14:20.0886483Z ##[endgroup]
+2026-11-25T15:14:20.0887572Z ##[group]GITHUB_TOKEN Permissions
+2026-11-25T15:14:20.0889920Z Contents: read
+2026-11-25T15:14:20.0890516Z Metadata: read
+2026-11-25T15:14:20.0891051Z ##[endgroup]
+2026-11-25T15:14:20.0894078Z Secret source: Actions
+2026-11-25T15:14:20.0895003Z Cache mode: write
+2026-11-25T15:14:20.0895982Z Prepare workflow directory
+2026-11-25T15:14:20.1434283Z Prepare all required actions
+2026-11-25T15:14:20.1490470Z Getting action download info
+2026-11-25T15:14:20.4146977Z Download action repository 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+2026-11-25T15:14:20.5107487Z Download action repository 'actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f' (SHA:b7c566a772e6b6bfb58ed0dc250532a479d7789f)
+2026-11-25T15:14:20.7395174Z Complete job name: Current native media screen (vndb)
+2026-11-25T15:14:20.8228800Z ##[group]Run actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+2026-11-25T15:14:20.8229794Z with:
+2026-11-25T15:14:20.8230465Z   persist-credentials: false
+2026-11-25T15:14:20.8231147Z   repository: ManabiIO/manabitan
+2026-11-25T15:14:20.8235231Z   token: ***
+2026-11-25T15:14:20.8235734Z   ssh-strict: true
+2026-11-25T15:14:20.8236217Z   ssh-user: git
+2026-11-25T15:14:20.8236770Z   clean: true
+2026-11-25T15:14:20.8237316Z   sparse-checkout-cone-mode: true
+2026-11-25T15:14:20.8237912Z   fetch-depth: 1
+2026-11-25T15:14:20.8238399Z   fetch-tags: false
+2026-11-25T15:14:20.8238888Z   show-progress: true
+2026-11-25T15:14:20.8239457Z   lfs: false
+2026-11-25T15:14:20.8239928Z   submodules: false
+2026-11-25T15:14:20.8240810Z   set-safe-directory: true
+2026-11-25T15:14:20.8241415Z   allow-unsafe-pr-checkout: false
+2026-11-25T15:14:20.8242842Z env:
+2026-11-25T15:14:20.8243496Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:20.8244445Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:20.8246030Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:20.8247449Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:20.8247995Z ##[endgroup]
+2026-11-25T15:14:21.2043111Z Syncing repository: ManabiIO/manabitan
+2026-11-25T15:14:21.2046431Z ##[group]Getting Git version info
+2026-11-25T15:14:21.2047585Z Working directory is '/home/runner/work/manabitan/manabitan'
+2026-11-25T15:14:21.2049395Z [command]/usr/bin/git version
+2026-11-25T15:14:21.2055160Z git version 2.56.1
+2026-11-25T15:14:21.2078535Z ##[endgroup]
+2026-11-25T15:14:21.2092684Z Temporarily overriding HOME='/home/runner/work/_temp/e98fe30d-eaae-4610-aae7-c12990dcf14f' before making global git config changes
+2026-11-25T15:14:21.2095728Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-25T15:14:21.2098396Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-25T15:14:21.2173425Z Deleting the contents of '/home/runner/work/manabitan/manabitan'
+2026-11-25T15:14:21.2177491Z ##[group]Determining repository object format
+2026-11-25T15:14:21.2179495Z ##[endgroup]
+2026-11-25T15:14:21.2181224Z ##[group]Initializing the repository
+2026-11-25T15:14:21.2205131Z [command]/usr/bin/git init /home/runner/work/manabitan/manabitan
+2026-11-25T15:14:21.2325443Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-25T15:14:21.2326767Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-25T15:14:21.2328086Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-25T15:14:21.2328999Z hint: call:
+2026-11-25T15:14:21.2329568Z hint:
+2026-11-25T15:14:21.2330257Z hint: 	git config --global init.defaultBranch <name>
+2026-11-25T15:14:21.2331071Z hint:
+2026-11-25T15:14:21.2332149Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-25T15:14:21.2333313Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-25T15:14:21.2334210Z hint:
+2026-11-25T15:14:21.2335053Z hint: 	git branch -m <name>
+2026-11-25T15:14:21.2335984Z hint:
+2026-11-25T15:14:21.2337100Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-25T15:14:21.2343757Z Initialized empty Git repository in /home/runner/work/manabitan/manabitan/.git/
+2026-11-25T15:14:21.2352880Z [command]/usr/bin/git remote add origin https://github.com/ManabiIO/manabitan
+2026-11-25T15:14:21.2415721Z ##[endgroup]
+2026-11-25T15:14:21.2416755Z ##[group]Disabling automatic garbage collection
+2026-11-25T15:14:21.2420010Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-25T15:14:21.2453933Z ##[endgroup]
+2026-11-25T15:14:21.2455328Z ##[group]Setting up auth
+2026-11-25T15:14:21.2456347Z Removing SSH command configuration
+2026-11-25T15:14:21.2462406Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-25T15:14:21.2497210Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-25T15:14:21.3064736Z Removing HTTP extra header
+2026-11-25T15:14:21.3066455Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-25T15:14:21.3097588Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-25T15:14:21.3336888Z Removing includeIf entries pointing to credentials config files
+2026-11-25T15:14:21.3339079Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-25T15:14:21.3369808Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-25T15:14:21.3609359Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-25T15:14:21.3660737Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:21.3697007Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:21.3740168Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:21.3772210Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:21.3799293Z ##[endgroup]
+2026-11-25T15:14:21.3800323Z ##[group]Fetching the repository
+2026-11-25T15:14:21.3808128Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +ae85fc50a77ce5d13cb9001ad376f741f915ec7a:refs/remotes/origin/research/import-studies-20261125-2754
+2026-11-25T15:14:23.0187594Z From https://github.com/ManabiIO/manabitan
+2026-11-25T15:14:23.0189487Z  * [new ref]         ae85fc50a77ce5d13cb9001ad376f741f915ec7a -> origin/research/import-studies-20261125-2754
+2026-11-25T15:14:23.0198032Z [command]/usr/bin/git branch --list --remote origin/research/import-studies-20261125-2754
+2026-11-25T15:14:23.0222486Z   origin/research/import-studies-20261125-2754
+2026-11-25T15:14:23.0230907Z [command]/usr/bin/git rev-parse refs/remotes/origin/research/import-studies-20261125-2754
+2026-11-25T15:14:23.0253357Z ae85fc50a77ce5d13cb9001ad376f741f915ec7a
+2026-11-25T15:14:23.0256653Z ##[endgroup]
+2026-11-25T15:14:23.0257801Z ##[group]Determining the checkout info
+2026-11-25T15:14:23.0258829Z ##[endgroup]
+2026-11-25T15:14:23.0263677Z [command]/usr/bin/git sparse-checkout disable
+2026-11-25T15:14:23.0319736Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-25T15:14:23.0348689Z ##[group]Checking out the ref
+2026-11-25T15:14:23.0352939Z [command]/usr/bin/git checkout --progress --force -B research/import-studies-20261125-2754 refs/remotes/origin/research/import-studies-20261125-2754
+2026-11-25T15:14:23.3315637Z Switched to a new branch 'research/import-studies-20261125-2754'
+2026-11-25T15:14:23.3320917Z branch 'research/import-studies-20261125-2754' set up to track 'origin/research/import-studies-20261125-2754'.
+2026-11-25T15:14:23.3332208Z ##[endgroup]
+2026-11-25T15:14:23.3384812Z [command]/usr/bin/git log -1 --format=%H
+2026-11-25T15:14:23.3411044Z ae85fc50a77ce5d13cb9001ad376f741f915ec7a
+2026-11-25T15:14:23.3422516Z ##[group]Removing auth
+2026-11-25T15:14:23.3423248Z Removing SSH command configuration
+2026-11-25T15:14:23.3425458Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-25T15:14:23.3457201Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-25T15:14:23.3699135Z Removing HTTP extra header
+2026-11-25T15:14:23.3704256Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-25T15:14:23.3735447Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-25T15:14:23.3968744Z Removing includeIf entries pointing to credentials config files
+2026-11-25T15:14:23.3972206Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-25T15:14:23.3999302Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-25T15:14:23.4000570Z includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-25T15:14:23.4001438Z includeif.gitdir:/github/workspace/.git.path
+2026-11-25T15:14:23.4002276Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-25T15:14:23.4009401Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path
+2026-11-25T15:14:23.4031050Z /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4040644Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git.path /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4076849Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path
+2026-11-25T15:14:23.4098697Z /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4120132Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/manabitan/manabitan/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4162647Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-11-25T15:14:23.4183556Z /github/runner_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4190046Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4224527Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-11-25T15:14:23.4245655Z /github/runner_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4252473Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config
+2026-11-25T15:14:23.4308303Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-25T15:14:23.4538394Z Removing credentials config '/home/runner/work/_temp/git-credentials-101f4a57-94bb-4650-bbc2-125f9b5ff01f.config'
+2026-11-25T15:14:23.4549750Z ##[endgroup]
+2026-11-25T15:14:23.4757692Z ##[group]Run git fetch --no-tags --depth=64 origin "$PERF_BASELINE_SHA" "$PERF_CANDIDATE_SHA"
+2026-11-25T15:14:23.4758473Z [36;1mgit fetch --no-tags --depth=64 origin "$PERF_BASELINE_SHA" "$PERF_CANDIDATE_SHA"[0m
+2026-11-25T15:14:23.4786540Z shell: /usr/bin/bash -e {0}
+2026-11-25T15:14:23.4787010Z env:
+2026-11-25T15:14:23.4787450Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:23.4787973Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:23.4788897Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:23.4789756Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:23.4790078Z ##[endgroup]
+2026-11-25T15:14:24.3975479Z From https://github.com/ManabiIO/manabitan
+2026-11-25T15:14:24.3976253Z  * branch            7d1643e6147a10cb2165e9744cf0e63b59e46632 -> FETCH_HEAD
+2026-11-25T15:14:24.3977014Z  * branch            7a8b25a44a3fe165107ed816377cc72bb0fac67d -> FETCH_HEAD
+2026-11-25T15:14:24.4133663Z Prepare all required actions
+2026-11-25T15:14:24.4134442Z Getting action download info
+2026-11-25T15:14:24.5150968Z Download action repository 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-11-25T15:14:24.5948134Z ##[group]Run ./.github/actions/setup
+2026-11-25T15:14:24.5948529Z with:
+2026-11-25T15:14:24.5948839Z   node-version: 22.22.0
+2026-11-25T15:14:24.5949189Z env:
+2026-11-25T15:14:24.5949547Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:24.5950060Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:24.5951022Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:24.5952037Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:24.5952453Z ##[endgroup]
+2026-11-25T15:14:24.6019118Z ##[start-action display=Setup node;id=__self.__actions_setup-node]
+2026-11-25T15:14:24.6123244Z ##[group]Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+2026-11-25T15:14:24.6123797Z with:
+2026-11-25T15:14:24.6124108Z   node-version: 22.22.0
+2026-11-25T15:14:24.6124455Z   cache: npm
+2026-11-25T15:14:24.6124754Z   always-auth: false
+2026-11-25T15:14:24.6125084Z   check-latest: false
+2026-11-25T15:14:24.6127787Z   token: ***
+2026-11-25T15:14:24.6128069Z env:
+2026-11-25T15:14:24.6128399Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:24.6128957Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:24.6129872Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:24.6130750Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:24.6131058Z ##[endgroup]
+2026-11-25T15:14:24.7614603Z Attempting to download 22.22.0...
+2026-11-25T15:14:24.7783243Z (node:2498) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-25T15:14:24.7784296Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-25T15:14:25.7693830Z Acquiring 22.22.0 - x64 from https://github.com/actions/node-versions/releases/download/22.22.0-20981702931/node-22.22.0-linux-x64.tar.gz
+2026-11-25T15:14:26.2627760Z Extracting ...
+2026-11-25T15:14:26.2748241Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/abeadc90-467a-4aca-b6ba-d82df9ccfcec -f /home/runner/work/_temp/061dfefd-8d71-4e4e-9a48-3919ba16dbbe
+2026-11-25T15:14:27.0585763Z Adding to the cache ...
+2026-11-25T15:14:29.3756600Z ##[group]Environment details
+2026-11-25T15:14:29.6102863Z node: v22.22.0
+2026-11-25T15:14:29.6103279Z npm: 10.9.4
+2026-11-25T15:14:29.6103678Z yarn: 1.22.22
+2026-11-25T15:14:29.6104518Z ##[endgroup]
+2026-11-25T15:14:29.6121466Z [command]/opt/hostedtoolcache/node/22.22.0/x64/bin/npm config get cache
+2026-11-25T15:14:29.6983809Z /home/runner/.npm
+2026-11-25T15:14:29.8682719Z Cache hit for: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-25T15:14:29.8777708Z (node:2498) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-25T15:14:30.8285356Z Received 63143556 of 63143556 (100.0%), 76.4 MBs/sec
+2026-11-25T15:14:30.8285991Z Cache Size: ~60 MB (63143556 B)
+2026-11-25T15:14:30.8423267Z [command]/usr/bin/tar -xf /home/runner/work/_temp/8b501bfc-9ad3-4646-aac3-006b6b2de63a/cache.tzst -P -C /home/runner/work/manabitan/manabitan --use-compress-program unzstd
+2026-11-25T15:14:31.0044958Z Cache restored successfully
+2026-11-25T15:14:31.0074736Z Cache restored from key: node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531
+2026-11-25T15:14:31.0207685Z ##[end-action id=__self.__actions_setup-node;outcome=success;conclusion=success;duration_ms=6418]
+2026-11-25T15:14:31.0211312Z ##[start-action display=Setup node from package.json;id=__self.__actions_setup-node_2]
+2026-11-25T15:14:31.0219514Z ##[end-action id=__self.__actions_setup-node_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-11-25T15:14:31.0223149Z ##[start-action display=Install dependencies;id=__self.__run]
+2026-11-25T15:14:31.0246359Z ##[group]Run npm ci
+2026-11-25T15:14:31.0246754Z [36;1mnpm ci[0m
+2026-11-25T15:14:31.0273467Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-25T15:14:31.0273981Z env:
+2026-11-25T15:14:31.0274363Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:31.0274903Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:31.0275869Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:31.0276699Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:31.0277063Z ##[endgroup]
+2026-11-25T15:14:31.5708451Z npm warn skipping integrity check for git dependency ssh://git@github.com/yomidevs/yomitan-handlebars.git
+2026-11-25T15:14:36.6083984Z npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2026-11-25T15:14:37.6878115Z 
+2026-11-25T15:14:37.6879011Z > yomitan@0.0.0 prepare
+2026-11-25T15:14:37.6879717Z > husky
+2026-11-25T15:14:37.6879985Z 
+2026-11-25T15:14:37.7438520Z 
+2026-11-25T15:14:37.7440036Z added 670 packages, and audited 671 packages in 7s
+2026-11-25T15:14:37.7462644Z 
+2026-11-25T15:14:37.7470991Z 232 packages are looking for funding
+2026-11-25T15:14:37.7472358Z   run `npm fund` for details
+2026-11-25T15:14:37.7472869Z 
+2026-11-25T15:14:37.7473296Z found 0 vulnerabilities
+2026-11-25T15:14:37.7925247Z ##[end-action id=__self.__run;outcome=success;conclusion=success;duration_ms=6770]
+2026-11-25T15:14:37.7931848Z ##[start-action display=Build third-party libraries and license page;id=__self.__run_2]
+2026-11-25T15:14:37.7964971Z ##[group]Run npm run build:libs
+2026-11-25T15:14:37.7965529Z [36;1mnpm run build:libs[0m
+2026-11-25T15:14:37.7966042Z [36;1mnpm run license-report:html[0m
+2026-11-25T15:14:37.7997835Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-25T15:14:37.7998484Z env:
+2026-11-25T15:14:37.7999054Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:37.7999847Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:37.8001251Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:37.8002664Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:37.8003127Z ##[endgroup]
+2026-11-25T15:14:37.8923533Z 
+2026-11-25T15:14:37.8924285Z > yomitan@0.0.0 build:libs
+2026-11-25T15:14:37.8924915Z > node ./dev/bin/build-libs.js
+2026-11-25T15:14:37.8925149Z 
+2026-11-25T15:14:38.4332788Z 
+2026-11-25T15:14:38.4333998Z > yomitan@0.0.0 license-report:html
+2026-11-25T15:14:38.4335830Z > license-report --output=html --only=prod --fields=name --fields=installedVersion --fields=licenseType --fields=link --html.cssFile=dev/data/legal-npm.css > ext/legal-npm.html
+2026-11-25T15:14:38.4337039Z 
+2026-11-25T15:14:38.7889570Z ##[end-action id=__self.__run_2;outcome=success;conclusion=success;duration_ms=995]
+2026-11-25T15:14:38.7939828Z ##[group]Run npx playwright install --with-deps chromium
+2026-11-25T15:14:38.7940374Z [36;1mnpx playwright install --with-deps chromium[0m
+2026-11-25T15:14:38.7962071Z shell: /usr/bin/bash -e {0}
+2026-11-25T15:14:38.7962475Z env:
+2026-11-25T15:14:38.7962866Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:38.7963410Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:38.7964343Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:38.7965196Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:38.7965517Z ##[endgroup]
+2026-11-25T15:14:39.4698134Z Installing dependencies...
+2026-11-25T15:14:39.4754603Z Switching to root user to install dependencies...
+2026-11-25T15:14:39.5603949Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-25T15:14:39.6181039Z Hit:2 http://azure.archive.ubuntu.com/ubuntu resolute InRelease
+2026-11-25T15:14:39.6189344Z Get:6 https://packages.microsoft.com/ubuntu/26.04/prod resolute InRelease [3964 B]
+2026-11-25T15:14:39.6239110Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute-updates InRelease [137 kB]
+2026-11-25T15:14:39.6290146Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute-backports InRelease [137 kB]
+2026-11-25T15:14:39.6308968Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute-security InRelease [137 kB]
+2026-11-25T15:14:39.6605720Z Get:7 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main amd64 Packages [190 kB]
+2026-11-25T15:14:39.6640690Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main amd64v3 Packages [917 kB]
+2026-11-25T15:14:39.6784924Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute-updates/main Translation-en [202 kB]
+2026-11-25T15:14:39.6814208Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe amd64v3 Packages [397 kB]
+2026-11-25T15:14:39.6907636Z Get:11 http://azure.archive.ubuntu.com/ubuntu resolute-updates/universe Translation-en [126 kB]
+2026-11-25T15:14:39.6909879Z Get:12 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted amd64v3 Packages [640 kB]
+2026-11-25T15:14:39.6915221Z Get:13 http://azure.archive.ubuntu.com/ubuntu resolute-updates/restricted Translation-en [132 kB]
+2026-11-25T15:14:39.6916733Z Get:14 https://packages.microsoft.com/ubuntu/26.04/prod resolute/main arm64 Packages [175 kB]
+2026-11-25T15:14:39.6953761Z Get:15 http://azure.archive.ubuntu.com/ubuntu resolute-security/main amd64v3 Packages [753 kB]
+2026-11-25T15:14:39.6967235Z Get:16 http://azure.archive.ubuntu.com/ubuntu resolute-security/main Translation-en [163 kB]
+2026-11-25T15:14:39.6990584Z Get:17 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe amd64v3 Packages [224 kB]
+2026-11-25T15:14:39.7027899Z Get:18 http://azure.archive.ubuntu.com/ubuntu resolute-security/universe Translation-en [73.2 kB]
+2026-11-25T15:14:39.7511165Z Get:19 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted amd64v3 Packages [618 kB]
+2026-11-25T15:14:39.7547776Z Get:20 http://azure.archive.ubuntu.com/ubuntu resolute-security/restricted Translation-en [128 kB]
+2026-11-25T15:14:42.3118266Z Fetched 5155 kB in 0s (10.4 MB/s)
+2026-11-25T15:14:43.0650447Z Reading package lists...
+2026-11-25T15:14:43.0922170Z Reading package lists...
+2026-11-25T15:14:43.2706921Z Building dependency tree...
+2026-11-25T15:14:43.2714463Z Reading state information...
+2026-11-25T15:14:43.3105455Z libasound2t64 is already the newest version (1.2.15.3-1ubuntu1.1).
+2026-11-25T15:14:43.3106451Z libasound2t64 set to manually installed.
+2026-11-25T15:14:43.3107255Z libatk-bridge2.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-25T15:14:43.3108108Z libatk-bridge2.0-0t64 set to manually installed.
+2026-11-25T15:14:43.3109079Z libatk1.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-25T15:14:43.3109877Z libatk1.0-0t64 set to manually installed.
+2026-11-25T15:14:43.3111274Z libatspi2.0-0t64 is already the newest version (2.60.4-0ubuntu0.1).
+2026-11-25T15:14:43.3112412Z libatspi2.0-0t64 set to manually installed.
+2026-11-25T15:14:43.3113190Z libcairo2 is already the newest version (1.18.4-3).
+2026-11-25T15:14:43.3113868Z libcairo2 set to manually installed.
+2026-11-25T15:14:43.3114706Z libcups2t64 is already the newest version (2.4.16-1ubuntu1.3).
+2026-11-25T15:14:43.3115314Z libcups2t64 set to manually installed.
+2026-11-25T15:14:43.3116069Z libdbus-1-3 is already the newest version (1.16.2-2ubuntu4).
+2026-11-25T15:14:43.3116899Z libdbus-1-3 set to manually installed.
+2026-11-25T15:14:43.3117565Z libdrm2 is already the newest version (2.4.131-1).
+2026-11-25T15:14:43.3118296Z libdrm2 set to manually installed.
+2026-11-25T15:14:43.3119053Z libgbm1 is already the newest version (26.0.8-1ubuntu0.3).
+2026-11-25T15:14:43.3119842Z libgbm1 set to manually installed.
+2026-11-25T15:14:43.3120483Z libglib2.0-0t64 is already the newest version (2.88.0-1ubuntu0.1).
+2026-11-25T15:14:43.3121178Z libglib2.0-0t64 set to manually installed.
+2026-11-25T15:14:43.3122225Z libnspr4 is already the newest version (2:4.38.2-1ubuntu1).
+2026-11-25T15:14:43.3123167Z libnspr4 set to manually installed.
+2026-11-25T15:14:43.3124022Z libnss3 is already the newest version (2:3.120-1ubuntu2.2).
+2026-11-25T15:14:43.3124727Z libnss3 set to manually installed.
+2026-11-25T15:14:43.3125423Z libpango-1.0-0 is already the newest version (1.57.0-1).
+2026-11-25T15:14:43.3126211Z libpango-1.0-0 set to manually installed.
+2026-11-25T15:14:43.3126962Z libx11-6 is already the newest version (2:1.8.13-1ubuntu0.1).
+2026-11-25T15:14:43.3127751Z libx11-6 set to manually installed.
+2026-11-25T15:14:43.3128500Z libxcb1 is already the newest version (1.17.0-2ubuntu1).
+2026-11-25T15:14:43.3129205Z libxcb1 set to manually installed.
+2026-11-25T15:14:43.3130193Z libxcomposite1 is already the newest version (1:0.4.6-1build1).
+2026-11-25T15:14:43.3130980Z libxcomposite1 set to manually installed.
+2026-11-25T15:14:43.3131892Z libxdamage1 is already the newest version (1:1.1.7-1).
+2026-11-25T15:14:43.3132627Z libxdamage1 set to manually installed.
+2026-11-25T15:14:43.3133422Z libxext6 is already the newest version (2:1.3.4-1build3).
+2026-11-25T15:14:43.3134125Z libxext6 set to manually installed.
+2026-11-25T15:14:43.3134907Z libxfixes3 is already the newest version (1:6.0.0-2build2).
+2026-11-25T15:14:43.3135697Z libxfixes3 set to manually installed.
+2026-11-25T15:14:43.3136418Z libxkbcommon0 is already the newest version (1.13.1-1).
+2026-11-25T15:14:43.3137184Z libxkbcommon0 set to manually installed.
+2026-11-25T15:14:43.3137936Z libxrandr2 is already the newest version (2:1.5.4-1build1).
+2026-11-25T15:14:43.3139401Z libxrandr2 set to manually installed.
+2026-11-25T15:14:43.3140155Z xvfb is already the newest version (2:21.1.22-1ubuntu1.3).
+2026-11-25T15:14:43.3141119Z fonts-noto-color-emoji is already the newest version (2.051-1build1).
+2026-11-25T15:14:43.3142234Z libfontconfig1 is already the newest version (2.17.1-3ubuntu1).
+2026-11-25T15:14:43.3143068Z libfontconfig1 set to manually installed.
+2026-11-25T15:14:43.3143907Z libfreetype6 is already the newest version (2.14.2+dfsg-1ubuntu0.2).
+2026-11-25T15:14:43.3144734Z libfreetype6 set to manually installed.
+2026-11-25T15:14:43.3145543Z fonts-liberation is already the newest version (1:2.1.5-3build1).
+2026-11-25T15:14:43.3146350Z fonts-liberation set to manually installed.
+2026-11-25T15:14:43.3662574Z Solving dependencies...
+2026-11-25T15:14:43.4668415Z The following additional packages will be installed:
+2026-11-25T15:14:43.4669201Z   xfonts-encodings xfonts-utils
+2026-11-25T15:14:43.4675400Z Recommended packages:
+2026-11-25T15:14:43.4675840Z   fonts-ipafont-mincho fonts-tlwg-loma
+2026-11-25T15:14:43.4881639Z The following NEW packages will be installed:
+2026-11-25T15:14:43.4882637Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+2026-11-25T15:14:43.4890896Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+2026-11-25T15:14:43.4891370Z   xfonts-utils
+2026-11-25T15:14:43.5089881Z 0 upgraded, 9 newly installed, 0 to remove and 61 not upgraded.
+2026-11-25T15:14:43.5090451Z Need to get 21.9 MB of archives.
+2026-11-25T15:14:43.5091102Z After this operation, 80.2 MB of additional disk space will be used.
+2026-11-25T15:14:43.5091669Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-11-25T15:14:43.5479511Z Get:2 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-ipafont-gothic all 00303-23ubuntu1 [3703 kB]
+2026-11-25T15:14:43.6453021Z Get:3 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 fonts-freefont-ttf all 20211204+svn4273-4build1 [5656 kB]
+2026-11-25T15:14:43.7818906Z Get:4 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-tlwg-loma-otf all 1:0.7.3-1build1 [106 kB]
+2026-11-25T15:14:43.7850012Z Get:5 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-unifont all 1:16.0.04-1build1 [3169 kB]
+2026-11-25T15:14:43.8806552Z Get:6 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 fonts-wqy-zenhei all 0.9.45-8build1 [7863 kB]
+2026-11-25T15:14:44.1230751Z Get:7 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 xfonts-encodings all 1:1.0.5-0ubuntu3 [576 kB]
+2026-11-25T15:14:44.1326537Z Get:8 http://azure.archive.ubuntu.com/ubuntu resolute/main amd64v3 xfonts-utils amd64 1:7.7+7build1 [97.3 kB]
+2026-11-25T15:14:44.1344222Z Get:9 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 xfonts-cyrillic all 1:1.0.5+nmu1build1 [384 kB]
+2026-11-25T15:14:44.1387293Z Get:10 http://azure.archive.ubuntu.com/ubuntu resolute/universe amd64v3 xfonts-scalable all 1:1.0.3-1.3build1 [304 kB]
+2026-11-25T15:14:44.4838669Z Fetched 21.9 MB in 1s (34.0 MB/s)
+2026-11-25T15:14:44.5081112Z Selecting previously unselected package fonts-ipafont-gothic.
+2026-11-25T15:14:44.5350232Z (Reading database ... 
+2026-11-25T15:14:44.5350927Z (Reading database ... 5%
+2026-11-25T15:14:44.5351272Z (Reading database ... 10%
+2026-11-25T15:14:44.5351893Z (Reading database ... 15%
+2026-11-25T15:14:44.5352434Z (Reading database ... 20%
+2026-11-25T15:14:44.5353106Z (Reading database ... 25%
+2026-11-25T15:14:44.5353508Z (Reading database ... 30%
+2026-11-25T15:14:44.5353856Z (Reading database ... 35%
+2026-11-25T15:14:44.5354238Z (Reading database ... 40%
+2026-11-25T15:14:44.5354576Z (Reading database ... 45%
+2026-11-25T15:14:44.5354954Z (Reading database ... 50%
+2026-11-25T15:14:44.5676511Z (Reading database ... 55%
+2026-11-25T15:14:44.6110095Z (Reading database ... 60%
+2026-11-25T15:14:44.6491926Z (Reading database ... 65%
+2026-11-25T15:14:44.6884635Z (Reading database ... 70%
+2026-11-25T15:14:44.7420593Z (Reading database ... 75%
+2026-11-25T15:14:44.8613622Z (Reading database ... 80%
+2026-11-25T15:14:45.0688971Z (Reading database ... 85%
+2026-11-25T15:14:45.2564793Z (Reading database ... 90%
+2026-11-25T15:14:45.4712603Z (Reading database ... 95%
+2026-11-25T15:14:45.4713328Z (Reading database ... 100%
+2026-11-25T15:14:45.4714486Z (Reading database ... 214296 files and directories currently installed.)
+2026-11-25T15:14:45.4759444Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-23ubuntu1_all.deb ...
+2026-11-25T15:14:45.4844313Z Unpacking fonts-ipafont-gothic (00303-23ubuntu1) ...
+2026-11-25T15:14:45.6111068Z Selecting previously unselected package fonts-freefont-ttf.
+2026-11-25T15:14:45.6244359Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-4build1_all.deb ...
+2026-11-25T15:14:45.6255557Z Unpacking fonts-freefont-ttf (20211204+svn4273-4build1) ...
+2026-11-25T15:14:45.7305482Z Selecting previously unselected package fonts-tlwg-loma-otf.
+2026-11-25T15:14:45.7439211Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1build1_all.deb ...
+2026-11-25T15:14:45.7450722Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1build1) ...
+2026-11-25T15:14:45.7657941Z Selecting previously unselected package fonts-unifont.
+2026-11-25T15:14:45.7792962Z Preparing to unpack .../3-fonts-unifont_1%3a16.0.04-1build1_all.deb ...
+2026-11-25T15:14:45.7969132Z Unpacking fonts-unifont (1:16.0.04-1build1) ...
+2026-11-25T15:14:46.2113427Z Selecting previously unselected package fonts-wqy-zenhei.
+2026-11-25T15:14:46.2250739Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8build1_all.deb ...
+2026-11-25T15:14:46.2385500Z Unpacking fonts-wqy-zenhei (0.9.45-8build1) ...
+2026-11-25T15:14:46.4050388Z Selecting previously unselected package xfonts-encodings.
+2026-11-25T15:14:46.4183418Z Preparing to unpack .../5-xfonts-encodings_1%3a1.0.5-0ubuntu3_all.deb ...
+2026-11-25T15:14:46.4194950Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu3) ...
+2026-11-25T15:14:46.4434770Z Selecting previously unselected package xfonts-utils.
+2026-11-25T15:14:46.4569295Z Preparing to unpack .../6-xfonts-utils_1%3a7.7+7build1_amd64v3.deb ...
+2026-11-25T15:14:46.4586182Z Unpacking xfonts-utils (1:7.7+7build1) ...
+2026-11-25T15:14:46.4914469Z Selecting previously unselected package xfonts-cyrillic.
+2026-11-25T15:14:46.5047276Z Preparing to unpack .../7-xfonts-cyrillic_1%3a1.0.5+nmu1build1_all.deb ...
+2026-11-25T15:14:46.5056864Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1build1) ...
+2026-11-25T15:14:46.5313163Z Selecting previously unselected package xfonts-scalable.
+2026-11-25T15:14:46.5446063Z Preparing to unpack .../8-xfonts-scalable_1%3a1.0.3-1.3build1_all.deb ...
+2026-11-25T15:14:46.5457215Z Unpacking xfonts-scalable (1:1.0.3-1.3build1) ...
+2026-11-25T15:14:46.5887363Z Setting up fonts-wqy-zenhei (0.9.45-8build1) ...
+2026-11-25T15:14:46.6040934Z Setting up fonts-freefont-ttf (20211204+svn4273-4build1) ...
+2026-11-25T15:14:46.6061319Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1build1) ...
+2026-11-25T15:14:46.6080698Z Setting up xfonts-encodings (1:1.0.5-0ubuntu3) ...
+2026-11-25T15:14:46.6100704Z Setting up fonts-ipafont-gothic (00303-23ubuntu1) ...
+2026-11-25T15:14:46.6158727Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+2026-11-25T15:14:46.6175265Z Setting up fonts-unifont (1:16.0.04-1build1) ...
+2026-11-25T15:14:46.6196531Z Setting up xfonts-utils (1:7.7+7build1) ...
+2026-11-25T15:14:46.6251679Z Setting up xfonts-cyrillic (1:1.0.5+nmu1build1) ...
+2026-11-25T15:14:46.6688600Z Setting up xfonts-scalable (1:1.0.3-1.3build1) ...
+2026-11-25T15:14:46.7049352Z Processing triggers for man-db (2.13.1-1build1) ...
+2026-11-25T15:14:46.7082217Z Not building database; man-db/auto-update is not 'true'.
+2026-11-25T15:14:46.7097999Z Processing triggers for fontconfig (2.17.1-3ubuntu1) ...
+2026-11-25T15:14:47.3927700Z 
+2026-11-25T15:14:47.3928561Z Running kernel seems to be up-to-date.
+2026-11-25T15:14:47.3929089Z 
+2026-11-25T15:14:47.3929257Z Restarting services...
+2026-11-25T15:14:47.4006923Z 
+2026-11-25T15:14:47.4007979Z Service restarts being deferred:
+2026-11-25T15:14:47.4011576Z  systemctl restart hosted-compute-agent.service
+2026-11-25T15:14:47.4012232Z 
+2026-11-25T15:14:47.4012595Z No containers need to be restarted.
+2026-11-25T15:14:47.4012912Z 
+2026-11-25T15:14:47.4013241Z No user sessions are running outdated binaries.
+2026-11-25T15:14:47.4013703Z 
+2026-11-25T15:14:47.4014153Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-11-25T15:14:48.5318101Z Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-linux64.zip
+2026-11-25T15:14:48.9982574Z |                                                                                |   0% of 186.8 MiB
+2026-11-25T15:14:49.1832196Z |■■■■■■■■                                                                        |  10% of 186.8 MiB
+2026-11-25T15:14:49.2504690Z |■■■■■■■■■■■■■■■■                                                                |  20% of 186.8 MiB
+2026-11-25T15:14:49.2977285Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 186.8 MiB
+2026-11-25T15:14:49.3474344Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 186.8 MiB
+2026-11-25T15:14:49.3928126Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 186.8 MiB
+2026-11-25T15:14:49.4487775Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 186.8 MiB
+2026-11-25T15:14:49.5014016Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 186.8 MiB
+2026-11-25T15:14:49.5593923Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 186.8 MiB
+2026-11-25T15:14:49.6185075Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 186.8 MiB
+2026-11-25T15:14:49.6671705Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 186.8 MiB
+2026-11-25T15:14:52.5162699Z Chrome for Testing 153.0.8010.12 (playwright chromium v1243) downloaded to /home/runner/.cache/ms-playwright/chromium-1243
+2026-11-25T15:14:52.5166146Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+2026-11-25T15:14:52.9517161Z |                                                                                |   0% of 2.3 MiB
+2026-11-25T15:14:52.9879450Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+2026-11-25T15:14:53.0036876Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+2026-11-25T15:14:53.0141635Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+2026-11-25T15:14:53.0214808Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+2026-11-25T15:14:53.0268537Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+2026-11-25T15:14:53.0313857Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+2026-11-25T15:14:53.0351086Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+2026-11-25T15:14:53.0385933Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+2026-11-25T15:14:53.0416198Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+2026-11-25T15:14:53.0440453Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+2026-11-25T15:14:53.0988541Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+2026-11-25T15:14:53.0990856Z Downloading Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux64/chrome-headless-shell-linux64.zip
+2026-11-25T15:14:53.5051620Z |                                                                                |   0% of 114.3 MiB
+2026-11-25T15:14:53.6598569Z |■■■■■■■■                                                                        |  10% of 114.3 MiB
+2026-11-25T15:14:53.6992381Z |■■■■■■■■■■■■■■■■                                                                |  20% of 114.3 MiB
+2026-11-25T15:14:53.7390371Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.3 MiB
+2026-11-25T15:14:53.7786702Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.3 MiB
+2026-11-25T15:14:53.8084155Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.3 MiB
+2026-11-25T15:14:53.8367488Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.3 MiB
+2026-11-25T15:14:53.8663682Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.3 MiB
+2026-11-25T15:14:53.8934040Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.3 MiB
+2026-11-25T15:14:53.9256377Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.3 MiB
+2026-11-25T15:14:53.9554623Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.3 MiB
+2026-11-25T15:14:56.0348304Z Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1243
+2026-11-25T15:14:56.0571431Z ##[group]Run python3 -m unittest discover -s dev/perf/import-storage-20261124-3aac -p 'test_*.py' -v
+2026-11-25T15:14:56.0572663Z [36;1mpython3 -m unittest discover -s dev/perf/import-storage-20261124-3aac -p 'test_*.py' -v[0m
+2026-11-25T15:14:56.0596692Z shell: /usr/bin/bash -e {0}
+2026-11-25T15:14:56.0597061Z env:
+2026-11-25T15:14:56.0597583Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:56.0598080Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:56.0599068Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:56.0599894Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:56.0600189Z ##[endgroup]
+2026-11-25T15:14:56.1916748Z test_balanced_non_sah_changes_cannot_hide_behind_equal_total (test_storage_receipts.StorageReceiptTests.test_balanced_non_sah_changes_cannot_hide_behind_equal_total) ... ok
+2026-11-25T15:14:56.1918912Z test_duplicates_and_two_generation_files_fail (test_storage_receipts.StorageReceiptTests.test_duplicates_and_two_generation_files_fail) ... ok
+2026-11-25T15:14:56.1924674Z test_each_non_sah_size_change_fails_comparison (test_storage_receipts.StorageReceiptTests.test_each_non_sah_size_change_fails_comparison) ... ok
+2026-11-25T15:14:56.1927896Z test_each_required_non_sah_path_must_exist (test_storage_receipts.StorageReceiptTests.test_each_required_non_sah_path_must_exist) ... ok
+2026-11-25T15:14:56.1929351Z test_empty_sah_sizes_and_multiple_active_files_fail (test_storage_receipts.StorageReceiptTests.test_empty_sah_sizes_and_multiple_active_files_fail) ... ok
+2026-11-25T15:14:56.1931064Z test_extra_and_missing_sah_files_fail (test_storage_receipts.StorageReceiptTests.test_extra_and_missing_sah_files_fail) ... ok
+2026-11-25T15:14:56.1932824Z test_file_enumeration_and_documented_random_names_do_not_change_key (test_storage_receipts.StorageReceiptTests.test_file_enumeration_and_documented_random_names_do_not_change_key) ... ok
+2026-11-25T15:14:56.1936365Z test_frozen_vndb_bounds_preserve_every_raw_size (test_storage_receipts.StorageReceiptTests.test_frozen_vndb_bounds_preserve_every_raw_size) ... ok
+2026-11-25T15:14:56.1938057Z test_invalid_sizes_and_receipt_schema_fail (test_storage_receipts.StorageReceiptTests.test_invalid_sizes_and_receipt_schema_fail) ... ok
+2026-11-25T15:14:56.1939842Z test_offline_normalized_field_tampering_fails (test_storage_receipts.StorageReceiptTests.test_offline_normalized_field_tampering_fails) ... ok
+2026-11-25T15:14:56.1943200Z test_other_dictionaries_keep_exact_sah_allocation (test_storage_receipts.StorageReceiptTests.test_other_dictionaries_keep_exact_sah_allocation) ... ok
+2026-11-25T15:14:56.1944847Z test_outside_vndb_bounds_fails_even_when_both_arms_agree (test_storage_receipts.StorageReceiptTests.test_outside_vndb_bounds_fails_even_when_both_arms_agree) ... ok
+2026-11-25T15:14:56.1946802Z test_total_must_reconcile_with_every_file (test_storage_receipts.StorageReceiptTests.test_total_must_reconcile_with_every_file) ... ok
+2026-11-25T15:14:56.1948453Z test_unaligned_active_allocation_fails (test_storage_receipts.StorageReceiptTests.test_unaligned_active_allocation_fails) ... ok
+2026-11-25T15:14:56.1950262Z test_unknown_fixture_and_cross_fixture_paths_fail (test_storage_receipts.StorageReceiptTests.test_unknown_fixture_and_cross_fixture_paths_fail) ... ok
+2026-11-25T15:14:56.1952174Z test_unknown_path_is_rejected_even_on_baseline (test_storage_receipts.StorageReceiptTests.test_unknown_path_is_rejected_even_on_baseline) ... ok
+2026-11-25T15:14:56.1953155Z 
+2026-11-25T15:14:56.1953471Z ----------------------------------------------------------------------
+2026-11-25T15:14:56.1953972Z Ran 16 tests in 0.004s
+2026-11-25T15:14:56.1954187Z 
+2026-11-25T15:14:56.1954358Z OK
+2026-11-25T15:14:56.2073502Z ##[group]Run set -euo pipefail
+2026-11-25T15:14:56.2073968Z [36;1mset -euo pipefail[0m
+2026-11-25T15:14:56.2074475Z [36;1mmkdir -p "$RUNNER_TEMP/import-study-evidence"[0m
+2026-11-25T15:14:56.2075116Z [36;1mcp .github/workflows/import-studies-20261124-3aac.yml "$RUNNER_TEMP/import-study-evidence/workflow.yml"[0m
+2026-11-25T15:14:56.2075960Z [36;1mcp dev/perf/import-runtime-20261124-3aac.py "$RUNNER_TEMP/import-study-evidence/runner.py"[0m
+2026-11-25T15:14:56.2076777Z [36;1mcp -R dev/perf/import-storage-20261124-3aac "$RUNNER_TEMP/import-study-evidence/storage-policy"[0m
+2026-11-25T15:14:56.2077462Z [36;1mpython3 dev/perf/import-runtime-20261124-3aac.py \[0m
+2026-11-25T15:14:56.2078030Z [36;1m  --baseline "$PERF_BASELINE_SHA" --candidate "$PERF_CANDIDATE_SHA" \[0m
+2026-11-25T15:14:56.2078541Z [36;1m  --dictionary "$PERF_DICTIONARY" --stage screen \[0m
+2026-11-25T15:14:56.2079121Z [36;1m  --expected-differences "$PERF_EXPECTED_DIFFERENCES" \[0m
+2026-11-25T15:14:56.2080268Z [36;1m  --output "$RUNNER_TEMP/import-study-evidence/cohort" \[0m
+2026-11-25T15:14:56.2080845Z [36;1m  2>&1 | tee "$RUNNER_TEMP/import-study-evidence/runner.log"[0m
+2026-11-25T15:14:56.2103663Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-11-25T15:14:56.2104145Z env:
+2026-11-25T15:14:56.2104635Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:56.2105128Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:56.2106094Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:14:56.2106920Z   PERF_DICTIONARY: vndb
+2026-11-25T15:14:56.2107239Z ##[endgroup]
+2026-11-25T15:14:56.2841496Z [/home/runner/work/manabitan/manabitan] node --version
+2026-11-25T15:14:56.2876802Z [/home/runner/work/manabitan/manabitan] git rev-parse 7d1643e6147a10cb2165e9744cf0e63b59e46632^{commit}
+2026-11-25T15:14:56.2893531Z [/home/runner/work/manabitan/manabitan] git rev-parse 7d1643e6147a10cb2165e9744cf0e63b59e46632^{tree}
+2026-11-25T15:14:56.2908538Z [/home/runner/work/manabitan/manabitan] git rev-parse 7a8b25a44a3fe165107ed816377cc72bb0fac67d^{commit}
+2026-11-25T15:14:56.2922409Z [/home/runner/work/manabitan/manabitan] git rev-parse 7a8b25a44a3fe165107ed816377cc72bb0fac67d^{tree}
+2026-11-25T15:14:56.2936015Z [/home/runner/work/manabitan/manabitan] git merge-base --is-ancestor 7d1643e6147a10cb2165e9744cf0e63b59e46632 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:14:56.2952254Z [/home/runner/work/manabitan/manabitan] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:14:56.3001206Z [/home/runner/work/manabitan/manabitan] git rev-parse HEAD
+2026-11-25T15:14:56.3020355Z [/home/runner/work/manabitan/manabitan] git worktree add --detach /home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:14:56.6095650Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:14:56.9446572Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] npm run build:libs
+2026-11-25T15:14:57.4706498Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] npm run build -- --target chrome
+2026-11-25T15:15:00.8416184Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] git status --porcelain
+2026-11-25T15:15:01.0249674Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:15:01.3196650Z [/home/runner/work/manabitan/manabitan] git worktree add --detach /home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:15:01.6829260Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:15:02.1772644Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] npm run build:libs
+2026-11-25T15:15:02.7894908Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] npm run build -- --target chrome
+2026-11-25T15:15:06.2188468Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] git status --porcelain
+2026-11-25T15:15:06.4393074Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:15:06.7248856Z [/home/runner/work/manabitan/manabitan] git diff --stat 7d1643e6147a10cb2165e9744cf0e63b59e46632 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:15:06.7338841Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/prepare-dictionaries.js jmdict jmnedict jitendex vndb
+2026-11-25T15:15:09.6859005Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:15:09.7116031Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/warmup-A
+2026-11-25T15:15:37.9689618Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:15:37.9948556Z {"name": "warmup-A", "arm": "A", "cohort": "excluded-warmup", "block": null, "position": null, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 7619.699999999997, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "warmup-A/summary.json", "phaseCounters": "warmup-A/phase-counters.json", "commandElapsedSeconds": 28.282761754999996}
+2026-11-25T15:15:37.9954953Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:15:38.0213558Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/warmup-B
+2026-11-25T15:16:08.1334224Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:16:08.1589523Z {"name": "warmup-B", "arm": "B", "cohort": "excluded-warmup", "block": null, "position": null, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6667, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "warmup-B/summary.json", "phaseCounters": "warmup-B/phase-counters.json", "commandElapsedSeconds": 30.137179556000007}
+2026-11-25T15:16:08.1595186Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:16:08.1860229Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/warmup-C
+2026-11-25T15:16:34.6683636Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:16:34.6938545Z {"name": "warmup-C", "arm": "C", "cohort": "excluded-warmup", "block": null, "position": null, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6727.600000000006, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "warmup-C/summary.json", "phaseCounters": "warmup-C/phase-counters.json", "commandElapsedSeconds": 26.508077661}
+2026-11-25T15:16:34.6944148Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:16:34.7198150Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-01-1-A
+2026-11-25T15:17:01.1849817Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:17:01.2107866Z {"name": "block-01-1-A", "arm": "A", "cohort": "timed", "block": 1, "position": 1, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6686.100000000006, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-01-1-A/summary.json", "phaseCounters": "block-01-1-A/phase-counters.json", "commandElapsedSeconds": 26.489855820000002}
+2026-11-25T15:17:01.2114459Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:17:01.2370764Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-01-2-B
+2026-11-25T15:17:27.2958139Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:17:27.3213829Z {"name": "block-01-2-B", "arm": "B", "cohort": "timed", "block": 1, "position": 2, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6332.899999999994, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-01-2-B/summary.json", "phaseCounters": "block-01-2-B/phase-counters.json", "commandElapsedSeconds": 26.083579544999992}
+2026-11-25T15:17:27.3219707Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:17:27.3473131Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-01-3-C
+2026-11-25T15:17:53.7172386Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:17:53.7429062Z {"name": "block-01-3-C", "arm": "C", "cohort": "timed", "block": 1, "position": 3, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6666, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-01-3-C/summary.json", "phaseCounters": "block-01-3-C/phase-counters.json", "commandElapsedSeconds": 26.39440429999999}
+2026-11-25T15:17:53.7435664Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:17:53.7698284Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-02-1-C
+2026-11-25T15:18:19.9762195Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:18:20.0014880Z {"name": "block-02-1-C", "arm": "C", "cohort": "timed", "block": 2, "position": 1, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6691.400000000023, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-02-1-C/summary.json", "phaseCounters": "block-02-1-C/phase-counters.json", "commandElapsedSeconds": 26.231805246999983}
+2026-11-25T15:18:20.0021307Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:18:20.0290790Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-02-2-B
+2026-11-25T15:18:45.9588746Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:18:45.9849057Z {"name": "block-02-2-B", "arm": "B", "cohort": "timed", "block": 2, "position": 2, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6255.900000000023, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-02-2-B/summary.json", "phaseCounters": "block-02-2-B/phase-counters.json", "commandElapsedSeconds": 25.95592202900002}
+2026-11-25T15:18:45.9854129Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:18:46.0118171Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-02-3-A
+2026-11-25T15:19:12.5635612Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:19:12.5891513Z {"name": "block-02-3-A", "arm": "A", "cohort": "timed", "block": 2, "position": 3, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6621.899999999965, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-02-3-A/summary.json", "phaseCounters": "block-02-3-A/phase-counters.json", "commandElapsedSeconds": 26.577499392999982}
+2026-11-25T15:19:12.5897829Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:19:12.6154463Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-03-1-B
+2026-11-25T15:19:38.7318695Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:19:38.7576091Z {"name": "block-03-1-B", "arm": "B", "cohort": "timed", "block": 3, "position": 1, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6435.900000000023, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-03-1-B/summary.json", "phaseCounters": "block-03-1-B/phase-counters.json", "commandElapsedSeconds": 26.141293271999984}
+2026-11-25T15:19:38.7582788Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:19:38.7836830Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-03-2-A
+2026-11-25T15:20:04.9440392Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:20:04.9697689Z {"name": "block-03-2-A", "arm": "A", "cohort": "timed", "block": 3, "position": 2, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6428.600000000035, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-03-2-A/summary.json", "phaseCounters": "block-03-2-A/phase-counters.json", "commandElapsedSeconds": 26.183193650999954}
+2026-11-25T15:20:04.9704190Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:20:04.9958490Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-03-3-C
+2026-11-25T15:20:31.5583200Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:20:31.5847076Z {"name": "block-03-3-C", "arm": "C", "cohort": "timed", "block": 3, "position": 3, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6689.400000000023, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-03-3-C/summary.json", "phaseCounters": "block-03-3-C/phase-counters.json", "commandElapsedSeconds": 26.58705738699996}
+2026-11-25T15:20:31.5852949Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:20:31.6115891Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-04-1-C
+2026-11-25T15:20:57.8104404Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:20:57.8367253Z {"name": "block-04-1-C", "arm": "C", "cohort": "timed", "block": 4, "position": 1, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6547.700000000012, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-04-1-C/summary.json", "phaseCounters": "block-04-1-C/phase-counters.json", "commandElapsedSeconds": 26.224400801}
+2026-11-25T15:20:57.8374363Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:20:57.8632887Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-04-2-A
+2026-11-25T15:21:24.3732430Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:21:24.4001620Z {"name": "block-04-2-A", "arm": "A", "cohort": "timed", "block": 4, "position": 2, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6785.700000000012, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-04-2-A/summary.json", "phaseCounters": "block-04-2-A/phase-counters.json", "commandElapsedSeconds": 26.535049543000014}
+2026-11-25T15:21:24.4007333Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:21:24.4272891Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-04-3-B
+2026-11-25T15:21:50.7250964Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:21:50.7511131Z {"name": "block-04-3-B", "arm": "B", "cohort": "timed", "block": 4, "position": 3, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6269.799999999988, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-04-3-B/summary.json", "phaseCounters": "block-04-3-B/phase-counters.json", "commandElapsedSeconds": 26.323430040999995}
+2026-11-25T15:21:50.7516762Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:21:50.7776150Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-05-1-B
+2026-11-25T15:22:16.9883430Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:22:17.0148988Z {"name": "block-05-1-B", "arm": "B", "cohort": "timed", "block": 5, "position": 1, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6314.599999999977, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-05-1-B/summary.json", "phaseCounters": "block-05-1-B/phase-counters.json", "commandElapsedSeconds": 26.235834428000032}
+2026-11-25T15:22:17.0156237Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:22:17.0412571Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-05-2-C
+2026-11-25T15:22:43.2582771Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:22:43.2840384Z {"name": "block-05-2-C", "arm": "C", "cohort": "timed", "block": 5, "position": 2, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6451, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-05-2-C/summary.json", "phaseCounters": "block-05-2-C/phase-counters.json", "commandElapsedSeconds": 26.23906271300001}
+2026-11-25T15:22:43.2846929Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:22:43.3107110Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-05-3-A
+2026-11-25T15:23:09.5545349Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:23:09.5811306Z {"name": "block-05-3-A", "arm": "A", "cohort": "timed", "block": 5, "position": 3, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6565.79999999993, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-05-3-A/summary.json", "phaseCounters": "block-05-3-A/phase-counters.json", "commandElapsedSeconds": 26.26901705900002}
+2026-11-25T15:23:09.5819059Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:23:09.6083261Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-06-1-A
+2026-11-25T15:23:36.0094619Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:23:36.0348250Z {"name": "block-06-1-A", "arm": "A", "cohort": "timed", "block": 6, "position": 1, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6475.5, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-06-1-A/summary.json", "phaseCounters": "block-06-1-A/phase-counters.json", "commandElapsedSeconds": 26.426724099000012}
+2026-11-25T15:23:36.0356185Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:23:36.0605542Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-06-2-C
+2026-11-25T15:24:02.3803187Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:24:02.4062348Z {"name": "block-06-2-C", "arm": "C", "cohort": "timed", "block": 6, "position": 2, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6405, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-06-2-C/summary.json", "phaseCounters": "block-06-2-C/phase-counters.json", "commandElapsedSeconds": 26.34386034399995}
+2026-11-25T15:24:02.4069446Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:24:02.4320969Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check sample --output /home/runner/work/_temp/import-study-evidence/cohort/block-06-3-B
+2026-11-25T15:24:28.1628268Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:24:28.1893560Z {"name": "block-06-3-B", "arm": "B", "cohort": "timed", "block": 6, "position": 3, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "sample", "totalImportMs": 6164.5, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "block-06-3-B/summary.json", "phaseCounters": "block-06-3-B/phase-counters.json", "commandElapsedSeconds": 25.75517955700002}
+2026-11-25T15:24:28.1900681Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:24:28.2154981Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check all --output /home/runner/work/_temp/import-study-evidence/cohort/diagnostic-A
+2026-11-25T15:31:12.5906474Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] node dev/perf/host-environment.js
+2026-11-25T15:31:12.6160114Z {"name": "diagnostic-A", "arm": "A", "cohort": "exhaustive-diagnostic", "block": null, "position": null, "source": {"commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632", "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"}, "status": "success", "mediaCheck": "all", "totalImportMs": 6521.800000000047, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "diagnostic-A/summary.json", "phaseCounters": "diagnostic-A/phase-counters.json", "commandElapsedSeconds": 404.3997676959999}
+2026-11-25T15:31:12.6167338Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:31:12.6414418Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/import-benchmark.js vndb --runs 1 --no-build --build-target chrome --media-check all --output /home/runner/work/_temp/import-study-evidence/cohort/diagnostic-B
+2026-11-25T15:37:58.1949687Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] node dev/perf/host-environment.js
+2026-11-25T15:37:58.2214462Z {"name": "diagnostic-B", "arm": "B", "cohort": "exhaustive-diagnostic", "block": null, "position": null, "source": {"commit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d", "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"}, "status": "success", "mediaCheck": "all", "totalImportMs": 6190.099999999977, "storageBytes": 609553611, "activeSahFileBytes": 528384, "nonSahBytes": 608996555, "summary": "diagnostic-B/summary.json", "phaseCounters": "diagnostic-B/phase-counters.json", "commandElapsedSeconds": 405.57724351799993}
+2026-11-25T15:37:58.2218188Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:37:58.2402309Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A] git status --porcelain
+2026-11-25T15:37:58.2456090Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] git ls-files -- dev/perf test/chromium test/e2e test/perf test/firefox/data package.json package-lock.json .github/actions/setup/action.yml ext/js/core/json.js ext/js/core/safe-performance.js ext/js/dictionary/term-bank-experiments.js ext/js/data/anki-util.js ext/js/media/media-util.js ext/js/pages/settings/dictionary-import-controller.js
+2026-11-25T15:37:58.2638554Z [/home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B] git status --porcelain
+2026-11-25T15:37:58.3020212Z [/home/runner/work/manabitan/manabitan] git worktree remove --force /home/runner/work/_temp/import-runtime-3aac-8q30bd1p/A
+2026-11-25T15:37:58.7273432Z [/home/runner/work/manabitan/manabitan] git worktree remove --force /home/runner/work/_temp/import-runtime-3aac-8q30bd1p/B
+2026-11-25T15:37:59.1830417Z ##[group]Run actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+2026-11-25T15:37:59.1830955Z with:
+2026-11-25T15:37:59.1831303Z   name: current-media-screen-vndb-2754
+2026-11-25T15:37:59.1832156Z   path: /home/runner/work/_temp/import-study-evidence
+2026-11-25T15:37:59.1832574Z   if-no-files-found: error
+2026-11-25T15:37:59.1833002Z   retention-days: 14
+2026-11-25T15:37:59.1833340Z   compression-level: 6
+2026-11-25T15:37:59.1833738Z   overwrite: false
+2026-11-25T15:37:59.1834070Z   include-hidden-files: false
+2026-11-25T15:37:59.1834421Z env:
+2026-11-25T15:37:59.1834830Z   PERF_BASELINE_SHA: 7d1643e6147a10cb2165e9744cf0e63b59e46632
+2026-11-25T15:37:59.1835374Z   PERF_CANDIDATE_SHA: 7a8b25a44a3fe165107ed816377cc72bb0fac67d
+2026-11-25T15:37:59.1836303Z   PERF_EXPECTED_DIFFERENCES: ["js/dictionary/term-bank-wasm-parser-worker.js","js/dictionary/term-bank-wasm-parser.js","js/dictionary/wasm/term-bank-parser.c","lib/term-bank-parser.wasm"]
+2026-11-25T15:37:59.1837296Z   PERF_DICTIONARY: vndb
+2026-11-25T15:37:59.1837650Z ##[endgroup]
+2026-11-25T15:37:59.4003866Z With the provided path, there will be 212 files uploaded
+2026-11-25T15:37:59.4005260Z Artifact name is valid!
+2026-11-25T15:37:59.4005713Z Root directory input is valid!
+2026-11-25T15:37:59.7268426Z Beginning upload of artifact content to blob storage
+2026-11-25T15:38:00.3678218Z Uploaded bytes 1078333
+2026-11-25T15:38:00.4113504Z Finished uploading artifact content to blob storage!
+2026-11-25T15:38:00.4115126Z SHA256 digest of uploaded artifact zip is 66a52eb28790f1bc10d38cb81569bf6077104696fdfd685f15965339f02efdf9
+2026-11-25T15:38:00.4116156Z Finalizing artifact upload
+2026-11-25T15:38:00.9432054Z Artifact current-media-screen-vndb-2754.zip successfully finalized. Artifact ID 15037168171
+2026-11-25T15:38:00.9433084Z Artifact current-media-screen-vndb-2754 has been successfully uploaded! Final size is 1078333 bytes. Artifact ID is 15037168171
+2026-11-25T15:38:00.9436980Z Artifact download URL: https://github.com/ManabiIO/manabitan/actions/runs/45642169759/artifacts/15037168171
+2026-11-25T15:38:00.9615080Z Post job cleanup.
+2026-11-25T15:38:00.9619378Z ##[start-action display=Setup node;id=__e400c8ea-036b-468b-9fe0-e997a7183060.__actions_setup-node]
+2026-11-25T15:38:00.9662678Z Post job cleanup.
+2026-11-25T15:38:01.0918876Z (node:11810) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-25T15:38:01.0919992Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-25T15:38:01.0922237Z Cache hit occurred on the primary key node-cache-Linux-x64-npm-a9e110cc353a5819b73d48a0926caec4717310dec0a88046014ab59b43176531, not saving cache.
+2026-11-25T15:38:01.0981054Z ##[end-action id=__e400c8ea-036b-468b-9fe0-e997a7183060.__actions_setup-node;outcome=success;conclusion=success;duration_ms=136]
+2026-11-25T15:38:01.1051616Z Post job cleanup.
+2026-11-25T15:38:01.1907970Z [command]/usr/bin/git version
+2026-11-25T15:38:01.1947405Z git version 2.56.1
+2026-11-25T15:38:01.1985771Z Temporarily overriding HOME='/home/runner/work/_temp/9c5dcfb4-a409-4906-8821-4f34bf42cc62' before making global git config changes
+2026-11-25T15:38:01.1987316Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-25T15:38:01.1989966Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/manabitan/manabitan
+2026-11-25T15:38:01.2022124Z Removing SSH command configuration
+2026-11-25T15:38:01.2028402Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-25T15:38:01.2062669Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-25T15:38:01.2342419Z Removing HTTP extra header
+2026-11-25T15:38:01.2343544Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-25T15:38:01.2380092Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-25T15:38:01.2680883Z Removing includeIf entries pointing to credentials config files
+2026-11-25T15:38:01.2697488Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-25T15:38:01.2748594Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-25T15:38:01.3245857Z Cleaning up orphan processes
+2026-11-25T15:38:01.3577198Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+

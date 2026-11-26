@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {toError} from '../core/to-error.js';
@@ -115,8 +116,14 @@ const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
 const resolvedContentReferenceOrigins = new WeakMap();
 const ARRAY_BUFFER_BYTE_LENGTH_DESCRIPTOR = Object.getOwnPropertyDescriptor(ArrayBuffer.prototype, 'byteLength');
 const MAX_SINGLE_LOOKUP_INDEX_READ_BYTES = 32 * 1024 * 1024;
+const MIN_DIRECT_LOOKUP_INDEX_READ_BYTES = 8 * 1024 * 1024;
 const LOOKUP_INDEX_READ_AHEAD_BYTES = 16 * 1024 * 1024;
 const EMPTY_BYTES = new Uint8Array(0);
+const MAX_EXACT_LOOKUP_ROUTE_BYTES = 32 * 1024 * 1024;
+const MAX_EXACT_LOOKUP_SELECTED_BYTES = 64 * 1024 * 1024;
+const MAX_EXACT_LOOKUP_SELECTED_FRACTION = 0.75;
+const MAX_EXACT_LOOKUP_ROUTE_CHUNKS = 512;
+const MAX_EXACT_LOOKUP_ROUTE_TERMS = 64;
 
 /**
  * Parses an on-disk decimal filename field without allowing Number rounding,
@@ -803,6 +810,13 @@ class DenseIdRecordStore {
  * @property {import('./term-lookup-index.js').PersistedTermLookupIndex} lookupIndex
  */
 
+/** @typedef {Pick<PersistentRecordChunk, 'firstId'|'count'>} PersistentRecordRange */
+/** @typedef {PersistentRecordRange & {start: number, end: number, header: Uint8Array}} ExactLookupChunkRange */
+/** @typedef {{end: number, generationId: Uint8Array, recordCount: number, chunkCount: number, chunks: ExactLookupChunkRange[]}} ExactLookupShardSelection */
+/** @typedef {{end: number, generationId: Uint8Array, recordCount: number, chunks: (ExactLookupChunkRange & {filter: Uint32Array})[]}} ExactLookupShardRoute */
+/** @typedef {{dictionaryName: string, shards: Map<TermRecordShardState, ExactLookupShardRoute>, bytes: number, chunkCount: number, published: boolean}} ExactLookupRoute */
+/** @typedef {{dictionaryName: string, chunks: PersistentRecordChunk[], terms: Set<string>, isCurrent: () => boolean}} ExactLookupView */
+
 /**
  * @typedef {object} TermRecordRenamePlan
  * @property {TermRecordShardState} state
@@ -860,6 +874,10 @@ export class TermRecordOpfsStore {
         this._queuedWriteBudgetBytes = this._computeQueuedWriteBudgetBytes();
         /** @type {boolean} */
         this._importSessionActive = false;
+        /** @type {ExactLookupRoute|null} */
+        this._exactLookupRoute = null;
+        /** @type {boolean} */
+        this._exactLookupRouteAbandoned = false;
         /** @type {Promise<import('./term-record-import-index-worker-client.js').ImportIndexWorkerClient|null>|null} */
         this._importIndexWorkerPromise = null;
         /** @type {DenseIdRecordStore} */
@@ -913,6 +931,7 @@ export class TermRecordOpfsStore {
 
     /** */
     _invalidateAllPersistentLookupState() {
+        this._exactLookupRoute = null;
         ++this._persistentLookupGeneration;
         this._persistentRecordChunksByDictionary.clear();
         this._persistentIndexLoadedDictionaryNames.clear();
@@ -927,6 +946,7 @@ export class TermRecordOpfsStore {
      * @param {boolean} [resetRepairRetry=true]
      */
     _invalidatePersistentLookupState(dictionaryName, resetRepairRetry = true) {
+        if (this._exactLookupRoute?.dictionaryName === dictionaryName) { this._exactLookupRoute = null; }
         this._persistentLookupGenerationByDictionary.set(
             dictionaryName,
             (this._persistentLookupGenerationByDictionary.get(dictionaryName) ?? 0) + 1,
@@ -1184,6 +1204,8 @@ export class TermRecordOpfsStore {
                 return;
             }
             this._importSessionActive = true;
+            this._exactLookupRoute = null;
+            this._exactLookupRouteAbandoned = false;
             this._deferIndexBuild = true;
             this._indexDirty = true;
             this._reloadFromShardsAfterImport = false;
@@ -2395,7 +2417,7 @@ export class TermRecordOpfsStore {
      * @param {number[]|Uint32Array} contentLengths
      * @param {import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan|null} [preinternedPlan]
      * @param {string} [contentDictName='raw']
-     * @param {Map<string, {bytes: Uint8Array, preinternedPlan: import('./term-record-preinterned-plan.js').PreinternedTermRecordPlan}>|null} [preparedLookupIndexes=null]
+     * @param {Map<string, import('./term-lookup-index-preparation.js').PreparedTermLookupIndex>|null} [preparedLookupIndexes=null]
      * @returns {Promise<{encodeMs: number, appendWriteMs: number, validationMs: number, recordFieldEncodeMs: number, lookupIndexEncodeMs: number}>}
      */
     async _encodeAndAppendArtifactChunkForState(state, chunk, firstId, contentOffsets, contentLengths, preinternedPlan = null, contentDictName = 'raw', preparedLookupIndexes = null) {
@@ -2513,6 +2535,9 @@ export class TermRecordOpfsStore {
                 encodedChunk.lookupIndexBytes,
                 encodedChunk.recordFields,
                 encodedChunk.recordFieldsFormat,
+                (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES ?
+                    preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :
+                    null,
             );
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
@@ -3048,11 +3073,86 @@ export class TermRecordOpfsStore {
     }
 
     /**
+     * Read a large, already bounded index into its final buffer in the
+     * dictionary worker. The caller still validates the on-disk data.
+     * @param {FileSystemFileHandle} fileHandle
+     * @param {File} file
+     * @returns {Promise<Uint8Array>}
+     */
+    async _readWholeLookupIndex(fileHandle, file) {
+        if (file.size >= MIN_DIRECT_LOOKUP_INDEX_READ_BYTES && typeof fileHandle.createSyncAccessHandle === 'function') {
+            try {
+                // The DOM library still declares the original zero-argument method.
+                const readOnlyHandle = /** @type {{createSyncAccessHandle: (options: {mode: 'read-only'}) => Promise<FileSystemSyncAccessHandle>}} */ (fileHandle);
+                const access = await readOnlyHandle.createSyncAccessHandle({mode: 'read-only'});
+                try {
+                    if (access.getSize() === file.size) {
+                        const bytes = new Uint8Array(file.size);
+                        if (access.read(bytes, {at: 0}) === bytes.byteLength) { return bytes; }
+                    }
+                } finally {
+                    access.close();
+                }
+            } catch (_) {
+                // The snapshot read also works when read-only access is unavailable.
+            }
+        }
+        return await this._readFileRange(file, 0, file.size);
+    }
+
+    /**
+     * The index loader bounds and validates each window before publishing it.
+     * Yield between reads so other lookup work can run in this worker.
+     * @param {FileSystemFileHandle} fileHandle
+     * @param {File} file
+     * @returns {Promise<{read: (start: number, end: number) => Promise<Uint8Array>, close: () => void}|null>}
+     */
+    async _openRangedLookupIndexReader(fileHandle, file) {
+        const {scheduler} = /** @type {{scheduler?: {yield: () => Promise<void>}}} */ (globalThis);
+        if (typeof scheduler?.yield !== 'function' || typeof fileHandle.createSyncAccessHandle !== 'function') { return null; }
+        /** @type {FileSystemSyncAccessHandle|null} */
+        let access = null;
+        const close = () => {
+            const handle = access;
+            access = null;
+            try { handle?.close(); } catch (_) { /* Use the snapshot if direct reads are unavailable. */ }
+        };
+        try {
+            const readOnlyHandle = /** @type {{createSyncAccessHandle: (options: {mode: 'read-only'}) => Promise<FileSystemSyncAccessHandle>}} */ (fileHandle);
+            access = await readOnlyHandle.createSyncAccessHandle({mode: 'read-only'});
+            if (access.getSize() !== file.size) {
+                close();
+                return null;
+            }
+        } catch (_) {
+            close();
+            return null;
+        }
+        return {
+            read: async (start, end) => {
+                if (access !== null && end - start <= LOOKUP_INDEX_READ_AHEAD_BYTES) {
+                    await scheduler.yield();
+                    if (access !== null) {
+                        try {
+                            const bytes = new Uint8Array(end - start);
+                            if (access.read(bytes, {at: start}) === bytes.byteLength) { return bytes; }
+                        } catch (_) { /* Retry the range using the file snapshot. */ }
+                        close();
+                    }
+                }
+                return await this._readFileRange(file, start, end);
+            },
+            close,
+        };
+    }
+
+    /**
      * @param {number} id
+     * @param {Iterable<PersistentRecordChunk[]>} [owners]
      * @returns {PersistentRecordChunk|null}
      */
-    _findPersistentRecordChunk(id) {
-        for (const chunks of this._persistentRecordChunksByDictionary.values()) {
+    _findPersistentRecordChunk(id, owners = this._persistentRecordChunksByDictionary.values()) {
+        for (const chunks of owners) {
             let low = 0;
             let high = chunks.length - 1;
             while (low <= high) {
@@ -3072,16 +3172,24 @@ export class TermRecordOpfsStore {
 
     /**
      * @param {Iterable<number>} ids
+     * @param {ExactLookupView|null} [view=null]
      * @returns {Promise<Map<number, TermRecord>>}
      */
-    async getByIdsAsync(ids) {
+    async getByIdsAsync(ids, view = null) {
         const idList = [...new Set(ids)];
+        if (view !== null && !view.isCurrent()) { return new Map(); }
         const result = this.getByIds(idList);
+        const owners = view === null ? void 0 : [view.chunks, ...this._persistentRecordChunksByDictionary.values()];
+        if (view !== null) {
+            for (const [id, record] of result) {
+                if (record.dictionary === view.dictionaryName) { result.delete(id); }
+            }
+        }
         /** @type {Map<ReturnType<TermRecordOpfsStore['_findPersistentRecordChunk']>, number[]>} */
         const idsByChunk = new Map();
         for (const id of idList) {
             if (result.has(id)) { continue; }
-            const chunk = this._findPersistentRecordChunk(id);
+            const chunk = this._findPersistentRecordChunk(id, owners);
             if (chunk === null) { continue; }
             const chunkIds = idsByChunk.get(chunk);
             if (typeof chunkIds === 'undefined') {
@@ -3095,7 +3203,7 @@ export class TermRecordOpfsStore {
             if (chunk === null) { continue; }
             if (
                 this.getDictionaryHealth(chunk.dictionaryName).status === 'reimportRequired' ||
-                !(this._persistentRecordChunksByDictionary.get(chunk.dictionaryName) ?? []).includes(chunk)
+                (view?.dictionaryName !== chunk.dictionaryName && !(this._persistentRecordChunksByDictionary.get(chunk.dictionaryName) ?? []).includes(chunk))
             ) { continue; }
             const compactFields = chunk.compactRecordFields;
             const fieldsView = compactFields === null ?
@@ -3142,7 +3250,7 @@ export class TermRecordOpfsStore {
                         compactFields.scores[compactFields.scoreKeys[ordinal]],
                     sequence: getPersistedTermSequence(chunk.lookupIndex, ordinal),
                 };
-                this._storeRecord(record);
+                if (view?.dictionaryName !== chunk.dictionaryName) { this._storeRecord(record); }
                 result.set(id, record);
             }
         }
@@ -3807,20 +3915,56 @@ export class TermRecordOpfsStore {
             this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Term-record directory is unavailable');
             return false;
         }
-        const states = [...this._shardStateByFileName.values()]
-            .filter((state) => this._decodeDictionaryNameFromShardFileName(state.fileName) === dictionaryName)
-            .sort((a, b) => a.fileName.localeCompare(b.fileName));
+        const states = this._getDictionaryShardStates(dictionaryName);
         if (states.length === 0) {
             this._recordPersistentIndexFailure(dictionaryName, 'missing', 'No term-record shards exist');
             return false;
         }
+        const isCurrent = () => this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration);
+        let recordChunks;
+        try {
+            recordChunks = await this._readPersistentDictionaryIndex(this._recordsDirectoryHandle, dictionaryName, states, isCurrent);
+        } catch (error) {
+            if (isCurrent()) {
+                this._recordPersistentIndexFailure(
+                    dictionaryName,
+                    error instanceof PersistentLookupIndexError ? error.kind : 'transient',
+                    error instanceof Error ? error.message : String(error),
+                );
+            }
+            return false;
+        }
+        if (recordChunks === null || !isCurrent() || !this._validatePersistentRecordIdOwnership(dictionaryName, recordChunks)) { return false; }
+        this._indexByDictionary.delete(dictionaryName);
+        this._persistentRecordChunksByDictionary.set(dictionaryName, recordChunks);
+        if (this._exactLookupRoute?.dictionaryName === dictionaryName) { this._exactLookupRoute = null; }
+        this._persistentIndexLoadedDictionaryNames.add(dictionaryName);
+        this._persistentIndexFailureByDictionary.delete(dictionaryName);
+        this._setDictionaryHealth(dictionaryName, 'available');
+        return true;
+    }
+
+    /**
+     * @param {FileSystemDirectoryHandle} directory
+     * @param {string} dictionaryName
+     * @param {TermRecordShardState[]} states
+     * @param {() => boolean} isCurrent
+     * @param {Map<TermRecordShardState, ExactLookupShardSelection>|null} [selection=null]
+     * @returns {Promise<PersistentRecordChunk[]|null>}
+     * @throws {Error} If any required part of the index cannot be verified.
+     */
+    async _readPersistentDictionaryIndex(directory, dictionaryName, states, isCurrent, selection = null) {
         /** @type {PersistentRecordChunk[]} */
         const recordChunks = [];
+        /** @type {Awaited<ReturnType<TermRecordOpfsStore['_openRangedLookupIndexReader']>>} */
+        let rangedReader = null;
         try {
             for (const state of states) {
+                rangedReader?.close();
+                rangedReader = null;
                 let indexFileHandle;
                 try {
-                    indexFileHandle = await this._recordsDirectoryHandle.getFileHandle(
+                    indexFileHandle = await directory.getFileHandle(
                         `${state.fileName}${LOOKUP_INDEX_FILE_SUFFIX}`,
                         {create: false},
                     );
@@ -3850,16 +3994,24 @@ export class TermRecordOpfsStore {
                 if (recordFile.size < (BINARY_HEADER_PREFIX_BYTES + 2) || indexFile.size < LOOKUP_INDEX_FILE_HEADER_BYTES) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index is truncated for ${state.fileName}`);
                 }
+                const selectedShard = selection?.get(state);
+                if (selection !== null && (
+                    typeof selectedShard === 'undefined' || selectedShard.end !== indexFile.size
+                )) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index does not match the import route for ${state.fileName}`);
+                }
                 // Read small indexes in one pass. For larger files, check the
                 // descriptor before prefetching a bounded window of chunks.
-                const shouldReadWholeIndex = indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES;
+                const shouldReadWholeIndex = selection === null && indexFile.size <= MAX_SINGLE_LOOKUP_INDEX_READ_BYTES;
                 const initialReadLength = shouldReadWholeIndex ? indexFile.size : LOOKUP_INDEX_FILE_HEADER_BYTES;
+                if (!shouldReadWholeIndex) { rangedReader = await this._openRangedLookupIndexReader(indexFileHandle, indexFile); }
+                const readIndexBytes = (/** @type {number} */ start, /** @type {number} */ end) => {
+                    return rangedReader?.read(start, end) ?? this._readFileRange(indexFile, start, end);
+                };
                 const [indexRead, recordHeader] = await Promise.all([
-                    this._readFileRange(
-                        indexFile,
-                        0,
-                        initialReadLength,
-                    ),
+                    shouldReadWholeIndex ?
+                        this._readWholeLookupIndex(indexFileHandle, indexFile) :
+                        readIndexBytes(0, initialReadLength),
                     this._readFileRange(recordFile, 0, BINARY_HEADER_PREFIX_BYTES),
                 ]);
                 if (indexRead.byteLength !== initialReadLength) {
@@ -3870,10 +4022,14 @@ export class TermRecordOpfsStore {
                 // body share the same window even when a chunk crosses a boundary.
                 let window = indexRead;
                 let windowStart = 0;
+                let selectedChunkEnd = 0;
                 const readIndexRange = async (/** @type {number} */ start, /** @type {number} */ end, /** @type {number} */ chunkStart) => {
                     if (start < windowStart || end > windowStart + window.byteLength) {
-                        const readEnd = Math.min(indexFile.size, Math.max(chunkStart + LOOKUP_INDEX_READ_AHEAD_BYTES, end));
-                        const bytes = await this._readFileRange(indexFile, chunkStart, readEnd);
+                        const readEnd = selectedChunkEnd || Math.min(indexFile.size, Math.max(chunkStart + LOOKUP_INDEX_READ_AHEAD_BYTES, end));
+                        if (end > readEnd) {
+                            throw new PersistentLookupIndexError('invalid', `Lookup index chunk exceeds its import range for ${state.fileName}`);
+                        }
+                        const bytes = await readIndexBytes(chunkStart, readEnd);
                         if (bytes.byteLength !== readEnd - chunkStart) {
                             throw new PersistentLookupIndexError('transient', `Short lookup index read for ${state.fileName}`);
                         }
@@ -3885,7 +4041,7 @@ export class TermRecordOpfsStore {
                 const indexHeader = shouldReadWholeIndex ?
                     indexRead.subarray(0, LOOKUP_INDEX_FILE_HEADER_BYTES) :
                     indexRead;
-                if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
+                if (!isCurrent()) { return null; }
                 const headerView = new DataView(indexHeader.buffer, indexHeader.byteOffset, indexHeader.byteLength);
                 if (this._textDecoder.decode(indexHeader.subarray(0, LOOKUP_INDEX_MAGIC_BYTES)) !== LOOKUP_INDEX_MAGIC_TEXT) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index header is invalid for ${state.fileName}`);
@@ -3898,7 +4054,13 @@ export class TermRecordOpfsStore {
                 if (!bytesEqual(recordGenerationId, indexGenerationId)) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index generation does not match ${state.fileName}`);
                 }
-                state.generationId = new Uint8Array(recordGenerationId);
+                if (typeof selectedShard !== 'undefined') {
+                    if (!bytesEqual(recordGenerationId, selectedShard.generationId)) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index generation does not match the import route for ${state.fileName}`);
+                    }
+                } else {
+                    state.generationId = new Uint8Array(recordGenerationId);
+                }
                 let expectedDescriptorFileLength;
                 try {
                     expectedDescriptorFileLength = readSafeU64Le(headerView, 8);
@@ -3931,10 +4093,18 @@ export class TermRecordOpfsStore {
                 ) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index size is implausible for ${state.fileName}`);
                 }
+                if (typeof selectedShard !== 'undefined' && (
+                    selectedShard.chunkCount !== chunkCount || selectedShard.recordCount !== expectedRecordCount
+                )) {
+                    throw new PersistentLookupIndexError('invalid', `Lookup index dimensions do not match the import route for ${state.fileName}`);
+                }
                 let cursor = LOOKUP_INDEX_FILE_HEADER_BYTES;
                 let actualRecordCount = 0;
-                for (let chunkIndex = 0; chunkIndex < chunkCount; ++chunkIndex) {
-                    const chunkHeaderStart = cursor;
+                const readChunkCount = selectedShard?.chunks.length ?? chunkCount;
+                for (let chunkIndex = 0; chunkIndex < readChunkCount; ++chunkIndex) {
+                    const selectedChunk = selectedShard?.chunks[chunkIndex];
+                    selectedChunkEnd = selectedChunk?.end ?? 0;
+                    const chunkHeaderStart = selectedChunk?.start ?? cursor;
                     const chunkHeaderEnd = chunkHeaderStart + LOOKUP_INDEX_CHUNK_HEADER_BYTES;
                     if (!Number.isSafeInteger(chunkHeaderEnd) || chunkHeaderEnd > indexFile.size) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk header is truncated for ${state.fileName}`);
@@ -3942,7 +4112,10 @@ export class TermRecordOpfsStore {
                     const chunkHeader = shouldReadWholeIndex ?
                         indexRead.subarray(chunkHeaderStart, chunkHeaderEnd) :
                         await readIndexRange(chunkHeaderStart, chunkHeaderEnd, chunkHeaderStart);
-                    if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
+                    if (!isCurrent()) { return null; }
+                    if (typeof selectedChunk !== 'undefined' && !bytesEqual(chunkHeader, selectedChunk.header)) {
+                        throw new PersistentLookupIndexError('invalid', `Lookup index chunk header does not match the import route for ${state.fileName}`);
+                    }
                     const chunkView = new DataView(chunkHeader.buffer, chunkHeader.byteOffset, chunkHeader.byteLength);
                     const firstId = chunkView.getUint32(0, true);
                     const count = chunkView.getUint32(4, true);
@@ -3999,13 +4172,13 @@ export class TermRecordOpfsStore {
                         throw new PersistentLookupIndexError('invalid', `Lookup index record fields are invalid for ${state.fileName}`, error);
                     }
                     const chunkBodyEnd = recordFieldsStart + recordFieldsLength;
-                    if (!Number.isSafeInteger(chunkBodyEnd) || chunkBodyEnd > indexFile.size) {
+                    if (!Number.isSafeInteger(chunkBodyEnd) || chunkBodyEnd > indexFile.size || (selectedChunkEnd !== 0 && chunkBodyEnd !== selectedChunkEnd)) {
                         throw new PersistentLookupIndexError('invalid', `Lookup index chunk metadata is invalid for ${state.fileName}`);
                     }
                     const chunkBody = shouldReadWholeIndex ?
                         indexRead.subarray(payloadStart, chunkBodyEnd) :
                         await readIndexRange(payloadStart, chunkBodyEnd, chunkHeaderStart);
-                    if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
+                    if (!isCurrent()) { return null; }
                     const payload = chunkBody.subarray(0, payloadLength);
                     let sections;
                     try {
@@ -4065,45 +4238,121 @@ export class TermRecordOpfsStore {
                     actualRecordCount += count;
                     cursor = chunkBodyEnd;
                 }
-                if (cursor !== indexFile.size || actualRecordCount !== expectedRecordCount) {
+                if (selection === null && (cursor !== indexFile.size || actualRecordCount !== expectedRecordCount)) {
                     throw new PersistentLookupIndexError('invalid', `Lookup index file length is invalid for ${state.fileName}`);
                 }
             }
-        } catch (error) {
-            if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
-            if (error instanceof PersistentLookupIndexError) {
-                this._recordPersistentIndexFailure(dictionaryName, error.kind, error.message);
-            } else {
-                this._recordPersistentIndexFailure(
-                    dictionaryName,
-                    'transient',
-                    error instanceof Error ? error.message : String(error),
-                );
-            }
-            return false;
+        } finally {
+            rangedReader?.close();
         }
-        if (!this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration)) { return false; }
+        if (!isCurrent()) { return null; }
         recordChunks.sort((a, b) => a.firstId - b.firstId);
         for (let i = 1; i < recordChunks.length; ++i) {
             if (recordChunks[i].firstId <= (recordChunks[i - 1].firstId + recordChunks[i - 1].count - 1)) {
-                this._recordPersistentIndexFailure(dictionaryName, 'invalid', 'Lookup index record ranges overlap');
-                return false;
+                throw new PersistentLookupIndexError('invalid', 'Lookup index record ranges overlap');
             }
         }
         if (
             this._importSessionActive ||
             states.some((state) => this._shardStateByFileName.get(state.fileName) !== state)
         ) {
-            this._recordPersistentIndexFailure(dictionaryName, 'transient', 'Lookup index generation changed while loading');
-            return false;
+            throw new PersistentLookupIndexError('transient', 'Lookup index generation changed while loading');
         }
-        if (!this._validatePersistentRecordIdOwnership(dictionaryName, recordChunks)) { return false; }
-        this._indexByDictionary.delete(dictionaryName);
-        this._persistentRecordChunksByDictionary.set(dictionaryName, recordChunks);
-        this._persistentIndexLoadedDictionaryNames.add(dictionaryName);
-        this._persistentIndexFailureByDictionary.delete(dictionaryName);
-        this._setDictionaryHealth(dictionaryName, 'available');
-        return true;
+        return recordChunks;
+    }
+
+    /**
+     * Makes the optional import route visible only after the dictionary's
+     * durable publication. A route never survives a different import session.
+     * @param {string} dictionaryName
+     */
+    publishExactLookupRoute(dictionaryName) {
+        const route = this._exactLookupRoute;
+        if (route === null) { return; }
+        if (route.dictionaryName !== dictionaryName || this._importSessionActive) {
+            this._exactLookupRoute = null;
+            return;
+        }
+        route.published = true;
+    }
+
+    /** @returns {string|null} */
+    getExactLookupRouteOwner() {
+        return this._exactLookupRoute?.published === true ? this._exactLookupRoute.dictionaryName : null;
+    }
+
+    /**
+     * Prepare only the index ranges needed for one complete batch of exact
+     * queries. Missing, stale, dense and failed routes use the full reader.
+     * @param {string} dictionaryName
+     * @param {string[]} terms
+     * @returns {Promise<ExactLookupView|null>}
+     */
+    async prepareExactLookupView(dictionaryName, terms) {
+        const route = this._exactLookupRoute;
+        const directory = this._recordsDirectoryHandle;
+        if (
+            route === null || !route.published || route.dictionaryName !== dictionaryName || directory === null ||
+            this._importSessionActive || this._storageMutationActive ||
+            this._persistentIndexLoadedDictionaryNames.has(dictionaryName) ||
+            this._persistentIndexLoadPromiseByDictionary.has(dictionaryName) ||
+            this.getDictionaryHealth(dictionaryName).status !== 'available' ||
+            terms.length === 0 || terms.length > MAX_EXACT_LOOKUP_ROUTE_TERMS
+        ) { return null; }
+
+        const states = this._getDictionaryShardStates(dictionaryName);
+        if (states.length === 0 || route.shards.size !== states.length) { return null; }
+        const queryTerms = new Set(terms);
+        const hashes = [...new Set([...queryTerms].map((term) => hashTermLookupKeyBytes(this._textEncoder.encode(term))))];
+        /** @type {Map<TermRecordShardState, ExactLookupShardSelection>} */
+        const selection = new Map();
+        /** @type {PersistentRecordRange[]} */
+        const recordRanges = [];
+        let selectedBytes = 0;
+        let indexBodyBytes = 0;
+        for (const state of states) {
+            const shard = route.shards.get(state);
+            if (typeof shard === 'undefined') { return null; }
+            indexBodyBytes += shard.end - LOOKUP_INDEX_FILE_HEADER_BYTES;
+            /** @type {ExactLookupChunkRange[]} */
+            const chunks = [];
+            for (const chunk of shard.chunks) {
+                const {firstId, count, start, end, header, filter} = chunk;
+                recordRanges.push({firstId, count});
+                if (!hashes.some((hash) => termLookupFilterMayContain(filter, hash))) { continue; }
+                selectedBytes += end - start;
+                if (selectedBytes > MAX_EXACT_LOOKUP_SELECTED_BYTES) { return null; }
+                chunks.push({firstId, count, start, end, header});
+            }
+            selection.set(state, {end: shard.end, generationId: shard.generationId, recordCount: shard.recordCount, chunkCount: shard.chunks.length, chunks});
+        }
+        // Dense queries benefit from the full reader's coalesced I/O and leave
+        // a complete lookup cache for subsequent requests.
+        if (selectedBytes > indexBodyBytes * MAX_EXACT_LOOKUP_SELECTED_FRACTION) { return null; }
+        recordRanges.sort((a, b) => a.firstId - b.firstId);
+        for (let i = 1; i < recordRanges.length; ++i) {
+            if (recordRanges[i].firstId < recordRanges[i - 1].firstId + recordRanges[i - 1].count) { return null; }
+        }
+
+        const globalGeneration = this._persistentLookupGeneration;
+        const dictionaryGeneration = this._getPersistentLookupGeneration(dictionaryName);
+        // These scopes own their response. Completing a parallel full-index
+        // read may release the routing filter while this scope is still valid.
+        const isCurrent = () => (
+            !this._importSessionActive && !this._storageMutationActive &&
+            !this._pendingDictionaryDeletionNames.has(dictionaryName) &&
+            this._isPersistentLookupGenerationCurrent(dictionaryName, globalGeneration, dictionaryGeneration) &&
+            this.getDictionaryHealth(dictionaryName).status === 'available'
+        );
+        let chunks;
+        try {
+            chunks = await this._readPersistentDictionaryIndex(directory, dictionaryName, states, isCurrent, selection);
+        } catch (_) {
+            if (this._exactLookupRoute === route) { this._exactLookupRoute = null; }
+            return null;
+        }
+        if (chunks === null || !isCurrent() || !this._validatePersistentRecordIdOwnership(dictionaryName, recordRanges)) { return null; }
+        return {dictionaryName, chunks, terms: queryTerms, isCurrent};
     }
 
     /**
@@ -4112,7 +4361,7 @@ export class TermRecordOpfsStore {
      * is authoritative enough to choose a winner, so quarantine both rather
      * than returning one dictionary's content for the other's lookup match.
      * @param {string} dictionaryName
-     * @param {PersistentRecordChunk[]} recordChunks Sorted, nonoverlapping ranges.
+     * @param {PersistentRecordRange[]} recordChunks Sorted, nonoverlapping ranges.
      * @returns {boolean}
      */
     _validatePersistentRecordIdOwnership(dictionaryName, recordChunks) {
@@ -4783,15 +5032,20 @@ export class TermRecordOpfsStore {
      * and hashing, which are otherwise repeated for every enabled dictionary.
      * @param {string[]} dictionaryNames
      * @param {string} query
+     * @param {ExactLookupView|null} [view=null]
      * @returns {Array<{expression: number[], reading: number[]}>}
+     * @throws {Error} If a query is outside its exact lookup scope.
      */
-    findTermIdMatchesForDictionaries(dictionaryNames, query) {
+    findTermIdMatchesForDictionaries(dictionaryNames, query, view = null) {
+        if (view !== null && !view.terms.has(query)) { throw new Error('Term is outside the exact lookup scope'); }
         /** @type {Uint8Array|null} */
         let queryBytes = null;
         let queryHash = 0;
         return dictionaryNames.map((dictionaryName) => {
-            const chunks = this._persistentRecordChunksByDictionary.get(dictionaryName);
-            if (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) && typeof chunks !== 'undefined') {
+            const chunks = view?.dictionaryName === dictionaryName ?
+view.chunks :
+                (this._persistentIndexLoadedDictionaryNames.has(dictionaryName) ? this._persistentRecordChunksByDictionary.get(dictionaryName) : void 0);
+            if (typeof chunks !== 'undefined') {
                 if (queryBytes === null) {
                     queryBytes = this._textEncoder.encode(query);
                     queryHash = hashTermLookupKeyBytes(queryBytes);
@@ -5767,6 +6021,7 @@ export class TermRecordOpfsStore {
      * @param {Uint8Array|null} [lookupIndexBytes=null]
      * @param {Uint8Array|null} [recordFields=null]
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
+     * @param {Uint32Array|null} [routeFilter=null]
      * @returns {Promise<void>}
      */
     async _appendEncodedChunk(
@@ -5778,6 +6033,7 @@ export class TermRecordOpfsStore {
         lookupIndexBytes = null,
         recordFields = null,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
+        routeFilter = null,
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
@@ -5816,6 +6072,12 @@ export class TermRecordOpfsStore {
                 recordFields,
                 recordFieldsFormat,
             );
+            if (
+                this._importSessionActive && !this._exactLookupRouteAbandoned &&
+                (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES
+            ) {
+                this._recordExactLookupRouteChunk(state, firstId, count, lookupIndexChunk, lookupIndexBytes, routeFilter);
+            }
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
             state.pendingLookupIndexRecordCount += count;
@@ -5840,6 +6102,48 @@ export class TermRecordOpfsStore {
                 await this._closeShardWritable(state);
             }
         }
+    }
+
+    /**
+     * Retain routing metadata from complete immutable bytes before a queued
+     * writer can transfer the chunk. The actual index file is unchanged.
+     * @param {TermRecordShardState} state
+     * @param {number} firstId
+     * @param {number} count
+     * @param {Uint8Array} chunk
+     * @param {Uint8Array} payload
+     * @param {Uint32Array|null} preparedFilter
+     */
+    _recordExactLookupRouteChunk(state, firstId, count, chunk, payload, preparedFilter) {
+        const dictionaryName = this._decodeDictionaryNameFromShardFileName(state.fileName);
+        if (dictionaryName === null) { return; }
+        /** @type {ExactLookupRoute} */
+        const route = this._exactLookupRoute ?? {
+            dictionaryName, shards: new Map(), bytes: 0, chunkCount: 0, published: false,
+        };
+        const base = splitPersistedTermLookupIndex(payload).base;
+        const filter = buildTermLookupFilterFromBase(base, preparedFilter);
+        if (
+            filter === null || route.dictionaryName !== dictionaryName ||
+            route.chunkCount >= MAX_EXACT_LOOKUP_ROUTE_CHUNKS ||
+            route.bytes + filter.byteLength > MAX_EXACT_LOOKUP_ROUTE_BYTES
+        ) {
+            this._exactLookupRoute = null;
+            this._exactLookupRouteAbandoned = true;
+            return;
+        }
+        let shard = route.shards.get(state);
+        if (typeof shard === 'undefined') {
+            shard = {end: LOOKUP_INDEX_FILE_HEADER_BYTES, generationId: new Uint8Array(state.generationId), recordCount: 0, chunks: []};
+            route.shards.set(state, shard);
+        }
+        const start = shard.end;
+        shard.end += chunk.byteLength;
+        shard.recordCount += count;
+        shard.chunks.push({firstId, count, start, end: shard.end, header: chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES), filter});
+        route.bytes += filter.byteLength;
+        ++route.chunkCount;
+        this._exactLookupRoute = route;
     }
 
     /**

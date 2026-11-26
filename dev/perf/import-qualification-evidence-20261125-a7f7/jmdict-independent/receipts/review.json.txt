@@ -1,0 +1,16 @@
+{
+  "base": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "head": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+  "tree": "59959442e3d7ec9290d9da5d1177a7df28b58ed1",
+  "trackedDiff": "",
+  "node": "v22.22.0",
+  "replayHarnessCommit": "96f5ed82a76ecca9dcb8dea382ec54af288a0ffe",
+  "replayHarnessSha256": "e547dff7ea572c19a466f565968dccbf47eb665965883ac56bfc25eae30feb9b",
+  "review": "No correctness blocker found. Stronger exact-index-subview guard than independent local candidate. Broader but safe score-accessor parent admission because the child score snapshot is independently guarded. No product follow-up warranted.",
+  "focusedTests": {
+    "passed": 75,
+    "failed": 0,
+    "files": 4
+  },
+  "initialIndependentDifference": "One original score-accessor parent staging-count expectation failed after byte equality passed. Its source and output are retained; adapted run changes only that expectation and case label."
+}

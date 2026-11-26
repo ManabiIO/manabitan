@@ -1,0 +1,3 @@
+{"status": "passed", "dictionary": "jmdict", "observationsReopened": 23, "candidate": "c2cf7647c67b02474301ed48e54a53205be0f027", "recordedAuditReproducedExactly": true}
+{"status": "passed", "dictionary": "jitendex", "observationsReopened": 23, "candidate": "c2cf7647c67b02474301ed48e54a53205be0f027", "recordedAuditReproducedExactly": true}
+{"status": "passed", "dictionary": "vndb", "observationsReopened": 23, "candidate": "c2cf7647c67b02474301ed48e54a53205be0f027", "recordedAuditReproducedExactly": true}

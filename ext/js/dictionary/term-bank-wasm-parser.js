@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {buildTermLookupFilter} from './term-lookup-route.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
 import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
+import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
 import {createTermRecordPreinternedPlanBuilder} from './term-record-preinterned-plan.js';
@@ -77,7 +79,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
 /** @typedef {{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename?: string}} CompressedTermBankSource */
 /** @typedef {Uint8Array|CompressedTermBankSource} ParallelTermBankSourceValue */
 /** @typedef {{wasm: TermBankWasmExports, jsonPtr: number, jsonLength: number, sourceCount: number, bankSpansPtr?: number, bankSpanCount?: number, crcSignaturesPtr?: number, crcStatsPtr?: number, crcVerified?: boolean, crcError?: Error, crcMs?: number, crcScannedBytes?: number, crcReusedBytes?: number, crcReusedGlossaryCount?: number, inflateMs: number, compressedBytes: number, uncompressedBytes: number}} PreloadedTermBankSource */
-/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
+/** @typedef {{memory: WebAssembly.Memory, wasm_reset_heap: () => void, wasm_alloc: (size: number) => number, wasm_get_last_parse_capacity: () => number, wasm_get_last_content_capacity: () => number, inflate_and_join_term_banks: (...args: number[]) => number, verify_term_bank_source_crcs?: (...args: number[]) => number, inflate_zip_media_batch: (...args: number[]) => number, project_single_glossary_image_path?: (sourcePtr: number, sourceLength: number) => bigint, parse_term_bank: (...args: number[]) => number, parse_term_bank_with_media_hints: (...args: number[]) => number, parse_and_encode_term_bank_token_binary_dedup: (...args: number[]) => number, build_term_string_plan: (...args: number[]) => number, compact_term_lookup_keys?: (...args: number[]) => number, encode_term_lookup_index: (...args: number[]) => number, encode_term_content: (...args: number[]) => number, encode_term_content_no_hash: (...args: number[]) => number, encode_term_content_token_binary: (...args: number[]) => number, encode_term_content_token_binary_dedup: (...args: number[]) => number}} TermBankWasmExports */
 /**
  * Options shared by column parsing and its worker transport. Keep per-call
  * preloaded WASM memory separate from the transferable worker options.
@@ -96,6 +98,7 @@ const EMPTY_UINT8_ARRAY = new Uint8Array(0);
  * emitTermByteLists?: boolean,
  * singleChunk?: boolean,
  * prepareLookupIndexes?: boolean,
+ * prepareLookupRoute?: boolean,
  * }} TermBankColumnParserOptions
  */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
@@ -193,6 +196,7 @@ async function getWasm() {
             inflate_and_join_term_banks: exports.inflate_and_join_term_banks,
             verify_term_bank_source_crcs: typeof exports.verify_term_bank_source_crcs === 'function' ? exports.verify_term_bank_source_crcs : void 0,
             inflate_zip_media_batch: exports.inflate_zip_media_batch,
+            project_single_glossary_image_path: typeof exports.project_single_glossary_image_path === 'function' ? exports.project_single_glossary_image_path : void 0,
             parse_term_bank: exports.parse_term_bank,
             parse_term_bank_with_media_hints: exports.parse_term_bank_with_media_hints,
             parse_and_encode_term_bank_token_binary_dedup: exports.parse_and_encode_term_bank_token_binary_dedup,
@@ -1674,14 +1678,19 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
             indexScratch,
         );
         if (bytes === null) { return null; }
-        const ownedPlan = {stringLengths: new Uint16Array(runPlan.stringLengths),
-            stringOffsets: new Uint32Array(runPlan.stringOffsets),
+        /* eslint-disable @stylistic/semi */
+        // The owned v7 base already contains the compact lengths immediately
+        // after its padded key arena. Reuse that column; offsets are optional
+        // and can be reconstructed from lengths if a later split needs them.
+        const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(length / 4) * 4, keys)
+        const ownedPlan = {stringLengths,
             stringHashes: new Uint32Array(runPlan.stringHashes),
             // v7: 16-byte container header, then the 32-byte base header.
             stringsBuffer: bytes.subarray(48, 48 + length),
             expressionIndexes: new Uint32Array(runPlan.expressionIndexes),
-            readingIndexes: new Uint32Array(runPlan.readingIndexes)};
-        indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan});
+            readingIndexes: new Uint32Array(runPlan.readingIndexes)}
+        indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan})
+        /* eslint-enable @stylistic/semi */
     }
     return indexes;
 }
@@ -4003,13 +4012,42 @@ function copyProjectedMediaKeyBytes(bytes, index, offsets, lengths, ownedStrings
 }
 
 /**
+ * The worker's live inflated-source capability bounds this synchronous read.
+ * Native projection proves complete collector semantics, not merely a media
+ * hint, and returns one quoted token without allocating or changing the heap.
+ * Foreign/private views and general results retain the JavaScript collector.
+ * @param {ParsedTermBankRow} row
+ * @param {PreloadedTermBankSource|undefined} source
+ * @returns {string[]|null}
+ */
+function tryProjectNativeGlossaryImagePath(row, source) {
+    if (typeof source === 'undefined' || row.glossaryJson.length > 0) { return null; }
+    const bytes = row.glossaryJsonBytes;
+    const {wasm, jsonPtr, jsonLength} = source;
+    const project = wasm.project_single_glossary_image_path;
+    if (
+        typeof project !== 'function' || !(bytes instanceof Uint8Array) ||
+        bytes.buffer !== wasm.memory.buffer || bytes.byteOffset < jsonPtr ||
+        bytes.byteOffset + bytes.byteLength > jsonPtr + jsonLength
+    ) { return null; }
+    const span = project(bytes.byteOffset, bytes.byteLength);
+    if (span === 0n) { return null; }
+    const start = Number((span >> 32n) & 0xffffffffn);
+    const length = Number(span & 0xffffffffn);
+    const path = decodeJsonStringToken(bytes, start, length);
+    return getImageMediaTypeFromFileName(path) === null ? null : [path];
+}
+
+/**
  * @param {TermBankColumnChunk} chunk
  * @param {boolean} [shareContentBytes=false]
  * @param {boolean} [projectImagePaths=false]
+ * @param {boolean} [prepareLookupRoute=false]
+ * @param {PreloadedTermBankSource} [preloadedSource]
  * @returns {TermBankColumnChunk}
  * @throws {Error} If the native string plan is incomplete.
  */
-export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false) {
+export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, projectImagePaths = false, prepareLookupRoute = false, preloadedSource = void 0) {
     const sourceContentMetaList = chunk.contentMetaList ?? new Uint32Array(0);
     const contentMetaList = new Uint32Array(sourceContentMetaList);
     let {contentBytesLength} = chunk;
@@ -4047,11 +4085,11 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
     const ownedStrings = new Uint8Array(plan.stringsBuffer);
     const mediaRows = chunk.mediaRows.map(({index, row}) => {
         const imagePaths = projectImagePaths && row.termEntryContentBytes.length > 0 ?
-            tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
+            (tryProjectNativeGlossaryImagePath(row, preloadedSource) ?? tryCollectGlossaryImagePaths(row.glossaryJson.length > 0 || !(row.glossaryJsonBytes instanceof Uint8Array) ?
                 row.glossaryJson :
                 glossaryJsonDecoder.decode(row.glossaryJsonBytes.buffer instanceof ArrayBuffer ?
                     row.glossaryJsonBytes :
-                    new Uint8Array(row.glossaryJsonBytes))) :
+                    new Uint8Array(row.glossaryJsonBytes)))) :
             [];
         const useProjectedPaths = imagePaths.length > 0;
         return {
@@ -4096,6 +4134,7 @@ export function copyWasmBackedColumnChunk(chunk, shareContentBytes = false, proj
                     new Uint8Array(prepared.bytes) :
                     prepared.bytes,
                 preinternedPlan: prepared.preinternedPlan === plan ? stablePlan : prepared.preinternedPlan,
+                ...(prepareLookupRoute ? {routeFilter: buildTermLookupFilter(prepared.preinternedPlan.stringHashes)} : {}),
             });
         }
     }

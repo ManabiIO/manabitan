@@ -1,0 +1,507 @@
+{
+    "schemaVersion": 1,
+    "recordedAtUtc": "2026-11-25 16:14:50 UTC",
+    "scope": "Source correctness and build CI; performance promotion remains a separate failed gate",
+    "runs": [
+        {
+            "pr": 899,
+            "run": 45641722087,
+            "head": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+            "tree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5",
+            "url": "https://github.com/ManabiIO/manabitan/actions/runs/45641722087",
+            "passed": 15,
+            "skipped": 4,
+            "jobs": [
+                {
+                    "id": 139301857711,
+                    "name": "Anki Deduplication Matrix (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858201,
+                    "name": "Unit Tests",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858290,
+                    "name": "Full Extension E2E (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858366,
+                    "name": "Full Extension E2E (Firefox)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858416,
+                    "name": "Test Build",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858669,
+                    "name": "CSS",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858672,
+                    "name": "JavaScript",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858832,
+                    "name": "Unit Tests (options)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858850,
+                    "name": "HTML",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858951,
+                    "name": "TypeScript (bench)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301858952,
+                    "name": "TypeScript (dev)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301859005,
+                    "name": "TypeScript (test)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301859025,
+                    "name": "JSON",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301859076,
+                    "name": "Markdown",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301859177,
+                    "name": "TypeScript (main)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139301860461,
+                    "name": "Published release upgrade and reimport",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139301861089,
+                    "name": "Firefox Android Installation Smoke (blocking)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139301861622,
+                    "name": "Full Extension E2E (Edge)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139301952315,
+                    "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                }
+            ]
+        },
+        {
+            "pr": 905,
+            "run": 45644919029,
+            "head": "f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9",
+            "tree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+            "url": "https://github.com/ManabiIO/manabitan/actions/runs/45644919029",
+            "passed": 15,
+            "skipped": 4,
+            "jobs": [
+                {
+                    "id": 139313198807,
+                    "name": "Full Extension E2E (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199316,
+                    "name": "Unit Tests",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199318,
+                    "name": "JavaScript",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199364,
+                    "name": "HTML",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199412,
+                    "name": "Markdown",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199414,
+                    "name": "Anki Deduplication Matrix (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199426,
+                    "name": "Test Build",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199454,
+                    "name": "Unit Tests (options)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199571,
+                    "name": "TypeScript (dev)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199655,
+                    "name": "Full Extension E2E (Firefox)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199674,
+                    "name": "TypeScript (main)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199692,
+                    "name": "TypeScript (test)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199710,
+                    "name": "TypeScript (bench)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313199817,
+                    "name": "CSS",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313200119,
+                    "name": "JSON",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139313201431,
+                    "name": "Full Extension E2E (Edge)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139313201679,
+                    "name": "Published release upgrade and reimport",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139313261998,
+                    "name": "Firefox Android Installation Smoke (blocking)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139313269063,
+                    "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                }
+            ]
+        },
+        {
+            "pr": 893,
+            "run": 45642650714,
+            "head": "811950b5cbd1a81a365848bf63675c46a8ff0dde",
+            "tree": "7beefa4ffa5efca14d3efff7af042234ff1f5e0b",
+            "url": "https://github.com/ManabiIO/manabitan/actions/runs/45642650714",
+            "passed": 15,
+            "skipped": 4,
+            "jobs": [
+                {
+                    "id": 139305151245,
+                    "name": "Full Extension E2E (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151580,
+                    "name": "JavaScript",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151765,
+                    "name": "Unit Tests (options)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151776,
+                    "name": "CSS",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151792,
+                    "name": "Full Extension E2E (Firefox)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151797,
+                    "name": "Unit Tests",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151800,
+                    "name": "HTML",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151816,
+                    "name": "Anki Deduplication Matrix (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151858,
+                    "name": "JSON",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151873,
+                    "name": "TypeScript (test)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305151970,
+                    "name": "TypeScript (dev)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305152022,
+                    "name": "TypeScript (main)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305152068,
+                    "name": "Test Build",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305152152,
+                    "name": "TypeScript (bench)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305152160,
+                    "name": "Markdown",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139305154140,
+                    "name": "Published release upgrade and reimport",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139305154416,
+                    "name": "Full Extension E2E (Edge)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139305154424,
+                    "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139305154520,
+                    "name": "Firefox Android Installation Smoke (blocking)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                }
+            ]
+        },
+        {
+            "pr": 895,
+            "run": 45640793230,
+            "head": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+            "tree": "f0d5739c8344b4d14d6b51e0e740e0908e444400",
+            "url": "https://github.com/ManabiIO/manabitan/actions/runs/45640793230",
+            "passed": 15,
+            "skipped": 4,
+            "jobs": [
+                {
+                    "id": 139298527817,
+                    "name": "Full Extension E2E (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528052,
+                    "name": "Test Build",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528066,
+                    "name": "Full Extension E2E (Firefox)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528183,
+                    "name": "Anki Deduplication Matrix (Chromium)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528522,
+                    "name": "TypeScript (test)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528899,
+                    "name": "TypeScript (dev)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528914,
+                    "name": "HTML",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528935,
+                    "name": "JSON",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528949,
+                    "name": "TypeScript (main)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298528966,
+                    "name": "Markdown",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298529011,
+                    "name": "Unit Tests",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298529086,
+                    "name": "Unit Tests (options)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298529130,
+                    "name": "TypeScript (bench)",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298529145,
+                    "name": "JavaScript",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298529338,
+                    "name": "CSS",
+                    "status": "completed",
+                    "conclusion": "success"
+                },
+                {
+                    "id": 139298530610,
+                    "name": "Full Extension E2E (Edge)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139298530639,
+                    "name": "Firefox Android Installation Smoke (blocking)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139298531905,
+                    "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                },
+                {
+                    "id": 139298638250,
+                    "name": "Published release upgrade and reimport",
+                    "status": "completed",
+                    "conclusion": "skipped"
+                }
+            ]
+        }
+    ]
+}

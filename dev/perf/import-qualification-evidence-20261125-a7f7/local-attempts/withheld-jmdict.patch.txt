@@ -1,0 +1,530 @@
+diff --git a/ext/js/dictionary/term-record-opfs-store.js b/ext/js/dictionary/term-record-opfs-store.js
+index be1d8b638..523d3d157 100644
+--- a/ext/js/dictionary/term-record-opfs-store.js
++++ b/ext/js/dictionary/term-record-opfs-store.js
+@@ -435,6 +435,27 @@ function getSynchronousRecordFieldReferences(chunk, count) {
+     } catch { return null }
+     return references
+ }
++
++/**
++ * Preserve the factory origin when internal slicing creates fresh ordinary
++ * objects. This carries no validated spans across an await: both the producer
++ * and the sliced columns still pass their current guards before each encode.
++ * Keep unproven, accessor-backed, shared and unusual score inputs on the
++ * generic path even if slicing happens to produce ordinary columns.
++ * @param {{scoreList: number[]|Int32Array|Float64Array, fixedContentLength?: number, resolvedContentReferences?: ResolvedContentReferences}} source
++ * @param {{resolvedContentReferences?: ResolvedContentReferences}} target
++ * @param {number} count
++ */
++function inheritSlicedRecordFieldOrigin(source, target, count) {
++    const references = getSynchronousRecordFieldReferences(source, count)
++    const sliced = target.resolvedContentReferences
++    if (
++        references !== null && typeof sliced === 'object' && sliced !== null &&
++        sliced.offsets === references.offsets && sliced.lengths === references.lengths
++    ) {
++        resolvedContentReferenceOrigins.set(target, sliced)
++    }
++}
+ /* eslint-enable @stylistic/semi */
+ 
+ /**
+@@ -2321,6 +2342,8 @@ export class TermRecordOpfsStore {
+                 termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, runStart, runCount),
+                 resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
+             };
++            /* eslint-disable-next-line @stylistic/semi */
++            inheritSlicedRecordFieldOrigin(chunk, chunkSlice, count)
+             const metrics = await this._encodeAndAppendArtifactChunkForState(
+                 state,
+                 chunkSlice,
+@@ -2501,6 +2524,9 @@ export class TermRecordOpfsStore {
+                     fixedContentLength: chunk.fixedContentLength,
+                     resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
+                 };
++            /* eslint-disable @stylistic/semi */
++            if (!isWholeChunk) { inheritSlicedRecordFieldOrigin(chunk, runChunk, count) }
++            /* eslint-enable @stylistic/semi */
+             const runUsesContentReferences = hasResolvedContentReferences(runChunk, runCount);
+             const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentOffsets : contentOffsets.slice(runStart, runEnd);
+             const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentLengths : contentLengths.slice(runStart, runEnd);
+diff --git a/test/fixtures/record-split-origin/replay.mjs b/test/fixtures/record-split-origin/replay.mjs
+new file mode 100644
+index 000000000..6ef8cbfa6
+--- /dev/null
++++ b/test/fixtures/record-split-origin/replay.mjs
+@@ -0,0 +1,222 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import assert from 'node:assert/strict'
++import {createHash} from 'node:crypto'
++import {createReadStream, openAsBlob} from 'node:fs'
++import {readFile, writeFile} from 'node:fs/promises'
++import {join, resolve} from 'node:path'
++import {pathToFileURL} from 'node:url'
++import {Worker as ThreadWorker} from 'node:worker_threads'
++import {BlobReader, Uint8ArrayWriter, ZipReader} from '@zip.js/zip.js'
++
++// Replay the actual source planner and parser workers. Only persistence is
++// intercepted. Resolved spans use native content lengths at deterministic
++// offsets; this checks record bytes, not compression or whole-database parity.
++const [parentPath, candidatePath, cachePath, outputPath, dictionary = 'jmdict', cpus = '4', memory = '8'] = process.argv.slice(2)
++assert(parentPath && candidatePath && cachePath && outputPath)
++const parentRoot = resolve(parentPath)
++const candidateRoot = resolve(candidatePath)
++// The CLI explicitly selects the two local source trees to compare.
++// eslint-disable-next-line no-unsanitized/method
++const localImport = (root, filename) => import(pathToFileURL(join(root, filename)))
++const parser = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-wasm-parser.js')
++const pipelineModule = await localImport(candidateRoot, 'ext/js/dictionary/term-bank-source-pipeline.js')
++const parents = await localImport(parentRoot, 'ext/js/dictionary/term-record-opfs-store.js')
++const candidates = await localImport(candidateRoot, 'ext/js/dictionary/term-record-opfs-store.js')
++const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
++const lockBytes = await readFile(join(candidateRoot, 'test/perf/dictionaries.lock.json'))
++assert.deepEqual(lockBytes, await readFile(join(parentRoot, 'test/perf/dictionaries.lock.json')))
++const fixture = JSON.parse(lockBytes).dictionaries[dictionary]
++assert(fixture)
++const archivePath = join(cachePath, fixture.cacheFile)
++const archiveHash = createHash('sha256')
++for await (const bytes of createReadStream(archivePath)) { archiveHash.update(bytes) }
++assert.equal(archiveHash.digest('hex'), fixture.sha256)
++const archive = await openAsBlob(archivePath)
++assert.equal(archive.size, fixture.sizeBytes)
++const wasm = await readFile(join(candidateRoot, 'ext/lib/term-bank-parser.wasm'))
++assert.deepEqual(wasm, await readFile(join(parentRoot, 'ext/lib/term-bank-parser.wasm')))
++parser.setTermBankWasmModule(await WebAssembly.compile(wasm))
++
++const terminations = []
++const sourceGroups = []
++class BrowserWorker extends EventTarget {
++    constructor(url) {
++        super()
++        this.worker = new ThreadWorker(pathToFileURL(join(candidateRoot, 'test/fixtures/parser-settlement/worker-node.mjs')), {workerData: {url: url.href}})
++        this.worker.on('message', (data) => this.dispatchEvent(new MessageEvent('message', {data})))
++        this.worker.on('error', (error) => {
++            const event = new Event('error')
++            Object.defineProperty(event, 'message', {value: error.message})
++            this.dispatchEvent(event)
++        })
++        this.worker.on('messageerror', () => this.dispatchEvent(new MessageEvent('messageerror')))
++    }
++
++    postMessage(data, transfer) {
++        if (data.type === 'parse') {
++            sourceGroups.push({id: data.id, files: data.sourceMetadata?.map(({filename}) => filename) ?? null, bytes: data.sourceBuffers.map((buffer) => buffer.byteLength)})
++        }
++        this.worker.postMessage(data, transfer)
++    }
++
++    terminate() { terminations.push(this.worker.terminate()) }
++}
++globalThis.Worker = BrowserWorker
++Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {hardwareConcurrency: Number(cpus), deviceMemory: Number(memory)}})
++
++const reader = new ZipReader(new BlobReader(archive))
++const entries = await reader.getEntries()
++const termFiles = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
++const rawReader = new pipelineModule.RawZipPayloadReader(archive)
++const sourcePipeline = new pipelineModule.TermBankSourcePipeline({
++    termFiles,
++    enabled: true,
++    read: async (file) => await file.getData(new Uint8ArrayWriter(), {useWebWorkers: false, checkSignature: true}),
++    readCompressed: async (file, signal) => await rawReader.read(file, signal),
++})
++const groups = []
++const profiles = []
++const fullDigest = createHash('sha256')
++let rowCount = 0
++let contentBase = 2 ** 40
++
++async function encode(module, chunk, offsets, lengths) {
++    const store = new module.TermRecordOpfsStore()
++    const writes = []
++    const copies = {u32: 0, u16: 0}
++    const fields = store._encodeArtifactRecordFields.bind(store)
++    store._encodeArtifactRecordFields = (...args) => {
++        const set32 = Uint32Array.prototype.set
++        const set16 = Uint16Array.prototype.set
++        // Observe only synchronous field encoding, restoring both builtins even
++        // if an encoder throws. No parser or persistence work runs in this scope.
++        /* eslint-disable no-extend-native */
++        Uint32Array.prototype.set = function count32(source, offset) {
++            copies.u32 += source.length * 4
++            return set32.call(this, source, offset)
++        }
++        Uint16Array.prototype.set = function count16(source, offset) {
++            copies.u16 += source.length * 2
++            return set16.call(this, source, offset)
++        }
++        try { return fields(...args) } finally {
++            Uint32Array.prototype.set = set32
++            Uint16Array.prototype.set = set16
++        }
++        /* eslint-enable no-extend-native */
++    }
++    store._appendEncodedChunk = async (...args) => { writes.push(args) }
++    const recordChunk = module.createArtifactTermRecordChunkWithResolvedContent(
++        {...chunk, dictionary: fixture.expectedTitle},
++        chunk.contentUniqueIndexList,
++        offsets,
++        lengths,
++        chunk.preparedLookupIndexes,
++    )
++    await store._encodeAndAppendArtifactChunkForState({}, recordChunk, rowCount + 1, new Float64Array(0), new Uint32Array(0), chunk.termRecordPreinternedPlan, 'raw', chunk.preparedLookupIndexes)
++    return {writes, copies}
++}
++
++async function consume(chunk) {
++    const plan = chunk.contentDedupPlan
++    assert(plan && chunk.contentUniqueIndexList && chunk.contentMetaList)
++    const offsets = new Float64Array(plan.uniqueCount)
++    const lengths = new Uint32Array(plan.uniqueCount)
++    for (let i = 0; i < plan.uniqueCount; ++i) {
++        const meta = (chunk.contentMetaByUniqueIndex ? i : plan.uniqueRowIndexes[i]) * 4
++        offsets[i] = contentBase + chunk.contentMetaList[meta]
++        lengths[i] = chunk.contentMetaList[meta + 1]
++    }
++    const before = await encode(parents, chunk, offsets, lengths)
++    const after = await encode(candidates, chunk, offsets, lengths)
++    assert.deepEqual(after.writes, before.writes)
++    for (const args of after.writes) {
++        fullDigest.update(args[5])
++        fullDigest.update(args[6])
++    }
++    groups.push({rows: chunk.rowCount, prepared: [...chunk.preparedLookupIndexes.keys()], runRows: after.writes.map((args) => args[2]), parentCopies: before.copies, candidateCopies: after.copies})
++    rowCount += chunk.rowCount
++    contentBase += chunk.contentBytesLength ?? chunk.contentBytesBuffer.byteLength
++    process.stderr.write(`${dictionary}: ${rowCount}/${fixture.termRows} rows\n`)
++}
++
++const media = fixture.mediaFiles > 0
++const options = {
++    emitTermByteLists: false,
++    computeContentHashes: true,
++    emitContentSlab: true,
++    emitTokenBinaryContent: true,
++    mediaHintFastScan: media,
++    projectImagePaths: media,
++    validateGlossaryTypes: true,
++    prepareLookupIndexes: true,
++    maxPendingChunks: 2,
++}
++let complete = false
++let error = null
++try {
++    for (let start = 0; start < termFiles.length;) {
++        const compressedPlan = sourcePipeline.createCompressedImportRunPlan(start)
++        if (compressedPlan !== null) {
++            assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelCompressedLazy(compressedPlan.loaders, compressedPlan.estimatedByteLengths, 3, consume, options), true)
++            profiles.push(parser.consumeLastTermBankWasmParseProfile())
++            sourcePipeline.releaseBatch(compressedPlan.files)
++            start += compressedPlan.files.length
++        } else {
++            const files = sourcePipeline.getBatch(start)
++            const batch = await sourcePipeline.readBatch(files)
++            if (batch?.promises) {
++                assert.equal(await parser.parseTermBankWithWasmColumnChunksParallelDeferred(batch.promises, batch.estimatedByteLengths, 3, consume, options), true)
++            } else {
++                await parser.parseTermBankWithWasmColumnChunks(batch, 3, consume, 2048, {...options, singleChunk: true})
++            }
++            profiles.push(parser.consumeLastTermBankWasmParseProfile())
++            sourcePipeline.releaseBatch(files)
++            start += files.length
++        }
++    }
++    assert.equal(rowCount, fixture.termRows)
++    complete = true
++} catch (failure) {
++    error = String(failure)
++    throw failure
++} finally {
++    await sourcePipeline.dispose()
++    await parser.disposeParallelTermBankParser()
++    await Promise.all(terminations)
++    await reader.close()
++    const summary = {rows: 0, runs: 0, parentCopyBytes: 0, candidateCopyBytes: 0}
++    for (const group of groups) {
++        summary.rows += group.rows
++        summary.runs += group.runRows.length
++        summary.parentCopyBytes += group.parentCopies.u32 + group.parentCopies.u16
++        summary.candidateCopyBytes += group.candidateCopies.u32 + group.candidateCopies.u16
++    }
++    summary.copyBytesAvoided = summary.parentCopyBytes - summary.candidateCopyBytes
++    const report = {
++        complete,
++        error,
++        node: process.version,
++        dictionary,
++        hardwareConcurrency: Number(cpus),
++        deviceMemory: Number(memory),
++        fixture,
++        lockSha256: sha(lockBytes),
++        parserWasmSha256: sha(wasm),
++        parentSourceSha256: sha(await readFile(join(parentRoot, 'ext/js/dictionary/term-record-opfs-store.js'))),
++        candidateSourceSha256: sha(await readFile(join(candidateRoot, 'ext/js/dictionary/term-record-opfs-store.js'))),
++        scope: 'Actual source planner and native worker output through record encoders, with deterministic native-content spans and intercepted persistence. No elapsed-time or full-database parity claim.',
++        summary,
++        encodedByteSha256: fullDigest.digest('hex'),
++        groups,
++        sourceGroups,
++        profiles,
++    }
++    await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`, {flag: 'wx'})
++    console.log(JSON.stringify({complete, error, ...summary}))
++}
+diff --git a/test/term-record-sliced-origin.test.js b/test/term-record-sliced-origin.test.js
+new file mode 100644
+index 000000000..cde862bd0
+--- /dev/null
++++ b/test/term-record-sliced-origin.test.js
+@@ -0,0 +1,245 @@
++/*
++ * Copyright (C) 2026 Manabitan authors
++ * SPDX-License-Identifier: GPL-3.0-or-later
++ */
++/* eslint @stylistic/semi: ["error", "never"] */
++
++import assert from 'node:assert/strict'
++import {afterEach, describe, expect, test, vi} from 'vitest'
++import {createArtifactTermRecordChunkWithResolvedContent, TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js'
++
++/** @typedef {ReturnType<typeof fixture>} Fixture */
++/** @typedef {Parameters<TermRecordOpfsStore['_appendEncodedChunk']>} AppendArguments */
++
++/**
++ * A 256-row input splits at the offset boundary. Larger inputs split at the
++ * existing 30K lookup limit, using the same compact fields as real imports.
++ * @param {number} [count=256]
++ * @returns {ReturnType<typeof createArtifactTermRecordChunkWithResolvedContent<{
++ * dictionary: string, rowCount: number, dictionaryTotalRows: number,
++ * expressionBytesList: Uint8Array[], readingBytesList: Uint8Array[],
++ * readingEqualsExpressionList: Uint8Array, scoreList: Int32Array,
++ * sequenceList: Int32Array,
++ * termRecordPreinternedPlan: import('../ext/js/dictionary/term-record-preinterned-plan.js').PreinternedTermRecordPlan
++ * }>>}
++ */
++function fixture(count = 256) {
++    const stringsBuffer = new TextEncoder().encode('語')
++    const uniqueCount = 256
++    return createArtifactTermRecordChunkWithResolvedContent(
++        {
++            dictionary: 'Sliced resolved columns',
++            rowCount: count,
++            dictionaryTotalRows: 100_000,
++            expressionBytesList: [],
++            readingBytesList: [],
++            readingEqualsExpressionList: new Uint8Array(count).fill(1),
++            scoreList: Int32Array.from({length: count}, (_, i) => i % 7 - 3),
++            sequenceList: new Int32Array(count).fill(-1),
++            termRecordPreinternedPlan: {
++                stringLengths: Uint16Array.of(stringsBuffer.byteLength),
++                stringOffsets: Uint32Array.of(0),
++                stringsBuffer,
++                expressionIndexes: new Uint32Array(count),
++                readingIndexes: new Uint32Array(count),
++            },
++        },
++        Uint32Array.from({length: count}, (_, i) => i % uniqueCount),
++        Float64Array.from({length: uniqueCount}, (_, i) => 2 ** 40 + i * 19 + (count === 256 && i >= 128 ? 0xffffffff : 0)),
++        Uint32Array.from({length: uniqueCount}, (_, i) => i % 31),
++    )
++}
++
++/**
++ * Execute the real validation and encoders while intercepting only persistence.
++ * Measure staging copies inside the field encoder, excluding lookup preparation.
++ * @param {((args: AppendArguments, index: number) => void|Promise<void>)|null} [afterAppend=null]
++ * @returns {{store: TermRecordOpfsStore, writes: AppendArguments[], copies: number[]}}
++ */
++function createStore(afterAppend = null) {
++    const store = new TermRecordOpfsStore()
++    /** @type {AppendArguments[]} */
++    const writes = []
++    /** @type {number[]} */
++    const copies = []
++    const encodeFields = store._encodeArtifactRecordFields.bind(store)
++    vi.spyOn(store, '_encodeArtifactRecordFields').mockImplementation((...args) => {
++        const copiedOffsets = vi.spyOn(Uint32Array.prototype, 'set')
++        try {
++            const result = encodeFields(...args)
++            copies.push(copiedOffsets.mock.calls.length)
++            return result
++        } finally {
++            copiedOffsets.mockRestore()
++        }
++    })
++    vi.spyOn(store, '_appendEncodedChunk').mockImplementation(async (...args) => {
++        writes.push(args)
++        await afterAppend?.(args, writes.length - 1)
++    })
++    return {store, writes, copies}
++}
++
++/**
++ * @param {TermRecordOpfsStore} store
++ * @param {Fixture} chunk
++ * @returns {ReturnType<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>}
++ */
++function encode(store, chunk) {
++    return store._encodeAndAppendArtifactChunkForState(
++        /** @type {Parameters<TermRecordOpfsStore['_encodeAndAppendArtifactChunkForState']>[0]} */ ({}),
++        chunk,
++        1,
++        new Float64Array(0),
++        new Uint32Array(0),
++        chunk.termRecordPreinternedPlan,
++        'raw',
++    )
++}
++
++afterEach(() => { vi.restoreAllMocks() })
++
++describe('resolved column origin through record splits', () => {
++    test.each([256, 60_128])('keeps exact lookup/field bytes without staged field copies across %i rows', async (count) => {
++        const chunk = fixture(count)
++        const generic = createStore()
++        await encode(generic.store, {...chunk})
++        const candidate = createStore()
++        await encode(candidate.store, chunk)
++        assert.deepStrictEqual(candidate.writes, generic.writes)
++        expect(candidate.writes.map((args) => args[2])).toStrictEqual(count === 256 ? [128, 128] : [30_000, 30_000, 128])
++        expect(generic.copies).toStrictEqual(count === 256 ? [1, 1] : [1, 1, 1])
++        expect(candidate.copies).toStrictEqual(count === 256 ? [0, 0] : [0, 0, 0])
++        for (const args of candidate.writes) {
++            const fields = /** @type {Uint8Array} */ (args[6])
++            expect(fields.buffer.byteLength).toBe(fields.byteLength)
++        }
++    })
++
++    test.each(['unproven', 'reference-replaced', 'shared', 'score-accessor', 'score-subclass'])('keeps %s source snapshots on the generic path', async (kind) => {
++        let chunk = fixture()
++        switch (kind) {
++            case 'unproven': chunk = {...chunk}; break
++            case 'reference-replaced': chunk.resolvedContentReferences = {...chunk.resolvedContentReferences}; break
++            case 'shared': {
++                const lengths = new Uint32Array(new SharedArrayBuffer(256 * 4))
++                lengths.set(chunk.resolvedContentReferences.lengths)
++                chunk.resolvedContentReferences.lengths = lengths
++                break
++            }
++            case 'score-accessor': {
++                const scores = chunk.scoreList
++                Object.defineProperty(chunk, 'scoreList', {get: () => scores})
++                break
++            }
++            default: {
++                class Scores extends Int32Array {}
++                chunk.scoreList = new Scores(chunk.scoreList)
++                break
++            }
++        }
++        const generic = createStore()
++        await encode(generic.store, {...chunk})
++        const candidate = createStore()
++        await encode(candidate.store, chunk)
++        assert.deepStrictEqual(candidate.writes, generic.writes)
++        expect(candidate.copies).toStrictEqual([1, 1])
++    })
++
++    test('rechecks provenance when an awaited append replaces the producer reference object', async () => {
++        const chunk = fixture()
++        const candidate = createStore(async (_args, index) => {
++            await Promise.resolve()
++            if (index === 0) { chunk.resolvedContentReferences = {...chunk.resolvedContentReferences} }
++        })
++        const generic = createStore()
++        await encode(generic.store, {...chunk})
++        await encode(candidate.store, chunk)
++        assert.deepStrictEqual(candidate.writes, generic.writes)
++        expect(candidate.copies).toStrictEqual([0, 1])
++    })
++
++    test.each(['offset', 'length', 'index', 'accessor'])('rejects invalid %s changes after an awaited compact-field append', async (kind) => {
++        const chunk = fixture()
++        const columns = chunk.resolvedContentReferences
++        const candidate = createStore(async (_args, index) => {
++            await Promise.resolve()
++            if (index !== 0) { return }
++            if (kind === 'offset') { columns.offsets[128] = Number.NaN }
++            if (kind === 'length') { columns.lengths[128] = 0xffffffff }
++            if (kind === 'index') { columns.uniqueIndexList[128] = 256 }
++            if (kind === 'accessor') {
++                const offsets = new Float64Array(columns.offsets)
++                offsets[128] = Number.NaN
++                Object.defineProperty(columns, 'offsets', {get: () => offsets})
++            }
++        })
++        await expect(encode(candidate.store, chunk)).rejects.toThrow(/Invalid (term content|resolved term content reference)/)
++        expect(candidate.writes).toHaveLength(1)
++        expect(candidate.copies).toStrictEqual([0])
++    })
++
++    test('rereads future runs after an await while keeping completed encoded fields owned', async () => {
++        /** @type {Uint8Array|null} */
++        let firstBytes = null
++        const chunk = fixture()
++        const candidate = createStore(async (args, index) => {
++            await Promise.resolve()
++            if (index !== 0) { return }
++            firstBytes = new Uint8Array(/** @type {Uint8Array} */ (args[6]))
++            chunk.scoreList.fill(-37, 128)
++            chunk.resolvedContentReferences.lengths.fill(29)
++        })
++        await encode(candidate.store, chunk)
++        expect(candidate.writes[0][6]).toEqual(firstBytes)
++        const secondFields = /** @type {Uint8Array} */ (candidate.writes[1][6])
++        const view = new DataView(secondFields.buffer, secondFields.byteOffset, secondFields.byteLength)
++        expect(view.getInt32(16, true)).toBe(-37)
++        expect(view.getUint16(20 + 128 * 4, true)).toBe(29)
++        expect(candidate.copies).toStrictEqual([0, 0])
++    })
++
++    test('rechecks sliced score descriptors before the final synchronous encoder', async () => {
++        const chunk = fixture()
++        const candidate = createStore()
++        const encodeChunk = candidate.store._encodeArtifactChunkRecords.bind(candidate.store)
++        vi.spyOn(candidate.store, '_encodeArtifactChunkRecords').mockImplementation(async (run, ...args) => {
++            const scores = run.scoreList
++            Object.defineProperty(run, 'scoreList', {get: () => scores})
++            return await encodeChunk(run, ...args)
++        })
++        const generic = createStore()
++        await encode(generic.store, {...chunk})
++        await encode(candidate.store, chunk)
++        assert.deepStrictEqual(candidate.writes, generic.writes)
++        expect(candidate.copies).toStrictEqual([1, 1])
++    })
++
++    test('preserves origins through content-dictionary partitioning before offset splitting', async () => {
++        const chunk = fixture()
++        /**
++         * @param {Fixture} input
++         * @returns {Promise<ReturnType<typeof createStore>>}
++         */
++        const append = async (input) => {
++            const result = createStore()
++            Reflect.set(result.store, '_importSessionActive', true)
++            vi.spyOn(result.store, '_ensureNextIdReadyForAppend').mockResolvedValue()
++            vi.spyOn(result.store, '_getOrCreateShardState').mockResolvedValue(
++                /** @type {NonNullable<Awaited<ReturnType<TermRecordOpfsStore['_getOrCreateShardState']>>>} */ ({}),
++            )
++            await result.store.appendBatchFromArtifactChunkResolvedContent(
++                input,
++                new Float64Array(0),
++                new Uint32Array(0),
++                Array.from({length: input.rowCount}, (_, i) => (i < 128 ? 'raw' : 'jmdict')),
++            )
++            return result
++        }
++        const generic = await append({...chunk})
++        const candidate = await append(chunk)
++        assert.deepStrictEqual(candidate.writes, generic.writes)
++        expect(generic.copies).toStrictEqual([1, 1])
++        expect(candidate.copies).toStrictEqual([0, 0])
++    })
++})

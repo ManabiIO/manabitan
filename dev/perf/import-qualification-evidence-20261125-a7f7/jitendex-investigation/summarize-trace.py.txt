@@ -1,0 +1,18 @@
+import json,collections
+from pathlib import Path
+root=Path('/workspace/scratch/a7f76505d50d'); p=root/'baseline-evidence/current-profile-jitendex/trace/run-1.trace.json'
+events=json.loads(p.read_text())['traceEvents'];nodes={};chunks=[]
+for e in events:
+ d=e.get('args',{}).get('data',{});profile=d.get('cpuProfile');key=(e.get('pid'),e.get('tid'),str(e.get('id2',e.get('id'))))
+ if profile:
+  for n in profile.get('nodes',[]): nodes[(key,n['id'])]=n
+  chunks.append((key,profile.get('samples',[]),d.get('timeDeltas',[])))
+times=collections.Counter();counts=collections.Counter()
+for key,samples,deltas in chunks:
+ for i,node_id in enumerate(samples):
+  n=nodes.get((key,node_id),{});f=n.get('callFrame',{});name=(f.get('functionName'),f.get('url',''),f.get('lineNumber'))
+  counts[name]+=1
+  if i<len(deltas):times[name]+=deltas[i]
+results=[{'sampledMs':round(t/1000,2),'samples':counts[n],'function':n[0],'source':n[1],'line':n[2]} for n,t in times.most_common(60)]
+(root/'jitendex-evidence/current-profile-hotspots.json').write_text(json.dumps(results,indent=2))
+for r in results[:40]:print(r)

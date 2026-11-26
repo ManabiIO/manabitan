@@ -1,0 +1,741 @@
+{
+    "runId": 45642179064,
+    "workflowHead": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+    "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "candidateCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+    "candidateProductIdenticalTo": "5afd2e97ec2707b150acfde61115aee688547a78",
+    "verifiedProductTrees": {
+        "ext": "b1948af92d8dd0b00b447d745097408ccfec8b73",
+        "dev/data/dictionary-wasm": "c09937644775ac08a4e92c03396c02bf45cd4cff"
+    },
+    "separateFromRun": 45647030792,
+    "mediaReadbackMode": "sample",
+    "observations": 16,
+    "rawScanCount": 1504,
+    "correctnessPassedEveryObservation": true,
+    "bothReplicationsPassByDictionary": {
+        "jitendex": true,
+        "vndb": false
+    },
+    "cells": [
+        {
+            "runId": 45642179064,
+            "workflowHead": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+            "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "candidateCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "candidateProductIdenticalTo": "5afd2e97ec2707b150acfde61115aee688547a78",
+            "dictionary": "jitendex",
+            "replication": 1,
+            "artifactId": 15035921814,
+            "artifactSha256": "d60df0b581f6278b14e8afb6e199e41c77a2c891e470f662cff08d614dc57e6b",
+            "artifactBytes": 34175165,
+            "sourceAndPackageBindingVerified": true,
+            "frozenRawScanAuditReproduced": true,
+            "frozenReceiptAuditReproduced": true,
+            "mediaReadbackMode": "sample",
+            "observations": [
+                {
+                    "arm": "A",
+                    "index": 1,
+                    "name": "A1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1055722,
+                    "maxSampledPrivateKiB": 825180,
+                    "maximumCoveredSampleGapMs": 164.904016,
+                    "preImportBracketGapMs": 6.78941,
+                    "postImportBracketGapMs": 97.26525,
+                    "stableFullyReadImportSampleCount": 17,
+                    "allObservedSampleCount": 87,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 2255.125239,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 87,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "B",
+                    "index": 2,
+                    "name": "B1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1037977,
+                    "maxSampledPrivateKiB": 807304,
+                    "maximumCoveredSampleGapMs": 146.021474,
+                    "preImportBracketGapMs": 32.304457,
+                    "postImportBracketGapMs": 75.858044,
+                    "stableFullyReadImportSampleCount": 13,
+                    "allObservedSampleCount": 81,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 1710.527866,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 81,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "B",
+                    "index": 3,
+                    "name": "B2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1049895,
+                    "maxSampledPrivateKiB": 819940,
+                    "maximumCoveredSampleGapMs": 148.569258,
+                    "preImportBracketGapMs": 22.081853,
+                    "postImportBracketGapMs": 75.508088,
+                    "stableFullyReadImportSampleCount": 14,
+                    "allObservedSampleCount": 77,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 1757.164089,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 77,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "A",
+                    "index": 4,
+                    "name": "A2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1087240,
+                    "maxSampledPrivateKiB": 854460,
+                    "maximumCoveredSampleGapMs": 170.196895,
+                    "preImportBracketGapMs": 7.859645,
+                    "postImportBracketGapMs": 87.025083,
+                    "stableFullyReadImportSampleCount": 14,
+                    "allObservedSampleCount": 81,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 1793.469315,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 81,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                }
+            ],
+            "pairs": [
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": 825180,
+                        "candidate": 807304,
+                        "changePercent": -2.166315228192639
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": 1055722,
+                        "candidate": 1037977,
+                        "changePercent": -1.6808402211945905
+                    },
+                    "pair": 1,
+                    "qualified": true
+                },
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": 854460,
+                        "candidate": 819940,
+                        "changePercent": -4.0399784659317035
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": 1087240,
+                        "candidate": 1049895,
+                        "changePercent": -3.4348441926345563
+                    },
+                    "pair": 2,
+                    "qualified": true
+                }
+            ],
+            "metrics": {
+                "maxSampledPrivateKiB": {
+                    "maximumPairedChangePercent": -2.166315228192639,
+                    "medianPairedChangePercent": -3.1031468470621713
+                },
+                "maxSampledPssKiB": {
+                    "maximumPairedChangePercent": -1.6808402211945905,
+                    "medianPairedChangePercent": -2.5578422069145734
+                }
+            },
+            "everyObservationQualified": true,
+            "passesProspectiveMemoryScreen": true,
+            "qualifiedObservations": 4,
+            "rawScanCount": 326,
+            "correctnessPassed": true,
+            "recordedQualification": {
+                "authoritativeTiming": false,
+                "bothIndependentReplicationsRequired": true,
+                "correctnessPassed": true,
+                "memoryScreenPassed": true,
+                "retriedObservations": 0,
+                "status": "passed"
+            },
+            "classification": "pass"
+        },
+        {
+            "runId": 45642179064,
+            "workflowHead": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+            "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "candidateCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "candidateProductIdenticalTo": "5afd2e97ec2707b150acfde61115aee688547a78",
+            "dictionary": "jitendex",
+            "replication": 2,
+            "artifactId": 15036925291,
+            "artifactSha256": "a4cd351a062953176543dcb442c7b2a1e11641efdeb0992a358588d68b8769ea",
+            "artifactBytes": 34132364,
+            "sourceAndPackageBindingVerified": true,
+            "frozenRawScanAuditReproduced": true,
+            "frozenReceiptAuditReproduced": true,
+            "mediaReadbackMode": "sample",
+            "observations": [
+                {
+                    "arm": "B",
+                    "index": 1,
+                    "name": "B1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1068192,
+                    "maxSampledPrivateKiB": 836224,
+                    "maximumCoveredSampleGapMs": 163.251545,
+                    "preImportBracketGapMs": 76.655329,
+                    "postImportBracketGapMs": 19.44065,
+                    "stableFullyReadImportSampleCount": 13,
+                    "allObservedSampleCount": 72,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 1949.439961,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 72,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "A",
+                    "index": 2,
+                    "name": "A1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1043376,
+                    "maxSampledPrivateKiB": 809388,
+                    "maximumCoveredSampleGapMs": 224.244401,
+                    "preImportBracketGapMs": 83.277281,
+                    "postImportBracketGapMs": 88.948808,
+                    "stableFullyReadImportSampleCount": 13,
+                    "allObservedSampleCount": 73,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 2492.417197,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 73,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "A",
+                    "index": 3,
+                    "name": "A2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1062270,
+                    "maxSampledPrivateKiB": 829084,
+                    "maximumCoveredSampleGapMs": 187.527807,
+                    "preImportBracketGapMs": 57.769019,
+                    "postImportBracketGapMs": 91.490809,
+                    "stableFullyReadImportSampleCount": 11,
+                    "allObservedSampleCount": 70,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 1948.395272,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 70,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "B",
+                    "index": 4,
+                    "name": "B2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1075920,
+                    "maxSampledPrivateKiB": 844156,
+                    "maximumCoveredSampleGapMs": 202.698431,
+                    "preImportBracketGapMs": 19.465785,
+                    "postImportBracketGapMs": 112.944032,
+                    "stableFullyReadImportSampleCount": 12,
+                    "allObservedSampleCount": 68,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 1977.911361,
+                    "samplesWithUnavailableSmaps": 5,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 1,
+                    "rawScanCount": 68,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 236,
+                    "mediaBytesRead": 1302012,
+                    "lookupReceiptCount": 72
+                }
+            ],
+            "pairs": [
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": 809388,
+                        "candidate": 836224,
+                        "changePercent": 3.315591533356077
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": 1043376,
+                        "candidate": 1068192,
+                        "changePercent": 2.3784330864424774
+                    },
+                    "pair": 1,
+                    "qualified": true
+                },
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": 829084,
+                        "candidate": 844156,
+                        "changePercent": 1.8179098860911624
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": 1062270,
+                        "candidate": 1075920,
+                        "changePercent": 1.284984043604731
+                    },
+                    "pair": 2,
+                    "qualified": true
+                }
+            ],
+            "metrics": {
+                "maxSampledPrivateKiB": {
+                    "maximumPairedChangePercent": 3.315591533356077,
+                    "medianPairedChangePercent": 2.5667507097236197
+                },
+                "maxSampledPssKiB": {
+                    "maximumPairedChangePercent": 2.3784330864424774,
+                    "medianPairedChangePercent": 1.8317085650236042
+                }
+            },
+            "everyObservationQualified": true,
+            "passesProspectiveMemoryScreen": true,
+            "qualifiedObservations": 4,
+            "rawScanCount": 283,
+            "correctnessPassed": true,
+            "recordedQualification": {
+                "authoritativeTiming": false,
+                "bothIndependentReplicationsRequired": true,
+                "correctnessPassed": true,
+                "memoryScreenPassed": true,
+                "retriedObservations": 0,
+                "status": "passed"
+            },
+            "classification": "pass"
+        },
+        {
+            "runId": 45642179064,
+            "workflowHead": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+            "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "candidateCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "candidateProductIdenticalTo": "5afd2e97ec2707b150acfde61115aee688547a78",
+            "dictionary": "vndb",
+            "replication": 1,
+            "artifactId": 15036831091,
+            "artifactSha256": "61d4ded17022539714c6892a2954d49a485a08dbbd58047f065277ed5cd21795",
+            "artifactBytes": 34289988,
+            "sourceAndPackageBindingVerified": true,
+            "frozenRawScanAuditReproduced": true,
+            "frozenReceiptAuditReproduced": true,
+            "mediaReadbackMode": "sample",
+            "observations": [
+                {
+                    "arm": "A",
+                    "index": 1,
+                    "name": "A1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1421061,
+                    "maxSampledPrivateKiB": 1188860,
+                    "maximumCoveredSampleGapMs": 161.775619,
+                    "preImportBracketGapMs": 47.906649,
+                    "postImportBracketGapMs": 81.060505,
+                    "stableFullyReadImportSampleCount": 48,
+                    "allObservedSampleCount": 143,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 5828.553161,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 143,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "B",
+                    "index": 2,
+                    "name": "B1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1411740,
+                    "maxSampledPrivateKiB": 1179096,
+                    "maximumCoveredSampleGapMs": 171.575019,
+                    "preImportBracketGapMs": 29.259166,
+                    "postImportBracketGapMs": 83.732689,
+                    "stableFullyReadImportSampleCount": 45,
+                    "allObservedSampleCount": 109,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 5547.398063,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 109,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "B",
+                    "index": 3,
+                    "name": "B2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1427052,
+                    "maxSampledPrivateKiB": 1193948,
+                    "maximumCoveredSampleGapMs": 173.296953,
+                    "preImportBracketGapMs": 51.447005,
+                    "postImportBracketGapMs": 6.440892,
+                    "stableFullyReadImportSampleCount": 42,
+                    "allObservedSampleCount": 104,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 5387.838547,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 104,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "A",
+                    "index": 4,
+                    "name": "A2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": false,
+                    "maxSampledPssKiB": null,
+                    "maxSampledPrivateKiB": null,
+                    "maximumCoveredSampleGapMs": 350.425804,
+                    "preImportBracketGapMs": 6.15912,
+                    "postImportBracketGapMs": 30.810581,
+                    "stableFullyReadImportSampleCount": 46,
+                    "allObservedSampleCount": 110,
+                    "qualificationFailures": [
+                        "covered-import-scan-gap-over-250ms"
+                    ],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 6303.377046,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 110,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                }
+            ],
+            "pairs": [
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1188860,
+                        "candidate": 1179096,
+                        "changePercent": -0.8212909846407435
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": 1421061,
+                        "candidate": 1411740,
+                        "changePercent": -0.6559183595918783
+                    },
+                    "pair": 1,
+                    "qualified": true
+                },
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": null,
+                        "candidate": 1193948,
+                        "changePercent": null
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": null,
+                        "candidate": 1427052,
+                        "changePercent": null
+                    },
+                    "pair": 2,
+                    "qualified": false
+                }
+            ],
+            "metrics": {
+                "maxSampledPrivateKiB": {
+                    "maximumPairedChangePercent": null,
+                    "medianPairedChangePercent": null
+                },
+                "maxSampledPssKiB": {
+                    "maximumPairedChangePercent": null,
+                    "medianPairedChangePercent": null
+                }
+            },
+            "everyObservationQualified": false,
+            "passesProspectiveMemoryScreen": false,
+            "qualifiedObservations": 3,
+            "rawScanCount": 466,
+            "correctnessPassed": true,
+            "recordedQualification": {
+                "authoritativeTiming": false,
+                "bothIndependentReplicationsRequired": true,
+                "correctnessPassed": true,
+                "memoryScreenPassed": false,
+                "retriedObservations": 0,
+                "status": "failed"
+            },
+            "classification": "coverage failure"
+        },
+        {
+            "runId": 45642179064,
+            "workflowHead": "718c23b87e3f0b0cdc89d42f2db2770092de47c9",
+            "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "candidateCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+            "candidateProductIdenticalTo": "5afd2e97ec2707b150acfde61115aee688547a78",
+            "dictionary": "vndb",
+            "replication": 2,
+            "artifactId": 15035433747,
+            "artifactSha256": "79daf7b337b181b56146adbd71404c32184cc8e73b26b404f89e7ac55b506ae7",
+            "artifactBytes": 34264537,
+            "sourceAndPackageBindingVerified": true,
+            "frozenRawScanAuditReproduced": true,
+            "frozenReceiptAuditReproduced": true,
+            "mediaReadbackMode": "sample",
+            "observations": [
+                {
+                    "arm": "B",
+                    "index": 1,
+                    "name": "B1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": false,
+                    "maxSampledPssKiB": null,
+                    "maxSampledPrivateKiB": null,
+                    "maximumCoveredSampleGapMs": 324.494085,
+                    "preImportBracketGapMs": 116.675495,
+                    "postImportBracketGapMs": 49.009626,
+                    "stableFullyReadImportSampleCount": 42,
+                    "allObservedSampleCount": 112,
+                    "qualificationFailures": [
+                        "covered-import-scan-gap-over-250ms"
+                    ],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 9125.380701,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 112,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "A",
+                    "index": 2,
+                    "name": "A1",
+                    "pair": 1,
+                    "qualifiedForWholeTreePss": false,
+                    "maxSampledPssKiB": null,
+                    "maxSampledPrivateKiB": null,
+                    "maximumCoveredSampleGapMs": 258.866332,
+                    "preImportBracketGapMs": 104.368673,
+                    "postImportBracketGapMs": 36.558205,
+                    "stableFullyReadImportSampleCount": 41,
+                    "allObservedSampleCount": 106,
+                    "qualificationFailures": [
+                        "covered-import-scan-gap-over-250ms"
+                    ],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 8200.686246,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 106,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "A",
+                    "index": 3,
+                    "name": "A2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": true,
+                    "maxSampledPssKiB": 1383326,
+                    "maxSampledPrivateKiB": 1152024,
+                    "maximumCoveredSampleGapMs": 244.012203,
+                    "preImportBracketGapMs": 117.94574,
+                    "postImportBracketGapMs": 129.901225,
+                    "stableFullyReadImportSampleCount": 45,
+                    "allObservedSampleCount": 107,
+                    "qualificationFailures": [],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 8371.61066,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 107,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                },
+                {
+                    "arm": "B",
+                    "index": 4,
+                    "name": "B2",
+                    "pair": 2,
+                    "qualifiedForWholeTreePss": false,
+                    "maxSampledPssKiB": null,
+                    "maxSampledPrivateKiB": null,
+                    "maximumCoveredSampleGapMs": 275.215655,
+                    "preImportBracketGapMs": 105.866841,
+                    "postImportBracketGapMs": 69.250356,
+                    "stableFullyReadImportSampleCount": 40,
+                    "allObservedSampleCount": 104,
+                    "qualificationFailures": [
+                        "covered-import-scan-gap-over-250ms"
+                    ],
+                    "benchmarkExitCode": 0,
+                    "windowDurationMs": 7945.238412,
+                    "samplesWithUnavailableSmaps": 0,
+                    "samplesWithUnreadableAddressSpaces": 0,
+                    "confirmedExitedZombieIdentityCount": 0,
+                    "rawScanCount": 104,
+                    "mediaReadbackMode": "sample",
+                    "mediaFilesRead": 64,
+                    "totalMediaFiles": 146570,
+                    "mediaBytesRead": 86256,
+                    "lookupReceiptCount": 72
+                }
+            ],
+            "pairs": [
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": null,
+                        "candidate": null,
+                        "changePercent": null
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": null,
+                        "candidate": null,
+                        "changePercent": null
+                    },
+                    "pair": 1,
+                    "qualified": false
+                },
+                {
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1152024,
+                        "candidate": null,
+                        "changePercent": null
+                    },
+                    "maxSampledPssKiB": {
+                        "baseline": 1383326,
+                        "candidate": null,
+                        "changePercent": null
+                    },
+                    "pair": 2,
+                    "qualified": false
+                }
+            ],
+            "metrics": {
+                "maxSampledPrivateKiB": {
+                    "maximumPairedChangePercent": null,
+                    "medianPairedChangePercent": null
+                },
+                "maxSampledPssKiB": {
+                    "maximumPairedChangePercent": null,
+                    "medianPairedChangePercent": null
+                }
+            },
+            "everyObservationQualified": false,
+            "passesProspectiveMemoryScreen": false,
+            "qualifiedObservations": 1,
+            "rawScanCount": 429,
+            "correctnessPassed": true,
+            "recordedQualification": {
+                "authoritativeTiming": false,
+                "bothIndependentReplicationsRequired": true,
+                "correctnessPassed": true,
+                "memoryScreenPassed": false,
+                "retriedObservations": 0,
+                "status": "failed"
+            },
+            "classification": "coverage failure"
+        }
+    ],
+    "limitations": [
+        "Non-atomic sampled whole-tree PSS/private maxima are not exact peaks.",
+        "Only complete scans wholly within the import markers contribute to maxima.",
+        "Startup, media readback and restart are outside the memory import window.",
+        "Each observation validates 64 sampled media files; this is not exhaustive media readback.",
+        "This older independent study is not pooled with or substituted into run 45647030792."
+    ]
+}

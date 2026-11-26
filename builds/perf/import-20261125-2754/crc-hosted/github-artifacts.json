@@ -1,0 +1,184 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "runs": [
+    {
+      "artifacts": [
+        {
+          "id": 15038993452,
+          "name": "exact-crc-screen-vndb-2754",
+          "size_in_bytes": 1080665,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038993452",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038993452/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:53:44Z",
+          "expires_at": "2026-12-09T15:53:43Z",
+          "updated_at": "2026-11-25T15:53:44Z",
+          "digest": "sha256:8f7478ab11070dc5ae405d0485e2a65742cabeaf1e6dfdbd33de551c23e8e5e5",
+          "workflow_run": {
+            "id": 45644628634,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-screen-20261125-2754",
+            "head_sha": "97638c1b15a0a8bdc516c4b8c7d7c68085d15b7a"
+          }
+        },
+        {
+          "id": 15038541229,
+          "name": "exact-crc-screen-jitendex-2754",
+          "size_in_bytes": 1059425,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038541229",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038541229/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:37:51Z",
+          "expires_at": "2026-12-09T15:37:49Z",
+          "updated_at": "2026-11-25T15:37:51Z",
+          "digest": "sha256:9391862e6e9333a94f13cfcfb6bb974632ed1969401ec7bc7693c3465728f775",
+          "workflow_run": {
+            "id": 45644628634,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-screen-20261125-2754",
+            "head_sha": "97638c1b15a0a8bdc516c4b8c7d7c68085d15b7a"
+          }
+        },
+        {
+          "id": 15036814976,
+          "name": "exact-crc-screen-jmdict-2754",
+          "size_in_bytes": 1042506,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15036814976",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15036814976/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:36:25Z",
+          "expires_at": "2026-12-09T15:36:23Z",
+          "updated_at": "2026-11-25T15:36:25Z",
+          "digest": "sha256:fca19417c39b9a7f8caa481dc22452d51492f669548960493d98cd4a33ef9986",
+          "workflow_run": {
+            "id": 45644628634,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-screen-20261125-2754",
+            "head_sha": "97638c1b15a0a8bdc516c4b8c7d7c68085d15b7a"
+          }
+        }
+      ]
+    },
+    {
+      "artifacts": [
+        {
+          "id": 15039581472,
+          "name": "exact-crc-memory-vndb-rep1-2754",
+          "size_in_bytes": 34282489,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039581472",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039581472/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:43:06Z",
+          "expires_at": "2026-12-09T15:43:04Z",
+          "updated_at": "2026-11-25T15:43:06Z",
+          "digest": "sha256:6d677ed82afe248b6820909ea7e416be3be8eee361c30ab319777617f55b9949",
+          "workflow_run": {
+            "id": 45644635208,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-memory-20261125-2754",
+            "head_sha": "012f42aa173b5091558eb9590df7cf064957f955"
+          }
+        },
+        {
+          "id": 15039215938,
+          "name": "exact-crc-memory-vndb-rep2-2754",
+          "size_in_bytes": 34446018,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039215938",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039215938/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:40:31Z",
+          "expires_at": "2026-12-09T15:40:30Z",
+          "updated_at": "2026-11-25T15:40:31Z",
+          "digest": "sha256:1c935613a38fdec4baf9cf08a82be68d38b2c65439bbaad7db48efc5fd8f60fa",
+          "workflow_run": {
+            "id": 45644635208,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-memory-20261125-2754",
+            "head_sha": "012f42aa173b5091558eb9590df7cf064957f955"
+          }
+        },
+        {
+          "id": 15038726730,
+          "name": "exact-crc-memory-jitendex-rep2-2754",
+          "size_in_bytes": 34172722,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038726730",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038726730/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:42:00Z",
+          "expires_at": "2026-12-09T15:41:57Z",
+          "updated_at": "2026-11-25T15:42:00Z",
+          "digest": "sha256:db106e0ef170110cfd9fc6009f2a89633dbccf00f120078f6f9b5d1d8f5036f4",
+          "workflow_run": {
+            "id": 45644635208,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-memory-20261125-2754",
+            "head_sha": "012f42aa173b5091558eb9590df7cf064957f955"
+          }
+        },
+        {
+          "id": 15037852350,
+          "name": "exact-crc-memory-jmdict-rep1-2754",
+          "size_in_bytes": 34128604,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037852350",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037852350/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:38:50Z",
+          "expires_at": "2026-12-09T15:38:48Z",
+          "updated_at": "2026-11-25T15:38:50Z",
+          "digest": "sha256:8ec241627ad4fa38e8b64f8d7960e8edebee8d4d70dae0e020bf166728b9cfaa",
+          "workflow_run": {
+            "id": 45644635208,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-memory-20261125-2754",
+            "head_sha": "012f42aa173b5091558eb9590df7cf064957f955"
+          }
+        },
+        {
+          "id": 15037468972,
+          "name": "exact-crc-memory-jmdict-rep2-2754",
+          "size_in_bytes": 34117313,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037468972",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037468972/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:35:22Z",
+          "expires_at": "2026-12-09T15:35:20Z",
+          "updated_at": "2026-11-25T15:35:22Z",
+          "digest": "sha256:e358e51201858bcea6b04c067b891d87964debfb79bee79cd92db94e6b4c3b92",
+          "workflow_run": {
+            "id": 45644635208,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-memory-20261125-2754",
+            "head_sha": "012f42aa173b5091558eb9590df7cf064957f955"
+          }
+        },
+        {
+          "id": 15037132938,
+          "name": "exact-crc-memory-jitendex-rep1-2754",
+          "size_in_bytes": 34210340,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037132938",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037132938/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:35:24Z",
+          "expires_at": "2026-12-09T15:35:21Z",
+          "updated_at": "2026-11-25T15:35:24Z",
+          "digest": "sha256:dc727b9b2be9cac55680797896ded53ee8856e50131a24a3ec2c88fdb5001533",
+          "workflow_run": {
+            "id": 45644635208,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "research/crc-import-memory-20261125-2754",
+            "head_sha": "012f42aa173b5091558eb9590df7cf064957f955"
+          }
+        }
+      ]
+    }
+  ]
+}

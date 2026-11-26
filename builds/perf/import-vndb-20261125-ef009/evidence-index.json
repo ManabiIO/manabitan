@@ -1,0 +1,310 @@
+{
+    "schemaVersion": 1,
+    "candidate": "bounded single-image path projection",
+    "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/905",
+    "baseCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "frozenQualificationSourceCommit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+    "currentSourceCiCommit": "f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9",
+    "sourceTree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+    "sourceIdentityNote": "The frozen qualification source and empty CI-trigger retry have the same tree. The measured parser differs from this tree only in leading indentation of one null ternary branch; reversing exactly that whitespace edit reproduces its recorded SHA-256. The projector source is byte-identical.",
+    "measuredSourceSha256": {
+        "baselineParser": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+        "candidateParser": "d57f716ab26ea3e5c032f534ec2b0ee607510511f3e9ed8ec93e7377883c508d",
+        "projector": "e0ba54af2c7595e72d5840ff6b32759b90470d27fe278c1c9620507d09dad658",
+        "wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+        "runner": "bedf73fa17d7715bb9b2f96a52b297b49d20d60aec4533e2658cdd6233402b45"
+    },
+    "finalParserSha256": "23f99cd19db8b4d562bf57e73a9b3bbe43e55f22df8fa33b4055d219f0e1569d",
+    "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true,
+        "bytes": 291705969
+    },
+    "nativeColumnAndImageProjectionParity": {
+        "complete": true,
+        "rows": 6648310,
+        "sourceBanks": 665,
+        "sourceBytes": 4267992967,
+        "groups": 170,
+        "nativeFusedAttempts": 170,
+        "nativeFusedFallbacks": 0,
+        "mediaRows": 146725,
+        "acceptedProjectionRows": 146725,
+        "projectionFallbackRows": 0,
+        "uniqueMediaPaths": 146570,
+        "imagePathSha256": "089bb7071cae03c76174adaf5ffa65c6d4706434687a2453b1fe7a6c6f44f690",
+        "assertion": "Complete nested baseline and candidate owned chunk results are deep-equal on the same native-validated borrowed input, then equal again after structuredClone. The unchanged native producer parses all CRC-checked locked VNDB term banks. Separate unit tests exercise actual compressed worker transfer and reuse.",
+        "boundary": "Native column-copy and image projection parity across all corpus rows. This does not assert complete persisted database equality, browser import completion, or whole-import memory/latency qualification."
+    },
+    "decoderInputVolume": {
+        "baseline": {
+            "calls": 146725,
+            "bytes": 84398732,
+            "shared": 0
+        },
+        "candidate": {
+            "calls": 146725,
+            "bytes": 2684628,
+            "shared": 0
+        },
+        "cumulativeBytesAvoided": 81714104,
+        "cumulativePercentAvoided": 96.81911334876453,
+        "boundary": "Instrumented TextDecoder input bytes and corresponding shared-span snapshots within synchronous chunk copying; candidate decodes only the quoted JSON path token. Cumulative byte reduction is not peak-memory savings."
+    },
+    "componentTiming": {
+        "authoritativeEndToEndTiming": false,
+        "protocol": {
+            "oracle": "Every locked VNDB production-sized source group is CRC-validated and parsed by the unchanged native producer. A and B copy the same borrowed chunk synchronously; complete nested outputs are deep-equal before the next heap reuse. Raw source bytes and borrowed semantics are unchanged.",
+            "timingBoundary": "Shared validated glossary bytes through returned image path strings only. Excludes source inflate/parse, remaining chunk copies, worker IPC, OPFS, and UI. This is not a complete-import or process-memory benchmark.",
+            "warmup": "ABC",
+            "timed": [
+                "ABC",
+                "BCA",
+                "CAB",
+                "ACB",
+                "CBA",
+                "BAC"
+            ],
+            "controls": "A and C call the exact same existing JSON collector and private SharedArrayBuffer snapshot path. B attempts the new projector then the same fallback.",
+            "noRetriesOrTailExclusions": true
+        },
+        "observations": 21,
+        "timedObservations": 18,
+        "warmups": 3,
+        "comparisons": {
+            "BA": {
+                "pairs": [
+                    {
+                        "block": 0,
+                        "numeratorMs": 751.5814129999999,
+                        "denominatorMs": 1180.521013999998,
+                        "changePercent": -36.33477048804139
+                    },
+                    {
+                        "block": 1,
+                        "numeratorMs": 493.27713799999765,
+                        "denominatorMs": 1106.935145000003,
+                        "changePercent": -55.43757552299993
+                    },
+                    {
+                        "block": 2,
+                        "numeratorMs": 1162.3419790000007,
+                        "denominatorMs": 730.8232210000024,
+                        "changePercent": 59.04557293753492
+                    },
+                    {
+                        "block": 3,
+                        "numeratorMs": 574.4139119999963,
+                        "denominatorMs": 807.2258289999991,
+                        "changePercent": -28.84098955163673
+                    },
+                    {
+                        "block": 4,
+                        "numeratorMs": 547.8959019999966,
+                        "denominatorMs": 866.0740219999934,
+                        "changePercent": -36.737982195244655
+                    },
+                    {
+                        "block": 5,
+                        "numeratorMs": 720.743226999999,
+                        "denominatorMs": 1006.956975000001,
+                        "changePercent": -28.423632300675173
+                    }
+                ],
+                "pairedMedianPercent": -32.58788001983906,
+                "equalWorkPercent": -25.414994002760004
+            },
+            "BC": {
+                "pairs": [
+                    {
+                        "block": 0,
+                        "numeratorMs": 751.5814129999999,
+                        "denominatorMs": 1078.158150000003,
+                        "changePercent": -30.29024424663508
+                    },
+                    {
+                        "block": 1,
+                        "numeratorMs": 493.27713799999765,
+                        "denominatorMs": 890.9296219999997,
+                        "changePercent": -44.63343390775732
+                    },
+                    {
+                        "block": 2,
+                        "numeratorMs": 1162.3419790000007,
+                        "denominatorMs": 872.6325140000008,
+                        "changePercent": 33.19948092147293
+                    },
+                    {
+                        "block": 3,
+                        "numeratorMs": 574.4139119999963,
+                        "denominatorMs": 795.0212979999997,
+                        "changePercent": -27.74861334595383
+                    },
+                    {
+                        "block": 4,
+                        "numeratorMs": 547.8959019999966,
+                        "denominatorMs": 2232.101923999995,
+                        "changePercent": -75.45381346125313
+                    },
+                    {
+                        "block": 5,
+                        "numeratorMs": 720.743226999999,
+                        "denominatorMs": 954.8433460000015,
+                        "changePercent": -24.517123147025842
+                    }
+                ],
+                "pairedMedianPercent": -29.019428796294456,
+                "equalWorkPercent": -37.71323828395613
+            },
+            "CA": {
+                "pairs": [
+                    {
+                        "block": 0,
+                        "numeratorMs": 1078.158150000003,
+                        "denominatorMs": 1180.521013999998,
+                        "changePercent": -8.670990417456082
+                    },
+                    {
+                        "block": 1,
+                        "numeratorMs": 890.9296219999997,
+                        "denominatorMs": 1106.935145000003,
+                        "changePercent": -19.51383728086462
+                    },
+                    {
+                        "block": 2,
+                        "numeratorMs": 872.6325140000008,
+                        "denominatorMs": 730.8232210000024,
+                        "changePercent": 19.404048602336065
+                    },
+                    {
+                        "block": 3,
+                        "numeratorMs": 795.0212979999997,
+                        "denominatorMs": 807.2258289999991,
+                        "changePercent": -1.51191036777385
+                    },
+                    {
+                        "block": 4,
+                        "numeratorMs": 2232.101923999995,
+                        "denominatorMs": 866.0740219999934,
+                        "changePercent": 157.7264607066129
+                    },
+                    {
+                        "block": 5,
+                        "numeratorMs": 954.8433460000015,
+                        "denominatorMs": 1006.956975000001,
+                        "changePercent": -5.175358063337255
+                    }
+                ],
+                "pairedMedianPercent": -3.3436342155555523,
+                "equalWorkPercent": 19.744555572277143
+            }
+        },
+        "interpretation": "Exploratory component evidence only. The shared host had competing work and large same-code variation; all tails are retained. Do not treat paired medians as complete-import speedup or use this screen to qualify production latency.",
+        "worstCandidatePairChangePercent": 59.04557293753492,
+        "maximumSameCodeControlPairChangePercent": 157.7264607066129
+    },
+    "localValidation": {
+        "focusedUnitTests": {
+            "status": "passed",
+            "tests": 276,
+            "suites": 5,
+            "newTests": 94,
+            "command": "node node_modules/vitest/vitest.mjs run test/validated-image-path-projector.test.js test/dictionary-importer-media-reference.test.js test/dictionary-importer-media-keys.test.js test/term-bank-experiments.test.js test/dictionary-entry-media-paths.test.js",
+            "receipt": "Interactive command result; no standalone log was captured."
+        },
+        "mainTypes": {
+            "status": "passed",
+            "command": "node node_modules/typescript/bin/tsc --noEmit --project jsconfig.json"
+        },
+        "testTypes": {
+            "status": "passed",
+            "command": "node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json"
+        },
+        "changedFileEslint": {
+            "status": "passed"
+        },
+        "allTargetDryBuild": {
+            "status": "passed",
+            "targets": 7,
+            "command": "node dev/bin/build.js --dryRun --all"
+        },
+        "fullLocalUnitSuite": {
+            "status": "interrupted-incomplete",
+            "exitCode": 130,
+            "reason": "Stopped at coordinating agent request on a noisy host; complete unit CI was queued separately. No full local unit pass claimed.",
+            "log": "local-unit-interrupted.log"
+        },
+        "independentReview": {
+            "status": "no-blocking-findings",
+            "scope": "Image traversal semantics, duplicate/escaped-field fallback, surrogate and path decoding, shared view ownership, native validation boundary, and synchronous lifetime."
+        }
+    },
+    "hostedStudies": {
+        "sourceCi": {
+            "runId": 45644919029,
+            "url": "https://github.com/ManabiIO/manabitan/actions/runs/45644919029",
+            "statusReceipt": "source-ci.json",
+            "status": "completed",
+            "conclusion": "success",
+            "successfulJobCount": 15,
+            "skippedJobCount": 4,
+            "head": "f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9"
+        },
+        "memoryQualification": {
+            "pullRequest": "https://github.com/ManabiIO/manabitan/pull/916",
+            "runId": 45646484626,
+            "url": "https://github.com/ManabiIO/manabitan/actions/runs/45646484626",
+            "head": "57590f5eaee359d721ba9d5d8bde28728a8d172e",
+            "tree": "1be0798152baa751fd22a4bbd8f4b6a48c21be08",
+            "status": "completed",
+            "qualified": false,
+            "criteria": "All three dictionaries on two independent hosts; fixed four ABBA/BAAB observations per host; every observation covers the original import window; both PSS and private-memory median paired increases <=5% and every individual pair <=10%.",
+            "timingAuthority": "All memory instrumented browser and benchmark timing is explicitly non-authoritative.",
+            "conclusion": "failure",
+            "decision": "not-qualified-coverage-failure",
+            "acquisitionComplete": true,
+            "preservedCells": 6,
+            "preservedObservations": 24,
+            "rawScansRecomputed": 2399,
+            "passingCells": 5,
+            "unqualifiedCell": "VNDB host 1, candidate B1",
+            "qualificationFailure": "Covered-scan gap 254.998740 ms exceeds the frozen 250 ms limit. B1 qualified maxima and pair 1 remain null; the full six-cell qualification fails. All imports and semantic checks completed; no observation was replaced and no threshold was changed.",
+            "evidencePath": "memory/decision-summary.json",
+            "rawEvidenceIndex": "memory/full-evidence-index.json",
+            "independentReaudit": "memory/independent-reaudit.json",
+            "statusReceipt": "memory-ci-status.json",
+            "sampledMaximaLimitation": "Sampled PSS/private maxima are non-atomic observations, not exact peaks; the cumulative 81,714,104 decoder-input bytes avoided in the component experiment are not peak-memory savings.",
+            "independentDirectReview": "memory/independent-review.json"
+        }
+    },
+    "files": {
+        "component-results.json": {
+            "sha256": "db4b394feb234a40fac75c29b2ca6d24bf61e88c5c3c201ebef676673ac380ec",
+            "bytes": 56394
+        },
+        "executed-component-runner.mjs.txt": {
+            "sha256": "bedf73fa17d7715bb9b2f96a52b297b49d20d60aec4533e2658cdd6233402b45",
+            "bytes": 11729
+        },
+        "component-run.log": {
+            "sha256": "06adc4f92891fa540e72454af865dbb1766d8adfeb754155b153cdd8dc1ed237",
+            "bytes": 6282
+        },
+        "local-unit-interrupted.log": {
+            "sha256": "aac5f165c8fa62a01b215dec649785d453fc3f24636b9ad295b3504410cc48d8",
+            "bytes": 7362
+        }
+    },
+    "reproduction": "The archived executed runner is byte-exact and records the original local absolute paths. Restore parent and candidate worktrees plus locked fixture/native bytes at those paths (or create a separately identified adapted runner) to reproduce. The source is retained as text evidence, not installed as a generic benchmark."
+}

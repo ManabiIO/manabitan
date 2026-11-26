@@ -1,0 +1,193 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {execFileSync} from 'node:child_process'
+import {createReadStream, openAsBlob} from 'node:fs'
+import {readFile, writeFile} from 'node:fs/promises'
+import path from 'node:path'
+import {pathToFileURL} from 'node:url'
+
+const [root, archivePath, outputPath] = process.argv.slice(2)
+assert(root && archivePath && outputPath, 'Usage: node verify-production-media-projection.mjs ROOT VNDB_ZIP OUTPUT_JSON')
+const hash = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const readIdentity = async (name) => ({path: name, sha256: hash(await readFile(path.join(root, name)))})
+const lockBytes = await readFile(path.join(root, 'test/perf/dictionaries.lock.json'))
+const fixture = JSON.parse(lockBytes).dictionaries.vndb
+const archive = await openAsBlob(archivePath)
+assert.equal(archive.size, fixture.sizeBytes)
+const archiveHash = createHash('sha256')
+for await (const bytes of createReadStream(archivePath)) archiveHash.update(bytes)
+assert.equal(archiveHash.digest('hex'), fixture.sha256)
+const parserPath = 'ext/js/dictionary/term-bank-wasm-parser.js'
+const parser = await import(pathToFileURL(path.join(root, parserPath)))
+const {readDenseZipDirectory} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/dense-zip-directory.js')))
+const {RawZipPayloadReader} = await import(pathToFileURL(path.join(root, 'ext/js/dictionary/term-bank-source-pipeline.js')))
+parser.setTermBankWasmModule(await WebAssembly.compile(await readFile(path.join(root, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))))
+const entries = await readDenseZipDirectory(archive)
+assert(entries, 'Pinned VNDB must use the dense directory')
+const banks = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename))
+    .sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const totalBytes = banks.reduce((sum, {uncompressedSize}) => sum + uncompressedSize, 0)
+
+// Match the unchanged lazy parser partition for the observed three-worker
+// browser configuration. This is a source-count replay, not a browser timing.
+const workerCount = 3
+const groupsPerWorker = 3
+const targetGroupBytes = 24 * 1024 * 1024
+const groupCount = Math.min(banks.length, Math.max(workerCount * groupsPerWorker, Math.ceil(totalBytes / targetGroupBytes)))
+const groups = []
+let start = 0
+let consumedBytes = 0
+for (let groupIndex = 0; groupIndex < groupCount - 1; ++groupIndex) {
+    const remainingGroups = groupCount - groupIndex
+    const targetBytes = (totalBytes - consumedBytes) / remainingGroups
+    let end = start + 1
+    let bytes = banks[start].uncompressedSize
+    const maxEnd = banks.length - (remainingGroups - 1)
+    while (end < maxEnd) {
+        const nextBytes = bytes + banks[end].uncompressedSize
+        if (Math.abs(nextBytes - targetBytes) > Math.abs(bytes - targetBytes)) break
+        bytes = nextBytes
+        ++end
+    }
+    groups.push(banks.slice(start, end))
+    start = end
+    consumedBytes += bytes
+}
+groups.push(banks.slice(start))
+
+const options = {
+    experimentalNativeEscapedKeys: true,
+    singleChunk: true,
+    maxPendingChunks: 1,
+    emitTermByteLists: false,
+    computeContentHashes: true,
+    emitContentSlab: true,
+    emitTokenBinaryContent: true,
+    compactContentMetadata: true,
+    mediaHintFastScan: true,
+    validateGlossaryTypes: true,
+    prepareLookupIndexes: true,
+}
+const report = {
+    schema: 1,
+    complete: false,
+    scope: 'Current-develop integration of PR875 with prepared lookup routes enabled. Complete pinned VNDB native compressed-source parse followed by legacy JavaScript and candidate native media projection on the same chunk. Every output field, content column, key plan and prepared lookup index is deep-compared. Owned output remains unchanged across the next native parse. Exact three-worker media partition. Correctness and mechanical counts only; no performance inference.',
+    node: process.version,
+    v8: process.versions.v8,
+    head: execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
+    tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {cwd: root, encoding: 'utf8'}).trim(),
+    runnerSha256: hash(await readFile(new URL(import.meta.url))),
+    sourceFiles: await Promise.all([
+        parserPath,
+        'ext/js/dictionary/term-bank-wasm-parser-worker.js',
+        'ext/js/dictionary/term-lookup-route.js',
+        'ext/js/dictionary/term-content-ownership.js',
+        'dev/data/dictionary-wasm/manifest.json',
+        'ext/js/dictionary/wasm/term-bank-parser.c',
+        'dev/data/dictionary-wasm/term-bank-parser.wasm',
+        'ext/js/dictionary/dictionary-image-references.js',
+        'ext/js/dictionary/dense-zip-directory.js',
+        'ext/js/dictionary/term-bank-source-pipeline.js',
+    ].map(readIdentity)),
+    fixture: {...fixture, lockSha256: hash(lockBytes)},
+    partition: {workerCount, groupsPerWorker, targetGroupBytes, groupCount, totalBytes},
+    options,
+    totals: {rows: 0, mediaRows: 0, projectedRows: 0, fallbackRows: 0, projectedPaths: 0, glossaryJsonParseCalls: 0, glossaryJsonParseUtf8Bytes: 0, glossaryDecodeCalls: 0, glossaryDecodeBytes: 0, sharedGlossarySources: 0, sharedGlossarySourceBytes: 0},
+    projectedPathCounts: {},
+    groups: [],
+}
+const reader = new RawZipPayloadReader(archive)
+const allPaths = new Set()
+const nativeCounts = {calls: 0, singlePathSpans: 0, fallbackSpans: 0}
+const legacyProjectionTotals = {glossaryJsonParseCalls: 0, glossaryJsonParseUtf8Bytes: 0, glossaryDecodeCalls: 0, glossaryDecodeBytes: 0}
+let previous = null
+const pathDigest = createHash('sha256')
+const originalParse = JSON.parse
+const originalDecode = TextDecoder.prototype.decode
+let activeCounts = null
+JSON.parse = function (source, reviver) {
+    if (activeCounts !== null) {
+        ++activeCounts.glossaryJsonParseCalls
+        activeCounts.glossaryJsonParseUtf8Bytes += Buffer.byteLength(source)
+    }
+    return originalParse(source, reviver)
+}
+TextDecoder.prototype.decode = function (input, options) {
+    if (activeCounts !== null) {
+        ++activeCounts.glossaryDecodeCalls
+        activeCounts.glossaryDecodeBytes += input?.byteLength ?? 0
+    }
+    return originalDecode.call(this, input, options)
+}
+try {
+    for (const [index, group] of groups.entries()) {
+        const source = await Promise.all(group.map(async (entry) => ({...entry, bytes: await reader.read(entry, new AbortController().signal, true)})))
+        const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(source, options, true)
+        const counts = {index, banks: group.map(({filename}) => filename), sourceBytes: group.reduce((sum, {uncompressedSize}) => sum + uncompressedSize, 0), ...Object.fromEntries(Object.keys(report.totals).map((key) => [key, 0]))}
+        await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
+            counts.rows += chunk.rowCount
+            counts.mediaRows += chunk.mediaRows.length
+            for (const {row} of chunk.mediaRows) {
+                const bytes = row.glossaryJsonBytes
+                if (row.termEntryContentBytes.length > 0 && row.glossaryJson.length === 0 && bytes instanceof Uint8Array && !(bytes.buffer instanceof ArrayBuffer)) {
+                    ++counts.sharedGlossarySources
+                    counts.sharedGlossarySourceBytes += bytes.byteLength
+                }
+            }
+            if (previous !== null) assert.deepEqual(previous.value, previous.snapshot, 'Owned prior chunk changed after native reuse')
+            const legacyCounts = Object.fromEntries(Object.keys(legacyProjectionTotals).map(key => [key, 0]))
+            activeCounts = legacyCounts
+            let legacy
+            try { legacy = parser.copyWasmBackedColumnChunk(chunk, false, true, true) } finally { activeCounts = null }
+            counts.legacyProjection = legacyCounts
+            for (const key of Object.keys(legacyProjectionTotals)) legacyProjectionTotals[key] += legacyCounts[key]
+            const nativeProject = preloadedSource.wasm.project_single_glossary_image_path
+            assert.equal(typeof nativeProject, 'function')
+            preloadedSource.wasm.project_single_glossary_image_path = (...args) => {
+                ++nativeCounts.calls
+                const span = nativeProject(...args)
+                if (span === 0n) ++nativeCounts.fallbackSpans
+                else ++nativeCounts.singlePathSpans
+                return span
+            }
+            activeCounts = counts
+            let owned
+            try { owned = parser.copyWasmBackedColumnChunk(chunk, false, true, true, preloadedSource) } finally {
+                activeCounts = null
+                preloadedSource.wasm.project_single_glossary_image_path = nativeProject
+            }
+            assert.deepEqual(owned, legacy, 'Native projection changed output')
+            previous = {value: owned, snapshot: structuredClone(owned)}
+            for (const {imagePaths} of owned.mediaRows) {
+                if (imagePaths === undefined) {
+                    ++counts.fallbackRows
+                    continue
+                }
+                ++counts.projectedRows
+                counts.projectedPaths += imagePaths.length
+                report.projectedPathCounts[imagePaths.length] = (report.projectedPathCounts[imagePaths.length] ?? 0) + 1
+                pathDigest.update(JSON.stringify(imagePaths) + '\n')
+                for (const value of imagePaths) allPaths.add(value)
+            }
+        }, 2048, {...options, preloadedSource})
+        counts.nativeProfile = parser.consumeLastTermBankWasmParseProfile()
+        report.groups.push(counts)
+        for (const key of Object.keys(report.totals)) report.totals[key] += counts[key]
+        process.stderr.write(`media projection counts: ${index + 1}/${groups.length}\n`)
+    }
+} finally {
+    activeCounts = null
+    JSON.parse = originalParse
+    TextDecoder.prototype.decode = originalDecode
+}
+assert.equal(report.totals.rows, fixture.termRows)
+assert.equal(allPaths.size, fixture.mediaFiles)
+if (previous !== null) assert.deepEqual(previous.value, previous.snapshot)
+report.nativeCounts = nativeCounts
+report.legacyProjectionTotals = legacyProjectionTotals
+report.effectiveFlagCorrection = "Production large projected imports force experimentalNativeEscapedKeys=true in ParallelTermBankPipelineRun; this corrected oracle uses it. The earlier oracle retained false and remains separate fallback coverage."
+report.uniqueImagePaths = allPaths.size
+report.projectedPathDigest = pathDigest.digest('hex')
+report.complete = true
+await writeFile(outputPath, JSON.stringify(report, null, 2) + '\n')
+console.log(JSON.stringify({complete: true, partition: report.partition, totals: report.totals, legacyProjectionTotals, nativeCounts, projectedPathCounts: report.projectedPathCounts, uniqueImagePaths: report.uniqueImagePaths, outputPath}))

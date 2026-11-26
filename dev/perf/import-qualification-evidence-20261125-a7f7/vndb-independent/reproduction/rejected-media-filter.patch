@@ -1,0 +1,255 @@
+diff --git a/ext/js/dictionary/dictionary-importer.js b/ext/js/dictionary/dictionary-importer.js
+index c96826252..b43b9f745 100644
+--- a/ext/js/dictionary/dictionary-importer.js
++++ b/ext/js/dictionary/dictionary-importer.js
+@@ -2307,6 +2307,7 @@ export class DictionaryImporter {
+                             },
+                             preloadedTermFileBytes,
+                             sourceTermFileBatchCount > 1 ? SOURCE_TERM_BANK_BATCH_WASM_ROW_CHUNK_SIZE : null,
++                            uniqueMediaPaths,
+                         );
+                         termBankSourcePipeline.releaseBatch(sourceTermFileBatch);
+                         lastFastTermBankReadProfile = this._lastFastTermBankReadProfile ?? null;
+@@ -3390,6 +3391,48 @@ export class DictionaryImporter {
+         });
+     }
+ 
++    /* eslint-disable @stylistic/semi */
++    /**
++     * Projected references have no presentation target to update. Keep the
++     * first occurrence of each new path before copying diagnostic keys; the
++     * ordinary sink still owns admission and first-reference error ordering.
++     * Target-bearing rows remain in their original order and are not filtered.
++     * @template {{imagePaths?: string[]}} T
++     * @param {T[]} mediaRows
++     * @param {ReadonlySet<string>} knownMediaPaths
++     * @returns {T[]}
++     */
++    _selectNewMediaReferenceRows(mediaRows, knownMediaPaths) {
++        /** @type {T[]} */
++        const selected = []
++        const newPaths = new Set()
++        for (const mediaRow of mediaRows) {
++            const {imagePaths} = mediaRow
++            if (typeof imagePaths === 'undefined') {
++                selected.push(mediaRow)
++                continue
++            }
++            /** @type {string[]|null} */
++            let selectedPaths = null
++            for (let i = 0; i < imagePaths.length; ++i) {
++                const path = imagePaths[i]
++                if (knownMediaPaths.has(path) || newPaths.has(path)) {
++                    selectedPaths ??= imagePaths.slice(0, i)
++                } else {
++                    newPaths.add(path)
++                    selectedPaths?.push(path)
++                }
++            }
++            if (selectedPaths === null) {
++                if (imagePaths.length > 0) { selected.push(mediaRow) }
++            } else if (selectedPaths.length > 0) {
++                selected.push({...mediaRow, imagePaths: selectedPaths})
++            }
++        }
++        return selected
++    }
++    /* eslint-enable @stylistic/semi */
++
+     /**
+      * Keep diagnostic keys in one owned arena per projected chunk. Successful
+      * image imports need neither decoded headwords nor one retained buffer per
+@@ -5029,9 +5072,10 @@ export class DictionaryImporter {
+      * @param {(termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} [onChunk]
+      * @param {Uint8Array|Uint8Array[]|Promise<Uint8Array|Uint8Array[]>|import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|{loaders: Array<() => Promise<Uint8Array|{bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string}>>, estimatedByteLengths: number[], compressed?: boolean}|null} [preloadedBytes]
+      * @param {number|null} [wasmRowChunkSizeOverride]
++     * @param {ReadonlySet<string>|null} [knownMediaPaths] Paths admitted by the ordered import sink.
+      * @returns {Promise<{termList: import('dictionary-database').DatabaseTermEntry[], requirements: import('dictionary-importer').ImportRequirement[]|null}>}
+      */
+-    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null) {
++    async _readTermBankFileFast(termFile, version, dictionaryTitle, prefixWildcardsSupported, useMediaPipeline, enableTermEntryContentDedup, termContentStorageMode, onChunk = void 0, preloadedBytes = null, wasmRowChunkSizeOverride = null, knownMediaPaths = null) {
+         this._lastFastTermBankReadProfile = null;
+         /** @type {import('./term-bank-source-pipeline.js').DeferredTermBankSourceBatch|null} */
+         let deferredSourceBatch = null;
+@@ -5141,9 +5185,12 @@ export class DictionaryImporter {
+                     const columnChunk = /** @type {DirectTermChunk & {mediaRows: Array<{index: number, row: ParsedTermBankChunkRow, imagePaths?: string[]}>}} */ (/** @type {unknown} */ (parsedRows));
+                     const {mediaRows, ...columnPayload} = columnChunk;
+                     if (requirementsForChunk !== null) {
+-                        const diagnosticKeys = this._createMediaReferenceDiagnostics(columnChunk);
++                        /* eslint-disable @stylistic/semi */
++                        const selectedMediaRows = knownMediaPaths === null ? mediaRows : this._selectNewMediaReferenceRows(mediaRows, knownMediaPaths)
++                        const diagnosticKeys = this._createMediaReferenceDiagnostics(selectedMediaRows === mediaRows ? columnChunk : {...columnChunk, mediaRows: selectedMediaRows})
++                        /* eslint-enable @stylistic/semi */
+                         let diagnosticIndex = 0;
+-                        for (const {index, row, imagePaths} of mediaRows) {
++                        for (const {index, row, imagePaths} of selectedMediaRows) {
+                             if (typeof imagePaths !== 'undefined' && diagnosticKeys !== null) {
+                                 const entry = {dictionary: dictionaryTitle, diagnosticKeys, diagnosticIndex: diagnosticIndex++};
+                                 for (const path of imagePaths) { this._addFastMediaRequirement(path, entry, requirementsForChunk); }
+diff --git a/test/dictionary-importer-media-reference.test.js b/test/dictionary-importer-media-reference.test.js
+index cf0e327a6..5e979cd99 100644
+--- a/test/dictionary-importer-media-reference.test.js
++++ b/test/dictionary-importer-media-reference.test.js
+@@ -25,16 +25,24 @@ afterEach(() => { vi.restoreAllMocks() })
+  * Only worker transport is replaced so ownership and diagnostic behavior can
+  * be observed without spawning a browser for this unit test.
+  * @param {unknown[]} rows
+- * @param {(chunk: ColumnChunk) => void} [inspect]
++ * @param {(chunk: ColumnChunk, native: ColumnChunk) => void} [inspect]
++ * @param {{knownPaths: Set<string>, chunkSize?: number, overlapChunks?: boolean, onRequirements?: (requirements: import('dictionary-importer').ImportRequirement[]) => Promise<void>|void}|null} [selection]
+  * @returns {Promise<{importer: DictionaryImporter, requirements: import('dictionary-importer').ImportRequirement[]}>}
+  */
+-async function collectReferences(rows, inspect = () => {}) {
++async function collectReferences(rows, inspect = () => {}, selection = null) {
+     vi.spyOn(parser, 'parseTermBankWithWasmColumnChunks').mockImplementation(async (source, version, onChunk, size, options) => {
+-        return await nativeParse(source, version, async (chunk, progress) => {
++        /** @type {Array<() => Promise<void>>} */
++        const deliveries = []
++        await nativeParse(source, version, async (chunk, progress) => {
+             const projected = parser.copyWasmBackedColumnChunk(chunk, false, true)
+-            inspect(projected)
+-            await onChunk(projected, progress)
+-        }, size, options)
++            inspect(projected, chunk)
++            if (selection?.overlapChunks) {
++                deliveries.push(async () => { await onChunk(projected, progress) })
++            } else {
++                await onChunk(projected, progress)
++            }
++        }, selection?.chunkSize ?? size, selection?.chunkSize ? {...options, singleChunk: false} : options)
++        await Promise.all(deliveries.map((deliver) => deliver()))
+     })
+     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
+     Reflect.set(importer, '_skipImageMetadata', true)
+@@ -42,9 +50,10 @@ async function collectReferences(rows, inspect = () => {}) {
+     const requirements = []
+     const file = /** @type {import('@zip.js/zip.js').Entry} */ (/** @type {unknown} */ ({filename: 'term_bank_1.json'}))
+     const source = encoder.encode(JSON.stringify(rows))
+-    await importer._readTermBankFileFast(file, 3, 'Media references', false, true, true, 'raw-bytes', (_terms, chunkRequirements) => {
++    await importer._readTermBankFileFast(file, 3, 'Media references', false, true, true, 'raw-bytes', async (_terms, chunkRequirements) => {
+         requirements.push(...(chunkRequirements ?? []))
+-    }, source)
++        await selection?.onRequirements?.(chunkRequirements ?? [])
++    }, source, selection?.chunkSize ?? null, selection?.knownPaths ?? null)
+     return {importer, requirements}
+ }
+ 
+@@ -257,4 +266,118 @@ describe('preformatted image references', () => {
+         await expect(importer._importDeferredMediaRequirements([compact], [], new Map(), async () => {}))
+             .rejects.toThrow('Could not find image at path "missing.png" for 画像 (がぞう) in Media references')
+     })
++
++    test('copies only the first new projected row keys without changing caller-owned paths or rows', async () => {
++        const knownPaths = new Set(['known.png'])
++        /** @type {Array<{row: ColumnChunk['mediaRows'][number], paths: string[]}>} */
++        const snapshots = []
++        const {importer, requirements} = await collectReferences([
++            ['already admitted', '', '', '', 0, [{type: 'image', path: 'known.png'}], 1, ''],
++            ['first', 'reading', '', '', 0, [{type: 'image', path: 'new.png'}, {type: 'image', path: 'new.png'}], 2, ''],
++            ['duplicate', '', '', '', 0, [{type: 'image', path: 'new.png'}], 3, ''],
++            ['second', '', '', '', 0, [{type: 'image', path: 'known.png'}, {type: 'image', path: 'other.png'}], 4, ''],
++        ], (chunk) => {
++            for (const mediaRow of chunk.mediaRows) {
++                snapshots.push({row: mediaRow, paths: [...(mediaRow.imagePaths ?? [])]})
++                Object.freeze(mediaRow.imagePaths)
++                Object.freeze(mediaRow)
++            }
++        }, {knownPaths})
++        expect(requirements.map(({source}) => source.path)).toEqual(['new.png', 'other.png'])
++        expect([...knownPaths]).toEqual(['known.png'])
++        for (const {row, paths} of snapshots) { expect(row.imagePaths).toEqual(paths) }
++        const [first, second] = requirements
++        if (!('diagnosticKeys' in first.entry) || !('diagnosticKeys' in second.entry)) { throw new Error('Expected encoded diagnostics') }
++        expect(first.entry.diagnosticKeys).toBe(second.entry.diagnosticKeys)
++        expect(first.entry.diagnosticKeys.bytes).toEqual(encoder.encode('firstreadingsecond'))
++        expect(first.entry.diagnosticKeys.spans).toEqual(new Uint32Array([0, 5, 5, 7, 12, 6, 12, 6]))
++        await expect(importer._importDeferredMediaRequirements(requirements.map((value) => importer._createDeferredMediaRequirement(value)), [], new Map(), async () => {}))
++            .rejects.toThrow('Could not find image at path "new.png" for first (reading) in Media references')
++    })
++
++    test('observes sink admissions between projected chunks without retaining a second import-wide set', async () => {
++        const knownPaths = new Set()
++        /** @type {string[][]} */
++        const chunkPaths = []
++        const {requirements} = await collectReferences([
++            ['first', '', '', '', 0, [{type: 'image', path: 'same.png'}], 1, ''],
++            ['second', '', '', '', 0, [{type: 'image', path: 'same.png'}], 2, ''],
++            ['third', '', '', '', 0, [{type: 'image', path: 'other.png'}], 3, ''],
++            ['fourth', '', '', '', 0, [{type: 'image', path: 'other.png'}], 4, ''],
++        ], () => {}, {
++            knownPaths,
++            chunkSize: 1,
++            onRequirements(values) {
++                chunkPaths.push(values.map(({source}) => source.path))
++                for (const {source} of values) { knownPaths.add(source.path) }
++            },
++        })
++        expect(chunkPaths).toEqual([['same.png'], [], ['other.png'], []])
++        expect(requirements.map(({source}) => source.path)).toEqual(['same.png', 'other.png'])
++    })
++
++    test('keeps unprojected target-bearing rows between selected references', () => {
++        const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
++        /** @type {{id: string, imagePaths?: string[]}} */
++        const unprojected = {id: 'ordinary'}
++        const first = {id: 'first', imagePaths: ['new.png']}
++        const last = {id: 'last', imagePaths: ['new.png', 'other.png', 'known.png', 'other.png']}
++        const rows = [first, unprojected, {id: 'empty', imagePaths: []}, last]
++        const selected = importer._selectNewMediaReferenceRows(rows, new Set(['known.png']))
++        expect(selected).toEqual([first, unprojected, {id: 'last', imagePaths: ['other.png']}])
++        expect(selected[0]).toBe(first)
++        expect(selected[1]).toBe(unprojected)
++        expect(last.imagePaths).toEqual(['new.png', 'other.png', 'known.png', 'other.png'])
++    })
++
++    test.each([0, 1])('preserves the first error when target-bearing row %i shares a projected path', async (targetIndex) => {
++        const {importer, requirements} = await collectReferences([
++            ['first', 'first reading', '', '', 0, [{type: 'image', path: 'missing.png'}], 1, ''],
++            ['second', 'second reading', '', '', 0, [{type: 'image', path: 'missing.png'}], 2, ''],
++        ], (chunk, native) => {
++            const targetRow = parser.copyWasmBackedColumnChunk(native, false, false).mediaRows[targetIndex]
++            targetRow.row.termEntryContentBytes = new Uint8Array(0)
++            targetRow.row.glossaryJson = '[{"type":"image","path":"missing.png"}]'
++            targetRow.row.glossaryJsonBytes = void 0
++            chunk.mediaRows[targetIndex] = targetRow
++        }, {knownPaths: new Set()})
++        expect(requirements.map(({type}) => type)).toEqual(targetIndex === 0 ? ['image', 'image-reference'] : ['image-reference', 'image'])
++        expect(requirements[targetIndex]).toHaveProperty('target')
++        await expect(importer._importDeferredMediaRequirements([importer._createDeferredMediaRequirement(requirements[0])], [], new Map(), async () => {}))
++            .rejects.toThrow('Could not find image at path "missing.png" for first (first reading) in Media references')
++    })
++
++    test('filters a later delivered chunk while the first admitted sink is awaiting completion', async () => {
++        const knownPaths = new Set()
++        /** @type {string[][]} */
++        const delivered = []
++        let release = () => {}
++        const gate = new Promise((resolve) => { release = () => resolve(void 0) })
++        const {requirements} = await collectReferences([
++            ['first', '', '', '', 0, [{type: 'image', path: 'same.png'}], 1, ''],
++            ['second', '', '', '', 0, [{type: 'image', path: 'same.png'}], 2, ''],
++        ], () => {}, {
++            knownPaths,
++            chunkSize: 1,
++            overlapChunks: true,
++            async onRequirements(values) {
++                delivered.push(values.map(({source}) => source.path))
++                for (const {source} of values) { knownPaths.add(source.path) }
++                if (delivered.length === 1) {
++                    await gate
++                } else {
++                    expect(values).toEqual([])
++                    release()
++                }
++            },
++        })
++        expect(delivered).toEqual([['same.png'], []])
++        expect(requirements).toHaveLength(1)
++    })
++
++    test('validates unsupported glossary types even when every image path is already admitted', async () => {
++        await expect(collectReferences([
++            ['invalid glossary', '', '', '', 0, [{type: 'image', path: 'known.png'}, {type: 'unsupported'}], 1, ''],
++        ], () => {}, {knownPaths: new Set(['known.png'])})).rejects.toThrow()
++    })
+ })

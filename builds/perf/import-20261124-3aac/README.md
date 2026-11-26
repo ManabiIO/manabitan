@@ -6,6 +6,8 @@ Built product ZIP bytes are the sole CI-content exclusion. Their full archive SH
 
 The ZIP-byte checks apply only to product ZIPs actually present in the downloaded memory artifacts. The original timing artifacts never included product ZIP bytes; those cells retain the original archive hashes and package-entry inventories, which were reconciled without independently rehashing unavailable ZIPs. An empty omitted-product list does not imply that original CI included a product ZIP.
 
+The readable VNDB-audit copy repairs one relative link to `import-lookup-screen.js`, pointing it to the tracked `dev/perf` source. That source has the same Git blob `079a7f9fb9a4e5b4e17271466d160c71dbfb05bc` at frozen baseline `bbccabd520972cc351a65d9f545bd5369b6e9747`, the archived branch head, and current `develop`. The original supporting archive, its source manifest and measured evidence remain unchanged.
+
 Run `python3 package-evidence.py --verify` to audit archive/member hashes and readable receipts. Extract an archive with `tar -xzf <archive> -C <empty-directory>`. Omitted product ZIPs needed by the original memory receipt verifier can be recovered from the linked original CI artifact while available; their expected hashes are in each manifest.
 
 Refresh from the acquisition workspace with `python3 package-evidence.py --round2 /absolute/path/to/round2`. Add `--media-memory-run RUN_ID` before those artifacts arrive if needed. The script runs no tests, browser acquisitions or benchmarks. Input-content changes create a new version; prior snapshots are never removed.

@@ -1,0 +1,694 @@
+{
+  "schemaVersion": 1,
+  "baseline": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "candidate": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+  "candidateTree": "be5b6a8d9c24915516d6edd8167a071e0449d793",
+  "timingRun": 45645363685,
+  "memoryRun": 45645371602,
+  "timingObservations": 69,
+  "memoryObservations": 24,
+  "timedObservations": 54,
+  "rawMemoryScans": 2486,
+  "qualifiedMemoryObservations": 20,
+  "conclusion": "No demonstrated complete-import benefit for target JMdict; all six target pairs slower against both controls. Non-target intervals include zero. Memory qualification fails because all four VNDB replication-2 observations exceed the fixed covered-gap limit. No new acquisition or observation rerun.",
+  "timing": [
+    {
+      "analysisRecomputedIndependently": true,
+      "comparisons": {
+        "candidate": {
+          "baselineMedianMs": 896.2000000000116,
+          "bestPairPercent": 0.5425755730223525,
+          "candidateMedianMs": 913.1000000000058,
+          "equalWorkPercent": 4.452935694313753,
+          "fasterPairs": 0,
+          "pairedChangesPercent": [
+            17.657439064737467,
+            1.4955583042862486,
+            4.317200636218987,
+            1.0795454545454497,
+            0.5425755730223525,
+            1.446395053547156
+          ],
+          "pairedMedianBootstrap95Percent": [
+            0.8110605137839011,
+            10.987319850478228
+          ],
+          "pairedMedianPercent": 1.4709766789167023,
+          "pairs": 6,
+          "worstPairPercent": 17.657439064737467
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 897.1500000000233,
+          "bestPairPercent": 0.45921714410799286,
+          "candidateMedianMs": 913.1000000000058,
+          "equalWorkPercent": 2.2217763265905077,
+          "fasterPairs": 0,
+          "pairedChangesPercent": [
+            2.478386167145863,
+            0.6804238706085597,
+            6.420955030137221,
+            2.311939268465113,
+            1.1361104923093057,
+            0.45921714410799286
+          ],
+          "pairedMedianBootstrap95Percent": [
+            0.5698205073582763,
+            4.449670598641542
+          ],
+          "pairedMedianPercent": 1.7240248803872094,
+          "pairs": 6,
+          "worstPairPercent": 6.420955030137221
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 896.2000000000116,
+          "bestPairPercent": -1.976823449218701,
+          "candidateMedianMs": 897.1500000000233,
+          "equalWorkPercent": 2.1826654240431953,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            14.81195544281313,
+            0.8096255481852888,
+            -1.976823449218701,
+            -1.2045454545494216,
+            -0.5868674565372767,
+            0.9826653417207565
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -1.5906844518840613,
+            7.897310392266943
+          ],
+          "pairedMedianPercent": 0.11137904582400604,
+          "pairs": 6,
+          "worstPairPercent": 14.81195544281313
+        }
+      },
+      "dictionary": "jmdict",
+      "exhaustiveMedia": {
+        "bytes": 0,
+        "files": 0,
+        "mode": "all",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "totalBytes": 0,
+        "totalFiles": 0
+      },
+      "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+      "observationsReopened": 23,
+      "packageDifferences": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "rawReportValidator": "unchanged frozen benchmark-support.js",
+      "rawReportsRevalidated": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+          "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+        },
+        "C": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        }
+      },
+      "stage": "screen",
+      "status": "passed",
+      "storageBytesRange": [
+        43520477,
+        43520477
+      ],
+      "timedObservations": 18
+    },
+    {
+      "analysisRecomputedIndependently": true,
+      "comparisons": {
+        "candidate": {
+          "baselineMedianMs": 1165.0499999999884,
+          "bestPairPercent": -7.425783511123473,
+          "candidateMedianMs": 1160.8500000000058,
+          "equalWorkPercent": 0.26059191592306963,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -0.09504882052978614,
+            -0.1934235976791654,
+            -7.425783511123473,
+            -2.8954377523852437,
+            6.1185468451254055,
+            6.679814783055682
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -5.160610631754358,
+            6.399180814090544
+          ],
+          "pairedMedianPercent": -0.14423620910447577,
+          "pairs": 6,
+          "worstPairPercent": 6.679814783055682
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 1150.4500000000116,
+          "bestPairPercent": -3.9700996677731193,
+          "candidateMedianMs": 1160.8500000000058,
+          "equalWorkPercent": 0.10865369493948673,
+          "fasterPairs": 4,
+          "pairedChangesPercent": [
+            -3.9700996677731193,
+            -3.094635420920089,
+            -1.2612453695526993,
+            -0.09723327146070604,
+            1.110436366790002,
+            8.352203448873375
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -3.532367544346604,
+            4.731319907831688
+          ],
+          "pairedMedianPercent": -0.6792393205067027,
+          "pairs": 6,
+          "worstPairPercent": 8.352203448873375
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 1165.0499999999884,
+          "bestPairPercent": -6.2432812370816215,
+          "candidateMedianMs": 1150.4500000000116,
+          "equalWorkPercent": 0.15177331367033364,
+          "fasterPairs": 3,
+          "pairedChangesPercent": [
+            4.035254471614702,
+            2.9938609032045704,
+            -6.2432812370816215,
+            -2.800927914767326,
+            4.953109350817075,
+            -1.5434745326677435
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -4.522104575924474,
+            4.494181911215889
+          ],
+          "pairedMedianPercent": 0.7251931852684135,
+          "pairs": 6,
+          "worstPairPercent": 4.953109350817075
+        }
+      },
+      "dictionary": "jitendex",
+      "exhaustiveMedia": {
+        "bytes": 4992155,
+        "files": 236,
+        "mode": "all",
+        "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402",
+        "totalBytes": 4992155,
+        "totalFiles": 236
+      },
+      "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+      "observationsReopened": 23,
+      "packageDifferences": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "rawReportValidator": "unchanged frozen benchmark-support.js",
+      "rawReportsRevalidated": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+          "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+        },
+        "C": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        }
+      },
+      "stage": "screen",
+      "status": "passed",
+      "storageBytesRange": [
+        67466332,
+        67466332
+      ],
+      "timedObservations": 18
+    },
+    {
+      "analysisRecomputedIndependently": true,
+      "comparisons": {
+        "candidate": {
+          "baselineMedianMs": 5511.049999999988,
+          "bestPairPercent": -3.9616671187054697,
+          "candidateMedianMs": 5444.850000000006,
+          "equalWorkPercent": -0.8759208068280011,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -0.7575205768806326,
+            -3.9616671187054697,
+            -3.13752025498949,
+            -0.5347196435210977,
+            5.080238937887183,
+            -1.6755535153071266
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -3.54959368684748,
+            2.2727596471830425
+          ],
+          "pairedMedianPercent": -1.2165370460938796,
+          "pairs": 6,
+          "worstPairPercent": 5.080238937887183
+        },
+        "candidateVsSecondBaseline": {
+          "baselineMedianMs": 5545.250000000015,
+          "bestPairPercent": -6.334802672360718,
+          "candidateMedianMs": 5444.850000000006,
+          "equalWorkPercent": -2.0825419992765215,
+          "fasterPairs": 5,
+          "pairedChangesPercent": [
+            -1.5552464731490745,
+            -4.374909981276609,
+            -6.334802672360718,
+            -0.32559956834908865,
+            1.9623519151101165,
+            -1.5869369289764124
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -5.3548563268186635,
+            0.8183761733805139
+          ],
+          "pairedMedianPercent": -1.5710917010627434,
+          "pairs": 6,
+          "worstPairPercent": 1.9623519151101165
+        },
+        "identicalProductControl": {
+          "baselineMedianMs": 5511.049999999988,
+          "bestPairPercent": -0.20980319346431964,
+          "candidateMedianMs": 5545.250000000015,
+          "equalWorkPercent": 1.2322840248156774,
+          "fasterPairs": 2,
+          "pairedChangesPercent": [
+            0.8103285017122319,
+            0.4321489919541399,
+            3.4135223205554066,
+            -0.20980319346431964,
+            3.0578806434093275,
+            -0.09004555245554213
+          ],
+          "pairedMedianBootstrap95Percent": [
+            -0.14992437295993088,
+            3.235701481982367
+          ],
+          "pairedMedianPercent": 0.6212387468331859,
+          "pairs": 6,
+          "worstPairPercent": 3.4135223205554066
+        }
+      },
+      "dictionary": "vndb",
+      "exhaustiveMedia": {
+        "bytes": 188131284,
+        "files": 146570,
+        "mode": "all",
+        "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb",
+        "totalBytes": 188131284,
+        "totalFiles": 146570
+      },
+      "limits": "Descriptive fixed-cohort results; no multiple-comparison correction; separate stages not pooled.",
+      "observationsReopened": 23,
+      "packageDifferences": [
+        "js/dictionary/dictionary-database.js",
+        "js/dictionary/term-content-canonical-scan.js",
+        "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+        "lib/term-content-canonical-scan-v1.wasm"
+      ],
+      "rawReportValidator": "unchanged frozen benchmark-support.js",
+      "rawReportsRevalidated": true,
+      "sourceIdentities": {
+        "A": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        },
+        "B": {
+          "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+          "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+        },
+        "C": {
+          "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+        }
+      },
+      "stage": "screen",
+      "status": "passed",
+      "storageBytesRange": [
+        609553611,
+        609553611
+      ],
+      "timedObservations": 18
+    }
+  ],
+  "memory": [
+    {
+      "dictionary": "jitendex",
+      "replication": 1,
+      "cell": "publication-preflight-memory-jitendex-rep1-2754",
+      "rawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 346,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.3251373765082166,
+            "maximumPairedChangePercent": 0.4780782247387316
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.3278801089753036,
+            "maximumPairedChangePercent": 0.9846966839541116
+          }
+        }
+      },
+      "correctnessReceiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/dictionary-database.js",
+          "js/dictionary/term-content-canonical-scan.js",
+          "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "lib/term-content-canonical-scan-v1.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+            "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+          }
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "dictionary": "jitendex",
+      "replication": 2,
+      "cell": "publication-preflight-memory-jitendex-rep2-2754",
+      "rawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 335,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -2.114831013445817,
+            "maximumPairedChangePercent": 1.1248729515547673
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -2.594562615167456,
+            "maximumPairedChangePercent": 1.235253296321992
+          }
+        }
+      },
+      "correctnessReceiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/dictionary-database.js",
+          "js/dictionary/term-content-canonical-scan.js",
+          "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "lib/term-content-canonical-scan-v1.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+            "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+          }
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 1,
+      "cell": "publication-preflight-memory-jmdict-rep1-2754",
+      "rawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 299,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.8022026417155825,
+            "maximumPairedChangePercent": 0.3395670039367804
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.6115689301522509,
+            "maximumPairedChangePercent": 1.1158898676774776
+          }
+        }
+      },
+      "correctnessReceiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/dictionary-database.js",
+          "js/dictionary/term-content-canonical-scan.js",
+          "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "lib/term-content-canonical-scan-v1.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+            "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+          }
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "dictionary": "jmdict",
+      "replication": 2,
+      "cell": "publication-preflight-memory-jmdict-rep2-2754",
+      "rawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 439,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": -0.6930837808141077,
+            "maximumPairedChangePercent": -0.25783088052175884
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": -0.5175956840140716,
+            "maximumPairedChangePercent": 0.5512634389498672
+          }
+        }
+      },
+      "correctnessReceiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/dictionary-database.js",
+          "js/dictionary/term-content-canonical-scan.js",
+          "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "lib/term-content-canonical-scan-v1.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+            "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+          }
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 1,
+      "cell": "publication-preflight-memory-vndb-rep1-2754",
+      "rawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 627,
+        "everyObservationQualified": true,
+        "passesProspectiveMemoryScreen": true,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": 0.6725137487619381,
+            "maximumPairedChangePercent": 1.2368794245456671
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": 0.9390311477951663,
+            "maximumPairedChangePercent": 1.4148019481625251
+          }
+        }
+      },
+      "correctnessReceiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/dictionary-database.js",
+          "js/dictionary/term-content-canonical-scan.js",
+          "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "lib/term-content-canonical-scan-v1.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+            "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+          }
+        }
+      },
+      "status": "passed"
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "cell": "publication-preflight-memory-vndb-rep2-2754",
+      "rawMemoryAudit": {
+        "schemaVersion": 1,
+        "observations": 4,
+        "rawScanCount": 440,
+        "everyObservationQualified": false,
+        "passesProspectiveMemoryScreen": false,
+        "metrics": {
+          "maxSampledPssKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          },
+          "maxSampledPrivateKiB": {
+            "medianPairedChangePercent": null,
+            "maximumPairedChangePercent": null
+          }
+        }
+      },
+      "correctnessReceiptAudit": {
+        "schemaVersion": 1,
+        "authoritativeTiming": false,
+        "observations": 4,
+        "allCorrectnessPassed": true,
+        "packageDifferences": [
+          "js/dictionary/dictionary-database.js",
+          "js/dictionary/term-content-canonical-scan.js",
+          "js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "lib/term-content-canonical-scan-v1.wasm"
+        ],
+        "sourceIdentities": {
+          "A": {
+            "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+            "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+          },
+          "B": {
+            "commit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+            "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+          }
+        }
+      },
+      "status": "passed"
+    }
+  ],
+  "failedMemoryObservations": [
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "name": "B1",
+      "arm": "B",
+      "pair": 1,
+      "qualifiedForWholeTreePss": false,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null,
+      "maximumCoveredSampleGapMs": 318.904967,
+      "preImportBracketGapMs": 26.825576,
+      "postImportBracketGapMs": 63.079114
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "name": "A1",
+      "arm": "A",
+      "pair": 1,
+      "qualifiedForWholeTreePss": false,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null,
+      "maximumCoveredSampleGapMs": 252.904922,
+      "preImportBracketGapMs": 114.578469,
+      "postImportBracketGapMs": 126.205181
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "name": "A2",
+      "arm": "A",
+      "pair": 2,
+      "qualifiedForWholeTreePss": false,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null,
+      "maximumCoveredSampleGapMs": 276.914989,
+      "preImportBracketGapMs": 41.615487,
+      "postImportBracketGapMs": 123.064506
+    },
+    {
+      "dictionary": "vndb",
+      "replication": 2,
+      "name": "B2",
+      "arm": "B",
+      "pair": 2,
+      "qualifiedForWholeTreePss": false,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "maxSampledPssKiB": null,
+      "maxSampledPrivateKiB": null,
+      "maximumCoveredSampleGapMs": 379.334888,
+      "preImportBracketGapMs": 80.348068,
+      "postImportBracketGapMs": 74.118991
+    }
+  ],
+  "artifactMetadata": "/workspace/scratch/2754d3e3fa09/evidence/metadata-hosted/artifact-metadata-final.json",
+  "limits": [
+    "Single six-block timing screen per corpus, not independent timing replication.",
+    "Descriptive bootstrap intervals, no multiple-comparison correction.",
+    "Sampled non-atomic process-tree memory maxima, not instantaneous peaks.",
+    "All timing and memory sources remain tied to frozen preformat b2e816c; later formatting-only source CI is separate."
+  ]
+}

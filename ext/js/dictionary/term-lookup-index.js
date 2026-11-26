@@ -1230,15 +1230,25 @@ function validateKeyHashChains(heads, next, keyBytes, keyOffsets, validateHashBu
  * @throws {Error} If a posting is duplicated, missing, or assigned to the wrong key.
  */
 function validatePostingRows(offsets, rows, keys, seen, marker) {
-    validateOffsets(offsets, rows.length);
+    const end = rows.length;
+    if (offsets[0] !== 0 || offsets[offsets.length - 1] !== end) {
+        throw new Error('Invalid persisted term lookup posting offsets');
+    }
+    let start = 0;
     for (let key = 0; key < offsets.length - 1; ++key) {
-        for (let i = offsets[key]; i < offsets[key + 1]; ++i) {
+        const stop = offsets[key + 1];
+        // Check each range before reading its postings.
+        if (stop < start || stop > end) {
+            throw new Error('Invalid persisted term lookup posting order');
+        }
+        for (let i = start; i < stop; ++i) {
             const row = rows[i];
             if (keys[row] !== key || seen[row] === marker) {
                 throw new Error('Invalid persisted term lookup posting row');
             }
             seen[row] = marker;
         }
+        start = stop;
     }
 }
 

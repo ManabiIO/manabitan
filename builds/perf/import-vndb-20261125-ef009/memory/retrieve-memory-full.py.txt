@@ -1,0 +1,65 @@
+from pathlib import Path,PurePosixPath
+import gzip,hashlib,json,urllib.request,zipfile,io,tarfile
+import sys
+request=json.loads(sys.argv[1])
+root=Path('/workspace/scratch/ef009a302ea8/vndb-evidence-work/builds/perf/import-vndb-20261125-ef009/memory')
+(root/'full').mkdir(parents=True,exist_ok=True)
+a=request['artifact']
+data=urllib.request.urlopen(request['url']).read()
+assert len(data)==a['size_in_bytes']
+assert 'sha256:'+hashlib.sha256(data).hexdigest()==a['digest']
+name=a['name'].removeprefix('import-memory-ef009-')+'.tar.gz'
+destination=root/'full'/name
+members=[]
+excluded=[]
+with zipfile.ZipFile(io.BytesIO(data)) as archive:
+    names=[item.filename for item in archive.infolist() if not item.is_dir()]
+    assert len(set(names))==len(names)
+    assert all(not PurePosixPath(n).is_absolute() and '..' not in PurePosixPath(n).parts for n in names)
+    with destination.open('wb') as target:
+        with gzip.GzipFile(filename='',mode='wb',fileobj=target,mtime=0) as packed:
+            with tarfile.open(fileobj=packed,mode='w') as bundle:
+                for n in sorted(names):
+                    raw=archive.read(n)
+                    info={'path':n,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest()}
+                    if n in ['package-memory-A.zip','package-memory-B.zip']:
+                        receipt=json.loads(archive.read(n.replace('.zip','-receipt.json')))
+                        assert receipt['packageSha256']==info['sha256']
+                        info['sha256MatchesPackageReceipt']=True
+                        with zipfile.ZipFile(io.BytesIO(raw)) as release:
+                            release_names=[x.filename for x in release.infolist() if not x.is_dir()]
+                            assert len(release_names)==len(set(release_names))
+                            actual_members={p:hashlib.sha256(release.read(p)).hexdigest() for p in sorted(release_names)}
+                        expected_members=json.loads(archive.read(n.replace('.zip','-members.json')))
+                        assert actual_members==expected_members
+                        assert actual_members['lib/term-bank-parser.wasm']=='913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c'
+                        parser_key='js/dictionary/term-bank-wasm-parser.js'
+                        assert actual_members[parser_key]==('0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98' if n=='package-memory-A.zip' else '23f99cd19db8b4d562bf57e73a9b3bbe43e55f22df8fa33b4055d219f0e1569d')
+                        if n=='package-memory-B.zip':
+                            assert actual_members['js/dictionary/validated-image-path-projector.js']=='e0ba54af2c7595e72d5840ff6b32759b90470d27fe278c1c9620507d09dad658'
+                        info['allMemberHashesMatchReceipt']=True
+                        info['unchangedNativeAndFrozenParserSourceVerified']=True
+                        info['releaseMemberCount']=len(actual_members)
+                        info['reason']='Large release ZIP bytes omitted after full artifact and package hashes were verified; original artifact retains them.'
+                        excluded.append(info)
+                        continue
+                    header=tarfile.TarInfo(n)
+                    header.size=len(raw)
+                    header.mode=0o644
+                    header.mtime=0
+                    bundle.addfile(header,io.BytesIO(raw))
+                    members.append(info)
+packed=destination.read_bytes()
+record={'artifact':a,'archivePath':'full/'+name,'archiveBytes':len(packed),'archiveSha256':hashlib.sha256(packed).hexdigest(),'artifactZipDigestVerified':True,'members':members,'excludedMembers':excluded}
+meta_path=root/'full-evidence-index.json'
+items=json.loads(meta_path.read_text()) if meta_path.exists() else []
+prior=next((x for x in items if x['artifact']['id']==a['id']),None)
+if prior is not None:
+    assert prior['archiveSha256']==record['archiveSha256']
+    items=[x for x in items if x['artifact']['id']!=a['id']]
+items.append(record)
+temporary=meta_path.with_suffix('.tmp')
+temporary.write_text(json.dumps(items,indent=2)+'\n')
+temporary.replace(meta_path)
+print(json.dumps({'artifact':a['id'],'name':a['name'],'zipDigestVerified':True,'preservedMembers':len(members),'compressedBytes':len(packed),'excludedMembers':excluded}))
+

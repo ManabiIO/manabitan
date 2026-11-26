@@ -1,0 +1,15 @@
+{
+  "head": "475d351ff07c1b5cfc5651d7f59c624629e4fdc5",
+  "base": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "originalIndependentTestSha256": "293528d6f660ccea67739be4a8af1ae2473804d5bfac41d348cd4206c1f953de",
+  "adaptedIndependentTestSha256": "9462ddb76d7a97f9b92a63be9f74210a5cac09c41c42222d4e9bc86c373348a9",
+  "adjustment": "Parent score accessor is snapshotted into an ordinary Int32Array child before origin is transferred, so PR897 safely takes direct fields; all byte assertions are unchanged. The initial failed staging-count observation remains in focused-tests.json/log.",
+  "bothEncodedByteSha256": "f4d7d0f6fdaaa5dae60fc077ae5c0289bdd0dcd6c89e57c50c097cc3fc9b04dd",
+  "bothSummary": {
+    "rows": 528299,
+    "runs": 18,
+    "parentCopyBytes": 3146392,
+    "candidateCopyBytes": 1056598,
+    "copyBytesAvoided": 2089794
+  }
+}

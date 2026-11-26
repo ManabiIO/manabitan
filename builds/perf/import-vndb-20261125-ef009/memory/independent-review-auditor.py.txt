@@ -1,0 +1,482 @@
+#!/usr/bin/env python3
+"""Read-only second audit of frozen memory observations; no acquisition calls."""
+
+import ast
+import gzip
+import hashlib
+import json
+import math
+from pathlib import Path
+import statistics
+import subprocess
+import tarfile
+import traceback
+import uuid
+
+
+ROOT = Path('/workspace/scratch/ef009a302ea8/vndb-evidence-work')
+EVIDENCE = ROOT / 'builds/perf/import-vndb-20261125-ef009/memory'
+OUTPUT = Path('/workspace/scratch/ef009a302ea8/import-memory-independent-audit.json')
+WORKFLOW = '57590f5eaee359d721ba9d5d8bde28728a8d172e'
+WORKFLOW_TREE = '1be0798152baa751fd22a4bbd8f4b6a48c21be08'
+RUN_ID = '45646484626'
+BASE = '7d1643e6147a10cb2165e9744cf0e63b59e46632'
+CANDIDATE = '2af6593a6e3631cbddff736bf2280f0fd40c2a69'
+SOURCE_DIR = 'dev/perf/import-memory-ef009'
+EXPECTED = {(dictionary, replication) for dictionary in ('jmdict', 'jitendex', 'vndb') for replication in (1, 2)}
+PROMOTION = {'maximumMedianPairedIncreasePercent': 5, 'maximumIndividualPairedIncreasePercent': 10, 'everyObservationQualified': True}
+COVERAGE = {'minimumFullyCoveredImportScans': 5, 'maximumCoveredGapMs': 250, 'maximumBracketGapMs': 250, 'betweenScanWaitMs': 25}
+METRICS = ('maxSampledPssKiB', 'maxSampledPrivateKiB')
+
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def source(commit, name):
+    return subprocess.check_output(['git', 'show', f'{commit}:{name}'], cwd=ROOT)
+
+
+def tree(commit):
+    return subprocess.check_output(['git', 'rev-parse', f'{commit}^{{tree}}'], cwd=ROOT, text=True).strip()
+
+
+def equal_number(a, b):
+    assert (a is None and b is None) or (a is not None and b is not None and math.isclose(a, b, rel_tol=0, abs_tol=1e-10)), (a, b)
+
+
+PROTOCOL_BYTES = source(WORKFLOW, SOURCE_DIR + '/protocol.json')
+PROTOCOL = json.loads(PROTOCOL_BYTES)
+PROVENANCE_BYTES = source(WORKFLOW, SOURCE_DIR + '/provenance.json')
+PROVENANCE = json.loads(PROVENANCE_BYTES)
+assert tree(WORKFLOW) == WORKFLOW_TREE
+assert PROTOCOL['base'] == BASE and PROTOCOL['candidate']['commit'] == CANDIDATE
+assert PROTOCOL['candidate']['tree'] == tree(CANDIDATE)
+assert PROTOCOL['promotionCriteria'] == PROMOTION and PROTOCOL['frozenCoverage'] == COVERAGE
+assert PROTOCOL['orders'] == {'1': 'ABBA', '2': 'BAAB'}
+assert PROTOCOL['observationsPerHost'] == 4 and PROTOCOL['independentHostsPerDictionary'] == 2
+assert PROTOCOL['dictionaries'] == ['jmdict', 'jitendex', 'vndb']
+assert PROTOCOL['nodeVersion'] == 'v22.22.0' and PROTOCOL['browserVersion'] == '153.0.8010.12'
+OBSERVER_NAMES = ('audit_memory.py', 'chromium_memory.py', 'overlay_helpers.py', 'packaging_helpers.py',
+                  'run_memory.py', 'test_chromium_memory.py', 'test_import_window.py', 'test_protocol.py')
+SOURCES = {name: source(WORKFLOW, SOURCE_DIR + '/' + name) for name in OBSERVER_NAMES}
+for name, expected_hash in PROVENANCE['unchangedFiles'].items():
+    assert sha(SOURCES[name]) == expected_hash
+    assert SOURCES[name] == source(PROVENANCE['sourceCommit'], PROVENANCE['sourceDirectory'] + '/' + name)
+
+
+def ast_blocks(raw):
+    text = raw.decode()
+    lines = text.splitlines(keepends=True)
+    result = {}
+    for node in ast.parse(text).body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            name = node.name
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            name = node.targets[0].id
+        else:
+            continue
+        result[name] = ''.join(lines[node.lineno - 1:node.end_lineno]).encode()
+    return result
+
+
+original_blocks = ast_blocks(source(PROVENANCE['sourceCommit'], PROVENANCE['packagerSource']))
+current_blocks = ast_blocks(SOURCES['packaging_helpers.py'])
+for name, expected_hash in PROVENANCE['unchangedPackagerSourceBlocks'].items():
+    assert current_blocks[name] == original_blocks[name] and sha(current_blocks[name]) == expected_hash
+
+# These frozen, reviewed helpers classify stored process identities and render
+# the reviewed harness overlay. No observer/acquisition function is invoked.
+OBSERVER = {'__name__': 'frozen_memory_observer'}
+exec(compile(SOURCES['chromium_memory.py'], SOURCE_DIR + '/chromium_memory.py', 'exec'), OBSERVER)
+OVERLAY = {'__name__': 'frozen_memory_overlay'}
+exec(compile(SOURCES['overlay_helpers.py'], SOURCE_DIR + '/overlay_helpers.py', 'exec'), OVERLAY)
+HARNESS_PATHS = ('package-lock.json', 'test/perf/dictionaries.lock.json', 'dev/perf/benchmark-support.js',
+                 'dev/perf/dictionary-fixtures.js', 'dev/perf/import-benchmark.js', 'test/e2e/import-timing.js',
+                 'test/chromium/extension-two-dictionary-import.e2e.js')
+HARNESS = {name: sha(source(BASE, name)) for name in HARNESS_PATHS}
+assert {name: sha(source(CANDIDATE, name)) for name in HARNESS_PATHS} == HARNESS
+ORIGINALS = {name: source(BASE, name).decode() for name in OVERLAY['OVERLAY_PATHS']}
+OVERLAYS = OVERLAY['overlay_sources'](ORIGINALS)
+ORIGINAL_HASHES = {name: sha(value.encode()) for name, value in ORIGINALS.items()}
+OVERLAY_HASHES = {name: sha(value.encode()) for name, value in OVERLAYS.items()}
+LOCK = json.loads(source(BASE, 'test/perf/dictionaries.lock.json'))['dictionaries']
+TREES = {BASE: tree(BASE), CANDIDATE: tree(CANDIDATE)}
+
+
+def expected_schedule(replication):
+    result, counts = [], {'A': 0, 'B': 0}
+    for index, arm in enumerate('ABBA' if replication == 1 else 'BAAB', 1):
+        counts[arm] += 1
+        result.append({'index': index, 'arm': arm, 'name': f'{arm}{counts[arm]}', 'pair': (index + 1) // 2})
+    return result
+
+
+def verify_sample(sample, previous_end):
+    start, end = sample['startedAtMonotonicNs'], sample['finishedAtMonotonicNs']
+    assert type(start) is int and type(end) is int and previous_end <= start <= end
+    before, after = sample['discoveryBefore'], sample['discoveryAfter']
+    stable = OBSERVER['tree_signature'](before) == OBSERVER['tree_signature'](after)
+    assert sample['stableObservedProcessTree'] == stable
+    reads, unavailable = sample['processes'], sample['unavailableProcesses']
+    assert len({row['pid'] for row in reads + unavailable}) == len(reads) + len(unavailable)
+    assert {row['pid'] for row in before['processes']} == {row['pid'] for row in reads + unavailable}
+    for metric, total in [('pssKiB', 'readableProcessPssKiB'), ('privateKiB', 'readableProcessPrivateKiB')]:
+        assert all(type(row[metric]) is int and row[metric] >= 0 for row in reads)
+        assert sample[total] == sum(row[metric] for row in reads)
+    after_by_pid = {row['pid']: row for row in after['processes']}
+    exited = {row['pid'] for row in unavailable if OBSERVER['confirmed_exited_zombie'](row, after_by_pid.get(row['pid']))}
+    assert {row['pid'] for row in sample['confirmedExitedZombies']} == exited
+    unreadable = [row for row in unavailable if row['pid'] not in exited]
+    assert unreadable == sample['unreadableAddressSpaces']
+    roles = {row['role'] for row in reads}
+    assert sorted(roles) == sample['observedRoles']
+    failures = []
+    if not before['browserSeedPids']: failures.append('no-browser-seed')
+    if len(reads) < 2: failures.append('no-multiple-process-coverage')
+    if 'browser' not in roles: failures.append('no-readable-browser-process')
+    if 'renderer' not in roles: failures.append('no-readable-renderer-process')
+    if not stable: failures.append('process-tree-changed-during-scan')
+    if unreadable: failures.append('unreadable-discovered-process-smaps')
+    if any(row['errno'] not in OBSERVER['GONE_ERRORS'] for row in before['inventoryIdentityReadErrors'] + after['inventoryIdentityReadErrors']):
+        failures.append('incomplete-process-identity-inventory')
+    assert sample['qualificationFailures'] == failures
+    assert sample['qualifiedForWholeTreePss'] == (not failures)
+    return end
+
+
+def recompute_window(memory, markers):
+    assert markers == memory['windowMarkers']
+    assert len(markers) == 2 and [row['event'] for row in markers] == ['start', 'end']
+    assert all(isinstance(row['monotonicNs'], str) and row['monotonicNs'].isdigit() for row in markers)
+    start, end = [int(row['monotonicNs']) for row in markers]
+    assert end > start
+    samples = memory['samples']
+    last = 0
+    for sample in samples:
+        last = verify_sample(sample, last)
+    overlapping = [sample for sample in samples if sample['finishedAtMonotonicNs'] >= start and sample['startedAtMonotonicNs'] <= end]
+    inside = [sample for sample in overlapping if sample['startedAtMonotonicNs'] >= start and sample['finishedAtMonotonicNs'] <= end]
+    covered = [sample for sample in inside if sample['qualifiedForWholeTreePss']]
+    before = [sample for sample in samples if sample['qualifiedForWholeTreePss'] and sample['finishedAtMonotonicNs'] <= start]
+    after = [sample for sample in samples if sample['qualifiedForWholeTreePss'] and sample['startedAtMonotonicNs'] >= end]
+    pre_gap = (start - before[-1]['finishedAtMonotonicNs']) / 1e6 if before else None
+    post_gap = (after[0]['startedAtMonotonicNs'] - end) / 1e6 if after else None
+    midpoints = [start] + [(sample['startedAtMonotonicNs'] + sample['finishedAtMonotonicNs']) // 2 for sample in covered] + [end]
+    max_gap = max((right - left) / 1e6 for left, right in zip(midpoints, midpoints[1:]))
+    failures = []
+    if pre_gap is None or pre_gap > 250: failures.append('missing-covered-pre-import-bracket')
+    if post_gap is None or post_gap > 250: failures.append('missing-covered-post-import-bracket')
+    if len(covered) < 5: failures.append('fewer-than-five-covered-import-scans')
+    if max_gap > 250: failures.append('covered-import-scan-gap-over-250ms')
+    if memory['benchmarkExitCode'] != 0: failures.append('benchmark-command-failed')
+    if not any(sample['qualifiedForWholeTreePss'] for sample in overlapping):
+        failures.append('no-stable-fully-read-browser-renderer-tree')
+    if (any(sample['stableObservedProcessTree'] and sample['unreadableAddressSpaces'] for sample in overlapping) or
+            any(row['smapsReadError']['errno'] not in OBSERVER['GONE_ERRORS'] for sample in overlapping for row in sample['unreadableAddressSpaces'])):
+        failures.append('process-smaps-coverage-unqualified')
+    if any('incomplete-process-identity-inventory' in sample['qualificationFailures'] for sample in overlapping):
+        failures.append('process-identity-coverage-unqualified')
+    failures = list(dict.fromkeys(failures))
+    qualified = not failures
+    assert memory['qualificationFailures'] == failures and memory['qualifiedForWholeTreePss'] == qualified
+    assert memory['authoritativeTiming'] is False
+    assert memory['allObservedSampleCount'] == len(samples)
+    assert memory['overlappingImportSampleCount'] == len(overlapping)
+    assert memory['fullyContainedImportSampleCount'] == len(inside)
+    assert memory['stableFullyReadImportSampleCount'] == len(covered)
+    assert memory['sampleCount'] == len(overlapping)
+    equal_number(memory['preImportBracketGapMs'], pre_gap)
+    equal_number(memory['postImportBracketGapMs'], post_gap)
+    equal_number(memory['maximumCoveredSampleGapMs'], max_gap)
+    equal_number(memory['windowDurationMs'], (end - start) / 1e6)
+    maxima = {}
+    for metric, field in [('maxSampledPssKiB', 'readableProcessPssKiB'), ('maxSampledPrivateKiB', 'readableProcessPrivateKiB')]:
+        maxima[metric] = max(sample[field] for sample in covered) if qualified else None
+        assert memory[metric] == maxima[metric]
+    return {'qualified': qualified, 'failures': failures, 'rawScans': len(samples),
+            'coveredScans': len(covered), 'maximumCoveredGapMs': max_gap,
+            'preImportBracketGapMs': pre_gap, 'postImportBracketGapMs': post_gap, **maxima}
+
+
+def semantic_from_report(report, fixture):
+    assert report['status'] == 'success' and report['skippedVerification'] is False
+    assert report['failureReason'] == '' and report['skipReason'] == ''
+    assert report['browserFlavor'] == 'chromium' and report['launchMode'] == 'headless'
+    header = report['benchmark']
+    for flag in ('authoritativeTiming', 'traceEnabled', 'phaseProfiling', 'phaseScreenshots', 'processSampling'):
+        assert header[flag] is False
+    assert header['productionImportDefaults'] is True and header['pinnedDictionaries'] is True
+    assert header['importFlags'] is None and header['mediaCheck'] == 'all'
+    validation = header['validation']
+    assert validation['title'] == fixture['expectedTitle'] and validation['revision'] == fixture['revision']
+    assert validation['termRows'] == fixture['termRows'] and validation['contentReadable'] is True
+    probes = validation['probeTerms']
+    assert validation['probeCount'] == len(probes) == len(set(probes)) == 12
+    restart = validation['restart']
+    assert restart['title'] == fixture['expectedTitle'] and restart['revision'] == fixture['revision']
+    assert restart['termRows'] == fixture['termRows'] and restart['contentReadable'] is True
+    assert restart['probeCount'] == 12 and restart['mediaFiles'] == fixture['mediaFiles']
+    lookups = validation['lookup']['observations']
+    assert len(lookups) == 72 and {(row['pass'], row['term']) for row in lookups} == {(i, term) for i in range(6) for term in probes}
+    identities = {}
+    for row in lookups:
+        assert row['originalTextLength'] == len(row['term'].encode('utf-16-le')) // 2
+        assert row['results'] > 0 and row['hasExactHeadwordMatch'] is True and len(row['sha256']) == 64
+        identity = {key: row[key] for key in ('term', 'sha256', 'results', 'originalTextLength', 'hasExactHeadwordMatch')}
+        if row['term'] in identities: assert identities[row['term']] == identity
+        identities[row['term']] = identity
+    media = validation['media']
+    assert media['mode'] == 'all' and media['files'] == media['totalFiles'] == fixture['mediaFiles']
+    assert media['bytes'] == media['totalBytes'] == fixture['mediaBytes']
+    return {'title': validation['title'], 'revision': validation['revision'], 'termRows': validation['termRows'],
+            'contentReadable': True, 'probeTerms': sorted(probes), 'publicResults': [identities[key] for key in sorted(identities)],
+            'restart': restart, 'media': media}
+
+
+def audit_cell(retrieval, full):
+    raw_packed = (EVIDENCE / retrieval['rawPath']).read_bytes()
+    assert len(raw_packed) == retrieval['compressedBytes'] and sha(raw_packed) == retrieval['compressedSha256']
+    raw_summary = gzip.decompress(raw_packed)
+    assert len(raw_summary) == retrieval['originalBytes'] and sha(raw_summary) == retrieval['originalSha256']
+    summary = json.loads(raw_summary)
+    key = (summary['dictionary'], summary['replication'])
+    assert key in EXPECTED
+    for record in (retrieval, full):
+        assert record['artifactZipDigestVerified'] is True
+        assert str(record['artifact']['workflow_run']['id']) == RUN_ID
+        assert record['artifact']['workflow_run']['head_sha'] == WORKFLOW
+    assert summary['candidate'] == 'single-image-projection' and summary['prepareOnly'] is False
+    assert summary['authoritativeTiming'] is False
+    assert summary['acquisitionComplete'] is True
+    assert summary['validationFailures'] == []
+    plan = summary['plan']
+    assert plan['config'] == PROTOCOL and plan['promotionCriteria'] == PROMOTION and plan['frozenCoverage'] == COVERAGE
+    assert plan['workflowCommit'] == WORKFLOW and str(plan['workflowRun']) == RUN_ID and str(plan['workflowAttempt']) == '1'
+    assert plan['candidate'] == 'single-image-projection' and (plan['dictionary'], plan['replication']) == key
+    assert plan['prepareOnly'] is False and plan['authoritativeTiming'] is False
+    assert plan['schedule'] == expected_schedule(key[1])
+    assert plan['protocolSha256'] == sha(PROTOCOL_BYTES) and plan['provenanceSha256'] == sha(PROVENANCE_BYTES)
+    assert plan['observerSha256'] == {name: sha(raw) for name, raw in SOURCES.items()}
+    assert plan['originalHarnessSha256'] == ORIGINAL_HASHES and plan['memoryOverlaySha256'] == OVERLAY_HASHES
+    host = plan['hostIdentity']
+    assert str(uuid.UUID(host['bootId'])) == host['bootId']
+    assert host['hostname'] and host['runnerName'] and host['runnerEnvironment'] == 'github-hosted'
+    assert summary['fixture'] == LOCK[key[0]]
+    packed = (EVIDENCE / full['archivePath']).read_bytes()
+    assert len(packed) == full['archiveBytes'] and sha(packed) == full['archiveSha256']
+    expected_members = {member['path']: member for member in full['members']}
+    assert len(expected_members) == len(full['members'])
+    members = {}
+    visited = set()
+    with tarfile.open(EVIDENCE / full['archivePath'], 'r|gz') as archive:
+        for member in archive:
+            assert member.isfile() and member.name not in visited
+            visited.add(member.name)
+            raw = archive.extractfile(member).read()
+            expected = expected_members[member.name]
+            assert len(raw) == expected['bytes'] and sha(raw) == expected['sha256']
+            if member.name.endswith(('.json', '.jsonl', '.py', '.yml', '.js', '.log')):
+                members[member.name] = raw
+    assert visited == set(expected_members)
+    read = lambda name: json.loads(members[name])
+    assert members['protocol.json'] == PROTOCOL_BYTES and members['observer-source/protocol.json'] == PROTOCOL_BYTES
+    assert members['observer-source/provenance.json'] == PROVENANCE_BYTES
+    for name, raw in SOURCES.items(): assert members['observer-source/' + name] == raw
+    assert members['executed-packager.py'] == SOURCES['packaging_helpers.py']
+    assert members['executed-workflow.yml'] == source(WORKFLOW, '.github/workflows/import-memory-ef009.yml')
+    assert read('plan.json') == plan and read('fixture.json') == summary['fixture']
+    comparison = read('memory-comparison.json')
+    assert comparison['authoritativeTiming'] is False and comparison['validationFailures'] == []
+    raw_observations = read('observations.json')
+    assert comparison['observations'] == raw_observations
+    assert len(raw_observations) == len(summary['observations']) == len(summary['semanticProofs']) == 4
+    assert [row['name'] for row in summary['semanticProofs']] == [row['name'] for row in plan['schedule']]
+    receipts = {arm: read(f'package-memory-{arm}-receipt.json') for arm in 'AB'}
+    assert receipts == summary['packages']
+    overlay_receipts = read('overlay-receipts.json')
+    assert overlay_receipts == summary['overlayReceipts']
+    maps = {arm: read(f'package-memory-{arm}-members.json') for arm in 'AB'}
+    changed = sorted(name for name in maps['A'].keys() | maps['B'].keys() if maps['A'].get(name) != maps['B'].get(name))
+    assert changed == summary['packageDelta'] == read('package-delta.json') == sorted(PROTOCOL['candidate']['packagedDelta'])
+    excluded = {member['path']: member for member in full['excludedMembers']}
+    assert set(excluded) == {'package-memory-A.zip', 'package-memory-B.zip'}
+    for arm, commit in [('A', BASE), ('B', CANDIDATE)]:
+        receipt = receipts[arm]
+        assert receipt['sourceCommit'] == commit and receipt['sourceTree'] == TREES[commit]
+        assert receipt['harnessSha256'] == HARNESS
+        assert receipt['generatedLibrariesShared'] is True and receipt['nativeModulesRestoredFromOwnManifest'] is True
+        assert receipt['memberCount'] == len(maps[arm])
+        assert overlay_receipts[arm] == {'sourceCommit': commit, 'originalSha256': ORIGINAL_HASHES, 'appliedSha256': OVERLAY_HASHES}
+        release = excluded[f'package-memory-{arm}.zip']
+        assert release['sha256'] == receipt['packageSha256'] and release['sha256MatchesPackageReceipt'] is True
+        assert release['allMemberHashesMatchReceipt'] is True and release['unchangedNativeAndFrozenParserSourceVerified'] is True
+        assert maps[arm]['lib/term-bank-parser.wasm'] == sha(source(commit, 'dev/data/dictionary-wasm/term-bank-parser.wasm'))
+        assert maps[arm]['js/dictionary/term-bank-wasm-parser.js'] == sha(source(commit, 'ext/js/dictionary/term-bank-wasm-parser.js'))
+        assert maps[arm]['js/dictionary/wasm/term-bank-parser.c'] == sha(source(commit, 'ext/js/dictionary/wasm/term-bank-parser.c'))
+    projector = 'js/dictionary/validated-image-path-projector.js'
+    assert projector not in maps['A'] and maps['B'][projector] == sha(source(CANDIDATE, 'ext/' + projector))
+    for name, text in ORIGINALS.items(): assert members['original-harness/' + name] == text.encode()
+    for name, text in OVERLAYS.items(): assert members['memory-harness/' + name] == text.encode()
+    checked_observations = []
+    semantics = []
+    for scheduled, observation, compact, proof in zip(plan['schedule'], raw_observations, summary['observations'], summary['semanticProofs']):
+        assert all(observation[key] == value for key, value in scheduled.items())
+        assert compact == {key: observation[key] for key in compact}
+        name = scheduled['name']
+        memory = read(f'{name}/memory.json')
+        assert {key: value for key, value in memory.items() if key != 'samples'} == {key: value for key, value in observation.items() if key not in scheduled}
+        markers = [json.loads(line) for line in members[f'{name}/markers.jsonl'].decode().splitlines() if line]
+        checked = recompute_window(memory, markers)
+        report, benchmark = read(f'{name}/run-1.json'), read(f'{name}/summary.json')
+        receipt = receipts[scheduled['arm']]
+        assert report['browserVersion'] == benchmark['browserVersion'] == PROTOCOL['browserVersion']
+        assert report['packageSha256'] == receipt['packageSha256']
+        assert report['buildTarget'] == benchmark['buildTarget'] == 'chrome'
+        assert benchmark['gitSha'] == benchmark['source']['gitSha'] == receipt['sourceCommit']
+        assert benchmark['authoritativeTiming'] is False and benchmark['traceEnabled'] is False
+        assert benchmark['dictionary'] == key[0] and benchmark['fixture'] == summary['fixture']
+        assert report['benchmark']['dictionary'] == key[0]
+        assert benchmark['importFlags'] is None and benchmark['mediaCheck'] == 'all'
+        source_hashes = benchmark['source']['sha256']
+        for path, expected in {**HARNESS, **OVERLAY_HASHES}.items(): assert source_hashes[path] == expected
+        assert source_hashes['builds/manabitan-chrome.zip'] == receipt['packageSha256']
+        assert len(benchmark['runs']) == 1 and benchmark['runs'][0]['packageSha256'] == receipt['packageSha256']
+        assert memory['windowDurationMs'] >= benchmark['runs'][0]['totalImportMs']
+        for value in (report['hostEnvironment'], benchmark['hostEnvironment'], read(f'{name}/host-before.json'), read(f'{name}/host-after.json')):
+            assert value['nodeVersion'] == 'v22.22.0' and value['platform'] == 'linux' and value['arch'] == 'x64'
+        semantic = semantic_from_report(report, summary['fixture'])
+        assert semantic == read(f'{name}/semantic-receipt.json')
+        assert sha(members[f'{name}/semantic-receipt.json']) == proof['semanticReceiptSha256']
+        public_digest = sha(json.dumps(semantic['publicResults'], sort_keys=True, ensure_ascii=False).encode())
+        assert public_digest == proof['publicResultSha256'] and proof['publicLookupObservationCount'] == 72
+        assert proof['distinctProbeCount'] == 12 and proof['termRows'] == summary['fixture']['termRows']
+        assert proof['contentReadable'] is True and proof['restartContentReadable'] is True
+        assert proof['media'] == semantic['media']
+        checked_observations.append({**scheduled, **checked})
+        semantics.append(semantic)
+    assert all(value == semantics[0] for value in semantics)
+    qualified = all(row['qualified'] for row in checked_observations)
+    assert comparison['everyObservationQualified'] == qualified
+    recalculated_pairs = []
+    for pair_index in (1, 2):
+        selected = {row['arm']: row for row in checked_observations if row['pair'] == pair_index}
+        assert set(selected) == {'A', 'B'}
+        both_qualified = selected['A']['qualified'] and selected['B']['qualified']
+        pair = {'pair': pair_index, 'qualified': both_qualified}
+        for metric in METRICS:
+            a, b = selected['A'][metric], selected['B'][metric]
+            delta = 100 * (b / a - 1) if both_qualified and a > 0 else None
+            pair[metric] = {'baseline': a, 'candidate': b, 'changePercent': delta}
+        recalculated_pairs.append(pair)
+    assert recalculated_pairs == comparison['pairs'] == summary['pairs']
+    metrics = {}
+    for metric in METRICS:
+        values = [pair[metric]['changePercent'] for pair in recalculated_pairs]
+        metrics[metric] = {'medianPairedChangePercent': statistics.median(values) if qualified else None,
+                           'maximumPairedChangePercent': max(values) if qualified else None}
+    assert metrics == comparison['metrics'] == summary['metrics']
+    passes = qualified and all(row['medianPairedChangePercent'] <= 5 and row['maximumPairedChangePercent'] <= 10 for row in metrics.values())
+    assert comparison['passesProspectiveMemoryScreen'] == summary['passesProspectiveMemoryScreen'] == passes
+    assert summary['status'] == ('passed' if passes else 'failed')
+    if passes:
+        assert summary['error'] is None
+    else:
+        expected_error = 'Memory coverage, prospective memory gate, or semantic validation failed; no observations replaced'
+        assert summary['error'] == expected_error
+        failure = read('failure-status.json')
+        assert failure['qualified'] is False and failure['retried'] is False and failure['error'] == expected_error
+    expected_audit = {'schemaVersion': 1, 'observations': 4, 'rawScanCount': sum(row['rawScans'] for row in checked_observations),
+                      'everyObservationQualified': qualified, 'passesProspectiveMemoryScreen': passes, 'metrics': metrics}
+    assert read('memory-audit.json') == summary['independentAudit'] == expected_audit
+    assert json.loads(members['independent-audit.log']) == expected_audit
+    return {'dictionary': key[0], 'replication': key[1], 'summarySha256': sha(raw_summary),
+            'archiveSha256': sha(packed), 'retainedMembersVerified': len(visited), 'hostIdentity': host,
+            'observerLineageAndSourceHashesVerified': True, 'sourcePackageAndIdenticalOverlayVerified': True,
+            'originalRawScanAuditorReceiptVerified': True, 'rawProcessIdentityAndSumChecksVerified': True,
+            'directCoverageAndMaximaRecomputationVerified': True, 'rawScans': expected_audit['rawScanCount'],
+            'observations': checked_observations, 'pairs': recalculated_pairs, 'metrics': metrics,
+            'passesFrozenMemoryGate': passes, 'everyObservationQualified': qualified,
+            'recordedStatus': summary['status'], 'recordedError': summary['error'],
+            'semanticObservations': 4, 'publicLookupObservations': 288,
+            'semanticReceiptSha256': summary['semanticProofs'][0]['semanticReceiptSha256'],
+            'publicResultSha256': summary['semanticProofs'][0]['publicResultSha256'], 'fullMedia': semantics[0]['media'],
+            'packageMemberMapSha256': {arm: sha(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()) for arm, value in maps.items()},
+            'packageBytes': {arm: excluded[f'package-memory-{arm}.zip']['bytes'] for arm in 'AB'},
+            'authoritativeTiming': False}
+
+
+def main():
+    summaries = json.loads((EVIDENCE / 'retrieved-artifacts.json').read_text())
+    fulls = json.loads((EVIDENCE / 'full-evidence-index.json').read_text())
+    cells, errors = [], []
+    for retrieval in summaries:
+        name = retrieval['artifact']['name'].replace('import-memory-summary-ef009-', 'import-memory-ef009-')
+        matching = [full for full in fulls if full['artifact']['name'] == name]
+        if not matching:
+            continue
+        assert len(matching) == 1
+        try:
+            cells.append(audit_cell(retrieval, matching[0]))
+        except Exception as error:
+            errors.append({'artifact': name, 'error': repr(error), 'traceback': traceback.format_exc()})
+    observed = {(cell['dictionary'], cell['replication']) for cell in cells}
+    assert len(observed) == len(cells)
+    boots = [cell['hostIdentity']['bootId'] for cell in cells]
+    hosts = [cell['hostIdentity']['hostname'] for cell in cells]
+    runners = [cell['hostIdentity']['runnerName'] for cell in cells]
+    if len(set(boots)) != len(boots): errors.append({'error': 'Boot ID reused across cells'})
+    if len(set(runners)) != len(runners): errors.append({'error': 'Runner name reused across cells'})
+    for dictionary in ('jmdict', 'jitendex', 'vndb'):
+        selected = [cell for cell in cells if cell['dictionary'] == dictionary]
+        for field in ('semanticReceiptSha256', 'publicResultSha256', 'fullMedia'):
+            if len({json.dumps(cell[field], sort_keys=True) for cell in selected}) > 1:
+                errors.append({'dictionary': dictionary, 'error': f'{field} differs across hosts'})
+    for arm in 'AB':
+        if len({cell['packageMemberMapSha256'][arm] for cell in cells}) > 1:
+            errors.append({'arm': arm, 'error': 'Package member maps differ across hosts'})
+    primary_path = EVIDENCE / 'independent-reaudit.json'
+    primary = json.loads(primary_path.read_text()) if primary_path.exists() else None
+    if primary:
+        assert primary['workflowHead'] == WORKFLOW and str(primary['workflowRun']) == RUN_ID
+        assert primary['protocolSha256'] == sha(PROTOCOL_BYTES)
+        for cell in cells:
+            matching = [row for row in primary['cells'] if (row['dictionary'], row['replication']) == (cell['dictionary'], cell['replication'])]
+            assert len(matching) == 1
+            peer = matching[0]
+            assert peer['errors'] == [] and peer['evidenceVerified'] is True
+            assert peer['metrics'] == cell['metrics'] and peer['pairs'] == cell['pairs']
+            assert peer['hostIdentity'] == cell['hostIdentity']
+            assert peer['qualified'] == cell['passesFrozenMemoryGate']
+            assert peer['rawAudit']['rawScanCount'] == cell['rawScans']
+            assert peer['rawAudit']['everyObservationQualified'] == cell['everyObservationQualified']
+    complete = observed == EXPECTED and not errors
+    result = {'schemaVersion': 1, 'authoritativeTiming': False,
+              'workflowCommit': WORKFLOW, 'workflowTree': WORKFLOW_TREE, 'workflowRunId': RUN_ID, 'workflowAttempt': 1,
+              'auditRunnerSha256': sha(Path(__file__).read_bytes()), 'protocolSha256': sha(PROTOCOL_BYTES),
+              'retrievalMetadataSha256': {name: sha((EVIDENCE / name).read_bytes()) for name in ('retrieved-artifacts.json', 'full-evidence-index.json')},
+              'observerSha256': {name: sha(value) for name, value in SOURCES.items()},
+              'completeIndependentAudit': complete, 'passesFrozenSixCellMemoryGate': complete and all(cell['passesFrozenMemoryGate'] for cell in cells),
+              'receivedSummaries': len(summaries), 'receivedFullBundles': len(fulls), 'auditedCells': len(cells),
+              'observationsVerified': len(cells) * 4, 'publicLookupObservationsVerified': len(cells) * 288,
+              'coverageQualifiedObservations': sum(row['qualified'] for cell in cells for row in cell['observations']),
+              'memoryGatePassedCells': sum(cell['passesFrozenMemoryGate'] for cell in cells),
+              'memoryGateFailedCells': [[cell['dictionary'], cell['replication']] for cell in cells if not cell['passesFrozenMemoryGate']],
+              'rawScansRecomputed': sum(cell['rawScans'] for cell in cells),
+              'distinctBootIds': len(set(boots)), 'distinctHostnames': len(set(hosts)), 'distinctRunnerNames': len(set(runners)),
+              'hostnameReuseObserved': len(set(hosts)) != len(hosts),
+              'primaryUnchangedAuditorReexecutionReceiptSha256': sha(primary_path.read_bytes()) if primary else None,
+              'packageMemberMapsIdenticalAcrossCells': {arm: len(cells) == 6 and len({cell['packageMemberMapSha256'][arm] for cell in cells}) == 1 for arm in 'AB'},
+              'errors': errors, 'missingCells': [list(key) for key in sorted(EXPECTED - observed)],
+              'cells': sorted(cells, key=lambda cell: (cell['dictionary'], cell['replication'])),
+              'limitations': ['Sampled non-atomic process-tree PSS/private maxima within the marked import window, not exact peaks.',
+                             'Startup, media readback and restart are excluded from maxima; their semantics are checked separately.',
+                             'Instrumented timing is explicitly non-authoritative; these results do not establish import speed.',
+                             'Preserved package payload hashes/member maps identify the releases; large ZIP bytes remain in the original CI artifacts.',
+                             'Distinct boot IDs and runner assignments establish distinct hosted instances, not physical hardware independence. Hostnames may be reused across those instances.']}
+    OUTPUT.write_text(json.dumps(result, indent=2) + '\n')
+    print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+    main()

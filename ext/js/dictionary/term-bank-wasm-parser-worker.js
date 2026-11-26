@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {buildTermLookupFilter} from './term-lookup-route.js';
 import {
     consumeLastTermBankWasmParseProfile,
     copyWasmBackedColumnChunk,
@@ -26,7 +27,7 @@ import {
 import {safePerformance} from '../core/safe-performance.js';
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {prepareTermLookupIndexesFromPreinternedPlan} from './term-lookup-index-preparation.js';
-import {shouldOwnTermContentBytes} from './term-content-ownership.js';
+import {shouldBorrowProjectedTermContent, shouldOwnTermContentBytes} from './term-content-ownership.js';
 
 /** @typedef {import('./term-bank-wasm-parser.js').TermBankColumnParserOptions} ParserOptions */
 /** @typedef {{compressionMethod: unknown, compressedSize: unknown, uncompressedSize: unknown, signature: unknown, filename?: unknown}} CompressedSourceMetadata */
@@ -98,6 +99,7 @@ async function parse(data) {
         );
         const experiments = snapshotTermBankExperiments(options);
         const sourceBytes = sourceBuffers.map((buffer) => new Uint8Array(buffer));
+        /** @type {Awaited<ReturnType<typeof inflateCompressedTermBankSourcesWasm>>|undefined} */
         let preloadedSource;
         if (typeof data.sourceMetadata !== 'undefined') {
             if (!Array.isArray(data.sourceMetadata) || data.sourceMetadata.length !== sourceBytes.length) {
@@ -131,7 +133,7 @@ async function parse(data) {
                 }
                 resultRowCount = chunk.rowCount;
                 const tResultCopyStart = safePerformance.now();
-                // Compact cacheable slabs and large projected imports transfer
+                // Compact cacheable slabs and small projected slabs transfer
                 // ownership so the next parse can overlap the ordered sink.
                 const ownCacheableContent = options.ownContentBytes !== true && typeof SharedArrayBuffer === 'function' && shouldOwnTermContentBytes(
                     chunk.contentBytesLength,
@@ -139,8 +141,25 @@ async function parse(data) {
                     chunk.contentDedupPlan?.sourceRowCount,
                     chunk.rowCount,
                 );
-                const shareContentBytes = options.ownContentBytes !== true;
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true);
+                /* eslint-disable @stylistic/semi */
+                // Reuse the existing borrowed-result lease for byte-heavy
+                // projected groups. Never create a shared buffer for this path;
+                // nonshared sources retain the original private transfer.
+                const borrowProjectedContent = (
+                    options.ownContentBytes === true &&
+                    options.projectImagePaths === true &&
+                    typeof SharedArrayBuffer === 'function' &&
+                    chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer &&
+                    shouldBorrowProjectedTermContent(
+                        chunk.contentBytesLength,
+                        chunk.contentDedupPlan?.uniqueCount,
+                        chunk.contentDedupPlan?.sourceRowCount,
+                        chunk.rowCount,
+                    )
+                )
+                const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
+                /* eslint-enable @stylistic/semi */
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
@@ -202,6 +221,11 @@ async function parse(data) {
                 }
             }
         }
+        if (options.prepareLookupRoute === true && stableResultChunk?.preparedLookupIndexes instanceof Map) {
+            for (const index of stableResultChunk.preparedLookupIndexes.values()) {
+                index.routeFilter ??= buildTermLookupFilter(index.preinternedPlan.stringHashes);
+            }
+        }
         const transfer = stableResultChunk === null ? [] : collectChunkTransferables(stableResultChunk);
         self.postMessage({
             type: 'result',
@@ -260,6 +284,7 @@ function collectChunkTransferables(chunk) {
         for (const prepared of preparedLookupIndexes.values()) {
             if (typeof prepared !== 'object' || prepared === null) { continue; }
             addView(Reflect.get(prepared, 'bytes'));
+            addView(Reflect.get(prepared, 'routeFilter'));
             const preparedPlan = /** @type {unknown} */ (Reflect.get(prepared, 'preinternedPlan'));
             if (typeof preparedPlan !== 'object' || preparedPlan === null) { continue; }
             addView(Reflect.get(preparedPlan, 'stringLengths'));

@@ -1,0 +1,42 @@
+import {readFile,writeFile} from 'node:fs/promises'
+import {createHash} from 'node:crypto'
+import {createRequire} from 'node:module'
+import path from 'node:path'
+import {fileURLToPath} from 'node:url'
+const here = path.dirname(fileURLToPath(import.meta.url))
+const root = path.resolve(here, '../jitendex')
+const baseline = path.resolve(here, '../manabitan')
+const require = createRequire(path.join(root, 'package.json'))
+const {ZipReader,Uint8ArrayReader,Uint8ArrayWriter} = await import(require.resolve('@zip.js/zip.js'))
+const parser = await import(path.join(root,'ext/js/dictionary/term-bank-wasm-parser.js'))
+const wasmBytes = await readFile(path.join(here,'instrumented-parser.wasm'))
+const instrumentedModule = await WebAssembly.compile(wasmBytes)
+let exports
+const instantiate = WebAssembly.instantiate
+WebAssembly.instantiate = async function(module, imports) {
+    const result = await instantiate(module, imports)
+    if (module === instrumentedModule) exports = result.exports
+    return result
+}
+parser.setTermBankWasmModule(instrumentedModule)
+const dict = process.argv[2] ?? 'jitendex'
+const lock = JSON.parse(await readFile(path.join(root, 'test/perf/dictionaries.lock.json'),'utf8')).dictionaries[dict]
+const archive = await readFile(path.join(baseline, 'builds/e2e-dictionary-cache',lock.cacheFile))
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex')
+if (sha256(archive) !== lock.sha256) throw new Error('wrong archive')
+const reader = new ZipReader(new Uint8ArrayReader(new Uint8Array(archive)))
+const entries = (await reader.getEntries()).filter(e=>/^term_bank_\d+\.json$/.test(e.filename)).sort((a,b)=>Number(a.filename.slice(10,-5))-Number(b.filename.slice(10,-5)))
+let rows = 0
+const groupSize = {jitendex:10,jmdict:7,vndb:4}[dict]
+try {
+    for (let start=0; start<entries.length; start+=groupSize) {
+        const sources=[]
+        for (const entry of entries.slice(start,start+groupSize)) sources.push(await entry.getData(new Uint8ArrayWriter(),{useWebWorkers:false,checkSignature:true}))
+        await parser.parseTermBankWithWasmColumnChunks(sources,3,chunk=> { rows += chunk.rowCount },2048,{singleChunk:true,emitTermByteLists:false,computeContentHashes:true,emitContentSlab:true,emitTokenBinaryContent:true,mediaHintFastScan:true,validateGlossaryTypes:true,prepareLookupIndexes:true})
+    }
+} finally { await reader.close() }
+const keys = ['comparisons','baselineGlossaryComparedBytes','avoidedGlossaryComparedBytes','avoidedGlossaryComparisons','additionalShortFieldComparedBytes','glossaryWitnessComparisons']
+const results = {dictionary:dict,archiveSha256:lock.sha256,instrumentedWasmSha256:sha256(wasmBytes),rows,expectedRows:lock.termRows,instrumentationOnly:true,includesTiming:false,work:Object.fromEntries(keys.map((k,index)=>[k,Number(exports.raw_comparison_stat(index))]))}
+if (rows!==lock.termRows) throw new Error('row count mismatch')
+await writeFile(path.join(here,`work-counts-${dict}.json`),JSON.stringify(results,null,2)+'\n')
+console.log(JSON.stringify(results,null,2))
