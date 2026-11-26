@@ -1,0 +1,116 @@
+name: Import study 20261126 21d3
+
+on:
+  push:
+    branches: ['perf/import-study-20261126-21d3']
+    paths:
+      - '.github/workflows/import-study-20261126-21d3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-profile:
+    name: Current baseline profile (${{ matrix.dictionary }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+    env:
+      PERF_BASELINE: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_EVIDENCE: ${{ github.workspace }}/builds/perf/current-baseline-${{ matrix.dictionary }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+          persist-credentials: false
+      - name: Prepare evidence directory
+        run: mkdir -p "$PERF_EVIDENCE"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - name: Build the exact baseline
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PERF_BASELINE"
+          npm ci 2>&1 | tee "$PERF_EVIDENCE/npm-ci.log"
+          npm run build:libs 2>&1 | tee "$PERF_EVIDENCE/build-libs.log"
+          npm run license-report:html 2>&1 | tee "$PERF_EVIDENCE/license-report.log"
+          npm run build -- --target chrome 2>&1 | tee "$PERF_EVIDENCE/build-chrome.log"
+          git diff --exit-code
+      - name: Install pinned Chromium
+        run: |
+          set -euo pipefail
+          npx playwright install --with-deps chromium 2>&1 | tee "$PERF_EVIDENCE/browser-install.log"
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: import-study-21d3-${{ matrix.dictionary }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare and bind the locked corpus and runtime
+        run: |
+          set -euo pipefail
+          node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY" 2>&1 | tee "$PERF_EVIDENCE/fixtures.log"
+          node dev/perf/host-environment.js > "$PERF_EVIDENCE/host-before.json"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil, subprocess, zipfile
+
+          root = pathlib.Path.cwd()
+          evidence = pathlib.Path(os.environ['PERF_EVIDENCE'])
+          dictionary = os.environ['PERF_DICTIONARY']
+          def digest(path):
+              with pathlib.Path(path).open('rb') as source:
+                  return hashlib.file_digest(source, 'sha256').hexdigest()
+          def command(*args):
+              return subprocess.check_output(args, text=True).strip()
+          fixture = json.loads((root / 'test/perf/dictionaries.lock.json').read_text())['dictionaries'][dictionary]
+          archive = root / 'builds/e2e-dictionary-cache' / fixture['cacheFile']
+          assert archive.stat().st_size == fixture['sizeBytes']
+          assert digest(archive) == fixture['sha256']
+          binary = command('node', '--input-type=module', '-e', "import {chromium} from '@playwright/test'; process.stdout.write(chromium.executablePath())")
+          browser_version = command(binary, '--version')
+          assert '153.0.8010.12' in browser_version
+          assert command('node', '--version') == 'v22.22.0'
+          package = root / 'builds/manabitan-chrome.zip'
+          with zipfile.ZipFile(package) as release:
+              names = release.namelist()
+              assert len(names) == len(set(names))
+              members = {item.filename: hashlib.sha256(release.read(item)).hexdigest()
+                         for item in release.infolist() if not item.is_dir()}
+          identity = {
+              'baseline': command('git', 'rev-parse', 'HEAD'),
+              'tree': command('git', 'rev-parse', 'HEAD^{tree}'),
+              'nodeVersion': command('node', '--version'),
+              'browserVersion': browser_version,
+              'browserSha256': digest(binary),
+              'fixture': fixture,
+              'fixtureLockSha256': digest(root / 'test/perf/dictionaries.lock.json'),
+              'packageLockSha256': digest(root / 'package-lock.json'),
+              'packageSha256': digest(package),
+              'packageEntries': members,
+              'timingUse': 'Diagnostic CPU profile only; not an authoritative performance comparison',
+          }
+          assert identity['baseline'] == os.environ['PERF_BASELINE']
+          (evidence / 'identity.json').write_text(json.dumps(identity, indent=2, sort_keys=True) + '\n')
+          shutil.copyfile(package, evidence / 'baseline-chrome.zip')
+          PY
+      - name: Capture the complete baseline import profile
+        run: |
+          set -euo pipefail
+          node dev/perf/import-benchmark.js "$PERF_DICTIONARY" \
+            --trace --runs 1 --build-target chrome --no-build \
+            --output "$PERF_EVIDENCE/profile" 2>&1 | tee "$PERF_EVIDENCE/import-profile.log"
+      - name: Record final host state
+        if: always()
+        run: node dev/perf/host-environment.js > "$PERF_EVIDENCE/host-after.json"
+      - name: Preserve profiles, exact packages and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: import-baseline-20261126-${{ matrix.dictionary }}
+          path: ${{ env.PERF_EVIDENCE }}
+          if-no-files-found: error
+          retention-days: 14
