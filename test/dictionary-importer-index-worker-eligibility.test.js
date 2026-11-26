@@ -17,10 +17,23 @@
 /* eslint @stylistic/semi: ["error", "never"] */
 
 import {describe, expect, test, vi} from 'vitest'
-import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js'
+import {DictionaryImporter, isNativeImageProjectionSourceSizeEligible} from '../ext/js/dictionary/dictionary-importer.js'
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js'
 
 const GIB = 1024 * 1024 * 1024
+
+describe('native single-image projection admission', () => {
+    test.each([
+        [null, false],
+        [-1, false],
+        [GIB - 1, false],
+        [GIB, true],
+        [GIB + 37, true],
+        [Number.MAX_SAFE_INTEGER + 1, false],
+    ])('source total %s -> %s', (bytes, expected) => {
+        expect(isNativeImageProjectionSourceSizeEligible(bytes)).toBe(expected)
+    })
+})
 
 /**
  * @param {Array<{filename: string, uncompressedSize?: unknown}>} files
