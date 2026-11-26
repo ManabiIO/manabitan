@@ -1,0 +1,55 @@
+{
+    "archive": "local-correctness-evidence.tar.gz",
+    "sha256": "e1fa66ce24e39f4a62978390da05d5fa05ac20c59dc016955cb1bb71249ecded",
+    "bytes": 9306,
+    "files": {
+        "media/invocation.json": {
+            "sha256": "5f519dfface83766eb0e43f4f2cebf644d27f5ae015187dcb4a0d78f4ef69cec",
+            "bytes": 2701
+        },
+        "media/report.md": {
+            "sha256": "537f660301d583a1793e8d9f4d1345a05ebdabe09225c5827e2d7d1cedc23c44",
+            "bytes": 2164
+        },
+        "media/result.json": {
+            "sha256": "a35aa2b029274529e49407152b24fa39449081ede23820c7fa57cc731f655236",
+            "bytes": 103
+        },
+        "media/review-media-projection-original.mjs": {
+            "sha256": "8c64dad257f721126d5d4edfad22bc031986d59435269a87abff45e3fa37e260",
+            "bytes": 3324
+        },
+        "media/review-media-projection-strict.mjs": {
+            "sha256": "84200c75ba15ac843212ea78bbec28e1f674ed2193b8970c0beff245211cfbee",
+            "bytes": 3704
+        },
+        "media/stderr.txt": {
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "bytes": 0
+        },
+        "metadata/metadata-witness-parity-complete.json": {
+            "sha256": "9d810e72d5c85ae96b7818fa7e4a0ac95cfd0bf38cc8ec92eb26f20ec382abc2",
+            "bytes": 4052
+        },
+        "metadata/metadata-witness-parity-vndb.json": {
+            "sha256": "3e791ae2d65a6b9d239fda7c4ef73093e3893a7e89541d65ed36e5bdaca1450b",
+            "bytes": 1928
+        },
+        "metadata/metadata-witness-parity-vndb.mjs": {
+            "sha256": "6729bb9a4362864222ee5938b065497947347820ab8b8c69e1660b5ea08f9a13",
+            "bytes": 7661
+        },
+        "metadata/metadata-witness-parity.json": {
+            "sha256": "3e02df25d90be0d308aba3c0cc8da372ec969b5890ccd64eb92eaaf8b5c40c4c",
+            "bytes": 2631
+        },
+        "metadata/metadata-witness-parity.mjs": {
+            "sha256": "0501f91403213565bb23f40560ce2e6b05518f5a8598396c450a72bda8fbcfd0",
+            "bytes": 6877
+        },
+        "metadata/review-metadata-witness.mjs": {
+            "sha256": "cbed8c303115371b780529b0453bdd152cea7b1c126cd10c3d56ec8c9c5cfd57",
+            "bytes": 5205
+        }
+    }
+}

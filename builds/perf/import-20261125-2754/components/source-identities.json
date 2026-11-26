@@ -1,0 +1,155 @@
+{
+  "baseline": {
+    "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+  },
+  "candidates": {
+    "native-media-projection": {
+      "frozenHostedCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+      "equivalentLocalCommit": "98731a11d81161c929f7822516610e3018aa9dab",
+      "tree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+      "changedSourceFiles": [
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "bytes": 2588,
+          "sha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 67550,
+          "sha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+          "bytes": 16935,
+          "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+          "bytes": 206273,
+          "sha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c"
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 156075,
+          "sha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e"
+        },
+        {
+          "path": "test/term-bank-experiments.test.js",
+          "bytes": 49415,
+          "sha256": "ca311f17d749ac5ef9fb5533ffed651b44fc540860fd842638382c5c065e65bc"
+        },
+        {
+          "path": "test/term-bank-media-projection.test.js",
+          "bytes": 13050,
+          "sha256": "2765e5d44f176f806eec0b515bc13435d11b1e1e0b7d0490ffc40f507dc77c9e"
+        }
+      ],
+      "laterPr875TestHead": {
+        "commit": "5afd2e97ec2707b150acfde61115aee688547a78",
+        "tree": "a6981459853d7ea102afd801c1e447e49311db1e",
+        "parent": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "changedPaths": [
+          "test/term-bank-experiments.test.js",
+          "test/term-bank-media-projection.test.js"
+        ],
+        "productSourceAndBuildInputsUnchanged": true,
+        "meaning": "The frozen component, timing and memory product remains 7a8b25; the later PR head adds route-disabled coverage in only these two test files."
+      }
+    },
+    "native-metadata-preflight": {
+      "frozenHostedCommit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+      "equivalentLocalCommit": "d61a49f03b48b2b9cb1cd704aa0c2a994820f46d",
+      "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793",
+      "changedSourceFiles": [
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "bytes": 2521,
+          "sha256": "f93d858d832c25f99c08ca77d5162f1b2f67490c8daadd41df339705899c12dc"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+          "bytes": 2062,
+          "sha256": "f17603b330f8d21f454681518db52a4fb02d07b0f16faec20d6a4f69e17a7acc"
+        },
+        {
+          "path": "ext/js/dictionary/dictionary-database.js",
+          "bytes": 610544,
+          "sha256": "7af9c4aea1a05a10b4bb85ede77dd2c2691ff66d9cb21a2d4a9713d07d910a7c"
+        },
+        {
+          "path": "ext/js/dictionary/term-content-canonical-scan.js",
+          "bytes": 23286,
+          "sha256": "0a1c243821bcc5cfe7bd15b2c9ab5b502bd9cb6225bf4b15faa3f7de591b4b39"
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+          "bytes": 8211,
+          "sha256": "34cf2d361b188e9e3598ca35c7a90c337f0b841ef2b9117d6bca2fbb9d06b063"
+        },
+        {
+          "path": "test/dictionary-content-publication-range.test.js",
+          "bytes": 29450,
+          "sha256": "221dde50f5f4ad0a089997ccd87fa33abebacbb43d6a3652c7dc9076d3977749"
+        }
+      ],
+      "laterValidationHead": {
+        "commit": "b273513dab4fa409a0213a2db470e52b4a0f559c",
+        "equivalentLocalCommit": "60a8a9c1daeb1873017194f852ce6f7fef736d05",
+        "tree": "dcaa01db1e3cb790275ea71543e1cd607cb46be9",
+        "changedPathsSinceFrozenStudy": [
+          "ext/js/dictionary/term-content-canonical-scan.js",
+          "test/dictionary-content-publication-range.test.js"
+        ],
+        "meaning": "Frozen component and hosted study source remains b2e816c. Later source formatting has a retained exact AST comparison; subsequent checked non-null fixture guards affect tests. Final lint/types/focused tests/dry builds apply to this later validation head, not the frozen study commit."
+      }
+    },
+    "contiguous-source-crc": {
+      "frozenHostedCommit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+      "equivalentLocalCommit": "8657de155e6a17c7d85c67f66c0eebdff6931ed3",
+      "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b",
+      "changedSourceFiles": [
+        {
+          "path": "dev/data/dictionary-wasm/manifest.json",
+          "bytes": 2521,
+          "sha256": "e7601fae11df2e283863eba67e3219d9649570235b9ed65f6a485a939daa3d19"
+        },
+        {
+          "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+          "bytes": 63334,
+          "sha256": "183439d0b91d0f60c6a1a3823700b9e18a527238cb9b15f37a605027e3816c53"
+        },
+        {
+          "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+          "bytes": 204333,
+          "sha256": "d04d2e9a028b3b742e794e94a6eea16f0239e0cdd3f3ce994a8d2231eae35698"
+        },
+        {
+          "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+          "bytes": 152367,
+          "sha256": "b574e98d608512dfd77613ac8494449826d80e1c69c356468f59837f5eb7dca4"
+        },
+        {
+          "path": "test/term-bank-crc-contiguous-runs.test.js",
+          "bytes": 6386,
+          "sha256": "af93846d51596c81666d6732805fb75dd80ec8c22b2d4feaa29d4e306f044204"
+        },
+        {
+          "path": "test/term-bank-source-crc-reuse.test.js",
+          "bytes": 14750,
+          "sha256": "530c6f80441646f992ac6850032dbc0ab5b763d9bc3a9330068d590a263160e9"
+        }
+      ],
+      "laterTestAnnotationHead": {
+        "hostedCommit": "2fe47fa3db04342d04eb4f309c5d74ef45eef9e3",
+        "localCommit": "a3b5ddf4bb676b06bd8a577c67f971907ddc30b2",
+        "tree": "18f2494dbb185f189c59efb8ba2b1bf96855eeb8",
+        "changedPaths": [
+          "test/term-bank-source-crc-reuse.test.js"
+        ],
+        "productSourceAndBuildInputsUnchanged": true,
+        "meaning": "One JSDoc type annotation fixes the three test TypeScript literal-inference diagnostics. Performance studies remain labeled with frozen c2cf7647; no source or performance reacquisition occurred."
+      }
+    }
+  }
+}

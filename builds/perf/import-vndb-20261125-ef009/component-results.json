@@ -1,0 +1,2579 @@
+{
+  "schemaVersion": 1,
+  "complete": true,
+  "node": "v22.22.0",
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "source": {
+    "baselineParser": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+    "candidateParser": "d57f716ab26ea3e5c032f534ec2b0ee607510511f3e9ed8ec93e7377883c508d",
+    "projector": "e0ba54af2c7595e72d5840ff6b32759b90470d27fe278c1c9620507d09dad658",
+    "wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+    "runner": "bedf73fa17d7715bb9b2f96a52b297b49d20d60aec4533e2658cdd6233402b45"
+  },
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true,
+    "bytes": 291705969
+  },
+  "protocol": {
+    "oracle": "Every locked VNDB production-sized source group is CRC-validated and parsed by the unchanged native producer. A and B copy the same borrowed chunk synchronously; complete nested outputs are deep-equal before the next heap reuse. Raw source bytes and borrowed semantics are unchanged.",
+    "timingBoundary": "Shared validated glossary bytes through returned image path strings only. Excludes source inflate/parse, remaining chunk copies, worker IPC, OPFS, and UI. This is not a complete-import or process-memory benchmark.",
+    "warmup": "ABC",
+    "timed": [
+      "ABC",
+      "BCA",
+      "CAB",
+      "ACB",
+      "CBA",
+      "BAC"
+    ],
+    "controls": "A and C call the exact same existing JSON collector and private SharedArrayBuffer snapshot path. B attempts the new projector then the same fallback.",
+    "noRetriesOrTailExclusions": true
+  },
+  "sourceBanks": 665,
+  "sourceBytes": 4267992967,
+  "groups": [
+    {
+      "group": 0,
+      "banks": [
+        "term_bank_1.json",
+        "term_bank_2.json",
+        "term_bank_3.json",
+        "term_bank_4.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 805,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 1,
+      "banks": [
+        "term_bank_5.json",
+        "term_bank_6.json",
+        "term_bank_7.json",
+        "term_bank_8.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 844,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 2,
+      "banks": [
+        "term_bank_9.json",
+        "term_bank_10.json",
+        "term_bank_11.json",
+        "term_bank_12.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 810,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 3,
+      "banks": [
+        "term_bank_13.json",
+        "term_bank_14.json",
+        "term_bank_15.json",
+        "term_bank_16.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 792,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 4,
+      "banks": [
+        "term_bank_17.json",
+        "term_bank_18.json",
+        "term_bank_19.json",
+        "term_bank_20.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 819,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 5,
+      "banks": [
+        "term_bank_21.json",
+        "term_bank_22.json",
+        "term_bank_23.json",
+        "term_bank_24.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 873,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 6,
+      "banks": [
+        "term_bank_25.json",
+        "term_bank_26.json",
+        "term_bank_27.json",
+        "term_bank_28.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 941,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 7,
+      "banks": [
+        "term_bank_29.json",
+        "term_bank_30.json",
+        "term_bank_31.json",
+        "term_bank_32.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 785,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 8,
+      "banks": [
+        "term_bank_33.json",
+        "term_bank_34.json",
+        "term_bank_35.json",
+        "term_bank_36.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 823,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 9,
+      "banks": [
+        "term_bank_37.json",
+        "term_bank_38.json",
+        "term_bank_39.json",
+        "term_bank_40.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 844,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 10,
+      "banks": [
+        "term_bank_41.json",
+        "term_bank_42.json",
+        "term_bank_43.json",
+        "term_bank_44.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 863,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 11,
+      "banks": [
+        "term_bank_45.json",
+        "term_bank_46.json",
+        "term_bank_47.json",
+        "term_bank_48.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 876,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 12,
+      "banks": [
+        "term_bank_49.json",
+        "term_bank_50.json",
+        "term_bank_51.json",
+        "term_bank_52.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 813,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 13,
+      "banks": [
+        "term_bank_53.json",
+        "term_bank_54.json",
+        "term_bank_55.json",
+        "term_bank_56.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 839,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 14,
+      "banks": [
+        "term_bank_57.json",
+        "term_bank_58.json",
+        "term_bank_59.json",
+        "term_bank_60.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 930,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 15,
+      "banks": [
+        "term_bank_61.json",
+        "term_bank_62.json",
+        "term_bank_63.json",
+        "term_bank_64.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 873,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 16,
+      "banks": [
+        "term_bank_65.json",
+        "term_bank_66.json",
+        "term_bank_67.json",
+        "term_bank_68.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 810,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 17,
+      "banks": [
+        "term_bank_69.json",
+        "term_bank_70.json",
+        "term_bank_71.json",
+        "term_bank_72.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1053,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 18,
+      "banks": [
+        "term_bank_73.json",
+        "term_bank_74.json",
+        "term_bank_75.json",
+        "term_bank_76.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 938,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 19,
+      "banks": [
+        "term_bank_77.json",
+        "term_bank_78.json",
+        "term_bank_79.json",
+        "term_bank_80.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 900,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 20,
+      "banks": [
+        "term_bank_81.json",
+        "term_bank_82.json",
+        "term_bank_83.json",
+        "term_bank_84.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 884,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 21,
+      "banks": [
+        "term_bank_85.json",
+        "term_bank_86.json",
+        "term_bank_87.json",
+        "term_bank_88.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 840,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 22,
+      "banks": [
+        "term_bank_89.json",
+        "term_bank_90.json",
+        "term_bank_91.json",
+        "term_bank_92.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 797,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 23,
+      "banks": [
+        "term_bank_93.json",
+        "term_bank_94.json",
+        "term_bank_95.json",
+        "term_bank_96.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 871,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 24,
+      "banks": [
+        "term_bank_97.json",
+        "term_bank_98.json",
+        "term_bank_99.json",
+        "term_bank_100.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 803,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 25,
+      "banks": [
+        "term_bank_101.json",
+        "term_bank_102.json",
+        "term_bank_103.json",
+        "term_bank_104.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 802,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 26,
+      "banks": [
+        "term_bank_105.json",
+        "term_bank_106.json",
+        "term_bank_107.json",
+        "term_bank_108.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 782,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 27,
+      "banks": [
+        "term_bank_109.json",
+        "term_bank_110.json",
+        "term_bank_111.json",
+        "term_bank_112.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 722,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 28,
+      "banks": [
+        "term_bank_113.json",
+        "term_bank_114.json",
+        "term_bank_115.json",
+        "term_bank_116.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 802,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 29,
+      "banks": [
+        "term_bank_117.json",
+        "term_bank_118.json",
+        "term_bank_119.json",
+        "term_bank_120.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 944,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 30,
+      "banks": [
+        "term_bank_121.json",
+        "term_bank_122.json",
+        "term_bank_123.json",
+        "term_bank_124.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 885,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 31,
+      "banks": [
+        "term_bank_125.json",
+        "term_bank_126.json",
+        "term_bank_127.json",
+        "term_bank_128.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 805,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 32,
+      "banks": [
+        "term_bank_129.json",
+        "term_bank_130.json",
+        "term_bank_131.json",
+        "term_bank_132.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 850,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 33,
+      "banks": [
+        "term_bank_133.json",
+        "term_bank_134.json",
+        "term_bank_135.json",
+        "term_bank_136.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 809,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 34,
+      "banks": [
+        "term_bank_137.json",
+        "term_bank_138.json",
+        "term_bank_139.json",
+        "term_bank_140.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 949,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 35,
+      "banks": [
+        "term_bank_141.json",
+        "term_bank_142.json",
+        "term_bank_143.json",
+        "term_bank_144.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 873,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 36,
+      "banks": [
+        "term_bank_145.json",
+        "term_bank_146.json",
+        "term_bank_147.json",
+        "term_bank_148.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 870,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 37,
+      "banks": [
+        "term_bank_149.json",
+        "term_bank_150.json",
+        "term_bank_151.json",
+        "term_bank_152.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 844,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 38,
+      "banks": [
+        "term_bank_153.json",
+        "term_bank_154.json",
+        "term_bank_155.json",
+        "term_bank_156.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 812,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 39,
+      "banks": [
+        "term_bank_157.json",
+        "term_bank_158.json",
+        "term_bank_159.json",
+        "term_bank_160.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 841,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 40,
+      "banks": [
+        "term_bank_161.json",
+        "term_bank_162.json",
+        "term_bank_163.json",
+        "term_bank_164.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 847,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 41,
+      "banks": [
+        "term_bank_165.json",
+        "term_bank_166.json",
+        "term_bank_167.json",
+        "term_bank_168.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 846,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 42,
+      "banks": [
+        "term_bank_169.json",
+        "term_bank_170.json",
+        "term_bank_171.json",
+        "term_bank_172.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 845,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 43,
+      "banks": [
+        "term_bank_173.json",
+        "term_bank_174.json",
+        "term_bank_175.json",
+        "term_bank_176.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 891,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 44,
+      "banks": [
+        "term_bank_177.json",
+        "term_bank_178.json",
+        "term_bank_179.json",
+        "term_bank_180.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 825,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 45,
+      "banks": [
+        "term_bank_181.json",
+        "term_bank_182.json",
+        "term_bank_183.json",
+        "term_bank_184.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 953,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 46,
+      "banks": [
+        "term_bank_185.json",
+        "term_bank_186.json",
+        "term_bank_187.json",
+        "term_bank_188.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 801,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 47,
+      "banks": [
+        "term_bank_189.json",
+        "term_bank_190.json",
+        "term_bank_191.json",
+        "term_bank_192.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 864,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 48,
+      "banks": [
+        "term_bank_193.json",
+        "term_bank_194.json",
+        "term_bank_195.json",
+        "term_bank_196.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 832,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 49,
+      "banks": [
+        "term_bank_197.json",
+        "term_bank_198.json",
+        "term_bank_199.json",
+        "term_bank_200.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 890,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 50,
+      "banks": [
+        "term_bank_201.json",
+        "term_bank_202.json",
+        "term_bank_203.json",
+        "term_bank_204.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 882,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 51,
+      "banks": [
+        "term_bank_205.json",
+        "term_bank_206.json",
+        "term_bank_207.json",
+        "term_bank_208.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 890,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 52,
+      "banks": [
+        "term_bank_209.json",
+        "term_bank_210.json",
+        "term_bank_211.json",
+        "term_bank_212.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 795,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 53,
+      "banks": [
+        "term_bank_213.json",
+        "term_bank_214.json",
+        "term_bank_215.json",
+        "term_bank_216.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 786,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 54,
+      "banks": [
+        "term_bank_217.json",
+        "term_bank_218.json",
+        "term_bank_219.json",
+        "term_bank_220.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 795,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 55,
+      "banks": [
+        "term_bank_221.json",
+        "term_bank_222.json",
+        "term_bank_223.json",
+        "term_bank_224.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 774,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 56,
+      "banks": [
+        "term_bank_225.json",
+        "term_bank_226.json",
+        "term_bank_227.json",
+        "term_bank_228.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 812,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 57,
+      "banks": [
+        "term_bank_229.json",
+        "term_bank_230.json",
+        "term_bank_231.json",
+        "term_bank_232.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 824,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 58,
+      "banks": [
+        "term_bank_233.json",
+        "term_bank_234.json",
+        "term_bank_235.json",
+        "term_bank_236.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 886,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 59,
+      "banks": [
+        "term_bank_237.json",
+        "term_bank_238.json",
+        "term_bank_239.json",
+        "term_bank_240.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 898,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 60,
+      "banks": [
+        "term_bank_241.json",
+        "term_bank_242.json",
+        "term_bank_243.json",
+        "term_bank_244.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 914,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 61,
+      "banks": [
+        "term_bank_245.json",
+        "term_bank_246.json",
+        "term_bank_247.json",
+        "term_bank_248.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 830,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 62,
+      "banks": [
+        "term_bank_249.json",
+        "term_bank_250.json",
+        "term_bank_251.json",
+        "term_bank_252.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 857,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 63,
+      "banks": [
+        "term_bank_253.json",
+        "term_bank_254.json",
+        "term_bank_255.json",
+        "term_bank_256.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 786,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 64,
+      "banks": [
+        "term_bank_257.json",
+        "term_bank_258.json",
+        "term_bank_259.json",
+        "term_bank_260.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 839,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 65,
+      "banks": [
+        "term_bank_261.json",
+        "term_bank_262.json",
+        "term_bank_263.json",
+        "term_bank_264.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 815,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 66,
+      "banks": [
+        "term_bank_265.json",
+        "term_bank_266.json",
+        "term_bank_267.json",
+        "term_bank_268.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 827,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 67,
+      "banks": [
+        "term_bank_269.json",
+        "term_bank_270.json",
+        "term_bank_271.json",
+        "term_bank_272.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 818,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 68,
+      "banks": [
+        "term_bank_273.json",
+        "term_bank_274.json",
+        "term_bank_275.json",
+        "term_bank_276.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 854,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 69,
+      "banks": [
+        "term_bank_277.json",
+        "term_bank_278.json",
+        "term_bank_279.json",
+        "term_bank_280.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 775,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 70,
+      "banks": [
+        "term_bank_281.json",
+        "term_bank_282.json",
+        "term_bank_283.json",
+        "term_bank_284.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 888,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 71,
+      "banks": [
+        "term_bank_285.json",
+        "term_bank_286.json",
+        "term_bank_287.json",
+        "term_bank_288.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 770,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 72,
+      "banks": [
+        "term_bank_289.json",
+        "term_bank_290.json",
+        "term_bank_291.json",
+        "term_bank_292.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 792,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 73,
+      "banks": [
+        "term_bank_293.json",
+        "term_bank_294.json",
+        "term_bank_295.json",
+        "term_bank_296.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 814,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 74,
+      "banks": [
+        "term_bank_297.json",
+        "term_bank_298.json",
+        "term_bank_299.json",
+        "term_bank_300.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 805,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 75,
+      "banks": [
+        "term_bank_301.json",
+        "term_bank_302.json",
+        "term_bank_303.json",
+        "term_bank_304.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 780,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 76,
+      "banks": [
+        "term_bank_305.json",
+        "term_bank_306.json",
+        "term_bank_307.json",
+        "term_bank_308.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 841,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 77,
+      "banks": [
+        "term_bank_309.json",
+        "term_bank_310.json",
+        "term_bank_311.json",
+        "term_bank_312.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 758,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 78,
+      "banks": [
+        "term_bank_313.json",
+        "term_bank_314.json",
+        "term_bank_315.json",
+        "term_bank_316.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 904,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 79,
+      "banks": [
+        "term_bank_317.json",
+        "term_bank_318.json",
+        "term_bank_319.json",
+        "term_bank_320.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 855,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 80,
+      "banks": [
+        "term_bank_321.json",
+        "term_bank_322.json",
+        "term_bank_323.json",
+        "term_bank_324.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 815,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 81,
+      "banks": [
+        "term_bank_325.json",
+        "term_bank_326.json",
+        "term_bank_327.json",
+        "term_bank_328.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 867,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 82,
+      "banks": [
+        "term_bank_329.json",
+        "term_bank_330.json",
+        "term_bank_331.json",
+        "term_bank_332.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 853,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 83,
+      "banks": [
+        "term_bank_333.json",
+        "term_bank_334.json",
+        "term_bank_335.json",
+        "term_bank_336.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 941,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 84,
+      "banks": [
+        "term_bank_337.json",
+        "term_bank_338.json",
+        "term_bank_339.json",
+        "term_bank_340.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 810,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 85,
+      "banks": [
+        "term_bank_341.json",
+        "term_bank_342.json",
+        "term_bank_343.json",
+        "term_bank_344.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 830,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 86,
+      "banks": [
+        "term_bank_345.json",
+        "term_bank_346.json",
+        "term_bank_347.json",
+        "term_bank_348.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 791,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 87,
+      "banks": [
+        "term_bank_349.json",
+        "term_bank_350.json",
+        "term_bank_351.json",
+        "term_bank_352.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 823,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 88,
+      "banks": [
+        "term_bank_353.json",
+        "term_bank_354.json",
+        "term_bank_355.json",
+        "term_bank_356.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 904,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 89,
+      "banks": [
+        "term_bank_357.json",
+        "term_bank_358.json",
+        "term_bank_359.json",
+        "term_bank_360.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 959,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 90,
+      "banks": [
+        "term_bank_361.json",
+        "term_bank_362.json",
+        "term_bank_363.json",
+        "term_bank_364.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 837,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 91,
+      "banks": [
+        "term_bank_365.json",
+        "term_bank_366.json",
+        "term_bank_367.json",
+        "term_bank_368.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 913,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 92,
+      "banks": [
+        "term_bank_369.json",
+        "term_bank_370.json",
+        "term_bank_371.json",
+        "term_bank_372.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 913,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 93,
+      "banks": [
+        "term_bank_373.json",
+        "term_bank_374.json",
+        "term_bank_375.json",
+        "term_bank_376.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 900,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 94,
+      "banks": [
+        "term_bank_377.json",
+        "term_bank_378.json",
+        "term_bank_379.json",
+        "term_bank_380.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 816,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 95,
+      "banks": [
+        "term_bank_381.json",
+        "term_bank_382.json",
+        "term_bank_383.json",
+        "term_bank_384.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 840,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 96,
+      "banks": [
+        "term_bank_385.json",
+        "term_bank_386.json",
+        "term_bank_387.json",
+        "term_bank_388.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 833,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 97,
+      "banks": [
+        "term_bank_389.json",
+        "term_bank_390.json",
+        "term_bank_391.json",
+        "term_bank_392.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 882,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 98,
+      "banks": [
+        "term_bank_393.json",
+        "term_bank_394.json",
+        "term_bank_395.json",
+        "term_bank_396.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1040,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 99,
+      "banks": [
+        "term_bank_397.json",
+        "term_bank_398.json",
+        "term_bank_399.json",
+        "term_bank_400.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 879,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 100,
+      "banks": [
+        "term_bank_401.json",
+        "term_bank_402.json",
+        "term_bank_403.json",
+        "term_bank_404.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 856,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 101,
+      "banks": [
+        "term_bank_405.json",
+        "term_bank_406.json",
+        "term_bank_407.json",
+        "term_bank_408.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 850,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 102,
+      "banks": [
+        "term_bank_409.json",
+        "term_bank_410.json",
+        "term_bank_411.json",
+        "term_bank_412.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 874,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 103,
+      "banks": [
+        "term_bank_413.json",
+        "term_bank_414.json",
+        "term_bank_415.json",
+        "term_bank_416.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 974,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 104,
+      "banks": [
+        "term_bank_417.json",
+        "term_bank_418.json",
+        "term_bank_419.json",
+        "term_bank_420.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 926,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 105,
+      "banks": [
+        "term_bank_421.json",
+        "term_bank_422.json",
+        "term_bank_423.json",
+        "term_bank_424.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 967,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 106,
+      "banks": [
+        "term_bank_425.json",
+        "term_bank_426.json",
+        "term_bank_427.json",
+        "term_bank_428.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1039,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 107,
+      "banks": [
+        "term_bank_429.json",
+        "term_bank_430.json",
+        "term_bank_431.json",
+        "term_bank_432.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1022,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 108,
+      "banks": [
+        "term_bank_433.json",
+        "term_bank_434.json",
+        "term_bank_435.json",
+        "term_bank_436.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 950,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 109,
+      "banks": [
+        "term_bank_437.json",
+        "term_bank_438.json",
+        "term_bank_439.json",
+        "term_bank_440.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 905,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 110,
+      "banks": [
+        "term_bank_441.json",
+        "term_bank_442.json",
+        "term_bank_443.json",
+        "term_bank_444.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 810,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 111,
+      "banks": [
+        "term_bank_445.json",
+        "term_bank_446.json",
+        "term_bank_447.json",
+        "term_bank_448.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 969,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 112,
+      "banks": [
+        "term_bank_449.json",
+        "term_bank_450.json",
+        "term_bank_451.json",
+        "term_bank_452.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 811,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 113,
+      "banks": [
+        "term_bank_453.json",
+        "term_bank_454.json",
+        "term_bank_455.json",
+        "term_bank_456.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1002,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 114,
+      "banks": [
+        "term_bank_457.json",
+        "term_bank_458.json",
+        "term_bank_459.json",
+        "term_bank_460.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 889,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 115,
+      "banks": [
+        "term_bank_461.json",
+        "term_bank_462.json",
+        "term_bank_463.json",
+        "term_bank_464.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 914,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 116,
+      "banks": [
+        "term_bank_465.json",
+        "term_bank_466.json",
+        "term_bank_467.json",
+        "term_bank_468.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 828,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 117,
+      "banks": [
+        "term_bank_469.json",
+        "term_bank_470.json",
+        "term_bank_471.json",
+        "term_bank_472.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 833,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 118,
+      "banks": [
+        "term_bank_473.json",
+        "term_bank_474.json",
+        "term_bank_475.json",
+        "term_bank_476.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 916,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 119,
+      "banks": [
+        "term_bank_477.json",
+        "term_bank_478.json",
+        "term_bank_479.json",
+        "term_bank_480.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 847,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 120,
+      "banks": [
+        "term_bank_481.json",
+        "term_bank_482.json",
+        "term_bank_483.json",
+        "term_bank_484.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 879,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 121,
+      "banks": [
+        "term_bank_485.json",
+        "term_bank_486.json",
+        "term_bank_487.json",
+        "term_bank_488.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 740,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 122,
+      "banks": [
+        "term_bank_489.json",
+        "term_bank_490.json",
+        "term_bank_491.json",
+        "term_bank_492.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1078,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 123,
+      "banks": [
+        "term_bank_493.json",
+        "term_bank_494.json",
+        "term_bank_495.json",
+        "term_bank_496.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 764,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 124,
+      "banks": [
+        "term_bank_497.json",
+        "term_bank_498.json",
+        "term_bank_499.json",
+        "term_bank_500.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 648,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 125,
+      "banks": [
+        "term_bank_501.json",
+        "term_bank_502.json",
+        "term_bank_503.json",
+        "term_bank_504.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 741,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 126,
+      "banks": [
+        "term_bank_505.json",
+        "term_bank_506.json",
+        "term_bank_507.json",
+        "term_bank_508.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 719,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 127,
+      "banks": [
+        "term_bank_509.json",
+        "term_bank_510.json",
+        "term_bank_511.json",
+        "term_bank_512.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 727,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 128,
+      "banks": [
+        "term_bank_513.json",
+        "term_bank_514.json",
+        "term_bank_515.json",
+        "term_bank_516.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 754,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 129,
+      "banks": [
+        "term_bank_517.json",
+        "term_bank_518.json",
+        "term_bank_519.json",
+        "term_bank_520.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 858,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 130,
+      "banks": [
+        "term_bank_521.json",
+        "term_bank_522.json",
+        "term_bank_523.json",
+        "term_bank_524.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 763,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 131,
+      "banks": [
+        "term_bank_525.json",
+        "term_bank_526.json",
+        "term_bank_527.json",
+        "term_bank_528.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 799,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 132,
+      "banks": [
+        "term_bank_529.json",
+        "term_bank_530.json",
+        "term_bank_531.json",
+        "term_bank_532.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 798,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 133,
+      "banks": [
+        "term_bank_533.json",
+        "term_bank_534.json",
+        "term_bank_535.json",
+        "term_bank_536.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 902,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 134,
+      "banks": [
+        "term_bank_537.json",
+        "term_bank_538.json",
+        "term_bank_539.json",
+        "term_bank_540.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 847,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 135,
+      "banks": [
+        "term_bank_541.json",
+        "term_bank_542.json",
+        "term_bank_543.json",
+        "term_bank_544.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 932,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 136,
+      "banks": [
+        "term_bank_545.json",
+        "term_bank_546.json",
+        "term_bank_547.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 759,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 137,
+      "banks": [
+        "term_bank_548.json",
+        "term_bank_549.json",
+        "term_bank_550.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 678,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 138,
+      "banks": [
+        "term_bank_551.json",
+        "term_bank_552.json",
+        "term_bank_553.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 754,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 139,
+      "banks": [
+        "term_bank_554.json",
+        "term_bank_555.json",
+        "term_bank_556.json",
+        "term_bank_557.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 943,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 140,
+      "banks": [
+        "term_bank_558.json",
+        "term_bank_559.json",
+        "term_bank_560.json",
+        "term_bank_561.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 877,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 141,
+      "banks": [
+        "term_bank_562.json",
+        "term_bank_563.json",
+        "term_bank_564.json",
+        "term_bank_565.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 788,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 142,
+      "banks": [
+        "term_bank_566.json",
+        "term_bank_567.json",
+        "term_bank_568.json",
+        "term_bank_569.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 998,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 143,
+      "banks": [
+        "term_bank_570.json",
+        "term_bank_571.json",
+        "term_bank_572.json",
+        "term_bank_573.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1180,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 144,
+      "banks": [
+        "term_bank_574.json",
+        "term_bank_575.json",
+        "term_bank_576.json",
+        "term_bank_577.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1000,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 145,
+      "banks": [
+        "term_bank_578.json",
+        "term_bank_579.json",
+        "term_bank_580.json",
+        "term_bank_581.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1033,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 146,
+      "banks": [
+        "term_bank_582.json",
+        "term_bank_583.json",
+        "term_bank_584.json",
+        "term_bank_585.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1066,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 147,
+      "banks": [
+        "term_bank_586.json",
+        "term_bank_587.json",
+        "term_bank_588.json",
+        "term_bank_589.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1072,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 148,
+      "banks": [
+        "term_bank_590.json",
+        "term_bank_591.json",
+        "term_bank_592.json",
+        "term_bank_593.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1033,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 149,
+      "banks": [
+        "term_bank_594.json",
+        "term_bank_595.json",
+        "term_bank_596.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 733,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 150,
+      "banks": [
+        "term_bank_597.json",
+        "term_bank_598.json",
+        "term_bank_599.json",
+        "term_bank_600.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 954,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 151,
+      "banks": [
+        "term_bank_601.json",
+        "term_bank_602.json",
+        "term_bank_603.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 687,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 152,
+      "banks": [
+        "term_bank_604.json",
+        "term_bank_605.json",
+        "term_bank_606.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 613,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 153,
+      "banks": [
+        "term_bank_607.json",
+        "term_bank_608.json",
+        "term_bank_609.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 789,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 154,
+      "banks": [
+        "term_bank_610.json",
+        "term_bank_611.json",
+        "term_bank_612.json",
+        "term_bank_613.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1050,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 155,
+      "banks": [
+        "term_bank_614.json",
+        "term_bank_615.json",
+        "term_bank_616.json",
+        "term_bank_617.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1067,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 156,
+      "banks": [
+        "term_bank_618.json",
+        "term_bank_619.json",
+        "term_bank_620.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 847,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 157,
+      "banks": [
+        "term_bank_621.json",
+        "term_bank_622.json",
+        "term_bank_623.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 755,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 158,
+      "banks": [
+        "term_bank_624.json",
+        "term_bank_625.json",
+        "term_bank_626.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 701,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 159,
+      "banks": [
+        "term_bank_627.json",
+        "term_bank_628.json",
+        "term_bank_629.json",
+        "term_bank_630.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1026,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 160,
+      "banks": [
+        "term_bank_631.json",
+        "term_bank_632.json",
+        "term_bank_633.json",
+        "term_bank_634.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1084,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 161,
+      "banks": [
+        "term_bank_635.json",
+        "term_bank_636.json",
+        "term_bank_637.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 918,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 162,
+      "banks": [
+        "term_bank_638.json",
+        "term_bank_639.json",
+        "term_bank_640.json",
+        "term_bank_641.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 891,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 163,
+      "banks": [
+        "term_bank_642.json",
+        "term_bank_643.json",
+        "term_bank_644.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 819,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 164,
+      "banks": [
+        "term_bank_645.json",
+        "term_bank_646.json",
+        "term_bank_647.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 801,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 165,
+      "banks": [
+        "term_bank_648.json",
+        "term_bank_649.json",
+        "term_bank_650.json",
+        "term_bank_651.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1121,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 166,
+      "banks": [
+        "term_bank_652.json",
+        "term_bank_653.json",
+        "term_bank_654.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 828,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 167,
+      "banks": [
+        "term_bank_655.json",
+        "term_bank_656.json",
+        "term_bank_657.json",
+        "term_bank_658.json"
+      ],
+      "rows": 40000,
+      "mediaRows": 1006,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 168,
+      "banks": [
+        "term_bank_659.json",
+        "term_bank_660.json",
+        "term_bank_661.json"
+      ],
+      "rows": 30000,
+      "mediaRows": 769,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    },
+    {
+      "group": 169,
+      "banks": [
+        "term_bank_662.json",
+        "term_bank_663.json",
+        "term_bank_664.json",
+        "term_bank_665.json"
+      ],
+      "rows": 38310,
+      "mediaRows": 1034,
+      "fusedAttempts": 1,
+      "fusedFallbacks": 0
+    }
+  ],
+  "rows": 6648310,
+  "mediaRows": 146725,
+  "accepted": 146725,
+  "fallback": 0,
+  "glossaryBytes": 84398732,
+  "baselineDecode": {
+    "calls": 146725,
+    "bytes": 84398732,
+    "shared": 0
+  },
+  "candidateDecode": {
+    "calls": 146725,
+    "bytes": 2684628,
+    "shared": 0
+  },
+  "observations": [
+    {
+      "arm": "A",
+      "phase": "warmup",
+      "block": -1,
+      "elapsedMs": 1017.8456740000001,
+      "cpuUserMs": 974.851,
+      "cpuSystemMs": 67.777,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "warmup",
+      "block": -1,
+      "elapsedMs": 675.3495779999976,
+      "cpuUserMs": 645.583,
+      "cpuSystemMs": 3.822,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "warmup",
+      "block": -1,
+      "elapsedMs": 1102.5210750000006,
+      "cpuUserMs": 1091.859,
+      "cpuSystemMs": 49.762,
+      "checksum": 17797303
+    },
+    {
+      "arm": "A",
+      "phase": "timed",
+      "block": 0,
+      "elapsedMs": 1180.521013999998,
+      "cpuUserMs": 1212.203,
+      "cpuSystemMs": 49.631,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "timed",
+      "block": 0,
+      "elapsedMs": 751.5814129999999,
+      "cpuUserMs": 681.019,
+      "cpuSystemMs": 0,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "timed",
+      "block": 0,
+      "elapsedMs": 1078.158150000003,
+      "cpuUserMs": 1150.323,
+      "cpuSystemMs": 39.394,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "timed",
+      "block": 1,
+      "elapsedMs": 493.27713799999765,
+      "cpuUserMs": 454.694,
+      "cpuSystemMs": 8.018,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "timed",
+      "block": 1,
+      "elapsedMs": 890.9296219999997,
+      "cpuUserMs": 946.115,
+      "cpuSystemMs": 30.03,
+      "checksum": 17797303
+    },
+    {
+      "arm": "A",
+      "phase": "timed",
+      "block": 1,
+      "elapsedMs": 1106.935145000003,
+      "cpuUserMs": 1216.215,
+      "cpuSystemMs": 78.03,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "timed",
+      "block": 2,
+      "elapsedMs": 872.6325140000008,
+      "cpuUserMs": 938.625,
+      "cpuSystemMs": 40.638,
+      "checksum": 17797303
+    },
+    {
+      "arm": "A",
+      "phase": "timed",
+      "block": 2,
+      "elapsedMs": 730.8232210000024,
+      "cpuUserMs": 758.955,
+      "cpuSystemMs": 43.049,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "timed",
+      "block": 2,
+      "elapsedMs": 1162.3419790000007,
+      "cpuUserMs": 1167.967,
+      "cpuSystemMs": 0.206,
+      "checksum": 17797303
+    },
+    {
+      "arm": "A",
+      "phase": "timed",
+      "block": 3,
+      "elapsedMs": 807.2258289999991,
+      "cpuUserMs": 850.637,
+      "cpuSystemMs": 60.731,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "timed",
+      "block": 3,
+      "elapsedMs": 795.0212979999997,
+      "cpuUserMs": 850.716,
+      "cpuSystemMs": 57.64,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "timed",
+      "block": 3,
+      "elapsedMs": 574.4139119999963,
+      "cpuUserMs": 571.658,
+      "cpuSystemMs": 4.683,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "timed",
+      "block": 4,
+      "elapsedMs": 2232.101923999995,
+      "cpuUserMs": 2652.412,
+      "cpuSystemMs": 98.025,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "timed",
+      "block": 4,
+      "elapsedMs": 547.8959019999966,
+      "cpuUserMs": 544.513,
+      "cpuSystemMs": 3.441,
+      "checksum": 17797303
+    },
+    {
+      "arm": "A",
+      "phase": "timed",
+      "block": 4,
+      "elapsedMs": 866.0740219999934,
+      "cpuUserMs": 945.171,
+      "cpuSystemMs": 23.26,
+      "checksum": 17797303
+    },
+    {
+      "arm": "B",
+      "phase": "timed",
+      "block": 5,
+      "elapsedMs": 720.743226999999,
+      "cpuUserMs": 678.255,
+      "cpuSystemMs": 12.791,
+      "checksum": 17797303
+    },
+    {
+      "arm": "A",
+      "phase": "timed",
+      "block": 5,
+      "elapsedMs": 1006.956975000001,
+      "cpuUserMs": 1057.466,
+      "cpuSystemMs": 22.869,
+      "checksum": 17797303
+    },
+    {
+      "arm": "C",
+      "phase": "timed",
+      "block": 5,
+      "elapsedMs": 954.8433460000015,
+      "cpuUserMs": 1029.684,
+      "cpuSystemMs": 32.648,
+      "checksum": 17797303
+    }
+  ],
+  "uniqueMediaPaths": 146570,
+  "imagePathSha256": "089bb7071cae03c76174adaf5ffa65c6d4706434687a2453b1fe7a6c6f44f690",
+  "comparisons": {
+    "BA": {
+      "pairs": [
+        {
+          "block": 0,
+          "numeratorMs": 751.5814129999999,
+          "denominatorMs": 1180.521013999998,
+          "changePercent": -36.33477048804139
+        },
+        {
+          "block": 1,
+          "numeratorMs": 493.27713799999765,
+          "denominatorMs": 1106.935145000003,
+          "changePercent": -55.43757552299993
+        },
+        {
+          "block": 2,
+          "numeratorMs": 1162.3419790000007,
+          "denominatorMs": 730.8232210000024,
+          "changePercent": 59.04557293753492
+        },
+        {
+          "block": 3,
+          "numeratorMs": 574.4139119999963,
+          "denominatorMs": 807.2258289999991,
+          "changePercent": -28.84098955163673
+        },
+        {
+          "block": 4,
+          "numeratorMs": 547.8959019999966,
+          "denominatorMs": 866.0740219999934,
+          "changePercent": -36.737982195244655
+        },
+        {
+          "block": 5,
+          "numeratorMs": 720.743226999999,
+          "denominatorMs": 1006.956975000001,
+          "changePercent": -28.423632300675173
+        }
+      ],
+      "pairedMedianPercent": -32.58788001983906,
+      "equalWorkPercent": -25.414994002760004
+    },
+    "BC": {
+      "pairs": [
+        {
+          "block": 0,
+          "numeratorMs": 751.5814129999999,
+          "denominatorMs": 1078.158150000003,
+          "changePercent": -30.29024424663508
+        },
+        {
+          "block": 1,
+          "numeratorMs": 493.27713799999765,
+          "denominatorMs": 890.9296219999997,
+          "changePercent": -44.63343390775732
+        },
+        {
+          "block": 2,
+          "numeratorMs": 1162.3419790000007,
+          "denominatorMs": 872.6325140000008,
+          "changePercent": 33.19948092147293
+        },
+        {
+          "block": 3,
+          "numeratorMs": 574.4139119999963,
+          "denominatorMs": 795.0212979999997,
+          "changePercent": -27.74861334595383
+        },
+        {
+          "block": 4,
+          "numeratorMs": 547.8959019999966,
+          "denominatorMs": 2232.101923999995,
+          "changePercent": -75.45381346125313
+        },
+        {
+          "block": 5,
+          "numeratorMs": 720.743226999999,
+          "denominatorMs": 954.8433460000015,
+          "changePercent": -24.517123147025842
+        }
+      ],
+      "pairedMedianPercent": -29.019428796294456,
+      "equalWorkPercent": -37.71323828395613
+    },
+    "CA": {
+      "pairs": [
+        {
+          "block": 0,
+          "numeratorMs": 1078.158150000003,
+          "denominatorMs": 1180.521013999998,
+          "changePercent": -8.670990417456082
+        },
+        {
+          "block": 1,
+          "numeratorMs": 890.9296219999997,
+          "denominatorMs": 1106.935145000003,
+          "changePercent": -19.51383728086462
+        },
+        {
+          "block": 2,
+          "numeratorMs": 872.6325140000008,
+          "denominatorMs": 730.8232210000024,
+          "changePercent": 19.404048602336065
+        },
+        {
+          "block": 3,
+          "numeratorMs": 795.0212979999997,
+          "denominatorMs": 807.2258289999991,
+          "changePercent": -1.51191036777385
+        },
+        {
+          "block": 4,
+          "numeratorMs": 2232.101923999995,
+          "denominatorMs": 866.0740219999934,
+          "changePercent": 157.7264607066129
+        },
+        {
+          "block": 5,
+          "numeratorMs": 954.8433460000015,
+          "denominatorMs": 1006.956975000001,
+          "changePercent": -5.175358063337255
+        }
+      ],
+      "pairedMedianPercent": -3.3436342155555523,
+      "equalWorkPercent": 19.744555572277143
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+    "schemaVersion": 1,
+    "scope": "Independent recomputation of archived evidence consistency; no new corpus import or timing acquisition.",
+    "complete": true,
+    "sourceTrees": {
+        "76ca0a7e50fe99ef36546de83d75bd4f0d1f9719": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+        "2af6593a6e3631cbddff736bf2280f0fd40c2a69": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+        "f4994991ae6d5caa9f4f732d276e2c7a4efcc0a9": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+    },
+    "recordedFileHashesVerified": 4,
+    "warmupOrderVerified": "ABC",
+    "timedOrdersVerified": [
+        "ABC",
+        "BCA",
+        "CAB",
+        "ACB",
+        "CBA",
+        "BAC"
+    ],
+    "pairedTimingRecomputed": {
+        "BA": {
+            "pairedMedianPercent": -32.58788001983906,
+            "equalWorkPercent": -25.414994002760004
+        },
+        "BC": {
+            "pairedMedianPercent": -29.019428796294456,
+            "equalWorkPercent": -37.71323828395613
+        },
+        "CA": {
+            "pairedMedianPercent": -3.3436342155555523,
+            "equalWorkPercent": 19.744555572277143
+        }
+    },
+    "allTimedAndWarmupChecksumsEqual": true,
+    "nativeGroupRowsSum": 6648310,
+    "nativeGroupMediaRowsSum": 146725,
+    "sourceBankCount": 665,
+    "nativeFusedFallbacks": 0,
+    "measuredParserReconstructedByIndentationOnly": true,
+    "fullBrowserImportTimingQualified": false,
+    "wholeProcessMemoryQualified": false
+}

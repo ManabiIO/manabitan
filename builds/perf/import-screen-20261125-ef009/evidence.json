@@ -1,0 +1,4023 @@
+{
+  "schemaVersion": 1,
+  "recordedDate": "2026-11-25",
+  "stage": "single-host-screen",
+  "studyPullRequest": "https://github.com/ManabiIO/manabitan/pull/911",
+  "workflowRun": {
+    "id": 45644488882,
+    "attempt": 1,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/45644488882",
+    "headCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+    "headTree": "3418f3b5f3daffed97b10dd19cd6a2070d51d83f"
+  },
+  "sources": {
+    "protocol": {
+      "path": "protocol.json",
+      "originalPath": "dev/perf/import-qualification-ef009.json",
+      "bytes": 3416,
+      "sha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8"
+    },
+    "runner": {
+      "path": "executed-runner.py.txt",
+      "originalPath": "dev/perf/qualify-import-ef009.py",
+      "bytes": 17984,
+      "sha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0"
+    },
+    "workflow": {
+      "path": "executed-workflow.yml.txt",
+      "originalPath": ".github/workflows/import-qualification-ef009.yml",
+      "bytes": 2803,
+      "sha256": "0824aff36c9994997bca2f70027a992a9311ad0c4769b148e075288307bce342"
+    },
+    "aggregation": {
+      "path": "aggregate-screen-evidence.py.txt",
+      "bytes": 23686,
+      "sha256": "e3547fa7e0a8d903ba2073948a19360cd6432a9b12ad184d5b9564409931e007",
+      "role": "Post-study aggregation and archive verification; not the executed measurement runner"
+    }
+  },
+  "protocol": {
+    "schemaVersion": 1,
+    "base": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "browserVersion": "153.0.8010.12",
+    "orders": [
+      [
+        "ABC",
+        "BCA",
+        "CAB",
+        "ACB",
+        "CBA",
+        "BAC"
+      ],
+      [
+        "BAC",
+        "CBA",
+        "ACB",
+        "CAB",
+        "BCA",
+        "ABC"
+      ]
+    ],
+    "warmups": [
+      "ABC",
+      "CBA"
+    ],
+    "thresholds": {
+      "targetMinimumReductionPercent": 5,
+      "targetMinimumFasterPairs": 5,
+      "nonTargetMaximumRegressionPercent": 3
+    },
+    "criterion": {
+      "primary": "Browser monotonic file-input change to visible import completion",
+      "target": "Screen requires at least 5% median paired reduction against both A and identical C, and at least five of six faster pairs against each control on the single host for this candidate and dictionary",
+      "nonTarget": "Screen requires no more than 3% median paired regression against either control on the single host; report every result even if this screen fails",
+      "correctness": "Every import passes original production-default validation; all 72 public lookup hashes match across arms, passes and restart; full media payload verification in A/B after timed observations on replica 0",
+      "observations": "All scheduled observations retained; no exclusions, replacements or outcome-dependent reruns; warmups and validation observations excluded from timing by schedule",
+      "memory": "Timing observations have process sampling disabled. Changes affecting retained buffers require a separate prospectively specified process-tree memory qualification",
+      "qualification": "One independent host per candidate and dictionary. A passing screen requires independent replication before claiming qualified performance."
+    },
+    "candidates": {
+      "integer-fields": {
+        "commit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+        "targetDictionaries": [
+          "jmdict"
+        ],
+        "packagedDelta": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/899"
+      },
+      "structured-metadata-keys": {
+        "commit": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+        "targetDictionaries": [
+          "jitendex"
+        ],
+        "packagedDelta": [
+          "js/dictionary/wasm/term-bank-parser.c",
+          "lib/term-bank-parser.wasm"
+        ],
+        "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/895",
+        "sourceProvenance": "Existing concurrent candidate; this work measures its frozen runtime without authoring or updating that runtime."
+      },
+      "single-image-projection": {
+        "commit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+        "targetDictionaries": [
+          "vndb"
+        ],
+        "packagedDelta": [
+          "js/dictionary/term-bank-wasm-parser.js",
+          "js/dictionary/validated-image-path-projector.js"
+        ],
+        "sourcePullRequest": "https://github.com/ManabiIO/manabitan/pull/905"
+      }
+    },
+    "stage": "single-host-screen",
+    "replicasPerCandidateDictionary": 1
+  },
+  "expectedCellCount": 9,
+  "collectedCellCount": 9,
+  "collectionComplete": true,
+  "completeCellCount": 9,
+  "missingCells": [],
+  "candidateDecisions": {
+    "integer-fields": {
+      "allThreeDictionaryScreensComplete": true,
+      "allProspectiveScreensPass": false,
+      "failedScreenDictionaries": [
+        "jmdict"
+      ],
+      "promotionDecision": "hold",
+      "reason": "The prospective performance screen failed for: jmdict. This study provides one runner allocation per candidate/dictionary. Independent replication and applicable remaining memory/storage/lookup/reliability gates remain required."
+    },
+    "structured-metadata-keys": {
+      "allThreeDictionaryScreensComplete": true,
+      "allProspectiveScreensPass": false,
+      "failedScreenDictionaries": [
+        "jitendex"
+      ],
+      "promotionDecision": "hold",
+      "reason": "The prospective performance screen failed for: jitendex. This study provides one runner allocation per candidate/dictionary. Independent replication and applicable remaining memory/storage/lookup/reliability gates remain required."
+    },
+    "single-image-projection": {
+      "allThreeDictionaryScreensComplete": true,
+      "allProspectiveScreensPass": false,
+      "failedScreenDictionaries": [
+        "vndb"
+      ],
+      "promotionDecision": "hold",
+      "reason": "The prospective performance screen failed for: vndb. This study provides one runner allocation per candidate/dictionary. Independent replication and applicable remaining memory/storage/lookup/reliability gates remain required."
+    }
+  },
+  "crossCellSemanticConsistency": {
+    "jmdict": {
+      "completeCandidateCells": 3,
+      "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+      "samePublicResultsAcrossCompleteCells": true,
+      "sameLockedFixtureAcrossCompleteCells": true
+    },
+    "jitendex": {
+      "completeCandidateCells": 3,
+      "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+      "samePublicResultsAcrossCompleteCells": true,
+      "sameLockedFixtureAcrossCompleteCells": true
+    },
+    "vndb": {
+      "completeCandidateCells": 3,
+      "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+      "samePublicResultsAcrossCompleteCells": true,
+      "sameLockedFixtureAcrossCompleteCells": true
+    }
+  },
+  "runnerIsolation": {
+    "assignedRunnerIds": [
+      1000087762,
+      1000087779,
+      1000087784,
+      1000087807,
+      1000087819,
+      1000087842,
+      1000087846,
+      1000087878,
+      1000087880
+    ],
+    "distinctRunnerAssignmentsForAllNineCells": true,
+    "physicalHostIdentityRecorded": false,
+    "notice": "Actions records distinct hosted runner assignments. The benchmark does not record physical-host IDs, hostnames or boot IDs, and this does not establish physical-host independence or multi-host replication of any cell."
+  },
+  "indexes": {
+    "retrieved-artifacts.json": {
+      "path": "retrieved-artifacts.json",
+      "bytes": 11034,
+      "sha256": "1e41178011930d25a4e368c674f91e4e338f86214c4413389738187a035a18c4"
+    },
+    "full-evidence-index.json": {
+      "path": "full-evidence-index.json",
+      "bytes": 322455,
+      "sha256": "e1588a6210cd9ebcf007150569bbb9199873a7b768ba6043e0dafe2bf6ff4b72"
+    },
+    "workflow-jobs.json": {
+      "path": "workflow-jobs.json",
+      "bytes": 39057,
+      "sha256": "2b678e9a7f53a5abc36da544b8b9c596a493abb021a68783ad8687044095e19d"
+    },
+    "workflow-artifacts.json": {
+      "path": "workflow-artifacts.json",
+      "bytes": 14895,
+      "sha256": "0bd70151b6b45fa5778495f81db9f8c91b8adbef557ce6973f3f2aeaeaa4828b"
+    },
+    "workflow-run.json": {
+      "path": "workflow-run.json",
+      "bytes": 1868,
+      "sha256": "75b50b7b617d2ecb76896f6b36b1538acceb0f0be473a80ba46e02046372951e"
+    }
+  },
+  "scaffoldCiFailure": {
+    "workflowRunId": 45644489031,
+    "jobId": 139311666547,
+    "job": "JSON",
+    "conclusion": "failure",
+    "failingTest": "JSON validation > File must exist in json.json: dev/perf/import-qualification-ef009.json",
+    "testCounts": {
+      "failed": 1,
+      "passed": 154
+    },
+    "diagnosis": "The temporary protocol JSON was not registered in test/data/json.json. The failure is registry bookkeeping, not a JSON parse, schema, or runtime import failure.",
+    "sourceMutationDuringStudy": false,
+    "log": {
+      "path": "scaffold-ci-json-job-139311666547.log.gz",
+      "encoding": "gzip",
+      "originalBytes": 48298,
+      "originalSha256": "6ebf02d6be00a4e3e6ecdc1d376e3ca7c8d42b86a2bfbabbbca2f8bbd05656e9",
+      "compressedBytes": 9301,
+      "compressedSha256": "ee6a9cd2bc0d7388e7aa696b90360b2a09b86ebc64dd452bf2358997e2673d1c"
+    },
+    "localRegistryFix": {
+      "commit": "3b369caa31d36bff8e6bb718efd5a0bad854f95e",
+      "changedPath": "test/data/json.json",
+      "change": "Register dev/perf/import-qualification-ef009.json using the existing perf-protocol ignore convention",
+      "command": "npm run test:json",
+      "nodeVersion": "v22.22.0",
+      "exitCode": 0,
+      "testsPassed": 155,
+      "originalExecutedProtocolRunnerWorkflowUnchanged": true,
+      "publishedOrMeasurementRerunByThisAgent": false,
+      "log": {
+        "path": "registry-fix-json-gate.log.gz",
+        "originalBytes": 2845,
+        "originalSha256": "b66562728c6885ccefd3f9f6a0109badc2583140f0c72767ae3d46bd2bf32647",
+        "compressedBytes": 884,
+        "compressedSha256": "2a563a4acf1740a6493961f674f3b5c61cbbd70245c6eccf85c45b8a7601943b"
+      }
+    }
+  },
+  "independentAudit": {
+    "path": "independent-audit.json",
+    "bytes": 64518,
+    "sha256": "3c256f93a30addf7815db848a9204a0c9286c6d85c54bb025cbe131b44c5fc69",
+    "runnerPath": "independent-audit.py.txt",
+    "runnerSha256": "7259c6f64a1dfb6193df5cecc0f6f0baf8a7172e4c06ed36013c63ecfe0ecf6a",
+    "allReferencedInputHashesVerified": true,
+    "totals": {
+      "successfulObservations": 207,
+      "semanticProofs": 207,
+      "timedObservations": 162,
+      "publicLookupObservations": 14904,
+      "fullMediaValidationObservations": 18,
+      "targetGatePasses": 0,
+      "nonTargetGatePasses": 6
+    }
+  },
+  "cells": [
+    {
+      "candidate": "integer-fields",
+      "dictionary": "jitendex",
+      "replica": 0,
+      "role": "non-target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665751,
+        "name": "integer-fields jitendex host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087880,
+        "runner_name": "GitHub Actions 1000087880",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:40:09Z",
+        "completed_at": "2026-11-25T15:45:20Z"
+      },
+      "execution": {
+        "candidate": "integer-fields",
+        "dictionary": "jitendex",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "93278a0fa182b08ed33a84a01cccb66e3ce7551b0db1f66fdcccf617d7506a0c",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+          "sourceTree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5",
+          "packageSha256": "3d571fda097ab7a844bbe141479826797d29099240c18314d37c108bd39bd068",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "93278a0fa182b08ed33a84a01cccb66e3ce7551b0db1f66fdcccf617d7506a0c",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "packageDelta": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+          "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 436555,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 236,
+            "totalBytes": 4992155,
+            "files": 236,
+            "bytes": 4992155,
+            "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+          "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 436555,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 236,
+            "totalBytes": 4992155,
+            "files": 236,
+            "bytes": 4992155,
+            "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15039486089,
+          "name": "import-screen-summary-ef009-integer-fields-jitendex-0",
+          "size_in_bytes": 5095,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039486089",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039486089/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:45:13Z",
+          "expires_at": "2026-12-09T15:45:12Z",
+          "updated_at": "2026-11-25T15:45:13Z",
+          "digest": "sha256:266173e81222c9bcba15502e59dffae3b6abb7399c08eaed56daff285cd1e5fd",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/integer-fields-jitendex-0.json.gz",
+        "originalBytes": 36927,
+        "originalSha256": "295efeffc16ba6923ad21bc2a57a293646d6fe226b24a52f30cd38e1d8186455",
+        "compressedBytes": 4984,
+        "compressedSha256": "5c2017497cb33e3317e8b11447e7d95091686ea9ee22a4ae5ad4300435a0774c",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15039655653,
+        "name": "import-screen-ef009-integer-fields-jitendex-0",
+        "size_in_bytes": 34394731,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039655653",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039655653/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:45:16Z",
+        "expires_at": "2026-12-09T15:45:13Z",
+        "updated_at": "2026-11-25T15:45:16Z",
+        "digest": "sha256:47a2d5e4306cfc120f3c160469b0dcfa629038c01fc76997e52f541df3e5cd89",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "non-target",
+        "passes": true
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 1619.2999999999884,
+            "B": 1582.7999999999884,
+            "C": 1588.1000000000058
+          },
+          "BvsA": -2.2540603964676276,
+          "BvsC": -0.33373213273832913,
+          "CvsA": -1.926758475883572
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 1563.6999999999825,
+            "C": 1598.2999999999884,
+            "A": 1584.6999999999825
+          },
+          "BvsA": -1.3251719568372677,
+          "BvsC": -2.164800100106745,
+          "CvsA": 0.8582066006187938
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 1585.1999999999825,
+            "A": 1603.1999999999825,
+            "B": 1563.8000000000175
+          },
+          "BvsA": -2.4575848303371672,
+          "BvsC": -1.349987383293294,
+          "CvsA": -1.1227544910179743
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 1613.6000000000058,
+            "C": 1594.6000000000058,
+            "B": 1572.3999999999942
+          },
+          "BvsA": -2.553296975707209,
+          "BvsC": -1.3921986705137113,
+          "CvsA": -1.1774913237481366
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 1600.6000000000058,
+            "B": 1590.5999999999767,
+            "A": 1621.3999999999942
+          },
+          "BvsA": -1.8995929443701431,
+          "BvsC": -0.6247657128594986,
+          "CvsA": -1.2828419884043707
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 1636.4000000000233,
+            "A": 1605.6999999999534,
+            "C": 1606
+          },
+          "BvsA": 1.911938718320405,
+          "BvsC": 1.892901618930476,
+          "CvsA": 0.01868344024702484
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/integer-fields-jitendex-0.tar.gz",
+        "archiveBytes": 894039,
+        "archiveSha256": "9e3b284ab82cbb55cfd8fe278dd63409f41b8e8c07aa9528f17019d4763c7c4f",
+        "originalArtifact": {
+          "id": 15039655653,
+          "name": "import-screen-ef009-integer-fields-jitendex-0",
+          "size_in_bytes": 34394731,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039655653",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039655653/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:45:16Z",
+          "expires_at": "2026-12-09T15:45:13Z",
+          "updated_at": "2026-11-25T15:45:16Z",
+          "digest": "sha256:47a2d5e4306cfc120f3c160469b0dcfa629038c01fc76997e52f541df3e5cd89",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 7763 64-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            67466332
+          ],
+          "B": [
+            67466332
+          ],
+          "C": [
+            67466332
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16791593
+        },
+        "packageZipDeltaBytes": 607,
+        "packageZipDeltaPercent": 0.0036150348764474316,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": -2.0768266704188854,
+        "BvsC": -0.9873765480763963,
+        "CvsA": -1.1501229073830554
+      },
+      "fasterPairs": {
+        "BvsA": 5,
+        "BvsC": 5
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 9647.899999999907,
+        "B": 9509.699999999983,
+        "C": 9572.799999999988
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": -1.4324360741708064,
+        "BvsC": -0.6591592846398764,
+        "CvsA": -0.7784077363977571
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -2.553296975707209,
+            1.911938718320405
+          ],
+          "worstPairPercent": 1.911938718320405,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -2.505440903022188,
+            0.29338338074156867
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -2.164800100106745,
+            1.892901618930476
+          ],
+          "worstPairPercent": 1.892901618930476,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.7784993853102282,
+            0.7795847430960734
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -1.926758475883572,
+            0.8582066006187938
+          ],
+          "worstPairPercent": 0.8582066006187938,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.6048002321439714,
+            0.43844502043290934
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "integer-fields",
+      "dictionary": "jmdict",
+      "replica": 0,
+      "role": "target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665680,
+        "name": "integer-fields jmdict host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087846,
+        "runner_name": "GitHub Actions 1000087846",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:38:00Z",
+        "completed_at": "2026-11-25T15:42:43Z"
+      },
+      "execution": {
+        "candidate": "integer-fields",
+        "dictionary": "jmdict",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "ccd9aa92fee0344f25da2bd7852a4d3b40627c453d77d48e925e9d6c974da958",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+          "sourceTree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5",
+          "packageSha256": "69959bf66f589b313749e4e2f788ad74eb430c7cc4eaa8ec495fa7cdffbde0d8",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "ccd9aa92fee0344f25da2bd7852a4d3b40627c453d77d48e925e9d6c974da958",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "packageDelta": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+          "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 528299,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 0,
+            "totalBytes": 0,
+            "files": 0,
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+          "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 528299,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 0,
+            "totalBytes": 0,
+            "files": 0,
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15039191309,
+          "name": "import-screen-summary-ef009-integer-fields-jmdict-0",
+          "size_in_bytes": 4907,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039191309",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039191309/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:42:35Z",
+          "expires_at": "2026-12-09T15:42:34Z",
+          "updated_at": "2026-11-25T15:42:35Z",
+          "digest": "sha256:a0a2d2715381a765d04072c1e800a871ef8e409b28cce4131911e24c8b9c30ec",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/integer-fields-jmdict-0.json.gz",
+        "originalBytes": 35859,
+        "originalSha256": "0d68fb3dff75186835aba7a9e1fc81fa2f2d85587127695555511fbc4853b31a",
+        "compressedBytes": 4782,
+        "compressedSha256": "db32944420549a89ce4e82a551b8e74ac6040b38313b13439b8cfc5ad3909a46",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15038926711,
+        "name": "import-screen-ef009-integer-fields-jmdict-0",
+        "size_in_bytes": 34385374,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038926711",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038926711/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:42:39Z",
+        "expires_at": "2026-12-09T15:42:36Z",
+        "updated_at": "2026-11-25T15:42:39Z",
+        "digest": "sha256:365e7b32343c62c211b7653ae7ad063bda23c2074d6e50f72f4a496d87665a11",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "target",
+        "passes": false
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 930.6000000000058,
+            "B": 919.8999999999942,
+            "C": 947
+          },
+          "BvsA": -1.149795830648137,
+          "BvsC": -2.8616684266109638,
+          "CvsA": 1.7623038899628352
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 937.7000000000116,
+            "C": 934.6000000000058,
+            "A": 1146.1000000000058
+          },
+          "BvsA": -18.18340458947676,
+          "BvsC": 0.331692702761166,
+          "CvsA": -18.453887095366806
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 955.3000000000175,
+            "A": 949,
+            "B": 955.2000000000116
+          },
+          "BvsA": 0.6533192834574875,
+          "BvsC": -0.010467915838563435,
+          "CvsA": 0.663856691255793
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 961.5,
+            "C": 944.3999999999942,
+            "B": 921.2999999999884
+          },
+          "BvsA": -4.180967238690759,
+          "BvsC": -2.445997458704574,
+          "CvsA": -1.7784711388461605
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 921.0999999999767,
+            "B": 926.6000000000058,
+            "A": 952.6000000000058
+          },
+          "BvsA": -2.7293722443837765,
+          "BvsC": 0.5971121485212505,
+          "CvsA": -3.306739449929552
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 925.8999999999942,
+            "A": 909.4000000000233,
+            "C": 958.0999999999767
+          },
+          "BvsA": 1.814383109739448,
+          "BvsC": -3.360818286189682,
+          "CvsA": 5.355179239053465
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/integer-fields-jmdict-0.tar.gz",
+        "archiveBytes": 883972,
+        "archiveSha256": "1a2344c8db6484b73c5ece14e57e988b90f89a780b3477b19f1f5cf23790de28",
+        "originalArtifact": {
+          "id": 15038926711,
+          "name": "import-screen-ef009-integer-fields-jmdict-0",
+          "size_in_bytes": 34385374,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038926711",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038926711/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:42:39Z",
+          "expires_at": "2026-12-09T15:42:36Z",
+          "updated_at": "2026-11-25T15:42:39Z",
+          "digest": "sha256:365e7b32343c62c211b7653ae7ad063bda23c2074d6e50f72f4a496d87665a11",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 7763 64-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            43520477
+          ],
+          "B": [
+            43520477
+          ],
+          "C": [
+            43520477
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16791593
+        },
+        "packageZipDeltaBytes": 607,
+        "packageZipDeltaPercent": 0.0036150348764474316,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": -1.9395840375159568,
+        "BvsC": -1.2282326872715688,
+        "CvsA": -0.5573072237951837
+      },
+      "fasterPairs": {
+        "BvsA": 4,
+        "BvsC": 4
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 5849.200000000041,
+        "B": 5586.600000000006,
+        "C": 5660.499999999971
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": -4.4895028379955075,
+        "BvsC": -1.3055383800011588,
+        "CvsA": -3.226082199276281
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -18.18340458947676,
+            1.814383109739448
+          ],
+          "worstPairPercent": 1.814383109739448,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -11.182185914083759,
+            1.2338511965984678
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -3.360818286189682,
+            0.5971121485212505
+          ],
+          "worstPairPercent": 0.5971121485212505,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -3.1112433564003226,
+            0.46440242564120826
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -18.453887095366806,
+            5.355179239053465
+          ],
+          "worstPairPercent": 5.355179239053465,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -10.880313272648179,
+            3.55874156450815
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "integer-fields",
+      "dictionary": "vndb",
+      "replica": 0,
+      "role": "non-target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665813,
+        "name": "integer-fields vndb host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087807,
+        "runner_name": "GitHub Actions 1000087807",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:34:49Z",
+        "completed_at": "2026-11-25T15:51:43Z"
+      },
+      "execution": {
+        "candidate": "integer-fields",
+        "dictionary": "vndb",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "53e6d828ddaa1f9c6b7f00cbee487eeadd410109e64aefa9e74e06d8f0bdb629",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "6d3d06408280e0f5d4437186c07b1d93429e2180",
+          "sourceTree": "f92b9b5663b0b7cd4f3c525cfc2f11483ff852a5",
+          "packageSha256": "ce316d9ee1934336908d92e7a5dbc570ae9f73fca7e98f545134e42ded3fb9a2",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "53e6d828ddaa1f9c6b7f00cbee487eeadd410109e64aefa9e74e06d8f0bdb629",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      },
+      "packageDelta": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+          "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 6648310,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 146570,
+            "totalBytes": 188131284,
+            "files": 146570,
+            "bytes": 188131284,
+            "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+          "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 6648310,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 146570,
+            "totalBytes": 188131284,
+            "files": 146570,
+            "bytes": 188131284,
+            "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15039646568,
+          "name": "import-screen-summary-ef009-integer-fields-vndb-0",
+          "size_in_bytes": 5061,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039646568",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039646568/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:51:36Z",
+          "expires_at": "2026-12-09T15:51:35Z",
+          "updated_at": "2026-11-25T15:51:36Z",
+          "digest": "sha256:6b05c4388b7aa79093cb7aae0cd9703e34d2168ad8d125a3954914f5f3add029",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/integer-fields-vndb-0.json.gz",
+        "originalBytes": 36422,
+        "originalSha256": "b70f4d94b8f877dbd3537a2d6e17eed07ceed34628be3890ba84859443102a24",
+        "compressedBytes": 4950,
+        "compressedSha256": "3fd5a18d4da36974672b78b70837b430bf97166cbe826c81914a6f51f8aefb95",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15039267652,
+        "name": "import-screen-ef009-integer-fields-vndb-0",
+        "size_in_bytes": 34411202,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039267652",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039267652/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:51:39Z",
+        "expires_at": "2026-12-09T15:51:36Z",
+        "updated_at": "2026-11-25T15:51:39Z",
+        "digest": "sha256:66626e676c87bb097142af69275813ba9ae2ce6724ffde17e8b44c95a7c1320c",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "non-target",
+        "passes": true
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 4731.8000000000175,
+            "B": 4789.899999999994,
+            "C": 4711.5
+          },
+          "BvsA": 1.2278625470217852,
+          "BvsC": 1.6640135837842296,
+          "CvsA": -0.429012215225022
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 4733.700000000012,
+            "C": 5106.200000000012,
+            "A": 4694.100000000035
+          },
+          "BvsA": 0.8436121940303076,
+          "BvsC": -7.295053072735092,
+          "CvsA": 8.779105685860422
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 5020.399999999965,
+            "A": 4536.399999999965,
+            "B": 4539.299999999988
+          },
+          "BvsA": 0.06392734326829963,
+          "BvsC": -9.582901760815476,
+          "CvsA": 10.669253152279424
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 4633.900000000023,
+            "C": 4506.700000000012,
+            "B": 4417.5
+          },
+          "BvsA": -4.669932454304626,
+          "BvsC": -1.9792753012184416,
+          "CvsA": -2.7449880230477786
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 4470.099999999977,
+            "B": 4834.700000000012,
+            "A": 5195
+          },
+          "BvsA": -6.935514918190345,
+          "BvsC": 8.15641708239272,
+          "CvsA": -13.953801732435478
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 5266.200000000012,
+            "A": 4529.099999999977,
+            "C": 5087.599999999977
+          },
+          "BvsA": 16.27475657415467,
+          "BvsC": 3.5104961081853014,
+          "CvsA": 12.33136826301038
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/integer-fields-vndb-0.tar.gz",
+        "archiveBytes": 908929,
+        "archiveSha256": "cdf307347729ab9066576344570190c1a7686fc908d8689e3ea87558f3d01796",
+        "originalArtifact": {
+          "id": 15039267652,
+          "name": "import-screen-ef009-integer-fields-vndb-0",
+          "size_in_bytes": 34411202,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039267652",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039267652/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:51:39Z",
+          "expires_at": "2026-12-09T15:51:36Z",
+          "updated_at": "2026-11-25T15:51:39Z",
+          "digest": "sha256:66626e676c87bb097142af69275813ba9ae2ce6724ffde17e8b44c95a7c1320c",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            609553611
+          ],
+          "B": [
+            609553611
+          ],
+          "C": [
+            609553611
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16791593
+        },
+        "packageZipDeltaBytes": 607,
+        "packageZipDeltaPercent": 0.0036150348764474316,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": 0.45376976864930363,
+        "BvsC": -0.15763085871710603,
+        "CvsA": 4.1750467353177
+      },
+      "fasterPairs": {
+        "BvsA": 2,
+        "BvsC": 3
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 28320.300000000017,
+        "B": 28581.300000000017,
+        "C": 28902.49999999994
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": 0.921600406775358,
+        "BvsC": -1.111322549952165,
+        "CvsA": 2.0557691832357783
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -6.935514918190345,
+            16.27475657415467
+          ],
+          "worstPairPercent": 16.27475657415467,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -5.802723686247486,
+            8.751309560588227
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -9.582901760815476,
+            8.15641708239272
+          ],
+          "worstPairPercent": 8.15641708239272,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -8.438977416775284,
+            5.833456595289011
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -13.953801732435478,
+            12.33136826301038
+          ],
+          "worstPairPercent": 12.33136826301038,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -8.349394877741629,
+            11.500310707644902
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "single-image-projection",
+      "dictionary": "jitendex",
+      "replica": 0,
+      "role": "non-target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665786,
+        "name": "single-image-projection jitendex host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087842,
+        "runner_name": "GitHub Actions 1000087842",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:37:37Z",
+        "completed_at": "2026-11-25T15:42:12Z"
+      },
+      "execution": {
+        "candidate": "single-image-projection",
+        "dictionary": "jitendex",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "084d7124bd5f5e2c811762fae8dd17e7a5b72f6e7d4e2f0f44a457e05c1b7d60",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+          "sourceTree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+          "packageSha256": "c102a1b40dabbda2d3b29d8b3c8059868148e73c97938ccf059bc0169693dfa5",
+          "memberCount": 552,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "084d7124bd5f5e2c811762fae8dd17e7a5b72f6e7d4e2f0f44a457e05c1b7d60",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "packageDelta": [
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/validated-image-path-projector.js"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+          "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 436555,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 236,
+            "totalBytes": 4992155,
+            "files": 236,
+            "bytes": 4992155,
+            "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+          "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 436555,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 236,
+            "totalBytes": 4992155,
+            "files": 236,
+            "bytes": 4992155,
+            "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15037208841,
+          "name": "import-screen-summary-ef009-single-image-projection-jitendex-0",
+          "size_in_bytes": 5115,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037208841",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037208841/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:42:06Z",
+          "expires_at": "2026-12-09T15:42:05Z",
+          "updated_at": "2026-11-25T15:42:06Z",
+          "digest": "sha256:25c14dcfc8486981931a2750a26323c0f8dc8d928d1704e07fa7a1197c6b3248",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/single-image-projection-jitendex-0.json.gz",
+        "originalBytes": 36952,
+        "originalSha256": "b754310b599c3011d43b1f4a0ab6237932ae2f02a7cb35691aae964e1c2910a3",
+        "compressedBytes": 5007,
+        "compressedSha256": "0222cf7331b119b81155c3e4eb0da5e9e29f5e76ec282677fb31ea708a2f8b04",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15039530444,
+        "name": "import-screen-ef009-single-image-projection-jitendex-0",
+        "size_in_bytes": 34389905,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039530444",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039530444/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:42:08Z",
+        "expires_at": "2026-12-09T15:42:06Z",
+        "updated_at": "2026-11-25T15:42:08Z",
+        "digest": "sha256:cbc91743688d4f75e92008d2ad25ae332b214687deb6dafa7559ec1010ee8c0d",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "non-target",
+        "passes": true
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 2274.1999999999825,
+            "B": 1358.2000000000116,
+            "C": 1446.9000000000233
+          },
+          "BvsA": -40.27789992085032,
+          "BvsC": -6.130347639782308,
+          "CvsA": -36.3776272975097
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 1355.3999999999942,
+            "C": 1361.8999999999942,
+            "A": 1368.0999999999767
+          },
+          "BvsA": -0.9282947152973287,
+          "BvsC": -0.47727439606432,
+          "CvsA": -0.4531832468374075
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 1354.7999999999884,
+            "A": 1360.6000000000058,
+            "B": 1362.8999999999942
+          },
+          "BvsA": 0.16904306923331003,
+          "BvsC": 0.5978742249783009,
+          "CvsA": -0.4262825224178646
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 1419.1999999999825,
+            "C": 1402.3999999999942,
+            "B": 1356.6999999999534
+          },
+          "BvsA": -4.403889515221948,
+          "BvsC": -3.258699372507201,
+          "CvsA": -1.1837655016902926
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 1324.5,
+            "B": 1346.4000000000233,
+            "A": 1295.0999999999767
+          },
+          "BvsA": 3.9610840861746155,
+          "BvsC": 1.653454133637089,
+          "CvsA": 2.2700949733629683
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 1438.7999999999884,
+            "A": 1353.9000000000233,
+            "C": 1269.100000000035
+          },
+          "BvsA": 6.270773321512935,
+          "BvsC": 13.371680718615453,
+          "CvsA": -6.263387251642438
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/single-image-projection-jitendex-0.tar.gz",
+        "archiveBytes": 885567,
+        "archiveSha256": "bdbb81ea260088d7b5eaa2c6bbc73360432e3ebdd52475f1b87c2143ccd463b8",
+        "originalArtifact": {
+          "id": 15039530444,
+          "name": "import-screen-ef009-single-image-projection-jitendex-0",
+          "size_in_bytes": 34389905,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039530444",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039530444/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:42:08Z",
+          "expires_at": "2026-12-09T15:42:06Z",
+          "updated_at": "2026-11-25T15:42:08Z",
+          "digest": "sha256:cbc91743688d4f75e92008d2ad25ae332b214687deb6dafa7559ec1010ee8c0d",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            67466332
+          ],
+          "B": [
+            67466332
+          ],
+          "C": [
+            67466332
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16793851
+        },
+        "packageZipDeltaBytes": 2865,
+        "packageZipDeltaPercent": 0.017062726393790584,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": -0.3796258230320093,
+        "BvsC": 0.060299914456990455,
+        "CvsA": -0.8184743742638501
+      },
+      "fasterPairs": {
+        "BvsA": 3,
+        "BvsC": 3
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 9071.099999999948,
+        "B": 8218.399999999965,
+        "C": 8159.600000000035
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": -9.400182998754147,
+        "BvsC": 0.7206235599775734,
+        "CvsA": -10.048395453692693
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -40.27789992085032,
+            6.270773321512935
+          ],
+          "worstPairPercent": 6.270773321512935,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -22.340894718036132,
+            5.115928703843775
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -6.130347639782308,
+            13.371680718615453
+          ],
+          "worstPairPercent": 13.371680718615453,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -4.694523506144755,
+            7.512567426126271
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -36.3776272975097,
+            2.2700949733629683
+          ],
+          "worstPairPercent": 2.2700949733629683,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -21.320507274576066,
+            0.9219062254725519
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "single-image-projection",
+      "dictionary": "jmdict",
+      "replica": 0,
+      "role": "non-target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665595,
+        "name": "single-image-projection jmdict host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087784,
+        "runner_name": "GitHub Actions 1000087784",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:32:36Z",
+        "completed_at": "2026-11-25T15:37:32Z"
+      },
+      "execution": {
+        "candidate": "single-image-projection",
+        "dictionary": "jmdict",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "955ac4db0ba2edb4c918ca017f0b67396aa096e481ceb1a0e2ecf7937913a263",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+          "sourceTree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+          "packageSha256": "907c848bd0425c57409b66052452b9b44643f3defcd4abe273d8ca8819eff1b8",
+          "memberCount": 552,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "955ac4db0ba2edb4c918ca017f0b67396aa096e481ceb1a0e2ecf7937913a263",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "packageDelta": [
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/validated-image-path-projector.js"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+          "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 528299,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 0,
+            "totalBytes": 0,
+            "files": 0,
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+          "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 528299,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 0,
+            "totalBytes": 0,
+            "files": 0,
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15038701018,
+          "name": "import-screen-summary-ef009-single-image-projection-jmdict-0",
+          "size_in_bytes": 4899,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038701018",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038701018/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:37:25Z",
+          "expires_at": "2026-12-09T15:37:24Z",
+          "updated_at": "2026-11-25T15:37:25Z",
+          "digest": "sha256:d08ae185a5a6004579e7ec2697d8f6e61e422f754ff4e48673b81bfb16d221cd",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/single-image-projection-jmdict-0.json.gz",
+        "originalBytes": 35931,
+        "originalSha256": "2cefc8e063fa1e994e75aaf2d5495fe344355d82e8e1cbe88c7733cea7eccb57",
+        "compressedBytes": 4773,
+        "compressedSha256": "d46ec4249275c1b08fb32f277d782ae6c36d86d04812933d5fc717030327b971",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15038376389,
+        "name": "import-screen-ef009-single-image-projection-jmdict-0",
+        "size_in_bytes": 34380710,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038376389",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038376389/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:37:28Z",
+        "expires_at": "2026-12-09T15:37:25Z",
+        "updated_at": "2026-11-25T15:37:28Z",
+        "digest": "sha256:e38b50578caf8577e35c311d03613dd98d3610a451a7ee391932bb55700106a3",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "non-target",
+        "passes": true
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 1084.8999999999942,
+            "B": 1088.5999999999913,
+            "C": 1079.9000000000087
+          },
+          "BvsA": 0.34104525762717053,
+          "BvsC": 0.8056301509382857,
+          "CvsA": -0.46087196976546396
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 1061,
+            "C": 1077.1999999999825,
+            "A": 1088.1000000000058
+          },
+          "BvsA": -2.4905799099352754,
+          "BvsC": -1.5038989973990669,
+          "CvsA": -1.0017461630386193
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 1072.1000000000058,
+            "A": 1079.6999999999825,
+            "B": 1114.1000000000058
+          },
+          "BvsA": 3.1860702046886846,
+          "BvsC": 3.9175450051301075,
+          "CvsA": -0.7038992312658032
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 1063.3000000000175,
+            "C": 1112.3000000000175,
+            "B": 1069.1999999999825
+          },
+          "BvsA": 0.5548763284082492,
+          "BvsC": -3.8748539063233167,
+          "CvsA": 4.6082949308754895
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 1159.2999999999884,
+            "B": 1082.7000000000116,
+            "A": 1045.2000000000116
+          },
+          "BvsA": 3.58783008036736,
+          "BvsC": -6.607435521433402,
+          "CvsA": 10.916570991195517
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 1070.5,
+            "A": 1082.899999999965,
+            "C": 1023
+          },
+          "BvsA": -1.145073413977793,
+          "BvsC": 4.643206256109478,
+          "CvsA": -5.531443346566345
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/single-image-projection-jmdict-0.tar.gz",
+        "archiveBytes": 875750,
+        "archiveSha256": "c8cb7aeb979a0c59497005d54a3a5559e1cd44386521846360b756c2d6120c30",
+        "originalArtifact": {
+          "id": 15038376389,
+          "name": "import-screen-ef009-single-image-projection-jmdict-0",
+          "size_in_bytes": 34380710,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038376389",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038376389/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:37:28Z",
+          "expires_at": "2026-12-09T15:37:25Z",
+          "updated_at": "2026-11-25T15:37:28Z",
+          "digest": "sha256:e38b50578caf8577e35c311d03613dd98d3610a451a7ee391932bb55700106a3",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16758394880,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            43520477
+          ],
+          "B": [
+            43520477
+          ],
+          "C": [
+            43520477
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16793851
+        },
+        "packageZipDeltaBytes": 2865,
+        "packageZipDeltaPercent": 0.017062726393790584,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": 0.44796079301770986,
+        "BvsC": -0.34913442323039057,
+        "CvsA": -0.5823856005156336
+      },
+      "fasterPairs": {
+        "BvsA": 2,
+        "BvsC": 3
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 6444.099999999977,
+        "B": 6486.099999999991,
+        "C": 6523.800000000003
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": 0.6517589733246565,
+        "BvsC": -0.5778840553053666,
+        "CvsA": 1.2367902422375066
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -2.4905799099352754,
+            3.58783008036736
+          ],
+          "worstPairPercent": 3.58783008036736,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.8178266619565342,
+            3.3869501425280224
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -6.607435521433402,
+            4.643206256109478
+          ],
+          "worstPairPercent": 4.643206256109478,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -5.241144713878359,
+            4.280375630619792
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -5.531443346566345,
+            10.916570991195517
+          ],
+          "worstPairPercent": 10.916570991195517,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -3.2665947548024823,
+            7.762432961035503
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "single-image-projection",
+      "dictionary": "vndb",
+      "replica": 0,
+      "role": "target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665835,
+        "name": "single-image-projection vndb host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087779,
+        "runner_name": "GitHub Actions 1000087779",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:32:28Z",
+        "completed_at": "2026-11-25T15:56:44Z"
+      },
+      "execution": {
+        "candidate": "single-image-projection",
+        "dictionary": "vndb",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "e3500b850f8b9afdc9e32a898cf8e58905d14d7a5be2dbbacb831ff5976cc3b4",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "2af6593a6e3631cbddff736bf2280f0fd40c2a69",
+          "sourceTree": "02f97bf86278a702ab14236323bbd5eaaa71ac90",
+          "packageSha256": "58587471ba546c4587b7f87565219d92cea2aa590edcdf424e075f6680705709",
+          "memberCount": 552,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "e3500b850f8b9afdc9e32a898cf8e58905d14d7a5be2dbbacb831ff5976cc3b4",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      },
+      "packageDelta": [
+        "js/dictionary/term-bank-wasm-parser.js",
+        "js/dictionary/validated-image-path-projector.js"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+          "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 6648310,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 146570,
+            "totalBytes": 188131284,
+            "files": 146570,
+            "bytes": 188131284,
+            "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+          "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 6648310,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 146570,
+            "totalBytes": 188131284,
+            "files": 146570,
+            "bytes": 188131284,
+            "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15040370626,
+          "name": "import-screen-summary-ef009-single-image-projection-vndb-0",
+          "size_in_bytes": 5063,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040370626",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15040370626/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:56:36Z",
+          "expires_at": "2026-12-09T15:56:35Z",
+          "updated_at": "2026-11-25T15:56:36Z",
+          "digest": "sha256:39fddd6306d20d5a82dcb3b879d894ec3dd4b37eae9bc9122fce98cc517004d5",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/single-image-projection-vndb-0.json.gz",
+        "originalBytes": 36422,
+        "originalSha256": "d68b4549b1ffacbc5e235a321137a736590a264298e7357a18c3306b6e8f241f",
+        "compressedBytes": 4943,
+        "compressedSha256": "7f30d5ae47131d32826c8d8c80ed7b86a532e547b0f455672ef9a155f4bbdaa2",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15039172946,
+        "name": "import-screen-ef009-single-image-projection-vndb-0",
+        "size_in_bytes": 34406934,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039172946",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039172946/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:56:39Z",
+        "expires_at": "2026-12-09T15:56:36Z",
+        "updated_at": "2026-11-25T15:56:39Z",
+        "digest": "sha256:5bab8ea36b653d3a28c9176eca2ca18350370880b0872320729ee083b92e58c1",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "target",
+        "passes": false
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 6681,
+            "B": 6707.600000000006,
+            "C": 6688.1999999999825
+          },
+          "BvsA": 0.39814399042068516,
+          "BvsC": 0.2900630961996331,
+          "CvsA": 0.10776829815870581
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 6582.600000000006,
+            "C": 6454,
+            "A": 6541
+          },
+          "BvsA": 0.6359883809816003,
+          "BvsC": 1.9925627517819233,
+          "CvsA": -1.3300718544565049
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 6445,
+            "A": 6436.399999999965,
+            "B": 6358.799999999988
+          },
+          "BvsA": -1.2056429059719265,
+          "BvsC": -1.337470907680549,
+          "CvsA": 0.13361506432221226
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 6674.599999999977,
+            "C": 6567.899999999965,
+            "B": 6386.700000000012
+          },
+          "BvsA": -4.313367093158638,
+          "BvsC": -2.7588726990355306,
+          "CvsA": -1.5985976687743375
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 6432.299999999988,
+            "B": 6328.099999999977,
+            "A": 6412.699999999953
+          },
+          "BvsA": -1.3192570991934383,
+          "BvsC": -1.6199493182844638,
+          "CvsA": 0.305643488702656
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 6255.70000000007,
+            "A": 6281.099999999977,
+            "C": 6534.79999999993
+          },
+          "BvsA": -0.40438776647254704,
+          "BvsC": -4.270979984083112,
+          "CvsA": 4.039101431277237
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/single-image-projection-vndb-0.tar.gz",
+        "archiveBytes": 901279,
+        "archiveSha256": "1e283408b9c0b3f31c93e889220b14f8aba3fa1d5e5251518b22925e9c791460",
+        "originalArtifact": {
+          "id": 15039172946,
+          "name": "import-screen-ef009-single-image-projection-vndb-0",
+          "size_in_bytes": 34406934,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039172946",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15039172946/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:56:39Z",
+          "expires_at": "2026-12-09T15:56:36Z",
+          "updated_at": "2026-11-25T15:56:39Z",
+          "digest": "sha256:5bab8ea36b653d3a28c9176eca2ca18350370880b0872320729ee083b92e58c1",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "INTEL(R) XEON(R) PLATINUM 8573C",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16758394880,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            609553611
+          ],
+          "B": [
+            609553611
+          ],
+          "C": [
+            609553611
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16793851
+        },
+        "packageZipDeltaBytes": 2865,
+        "packageZipDeltaPercent": 0.017062726393790584,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": -0.8050153362222368,
+        "BvsC": -1.4787101129825064,
+        "CvsA": 0.12069168124045904
+      },
+      "fasterPairs": {
+        "BvsA": 4,
+        "BvsC": 4
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 39026.79999999987,
+        "B": 38619.50000000006,
+        "C": 39122.199999999866
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": -1.0436418051180563,
+        "BvsC": -1.2849481879848468,
+        "CvsA": 0.24444740537270526
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -4.313367093158638,
+            0.6359883809816003
+          ],
+          "worstPairPercent": 0.6359883809816003,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -2.8163120961760377,
+            0.5170661857011427
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -4.270979984083112,
+            1.9925627517819233
+          ],
+          "worstPairPercent": 1.9925627517819233,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -3.5149263415593213,
+            1.1413129239907782
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -1.5985976687743375,
+            4.039101431277237
+          ],
+          "worstPairPercent": 4.039101431277237,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.4643347616154212,
+            2.1723724599899463
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "structured-metadata-keys",
+      "dictionary": "jitendex",
+      "replica": 0,
+      "role": "target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665754,
+        "name": "structured-metadata-keys jitendex host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087878,
+        "runner_name": "GitHub Actions 1000087878",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:39:57Z",
+        "completed_at": "2026-11-25T15:45:12Z"
+      },
+      "execution": {
+        "candidate": "structured-metadata-keys",
+        "dictionary": "jitendex",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "0154c8bcece8b48f729c847bb703882f5843b64f002c37a3729f792e3ffccc38",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+          "sourceTree": "f0d5739c8344b4d14d6b51e0e740e0908e444400",
+          "packageSha256": "41e11eacb13ca1ed19bb95f13345c1f9e3f70933c8340fe246b6cce2d3e0761e",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "0154c8bcece8b48f729c847bb703882f5843b64f002c37a3729f792e3ffccc38",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "Jitendex",
+        "cacheFile": "jitendex-yomitan.zip",
+        "release": "2026.10.03.0",
+        "url": "https://github.com/stephenmk/stephenmk.github.io/releases/download/2026.10.03.0/jitendex-yomitan.zip",
+        "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+        "sizeBytes": 38831822,
+        "expectedTitle": "Jitendex.org [2026-10-03]",
+        "revision": "2026.10.03.0",
+        "termRows": 436555,
+        "mediaFiles": 236,
+        "mediaBytes": 4992155,
+        "unreferencedMediaPaths": [
+          "jitendex/HanaMinA/05167.svg",
+          "jitendex/HanaMinA/05641.svg",
+          "jitendex/HanaMinA/0576b.svg",
+          "jitendex/HanaMinA/05bda.svg",
+          "jitendex/HanaMinA/06207.svg",
+          "jitendex/HanaMinA/07055.svg",
+          "jitendex/HanaMinA/07575.svg",
+          "jitendex/HanaMinA/076a5.svg",
+          "jitendex/HanaMinA/0793d.svg",
+          "jitendex/HanaMinA/080ed.svg",
+          "jitendex/HanaMinA/09093.svg",
+          "jitendex/HanaMinA/09c81.svg",
+          "jitendex/HanaMinA/20bb7.svg"
+        ]
+      },
+      "packageDelta": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+          "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 436555,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 236,
+            "totalBytes": 4992155,
+            "files": 236,
+            "bytes": 4992155,
+            "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "377ab45eac2ff7b7cffad22dffe987e4f81b547fec15111e04cb60b95aee0963",
+          "publicResultSha256": "413e7b92f6d2416e7adea254cf1da52463047c2392c7de82a9b4dbab4a27cbd8",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 436555,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 236,
+            "totalBytes": 4992155,
+            "files": 236,
+            "bytes": 4992155,
+            "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15038862082,
+          "name": "import-screen-summary-ef009-structured-metadata-keys-jitendex-0",
+          "size_in_bytes": 5115,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038862082",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038862082/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:45:07Z",
+          "expires_at": "2026-12-09T15:45:06Z",
+          "updated_at": "2026-11-25T15:45:07Z",
+          "digest": "sha256:ec69ada5a426eab2808fbe05456d8201ecd3562e20e1c09b1365e1c56abef466",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/structured-metadata-keys-jitendex-0.json.gz",
+        "originalBytes": 36867,
+        "originalSha256": "50100fa67bf401b7d0f6c2547a2f6c1cff2ed7a99e593cfe921609dd44df3f00",
+        "compressedBytes": 5000,
+        "compressedSha256": "b862b5a0881f5e4feaf79fd4e40eb64192d8036a5e8934401ead8f06f9e95c9c",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15038063317,
+        "name": "import-screen-ef009-structured-metadata-keys-jitendex-0",
+        "size_in_bytes": 34387947,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038063317",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038063317/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:45:09Z",
+        "expires_at": "2026-12-09T15:45:07Z",
+        "updated_at": "2026-11-25T15:45:09Z",
+        "digest": "sha256:472397312b2775fcd83bb6f8d2917e37dfe8f6c4f79ffbc592dbac5bfc77a576",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "target",
+        "passes": false
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 1652.1000000000058,
+            "B": 1754,
+            "C": 1617.699999999997
+          },
+          "BvsA": 6.16790751165146,
+          "BvsC": 8.425542436793165,
+          "CvsA": -2.0821984141401018
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 1658.2000000000116,
+            "C": 1666.7000000000116,
+            "A": 1678.2000000000116
+          },
+          "BvsA": -1.1917530687641453,
+          "BvsC": -0.5099898002039915,
+          "CvsA": -0.6852580145393805
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 1704.6000000000058,
+            "A": 1653.8999999999942,
+            "B": 1649
+          },
+          "BvsA": -0.2962694237858554,
+          "BvsC": -3.2617622902737065,
+          "CvsA": 3.065481588972241
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 1650.2999999999884,
+            "C": 1636.7999999999884,
+            "B": 1655.6999999999825
+          },
+          "BvsA": 0.3272132339571021,
+          "BvsC": 1.1546920821110973,
+          "CvsA": -0.8180330848936657
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 1925.7000000000116,
+            "B": 1640.7999999999884,
+            "A": 1662.2999999999884
+          },
+          "BvsA": -1.2933886783372484,
+          "BvsC": -14.794620138132707,
+          "CvsA": 15.845515249956389
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 1676.4000000000233,
+            "A": 1667.7999999999884,
+            "C": 1618.899999999965
+          },
+          "BvsA": 0.5156493584383526,
+          "BvsC": 3.5517944283191882,
+          "CvsA": -2.9320062357610976
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/structured-metadata-keys-jitendex-0.tar.gz",
+        "archiveBytes": 887192,
+        "archiveSha256": "23bc92dad326cc40127b1aa4569968b00d7734296e45a164325114129b81a5c1",
+        "originalArtifact": {
+          "id": 15038063317,
+          "name": "import-screen-ef009-structured-metadata-keys-jitendex-0",
+          "size_in_bytes": 34387947,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038063317",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038063317/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:45:09Z",
+          "expires_at": "2026-12-09T15:45:07Z",
+          "updated_at": "2026-11-25T15:45:09Z",
+          "digest": "sha256:472397312b2775fcd83bb6f8d2917e37dfe8f6c4f79ffbc592dbac5bfc77a576",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 7763 64-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            67466332
+          ],
+          "B": [
+            67466332
+          ],
+          "C": [
+            67466332
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16791472
+        },
+        "packageZipDeltaBytes": 486,
+        "packageZipDeltaPercent": 0.0028944101317263105,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": 0.01547190508562335,
+        "BvsC": 0.3223511409535529,
+        "CvsA": -0.7516455497165231
+      },
+      "fasterPairs": {
+        "BvsA": 3,
+        "BvsC": 3
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 9964.599999999977,
+        "B": 10034.100000000006,
+        "C": 10170.39999999998
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": 0.6974690404033312,
+        "BvsC": -1.3401636120504046,
+        "CvsA": 2.0653112016538966
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -1.2933886783372484,
+            6.16790751165146
+          ],
+          "worstPairPercent": 6.16790751165146,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.2425708735506968,
+            3.3417784350449065
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -14.794620138132707,
+            8.425542436793165
+          ],
+          "worstPairPercent": 8.425542436793165,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -9.028191214203208,
+            5.988668432556176
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -2.9320062357610976,
+            15.845515249956389
+          ],
+          "worstPairPercent": 15.845515249956389,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -2.5071023249505995,
+            9.455498419464314
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "structured-metadata-keys",
+      "dictionary": "jmdict",
+      "replica": 0,
+      "role": "non-target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665003,
+        "name": "structured-metadata-keys jmdict host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087762,
+        "runner_name": "GitHub Actions 1000087762",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:31:17Z",
+        "completed_at": "2026-11-25T15:34:45Z"
+      },
+      "execution": {
+        "candidate": "structured-metadata-keys",
+        "dictionary": "jmdict",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "36a20a8bf552fa0410a0f3e1c92303864b9110ceb925d45d685a37ee1858d36a",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+          "sourceTree": "f0d5739c8344b4d14d6b51e0e740e0908e444400",
+          "packageSha256": "34da493495da083e935875b0d8dddbc044382a8083e6a00a1ec9441a9e5e7612",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "36a20a8bf552fa0410a0f3e1c92303864b9110ceb925d45d685a37ee1858d36a",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "JMdict",
+        "cacheFile": "JMdict.zip",
+        "release": "2026-11-22",
+        "url": "https://github.com/yomidevs/jmdict-yomitan/releases/download/2026-11-22/JMdict_english.zip",
+        "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+        "sizeBytes": 15645766,
+        "expectedTitle": "JMdict [2026-11-22]",
+        "revision": "JMdict.2026-11-22",
+        "termRows": 528299,
+        "mediaFiles": 0,
+        "mediaBytes": 0
+      },
+      "packageDelta": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+          "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 528299,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 0,
+            "totalBytes": 0,
+            "files": 0,
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "014e1cf71e793836f51dc21798e822dd7b1d99dd5e459708d7c9d9c8049cf0e6",
+          "publicResultSha256": "bd1c04020f49a0725b03a956a8c66748a94183287081bb21fec667636fa0e814",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 528299,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 0,
+            "totalBytes": 0,
+            "files": 0,
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15037683351,
+          "name": "import-screen-summary-ef009-structured-metadata-keys-jmdict-0",
+          "size_in_bytes": 4904,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037683351",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15037683351/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:34:38Z",
+          "expires_at": "2026-12-09T15:34:38Z",
+          "updated_at": "2026-11-25T15:34:38Z",
+          "digest": "sha256:71b10fa8b35332f62dd3b19a7ef61fde7007213a57786311705dee325e7bc1fe",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/structured-metadata-keys-jmdict-0.json.gz",
+        "originalBytes": 35907,
+        "originalSha256": "482d2d43d172ed1a24941fa4f735f214ba77d42bbc8a6c68ced03ad104e07223",
+        "compressedBytes": 4784,
+        "compressedSha256": "c7247997dbf34cf41e04b2348b88b7d84c3268cb2a659dadc810907713f112b6",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15038236275,
+        "name": "import-screen-ef009-structured-metadata-keys-jmdict-0",
+        "size_in_bytes": 34376362,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038236275",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038236275/zip",
+        "expired": false,
+        "created_at": "2026-11-25T15:34:41Z",
+        "expires_at": "2026-12-09T15:34:39Z",
+        "updated_at": "2026-11-25T15:34:41Z",
+        "digest": "sha256:660c395e2eb3b4dc64bb23d12cd717d10388d0a9999c8861d3c42e0ddeeeb457",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "non-target",
+        "passes": true
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 751.0999999999767,
+            "B": 741.7000000000116,
+            "C": 748.1000000000349
+          },
+          "BvsA": -1.2514978032173274,
+          "BvsC": -0.8555006015269373,
+          "CvsA": -0.39941419250990595
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 699.7000000000116,
+            "C": 696.3999999999651,
+            "A": 730.9000000000233
+          },
+          "BvsA": -4.2687098098249665,
+          "BvsC": 0.47386559449262844,
+          "CvsA": -4.720207962793421
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 715.1000000000349,
+            "A": 783.7000000000116,
+            "B": 718.9000000000233
+          },
+          "BvsA": -8.2684700778343,
+          "BvsC": 0.5313942105982683,
+          "CvsA": -8.753349495977503
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 759,
+            "C": 830.6000000000349,
+            "B": 690.4000000000233
+          },
+          "BvsA": -9.038208168639883,
+          "BvsC": -16.879364314953737,
+          "CvsA": 9.4334650856436
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 724.7999999999884,
+            "B": 733.2000000000116,
+            "A": 749.8999999999651
+          },
+          "BvsA": -2.226963595139908,
+          "BvsC": 1.1589403973542245,
+          "CvsA": -3.347112948390174
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 712.2999999999884,
+            "A": 738.2999999999884,
+            "C": 717.9000000000233
+          },
+          "BvsA": -3.521603684139296,
+          "BvsC": -0.780052932168096,
+          "CvsA": -2.7631044290891804
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/structured-metadata-keys-jmdict-0.tar.gz",
+        "archiveBytes": 874445,
+        "archiveSha256": "f7c2c30222dde39a8f2bb677da283171d4cfebd8e8b1475610737ca5d822f828",
+        "originalArtifact": {
+          "id": 15038236275,
+          "name": "import-screen-ef009-structured-metadata-keys-jmdict-0",
+          "size_in_bytes": 34376362,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038236275",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038236275/zip",
+          "expired": false,
+          "created_at": "2026-11-25T15:34:41Z",
+          "expires_at": "2026-12-09T15:34:39Z",
+          "updated_at": "2026-11-25T15:34:41Z",
+          "digest": "sha256:660c395e2eb3b4dc64bb23d12cd717d10388d0a9999c8861d3c42e0ddeeeb457",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 9V45 96-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            43520477
+          ],
+          "B": [
+            43520477
+          ],
+          "C": [
+            43520477
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": true,
+        "nonMinimumLogicalStorageObservations": [],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16791472
+        },
+        "packageZipDeltaBytes": 486,
+        "packageZipDeltaPercent": 0.0028944101317263105,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": -3.8951567469821313,
+        "BvsC": -0.1530936688377338,
+        "CvsA": -3.0551086887396774
+      },
+      "fasterPairs": {
+        "BvsA": 6,
+        "BvsC": 3
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 4512.899999999965,
+        "B": 4296.20000000007,
+        "C": 4432.9000000000815
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": -4.801790423007313,
+        "BvsC": -3.0837600667736553,
+        "CvsA": -1.772696049101119
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -9.038208168639883,
+            -1.2514978032173274
+          ],
+          "worstPairPercent": -1.2514978032173274,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -8.653339123237092,
+            -1.7392306991786177
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -16.879364314953737,
+            1.1589403973542245
+          ],
+          "worstPairPercent": 1.1589403973542245,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -8.867432458240337,
+            0.8451673039762464
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -8.753349495977503,
+            9.4334650856436
+          ],
+          "worstPairPercent": 9.4334650856436,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -6.7367787293854615,
+            4.517025446566848
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    },
+    {
+      "candidate": "structured-metadata-keys",
+      "dictionary": "vndb",
+      "replica": 0,
+      "role": "non-target",
+      "status": "complete",
+      "error": null,
+      "job": {
+        "id": 139311665973,
+        "name": "structured-metadata-keys vndb host 0",
+        "status": "completed",
+        "conclusion": "success",
+        "runner_id": 1000087819,
+        "runner_name": "GitHub Actions 1000087819",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions",
+        "started_at": "2026-11-25T15:35:59Z",
+        "completed_at": "2026-11-25T16:00:09Z"
+      },
+      "execution": {
+        "candidate": "structured-metadata-keys",
+        "dictionary": "vndb",
+        "replica": 0,
+        "workflowCommit": "863bda45046ba0bf0c778008d0fb30e65b7f0669",
+        "protocolSha256": "f2b4873cfc1ee92d76374dd43397ed2c1ab692c7fa2daa375f2c22b6559e87d8",
+        "runnerSha256": "25de6787acff75f3c91015cebf811ca252936672c64578932e4238cbec1e39d0",
+        "runId": "45644488882",
+        "runAttempt": "1"
+      },
+      "packages": {
+        "A": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "2443fbba5183334c0057c45428f1b8f3d6d47aef6c08cff20587f599e1652e53",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "B": {
+          "sourceCommit": "36fd7a27b7aa631fc8aa20bd70a9f125850499cb",
+          "sourceTree": "f0d5739c8344b4d14d6b51e0e740e0908e444400",
+          "packageSha256": "f0584cf43b1308a744375b8972c96ef8b4c10212884a5a0805b1a18d6b78ae73",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true
+        },
+        "C": {
+          "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+          "sourceTree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+          "packageSha256": "2443fbba5183334c0057c45428f1b8f3d6d47aef6c08cff20587f599e1652e53",
+          "memberCount": 551,
+          "harnessSha256": {
+            "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+            "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89",
+            "dev/perf/benchmark-support.js": "08463998f6e6b4590c65e5c36c9e162bd28d770fdd1e51e869a75ccbec1e8132",
+            "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+            "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+            "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+            "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf"
+          },
+          "generatedLibrariesShared": true,
+          "nativeModulesRestoredFromOwnManifest": true,
+          "identicalTo": "A"
+        }
+      },
+      "fixture": {
+        "label": "VNDB",
+        "cacheFile": "vndb_characters_by_bee.zip",
+        "release": "1.0.0",
+        "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+        "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+        "sizeBytes": 291705969,
+        "expectedTitle": "VNDB Characters by Bee",
+        "revision": "395525135651",
+        "termRows": 6648310,
+        "mediaFiles": 146570,
+        "mediaBytes": 188131284,
+        "mediaRows": 146570,
+        "optional": true
+      },
+      "packageDelta": [
+        "js/dictionary/wasm/term-bank-parser.c",
+        "lib/term-bank-parser.wasm"
+      ],
+      "identityChecks": {
+        "baselineCommitAndTree": true,
+        "candidateCommitAndTree": true,
+        "identicalControlPackage": true,
+        "identicalControlSource": true,
+        "unchangedHarnessHashes": true,
+        "exactDeclaredPackagedDelta": true,
+        "ownNativeModulesRestored": true,
+        "generatedLibrariesShared": true
+      },
+      "observationCount": 23,
+      "scheduledObservationCount": 23,
+      "failures": [],
+      "errorFromAnalysis": [],
+      "observedFixedSchedule": true,
+      "completeProofCount": 23,
+      "publicResultSha256Values": [
+        "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef"
+      ],
+      "fullMediaProofs": [
+        {
+          "name": "all-media-A",
+          "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+          "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 6648310,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 146570,
+            "totalBytes": 188131284,
+            "files": 146570,
+            "bytes": 188131284,
+            "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+          }
+        },
+        {
+          "name": "all-media-B",
+          "semanticReceiptSha256": "1461629a84f7a869bbce2d9da2e1823c83fe53b9679fb85906765725650c10c7",
+          "publicResultSha256": "cf0453cb648d06f4cf0e1c951eb9ba465a5ff00c5ae5ba67eef318432d8b5cef",
+          "publicLookupObservationCount": 72,
+          "distinctProbeCount": 12,
+          "termRows": 6648310,
+          "contentReadable": true,
+          "restartContentReadable": true,
+          "media": {
+            "mode": "all",
+            "totalFiles": 146570,
+            "totalBytes": 188131284,
+            "files": 146570,
+            "bytes": 188131284,
+            "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+          }
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 15038674659,
+          "name": "import-screen-summary-ef009-structured-metadata-keys-vndb-0",
+          "size_in_bytes": 5062,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038674659",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038674659/zip",
+          "expired": false,
+          "created_at": "2026-11-25T16:00:01Z",
+          "expires_at": "2026-12-09T16:00:00Z",
+          "updated_at": "2026-11-25T16:00:01Z",
+          "digest": "sha256:250afb417ff90e69eccc9995b8fcaa59586899c670599a592ba1f44eb72ba3e6",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "rawPath": "raw/structured-metadata-keys-vndb-0.json.gz",
+        "originalBytes": 36325,
+        "originalSha256": "8bc6dc423aedc4f85a3fcf466ba63bc551158f5552ac993b25a2c80b07259c13",
+        "compressedBytes": 4939,
+        "compressedSha256": "a4cd2c663b2f7101065d2db8eea577091f10154c6d82aaf7ad0e1f62b102ab49",
+        "artifactZipDigestVerified": true
+      },
+      "completeEvidenceArtifact": {
+        "id": 15038894600,
+        "name": "import-screen-ef009-structured-metadata-keys-vndb-0",
+        "size_in_bytes": 34405456,
+        "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038894600",
+        "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038894600/zip",
+        "expired": false,
+        "created_at": "2026-11-25T16:00:05Z",
+        "expires_at": "2026-12-09T16:00:02Z",
+        "updated_at": "2026-11-25T16:00:05Z",
+        "digest": "sha256:45c6a4ced90fcad9d1ab4f1bb7dc6fbdc0f6b27847304241c2083ea536490496",
+        "workflow_run": {
+          "id": 45644488882,
+          "repository_id": 1165902460,
+          "head_repository_id": 1165902460,
+          "head_branch": "codex/import-qualification-20261125-ef009",
+          "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+        }
+      },
+      "prospectiveScreen": {
+        "role": "non-target",
+        "passes": true
+      },
+      "pairs": [
+        {
+          "cohort": 0,
+          "qualified": true,
+          "ms": {
+            "A": 6756.5,
+            "B": 6747,
+            "C": 6679
+          },
+          "BvsA": -0.14060534300303074,
+          "BvsC": 1.0181164845036728,
+          "CvsA": -1.1470435876563267
+        },
+        {
+          "cohort": 1,
+          "qualified": true,
+          "ms": {
+            "B": 6768,
+            "C": 6667.100000000035,
+            "A": 6630.799999999988
+          },
+          "BvsA": 2.0691319297823973,
+          "BvsC": 1.5134016288935959,
+          "CvsA": 0.5474452554751652
+        },
+        {
+          "cohort": 2,
+          "qualified": true,
+          "ms": {
+            "C": 6576.399999999965,
+            "A": 6656.899999999965,
+            "B": 6496.300000000047
+          },
+          "BvsA": -2.412534362840346,
+          "BvsC": -1.217991606348745,
+          "CvsA": -1.2092715828689093
+        },
+        {
+          "cohort": 3,
+          "qualified": true,
+          "ms": {
+            "A": 6537.899999999965,
+            "C": 6597.399999999965,
+            "B": 6744.699999999953
+          },
+          "BvsA": 3.163095183468534,
+          "BvsC": 2.232697729408395,
+          "CvsA": 0.9100781596537155
+        },
+        {
+          "cohort": 4,
+          "qualified": true,
+          "ms": {
+            "C": 6538.5,
+            "B": 6946.70000000007,
+            "A": 6543.099999999977
+          },
+          "BvsA": 6.168329996486288,
+          "BvsC": 6.243022099871065,
+          "CvsA": -0.07030306735303915
+        },
+        {
+          "cohort": 5,
+          "qualified": true,
+          "ms": {
+            "B": 6799.599999999977,
+            "A": 6691.300000000047,
+            "C": 6695.199999999953
+          },
+          "BvsA": 1.6185195701871047,
+          "BvsC": 1.5593260843592915,
+          "CvsA": 0.05828463826023089
+        }
+      ],
+      "preservedFullEvidence": {
+        "archivePath": "full/structured-metadata-keys-vndb-0.tar.gz",
+        "archiveBytes": 902517,
+        "archiveSha256": "6189933f0bd6df3be62fbcdcd45e3621ab45762f3ad1d840c74baa735aa6aaaa",
+        "originalArtifact": {
+          "id": 15038894600,
+          "name": "import-screen-ef009-structured-metadata-keys-vndb-0",
+          "size_in_bytes": 34405456,
+          "url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038894600",
+          "archive_download_url": "https://api.github.com/repos/ManabiIO/manabitan/actions/artifacts/15038894600/zip",
+          "expired": false,
+          "created_at": "2026-11-25T16:00:05Z",
+          "expires_at": "2026-12-09T16:00:02Z",
+          "updated_at": "2026-11-25T16:00:05Z",
+          "digest": "sha256:45c6a4ced90fcad9d1ab4f1bb7dc6fbdc0f6b27847304241c2083ea536490496",
+          "workflow_run": {
+            "id": 45644488882,
+            "repository_id": 1165902460,
+            "head_repository_id": 1165902460,
+            "head_branch": "codex/import-qualification-20261125-ef009",
+            "head_sha": "863bda45046ba0bf0c778008d0fb30e65b7f0669"
+          }
+        },
+        "originalArtifactZipDigestVerified": true,
+        "preservedMemberCount": 202,
+        "everyPreservedMemberDigestVerified": true,
+        "observedBrowserVersions": [
+          "153.0.8010.12"
+        ],
+        "observedNodeVersions": [
+          "v22.22.0"
+        ],
+        "hostSnapshotCount": 46,
+        "observedHostProfiles": [
+          {
+            "arch": "x64",
+            "availableParallelism": 4,
+            "cpuModel": "AMD EPYC 7763 64-Core Processor",
+            "logicalCpuCount": 4,
+            "nodeVersion": "v22.22.0",
+            "platform": "linux",
+            "totalMemoryBytes": 16759431168,
+            "v8Version": "12.4.254.21-node.33"
+          }
+        ],
+        "sourceDirtyValues": [
+          true
+        ],
+        "sourceDirtyNotice": "The benchmark records a dirty-source boolean without status paths. Preparation adds a dependency symlink, but a clean-checkout assertion cannot be independently recovered from this field. Exact harness hashes, restored own-source native modules and package-member deltas are separately checked.",
+        "opfsLogicalBytesByArm": {
+          "A": [
+            609553611
+          ],
+          "B": [
+            609553611,
+            609561803
+          ],
+          "C": [
+            609553611,
+            609561803
+          ]
+        },
+        "allObservedLogicalStorageTotalsEqual": false,
+        "nonMinimumLogicalStorageObservations": [
+          {
+            "name": "cohort-1-B",
+            "bytes": 609561803,
+            "arm": "B",
+            "extraBytesOverCellMinimum": 8192
+          },
+          {
+            "name": "cohort-1-C",
+            "bytes": 609561803,
+            "arm": "C",
+            "extraBytesOverCellMinimum": 8192
+          }
+        ],
+        "packageZipBytes": {
+          "A": 16790986,
+          "B": 16791472
+        },
+        "packageZipDeltaBytes": 486,
+        "packageZipDeltaPercent": 0.0028944101317263105,
+        "releaseZipHashesMatchedReceiptsBeforeOmission": true
+      },
+      "medianPairedChangePercent": {
+        "BvsA": 1.843825749984751,
+        "BvsC": 1.5363638566264437,
+        "CvsA": -0.006009214546404129
+      },
+      "fasterPairs": {
+        "BvsA": 2,
+        "BvsC": 1
+      },
+      "equalWorkTimedImportTotalsMs": {
+        "A": 39816.49999999994,
+        "B": 40502.30000000005,
+        "C": 39753.59999999992
+      },
+      "equalWorkTotalChangePercent": {
+        "BvsA": 1.7224015169593043,
+        "BvsC": 1.8833514449009048,
+        "CvsA": -0.157974708977493
+      },
+      "descriptiveUncertainty": {
+        "BvsA": {
+          "observedPairRangePercent": [
+            -2.412534362840346,
+            6.168329996486288
+          ],
+          "worstPairPercent": 6.168329996486288,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.2765698529216885,
+            4.665712589977411
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "BvsC": {
+          "observedPairRangePercent": [
+            -1.217991606348745,
+            6.243022099871065
+          ],
+          "worstPairPercent": 6.243022099871065,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -0.09993756092253614,
+            4.2378599146397296
+          ],
+          "bootstrapResampleCount": 46656
+        },
+        "CvsA": {
+          "observedPairRangePercent": [
+            -1.2092715828689093,
+            0.9100781596537155
+          ],
+          "worstPairPercent": 0.9100781596537155,
+          "medianBootstrapPercentile95IntervalPercent": [
+            -1.178157585262618,
+            0.7287617075644404
+          ],
+          "bootstrapResampleCount": 46656
+        }
+      }
+    }
+  ],
+  "statisticalNotice": "The original prospective screen gates are recomputed unchanged. Equal-work totals, observed ranges, worst pairs and exhaustive percentile bootstrap intervals are descriptive post-study summaries, not additional pass gates. The bootstrap enumerates all 6^6 resamples of the six cohort ratios; it assumes exchangeable cohorts and does not establish host-to-host reproducibility or account for systematic order drift. No host pooling, exclusions, replacements or result-dependent reruns are used.",
+  "archiveNotice": "Each raw/*.json.gz preserves the complete original summary.json bytes, including every observation and failure. Original GitHub artifact ZIP sizes/digests were checked on download. Every full/*.tar.gz preserves all original full-artifact members except package-A.zip and package-B.zip, with exact member byte hashes indexed in full-evidence-index.json. This retains per-observation browser reports, summaries, host snapshots, semantic receipts, logs and source/package metadata. The release ZIP payloads were themselves hashed and matched their receipts before omission; the referenced original GitHub artifacts retain those payloads until the recorded expiry. Exact executed protocol, runner and workflow source bytes are also retained separately.",
+  "scopeNotice": "Successful runner validation covers complete UI import, public lookup hashes across passes/restart and post-timing full media payload readback. It does not establish complete persisted database-byte equality, long-run lookup latency, process-memory non-regression or all reliability scenarios. A passing performance screen is not replicated qualification."
+}

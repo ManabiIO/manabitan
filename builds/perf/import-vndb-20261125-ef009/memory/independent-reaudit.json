@@ -1,0 +1,635 @@
+{
+    "schemaVersion": 1,
+    "authoritativeTiming": false,
+    "source": "Independent local re-execution of the unchanged frozen raw-scan auditor plus retained original semantic/source/package reports; no new imports or substituted observations.",
+    "workflowRun": 45646484626,
+    "workflowHead": "57590f5eaee359d721ba9d5d8bde28728a8d172e",
+    "protocolSha256": "0880cf10e13635bddd64a4d0848db13c4f46b06684e92f826a643086d213bc42",
+    "expectedCells": 6,
+    "receivedSummaryCount": 6,
+    "receivedFullArtifactCount": 6,
+    "missingCells": [],
+    "complete": true,
+    "qualified": false,
+    "cells": [
+        {
+            "dictionary": "jitendex",
+            "replication": 1,
+            "artifactId": 15038074916,
+            "rawArchive": "full/jitendex-1.tar.gz",
+            "errors": [],
+            "summaryArtifactId": 15038104755,
+            "rawAudit": {
+                "schemaVersion": 1,
+                "observations": 4,
+                "rawScanCount": 311,
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "metrics": {
+                    "maxSampledPssKiB": {
+                        "medianPairedChangePercent": -2.408762720687996,
+                        "maximumPairedChangePercent": -1.8292810881446742
+                    },
+                    "maxSampledPrivateKiB": {
+                        "medianPairedChangePercent": -3.0558222240352926,
+                        "maximumPairedChangePercent": -2.3908447422508528
+                    }
+                }
+            },
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "04403733-128b-4c73-a694-0c327ec90b8f",
+                "runnerName": "GitHub Actions 1000088097",
+                "runnerEnvironment": "github-hosted"
+            },
+            "sourceAndPackageIdentityVerified": true,
+            "semanticObservationsVerified": 4,
+            "publicLookupObservationsVerified": 288,
+            "mediaPayloadsPerObservation": 236,
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "2af6593a6e3631cbddff736bf2280f0fd40c2a69"
+            },
+            "sourceTrees": {
+                "A": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+                "B": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+            },
+            "packageMemberCounts": {
+                "A": 551,
+                "B": 552
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": -2.408762720687996,
+                    "maximumPairedChangePercent": -1.8292810881446742
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": -3.0558222240352926,
+                    "maximumPairedChangePercent": -2.3908447422508528
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1048390,
+                        "candidate": 1029212,
+                        "changePercent": -1.8292810881446742
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 815444,
+                        "candidate": 795948,
+                        "changePercent": -2.3908447422508528
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1057109,
+                        "candidate": 1025520,
+                        "changePercent": -2.9882443532313174
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 826704,
+                        "candidate": 795944,
+                        "changePercent": -3.720799705819733
+                    }
+                }
+            ],
+            "minimumCoveredImportScans": 12,
+            "maximumCoveredGapMs": 148.91454,
+            "maximumBracketGapMs": 74.482295,
+            "qualificationFailures": [],
+            "acquisitionComplete": true,
+            "evidenceVerified": true,
+            "qualified": true
+        },
+        {
+            "dictionary": "jitendex",
+            "replication": 2,
+            "artifactId": 15038718992,
+            "rawArchive": "full/jitendex-2.tar.gz",
+            "errors": [],
+            "summaryArtifactId": 15039358218,
+            "rawAudit": {
+                "schemaVersion": 1,
+                "observations": 4,
+                "rawScanCount": 472,
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "metrics": {
+                    "maxSampledPssKiB": {
+                        "medianPairedChangePercent": -0.19622794674753474,
+                        "maximumPairedChangePercent": 0.3523035740505831
+                    },
+                    "maxSampledPrivateKiB": {
+                        "medianPairedChangePercent": -0.4089040337333927,
+                        "maximumPairedChangePercent": 0.6297010607521747
+                    }
+                }
+            },
+            "hostIdentity": {
+                "hostname": "ip-10-0-140-160",
+                "bootId": "df909984-faf1-49de-8466-03a7fa1aa3f8",
+                "runnerName": "GitHub Actions 1000088061",
+                "runnerEnvironment": "github-hosted"
+            },
+            "sourceAndPackageIdentityVerified": true,
+            "semanticObservationsVerified": 4,
+            "publicLookupObservationsVerified": 288,
+            "mediaPayloadsPerObservation": 236,
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "2af6593a6e3631cbddff736bf2280f0fd40c2a69"
+            },
+            "sourceTrees": {
+                "A": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+                "B": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+            },
+            "packageMemberCounts": {
+                "A": 551,
+                "B": 552
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": -0.19622794674753474,
+                    "maximumPairedChangePercent": 0.3523035740505831
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": -0.4089040337333927,
+                    "maximumPairedChangePercent": 0.6297010607521747
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1062436,
+                        "candidate": 1066179,
+                        "changePercent": 0.3523035740505831
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 829600,
+                        "candidate": 834824,
+                        "changePercent": 0.6297010607521747
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1058194,
+                        "candidate": 1050313,
+                        "changePercent": -0.7447594675456526
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 830392,
+                        "candidate": 818372,
+                        "changePercent": -1.44750912821896
+                    }
+                }
+            ],
+            "minimumCoveredImportScans": 15,
+            "maximumCoveredGapMs": 143.196499,
+            "maximumBracketGapMs": 55.802182,
+            "qualificationFailures": [],
+            "acquisitionComplete": true,
+            "evidenceVerified": true,
+            "qualified": true
+        },
+        {
+            "dictionary": "jmdict",
+            "replication": 1,
+            "artifactId": 15038619062,
+            "rawArchive": "full/jmdict-1.tar.gz",
+            "errors": [],
+            "summaryArtifactId": 15038273991,
+            "rawAudit": {
+                "schemaVersion": 1,
+                "observations": 4,
+                "rawScanCount": 297,
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "metrics": {
+                    "maxSampledPssKiB": {
+                        "medianPairedChangePercent": -1.4058534106683063,
+                        "maximumPairedChangePercent": -0.3674196740575786
+                    },
+                    "maxSampledPrivateKiB": {
+                        "medianPairedChangePercent": -2.210466462140576,
+                        "maximumPairedChangePercent": -0.937140134217529
+                    }
+                }
+            },
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "231dafb1-57a6-43cd-bb95-f9831ebe2295",
+                "runnerName": "GitHub Actions 1000088077",
+                "runnerEnvironment": "github-hosted"
+            },
+            "sourceAndPackageIdentityVerified": true,
+            "semanticObservationsVerified": 4,
+            "publicLookupObservationsVerified": 288,
+            "mediaPayloadsPerObservation": 0,
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "2af6593a6e3631cbddff736bf2280f0fd40c2a69"
+            },
+            "sourceTrees": {
+                "A": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+                "B": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+            },
+            "packageMemberCounts": {
+                "A": 551,
+                "B": 552
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": -1.4058534106683063,
+                    "maximumPairedChangePercent": -0.3674196740575786
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": -2.210466462140576,
+                    "maximumPairedChangePercent": -0.937140134217529
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1034784,
+                        "candidate": 1030982,
+                        "changePercent": -0.3674196740575786
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 805856,
+                        "candidate": 798304,
+                        "changePercent": -0.937140134217529
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1022834,
+                        "candidate": 997833,
+                        "changePercent": -2.444287147279034
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 792240,
+                        "candidate": 764640,
+                        "changePercent": -3.4837927900636223
+                    }
+                }
+            ],
+            "minimumCoveredImportScans": 8,
+            "maximumCoveredGapMs": 127.879816,
+            "maximumBracketGapMs": 87.79248,
+            "qualificationFailures": [],
+            "acquisitionComplete": true,
+            "evidenceVerified": true,
+            "qualified": true
+        },
+        {
+            "dictionary": "jmdict",
+            "replication": 2,
+            "artifactId": 15040025573,
+            "rawArchive": "full/jmdict-2.tar.gz",
+            "errors": [],
+            "summaryArtifactId": 15038264134,
+            "rawAudit": {
+                "schemaVersion": 1,
+                "observations": 4,
+                "rawScanCount": 359,
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "metrics": {
+                    "maxSampledPssKiB": {
+                        "medianPairedChangePercent": 0.25088129420160477,
+                        "maximumPairedChangePercent": 0.9046380902855145
+                    },
+                    "maxSampledPrivateKiB": {
+                        "medianPairedChangePercent": 0.007458025613799046,
+                        "maximumPairedChangePercent": 0.6008861657397224
+                    }
+                }
+            },
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "e2e610a8-7945-484b-9264-e57f92b772eb",
+                "runnerName": "GitHub Actions 1000088075",
+                "runnerEnvironment": "github-hosted"
+            },
+            "sourceAndPackageIdentityVerified": true,
+            "semanticObservationsVerified": 4,
+            "publicLookupObservationsVerified": 288,
+            "mediaPayloadsPerObservation": 0,
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "2af6593a6e3631cbddff736bf2280f0fd40c2a69"
+            },
+            "sourceTrees": {
+                "A": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+                "B": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+            },
+            "packageMemberCounts": {
+                "A": 551,
+                "B": 552
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": 0.25088129420160477,
+                    "maximumPairedChangePercent": 0.9046380902855145
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": 0.007458025613799046,
+                    "maximumPairedChangePercent": 0.6008861657397224
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1009575,
+                        "candidate": 1018708,
+                        "changePercent": 0.9046380902855145
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 778184,
+                        "candidate": 782860,
+                        "changePercent": 0.6008861657397224
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1022152,
+                        "candidate": 1018034,
+                        "changePercent": -0.4028755018823049
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 790484,
+                        "candidate": 785852,
+                        "changePercent": -0.5859701145121243
+                    }
+                }
+            ],
+            "minimumCoveredImportScans": 8,
+            "maximumCoveredGapMs": 174.602852,
+            "maximumBracketGapMs": 93.45927,
+            "qualificationFailures": [],
+            "acquisitionComplete": true,
+            "evidenceVerified": true,
+            "qualified": true
+        },
+        {
+            "dictionary": "vndb",
+            "replication": 1,
+            "artifactId": 15040177878,
+            "rawArchive": "full/vndb-1.tar.gz",
+            "errors": [],
+            "summaryArtifactId": 15041851355,
+            "rawAudit": {
+                "schemaVersion": 1,
+                "observations": 4,
+                "rawScanCount": 480,
+                "everyObservationQualified": false,
+                "passesProspectiveMemoryScreen": false,
+                "metrics": {
+                    "maxSampledPssKiB": {
+                        "medianPairedChangePercent": null,
+                        "maximumPairedChangePercent": null
+                    },
+                    "maxSampledPrivateKiB": {
+                        "medianPairedChangePercent": null,
+                        "maximumPairedChangePercent": null
+                    }
+                }
+            },
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "913bab4b-446d-438a-8d0b-fa95542f74e1",
+                "runnerName": "GitHub Actions 1000088084",
+                "runnerEnvironment": "github-hosted"
+            },
+            "sourceAndPackageIdentityVerified": true,
+            "semanticObservationsVerified": 4,
+            "publicLookupObservationsVerified": 288,
+            "mediaPayloadsPerObservation": 146570,
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "2af6593a6e3631cbddff736bf2280f0fd40c2a69"
+            },
+            "sourceTrees": {
+                "A": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+                "B": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+            },
+            "packageMemberCounts": {
+                "A": 551,
+                "B": 552
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": null,
+                    "maximumPairedChangePercent": null
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": null,
+                    "maximumPairedChangePercent": null
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": false,
+                    "maxSampledPssKiB": {
+                        "baseline": 1384928,
+                        "candidate": null,
+                        "changePercent": null
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1152756,
+                        "candidate": null,
+                        "changePercent": null
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1464711,
+                        "candidate": 1406352,
+                        "changePercent": -3.9843354764182104
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1234352,
+                        "candidate": 1176660,
+                        "changePercent": -4.673869366274774
+                    }
+                }
+            ],
+            "minimumCoveredImportScans": 47,
+            "maximumCoveredGapMs": 254.99874,
+            "maximumBracketGapMs": 109.153628,
+            "qualificationFailures": [
+                {
+                    "observation": "B1",
+                    "failures": [
+                        "covered-import-scan-gap-over-250ms"
+                    ],
+                    "maximumCoveredSampleGapMs": 254.99874
+                }
+            ],
+            "acquisitionComplete": true,
+            "evidenceVerified": true,
+            "qualified": false
+        },
+        {
+            "dictionary": "vndb",
+            "replication": 2,
+            "artifactId": 15039734990,
+            "rawArchive": "full/vndb-2.tar.gz",
+            "errors": [],
+            "summaryArtifactId": 15039794809,
+            "rawAudit": {
+                "schemaVersion": 1,
+                "observations": 4,
+                "rawScanCount": 480,
+                "everyObservationQualified": true,
+                "passesProspectiveMemoryScreen": true,
+                "metrics": {
+                    "maxSampledPssKiB": {
+                        "medianPairedChangePercent": 0.8428565161834767,
+                        "maximumPairedChangePercent": 0.9288332679627809
+                    },
+                    "maxSampledPrivateKiB": {
+                        "medianPairedChangePercent": 0.9258843158537533,
+                        "maximumPairedChangePercent": 1.103609976957598
+                    }
+                }
+            },
+            "hostIdentity": {
+                "hostname": "runnervm0hi8g",
+                "bootId": "1933ffc9-7728-426c-b17f-c23688b88792",
+                "runnerName": "GitHub Actions 1000088062",
+                "runnerEnvironment": "github-hosted"
+            },
+            "sourceAndPackageIdentityVerified": true,
+            "semanticObservationsVerified": 4,
+            "publicLookupObservationsVerified": 288,
+            "mediaPayloadsPerObservation": 146570,
+            "sourceCommits": {
+                "A": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+                "B": "2af6593a6e3631cbddff736bf2280f0fd40c2a69"
+            },
+            "sourceTrees": {
+                "A": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d",
+                "B": "02f97bf86278a702ab14236323bbd5eaaa71ac90"
+            },
+            "packageMemberCounts": {
+                "A": 551,
+                "B": 552
+            },
+            "metrics": {
+                "maxSampledPssKiB": {
+                    "medianPairedChangePercent": 0.8428565161834767,
+                    "maximumPairedChangePercent": 0.9288332679627809
+                },
+                "maxSampledPrivateKiB": {
+                    "medianPairedChangePercent": 0.9258843158537533,
+                    "maximumPairedChangePercent": 1.103609976957598
+                }
+            },
+            "pairs": [
+                {
+                    "pair": 1,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1399713,
+                        "candidate": 1412714,
+                        "changePercent": 0.9288332679627809
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1170340,
+                        "candidate": 1179096,
+                        "changePercent": 0.7481586547499086
+                    }
+                },
+                {
+                    "pair": 2,
+                    "qualified": true,
+                    "maxSampledPssKiB": {
+                        "baseline": 1419380,
+                        "candidate": 1430123,
+                        "changePercent": 0.7568797644041725
+                    },
+                    "maxSampledPrivateKiB": {
+                        "baseline": 1187376,
+                        "candidate": 1200480,
+                        "changePercent": 1.103609976957598
+                    }
+                }
+            ],
+            "minimumCoveredImportScans": 42,
+            "maximumCoveredGapMs": 216.756057,
+            "maximumBracketGapMs": 84.956626,
+            "qualificationFailures": [],
+            "acquisitionComplete": true,
+            "evidenceVerified": true,
+            "qualified": true
+        }
+    ],
+    "independentHosts": {
+        "jmdict": {
+            "bootIds": [
+                "e2e610a8-7945-484b-9264-e57f92b772eb",
+                "231dafb1-57a6-43cd-bb95-f9831ebe2295"
+            ],
+            "runnerNames": [
+                "GitHub Actions 1000088075",
+                "GitHub Actions 1000088077"
+            ],
+            "verified": true
+        },
+        "jitendex": {
+            "bootIds": [
+                "df909984-faf1-49de-8466-03a7fa1aa3f8",
+                "04403733-128b-4c73-a694-0c327ec90b8f"
+            ],
+            "runnerNames": [
+                "GitHub Actions 1000088061",
+                "GitHub Actions 1000088097"
+            ],
+            "verified": true
+        },
+        "vndb": {
+            "bootIds": [
+                "1933ffc9-7728-426c-b17f-c23688b88792",
+                "913bab4b-446d-438a-8d0b-fa95542f74e1"
+            ],
+            "runnerNames": [
+                "GitHub Actions 1000088062",
+                "GitHub Actions 1000088084"
+            ],
+            "verified": true
+        }
+    },
+    "semanticAgreementAcrossHosts": {
+        "jmdict": true,
+        "jitendex": true,
+        "vndb": true
+    },
+    "allPackageMemberMapsEqualAcrossHostsAndDictionaries": {
+        "A": true,
+        "B": true
+    },
+    "observationsPreserved": 24,
+    "rawScansRecomputed": 2399,
+    "limitations": "Non-atomic sampled import-window maxima, not exact peaks. Startup, semantic/media readback, and restart are excluded from maxima. Cumulative allocation or copying reductions do not establish peak-memory savings."
+}

@@ -1,0 +1,29 @@
+{
+    "A": {
+        "sourceCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+        "allNativeArtifactsMatchOwnManifest": true,
+        "packagedNativeSourceMatchesCommit": true,
+        "nativeArtifacts": {
+            "term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+            "term-bank-parser.wasm": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+        }
+    },
+    "metadata-witness": {
+        "sourceCommit": "11bf4550a26e98ccc3df1579da7444244fe1e861",
+        "allNativeArtifactsMatchOwnManifest": true,
+        "packagedNativeSourceMatchesCommit": true,
+        "nativeArtifacts": {
+            "term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+            "term-bank-parser.wasm": "d3ea9d7c95b433ea33412e0b62d544447fe68030818d8770d71dfbfaf2d50e47"
+        }
+    },
+    "native-projection": {
+        "sourceCommit": "5afd2e97ec2707b150acfde61115aee688547a78",
+        "allNativeArtifactsMatchOwnManifest": true,
+        "packagedNativeSourceMatchesCommit": true,
+        "nativeArtifacts": {
+            "term-content-canonical-scan-v1.wasm": "40948d5c20d26253e86c93d267e3cbb3817ea87c9731e02bcca0523c0eb3d6af",
+            "term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+        }
+    }
+}

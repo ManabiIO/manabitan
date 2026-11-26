@@ -1,0 +1,39 @@
+{
+  "workflowRunId": 45644489031,
+  "jobId": 139311666547,
+  "job": "JSON",
+  "conclusion": "failure",
+  "failingTest": "JSON validation > File must exist in json.json: dev/perf/import-qualification-ef009.json",
+  "testCounts": {
+    "failed": 1,
+    "passed": 154
+  },
+  "diagnosis": "The temporary protocol JSON was not registered in test/data/json.json. The failure is registry bookkeeping, not a JSON parse, schema, or runtime import failure.",
+  "sourceMutationDuringStudy": false,
+  "log": {
+    "path": "scaffold-ci-json-job-139311666547.log.gz",
+    "encoding": "gzip",
+    "originalBytes": 48298,
+    "originalSha256": "6ebf02d6be00a4e3e6ecdc1d376e3ca7c8d42b86a2bfbabbbca2f8bbd05656e9",
+    "compressedBytes": 9301,
+    "compressedSha256": "ee6a9cd2bc0d7388e7aa696b90360b2a09b86ebc64dd452bf2358997e2673d1c"
+  },
+  "localRegistryFix": {
+    "commit": "3b369caa31d36bff8e6bb718efd5a0bad854f95e",
+    "changedPath": "test/data/json.json",
+    "change": "Register dev/perf/import-qualification-ef009.json using the existing perf-protocol ignore convention",
+    "command": "npm run test:json",
+    "nodeVersion": "v22.22.0",
+    "exitCode": 0,
+    "testsPassed": 155,
+    "originalExecutedProtocolRunnerWorkflowUnchanged": true,
+    "publishedOrMeasurementRerunByThisAgent": false,
+    "log": {
+      "path": "registry-fix-json-gate.log.gz",
+      "originalBytes": 2845,
+      "originalSha256": "b66562728c6885ccefd3f9f6a0109badc2583140f0c72767ae3d46bd2bf32647",
+      "compressedBytes": 884,
+      "compressedSha256": "2a563a4acf1740a6493961f674f3b5c61cbbd70245c6eccf85c45b8a7601943b"
+    }
+  }
+}

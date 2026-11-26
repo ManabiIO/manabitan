@@ -1,0 +1,643 @@
+{
+  "archive": {
+    "bytes": 438507,
+    "path": "component-receipts-20261125-2754.text.tar.gz",
+    "sha256": "f86217f090ca0dda6e1c7018f992ddcaf1a3e9adf3b6363f889b4c2d4dce8f1a"
+  },
+  "includedFiles": [
+    {
+      "bytes": 5024,
+      "path": "contiguous-source-crc/crc-candidate-receipt.json",
+      "sha256": "5ec555fcfd5e82dc7d018169803648c1434d7b4fbc461a4777bb98e67d239b96"
+    },
+    {
+      "bytes": 8654,
+      "path": "contiguous-source-crc/crc-diagnostic-failures.json",
+      "sha256": "feefe2390057a875979bbf20415872ca94f719060c768774327ec913bed940a6"
+    },
+    {
+      "bytes": 5848,
+      "path": "contiguous-source-crc/crc-screen.mjs",
+      "sha256": "3b1b0ad8fb66ddb3871468ecb15612a52652ef38359ba136d9c79628d2c8865f"
+    },
+    {
+      "bytes": 3678,
+      "path": "contiguous-source-crc/final-codeql/codeql-workflow.yml",
+      "sha256": "078631d9b8b0d2ff433cc7e799874b9e0325f4360ed731e2247028f441dfbac4"
+    },
+    {
+      "bytes": 3059,
+      "path": "contiguous-source-crc/final-codeql/failure-review.json",
+      "sha256": "ef04dec2597defb4792e44fd13c3ad47327902189ec4a62e3cd0bb811386384b"
+    },
+    {
+      "bytes": 4769,
+      "path": "contiguous-source-crc/final-codeql/failure-review.md",
+      "sha256": "4b49fcbedb8e387884e326e1861345c4f7f7b743a086fbb7c7264b1b8d0c1c20"
+    },
+    {
+      "bytes": 692281,
+      "path": "contiguous-source-crc/final-codeql/job-139332071455.log",
+      "sha256": "7b8eb6af8419fcb5e16f3c64bdf11b2d68f87fce4b0aace20ddcd8ed71605f4a"
+    },
+    {
+      "bytes": 4356,
+      "path": "contiguous-source-crc/final-codeql/run-and-jobs.json",
+      "sha256": "032e810572fbdf6c3598d83bca6b7e4044c92eeeedd952f3faa5ec0dd666b95f"
+    },
+    {
+      "bytes": 2414,
+      "path": "contiguous-source-crc/independent-source-review.md",
+      "sha256": "e3b64934bb9838e651efc425eae02e67ca8b4e7ad9c8a961ff9f185ab21ea9ec"
+    },
+    {
+      "bytes": 2727,
+      "path": "contiguous-source-crc/jitendex-crc-screen-183439d0.json",
+      "sha256": "96091e2f02abed73a89fd1267e3f59909a8363144b15dddcc388220c26243689"
+    },
+    {
+      "bytes": 1882,
+      "path": "contiguous-source-crc/jitendex-crc-screen.json",
+      "sha256": "82461268911ddb5e66b7012045f3b0e189c9ca9895969c9f1a628613de6b198a"
+    },
+    {
+      "bytes": 68181,
+      "path": "contiguous-source-crc/jitendex-jitendex-bounded-worker-parity.json",
+      "sha256": "91de362d403766b7f3ede3dbb1f7f8152cde1ac0e3fb77d1e00b0eb235e4ac5b"
+    },
+    {
+      "bytes": 67469,
+      "path": "contiguous-source-crc/jitendex-manabitan-bounded-worker-parity.json",
+      "sha256": "27159d4585429dab619d59bdc7b97b24d86738d9c6ef9ef40b3468944ede164b"
+    },
+    {
+      "bytes": 74171,
+      "path": "contiguous-source-crc/jitendex-parser-profile.json",
+      "sha256": "193d09aa1fdbccbf7cb71ab5ae7c538f95709dfbab76bccf23513deb90f15391"
+    },
+    {
+      "bytes": 1057,
+      "path": "contiguous-source-crc/jmdict-crc-screen-183439d0.json",
+      "sha256": "44475ebc4c6fb9b3f7acb2424bed2122036dbf6014f0be23fcc9aaae31312fca"
+    },
+    {
+      "bytes": 28304,
+      "path": "contiguous-source-crc/jmdict-jitendex-bounded-worker-parity.json",
+      "sha256": "aeae2f4d225701b006361d7dd1be4fafe55861472f4a5e585c66e5734e0643b0"
+    },
+    {
+      "bytes": 28019,
+      "path": "contiguous-source-crc/jmdict-manabitan-bounded-worker-parity.json",
+      "sha256": "d341a019cc8e78c469238114ad532f9921c278d255e678cb92733c6ea3301b65"
+    },
+    {
+      "bytes": 4068,
+      "path": "contiguous-source-crc/parser-profile.mjs",
+      "sha256": "9d745055331dd70a162bdca2d2ae2bdde23ee81fb8fd80ca1ebf533fe0d285be"
+    },
+    {
+      "bytes": 384,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-build-final.log",
+      "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+    },
+    {
+      "bytes": 191320,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-full-unit.log",
+      "sha256": "2d88ab1b60c1ef58627db6bc20ada3e65f68e1ab43d41ddb6b2f85e36f34f6d2"
+    },
+    {
+      "bytes": 0,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-main-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 584,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-native-check.log",
+      "sha256": "515ddf9ce9420d9058ef41b1c75892a66adcf907b0e906731af43dc0bbe067ce"
+    },
+    {
+      "bytes": 1044,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-test-lint-fixed.log",
+      "sha256": "baec23c1a5a5647ad2590baea6c82fcb330a2d863774af12d14dad7b7ca83215"
+    },
+    {
+      "bytes": 0,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-test-types-fixed.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1917,
+      "path": "contiguous-source-crc/root-validation/manabitan-2754-crc-test-types.log",
+      "sha256": "b5e57a4264708defb23cf46af66a22bd1ed8d06176d2def512c6b560374a18ed"
+    },
+    {
+      "bytes": 522567,
+      "path": "contiguous-source-crc/vndb-jitendex-bounded-worker-parity.json",
+      "sha256": "70de3ccbd3d6f280446a2f35531821c21634c250f427e3301eaee8137d525776"
+    },
+    {
+      "bytes": 555891,
+      "path": "contiguous-source-crc/vndb-manabitan-worker-parity.json",
+      "sha256": "fe4f9b18a671b3cb7ecf753b56fc2ab8318519bef0713d8b428c5e6b7bd32a99"
+    },
+    {
+      "bytes": 8625,
+      "path": "contiguous-source-crc/worker-parity.mjs",
+      "sha256": "3039399178a9db7b546fb77f558ab20d4d7c9123944dc26ea24c5dc9968a9f57"
+    },
+    {
+      "bytes": 237,
+      "path": "native-media-projection/build-chrome-hardlink.log",
+      "sha256": "ddc205beaaf6e1af5e9bdd24b7468af7ee7800915f7d9bc70d7347f5b6f75327"
+    },
+    {
+      "bytes": 237,
+      "path": "native-media-projection/build-chrome.log",
+      "sha256": "ddc205beaaf6e1af5e9bdd24b7468af7ee7800915f7d9bc70d7347f5b6f75327"
+    },
+    {
+      "bytes": 384,
+      "path": "native-media-projection/build-dryrun.log",
+      "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+    },
+    {
+      "bytes": 25547,
+      "path": "native-media-projection/ci/media-jobs-45644262132.json",
+      "sha256": "a6c7878ad4d642a3ba11a2a87c4d9b7e0aad83758e37e85469c0687b07e26ad5"
+    },
+    {
+      "bytes": 14135,
+      "path": "native-media-projection/ci/media-run-45644262132.json",
+      "sha256": "60b2f66f1f39711465aa0f9ee877dede26bf6673c239cd5ccabbe1a04af46b42"
+    },
+    {
+      "bytes": 578981,
+      "path": "native-media-projection/current-base-projection-oracle.json",
+      "sha256": "da61816cbfd6a360212e6afbc0fd598892064ab6c442fedfc7123e96ede6ab3c"
+    },
+    {
+      "bytes": 6497,
+      "path": "native-media-projection/current-base-projection-oracle.log",
+      "sha256": "98001160fb0a0b1c6e79191970d122998743fe4b2866fb73b071b8415d5c04e5"
+    },
+    {
+      "bytes": 3386,
+      "path": "native-media-projection/directory-screen.json",
+      "sha256": "29db0c62a1c4c3b88be93caccc0cd8f777c2557c21ce6a241454672633d64f06"
+    },
+    {
+      "bytes": 2804,
+      "path": "native-media-projection/directory-screen.mjs",
+      "sha256": "4adff532773217322d1e9d4f635d44c785d6c55e232248271feaea7fd69e816f"
+    },
+    {
+      "bytes": 1977,
+      "path": "native-media-projection/focused-tests-final.log",
+      "sha256": "bdf34a99f14c36bb263a964d4e085cfa3d846e61911f0a0e072a8928c7369c8e"
+    },
+    {
+      "bytes": 3037,
+      "path": "native-media-projection/focused-tests.log",
+      "sha256": "c0b1f5f013e6c128a9e2bdb480b4b520f22758f01cd596121b1d25ea645fe720"
+    },
+    {
+      "bytes": 2521,
+      "path": "native-media-projection/integration-snapshot/dev/data/dictionary-wasm/manifest.json",
+      "sha256": "5bc7fa88ad0315bbeb7d35c2f840a16b99a3526f13d1c48807f7bc9dd69ef32f"
+    },
+    {
+      "bytes": 16935,
+      "path": "native-media-projection/integration-snapshot/ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+    },
+    {
+      "bytes": 206273,
+      "path": "native-media-projection/integration-snapshot/ext/js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c"
+    },
+    {
+      "bytes": 156075,
+      "path": "native-media-projection/integration-snapshot/ext/js/dictionary/wasm/term-bank-parser.c",
+      "sha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e"
+    },
+    {
+      "bytes": 48667,
+      "path": "native-media-projection/integration-snapshot/test/term-bank-experiments.test.js",
+      "sha256": "382e99a07a67f43a656c84ca342e6d469f6f84f5209731deb35eb7864a9c1e2c"
+    },
+    {
+      "bytes": 13050,
+      "path": "native-media-projection/integration-snapshot/test/term-bank-media-projection.test.js",
+      "sha256": "2765e5d44f176f806eec0b515bc13435d11b1e1e0b7d0490ffc40f507dc77c9e"
+    },
+    {
+      "bytes": 1042,
+      "path": "native-media-projection/lint-final.log",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    {
+      "bytes": 410,
+      "path": "native-media-projection/native-check.json",
+      "sha256": "e6aa03d1c166f818834bccb9c7dddc6274c3dad73b4bd31294ef3d6a9441ab3c"
+    },
+    {
+      "bytes": 410,
+      "path": "native-media-projection/native-write.json",
+      "sha256": "328dead07dcd19f69deeda43e20460f2b52d27a8720b304763bb343addc2faaf"
+    },
+    {
+      "bytes": 2013,
+      "path": "native-media-projection/package-delta-hardlink.json",
+      "sha256": "de36942a4f5f5e24cbf45ca70b9a3a99572ca3b81785133bf2dc94fe51d5a474"
+    },
+    {
+      "bytes": 5665,
+      "path": "native-media-projection/package-delta.json",
+      "sha256": "1bbcb91e0e758be093617026c8e5c05b086393cbcbda29018402d57bbce0917e"
+    },
+    {
+      "bytes": 9728,
+      "path": "native-media-projection/previous-audit/verify-native-media-projection.mjs",
+      "sha256": "817e4394aeb67d73012cfd3ba07b10d05b16b3a7c7333b060a0015c330c211b6"
+    },
+    {
+      "bytes": 10617,
+      "path": "native-media-projection/previous-audit/verify-production-media-projection.mjs",
+      "sha256": "9a516feda3d781ee172fafc3b5ddfe4623cc3999f21095e6b2ebb97dde157f6e"
+    },
+    {
+      "bytes": 1549,
+      "path": "native-media-projection/rejected-arena-decode.patch",
+      "sha256": "4ca6713bcc424d36bff5632daf28109255c0cf7b66531492191161fecd4399f9"
+    },
+    {
+      "bytes": 0,
+      "path": "native-media-projection/types-main.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "native-media-projection/types-test.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 10919,
+      "path": "native-media-projection/verify-integrated-media-projection.mjs",
+      "sha256": "81a54a109154dcb43258c75be78af8da414022562998b9c3d7875f755c3f9368"
+    },
+    {
+      "bytes": 3944,
+      "path": "native-metadata-preflight/independent-source-review.md",
+      "sha256": "50b06319c1e1ef3e87400884f66defa95169e3dc5bb9d5da209ac87853204eec"
+    },
+    {
+      "bytes": 52909,
+      "path": "native-metadata-preflight/jitendex-publish-real-parity.json",
+      "sha256": "36719e36c73a528294403376cdfcbe5ec239cd345b33dafdfe4d5274992cfdae"
+    },
+    {
+      "bytes": 14084,
+      "path": "native-metadata-preflight/jmdict-publish-real-parity.json",
+      "sha256": "5dce29766f60028cc1681d6a0e0378809ed8219b792f94c1f3ca1552e6c221ab"
+    },
+    {
+      "bytes": 9586,
+      "path": "native-metadata-preflight/jmdict-publish-real-parity.mjs",
+      "sha256": "d6dfa419b64f5c2e3dd49d2a25d1652262df34e8903d48c5aca5d8e13d232cff"
+    },
+    {
+      "bytes": 3648,
+      "path": "native-metadata-preflight/jmdict-publish-screen.mjs",
+      "sha256": "072b7321b57ade907f6133c711a5cdfb76472bda3a0151b7fbab1f188d05b50a"
+    },
+    {
+      "bytes": 1261,
+      "path": "native-metadata-preflight/later-format-ast.json",
+      "sha256": "5010d4485ad56d819446bf19cedd984fcb98373ac4c70a4c2591fab0b9ae5f8a"
+    },
+    {
+      "bytes": 35980,
+      "path": "native-metadata-preflight/metadata-admission-audit.json",
+      "sha256": "d568249b814c89293af71a1a26b463d48b4e632c2a4a6c2b9efcf60465fcb45f"
+    },
+    {
+      "bytes": 6099,
+      "path": "native-metadata-preflight/metadata-admission-audit.md",
+      "sha256": "f90f94aa427847e278eff89c356b7aadad335452fa05d7aa46721ab8fe4c9b5e"
+    },
+    {
+      "bytes": 691953,
+      "path": "native-metadata-preflight/metadata-codeql-45647170330-job.log",
+      "sha256": "e8c8d4807d6d4206c817d5cebe28ff872dc0a9716dd290a2f5b8b161611fc96d"
+    },
+    {
+      "bytes": 7115,
+      "path": "native-metadata-preflight/metadata-codeql-45647170330.json",
+      "sha256": "bff6569984cd7626411b9d62efddace340ac811baf7dafed5e3f38e7d1074ef5"
+    },
+    {
+      "bytes": 2577,
+      "path": "native-metadata-preflight/metadata-codeql-45647170330.md",
+      "sha256": "1fe84906f9fb361c1e136d408527f1e2f92eecad9f7f9dbde04c6b7b240ca5e5"
+    },
+    {
+      "bytes": 385,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-build-60a8.log",
+      "sha256": "135ee4670d5a0fade50f62f6eec6cd146f42bd49cd0fb60ddd0aaf4af4ebb1c7"
+    },
+    {
+      "bytes": 4691,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-final-lint.log",
+      "sha256": "6ce2f991a6894a3fd5b6d6763f33d408245b0ceac5f8dabffbabe9cef1ccd564"
+    },
+    {
+      "bytes": 192797,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-full-unit.log",
+      "sha256": "c8b90b84197d45eeaa10be971504fef493c3c20422c3b2ab867b7a0123298a0f"
+    },
+    {
+      "bytes": 1042,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-lint-60a8.log",
+      "sha256": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31"
+    },
+    {
+      "bytes": 0,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-main-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 584,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-native-check-final.log",
+      "sha256": "29a366dd7d64050dd97b488de9df7c475c766a2167551e1ecfa626843db29a3a"
+    },
+    {
+      "bytes": 1541,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-test-types.log",
+      "sha256": "d23f9e575bb67c7473871ba595748faa2e6fc07b82b81bf5db87a94c69183676"
+    },
+    {
+      "bytes": 928,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-tests-60a8.log",
+      "sha256": "8018976de095e8bcd36ad952addd2f18095cbdea97f15f3cba3488468bcde82c"
+    },
+    {
+      "bytes": 757,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-timeout-isolation-baseline.log",
+      "sha256": "50a19f7c89cbcc41364a8a048cc7539027528df22f3f1369adbb031682e9c60e"
+    },
+    {
+      "bytes": 753,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-timeout-isolation-candidate.log",
+      "sha256": "3ad2d939de776cb7881cb26b5241f8ab4f3ac93d31b2f6451181249c44725039"
+    },
+    {
+      "bytes": 1144,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-timeout-isolation.json",
+      "sha256": "d50151127eaf5cb060a6bd8530bcab094b6ee8f0b1ac0f83e55349c049b5884c"
+    },
+    {
+      "bytes": 0,
+      "path": "native-metadata-preflight/root-validation/manabitan-2754-jmdict-types-60a8.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 158653,
+      "path": "native-metadata-preflight/vndb-publish-real-parity.json",
+      "sha256": "f54216d22f51c479406d2cb0289ebf8a615139a8363e99cadc8fa1cb00a59777"
+    },
+    {
+      "bytes": 2521,
+      "path": "provenance/contiguous-source-crc-wasm-manifest.json",
+      "sha256": "e7601fae11df2e283863eba67e3219d9649570235b9ed65f6a485a939daa3d19"
+    },
+    {
+      "bytes": 9665,
+      "path": "provenance/final-pr-ci-snapshot.json",
+      "sha256": "54d83a55db2786907025b51fd69bb01274479f9f6b02357bb7231595f6e34400"
+    },
+    {
+      "bytes": 32356,
+      "path": "provenance/final-source-ci-jobs.json",
+      "sha256": "abfe10230425ee8adc131d1a4773e6fef52eb2f08c93323141fd79c335249e16"
+    },
+    {
+      "bytes": 2588,
+      "path": "provenance/native-media-projection-wasm-manifest.json",
+      "sha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd"
+    },
+    {
+      "bytes": 2521,
+      "path": "provenance/native-metadata-preflight-wasm-manifest.json",
+      "sha256": "f93d858d832c25f99c08ca77d5162f1b2f67490c8daadd41df339705899c12dc"
+    },
+    {
+      "bytes": 10301,
+      "path": "provenance/pack_component_evidence.py",
+      "sha256": "5a4ab28c8d13cac365b9a3c6baa639aed6772c74a0ce8e4d1fd5f3dffd2a9950"
+    },
+    {
+      "bytes": 6690,
+      "path": "provenance/source-identities.json",
+      "sha256": "2970a3de0be3794cf5240d2800718b93c61195def57f0d247ebde8e5b327fcb8"
+    }
+  ],
+  "notes": [
+    "Earlier media projection integration-snapshot is preserved as scratch history; its parser asset predates the successful pinned rebuild and is not qualification evidence.",
+    "Earlier media package-delta.json includes dependency-symlink path churn; package-delta-hardlink.json records the corrected ordinary build with exactly four changed entries.",
+    "The metadata owner supplied no saved raw logs for their first focused tests/native rebuild; this archive does not reconstruct those logs. Later genuine root-validation logs for head b273513 are preserved separately, along with the initial lint/nullability failures.",
+    "CRC failure receipts distinguish transcribed tool outcomes from original raw logs; their missing candidate results remain missing.",
+    "Component RSS and timing values are diagnostic only. Bounded worker replays do not reproduce full parallel scheduling."
+  ],
+  "omittedBinaryFiles": [
+    {
+      "bytes": 63004,
+      "path": "native-media-projection/integration-snapshot/dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "reason": "Compiled diagnostic or historical archive payload omitted; current committed asset identities, retained text sources, and diagnostic receipts are preserved. Integration-snapshot files are pre-rebuild scratch, not the frozen validated candidate.",
+      "sha256": "35df33574aa8ccfbcb31a8f4ba336b7ba35d9160c3a6ea4c49d140615ebc0764"
+    },
+    {
+      "bytes": 262640,
+      "path": "native-media-projection/previous-vndb-audit.tar.gz",
+      "reason": "Compiled diagnostic or historical archive payload omitted; current committed asset identities, retained text sources, and diagnostic receipts are preserved. Integration-snapshot files are pre-rebuild scratch, not the frozen validated candidate.",
+      "sha256": "a281f9fd4042b9aec0358e88f75f4a24c95aeda0111f65c38950004148e07c40"
+    },
+    {
+      "bytes": 63004,
+      "path": "contiguous-source-crc/parser-baseline.wasm",
+      "reason": "Compiled diagnostic or historical archive payload omitted; current committed asset identities, retained text sources, and diagnostic receipts are preserved. Integration-snapshot files are pre-rebuild scratch, not the frozen validated candidate.",
+      "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c"
+    },
+    {
+      "bytes": 64566,
+      "path": "contiguous-source-crc/parser-names.wasm",
+      "reason": "Compiled diagnostic or historical archive payload omitted; current committed asset identities, retained text sources, and diagnostic receipts are preserved. Integration-snapshot files are pre-rebuild scratch, not the frozen validated candidate.",
+      "sha256": "8f17a1ca6a43d4146052a653eb84ade4350a4b5ff25d10840c06e612686d935d"
+    }
+  ],
+  "schemaVersion": 1,
+  "scope": "Component correctness and diagnostic receipts only; no browser timing or memory qualification inference. All available supplied local text receipts and harnesses are preserved, including rejected experiments and failures.",
+  "sourceIdentities": {
+    "baseline": {
+      "commit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+      "tree": "99d23f16e973c7ae9feba77ca3643d1c27dfb93d"
+    },
+    "candidates": {
+      "contiguous-source-crc": {
+        "changedSourceFiles": [
+          {
+            "bytes": 2521,
+            "path": "dev/data/dictionary-wasm/manifest.json",
+            "sha256": "e7601fae11df2e283863eba67e3219d9649570235b9ed65f6a485a939daa3d19"
+          },
+          {
+            "bytes": 63334,
+            "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+            "sha256": "183439d0b91d0f60c6a1a3823700b9e18a527238cb9b15f37a605027e3816c53"
+          },
+          {
+            "bytes": 204333,
+            "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+            "sha256": "d04d2e9a028b3b742e794e94a6eea16f0239e0cdd3f3ce994a8d2231eae35698"
+          },
+          {
+            "bytes": 152367,
+            "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+            "sha256": "b574e98d608512dfd77613ac8494449826d80e1c69c356468f59837f5eb7dca4"
+          },
+          {
+            "bytes": 6386,
+            "path": "test/term-bank-crc-contiguous-runs.test.js",
+            "sha256": "af93846d51596c81666d6732805fb75dd80ec8c22b2d4feaa29d4e306f044204"
+          },
+          {
+            "bytes": 14750,
+            "path": "test/term-bank-source-crc-reuse.test.js",
+            "sha256": "530c6f80441646f992ac6850032dbc0ab5b763d9bc3a9330068d590a263160e9"
+          }
+        ],
+        "equivalentLocalCommit": "8657de155e6a17c7d85c67f66c0eebdff6931ed3",
+        "frozenHostedCommit": "c2cf7647c67b02474301ed48e54a53205be0f027",
+        "laterTestAnnotationHead": {
+          "changedPaths": [
+            "test/term-bank-source-crc-reuse.test.js"
+          ],
+          "hostedCommit": "2fe47fa3db04342d04eb4f309c5d74ef45eef9e3",
+          "localCommit": "a3b5ddf4bb676b06bd8a577c67f971907ddc30b2",
+          "meaning": "One JSDoc type annotation fixes the three test TypeScript literal-inference diagnostics. Performance studies remain labeled with frozen c2cf7647; no source or performance reacquisition occurred.",
+          "productSourceAndBuildInputsUnchanged": true,
+          "tree": "18f2494dbb185f189c59efb8ba2b1bf96855eeb8"
+        },
+        "tree": "074e622aec0c6537c7f0d8ac92725dd62c28b73b"
+      },
+      "native-media-projection": {
+        "changedSourceFiles": [
+          {
+            "bytes": 2588,
+            "path": "dev/data/dictionary-wasm/manifest.json",
+            "sha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd"
+          },
+          {
+            "bytes": 67550,
+            "path": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+            "sha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+          },
+          {
+            "bytes": 16935,
+            "path": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+            "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1"
+          },
+          {
+            "bytes": 206273,
+            "path": "ext/js/dictionary/term-bank-wasm-parser.js",
+            "sha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c"
+          },
+          {
+            "bytes": 156075,
+            "path": "ext/js/dictionary/wasm/term-bank-parser.c",
+            "sha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e"
+          },
+          {
+            "bytes": 49415,
+            "path": "test/term-bank-experiments.test.js",
+            "sha256": "ca311f17d749ac5ef9fb5533ffed651b44fc540860fd842638382c5c065e65bc"
+          },
+          {
+            "bytes": 13050,
+            "path": "test/term-bank-media-projection.test.js",
+            "sha256": "2765e5d44f176f806eec0b515bc13435d11b1e1e0b7d0490ffc40f507dc77c9e"
+          }
+        ],
+        "equivalentLocalCommit": "98731a11d81161c929f7822516610e3018aa9dab",
+        "frozenHostedCommit": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+        "laterPr875TestHead": {
+          "changedPaths": [
+            "test/term-bank-experiments.test.js",
+            "test/term-bank-media-projection.test.js"
+          ],
+          "commit": "5afd2e97ec2707b150acfde61115aee688547a78",
+          "meaning": "The frozen component, timing and memory product remains 7a8b25; the later PR head adds route-disabled coverage in only these two test files.",
+          "parent": "7a8b25a44a3fe165107ed816377cc72bb0fac67d",
+          "productSourceAndBuildInputsUnchanged": true,
+          "tree": "a6981459853d7ea102afd801c1e447e49311db1e"
+        },
+        "tree": "093a0be94fcf336ab5a0113b80fae7481855935a"
+      },
+      "native-metadata-preflight": {
+        "changedSourceFiles": [
+          {
+            "bytes": 2521,
+            "path": "dev/data/dictionary-wasm/manifest.json",
+            "sha256": "f93d858d832c25f99c08ca77d5162f1b2f67490c8daadd41df339705899c12dc"
+          },
+          {
+            "bytes": 2062,
+            "path": "dev/data/dictionary-wasm/term-content-canonical-scan-v1.wasm",
+            "sha256": "f17603b330f8d21f454681518db52a4fb02d07b0f16faec20d6a4f69e17a7acc"
+          },
+          {
+            "bytes": 610544,
+            "path": "ext/js/dictionary/dictionary-database.js",
+            "sha256": "7af9c4aea1a05a10b4bb85ede77dd2c2691ff66d9cb21a2d4a9713d07d910a7c"
+          },
+          {
+            "bytes": 23286,
+            "path": "ext/js/dictionary/term-content-canonical-scan.js",
+            "sha256": "0a1c243821bcc5cfe7bd15b2c9ab5b502bd9cb6225bf4b15faa3f7de591b4b39"
+          },
+          {
+            "bytes": 8211,
+            "path": "ext/js/dictionary/wasm/term-content-canonical-scan-v1.c",
+            "sha256": "34cf2d361b188e9e3598ca35c7a90c337f0b841ef2b9117d6bca2fbb9d06b063"
+          },
+          {
+            "bytes": 29450,
+            "path": "test/dictionary-content-publication-range.test.js",
+            "sha256": "221dde50f5f4ad0a089997ccd87fa33abebacbb43d6a3652c7dc9076d3977749"
+          }
+        ],
+        "equivalentLocalCommit": "d61a49f03b48b2b9cb1cd704aa0c2a994820f46d",
+        "frozenHostedCommit": "b2e816c4714f42f87cbb6a1ebc7fe1a2d2fd863b",
+        "laterValidationHead": {
+          "changedPathsSinceFrozenStudy": [
+            "ext/js/dictionary/term-content-canonical-scan.js",
+            "test/dictionary-content-publication-range.test.js"
+          ],
+          "commit": "b273513dab4fa409a0213a2db470e52b4a0f559c",
+          "equivalentLocalCommit": "60a8a9c1daeb1873017194f852ce6f7fef736d05",
+          "meaning": "Frozen component and hosted study source remains b2e816c. Later source formatting has a retained exact AST comparison; subsequent checked non-null fixture guards affect tests. Final lint/types/focused tests/dry builds apply to this later validation head, not the frozen study commit.",
+          "tree": "dcaa01db1e3cb790275ea71543e1cd607cb46be9"
+        },
+        "tree": "be5b6a8d9c24915516d6edd8167a071e0449d793"
+      }
+    }
+  },
+  "sourceRoots": {
+    "contiguous-source-crc": "/workspace/scratch/2754d3e3fa09/jitendex/builds/perf",
+    "native-media-projection": "/workspace/scratch/2754d3e3fa09/vndb-evidence",
+    "native-metadata-preflight": "/workspace/scratch/2754d3e3fa09/evidence"
+  },
+  "verification": {
+    "duplicateBuildByteIdentical": true,
+    "everyMemberRoundTripMatches": true
+  }
+}

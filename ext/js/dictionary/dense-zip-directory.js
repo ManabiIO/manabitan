@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {DenseZipFileMap} from './dense-zip-file-map.js';
+
 const SEARCH_BYTES = 98;
 const LOCAL_HEADER_BYTES = 30;
 const DIRECTORY_HEADER_BYTES = 46;
@@ -26,6 +28,7 @@ const UINT32_MAX = 0xffffffff;
 const decoder = new TextDecoder();
 
 /** @typedef {{filename: string, rawFilename: Uint8Array, offset: number, compressedSize: number, uncompressedSize: number, compressionMethod: 0|8, signature: number, encrypted: false, directory: false}} DenseZipEntry */
+/** @typedef {(this: DenseZipEntry, writer: import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter, options?: import('@zip.js/zip.js').EntryGetDataOptions) => Promise<unknown>} DenseZipEntryReader */
 
 /**
  * Read a narrow single-disk ZIP directory with plain printable ASCII names.
@@ -35,6 +38,31 @@ const decoder = new TextDecoder();
  * @returns {Promise<DenseZipEntry[]|null>}
  */
 export async function readDenseZipDirectory(archive, checkCancellation = () => {}) {
+    return /** @type {DenseZipEntry[]|null} */ (await readDenseZipDirectoryInternal(archive, checkCancellation, null));
+}
+
+/* eslint-disable @stylistic/semi */
+/**
+ * Read the same checked catalog while retaining compact metadata for members
+ * which the importer may never open. The media worker keeps the array API.
+ * @param {Blob} archive
+ * @param {DenseZipEntryReader} getData
+ * @param {() => void} [checkCancellation]
+ * @returns {Promise<DenseZipFileMap|null>}
+ */
+export async function readDenseZipFileMap(archive, getData, checkCancellation = () => {}) {
+    return /** @type {DenseZipFileMap|null} */ (await readDenseZipDirectoryInternal(archive, checkCancellation, getData))
+}
+/* eslint-enable @stylistic/semi */
+
+/**
+ * @param {Blob} archive
+ * @param {() => void} checkCancellation
+ * @param {DenseZipEntryReader|null} getData
+ * @returns {Promise<DenseZipEntry[]|DenseZipFileMap|null>}
+ * @throws {Error} If an otherwise valid directory contains duplicate names.
+ */
+async function readDenseZipDirectoryInternal(archive, checkCancellation, getData) {
     if (archive.size < MIN_ARCHIVE_BYTES) { return null; }
     const tailStart = archive.size - SEARCH_BYTES;
     checkCancellation();
@@ -98,12 +126,15 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
     // This narrow directory has no extra fields or comments. Filename views
     // retain a compact arena so catalog entries can release central headers.
     const filenameBytes = new Uint8Array(length - count * DIRECTORY_HEADER_BYTES)
+    const fileMap = getData === null ? null : new DenseZipFileMap(count, filenameBytes, getData)
+    /** @type {string|null} */
+    let duplicateFilename = null
     /** @type {DenseZipEntry[]} */
     const entries = [];
     let position = 0;
     let localEnd = 0;
     let filenamePosition = 0
-    while (entries.length < count) {
+    for (let row = 0; row < count; ++row) {
         if (position > length - DIRECTORY_HEADER_BYTES || view.getUint32(position, true) !== 0x02014b50) { return null; }
         const flags = view.getUint16(position + 8, true);
         const compressionMethod = view.getUint16(position + 10, true);
@@ -133,21 +164,28 @@ export async function readDenseZipDirectory(archive, checkCancellation = () => {
             filenameBytes[filenamePosition + i] = value
         }
         const rawFilename = filenameBytes.subarray(filenamePosition, filenamePosition + filenameLength)
-        entries.push({
-            filename: decoder.decode(rawFilename),
-            rawFilename,
-            offset: localOffset,
-            compressedSize,
-            uncompressedSize,
-            compressionMethod,
-            signature,
-            encrypted: false,
-            directory: false,
-        });
+        const filename = decoder.decode(rawFilename)
+        if (fileMap === null) {
+            entries.push({
+                filename,
+                rawFilename,
+                offset: localOffset,
+                compressedSize,
+                uncompressedSize,
+                compressionMethod,
+                signature,
+                encrypted: false,
+                directory: false,
+            })
+        } else if (!fileMap.addDirectoryEntry(row, filename, filenamePosition, localOffset, compressedSize, uncompressedSize, compressionMethod, signature)) {
+            duplicateFilename ??= filename
+        }
         position = filenameEnd;
         localEnd = localOffset + LOCAL_HEADER_BYTES + filenameLength + compressedSize;
         filenamePosition += filenameLength
     }
     /* eslint-enable @stylistic/semi */
-    return position === length && localEnd === offset ? entries : null;
+    if (position !== length || localEnd !== offset) { return null; }
+    if (duplicateFilename !== null) { throw new Error(`Duplicate archive filename: '${duplicateFilename}'`); }
+    return fileMap ?? entries;
 }
