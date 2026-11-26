@@ -113,7 +113,10 @@ describe('content-key child container entry', () => {
     })
 
     test('retains the exact nesting limit for consecutive content objects', async () => {
-        /** @param {number} objects */
+        /**
+         * @param {number} objects
+         * @returns {string}
+         */
         const nested = (objects) => `${'{"content":'.repeat(objects - 1)}{}${'}'.repeat(objects - 1)}`
         const accepted = `[{"type":"structured-content","content":${nested(254)}}]`
         expect((await parse([bank(accepted)])).glossaries).toStrictEqual([JSON.parse(accepted)])

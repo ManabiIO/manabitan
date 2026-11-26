@@ -188,13 +188,13 @@ async function replayGroup(source, banks, mediaHintFastScan) {
                 const alignedStringLength = Math.ceil(stringLength / 4) * 4
                 const baseColumns = (keyCount + 3 * rows) * 2
                 const derivedColumns = (keySlots + keyCount + 2 * (keyCount + 1) + rows + readingPostings +
-                    sequenceSlots + sequenceKeys + sequenceKeys + 1 + sequencePostings) * 2
+                sequenceSlots + sequenceKeys + sequenceKeys + 1 + sequencePostings) * 2
                 assert.equal(16 + baseLength + derivedLength, bytes.byteLength)
                 assert.equal(baseLength, 32 + alignedStringLength + Math.ceil(baseColumns / 4) * 4 + sequenceKeys * 4)
                 assert.equal(derivedLength, 32 + Math.ceil(derivedColumns / 4) * 4)
                 const requiredZeroBytes = 8 + alignedStringLength - stringLength +
-                    Math.ceil(baseColumns / 4) * 4 - baseColumns + derivedLength - 32 - derivedColumns +
-                    4 * (keyCount + 1) + 2 * (sequenceKeys + 1)
+                Math.ceil(baseColumns / 4) * 4 - baseColumns + derivedLength - 32 - derivedColumns +
+                4 * (keyCount + 1) + 2 * (sequenceKeys + 1)
                 initializationBytesAvoided += bytes.byteLength + 2 * (keyCount + sequenceKeys) - requiredZeroBytes
                 outputBytes += bytes.byteLength
             }

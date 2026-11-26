@@ -741,8 +741,9 @@ the JavaScript v7 encoder and all 86 existing lookup/index preparation tests.
 The new cases cover every key alignment, odd/even row counts, absent and present
 reading/sequence postings, changing data in reused memory, hash cardinalities,
 long keys, and guards around output capacity. Source-bound Clang/LLD 21.1.8
-regeneration succeeds for the composed source. Full composed validation and
-bounded three-corpus correctness receipts will be appended when completed.
+regeneration succeeds for the composed source. The complete bounded
+three-corpus replay now passes. Its scope and the local unit result are
+recorded below.
 
 No complete-import timing or peak-memory improvement is claimed. The first
 correctness replay was interrupted after five JMdict groups because it started
@@ -763,3 +764,59 @@ and every prepared lookup byte. Native output layouts provide source-level
 redundant initialization-byte counts, not hardware store counts or measured
 memory savings. Keep the composed candidate in draft pending hosted correctness
 checks and separate complete-import performance qualification.
+
+### Composed source-bound corpus result
+
+The final candidate is the 67,997-byte parser module with SHA-256
+`354a71c2adb4692a9304a14274f2b277d819b9929a10057ad04af61d6f41bd3e`,
+447 bytes larger than develop. The runner verifies the complete native source
+binding and the packaged module before reading a corpus. Source and module
+identities remained unchanged through completion.
+
+| Dictionary | Term rows compared | Banks | Native indexes | Repeated initialization bytes removed |
+| ---------- | -----------------: | ----: | -------------: | ------------------------------------: |
+| JMdict     |            528,299 |    53 |             12 |                            18,532,248 |
+| Jitendex   |            436,555 |   219 |             22 |                            18,897,396 |
+| VNDB       |          6,648,310 |   665 |            170 |                           327,921,810 |
+
+All 7,613,164 rows across 937 banks preserve complete canonical slabs, row
+content descriptors and unique IDs, media-row values, semantic key plans,
+and every prepared lookup byte. All 204 indexes use the native path; no
+native fallbacks occur. The byte counts sum to 365,351,454 bytes of eliminated
+source-level initialization work. They describe cumulative work in this fixed
+component grouping, not peak memory, CPU instructions, or import latency.
+Media payload extraction, persistence, and browser behavior are outside this
+replay. Source groups follow the existing byte-balancing model with an explicit
+three-worker policy, but execute serially; no browser concurrency is claimed.
+
+The immutable [complete report](../../builds/perf/native-lookup-initialization-20261126/composed-three-corpus-verified.json.txt)
+has SHA-256 `2eee36a6083824dfa00dd0c2504c0785d46129d24aaa35d7d51c5e3d43daeb61`.
+The source-bound runner and its exact invocation can be reproduced with Node 22:
+
+```sh
+node --expose-gc test/perf/native-lookup-initialization-20261126/replay.mjs \
+  --baseline-root /path/to/develop-0143e959 \
+  --candidate-root . --cache-dir /path/to/locked-dictionaries \
+  --parser-workers 3 --pairs 1 --out /path/to/new-report.json.txt \
+  jmdict jitendex vndb
+```
+
+The composed local five-file unit invocation reports 141 passing assertions,
+including all 56 new cases, and one failed unchanged maximum-cardinality
+sequence case after 11.76 seconds with `STACK_TRACE_ERROR`. It also reports a
+worker shutdown timeout. Its [original JSON](../../builds/perf/native-lookup-initialization-20261126/composed-focused.json.txt)
+and [raw log](../../builds/perf/native-lookup-initialization-20261126/composed-focused.log)
+remain a failed invocation; a complete local unit pass is not claimed from it.
+Hosted correctness checks and separate complete-import performance
+qualification remain required before promotion.
+
+The exact measured runner remains archived as
+[`composed-replay-runner.mjs.txt`](../../builds/perf/native-lookup-initialization-20261126/composed-replay-runner.mjs.txt);
+the maintained runner subsequently received continuation-indentation fixes
+only. Changed-file ESLint now passes for both new test suites and the runner,
+and `npm run test:build` passes all seven extension targets. These checks do
+not supersede the failed focused-unit invocation. The
+[validation receipt](../../builds/perf/native-lookup-initialization-20261126/final-validation.json.txt)
+records exact output hashes, the earlier invalid or failed attempts, and the
+remaining validation gates. Native source and the source-bound module are
+unchanged from the measured candidate.

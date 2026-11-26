@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "recordedAt": "2026-11-26T17:05:06.380381+00:00",
+  "scope": "Follow-up corpus evidence and lint-only runner/test edits. No production source or source-bound WASM changes from the source commit.",
+  "sourceCommit": "de7363b9cda818f6c6e2a64ab7d21fa0ffc48a97",
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "node": "v24.22.3",
+  "module": {
+    "bytes": 67997,
+    "sha256": "354a71c2adb4692a9304a14274f2b277d819b9929a10057ad04af61d6f41bd3e"
+  },
+  "corpus": {
+    "status": "passed",
+    "exitCode": 0,
+    "report": "composed-three-corpus-verified.json.txt",
+    "reportSha256": "2eee36a6083824dfa00dd0c2504c0785d46129d24aaa35d7d51c5e3d43daeb61",
+    "runnerSnapshot": "composed-replay-runner.mjs.txt",
+    "runnerSha256": "2ece3052a2f5b244f09e16510d0c200203c12994d44a8ec2d1f5433293c67d71",
+    "maintainedRunnerSha256": "c934e0249393127774aa8eda1be1d0d359921d03be0a68960513a6536cd5eb68",
+    "maintainedRunnerDifference": "Continuation-line indentation only after acquisition; exact measured runner retained separately.",
+    "rows": 7613164,
+    "banks": 937,
+    "nativeIndexes": 204,
+    "nativeFallbacks": 0,
+    "sourceLevelInitializationBytesRemoved": 365351454,
+    "interpretation": "Exact bounded parser/lookup parity and source-level initialization work counts only; no whole-import speed, peak-memory, hardware-store or browser claim."
+  },
+  "checks": [
+    {
+      "name": "changed-file ESLint",
+      "status": "passed",
+      "exitCode": 0,
+      "command": "node node_modules/eslint/bin/eslint.js test/term-lookup-output-initialization.test.js test/term-bank-content-container-open.test.js test/perf/native-lookup-initialization-20261126/replay.mjs",
+      "log": "final-changed-eslint.log"
+    },
+    {
+      "name": "all-target dry-run build",
+      "status": "passed",
+      "exitCode": 0,
+      "command": "npm run test:build",
+      "targets": [
+        "chrome",
+        "chrome-dev",
+        "chrome-playwright",
+        "firefox",
+        "firefox-dev",
+        "firefox-android",
+        "edge"
+      ],
+      "log": "final-test-build.log"
+    },
+    {
+      "name": "composed focused units",
+      "status": "failed",
+      "exitCode": 1,
+      "node": "v22.22.0",
+      "passedTests": 141,
+      "failedTests": 1,
+      "newTestsPassed": 56,
+      "report": "composed-focused.json.txt",
+      "log": "composed-focused.log",
+      "failure": "Unchanged maximum row/sequence cardinality case reported STACK_TRACE_ERROR after 11755.978933 ms; worker termination timeout also reported. This invocation is not a complete unit pass."
+    }
+  ],
+  "earlierFailures": [
+    {
+      "name": "initial composed correctness replay",
+      "status": "invalid and interrupted",
+      "record": "attempt01-disposition.json.txt",
+      "reason": "Replay started before composed native build completed, so packaged WASM was the prior standalone lookup binary."
+    },
+    {
+      "name": "standalone Jitendex timing screen",
+      "status": "failed with zero observations",
+      "record": "../import-20261126-4362/jitendex/receipt.json.txt",
+      "reason": "First baseline subprocess reached the unchanged 180-second timeout."
+    },
+    {
+      "name": "changed-file lint before formatting",
+      "status": "failed",
+      "reason": "Two runner continuation indentation violations and one missing nested-helper @returns annotation were fixed; first failure log was overwritten by the later failed attempt, so no reconstructed raw log is presented."
+    },
+    {
+      "name": "changed-file lint during disk exhaustion",
+      "status": "failed",
+      "exitCode": 2,
+      "log": "changed-eslint-disk-failure.log",
+      "reason": "Workspace disk exhaustion interrupted archival/lint work; retained raw log is empty. Subsequent successful checks ran after workspace space became available."
+    },
+    {
+      "name": "earlier standalone lint",
+      "status": "failed",
+      "exitCode": 137,
+      "reason": "Terminated under host resource pressure; no passing lint claim made from it."
+    }
+  ],
+  "rawEvidenceSha256": {
+    "composed-three-corpus-verified.log": "5e3b08fea87e05f0e6026f396c10dc96a274d6b4b80cb4c39269639efaa9d479",
+    "composed-focused.json.txt": "66b2a88aa3911e896afb5cda701fa6defdea7aee8e1a9a39416d823530c8b455",
+    "composed-focused.log": "d11b0b3641b1e20c3fe441594b1139d5351a22417926dd8155d7e06b4bbd238a",
+    "final-changed-eslint.log": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+    "final-test-build.log": "177a39e334338d228623f1b64257175099bfdac7961af1e6d1cce20784c1b85d",
+    "changed-eslint-disk-failure.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "remainingGates": "Parent coordinates composed main/test type checks and full unit coverage; hosted correctness CI and separate complete-import performance qualification remain required for promotion."
+}
