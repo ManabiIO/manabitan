@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {openAsBlob, readFileSync, writeFileSync} from 'node:fs'
+import {pathToFileURL} from 'node:url'
+
+const root = '/workspace/scratch/4a0c621eaaa8/manabitan-vndb'
+const out = '/workspace/scratch/4a0c621eaaa8/vndb-boundary-audit.json'
+const fixtureRoot = '/workspace/scratch/b4b304adc609/manabitan/builds/e2e-dictionary-cache'
+const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const {loadDictionaryWasm} = await import(pathToFileURL(`${root}/dev/dictionary-wasm.js`))
+const parser = await import(pathToFileURL(`${root}/ext/js/dictionary/term-bank-wasm-parser.js`))
+const {readDenseZipDirectory} = await import(pathToFileURL(`${root}/ext/js/dictionary/dense-zip-directory.js`))
+const {RawZipPayloadReader} = await import(pathToFileURL(`${root}/ext/js/dictionary/term-bank-source-pipeline.js`))
+parser.setTermBankWasmModule(await WebAssembly.compile(loadDictionaryWasm(root).get('term-bank-parser.wasm')))
+const source = readFileSync(`${root}/ext/js/dictionary/term-bank-wasm-parser.js`, 'utf8')
+const functions = source.slice(source.indexOf('function partitionSourceBanks('), source.indexOf('\n/**\n * @param {ParallelTermBankSourceValue[]}', source.indexOf('function partitionSourceBanks(')))
+const partition = new Function(`${functions}\nreturn partitionSourceBanks`)()
+const lock = JSON.parse(readFileSync(`${root}/test/perf/dictionaries.lock.json`)).dictionaries.vndb
+const archive = await openAsBlob(`${fixtureRoot}/${lock.cacheFile}`)
+assert.equal(archive.size, lock.sizeBytes)
+const entries = await readDenseZipDirectory(archive)
+assert(entries)
+const banks = entries.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+const estimatedSources = banks.map((file) => ({file, estimatedBytes: file.uncompressedSize}))
+const totalSourceBytes = banks.reduce((sum, file) => sum + file.uncompressedSize, 0)
+const groups = partition(estimatedSources, totalSourceBytes, Math.max(3 * 3, Math.ceil(totalSourceBytes / (24 * 1024 * 1024))))
+const reader = new RawZipPayloadReader(archive)
+const signal = new AbortController().signal
+const globalContent = new Map()
+const tailContent = new Map()
+let previousTail = null
+const report = {
+  dictionary: 'vndb', node: process.version, complete: false, authoritativeTiming: false,
+  boundary: 'Production source grouping and synchronous native compressed parser; exact token-byte equality. Cache opportunity census only, without database/OPFS persistence or a speed claim.',
+  archive: {filename: lock.cacheFile, sizeBytes: archive.size, expectedSha256: lock.sha256},
+  parserSha256: sha(source), groupingFunctionSha256: sha(functions), groups: [],
+  rows: 0, uniqueContent: 0, duplicateUniqueContent: 0, tailCacheHits: 0, previousTailHits: 0,
+  tailBytes: 0, maxTailBytes: 0,
+}
+const save = () => writeFileSync(out, JSON.stringify(report, null, 2) + '\n')
+for (const [groupIndex, group] of groups.entries()) {
+  const sources = []
+  for (const {file} of group) {
+    const bytes = await reader.read(file, signal)
+    assert(bytes)
+    sources.push({bytes, compressionMethod: file.compressionMethod, compressedSize: file.compressedSize, uncompressedSize: file.uncompressedSize, signature: file.signature, filename: file.filename})
+  }
+  const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, {}, true)
+  const receipt = {index: groupIndex, banks: group.map(({file}) => file.filename), rows: 0, unique: 0, duplicates: 0, tailCacheHits: 0, previousTailHits: 0, newTailBytes: 0}
+  await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, (chunk) => {
+    const {contentDedupPlan: plan, contentMetaList: meta, contentBytesBuffer: bytes, contentBytesBaseOffset: base, contentMetaByUniqueIndex} = chunk
+    assert(plan && meta && bytes && typeof base === 'number')
+    let lastPublished = null
+    receipt.rows += chunk.rowCount
+    receipt.unique += plan.uniqueCount
+    for (let unique = 0; unique < plan.uniqueCount; ++unique) {
+      const row = contentMetaByUniqueIndex ? unique : plan.uniqueRowIndexes[unique]
+      const start = base + meta[row * 4]
+      const value = Buffer.from(bytes.buffer, bytes.byteOffset + start, meta[row * 4 + 1])
+      const key = sha(value)
+      const previous = globalContent.get(key)
+      if (previous) {
+        assert(value.equals(previous), 'SHA-256 collision')
+        ++receipt.duplicates
+        if (tailContent.has(key)) { ++receipt.tailCacheHits }
+        if (previousTail === key) { ++receipt.previousTailHits }
+      } else {
+        const owned = Buffer.from(value)
+        globalContent.set(key, owned)
+        lastPublished = {key, owned}
+      }
+    }
+    if (lastPublished) {
+      previousTail = lastPublished.key
+      if (!tailContent.has(lastPublished.key)) {
+        tailContent.set(lastPublished.key, lastPublished.owned)
+        receipt.newTailBytes += lastPublished.owned.length
+        report.maxTailBytes = Math.max(report.maxTailBytes, lastPublished.owned.length)
+      }
+    }
+  }, 2048, {singleChunk: true, emitTermByteLists: false, computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true, validateGlossaryTypes: true, prepareLookupIndexes: true, preloadedSource})
+  report.rows += receipt.rows
+  report.duplicateUniqueContent += receipt.duplicates
+  report.tailCacheHits += receipt.tailCacheHits
+  report.previousTailHits += receipt.previousTailHits
+  report.tailBytes += receipt.newTailBytes
+  report.uniqueContent = globalContent.size
+  report.groups.push(receipt)
+  if (groupIndex % 20 === 0) { save(); console.log(JSON.stringify({groups: report.groups.length, rows: report.rows, duplicateUniqueContent: report.duplicateUniqueContent, tailCacheHits: report.tailCacheHits, previousTailHits: report.previousTailHits, tailBytes: report.tailBytes})) }
+}
+assert.equal(report.rows, lock.termRows)
+report.complete = true
+save()
+console.log(JSON.stringify({...report, groups: report.groups.length}))

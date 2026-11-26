@@ -1,0 +1,10 @@
+group,first_bank,last_bank,rows,local_unique,new_unique,persisted_hits,baseline_requests,candidate_requests,baseline_returned_bytes,candidate_returned_bytes,candidate_recent_hits,baseline_cache_bytes,candidate_cache_bytes,native_calls,native_eligibility_fallbacks
+0,term_bank_1.json,term_bank_6.json,60000,43143,43143,0,0,0,0,0,0,10867124,10867124,1,0
+1,term_bank_7.json,term_bank_12.json,60000,48849,48667,182,0,0,0,0,182,24862752,24862752,1,0
+2,term_bank_13.json,term_bank_18.json,60000,43866,43650,216,0,0,0,0,216,37725617,37725617,1,0
+3,term_bank_19.json,term_bank_24.json,60000,42443,41722,721,0,0,0,0,721,48155801,48155801,1,0
+4,term_bank_25.json,term_bank_30.json,60000,37764,37403,361,0,0,0,0,361,48201629,48201629,1,0
+5,term_bank_31.json,term_bank_36.json,60000,37732,37181,551,114,114,23186,23186,437,43279698,43279698,1,0
+6,term_bank_37.json,term_bank_41.json,50000,32040,31633,407,113,113,26147,26147,294,40153433,40153433,1,0
+7,term_bank_42.json,term_bank_47.json,60000,38126,37624,502,168,168,37116,37116,334,41394671,41394671,1,0
+8,term_bank_48.json,term_bank_53.json,58299,41847,41009,838,405,405,69415,69415,433,42031079,42031079,1,0

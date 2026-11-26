@@ -1,0 +1,20 @@
+{
+  "combined-integration.json.txt": "fa74412648e6ec0af0b2c8abb4d2b08d45e0cdc5af1560a633e8d18ad43721a6",
+  "focused-tests.log.txt": "f54753c0d7d3308a8d225ab1dc5b0ffef4247e009796b446fccfa3fc6c869872",
+  "initial-census-aborted.json.txt": "78401184f37b9bffb9ed99c57c506d5f258fbe2d9133f4feae7410c12749eb46",
+  "jitendex-groups.csv": "b8b1a4067a658610e127d478b84dff733a991d817c45faca2c994ba9bfb0a185",
+  "jitendex-result.json.txt": "1f37471ddb396140413bad9ef5d496c6d08d3d330f571013ffa0d0770318dea8",
+  "jitendex-stdout.log.txt": "cd6fb5d9f9b2edff546622f31b4029fb950686be1c3d012b6ffa43d81d7d71e2",
+  "jmdict-groups.csv": "4e46c430116afd97544b21af57dc0a2708266496307475d685244b0e29b06d3b",
+  "jmdict-result.json.txt": "469a769fdf19648a1d075701ce2da5603679bdea250cbe00b3de449c5a7e3d83",
+  "jmdict-stdout.log.txt": "eb86ce53a60c635f270f6f273b1d0c17efe076ef2be52f8423cb308144ca33a2",
+  "scoped-lint.log.txt": "5794b5b4481f050944e829ed20ac76610b88dd0cb673889c5540bfc23d084d8b",
+  "sources/initial-census-aborted.mjs.txt": "e2c33354a8431c66f561b09eace2535f395bfc623dd6474add0d899436b9f605",
+  "sources/jitendex-replay.mjs.txt": "8131ce11e978ae5a497daf21ce6f30ffed618d7b40a14a6d21b037ab9bfc7798",
+  "sources/jmdict-replay.mjs.txt": "d34f1be8c68a3815d6f97fba34fbc3fa74d33e1e1883415379792c08e39ec1aa",
+  "sources/vndb-replay.mjs.txt": "70a493f4fafa6e3d49d7e940f4a5ff055ace1c7f12799e579c0aa0a1288829b3",
+  "validation.json.txt": "415bbb603ba9e768da6231b33d11abd4eb76559bee1be294e86c6b18cef8cbcc",
+  "vndb-groups.csv": "fb69980e8d587ce0dc1204b537c955024edbb9289633768a73be870a9abb5064",
+  "vndb-result.json.txt": "347206c152069580c74529a4a796d685bb769c21e90e576888da34cf765df703",
+  "vndb-stdout.log.txt": "e3a208c9a760632bee5293645ef35424818be444fc7e04c0d34cecbabac2e87b"
+}

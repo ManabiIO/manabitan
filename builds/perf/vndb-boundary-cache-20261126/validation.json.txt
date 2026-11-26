@@ -1,0 +1,32 @@
+{
+  "sourceCommit": "bd9fc91b7cfa8aaffcea579908926c9550dc24a9",
+  "node": "v22.22.0",
+  "focusedTests": {
+    "command": "node node_modules/vitest/vitest.mjs run test/dictionary-database-boundary-cache.test.js test/dictionary-database-content-dedup.test.js --maxWorkers=1",
+    "files": 2,
+    "tests": 157,
+    "exitCode": 0
+  },
+  "lint": {
+    "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/dictionary-database.js test/dictionary-database-boundary-cache.test.js test/dictionary-database-content-dedup.test.js",
+    "exitCode": 0
+  },
+  "types": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json",
+    "exitCode": 0,
+    "stdoutBytes": 0
+  },
+  "independentReviews": [
+    "root: source and cache ownership review, no blocker",
+    "jmdict: bounds, ownership, rollback/reuse, wrap, exact matching review, no blocker",
+    "jitendex: source and disk oracle accounting review, no blocker"
+  ],
+  "setupFailures": [
+    "First focused test attempt could not collect tests because generated resvg-wasm.js was missing. Copied unchanged generated libraries from prepared baseline; next run passed.",
+    "Initial scoped lint found three new-test style/JSDoc errors; fixed all and rerun passed.",
+    "First JMdict replay setup used dense directory only, which returns null for small archives; added existing ZipReader fallback before rerun. No incomplete cohort was accepted."
+  ],
+  "textNormalization": "Derived CSV uses LF; focused-test and scoped-lint logs omit only trailing empty lines. Executed runner sources and corpus stdout remain verbatim.",
+  "sourceCommitScope": "Local frozen verification commit",
+  "combinedIntegrationReceipt": "combined-integration.json.txt"
+}

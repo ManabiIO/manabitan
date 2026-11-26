@@ -1,0 +1,196 @@
+import assert from 'node:assert/strict'
+import {createHash} from 'node:crypto'
+import {createReadStream, openAsBlob, openSync, closeSync, readSync, writeSync, readFileSync, writeFileSync} from 'node:fs'
+import {pathToFileURL, fileURLToPath} from 'node:url'
+
+const [baselineRoot, candidateRoot, fixtureRoot, outputFile, groupLimitText] = process.argv.slice(2)
+assert(baselineRoot && candidateRoot && fixtureRoot && outputFile, 'Usage: node --expose-gc replay.mjs BASELINE CANDIDATE FIXTURES OUTPUT [GROUP_LIMIT]')
+const groupLimit = groupLimitText ? Number(groupLimitText) : Infinity
+const sha = (bytes) => createHash('sha256').update(bytes).digest('hex')
+const fileSha = async (path) => {
+  const hash = createHash('sha256')
+  for await (const chunk of createReadStream(path)) { hash.update(chunk) }
+  return hash.digest('hex')
+}
+const originalFetch = globalThis.fetch
+// Node has no file: fetch. Both checkouts use their ordinary checked-in build assets.
+globalThis.fetch = async (input, options) => {
+  const url = input instanceof URL ? input : new URL(typeof input === 'string' ? input : input.url)
+  return url.protocol === 'file:' ? new Response(readFileSync(url), {headers: {'content-type': 'application/wasm'}}) : originalFetch(input, options)
+}
+const {loadDictionaryWasm} = await import(pathToFileURL(`${candidateRoot}/dev/dictionary-wasm.js`))
+const parser = await import(pathToFileURL(`${candidateRoot}/ext/js/dictionary/term-bank-wasm-parser.js`))
+const {readDenseZipDirectory} = await import(pathToFileURL(`${candidateRoot}/ext/js/dictionary/dense-zip-directory.js`))
+const {RawZipPayloadReader} = await import(pathToFileURL(`${candidateRoot}/ext/js/dictionary/term-bank-source-pipeline.js`))
+const {DictionaryDatabase: BaselineDatabase} = await import(pathToFileURL(`${baselineRoot}/ext/js/dictionary/dictionary-database.js`))
+const {DictionaryDatabase: CandidateDatabase} = await import(pathToFileURL(`${candidateRoot}/ext/js/dictionary/dictionary-database.js`))
+const parserWasm = loadDictionaryWasm(candidateRoot).get('term-bank-parser.wasm')
+parser.setTermBankWasmModule(await WebAssembly.compile(parserWasm))
+const parserSource = readFileSync(`${candidateRoot}/ext/js/dictionary/term-bank-wasm-parser.js`, 'utf8')
+assert.equal(parserSource, readFileSync(`${baselineRoot}/ext/js/dictionary/term-bank-wasm-parser.js`, 'utf8'))
+const functions = parserSource.slice(parserSource.indexOf('function partitionSourceBanks('), parserSource.indexOf('\n/**\n * @param {ParallelTermBankSourceValue[]}', parserSource.indexOf('function partitionSourceBanks(')))
+const partition = new Function(`${functions}\nreturn partitionSourceBanks`)()
+const lock = JSON.parse(readFileSync(`${candidateRoot}/test/perf/dictionaries.lock.json`)).dictionaries.jmdict
+const archivePath = `${fixtureRoot}/${lock.cacheFile}`
+const actualSha256 = await fileSha(archivePath)
+assert.equal(actualSha256, lock.sha256)
+const archive = await openAsBlob(archivePath)
+assert.equal(archive.size, lock.sizeBytes)
+let directory = await readDenseZipDirectory(archive)
+if (directory === null) {
+  const {ZipReader, BlobReader} = await import(pathToFileURL(`${candidateRoot}/node_modules/@zip.js/zip.js/index.js`))
+  const zip = new ZipReader(new BlobReader(archive), {useWebWorkers: false})
+  try { directory = await zip.getEntries() } finally { await zip.close() }
+}
+assert(directory)
+const banks = directory.filter(({filename}) => /^term_bank_\d+\.json$/.test(filename)).sort((a, b) => Number(a.filename.slice(10, -5)) - Number(b.filename.slice(10, -5)))
+directory = null
+const totalSourceBytes = banks.reduce((sum, file) => sum + file.uncompressedSize, 0)
+const groups = partition(banks.map((file) => ({file, estimatedBytes: file.uncompressedSize})), totalSourceBytes, Math.max(9, Math.ceil(totalSourceBytes / (24 * 1024 * 1024))))
+const reader = new RawZipPayloadReader(archive)
+const signal = new AbortController().signal
+const spoolPath = `${outputFile}.bytes`
+const spool = openSync(spoolPath, 'w+')
+let spoolSize = 0
+const oracle = new Map()
+let previousTail = null
+const variants = [
+  {name: 'baseline', database: new BaselineDatabase(), reads: 0, readBytes: 0, recentHits: 0, maxCacheBytes: 0, pending: 0, persistedHits: 0},
+  {name: 'candidate', database: new CandidateDatabase(), reads: 0, readBytes: 0, recentHits: 0, maxCacheBytes: 0, pending: 0, persistedHits: 0},
+]
+const readStored = (offset, length) => {
+  const bytes = Buffer.alloc(length)
+  assert.equal(readSync(spool, bytes, 0, length, offset), length)
+  return bytes
+}
+for (const variant of variants) {
+  const read = (offset, length, dictName) => {
+    assert.equal(dictName, 'raw-v6')
+    ++variant.reads
+    variant.readBytes += length
+    return {status: 'ok', bytes: readStored(offset, length)}
+  }
+  variant.database._readTermEntryContentBytesDetailedBatch = async (requests) => requests.map(({contentOffset, contentLength, contentDictName}) => read(contentOffset, contentLength, contentDictName))
+  variant.database._readTermEntryContentBytesDetailed = async (offset, length, dictName) => read(offset, length, dictName)
+}
+const report = {
+  dictionary: 'jmdict', node: process.version, complete: false, authoritativeTiming: false,
+  boundary: 'Production source grouping, native compressed parser, real native canonical resolver and synchronous metadata publication. A disk-backed exact-byte oracle substitutes for compressed OPFS persistence. Counts describe persisted-byte verification requests, not block reads, decompressions, import timing, or browser memory.',
+  archive: {filename: lock.cacheFile, sizeBytes: archive.size, expectedSha256: lock.sha256, actualSha256},
+  runnerSha256: sha(readFileSync(fileURLToPath(import.meta.url))), parserSha256: sha(parserSource), parserWasmSha256: sha(parserWasm), groupingFunctionSha256: sha(functions),
+  baselineDatabaseSha256: sha(readFileSync(`${baselineRoot}/ext/js/dictionary/dictionary-database.js`)),
+  candidateDatabaseSha256: sha(readFileSync(`${candidateRoot}/ext/js/dictionary/dictionary-database.js`)),
+  totalGroups: groups.length, totalBanks: banks.length, totalSourceBytes, groups: [], rows: 0, uniqueContent: 0, duplicateUniqueContent: 0, previousTailHits: 0, maxTailBytes: 0,
+  variants: [], maxObservedRssBytes: 0,
+}
+const snapshotVariants = () => variants.map(({database, ...counts}) => ({...counts, cacheBytes: database._recentTermContentSourceBatchBytes, publishedMetadata: database._termEntryContentMetaHashPairCount}))
+const save = () => {
+  report.variants = snapshotVariants()
+  writeFileSync(outputFile, JSON.stringify(report, null, 2) + '\n')
+}
+const clonePlan = (plan) => Object.fromEntries(Object.entries(plan).map(([key, value]) => [key, ArrayBuffer.isView(value) ? value.slice() : value]))
+const createChunk = (chunk) => ({
+  rowCount: chunk.rowCount, contentRowStart: chunk.contentRowStart,
+  contentBytesBuffer: chunk.contentBytesBuffer.subarray(chunk.contentBytesBaseOffset, chunk.contentBytesBaseOffset + chunk.contentBytesLength).slice(),
+  contentBytesBaseOffset: 0, contentBytesLength: chunk.contentBytesLength,
+  contentMetaList: chunk.contentMetaList.slice(), contentMetaByUniqueIndex: chunk.contentMetaByUniqueIndex,
+  contentUniqueIndexList: chunk.contentUniqueIndexList.slice(), contentDedupPlan: clonePlan(chunk.contentDedupPlan),
+  contentHash1List: new Uint32Array(0), contentHash2List: new Uint32Array(0), contentBytesList: [],
+  uniformContentDictName: 'raw-v6', useResolvedContentReferences: true, dictionaryTotalRows: lock.termRows,
+})
+try {
+  for (const [groupIndex, group] of groups.entries()) {
+    if (groupIndex >= groupLimit) { break }
+    const sources = []
+    for (const {file} of group) {
+      const bytes = await reader.read(file, signal)
+      assert(bytes)
+      sources.push({bytes, compressionMethod: file.compressionMethod, compressedSize: file.compressedSize, uncompressedSize: file.uncompressedSize, signature: file.signature, filename: file.filename})
+    }
+    const preloadedSource = await parser.inflateCompressedTermBankSourcesWasm(sources, {}, true)
+    const receipt = {index: groupIndex, banks: group.map(({file}) => file.filename), rows: 0, unique: 0, duplicates: 0, previousTailHits: 0, tailBytes: 0, variants: []}
+    await parser.parseTermBankWithWasmColumnChunks(new Uint8Array(0), 3, async (chunk) => {
+      const {contentDedupPlan: plan, contentMetaList: meta, contentBytesBuffer: bytes, contentBytesBaseOffset: base, contentMetaByUniqueIndex} = chunk
+      assert(plan && meta && bytes && typeof base === 'number' && typeof chunk.contentBytesLength === 'number')
+      let lastPublished = null
+      receipt.rows += chunk.rowCount
+      receipt.unique += plan.uniqueCount
+      for (let unique = 0; unique < plan.uniqueCount; ++unique) {
+        const row = contentMetaByUniqueIndex ? unique : plan.uniqueRowIndexes[unique]
+        const start = base + meta[row * 4]
+        const value = Buffer.from(bytes.buffer, bytes.byteOffset + start, meta[row * 4 + 1])
+        const key = sha(value)
+        const previous = oracle.get(key)
+        if (previous) {
+          assert.equal(value.length, previous.length)
+          assert(value.equals(readStored(previous.offset, previous.length)), 'SHA-256 collision')
+          ++receipt.duplicates
+          if (previousTail === key) { ++receipt.previousTailHits }
+        } else {
+          assert.equal(writeSync(spool, value, 0, value.length, spoolSize), value.length)
+          oracle.set(key, {offset: spoolSize, length: value.length})
+          spoolSize += value.length
+          lastPublished = {key, length: value.length}
+        }
+      }
+      if (lastPublished) {
+        previousTail = lastPublished.key
+        receipt.tailBytes = lastPublished.length
+        report.maxTailBytes = Math.max(report.maxTailBytes, lastPublished.length)
+      }
+      let baselineResult
+      for (const variant of variants) {
+        const owned = createChunk(chunk)
+        const {database} = variant
+        const beforeReads = variant.reads
+        const beforeReadBytes = variant.readBytes
+        const dedup = await database._resolveArtifactTermContentDedup(owned, true)
+        const spans = dedup.pendingContentSpans
+        assert(spans)
+        const pendingOffsets = new Float64Array(dedup.pendingContentCount)
+        const pendingLengths = new Uint32Array(dedup.pendingContentCount)
+        for (let i = 0; i < pendingOffsets.length; ++i) {
+          const value = spans.buffer.subarray(spans.offsets[i], spans.offsets[i] + spans.lengths[i])
+          const stored = oracle.get(sha(value))
+          assert(stored)
+          assert(Buffer.from(value).equals(readStored(stored.offset, stored.length)))
+          pendingOffsets[i] = stored.offset
+          pendingLengths[i] = stored.length
+        }
+        database._publishResolvedArtifactTermContentPlan(dedup.contentDedupPlan, dedup.pendingPlanUniqueStart, dedup.pendingPlanUniqueIndexes, pendingOffsets, pendingLengths, 'raw-v6')
+        const resolvedNames = database._publishArtifactTermContentMetadata({
+          ...dedup, count: owned.rowCount, pendingOffsets, pendingLengths, pendingResolvedDictNames: 'raw-v6',
+          contentUniqueIndexList: owned.contentUniqueIndexList, stagedContentMetadata: dedup.stagedContentMetadata,
+          useResolvedContentReferences: true,
+        })
+        variant.pending += dedup.pendingContentCount
+        variant.persistedHits += dedup.persistedHitCount
+        variant.recentHits += dedup.recentSourceHitCount ?? 0
+        variant.maxCacheBytes = Math.max(variant.maxCacheBytes, database._recentTermContentSourceBatchBytes)
+        const counts = {name: variant.name, pending: dedup.pendingContentCount, persistedHits: dedup.persistedHitCount, recentHits: dedup.recentSourceHitCount ?? 0, reads: variant.reads - beforeReads, readBytes: variant.readBytes - beforeReadBytes, cacheBytes: database._recentTermContentSourceBatchBytes, nativeScanCounts: Object.fromEntries(Object.entries(dedup.nativeScanMetrics ?? {}).filter(([key]) => !key.endsWith('Ms')))}
+        receipt.variants.push(counts)
+        const result = {pendingOffsets, pendingLengths, pendingHash1s: dedup.pendingContentHash1s, pendingHash2s: dedup.pendingContentHash2s, resolvedNames, resolvedFlags: owned.contentDedupPlan.resolvedFlags, resolvedOffsets: owned.contentDedupPlan.resolvedOffsets, resolvedLengths: owned.contentDedupPlan.resolvedLengths, uniqueIndexes: owned.contentUniqueIndexList, pending: dedup.pendingContentCount, persistedHits: dedup.persistedHitCount, exactFallbackCount: dedup.exactFallbackCount}
+        if (baselineResult) { assert.deepEqual(result, baselineResult, `Variant parity failed at group ${groupIndex}`) } else { baselineResult = result }
+      }
+    }, 2048, {singleChunk: true, emitTermByteLists: false, computeContentHashes: true, emitContentSlab: true, emitTokenBinaryContent: true, mediaHintFastScan: true, validateGlossaryTypes: true, prepareLookupIndexes: true, compactContentMetadata: true, preloadedSource})
+    report.rows += receipt.rows
+    report.duplicateUniqueContent += receipt.duplicates
+    report.previousTailHits += receipt.previousTailHits
+    report.uniqueContent = oracle.size
+    report.maxObservedRssBytes = Math.max(report.maxObservedRssBytes, process.memoryUsage().rss)
+    report.groups.push(receipt)
+    save()
+    if (groupIndex % 10 === 0) { console.log(JSON.stringify({groups: report.groups.length, rows: report.rows, duplicateUniqueContent: report.duplicateUniqueContent, previousTailHits: report.previousTailHits, variants: report.variants, rss: process.memoryUsage().rss})) }
+    globalThis.gc?.()
+  }
+  report.complete = report.groups.length === groups.length
+  if (report.complete) {
+    assert.equal(report.rows, lock.termRows)
+    assert.equal(variants[0].pending, oracle.size)
+    assert.equal(variants[1].pending, oracle.size)
+  }
+  save()
+  console.log(JSON.stringify({...report, groups: report.groups.length}))
+} finally {
+  closeSync(spool)
+}

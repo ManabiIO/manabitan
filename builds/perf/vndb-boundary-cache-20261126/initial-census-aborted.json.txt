@@ -1,0 +1,30 @@
+{
+  "dictionary": "vndb",
+  "node": "v22.22.0",
+  "complete": false,
+  "authoritativeTiming": false,
+  "boundary": "Production source grouping and synchronous native compressed parser; exact token-byte equality. Cache opportunity census only, without database/OPFS persistence or a speed claim.",
+  "archive": {
+    "filename": "vndb_characters_by_bee.zip",
+    "sizeBytes": 291705969,
+    "expectedSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "parserSha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+  "groupingFunctionSha256": "08b71d031d5c33c522924c199c345388e196c505b64020f766c1176bf4e3d5be",
+  "rows": 4840000,
+  "uniqueContent": 109065,
+  "duplicateUniqueContent": 289,
+  "tailCacheHits": 118,
+  "previousTailHits": 117,
+  "tailBytes": 72361,
+  "maxTailBytes": 662,
+  "completedGroups": 121,
+  "totalGroups": 170,
+  "exitCode": 137,
+  "disposition": "Incomplete initial opportunity census. Its in-memory exact-content oracle was replaced with the separately completed disk-backed real resolver/publication replay. This checkpoint is not a complete corpus result and is not used for accepted request-reduction or memory claims.",
+  "terminationEvidence": "exec session returned exit code 137; no kernel OOM attribution was collected",
+  "archiveHashValidation": "Initial runner recorded expected archive hash and checked size only. Complete replacement replay independently measured and verified actual SHA-256.",
+  "runnerSha256": "e2c33354a8431c66f561b09eace2535f395bfc623dd6474add0d899436b9f605",
+  "rawCheckpointSha256": "edf76b19c6326d16d5431fecc27d255cd1620c6e39d8e167f602090a4e6ae025",
+  "earlierSetupFailure": "An earlier launch failed on its first group because the audit reader call omitted AbortSignal; this was fixed before the retained 121-group census. It produced no accepted corpus evidence."
+}

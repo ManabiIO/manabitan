@@ -1,0 +1,92 @@
+{
+  "dictionary": "vndb",
+  "node": "v22.22.0",
+  "complete": true,
+  "authoritativeTiming": false,
+  "boundary": "Production source grouping, native compressed parser, real native canonical resolver and synchronous metadata publication. A disk-backed exact-byte oracle substitutes for compressed OPFS persistence. Counts describe persisted-byte verification requests, not block reads, decompressions, import timing, or browser memory.",
+  "archive": {
+    "filename": "vndb_characters_by_bee.zip",
+    "sizeBytes": 291705969,
+    "expectedSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "actualSha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792"
+  },
+  "runnerSha256": "70a493f4fafa6e3d49d7e940f4a5ff055ace1c7f12799e579c0aa0a1288829b3",
+  "parserSha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+  "parserWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+  "groupingFunctionSha256": "08b71d031d5c33c522924c199c345388e196c505b64020f766c1176bf4e3d5be",
+  "baselineDatabaseSha256": "c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51",
+  "candidateDatabaseSha256": "cfa4877da2d738f2beffc1e6e8ad60858ed059f9252f4bff4a60ff4f2083ea16",
+  "totalGroups": 170,
+  "totalBanks": 665,
+  "totalSourceBytes": 4267992967,
+  "rows": 6648310,
+  "uniqueContent": 157150,
+  "duplicateUniqueContent": 714,
+  "previousTailHits": 166,
+  "maxTailBytes": 662,
+  "variants": [
+    {
+      "name": "baseline",
+      "reads": 714,
+      "readBytes": 303459,
+      "recentHits": 0,
+      "maxCacheBytes": 0,
+      "pending": 157150,
+      "persistedHits": 714,
+      "cacheBytes": 0,
+      "publishedMetadata": 157150
+    },
+    {
+      "name": "candidate",
+      "reads": 548,
+      "readBytes": 205398,
+      "recentHits": 166,
+      "maxCacheBytes": 662,
+      "pending": 157150,
+      "persistedHits": 714,
+      "cacheBytes": 637,
+      "publishedMetadata": 157150
+    }
+  ],
+  "maxObservedRssBytes": 316366848,
+  "completedGroups": 170,
+  "rawReportSha256": "b17d77192c1febfd8b55e1442445aacc74eb85c95f76fd47d864308e30c34b3b",
+  "exitCode": 0,
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidateSourceCommit": "bd9fc91b7cfa8aaffcea579908926c9550dc24a9",
+  "resultAssertions": [
+    "all resolved flags, offsets, lengths and per-row unique indexes equal",
+    "all pending hashes, offsets, lengths and publication counts equal",
+    "all persisted-hit and exact-fallback counts equal",
+    "final pending count equals independently byte-checked global unique count"
+  ],
+  "nativeScanCounts": {
+    "baseline": {
+      "dedupNativeCallCount": 144,
+      "dedupNativeScannedRows": 133213,
+      "dedupNativeBulkPendingRows": 132635,
+      "dedupNativeExactCandidates": 578,
+      "dedupNativeCopiedInputBytes": 4928881,
+      "dedupNativeCopiedOutputBytes": 4624,
+      "dedupNativeSnapshotBytes": 0,
+      "dedupNativeFallbackCount": 26,
+      "dedupNativeFallbackEligibilityCount": 26,
+      "dedupNativeFallbackAssetCount": 0,
+      "dedupNativeFallbackUnsupportedCount": 0
+    },
+    "candidate": {
+      "dedupNativeCallCount": 144,
+      "dedupNativeScannedRows": 133213,
+      "dedupNativeBulkPendingRows": 132635,
+      "dedupNativeExactCandidates": 578,
+      "dedupNativeCopiedInputBytes": 4928881,
+      "dedupNativeCopiedOutputBytes": 4624,
+      "dedupNativeSnapshotBytes": 0,
+      "dedupNativeFallbackCount": 26,
+      "dedupNativeFallbackEligibilityCount": 26,
+      "dedupNativeFallbackAssetCount": 0,
+      "dedupNativeFallbackUnsupportedCount": 0
+    }
+  },
+  "candidateSourceCommitScope": "Local frozen verification commit; connector publication may recreate commit metadata while preserving the reviewed tree and source hashes."
+}

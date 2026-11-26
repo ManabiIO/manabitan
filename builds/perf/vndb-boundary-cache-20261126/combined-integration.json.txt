@@ -1,0 +1,107 @@
+{
+  "worktree": "/workspace/scratch/4a0c621eaaa8/manabitan-import-integration",
+  "published": false,
+  "baseCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "inputs": {
+    "indexCleanupLocalCommits": [
+      "2df25eb1822473134878e3c7bfc467901b31dae0",
+      "9f481edbddc8bac50191cad959ce09d555d071c4"
+    ],
+    "indexCleanupRemoteHead": "afebf0a84057397afeffaa2c6b80b5c5563c46eb",
+    "boundaryCacheFrozenLocalCommit": "bd9fc91b7cfa8aaffcea579908926c9550dc24a9"
+  },
+  "combinedCommit": "5751d8e6a5a09d2b724a9f006a9bfc26ebee9cc1",
+  "combinedTree": "0a7e3dd9132958fc45004c6a203643bb68e47e78",
+  "combinedSources": {
+    "ext/js/dictionary/dictionary-database.js": {
+      "bytes": 611882,
+      "sha256": "057bfdb2de64ee1db3ecb410b4dbbfca4e4b9026832d1a867b38e8e736220168",
+      "gitBlob": "caa447b4dc64caddc6a04ed27c0a30f1e2e185ee"
+    },
+    "test/dictionary-database-boundary-cache.test.js": {
+      "bytes": 11683,
+      "sha256": "ed677b174fbadcfce447cd4448d949199479ff99e5219627e8106063a46c4e79",
+      "gitBlob": "2838de24b5416f58ee9e584bec6e7ab5b078c7ea"
+    },
+    "test/dictionary-database-content-dedup.test.js": {
+      "bytes": 164221,
+      "sha256": "a1e3c39d86c53934e1e63d98896bd84cb8d3d435bae231148a16193fa626bebf",
+      "gitBlob": "9ab7d6d4bc70ffd6760eeb4505943236946dc138"
+    },
+    "test/dictionary-import-index-cleanup.test.js": {
+      "bytes": 7191,
+      "sha256": "90f54f9ed398ae3c2a005c9b100724bf0e8d953e70a8abd208e1d72813e0b046",
+      "gitBlob": "192aecc0599aa6a2cdf0823493e704d075e3ef18"
+    }
+  },
+  "mergeMethod": "Detached worktree from baseline; cherry-pick both index-cleanup commits and frozen boundary-cache commit. Git merged disjoint database hunks without conflicts; no whole-file replacement.",
+  "tests": {
+    "command": "node node_modules/vitest/vitest.mjs run test/dictionary-import-index-cleanup.test.js test/dictionary-database-boundary-cache.test.js test/dictionary-database-content-dedup.test.js --maxWorkers=1",
+    "node": "v22.22.0",
+    "exitCode": 0,
+    "filesPassed": 3,
+    "testsPassed": 161,
+    "testsFailed": 0,
+    "timeoutsChanged": false,
+    "suiteDurationSeconds": 5.24
+  },
+  "build": {
+    "command": "node dev/bin/build.js --dryRun --all",
+    "node": "v22.22.0",
+    "exitCode": 0,
+    "targets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ],
+    "initialAttempt": {
+      "exitCode": 1,
+      "logBytes": 0,
+      "observation": "Immediately afterward git status reported out-of-disk while writing its index lock; a later disk check showed 587 MiB available. Initial failure cause is not conclusively established."
+    },
+    "retryPreparation": "Replaced only integration ext/lib symlink with isolated copy of root prepared libraries because dry-run rebuilds libraries; no writes through shared generated-library symlink on retry."
+  },
+  "preparedDependencies": "/workspace/scratch/4a0c621eaaa8/manabitan/node_modules",
+  "preparedLibraries": "/workspace/scratch/4a0c621eaaa8/manabitan/ext/lib",
+  "afterBuild": {
+    "trackedDiffClean": true,
+    "diffCheckExitCode": 0
+  },
+  "logs": {
+    "import-integration-tests.log": {
+      "path": "/workspace/scratch/4a0c621eaaa8/import-integration-tests.log",
+      "bytes": 949,
+      "sha256": "be986188fc98df95c9e30322e8baf3c428d40cf59e82c70de03f5ded9fe5e109"
+    },
+    "import-integration-build.log": {
+      "path": "/workspace/scratch/4a0c621eaaa8/import-integration-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "import-integration-build-retry.log": {
+      "path": "/workspace/scratch/4a0c621eaaa8/import-integration-build-retry.log",
+      "bytes": 384,
+      "sha256": "cbb06836a19ebeb9a9b7f003cd37d98a86284fbb3125a58a19b02cda23b57a40"
+    }
+  },
+  "importPerformanceTimingCollected": false,
+  "fullBroadLocalSuiteRun": false,
+  "archivedLogContent": {
+    "import-integration-tests.log": {
+      "encoding": "base64",
+      "content": "KG5vZGU6NSkgW1VORElDSS1FSFBBXSBXYXJuaW5nOiBFbnZIdHRwUHJveHlBZ2VudCBpcyBleHBlcmltZW50YWwsIGV4cGVjdCB0aGVtIHRvIGNoYW5nZSBhdCBhbnkgdGltZS4KKFVzZSBgbm9kZSAtLXRyYWNlLXdhcm5pbmdzIC4uLmAgdG8gc2hvdyB3aGVyZSB0aGUgd2FybmluZyB3YXMgY3JlYXRlZCkKCiBSVU4gIHY0LjEuMTIgL3dvcmtzcGFjZS9zY3JhdGNoLzRhMGM2MjFlYWFhOC9tYW5hYml0YW4taW1wb3J0LWludGVncmF0aW9uCgoobm9kZToyMikgW1VORElDSS1FSFBBXSBXYXJuaW5nOiBFbnZIdHRwUHJveHlBZ2VudCBpcyBleHBlcmltZW50YWwsIGV4cGVjdCB0aGVtIHRvIGNoYW5nZSBhdCBhbnkgdGltZS4KKFVzZSBgbm9kZSAtLXRyYWNlLXdhcm5pbmdzIC4uLmAgdG8gc2hvdyB3aGVyZSB0aGUgd2FybmluZyB3YXMgY3JlYXRlZCkKKG5vZGU6MjkpIFtVTkRJQ0ktRUhQQV0gV2FybmluZzogRW52SHR0cFByb3h5QWdlbnQgaXMgZXhwZXJpbWVudGFsLCBleHBlY3QgdGhlbSB0byBjaGFuZ2UgYXQgYW55IHRpbWUuCihVc2UgYG5vZGUgLS10cmFjZS13YXJuaW5ncyAuLi5gIHRvIHNob3cgd2hlcmUgdGhlIHdhcm5pbmcgd2FzIGNyZWF0ZWQpCihub2RlOjM2KSBbVU5ESUNJLUVIUEFdIFdhcm5pbmc6IEVudkh0dHBQcm94eUFnZW50IGlzIGV4cGVyaW1lbnRhbCwgZXhwZWN0IHRoZW0gdG8gY2hhbmdlIGF0IGFueSB0aW1lLgooVXNlIGBub2RlIC0tdHJhY2Utd2FybmluZ3MgLi4uYCB0byBzaG93IHdoZXJlIHRoZSB3YXJuaW5nIHdhcyBjcmVhdGVkKQoKIFRlc3QgRmlsZXMgIDMgcGFzc2VkICgzKQogICAgICBUZXN0cyAgMTYxIHBhc3NlZCAoMTYxKQogICBTdGFydCBhdCAgMTE6NTk6MjgKICAgRHVyYXRpb24gIDUuMjRzICh0cmFuc2Zvcm0gMS42MHMsIHNldHVwIDQ5bXMsIGltcG9ydCAyLjYycywgdGVzdHMgMS44MXMsIGVudmlyb25tZW50IDBtcykKCg=="
+    },
+    "import-integration-build.log": {
+      "encoding": "base64",
+      "content": ""
+    },
+    "import-integration-build-retry.log": {
+      "encoding": "base64",
+      "content": "KG5vZGU6NSkgW1VORElDSS1FSFBBXSBXYXJuaW5nOiBFbnZIdHRwUHJveHlBZ2VudCBpcyBleHBlcmltZW50YWwsIGV4cGVjdCB0aGVtIHRvIGNoYW5nZSBhdCBhbnkgdGltZS4KKFVzZSBgbm9kZSAtLXRyYWNlLXdhcm5pbmdzIC4uLmAgdG8gc2hvdyB3aGVyZSB0aGUgd2FybmluZyB3YXMgY3JlYXRlZCkKVmVyc2lvbjogMC4wLjAuMC4uLgpCdWlsZGluZyBjaHJvbWUuLi4KCkJ1aWxkaW5nIGNocm9tZS1kZXYuLi4KCkJ1aWxkaW5nIGNocm9tZS1wbGF5d3JpZ2h0Li4uCgpCdWlsZGluZyBmaXJlZm94Li4uCgpCdWlsZGluZyBmaXJlZm94LWRldi4uLgoKQnVpbGRpbmcgZmlyZWZveC1hbmRyb2lkLi4uCgpCdWlsZGluZyBlZGdlLi4uCgpSZXN0b3JpbmcgbWFuaWZlc3QuLi4K"
+    }
+  }
+}

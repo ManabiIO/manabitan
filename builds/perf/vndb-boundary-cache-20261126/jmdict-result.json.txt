@@ -1,0 +1,92 @@
+{
+  "dictionary": "jmdict",
+  "node": "v22.22.0",
+  "complete": true,
+  "authoritativeTiming": false,
+  "boundary": "Production source grouping, native compressed parser, real native canonical resolver and synchronous metadata publication. A disk-backed exact-byte oracle substitutes for compressed OPFS persistence. Counts describe persisted-byte verification requests, not block reads, decompressions, import timing, or browser memory.",
+  "archive": {
+    "filename": "JMdict.zip",
+    "sizeBytes": 15645766,
+    "expectedSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+    "actualSha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f"
+  },
+  "runnerSha256": "d34f1be8c68a3815d6f97fba34fbc3fa74d33e1e1883415379792c08e39ec1aa",
+  "parserSha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+  "parserWasmSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+  "groupingFunctionSha256": "08b71d031d5c33c522924c199c345388e196c505b64020f766c1176bf4e3d5be",
+  "baselineDatabaseSha256": "c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51",
+  "candidateDatabaseSha256": "cfa4877da2d738f2beffc1e6e8ad60858ed059f9252f4bff4a60ff4f2083ea16",
+  "totalGroups": 9,
+  "totalBanks": 53,
+  "totalSourceBytes": 171617523,
+  "rows": 528299,
+  "uniqueContent": 362032,
+  "duplicateUniqueContent": 3778,
+  "previousTailHits": 4,
+  "maxTailBytes": 1086,
+  "variants": [
+    {
+      "name": "baseline",
+      "reads": 800,
+      "readBytes": 155864,
+      "recentHits": 2978,
+      "maxCacheBytes": 48201629,
+      "pending": 362032,
+      "persistedHits": 3778,
+      "cacheBytes": 42031079,
+      "publishedMetadata": 362032
+    },
+    {
+      "name": "candidate",
+      "reads": 800,
+      "readBytes": 155864,
+      "recentHits": 2978,
+      "maxCacheBytes": 48201629,
+      "pending": 362032,
+      "persistedHits": 3778,
+      "cacheBytes": 42031079,
+      "publishedMetadata": 362032
+    }
+  ],
+  "maxObservedRssBytes": 533422080,
+  "completedGroups": 9,
+  "rawReportSha256": "c4f409f93708f301052c6871e8d740d6c9345e9e27fac918d85fb94990c93ac8",
+  "exitCode": 0,
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidateSourceCommit": "bd9fc91b7cfa8aaffcea579908926c9550dc24a9",
+  "resultAssertions": [
+    "all resolved flags, offsets, lengths and per-row unique indexes equal",
+    "all pending hashes, offsets, lengths and publication counts equal",
+    "all persisted-hit and exact-fallback counts equal",
+    "final pending count equals independently byte-checked global unique count"
+  ],
+  "nativeScanCounts": {
+    "baseline": {
+      "dedupNativeCallCount": 9,
+      "dedupNativeScannedRows": 365810,
+      "dedupNativeBulkPendingRows": 362032,
+      "dedupNativeExactCandidates": 3778,
+      "dedupNativeCopiedInputBytes": 16784750,
+      "dedupNativeCopiedOutputBytes": 30224,
+      "dedupNativeSnapshotBytes": 0,
+      "dedupNativeFallbackCount": 0,
+      "dedupNativeFallbackEligibilityCount": 0,
+      "dedupNativeFallbackAssetCount": 0,
+      "dedupNativeFallbackUnsupportedCount": 0
+    },
+    "candidate": {
+      "dedupNativeCallCount": 9,
+      "dedupNativeScannedRows": 365810,
+      "dedupNativeBulkPendingRows": 362032,
+      "dedupNativeExactCandidates": 3778,
+      "dedupNativeCopiedInputBytes": 16784750,
+      "dedupNativeCopiedOutputBytes": 30224,
+      "dedupNativeSnapshotBytes": 0,
+      "dedupNativeFallbackCount": 0,
+      "dedupNativeFallbackEligibilityCount": 0,
+      "dedupNativeFallbackAssetCount": 0,
+      "dedupNativeFallbackUnsupportedCount": 0
+    }
+  },
+  "candidateSourceCommitScope": "Local frozen verification commit; connector publication may recreate commit metadata while preserving the reviewed tree and source hashes."
+}

@@ -687,3 +687,87 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## 2026-11-26: bounded definition boundary snapshots
+
+This round retains one copied definition when a parser group's average definition size exceeds the existing 512-byte recent-source admission limit. VNDB aliases often continue into the next group. Previously the whole group was rejected, requiring another persisted-byte verification for those aliases immediately after publication.
+
+The ordinary short-definition cache remains unchanged. The new snapshot uses the last published indexed span, copies owned bytes, expires when a subsequent group publishes, and is charged to the existing total cache budget. Its allocation is additionally capped by the existing 1 MiB content-block target. It cannot consume a transferred-source ownership witness or pin the parser slab. Exact comparison, metadata publication state, rollback, reset, and identifier wrap remain enforced. Eager Zstd level -1 and persistence formats are unchanged.
+
+Frozen local source commit: `bd9fc91b7cfa8aaffcea579908926c9550dc24a9`; baseline: live develop `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. The SQLite startup companion is #940. JMdict #932 is open as the stable base for #941 at head `1284daa53d3a921c5f3ef29f98056542c3664c15`; this boundary-cache change does not repeat that work.
+
+### Completed evidence and limits
+
+All three pinned corpora completed a sequential baseline/candidate replay using the production source partition function with three parser workers and the 24 MiB group target, the native compressed term-bank parser, and the real canonical resolver and synchronous metadata publication. A disk-backed exact-byte oracle substitutes for compressed OPFS persistence. SHA-256 locates candidate bytes; every oracle match is checked byte-for-byte. Variants receive independent owned chunk/plan arrays.
+
+For every group, assertions compare resolved flags, offsets, lengths, per-row unique indexes, pending hashes/offsets/lengths, publication counts, persisted-hit counts, and exact-fallback counts. Both final pending counts equal the independently checked global unique count. Each actual archive SHA-256 is measured and checked against `test/perf/dictionaries.lock.json` before replay.
+
+| Corpus   |      Rows | Groups | Unique definitions, both | Persisted exact hits, both | Verification requests, baseline → candidate | Returned verification bytes, baseline → candidate |
+| -------- | --------: | -----: | -----------------------: | -------------------------: | ------------------------------------------: | ------------------------------------------------: |
+| JMdict   |   528,299 |      9 |                  362,032 |                      3,778 |                                   800 → 800 |                                 155,864 → 155,864 |
+| Jitendex |   436,555 |     22 |                  363,243 |                         34 |                                     34 → 29 |                                   20,322 → 11,181 |
+| VNDB     | 6,648,310 |    170 |                  157,150 |                        714 |                                   714 → 548 |                                 303,459 → 205,398 |
+
+VNDB avoids **166 persisted-byte verification requests (23.25%)** and **98,061 returned verification bytes**. Its boundary snapshot occupies at most **662 bytes**, with 637 bytes retained after the last group. Jitendex avoids five requests and retains at most 3,374 bytes. JMdict's ordinary cache has the same 2,978 recent hits and maximum 48,201,629 retained bytes in both variants.
+
+Route counts match: VNDB has 144 native canonical scans and 26 ordinary eligibility fallbacks; JMdict has nine native scans and Jitendex has 22. There are no asset/unsupported fallbacks. An earlier progress update inferred zero VNDB fallbacks from sampled groups; the complete aggregation supersedes it.
+
+The measurements count actual requests reaching the persisted-byte reader API in this component replay. The storage substitution prevents interpreting them as physical OPFS reads or Zstd decompressions. No complete-import speedup, browser memory reduction, or constrained-device qualification is claimed. Process RSS samples include both variants, parser, and oracle and are only replay diagnostics.
+
+The 157 focused cache/dedup tests, scoped ESLint, and complete test TypeScript project pass. Independent reviews checked bounds, ownership, exact equality, accounting, rollback/reuse, wrap, and disk-oracle publication parity. An isolated cherry-pick with #940 passed all 161 focused tests and all seven dry-build targets; its combined tree is `0a7e3dd9132958fc45004c6a203643bb68e47e78`. The original dry-build attempt failed; disk exhaustion was observed immediately afterward and the cause remains unconfirmed. That attempt is retained separately in the integration receipt. Hosted whole-repository gates remain separate steps. Connector publication may recreate commit metadata; the frozen source hashes and complete published tree must match the reviewed local tree.
+
+### Preserved evidence and attempts
+
+`builds/perf/vndb-boundary-cache-20261126` contains compact receipts, per-group CSV counts, complete successful replay stdout, validation logs, executed sources, and a SHA-256 manifest. Text extensions preserve measured evidence without treating snapshots as maintained product sources. No corpus content, disk-oracle bytes, or package archives are included.
+
+The initial in-memory opportunity census terminated with exit code 137 after a saved 121/170-group checkpoint. Its compact checkpoint and executed source are retained separately as `initial-census-aborted.json.txt` and `sources/initial-census-aborted.mjs.txt`. No kernel OOM attribution was collected. It checked archive size and recorded only an expected hash; the completed replacement measured the actual hash. Its partial counts are excluded from accepted request-reduction and memory claims. Earlier setup failures omitted an `AbortSignal` from the census reader and lacked the small-archive directory fallback in the first JMdict replay. They produced no accepted corpus evidence and remain recorded in failure metadata. The three completed disk-oracle files were removed after validation to recover 581,354,896 local bytes; source, counts, stdout, and receipts remain.
+
+| Shared input                       | SHA-256                                                            |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| Baseline `dictionary-database.js`  | `c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51` |
+| Candidate `dictionary-database.js` | `cfa4877da2d738f2beffc1e6e8ad60858ed059f9252f4bff4a60ff4f2083ea16` |
+| Parser JavaScript                  | `69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64` |
+| Checked source-bound parser WASM   | `b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa` |
+| Production grouping function       | `08b71d031d5c33c522924c199c345388e196c505b64020f766c1176bf4e3d5be` |
+
+| Corpus   | Fixture SHA-256                                                    | Executed runner SHA-256                                            |
+| -------- | ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| JMdict   | `3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f` | `d34f1be8c68a3815d6f97fba34fbc3fa74d33e1e1883415379792c08e39ec1aa` |
+| Jitendex | `e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356` | `8131ce11e978ae5a497daf21ce6f30ffed618d7b40a14a6d21b037ab9bfc7798` |
+| VNDB     | `da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` | `70a493f4fafa6e3d49d7e940f4a5ff055ace1c7f12799e579c0aa0a1288829b3` |
+
+### Reproduction
+
+Use Node 22.22.0 and prepared checkouts with dependencies and generated library assets. The baseline must be the SHA above; the candidate runtime must match its recorded source hash. The smaller-archive runners use the ordinary ZipReader directory fallback. Their remaining parser/resolver/publication/oracle logic matches the VNDB runner.
+
+These are the actual local source and fixture directories; equivalent prepared checkouts and the same lockfile-pinned archives can replace them. Copying the text snapshots restores the exact executed runner bytes:
+
+```sh
+BOUNDARY_NODE=/workspace/scratch/21d3ef023f32/runtimes/node-v22.22.0-linux-x64/bin/node
+BOUNDARY_BASELINE=/workspace/scratch/4a0c621eaaa8/manabitan
+BOUNDARY_CANDIDATE=/workspace/scratch/4a0c621eaaa8/manabitan-vndb
+BOUNDARY_FIXTURES=/workspace/scratch/b4b304adc609/manabitan/builds/e2e-dictionary-cache
+BOUNDARY_EVIDENCE="$BOUNDARY_CANDIDATE/builds/perf/vndb-boundary-cache-20261126"
+BOUNDARY_OUT=/workspace/scratch/4a0c621eaaa8/boundary-reproduction
+mkdir -p "$BOUNDARY_OUT"
+for boundary_dictionary in vndb jmdict jitendex; do
+    cp "$BOUNDARY_EVIDENCE/sources/$boundary_dictionary-replay.mjs.txt" "$BOUNDARY_OUT/$boundary_dictionary-replay.mjs"
+    "$BOUNDARY_NODE" --expose-gc "$BOUNDARY_OUT/$boundary_dictionary-replay.mjs" \
+        "$BOUNDARY_BASELINE" "$BOUNDARY_CANDIDATE" "$BOUNDARY_FIXTURES" \
+        "$BOUNDARY_OUT/$boundary_dictionary-result.json" \
+        > "$BOUNDARY_OUT/$boundary_dictionary-stdout.log" 2>&1 || exit "$?"
+done
+```
+
+Each runner writes a temporary `.bytes` disk oracle beside its result. Those bytes are replay intermediates and are intentionally excluded from committed evidence. A nonzero exit or incomplete result fails the gate. Run the focused checks from the candidate checkout:
+
+```sh
+"$BOUNDARY_NODE" node_modules/vitest/vitest.mjs run \
+    test/dictionary-database-boundary-cache.test.js \
+    test/dictionary-database-content-dedup.test.js --maxWorkers=1
+"$BOUNDARY_NODE" node_modules/eslint/bin/eslint.js \
+    ext/js/dictionary/dictionary-database.js \
+    test/dictionary-database-boundary-cache.test.js \
+    test/dictionary-database-content-dedup.test.js
+"$BOUNDARY_NODE" node_modules/typescript/bin/tsc --noEmit --project test/jsconfig.typecheck.json
+```
