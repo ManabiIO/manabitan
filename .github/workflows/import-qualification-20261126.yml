@@ -22,7 +22,7 @@ jobs:
         dictionary: [jmdict, jitendex, vndb]
     env:
       PERF_DICTIONARY: ${{ matrix.dictionary }}
-      PERF_EVIDENCE_ROOT: ${{ runner.temp }}/import-baseline-${{ matrix.dictionary }}
+      PERF_EVIDENCE_ROOT: ${{ github.workspace }}/builds/perf/import-baseline-${{ matrix.dictionary }}
       MANABITAN_E2E_STRICT_RUNTIME: '1'
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -53,7 +53,7 @@ jobs:
           mkdir -p "$PERF_EVIDENCE_ROOT"
           node dev/perf/prepare-dictionaries.js "$PERF_DICTIONARY"
           npm run build -- --target chrome
-          git rev-parse HEAD HEAD^{tree} > "$PERF_EVIDENCE_ROOT/product-source.txt"
+          git rev-parse HEAD 'HEAD^{tree}' > "$PERF_EVIDENCE_ROOT/product-source.txt"
           git status --porcelain > "$PERF_EVIDENCE_ROOT/build-status.txt"
           git show "$GITHUB_SHA:.github/workflows/import-qualification-20261126.yml" > "$PERF_EVIDENCE_ROOT/executed-workflow.yml"
           cp test/perf/dictionaries.lock.json "$PERF_EVIDENCE_ROOT/dictionaries.lock.json"
