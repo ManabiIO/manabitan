@@ -2522,20 +2522,34 @@ static int copy_valid_utf8(uint8_t* output, const uint8_t* bytes, uint32_t lengt
         const uint8_t first = bytes[i++];
         output[i - 1u] = first;
         if (first < 0x80u) { continue; }
-        uint32_t width;
-        if (first >= 0xc2u && first <= 0xdfu) { width = 2u; }
-        else if (first >= 0xe0u && first <= 0xefu) { width = 3u; }
-        else if (first >= 0xf0u && first <= 0xf4u) { width = 4u; }
-        else { return 0; }
-        if (width - 1u > length - i) { return 0; }
-        const uint8_t second = bytes[i];
-        if ((first == 0xe0u && second < 0xa0u) || (first == 0xedu && second > 0x9fu) ||
-            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
-        for (uint32_t j = 0u; j < width - 1u; ++j) {
-            if ((bytes[i + j] & 0xc0u) != 0x80u) { return 0; }
+        if (first >= 0xe0u && first <= 0xefu) {
+            if (length - i < 2u) { return 0; }
+            const uint8_t second = bytes[i];
+            const uint8_t third = bytes[i + 1u];
+            if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u ||
+                (first == 0xe0u && second < 0xa0u) ||
+                (first == 0xedu && second > 0x9fu)) { return 0; }
+            output[i] = second;
+            output[i + 1u] = third;
+            i += 2u;
+            continue;
         }
-        for (uint32_t j = 0u; j < width - 1u; ++j) { output[i + j] = bytes[i + j]; }
-        i += width - 1u;
+        if (first >= 0xc2u && first <= 0xdfu) {
+            if (i >= length || (bytes[i] & 0xc0u) != 0x80u) { return 0; }
+            output[i] = bytes[i];
+            ++i;
+            continue;
+        }
+        if (first < 0xf0u || first > 0xf4u || length - i < 3u) { return 0; }
+        const uint8_t second = bytes[i];
+        const uint8_t third = bytes[i + 1u];
+        const uint8_t fourth = bytes[i + 2u];
+        if ((second & 0xc0u) != 0x80u || (third & 0xc0u) != 0x80u || (fourth & 0xc0u) != 0x80u ||
+            (first == 0xf0u && second < 0x90u) || (first == 0xf4u && second > 0x8fu)) { return 0; }
+        output[i] = second;
+        output[i + 1u] = third;
+        output[i + 2u] = fourth;
+        i += 3u;
     }
     return 1;
 }
