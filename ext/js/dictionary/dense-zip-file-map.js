@@ -107,6 +107,17 @@ export class DenseZipFileMap {
     has(key) { return this._entries.has(key) }
 
     /**
+     * Probe source ZIP membership without expanding compact metadata. Entries
+     * replaced by owned bytes must still follow the ordinary media resolver.
+     * @param {string} key
+     * @returns {boolean}
+     */
+    hasArchiveEntry(key) {
+        const value = this._entries.get(key)
+        return typeof value === 'number' || (typeof value !== 'undefined' && !Reflect.has(value, 'bytes'))
+    }
+
+    /**
      * @param {string} key
      * @param {import('dictionary-importer').ImportFileEntry} value
      * @returns {this}

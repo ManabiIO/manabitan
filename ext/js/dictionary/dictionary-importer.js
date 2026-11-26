@@ -72,6 +72,8 @@ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipFileMap} from './dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from './dense-zip-file-map.js'
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
 import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
@@ -2000,16 +2002,19 @@ export class DictionaryImporter {
                                     deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
-                                const file = fileMap.get(requirement.source.path);
+                                /* eslint-disable @stylistic/semi */
+                                const path = requirement.source.path
                                 if (
                                     deferArchiveImages &&
                                     (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
-                                    typeof file !== 'undefined' && !Reflect.has(file, 'bytes') &&
-                                    getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                    getImageMediaTypeFromFileName(path) !== null &&
+                                    this._hasArchiveFile(fileMap, path)
                                 ) {
-                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
-                                    continue;
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement))
+                                    continue
                                 }
+                                const file = fileMap.get(path)
+                                /* eslint-enable @stylistic/semi */
                                 const size = /** @type {unknown} */ (typeof file === 'undefined' ? void 0 : Reflect.get(file, 'uncompressedSize'));
                                 if (
                                     typeof size !== 'number' || !Number.isSafeInteger(size) || size < 0 ||
@@ -3157,6 +3162,21 @@ export class DictionaryImporter {
         }
         return false;
     }
+
+    /* eslint-disable @stylistic/semi */
+    /**
+     * Speculative media already owns its ZIP reads. Defer by membership alone
+     * so a compact catalog does not create an unused entry and filename view.
+     * @param {import('dictionary-importer').ArchiveFileMap} fileMap
+     * @param {string} path
+     * @returns {boolean}
+     */
+    _hasArchiveFile(fileMap, path) {
+        if (fileMap instanceof DenseZipFileMap) { return fileMap.hasArchiveEntry(path) }
+        const file = fileMap.get(path)
+        return typeof file !== 'undefined' && !Reflect.has(file, 'bytes')
+    }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * @returns {import('dictionary-importer').ProgressData}

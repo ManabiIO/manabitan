@@ -6,6 +6,10 @@
 import {crc32} from 'node:zlib';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from '../ext/js/dictionary/dense-zip-file-map.js'
+// eslint-disable-next-line @stylistic/semi
+import {RawZipPayloadReader} from '../ext/js/dictionary/term-bank-source-pipeline.js'
 import {createGenerationMediaIndex} from '../ext/js/dictionary/dictionary-generation-media-store.js';
 import {startSourceZipMediaPreparation} from '../ext/js/dictionary/source-zip-media-preparation.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
@@ -45,9 +49,7 @@ class LargeArchive extends Blob {
     get size() { return 129 * 1024 * 1024; }
 }
 
-function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?: boolean, onTerms?: () => void}} */ {missing = false, failSeal = false, rejectWrite = false, onTerms = () => {}} = {}) {
-    /** @type {import('dictionary-importer').ArchiveFileMap} */
-    const fileMap = new Map();
+function fixture(/** @type {{dense?: boolean, missing?: boolean, failSeal?: boolean, rejectWrite?: boolean, onTerms?: () => void}} */ {dense = false, missing = false, failSeal = false, rejectWrite = false, onTerms = () => {}} = {}) {
     /** @type {import('../ext/js/dictionary/dictionary-generation-media-store.js').SourceMediaRange[]} */
     const records = [];
     /** @type {Uint8Array<ArrayBuffer>[]} */
@@ -60,17 +62,38 @@ function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?
         state.events.push('image-read');
         return Uint8Array.from(images[index]);
     }));
+    /* eslint-disable @stylistic/semi */
+    const paths = Array.from({length: IMAGE_COUNT}, (_, index) => `img/card${index + 1}.webp`)
+    /**
+     * @this {import('../ext/js/dictionary/dense-zip-directory.js').DenseZipEntry}
+     * @returns {Promise<Uint8Array<ArrayBuffer>>}
+     */
+    async function readDenseImage() { return readImage(Number(this.filename.slice(8, -5)) - 1) }
+    /** @type {import('dictionary-importer').ArchiveFileMap} */
+    const fileMap = dense ? new DenseZipFileMap(IMAGE_COUNT, encoder.encode(paths.join('')), readDenseImage) : new Map()
+    let filenameOffset = 0
+    // This archive adapter supplies getData payloads, not physical ZIP bytes.
+    // Keep deferred fallback on those same adapter reads for both catalog types.
+    if (dense) { vi.spyOn(RawZipPayloadReader.prototype, 'supportsBatchReads').mockReturnValue(false) }
+    /* eslint-enable @stylistic/semi */
     const rows = [];
     for (let index = 0; index < IMAGE_COUNT; ++index) {
         const path = `img/card${index + 1}.webp`;
         const content = Uint8Array.of(index & 255, (index >>> 8) & 255, 255);
         images.push(content);
         records.push({path, packedOffset: index * 3, packedLength: 3, compressionMethod: 0, uncompressedLength: 3, signature: crc32(content)});
-        fileMap.set(path, /** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
-            filename: path,
-            uncompressedSize: content.length,
-            async getData() { return readImage(index); },
-        })));
+        /* eslint-disable @stylistic/semi */
+        if (fileMap instanceof DenseZipFileMap) {
+            fileMap.addDirectoryEntry(index, path, filenameOffset, index * 128, content.length, content.length, 0, crc32(content))
+            filenameOffset += path.length
+        } else {
+            fileMap.set(path, /** @type {import('dictionary-importer').ImportFileEntry} */ (/** @type {unknown} */ ({
+                filename: path,
+                uncompressedSize: content.length,
+                async getData() { return readImage(index) },
+            })))
+        }
+        /* eslint-enable @stylistic/semi */
         rows.push([
             `term${index + 1}`,
             `reading${index + 1}`,
@@ -144,7 +167,8 @@ function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?
         new LargeArchive([new Uint8Array(30)]),
         {skipImageMetadata: true, enableTermEntryContentDedup: false, zipUseWebWorkers: false},
     );
-    return {run, prepared, database, staged, selectedPlans, storedMedia, images, readImage, close};
+    // eslint-disable-next-line @stylistic/semi
+    return {run, prepared, database, staged, selectedPlans, storedMedia, images, readImage, close, fileMap}
 }
 
 /** @param {ReturnType<typeof fixture>} f */
@@ -172,6 +196,37 @@ afterEach(() => {
 });
 
 describe('speculative packed media import ownership', () => {
+    /* eslint-disable @stylistic/semi */
+    test('keeps dense media entries compact when the speculative plan publishes', async () => {
+        const f = fixture({dense: true, onTerms() { state.settle(f.prepared) }})
+        const get = vi.spyOn(f.fileMap, 'get')
+        const result = await f.run()
+        expect(result.errors).toEqual([])
+        expect(result.result?.counts?.media.total).toBe(IMAGE_COUNT)
+        expect(result.result?.generationMedia).toEqual(f.prepared.plan.descriptor)
+        expect(get.mock.calls.filter(([path]) => path.startsWith('img/'))).toEqual([])
+        expect(f.readImage).not.toHaveBeenCalled()
+        expect(f.selectedPlans).toHaveLength(1)
+        expect(f.selectedPlans[0].index).toBe(f.prepared.plan.index)
+        expect(f.database.finishBulkImport).toHaveBeenCalledOnce()
+        expect(f.close).toHaveBeenCalledOnce()
+    })
+
+    test.each(['unavailable', 'declined'])('materializes dense entries for complete fallback when speculative work is %s', async (mode) => {
+        state.available = mode !== 'unavailable'
+        const f = fixture({dense: true, onTerms() { state.settle(null) }})
+        const get = vi.spyOn(f.fileMap, 'get')
+        const result = await f.run()
+        expect(result.errors).toEqual([])
+        expect(result.result?.counts?.media.total).toBe(IMAGE_COUNT)
+        expect(result.result?.generationMedia).toBeUndefined()
+        expect(get.mock.calls.some(([path]) => path.startsWith('img/'))).toBe(true)
+        verifyFallback(f)
+        expect(f.database.finishBulkImport).toHaveBeenCalledOnce()
+        expect(f.close).toHaveBeenCalledOnce()
+    })
+    /* eslint-enable @stylistic/semi */
+
     test('publishes every verified reference without duplicate decoding or SQLite media', async () => {
         const f = fixture({onTerms() { state.settle(f.prepared); }});
         const result = await f.run();
@@ -238,8 +293,10 @@ describe('speculative packed media import ownership', () => {
         verifyFallback(f);
     });
 
-    test('preserves every payload if staged and ordinary packed publication both fail', async () => {
-        const f = fixture({failSeal: true, rejectWrite: true});
+    /* eslint-disable @stylistic/semi */
+    test.each([false, true])('preserves every payload if staged and ordinary packed publication both fail (dense=%s)', async (dense) => {
+        const f = fixture({failSeal: true, rejectWrite: true, dense})
+        /* eslint-enable @stylistic/semi */
         state.settle(f.prepared);
         const result = await f.run();
         expect(result.errors).toEqual([]);
@@ -251,8 +308,10 @@ describe('speculative packed media import ownership', () => {
         verifyFallback(f);
     });
 
-    test('does not hide a missing reference behind the speculative index', async () => {
-        const f = fixture({missing: true});
+    /* eslint-disable @stylistic/semi */
+    test.each([false, true])('does not hide a missing reference behind the speculative index (dense=%s)', async (dense) => {
+        const f = fixture({missing: true, dense})
+        /* eslint-enable @stylistic/semi */
         state.settle(f.prepared);
         const result = await f.run();
         expect(result.result).toBeNull();
@@ -266,8 +325,10 @@ describe('speculative packed media import ownership', () => {
         expect(f.close).toHaveBeenCalledOnce();
     });
 
-    test('cancels pending speculative preparation before aborting a failed term sink', async () => {
-        const f = fixture({onTerms() { throw new Error('Term sink failed'); }});
+    /* eslint-disable @stylistic/semi */
+    test.each([false, true])('cancels pending speculative preparation before aborting a failed term sink (dense=%s)', async (dense) => {
+        const f = fixture({dense, onTerms() { throw new Error('Term sink failed') }})
+        /* eslint-enable @stylistic/semi */
         const result = await f.run();
         expect(result.result).toBeNull();
         expect(result.errors.map(({message}) => message)).toEqual(['Term sink failed']);
@@ -280,8 +341,10 @@ describe('speculative packed media import ownership', () => {
         expect(f.close).toHaveBeenCalledOnce();
     });
 
-    test('discards staged media when the user cancels after preparation', async () => {
-        const f = fixture({onTerms() { state.cancelled = true; }});
+    /* eslint-disable @stylistic/semi */
+    test.each([false, true])('discards staged media when the user cancels after preparation (dense=%s)', async (dense) => {
+        const f = fixture({dense, onTerms() { state.cancelled = true }})
+        /* eslint-enable @stylistic/semi */
         state.settle(f.prepared);
         const result = await f.run();
         expect(result.result).toBeNull();

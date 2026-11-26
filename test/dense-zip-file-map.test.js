@@ -42,6 +42,31 @@ function materializedCount(map) {
 }
 
 describe('compact dense ZIP file map', () => {
+    test('probes archive entries without materializing metadata and observes byte replacements', () => {
+        const map = fixture()
+        expect(filenames.map((path) => map.hasArchiveEntry(path))).toEqual([true, true, true])
+        expect(map.hasArchiveEntry('missing.png')).toBe(false)
+        expect(materializedCount(map)).toBe(0)
+        const second = map.get('second.png')
+        if (typeof second === 'undefined') { throw new Error('Missing archive entry') }
+        expect(map.hasArchiveEntry('second.png')).toBe(true)
+        Reflect.set(second, 'bytes', new Uint8Array(0))
+        expect(map.hasArchiveEntry('second.png')).toBe(false)
+        map.set('first.png', owned('first.png'))
+        expect(map.hasArchiveEntry('first.png')).toBe(false)
+        map.delete('third.png')
+        expect(map.hasArchiveEntry('third.png')).toBe(false)
+        map.clear()
+        expect(map.hasArchiveEntry('first.png')).toBe(false)
+        map.set('first.png', second)
+        expect(map.hasArchiveEntry('first.png')).toBe(false)
+        Reflect.deleteProperty(second, 'bytes')
+        expect(map.hasArchiveEntry('first.png')).toBe(true)
+        const inheritedBytes = /** @type {import('dictionary-importer').ImportFileEntry} */ (Object.create(owned('inherited.png')))
+        map.set('inherited.png', inheritedBytes)
+        expect(map.hasArchiveEntry('inherited.png')).toBe(false)
+    })
+
     test('reads names without materializing entries and caches one requested entry', async () => {
         const map = fixture()
         expect(map.size).toBe(3)
