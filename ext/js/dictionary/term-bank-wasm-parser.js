@@ -20,7 +20,6 @@ import {DictionarySourceIntegrityError} from './dictionary-source-integrity-erro
 import {verifyTermBankSourceCrc} from './term-bank-source-crc.js';
 import {parseJson} from '../core/json.js';
 import {createGlossaryImagePathProjector} from './dictionary-image-projection.js';
-import {tryCollectGlossaryImagePaths} from './dictionary-image-references.js';
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {RetryablePromiseCache} from '../core/retryable-promise-cache.js';
 import {safePerformance} from '../core/safe-performance.js';
