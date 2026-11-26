@@ -186,13 +186,26 @@ export class RawZipPayloadReader {
      * @param {boolean} [borrowPayloadViews]
      * @returns {Promise<{sources: Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>, rangeReadCount: number, rangeReadBytes: number}|null>}
      */
+    /* eslint-disable @stylistic/semi */
     async readBatch(files, signal = new AbortController().signal, isCancelled = () => false, borrowPayloadViews = false) {
         if (!Array.isArray(files) || files.length === 0) { return {sources: [], rangeReadCount: 0, rangeReadBytes: 0}; }
         if (files.length > RAW_ZIP_BATCH_MAX_FILES) { return null; }
         const archiveSize = this._archiveContent instanceof Blob ? this._archiveContent.size : this._archiveContent.byteLength;
         if (borrowPayloadViews && (!(this._archiveContent instanceof Blob) || archiveSize <= RAW_ZIP_WHOLE_ARCHIVE_MAX_BYTES)) { return null; }
-        /** @type {Array<{file: TermBankSourceFile, offset: number, rawFilename: Uint8Array, compressedSize: number, uncompressedSize: number, compressionMethod: 0|8, signature: number, filename: string}>} */
-        const entries = [];
+        // Snapshot directly into the eventual result objects. Keep local-header
+        // positions and filename views in bounded side columns so retries never
+        // reread mutable file metadata or retain a second record per payload.
+        /** @type {Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>} */
+        const entries = []
+        const emptyBytes = new Uint8Array(0)
+        /** @type {number[]} */
+        const offsets = []
+        /** @type {Uint8Array[]} */
+        const rawFilenames = []
+        /** @type {number[]} */
+        const order = []
+        let ordered = true
+        let previousOffset = -1
         let compressedBytes = 0;
         let uncompressedBytes = 0;
         for (const file of files) {
@@ -216,10 +229,16 @@ export class RawZipPayloadReader {
             compressedBytes += compressedSize;
             uncompressedBytes += uncompressedSize;
             if (compressedBytes > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES || uncompressedBytes > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES) { return null; }
-            entries.push({file, offset, rawFilename, compressedSize, uncompressedSize, compressionMethod, signature, filename: file.filename});
+            const index = entries.length
+            offsets.push(offset)
+            rawFilenames.push(rawFilename)
+            order.push(index)
+            if (offset < previousOffset) { ordered = false }
+            previousOffset = offset
+            entries.push({file, archiveOffset: 0, bytes: emptyBytes, compressionMethod, compressedSize, uncompressedSize, signature, filename: file.filename})
         }
 
-        entries.sort((a, b) => a.offset - b.offset);
+        if (!ordered) { order.sort((a, b) => offsets[a] - offsets[b]) }
         /** @type {Array<{file: TermBankSourceFile, bytes: Uint8Array, compressionMethod: 0|8, compressedSize: number, uncompressedSize: number, signature: number, filename: string, archiveOffset: number}>} */
         const result = [];
         let rangeReadCount = 0;
@@ -227,22 +246,21 @@ export class RawZipPayloadReader {
         for (let startIndex = 0; startIndex < entries.length;) {
             signal.throwIfAborted();
             if (isCancelled()) { throw new Error('Dictionary import was cancelled'); }
-            const first = entries[startIndex];
-            const firstOffset = first.offset;
+            const firstOffset = offsets[order[startIndex]]
             let endIndex = startIndex;
             let rangeEnd = firstOffset;
-            /* eslint-disable @stylistic/semi */
             let minimumRangeEnd = firstOffset
             let contiguousMedia = borrowPayloadViews
-            /* eslint-enable @stylistic/semi */
             while (endIndex < entries.length) {
-                const entry = entries[endIndex];
+                const index = order[endIndex]
+                const entry = entries[index]
+                const offset = offsets[index]
                 // The local name must match the known central name. Only the
                 // extra field needs its maximum legal size in this read bound.
-                const entryUpperLength = ZIP_LOCAL_FILE_HEADER_LENGTH + entry.rawFilename.byteLength + 0xffff + entry.compressedSize;
-                const entryUpperEnd = entry.offset + Math.min(archiveSize - entry.offset, entryUpperLength);
+                const entryUpperLength = ZIP_LOCAL_FILE_HEADER_LENGTH + rawFilenames[index].byteLength + 0xffff + entry.compressedSize
+                const entryUpperEnd = offset + Math.min(archiveSize - offset, entryUpperLength)
                 const rangeLength = Math.min(archiveSize, entryUpperEnd) - firstOffset;
-                const gap = endIndex === startIndex ? 0 : entry.offset - rangeEnd;
+                const gap = endIndex === startIndex ? 0 : offset - rangeEnd
                 if (
                     endIndex > startIndex &&
                     (gap > RAW_ZIP_BATCH_MAX_GAP_BYTES || rangeLength > RAW_ZIP_BATCH_MAX_RANGE_BYTES)
@@ -254,17 +272,14 @@ export class RawZipPayloadReader {
                     return null;
                 }
                 rangeEnd = Math.max(rangeEnd, entryUpperEnd);
-                /* eslint-disable @stylistic/semi */
                 if (borrowPayloadViews) {
-                    if (endIndex > startIndex && entry.offset !== minimumRangeEnd) { contiguousMedia = false }
-                    minimumRangeEnd = Math.max(minimumRangeEnd, entry.offset + Math.min(archiveSize - entry.offset, entryUpperLength - 0xffff))
+                    if (endIndex > startIndex && offset !== minimumRangeEnd) { contiguousMedia = false }
+                    minimumRangeEnd = Math.max(minimumRangeEnd, offset + Math.min(archiveSize - offset, entryUpperLength - 0xffff))
                 }
-                /* eslint-enable @stylistic/semi */
                 ++endIndex;
             }
             const boundedEnd = Math.min(archiveSize, rangeEnd);
             const rangeLength = boundedEnd - firstOffset;
-            /* eslint-disable @stylistic/semi */
             // Isolated or nonadjacent media retain the original single read.
             // Adjacency supplies evidence for omitting unused tail slack; an
             // exceptional extra field on the last member can still retry.
@@ -282,8 +297,10 @@ export class RawZipPayloadReader {
                 const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
                 let retry = false
                 for (let i = startIndex; i < endIndex; ++i) {
-                    const entry = entries[i]
-                    const headerOffset = entry.offset - firstOffset
+                    const index = order[i]
+                    const entry = entries[index]
+                    const offset = offsets[index]
+                    const headerOffset = offset - firstOffset
                     if (headerOffset < 0 || headerOffset > bytes.byteLength - ZIP_LOCAL_FILE_HEADER_LENGTH || view.getUint32(headerOffset, true) !== ZIP_LOCAL_FILE_HEADER_SIGNATURE) {
                         throw new DictionarySourceIntegrityError(`Raw ZIP local header is invalid for '${entry.filename}'`)
                     }
@@ -294,14 +311,14 @@ export class RawZipPayloadReader {
                     }
                     const filenameLength = view.getUint16(headerOffset + 26, true)
                     const extraFieldLength = view.getUint16(headerOffset + 28, true)
-                    const {rawFilename} = entry
+                    const rawFilename = rawFilenames[index]
                     if (filenameLength !== rawFilename.byteLength) {
                         throw new DictionarySourceIntegrityError(`Raw ZIP local filename disagrees with central metadata for '${entry.filename}'`)
                     }
                     const localFilenameOffset = headerOffset + ZIP_LOCAL_FILE_HEADER_LENGTH
                     const dataOffset = localFilenameOffset + filenameLength + extraFieldLength
                     const payloadEnd = dataOffset + entry.compressedSize
-                    const absoluteDataOffset = entry.offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength
+                    const absoluteDataOffset = offset + ZIP_LOCAL_FILE_HEADER_LENGTH + filenameLength + extraFieldLength
                     if (
                         !Number.isSafeInteger(payloadEnd) || payloadEnd > rangeLength || (!borrowPayloadViews && payloadEnd > bytes.byteLength) ||
                         !Number.isSafeInteger(absoluteDataOffset) || absoluteDataOffset > archiveSize ||
@@ -318,32 +335,26 @@ export class RawZipPayloadReader {
                         retry = true
                         break
                     }
-                    result.push({
-                        file: entry.file,
-                        archiveOffset: absoluteDataOffset,
-                        bytes: borrowPayloadViews ? bytes.subarray(dataOffset, payloadEnd) : Uint8Array.from(bytes.subarray(dataOffset, payloadEnd)),
-                        compressionMethod: entry.compressionMethod,
-                        compressedSize: entry.compressedSize,
-                        uncompressedSize: entry.uncompressedSize,
-                        signature: entry.signature,
-                        filename: entry.filename,
-                    })
+                    entry.archiveOffset = absoluteDataOffset
+                    entry.bytes = borrowPayloadViews ? bytes.subarray(dataOffset, payloadEnd) : Uint8Array.from(bytes.subarray(dataOffset, payloadEnd))
+                    result.push(entry)
                 }
                 if (!retry) { break }
                 // Only an actual local extra field can exceed the minimum
                 // media span. Retry the original bounded range once, dropping
                 // provisional views and revalidating every entry afterward.
+                for (let i = rangeResultStart; i < result.length; ++i) { result[i].bytes = emptyBytes }
                 result.length = rangeResultStart
                 bytes = await this._readBlobRange(firstOffset, rangeLength, signal)
                 ++rangeReadCount
                 rangeReadBytes += rangeLength
                 if (isCancelled()) { throw new Error('Dictionary import was cancelled') }
             }
-            /* eslint-enable @stylistic/semi */
             startIndex = endIndex;
         }
         return {sources: result, rangeReadCount, rangeReadBytes};
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Blob.arrayBuffer cannot be interrupted. Join its completion and check

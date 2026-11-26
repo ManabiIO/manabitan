@@ -1,0 +1,64 @@
+{
+  "sourceCommit": "45e50e146e9326bfaeb28c32883c031377b152ef",
+  "sourceTree": "5aff8cd46878186fe1d84bea93b31b6b55c687c9",
+  "base": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "completeCorpus": {
+    "status": "passed",
+    "node": "v22.22.0",
+    "receipt": "results.json.txt",
+    "scope": "All raw VNDB media payloads and metadata, complete packed Blob and generation index; no term-row, browser or timing claim"
+  },
+  "focusedTests": [
+    {
+      "node": "v24.22.3",
+      "command": "npx vitest run test/raw-zip-range-reader.test.js test/source-zip-media-entry-pack.test.js test/term-bank-source-pipeline.test.js --maxWorkers=1 --reporter=dot",
+      "exitCode": 1,
+      "status": "failed/incomplete",
+      "summary": "A newly introduced large-offset fixture triggered Node Blob::ToSlice's native args[1]->IsUint32() assertion. The final fixture uses a virtually positioned bounded Blob. An unchanged source-media packer WASM compilation hook also exceeded its original 10000ms timeout. This attempt did not validate the final source/test tree.",
+      "retainedExcerpt": "Assertion failed: args[1]->IsUint32(); FAIL test/source-zip-media-entry-pack.test.js: Hook timed out in 10000ms; [vitest-pool]: Worker forks emitted error.",
+      "rawLogAvailable": false
+    },
+    {
+      "node": "v22.22.0",
+      "command": "node node_modules/vitest/vitest.mjs run test/raw-zip-range-reader.test.js test/source-zip-media-entry-pack.test.js --maxWorkers=1 --testTimeout=30000 --hookTimeout=30000 --reporter=verbose",
+      "exitCode": 1,
+      "passed": 98,
+      "failed": 2,
+      "allNineNewCasesPassed": true,
+      "log": "focused-tests.log.txt",
+      "failures": [
+        "Unchanged raw-reader local-extra-field batch test exceeded 30000ms",
+        "Unchanged nonphysical-order packer test exceeded 30000ms"
+      ],
+      "configurationChange": "Only command-line time limits; no tracked test configuration or assertions changed"
+    }
+  ],
+  "lint": [
+    {
+      "node": "v24.22.3",
+      "command": "npx eslint ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js",
+      "exitCode": 137,
+      "status": "killed; no pass claimed",
+      "rawLogAvailable": false
+    },
+    {
+      "node": "v22.22.0",
+      "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-bank-source-pipeline.js test/raw-zip-range-reader.test.js test/perf/zip-batch-snapshots-20261126/*.mjs",
+      "exitCode": 130,
+      "status": "stopped to serialize remaining validation; no pass claimed",
+      "log": "eslint.log.txt"
+    }
+  ],
+  "syntax": {
+    "node": "v24.22.3",
+    "status": "passed",
+    "files": [
+      "ext/js/dictionary/term-bank-source-pipeline.js",
+      "test/raw-zip-range-reader.test.js",
+      "test/perf/zip-batch-snapshots-20261126/replay.mjs",
+      "test/perf/zip-batch-snapshots-20261126/worker.mjs"
+    ]
+  },
+  "diffCheck": "passed",
+  "fullUnitTypeBuildAndBrowserGates": "not established by this acquisition"
+}

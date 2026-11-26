@@ -1,0 +1,148 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/3b76e685bf40/vndb
+
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ × test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves every record, byte and index slot in nonphysical request order 90652ms
+   → Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > declines duplicate names before payload I/O (entries) 2149ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > declines duplicate names before payload I/O (requirements) 897ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves metadata admission for encrypted 7030ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves metadata admission for method 3220ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves metadata admission for offset 1142ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves metadata admission for raw-name 673ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves metadata admission for inline 687ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves metadata admission for mdict 1093ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves generic request type, missing-path and exact-name admission 6715ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves the requested path when a central entry exposes later diagnostic aliases 19153ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > rejects an unsupported requested extension before reading its entry name 1219ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > keeps an earlier CRC failure ahead of a later malformed header (entries) 736ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > keeps an earlier CRC failure ahead of a later malformed header (requirements) 610ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > joins a cancelled read and starts no later payload batch (entries) 2798ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > joins a cancelled read and starts no later payload batch (requirements) 944ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves entry-count admission before any read (entries) 667ms
+ ✓ test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves entry-count admission before any read (requirements) 832ms
+(node:34) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > counts actual dispatched ranges and leaves cached whole-archive reads at zero 22ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > reduces adjacent reads without reading additional bytes or sharing transferable payloads 44ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > does not read an unclaimed entry between independently admitted groups 16ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > caps merged requests while preserving every admitted byte 112ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains independent ownership for overlapping exact payload reads after an extra field 12ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the existing owned exact-read buffer when no peer can share its range 10ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the exact local-header failure independently of an adjacent healthy entry: signature 7ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the exact local-header failure independently of an adjacent healthy entry: encrypted 2ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the exact local-header failure independently of an adjacent healthy entry: method 6ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the exact local-header failure independently of an adjacent healthy entry: filename 2ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the exact local-header failure independently of an adjacent healthy entry: name-length 6ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > retains the native inflater CRC error for coalesced source bytes 48ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > cancels one owner without dropping its adjacent peer or replacing its cancellation reason 11ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > joins shared Blob I/O through pool disposal, including released owners 11ms
+ ✓ test/raw-zip-range-reader.test.js > coalesced admitted compressed-source reads > cancels queued owners before physical I/O starts 11ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > batches owned or already cached bytes while retaining large-Blob ranged policy 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > coalesces nearby payloads and validates every local entry header 12ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves batch snapshots across metadata replacement: {"borrowed":false,"reversed":false,"retry":false} 25ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves batch snapshots across metadata replacement: {"borrowed":false,"reversed":true,"retry":false} 11ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves batch snapshots across metadata replacement: {"borrowed":true,"reversed":false,"retry":false} 4ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves batch snapshots across metadata replacement: {"borrowed":true,"reversed":true,"retry":true} 2ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves stable equal-offset order and distinct sources (borrowed=false) 34ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves stable equal-offset order and distinct sources (borrowed=true) 3ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps synchronous metadata getters aligned with the observed file list (append=false) 2ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps synchronous metadata getters aligned with the observed file list (append=true) 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves local offsets above uint32 in a virtually positioned Blob 8ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > borrows payload subviews only from bounded large-Blob ranges 11ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > coalesces the full deferred media entry limit in a bounded Blob range 888ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > projects checked stored and compressed payloads into one source span 1764ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > validates each batched filename against its ZIP central metadata 2ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects a malformed second batch header: signature 2ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects a malformed second batch header: encrypted 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects a malformed second batch header: method 5ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > declines ineligible batches before I/O: raw-filename 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > declines ineligible batches before I/O: compressed-budget 0ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > declines ineligible batches before I/O: uncompressed-budget 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > declines ineligible batches before I/O: source-count 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > declines ineligible batches before I/O: unsafe-offset 11ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > supports the maximum local extra field without reading an unknown filename allowance 5ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > omits unused local extra-field capacity from borrowed method-0 media ranges 9ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > omits unused local extra-field capacity from borrowed method-8 media ranges 18ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps borrowed singleton ranges on one original read with 0 extra bytes 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps borrowed singleton ranges on one original read with 12 extra bytes 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps borrowed singleton ranges on one original read with 65535 extra bytes 1ms
+ × test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps media batches with local extras on one original range read 42440ms
+   → Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps the original range when a later media entry breaks adjacency 24ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > retries a contiguous media range once when only its last member has an extra field 18ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps separate borrowed ranges bounded across a large source gap 34ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > checks cancellation before extending a borrowed media range 2ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > joins a cancelled borrowed media range extension before exposing bytes 12ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > validates local filenames after the borrowed range extension settles 2ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: signature 27ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: encrypted 3ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: method 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: filename 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: name-length 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: extra-length 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > preserves malformed borrowed-media rejection: truncated-payload 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > joins a cancelled batch Blob read before exposing bytes (borrowed=false) 73ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > joins a cancelled batch Blob read before exposing bytes (borrowed=true) 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > reads an exact owned payload with method 0 and skips unrelated bytes 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > reads an exact owned payload with method 8 and skips unrelated bytes 22ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > reads a fixed header when central filename bytes are unavailable 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > bounds the coalesced metadata read at a truncated local name 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > reads a local header beyond the old archive ceiling 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: signature 41ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: encrypted 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: method 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: filename 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: name-length 0ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: extra-length 18ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects malformed large entry: truncated-payload 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects invalid offset before I/O: -1 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects invalid offset before I/O: 0.5 0ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects invalid offset before I/O: NaN 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects invalid offset before I/O: 9007199254740991 9ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > does not start I/O for an already cancelled request 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > joins an in-flight real Blob read on disposal without starting its payload 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > retains the compressed-source budget on deviceMemory=2 30ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > retains the compressed-source budget on deviceMemory=8 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > rejects a single oversized compressed entry before reading it 1ms
+ ✓ test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > small Blob and ArrayBuffer paths retain owned payload copies 25ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/raw-zip-range-reader.test.js > bounded large ZIP entry reads > keeps media batches with local extras on one original range read
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/raw-zip-range-reader.test.js:760:9
+    758|     })
+    759|
+    760|     test('keeps media batches with local extras on one original range …
+       |         ^
+    761|         const extraLength = 12
+    762|         const sources = contiguousEntries(1024, extraLength)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/source-zip-media-entry-pack.test.js > direct source ZIP media entries > preserves every record, byte and index slot in nonphysical request order
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/source-zip-media-entry-pack.test.js:107:9
+    105|
+    106| describe('direct source ZIP media entries', () => {
+    107|     test('preserves every record, byte and index slot in nonphysical r…
+       |         ^
+    108|         const {archive, files} = fixture()
+    109|         const selected = files.reverse()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 98 passed (100)
+   Start at  11:41:59
+   Duration  226.91s (transform 5.66s, setup 391ms, import 17.19s, tests 188.13s, environment 0ms)
+

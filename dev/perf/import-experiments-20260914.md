@@ -687,3 +687,38 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## November 26, 2026: raw ZIP batch snapshot reuse
+
+Source `45e50e146e9326bfaeb28c32883c031377b152ef` is based on develop `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. The raw ZIP reader reuses each validated metadata snapshot as its eventual source object. Batch-local side arrays preserve original local-header offsets and filename views across asynchronous reads. Unordered and equal-offset inputs retain stable ordering; a range retry releases provisional payload views before rereading. Metadata checks, byte budgets, cancellation, local-name/header verification and downstream CRC validation remain intact. No native assets, stored formats or import defaults change.
+
+The [complete untimed media receipt](../../builds/perf/zip-batch-snapshots-20261126/results.json.txt) compares the actual production source-media preparation worker in separate Node **22.22.0** processes. Every raw payload and metadata tuple, original file identity, result property shape, complete packed Blob and generation index match between baseline and candidate.
+
+| Matching check                     |   Both arms |
+| ---------------------------------- | ----------: |
+| VNDB image sources                 |     146,570 |
+| Raw batches / physical range reads |   144 / 144 |
+| Compressed payload bytes           | 188,864,129 |
+| Decoded image bytes                | 188,131,284 |
+| Complete packed Blob bytes         | 195,649,882 |
+| Complete generation index bytes    |   3,912,816 |
+
+The packed Blob SHA-256 is `02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc`; the index SHA-256 is `a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5`. The receipt also retains all raw payload/metadata digests and exact fixture/source identities. Before and after execution, the runner requires unchanged helper/source hashes and proves that the raw reader is the only differing production file. The pinned parser WASM is identical, SHA-256 `b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa`; no native rebuild is claimed.
+
+Both recorded Git HEAD values are the baseline because the candidate was uncommitted during acquisition. Its recorded runtime SHA-256, `c474b2e6d24ac1ff48580041caee22fc698f201bf2e1736bf761fe2d5c340a0f`, was rechecked against the subsequently committed source above. The [portable runner](../../test/perf/zip-batch-snapshots-20261126/replay.mjs) and [worker wrapper](../../test/perf/zip-batch-snapshots-20261126/worker.mjs) retain their exact executed bytes; both hashes are in the receipt.
+
+This workload eliminates **146,570 temporary per-file snapshot objects**. It introduces three batch-local side arrays and one empty byte-view placeholder per batch; ordinary batch admission remains capped at 1,024 files. These are source-level allocation counts, not measured browser peak memory or complete-import savings. No full term-database, browser-restart, whole-import timing or process-memory qualification is claimed.
+
+The [focused test log](../../builds/perf/zip-batch-snapshots-20261126/focused-tests.log.txt) retains **98 passing cases and two timeout failures**. All nine new mutation, retry, duplicate-offset and large-offset cases passed. That diagnostic run used one worker and command-only 30-second test/hook limits; an unchanged local-extra-field case and unchanged nonphysical-order packer case exceeded those limits under shared-host load. Assertions and repository test configuration were not weakened. [Attempt metadata](../../builds/perf/zip-batch-snapshots-20261126/attempts.json.txt) also records the corrected Node 24 large-Blob test-fixture failure, the earlier compilation timeout, one lint process killed with exit 137 and a second lint process stopped with exit 130. All four new/changed JavaScript files pass syntax checks, and the diff check passes. Full unit, type, build and hosted extension checks remain separate gates.
+
+Reproduce the complete media comparison with both dependency-installed source checkouts and the locked archive:
+
+```sh
+node test/perf/zip-batch-snapshots-20261126/replay.mjs \
+  --baseline-root /path/to/baseline \
+  --candidate-root /path/to/candidate \
+  --cache-dir /path/to/pinned-dictionaries \
+  --output /path/to/results.json
+```
+
+The runner reads pinned WASM directly from `dev/data/dictionary-wasm`. Only compact reports and stderr receipts are written; no source corpus or packed-media binary is retained in this evidence update.

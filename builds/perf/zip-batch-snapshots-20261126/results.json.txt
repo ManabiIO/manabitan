@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "complete": true,
+  "scope": "Untimed exact-output comparison of the actual production source-media preparation worker in separate Node processes. Hashes every raw media payload and metadata tuple, then the complete final packed Blob and index. No browser import, timing, peak-memory or complete term-row claim.",
+  "node": "v22.22.0",
+  "fixture": {
+    "label": "VNDB",
+    "cacheFile": "vndb_characters_by_bee.zip",
+    "release": "1.0.0",
+    "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "sizeBytes": 291705969,
+    "expectedTitle": "VNDB Characters by Bee",
+    "revision": "395525135651",
+    "termRows": 6648310,
+    "mediaFiles": 146570,
+    "mediaBytes": 188131284,
+    "mediaRows": 146570,
+    "optional": true,
+    "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "runnerSha256": "c18ca3a9059e867b128d42e52abe8dd2d0250d880461bca6bd9eeda581339f35",
+  "workerSha256": "0df4ce0a550e4299a9ff91193aca2e428e9597fe7e50597e9e808973dba72c23",
+  "sources": {
+    "A": {
+      "head": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+      "files": {
+        "ext/js/dictionary/term-bank-source-pipeline.js": "ac172078b1593b8872aaadee60bcae2276e8dcfbc4a0caaa62e4b353f01c52a8",
+        "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+        "ext/js/dictionary/source-zip-media-pack.js": "8c0587b49630f66db5f4f2cf96f1638a423c78e3503d0401f5f8c328a4622d6d",
+        "ext/js/dictionary/dense-zip-directory.js": "73e690d6ebee26608d7033f143745662d47e0cabb7434d264a9e68aeac686498",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "737b3bfb1728b2ca64b85da82fefcf2b0911305e620e8d0f2e843f3e04eef139",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+        "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+      }
+    },
+    "B": {
+      "head": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+      "files": {
+        "ext/js/dictionary/term-bank-source-pipeline.js": "c474b2e6d24ac1ff48580041caee22fc698f201bf2e1736bf761fe2d5c340a0f",
+        "ext/js/dictionary/source-zip-media-preparation-worker.js": "0cfc877a8603bc0fb9579b021cfe8cceb052a9dd01ce5059eed6aae5f0a1b722",
+        "ext/js/dictionary/source-zip-media-pack.js": "8c0587b49630f66db5f4f2cf96f1638a423c78e3503d0401f5f8c328a4622d6d",
+        "ext/js/dictionary/dense-zip-directory.js": "73e690d6ebee26608d7033f143745662d47e0cabb7434d264a9e68aeac686498",
+        "ext/js/dictionary/dictionary-generation-media-store.js": "737b3bfb1728b2ca64b85da82fefcf2b0911305e620e8d0f2e843f3e04eef139",
+        "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+        "ext/js/media/media-util.js": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+      }
+    }
+  },
+  "observations": {
+    "A": {
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "indexBytes": 3912816,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "blobBytes": 195649882,
+      "blobSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+      "raw": {
+        "batches": 144,
+        "sourceCount": 146570,
+        "sourceBytes": 188864129,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "metadataSha256": "8268d111de303e6d29bca671b380187e94155025a0d079b900b27173270b50d4",
+        "payloadSha256": "1cd672474a273d55c1a27aa186a91d0e3cced5e876b0782ed8d93c60f73168e6"
+      },
+      "metrics": {
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      }
+    },
+    "B": {
+      "descriptor": {
+        "version": 2,
+        "prefix": "img/cc",
+        "suffix": ".webp",
+        "firstId": 1,
+        "slotCount": 163034,
+        "count": 146570,
+        "dataBytes": 195649882
+      },
+      "indexBytes": 3912816,
+      "indexSha256": "a385fd324da2f40f1f414f5db4c1ffe4f624076fce240eee8ccbb3426cf3aca5",
+      "blobBytes": 195649882,
+      "blobSha256": "02ea178832f43bb1ef0ff6d97c1f9b8aebe2be100842f862303e0aa943d13ecc",
+      "raw": {
+        "batches": 144,
+        "sourceCount": 146570,
+        "sourceBytes": 188864129,
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "metadataSha256": "8268d111de303e6d29bca671b380187e94155025a0d079b900b27173270b50d4",
+        "payloadSha256": "1cd672474a273d55c1a27aa186a91d0e3cced5e876b0782ed8d93c60f73168e6"
+      },
+      "metrics": {
+        "rangeReadCount": 144,
+        "rangeReadBytes": 195649882,
+        "compressedBytes": 188864129,
+        "uncompressedBytes": 188131284
+      }
+    }
+  }
+}
