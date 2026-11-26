@@ -2102,6 +2102,47 @@ static int encode_term_content_row(
     return 1;
 }
 
+/* All unnormalized token lengths are known before writing. Check their total
+ * once, including the three separators, then copy into the admitted range.
+ * Normalized text objects retain the incremental writer below. */
+static int write_literal_term_content_token_binary(
+    const uint8_t* src,
+    const TermRowMeta* row,
+    uint8_t* out,
+    uint32_t out_capacity,
+    uint32_t* cursor
+) {
+    static const uint8_t EMPTY_QUOTED[] = "\"\"";
+    static const uint8_t EMPTY_ARRAY[] = "[]";
+    const uint32_t starts[3] = {row->rules_start, row->definition_tags_start, row->term_tags_start};
+    uint32_t lengths[3] = {row->rules_length, row->definition_tags_length, row->term_tags_length};
+    const uint8_t* fields[3];
+    const uint32_t glossary_length = row->glossary_length > 0u ? row->glossary_length : 2u;
+    uint64_t required = 7u + (uint64_t)glossary_length;
+    for (uint32_t i = 0u; i < 3u; ++i) {
+        if (lengths[i] == 0u || is_null_token(src, starts[i], lengths[i])) {
+            fields[i] = EMPTY_QUOTED;
+            lengths[i] = 2u;
+        } else {
+            fields[i] = src + starts[i];
+        }
+        required += lengths[i];
+    }
+    const uint32_t start = *cursor;
+    if (start > out_capacity || required > (uint64_t)(out_capacity - start)) { return 0; }
+    uint8_t* target = out + start;
+    __builtin_memcpy(target, "MBR6", 4u);
+    target += 4u;
+    for (uint32_t i = 0u; i < 3u; ++i) {
+        __builtin_memcpy(target, fields[i], lengths[i]);
+        target += lengths[i];
+        *target++ = 0u;
+    }
+    __builtin_memcpy(target, row->glossary_length > 0u ? src + row->glossary_start : EMPTY_ARRAY, glossary_length);
+    *cursor = start + (uint32_t)required;
+    return 1;
+}
+
 static int encode_term_content_token_binary_row(
     const uint8_t* src,
     const TermRowMeta* row,
@@ -2116,6 +2157,10 @@ static int encode_term_content_token_binary_row(
     static const uint8_t MAGIC[] = "MBR6";
     static const uint8_t EMPTY_QUOTED[] = "\"\"";
     const uint32_t row_start = *cursor;
+    if (row->glossary_requires_text_normalization == 0u) {
+        if (!write_literal_term_content_token_binary(src, row, out, out_capacity, cursor)) { return 0; }
+        goto hash_row;
+    }
     if (!write_content_bytes(out, out_capacity, cursor, MAGIC, sizeof(MAGIC) - 1u)) { return 0; }
 
     const uint32_t field_starts[3] = {
@@ -2177,6 +2222,7 @@ static int encode_term_content_token_binary_row(
         if (!write_content_bytes(out, out_capacity, cursor, EMPTY_ARRAY, sizeof(EMPTY_ARRAY) - 1u)) { return 0; }
     }
 
+hash_row:;
     const uint32_t row_length = *cursor - row_start;
     uint32_t h1 = 0u;
     uint32_t h2 = 0u;

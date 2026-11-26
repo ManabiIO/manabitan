@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "scope": "Original local component-screen files; no browser or complete-import qualification.",
+  "files": [
+    {
+      "path": "empty-strings/contended-timeout-recheck.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/contended-timeout-recheck.log",
+      "sizeBytes": 519,
+      "sha256": "e3633e0beb5288e59a641d7960f616df50775f329eeaf9db458552d14e360f67"
+    },
+    {
+      "path": "empty-strings/eslint-capped.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/eslint-capped.log",
+      "sizeBytes": 1064,
+      "sha256": "fc22875f72290a098dbb2ff8184362a1db7c3cd48295714892f7295f6862913c"
+    },
+    {
+      "path": "empty-strings/focused-tests.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/focused-tests.log",
+      "sizeBytes": 2387,
+      "sha256": "a0a5aa1736b289204ecd2e50bf790f0c0b30c364811cf23414351ca2ebecb302"
+    },
+    {
+      "path": "empty-strings/jitendex-empty-fields.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/jitendex-empty-fields.json",
+      "sizeBytes": 455,
+      "sha256": "13c96d57b975358ce36744fa1860986f5dce5feff8f1989bf3cc88787c1ba83e"
+    },
+    {
+      "path": "empty-strings/native-screen.mjs",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/native-screen.mjs",
+      "sizeBytes": 7003,
+      "sha256": "8a8bd4f651ab14a1e9bdbb91d5c077697f569f628f92a19cb7b142096cb2981a"
+    },
+    {
+      "path": "empty-strings/screen-generic-blob.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-generic-blob.log",
+      "sizeBytes": 38622,
+      "sha256": "ee51d36e1ca6a9760354615afa0b2cc05d93a5aa0f80a6e838ccd59d86f98100"
+    },
+    {
+      "path": "empty-strings/screen-generic-dense.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-generic-dense.log",
+      "sizeBytes": 446,
+      "sha256": "f74778776a0677ec4f67ec05d5429bfbcbd27f0ed9e94507daa313008e62956a"
+    },
+    {
+      "path": "empty-strings/screen-generic-summary.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-generic-summary.json",
+      "sizeBytes": 5968,
+      "sha256": "e25a47a292e605068edde2814ebdc32696962715160f7501e2016f5b10e9ab02"
+    },
+    {
+      "path": "empty-strings/screen-generic.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-generic.json",
+      "sizeBytes": 51984,
+      "sha256": "856e6cc48953f9cf82a69009f735ab61ae7fe825512f1a6381bc6b11326c3d8d"
+    },
+    {
+      "path": "empty-strings/screen-generic.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-generic.log",
+      "sizeBytes": 595,
+      "sha256": "945f23733cffeceb01164f89000008a7b61136ffd9a10c1f0e889bcfa02579d9"
+    },
+    {
+      "path": "empty-strings/screen-native-summary.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-native-summary.json",
+      "sizeBytes": 7119,
+      "sha256": "89886cea4bb71f49c2a3fbeb13cbb796a43a2978d8d608c81f6dd84d9e337f52"
+    },
+    {
+      "path": "empty-strings/screen-native.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-native.json",
+      "sizeBytes": 20568,
+      "sha256": "54d7d2a2d99a6bee211cbb6f6a82b3479b124e030f768ecac6e794ae40ed9c8e"
+    },
+    {
+      "path": "empty-strings/screen-native.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen-native.log",
+      "sizeBytes": 13778,
+      "sha256": "e46c4e351af08482ef0541587f15faac3418fb958c0764a2a95d3c4f20662cd4"
+    },
+    {
+      "path": "empty-strings/screen.mjs",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jitendex/builds/perf/empty-string-screen/screen.mjs",
+      "sizeBytes": 6049,
+      "sha256": "3cc70c60ff9b362eca89d9379bdcc4f417474018f58e421f135e667c3e8a51d2"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-screen-16.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-screen-16.json",
+      "sizeBytes": 87073,
+      "sha256": "e75b4f56bb1f11b081eb224c212db748baf3b39f2a29534b2250bc169b2e7307"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-screen-16.log",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-screen-16.log",
+      "sizeBytes": 142,
+      "sha256": "fb0abc445b3610f5bc6193510e645398b1069e2e6cf3022d112ab58f7157d35b"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-screen-16.mjs",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-screen-16.mjs",
+      "sizeBytes": 6205,
+      "sha256": "ede792800142f3453cc5cd920fc82f17bef337dcd097f33774f5f01ceecc5dc2"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-screen.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-screen.json",
+      "sizeBytes": 86168,
+      "sha256": "310f8bb0cb6416ddcf526bb90442c96fbfc0aa4c32b75d4a7ad5730a948d1592"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-screen.mjs",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-screen.mjs",
+      "sizeBytes": 5131,
+      "sha256": "0b4b4b1542a13b64725dabc266a6dc10d7ed5b0f7410ebc431325632130df0fc"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-summary-16.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-summary-16.json",
+      "sizeBytes": 1630,
+      "sha256": "5925a2dad31dc8b93bbebc4e16f535719fa6e4fb4f5a64e1cf4ecc68d49cd952"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-native-preflight-summary.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-native-preflight-summary.json",
+      "sizeBytes": 1069,
+      "sha256": "2f842d5719f75ca48aa09288f66b2ff7c04795759b7340ba81e4a3d6e0866804"
+    },
+    {
+      "path": "mbr6-preflight/jmdict-preflight-screen.json",
+      "originalPath": "/workspace/scratch/1e61bf8c01fe/jmdict-preflight-screen.json",
+      "sizeBytes": 323,
+      "sha256": "cc44aabcb5b0d53f69d93f5d40e78e93cd261a845c1d9119313ca4d019a79b7e"
+    }
+  ]
+}
