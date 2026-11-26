@@ -1,6 +1,6 @@
 # Native import component screens — 26 November 2026
 
-**Both candidates remain unqualified for import speed.** The fixed comparisons preserve every observation, including warmups and slower outliers. Identical baseline arms vary enough that the favorable component percentages cannot establish a repeatable benefit. No further timing followup was run after the final fixed native screens.
+**Both candidates remain unqualified for import speed.** The fixed comparisons preserve every recorded observation, including the empty-string warmup triplets and slower outliers. Preflight warmups were not timed; their counts and schedules are preserved in the runners. Identical baseline arms vary enough that the favorable component percentages cannot establish a repeatable benefit. No further timing followup was run after the final fixed native screens.
 
 ## Candidates and scope
 
@@ -39,7 +39,7 @@ The final empty-string followup preallocates source/output arenas, executes 64 p
 
 For the Jitendex sample, B is faster than C in only one of six thread-CPU pairs; total B CPU is 9.85% greater than C. Identical-code C/A pairs range from −40.75% to +22.21%. For the no-empty fixture, the candidate's direction changes with the baseline used. These observations establish neither a consistent improvement nor a reliable generic-branch regression. No narrower runtime variant was introduced.
 
-Both empty-string screens use two excluded warmup triplets, then the fixed orders ABC, BCA, CAB, ACB, CBA and BAC. The final preflight screen uses the recorded fixed per-bank orders and their reversals, with 16 warmups per arm/bank and 16 encodes per observation. Warmups remain in raw evidence. Distinct timing boundaries and candidate effects must not be combined.
+Both empty-string screens use two excluded warmup triplets, then the fixed orders ABC, BCA, CAB, ACB, CBA and BAC. The final preflight screen uses the recorded fixed per-bank orders and their reversals, with 16 warmups per arm/bank and 16 encodes per observation. The empty-string warmup triplets remain in raw evidence. Preflight warmup encode loops were not timed or included in observation arrays. Distinct timing boundaries and candidate effects must not be combined.
 
 ## Correctness and retained failures
 
@@ -54,3 +54,7 @@ A summary-file write briefly failed with ENOSPC after the final native run had a
 ## Archive verification
 
 `MANIFEST.json` lists every original member's byte count and SHA-256, including exact executed runners for both completed empty-string screens and both preflight screens. Reports which embed a runner hash were checked against the archived runner before packaging. Files were copied byte-for-byte; original JSON and logs were not normalized. Summary percentages can be recomputed from the retained observations. The original initial preflight report does not embed its runner hash.
+
+The archived `SUMMARY.md` preserves the original packaging text. Its general
+statement about warmup retention is qualified by the distinction above; no
+measured preflight observation was omitted.
