@@ -1678,14 +1678,19 @@ function encodeNativeTermLookupSegments(wasm, plan, equals, sequences, count, in
             indexScratch,
         );
         if (bytes === null) { return null; }
-        const ownedPlan = {stringLengths: new Uint16Array(runPlan.stringLengths),
-            stringOffsets: new Uint32Array(runPlan.stringOffsets),
+        /* eslint-disable @stylistic/semi */
+        // The owned v7 base already contains the compact lengths immediately
+        // after its padded key arena. Reuse that column; offsets are optional
+        // and can be reconstructed from lengths if a later split needs them.
+        const stringLengths = new Uint16Array(bytes.buffer, bytes.byteOffset + 48 + Math.ceil(length / 4) * 4, keys)
+        const ownedPlan = {stringLengths,
             stringHashes: new Uint32Array(runPlan.stringHashes),
             // v7: 16-byte container header, then the 32-byte base header.
             stringsBuffer: bytes.subarray(48, 48 + length),
             expressionIndexes: new Uint32Array(runPlan.expressionIndexes),
-            readingIndexes: new Uint32Array(runPlan.readingIndexes)};
-        indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan});
+            readingIndexes: new Uint32Array(runPlan.readingIndexes)}
+        indexes.set(`${start}:${rows}`, {bytes, preinternedPlan: ownedPlan})
+        /* eslint-enable @stylistic/semi */
     }
     return indexes;
 }
