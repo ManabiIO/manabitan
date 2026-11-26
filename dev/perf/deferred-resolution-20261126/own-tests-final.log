@@ -1,0 +1,27 @@
+
+ RUN  v4.1.12 /workspace/scratch/9175611d1a4c/manabitan-parser
+
+ ❯ test/dictionary-content-plan-resolution.test.js (24 tests | 1 failed) 21671ms
+     × matches eager canonical resolution; native=false 11306ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/dictionary-content-plan-resolution.test.js > deferred content resolution at storage admission > matches eager canonical resolution; native=false
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/dictionary-content-plan-resolution.test.js:100:29
+     98|
+     99| describe('deferred content resolution at storage admission', () => {
+    100|     test.each([false, true])('matches eager canonical resolution; nati…
+       |                             ^
+    101|         const eager = await createDatabase(native)._resolveArtifactTer…
+    102|         const deferred = createPlan(true)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 23 passed (24)
+   Start at  11:42:22
+   Duration  150.42s (transform 107.91s, setup 480ms, import 114.52s, tests 21.67s, environment 0ms)
+

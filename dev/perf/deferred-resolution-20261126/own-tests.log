@@ -1,0 +1,75 @@
+
+ RUN  v4.1.12 /workspace/scratch/9175611d1a4c/manabitan-parser
+
+ ❯ test/dictionary-content-plan-resolution.test.js (24 tests | 2 failed) 1962ms
+     × matches eager canonical resolution; native=false 323ms
+     × matches eager canonical resolution; native=true 187ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/dictionary-content-plan-resolution.test.js > deferred content resolution at storage admission > matches eager canonical resolution; native=false
+AssertionError: expected { …(23) } to deeply equal { …(23) }
+
+- Expected
++ Received
+
+@@ -51,11 +51,11 @@
+        3,
+      ],
+    },
+    "contentLengths": Uint32Array [],
+    "contentOffsets": Float64Array [],
+-   "dedupCanonicalScanMs": 16.792753999994602,
++   "dedupCanonicalScanMs": 0.17916499999410007,
+    "dedupCapacityMs": 0,
+    "dedupExactCompareMs": 0,
+    "exactFallbackCount": 0,
+    "nativeScanMetrics": {
+      "dedupNativeBulkPendingRows": 0,
+
+ ❯ test/dictionary-content-plan-resolution.test.js:90:24
+     88|         const deferred = createPlan(true)
+     89|         const actual = await createDatabase(native)._resolveArtifactTe…
+     90|         expect(actual).toEqual(eager)
+       |                        ^
+     91|         expect(deferred.resolutionDeferred).toBe(false)
+     92|         expect(deferred.resolvedFlags).toHaveLength(3)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/dictionary-content-plan-resolution.test.js > deferred content resolution at storage admission > matches eager canonical resolution; native=true
+AssertionError: expected { …(23) } to deeply equal { …(23) }
+
+- Expected
++ Received
+
+@@ -51,11 +51,11 @@
+        3,
+      ],
+    },
+    "contentLengths": Uint32Array [],
+    "contentOffsets": Float64Array [],
+-   "dedupCanonicalScanMs": 27.93589899998915,
++   "dedupCanonicalScanMs": 0.48504200000024866,
+    "dedupCapacityMs": 0,
+    "dedupExactCompareMs": 0,
+    "exactFallbackCount": 0,
+    "nativeScanMetrics": {
+      "dedupNativeBulkPendingRows": 3,
+
+ ❯ test/dictionary-content-plan-resolution.test.js:90:24
+     88|         const deferred = createPlan(true)
+     89|         const actual = await createDatabase(native)._resolveArtifactTe…
+     90|         expect(actual).toEqual(eager)
+       |                        ^
+     91|         expect(deferred.resolutionDeferred).toBe(false)
+     92|         expect(deferred.resolvedFlags).toHaveLength(3)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 22 passed (24)
+   Start at  11:39:00
+   Duration  92.72s (transform 45.24s, setup 1.16s, import 53.77s, tests 1.96s, environment 0ms)
+

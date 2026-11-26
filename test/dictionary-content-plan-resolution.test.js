@@ -144,8 +144,12 @@ describe('deferred content resolution at storage admission', () => {
         })
         expect(first.pendingContentCount).toBe(1)
         database._publishResolvedArtifactTermContentPlan(
-            plan, first.pendingPlanUniqueStart, first.pendingPlanUniqueIndexes,
-            new Float64Array([123]), new Uint32Array([1]), 'raw-v6',
+            plan,
+            first.pendingPlanUniqueStart,
+            first.pendingPlanUniqueIndexes,
+            new Float64Array([123]),
+            new Uint32Array([1]),
+            'raw-v6',
         )
         const fields = [plan.resolvedFlags, plan.resolvedOffsets, plan.resolvedLengths]
         const second = await database._resolveArtifactTermContentDedup({
@@ -193,12 +197,21 @@ describe('deferred content resolution at storage admission', () => {
     })
 
     test.each([
-        ['uniqueCount', -1], ['uniqueCount', 1.5], ['uniqueCount', 4], ['sourceRowCount', 2],
-        ['uniqueRowIndexes', new Uint32Array(2)], ['resolvedFlags', new Uint8Array(1)],
-        ['resolvedOffsets', new Float64Array(1)], ['resolvedLengths', new Uint32Array(1)],
-        ['nextEpoch', 2], ['nextUnresolvedUniqueIndex', 1], ['persistedLookupRequired', false],
-        ['resolvedDictNames', []], ['resolvedUniformDictName', 'raw-v6'],
-        ['pendingEpochs', new Uint32Array(3)], ['pendingIndexes', new Uint32Array(3)],
+        ['uniqueCount', -1],
+        ['uniqueCount', 1.5],
+        ['uniqueCount', 4],
+        ['sourceRowCount', 2],
+        ['uniqueRowIndexes', new Uint32Array(2)],
+        ['resolvedFlags', new Uint8Array(1)],
+        ['resolvedOffsets', new Float64Array(1)],
+        ['resolvedLengths', new Uint32Array(1)],
+        ['nextEpoch', 2],
+        ['nextUnresolvedUniqueIndex', 1],
+        ['persistedLookupRequired', false],
+        ['resolvedDictNames', []],
+        ['resolvedUniformDictName', 'raw-v6'],
+        ['pendingEpochs', new Uint32Array(3)],
+        ['pendingIndexes', new Uint32Array(3)],
     ])('rejects inconsistent deferred %s before allocating', (property, value) => {
         const plan = createPlan(true)
         Reflect.set(plan, /** @type {string} */ (property), value)
@@ -211,7 +224,7 @@ describe('deferred content resolution at storage admission', () => {
     })
 
     test('leaves queued production worker results empty through transfer and initializes them at the sink', async () => {
-        const worker = new Worker(new URL('./fixtures/parser-settlement/worker-node.mjs', import.meta.url), {
+        const worker = new Worker(new URL('fixtures/parser-settlement/worker-node.mjs', import.meta.url), {
             workerData: {url: new URL('../ext/js/dictionary/term-bank-wasm-parser-worker.js', import.meta.url).href},
         })
         /**
@@ -220,16 +233,25 @@ describe('deferred content resolution at storage admission', () => {
          * @returns {Promise<Record<string, unknown>>}
          */
         const request = async (message, transfer = []) => await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => { cleanup(); reject(new Error('Parser worker timed out')) }, 10000)
+            const timeout = setTimeout(() => {
+                cleanup()
+                reject(new Error('Parser worker timed out'))
+            }, 10000)
             const cleanup = () => {
                 clearTimeout(timeout)
                 worker.off('message', onMessage)
                 worker.off('error', onError)
             }
             /** @param {Record<string, unknown>} result */
-            const onMessage = (result) => { cleanup(); resolve(result) }
+            const onMessage = (result) => {
+                cleanup()
+                resolve(result)
+            }
             /** @param {Error} error */
-            const onError = (error) => { cleanup(); reject(error) }
+            const onError = (error) => {
+                cleanup()
+                reject(error)
+            }
             worker.once('message', onMessage)
             worker.once('error', onError)
             worker.postMessage(message, transfer)
@@ -240,7 +262,10 @@ describe('deferred content resolution at storage admission', () => {
                 `word-${index}`, '', '', '', 0, [`definition-${index % 3}`], index, '',
             ])))
             const result = await request({
-                type: 'parse', id: 1, version: 3, sourceBuffers: [bytes.buffer],
+                type: 'parse',
+                id: 1,
+                version: 3,
+                sourceBuffers: [bytes.buffer],
                 options: {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, prepareLookupIndexes: true},
             }, [bytes.buffer])
             expect(bytes.byteLength).toBe(0)
@@ -253,7 +278,10 @@ describe('deferred content resolution at storage admission', () => {
             expect(plan.resolvedLengths).toHaveLength(0)
             const nextBytes = new TextEncoder().encode('[["next","","","",0,["unrelated"],1,""]]')
             expect((await request({
-                type: 'parse', id: 2, version: 3, sourceBuffers: [nextBytes.buffer],
+                type: 'parse',
+                id: 2,
+                version: 3,
+                sourceBuffers: [nextBytes.buffer],
                 options: {emitContentSlab: true, emitTokenBinaryContent: true, emitTermByteLists: false, prepareLookupIndexes: true},
             }, [nextBytes.buffer])).type).toBe('result')
             expect(plan.resolutionDeferred).toBe(true)
