@@ -1,0 +1,203 @@
+"""Independently audit the retained fixed PR875 memory cohort without acquisition."""
+
+import hashlib
+import io
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import zipfile
+
+ROOT = Path('/workspace/scratch/a7f76505d50d')
+EVIDENCE = ROOT / 'current875-evidence'
+AUDITOR = ROOT / 'qualification/dev/perf/import-memory-20261125-a7f7'
+sys.path.insert(0, str(AUDITOR))
+from audit_memory import audit_cell
+
+
+def digest_bytes(value):
+    return hashlib.sha256(value).hexdigest()
+
+
+def digest(path):
+    return digest_bytes(Path(path).read_bytes())
+
+
+def load(path):
+    return json.loads(Path(path).read_text())
+
+
+def file_entries(archive):
+    names = archive.namelist()
+    assert len(names) == len(set(names)), 'Duplicate ZIP entry'
+    return {item.filename: digest_bytes(archive.read(item))
+            for item in archive.infolist() if not item.is_dir()}
+
+
+expected_differences = [
+    'js/dictionary/term-bank-wasm-parser-worker.js',
+    'js/dictionary/term-bank-wasm-parser.js',
+    'js/dictionary/wasm/term-bank-parser.c',
+    'lib/term-bank-parser.wasm',
+]
+expected_identities = {
+    'A': {'commit': '7d1643e6147a10cb2165e9744cf0e63b59e46632',
+          'tree': '99d23f16e973c7ae9feba77ca3643d1c27dfb93d'},
+    'B': {'commit': '7a8b25a44a3fe165107ed816377cc72bb0fac67d',
+          'tree': '093a0be94fcf336ab5a0113b80fae7481855935a'},
+}
+local_packages = {}
+for arm, repository in [('A', 'manabitan'), ('B', 'vndb')]:
+    path = ROOT / repository / 'builds/manabitan-chrome.zip'
+    with zipfile.ZipFile(path) as archive:
+        local_packages[arm] = file_entries(archive)
+
+cells = []
+fixed_failures = []
+qualified_pair_limit_excesses = []
+for cell in sorted(EVIDENCE.glob('current-media-memory-*')):
+    if not cell.is_dir():
+        continue
+    source = cell / 'source/dev/perf/import-memory-20261124-3aac'
+    for name in ['audit_memory.py', 'chromium_memory.py']:
+        assert digest(AUDITOR / name) == digest(source / name), name
+    recomputed = audit_cell(cell)
+    assert recomputed == load(cell / 'memory-audit.json')
+    plan = load(cell / 'plan.json')
+    comparison = load(cell / 'memory-comparison.json')
+    qualification = load(cell / 'qualification.json')
+    assert plan['sourceIdentities'] == expected_identities
+    assert plan['workflowRun'] == '45642179064'
+    assert plan['workflowAttempt'] == '1'
+    assert plan['toolingCommit'] == '718c23b87e3f0b0cdc89d42f2db2770092de47c9'
+    assert plan['expectedPackageDifferences'] == expected_differences
+    assert qualification['retriedObservations'] == 0
+
+    nested_packages = {}
+    with tempfile.TemporaryDirectory(prefix='independent-receipts-', dir=EVIDENCE) as temporary:
+        temporary = Path(temporary)
+        for child in cell.iterdir():
+            (temporary / child.name).symlink_to(child, target_is_directory=child.is_dir())
+        with zipfile.ZipFile(str(cell) + '.zip') as outer:
+            assert len(outer.namelist()) == len(set(outer.namelist())), 'Duplicate artifact ZIP entry'
+            for arm in ['A', 'B']:
+                payload = outer.read(f'{arm}-product.zip')
+                identity = load(cell / f'{arm}-identity.json')
+                assert digest_bytes(payload) == identity['packageSha256']
+                with zipfile.ZipFile(io.BytesIO(payload)) as product:
+                    entries = file_entries(product)
+                    assert entries == load(cell / f'{arm}-package-entries.json')
+                    assert entries == local_packages[arm], 'Hosted package differs from independently built product'
+                    nested_packages[arm] = {
+                        'sha256': digest_bytes(payload), 'sizeBytes': len(payload),
+                        'fileCount': len(entries),
+                        'allFileBytesMatchIndependentLocalBuild': True,
+                    }
+                (temporary / f'{arm}-product.zip').write_bytes(payload)
+        code = 'import json,sys; from verify_receipts import verify; print(json.dumps(verify(sys.argv[1])))'
+        output = subprocess.check_output(
+            [sys.executable, '-c', code, str(temporary)],
+            env={**os.environ, 'PYTHONPATH': str(source), 'PYTHONDONTWRITEBYTECODE': '1'},
+            text=True,
+        )
+        receipts = json.loads(output)
+        assert receipts == load(cell / 'receipt-audit.json')
+        assert receipts['allCorrectnessPassed'] is True
+
+    input_paths = [
+        'plan.json', 'observations.json', 'memory-comparison.json', 'memory-audit.json',
+        'qualification.json', 'correctness.json', 'receipt-audit.json',
+        'storage-allocation-summary.json', 'package-differences.json',
+        'A-identity.json', 'B-identity.json', 'A-package-entries.json', 'B-package-entries.json',
+        'original-harness.e2e.js', 'memory-harness.e2e.js', 'setup-fixtures.json',
+    ]
+    input_paths += ['source/' + name for name in plan['sourceFiles']]
+    observations = []
+    for row in comparison['observations']:
+        name = row['name']
+        input_paths += [f'{name}/{suffix}' for suffix in [
+            'memory.json', 'markers.jsonl', 'acquisition.json', 'summary.json',
+            'run-1.json', 'correctness.json', 'host-before.json', 'host-after.json',
+        ]]
+        observations.append({key: row[key] for key in [
+            'name', 'arm', 'index', 'pair', 'allObservedSampleCount',
+            'qualifiedForWholeTreePss', 'qualificationFailures',
+            'maximumCoveredSampleGapMs', 'preImportBracketGapMs', 'postImportBracketGapMs',
+            'fullyContainedImportSampleCount', 'stableFullyReadImportSampleCount',
+            'maxSampledPssKiB', 'maxSampledPrivateKiB', 'benchmarkExitCode',
+        ]})
+        if not row['qualifiedForWholeTreePss']:
+            assert row['qualificationFailures'] == ['covered-import-scan-gap-over-250ms']
+            fixed_failures.append({
+                'dictionary': plan['dictionary'], 'replication': plan['replication'],
+                'observation': name, 'arm': row['arm'],
+                'failure': 'covered-import-scan-gap-over-250ms',
+                'maximumCoveredSampleGapMs': row['maximumCoveredSampleGapMs'],
+                'fixedLimitMs': 250,
+            })
+    for pair in comparison['pairs']:
+        for metric in ['maxSampledPssKiB', 'maxSampledPrivateKiB']:
+            change = pair[metric]['changePercent']
+            if pair['qualified'] and change > 10:
+                qualified_pair_limit_excesses.append({
+                    'cell': cell.name, 'pair': pair['pair'], 'metric': metric,
+                    'changePercent': change,
+                })
+    cells.append({
+        'cell': cell.name, 'dictionary': plan['dictionary'], 'replication': plan['replication'],
+        'artifactSha256': digest(str(cell) + '.zip'),
+        'inputSha256': {name: digest(cell / name) for name in sorted(set(input_paths))},
+        'sourceFilesVerified': plan['sourceFiles'],
+        'sourceIdentities': plan['sourceIdentities'], 'toolingCommit': plan['toolingCommit'],
+        'frozenCoverage': plan['frozenCoverage'], 'promotionCriteria': plan['promotionCriteria'],
+        'schedule': plan['schedule'], 'memoryAudit': recomputed,
+        'receiptAudit': receipts, 'packages': nested_packages,
+        'qualification': qualification, 'observations': observations,
+        'pairs': comparison['pairs'],
+    })
+    print(json.dumps({'cell': cell.name, 'memoryAudit': recomputed,
+                      'receiptAuditPassed': True, 'hostedFilesMatchIndependentBuild': True}))
+
+assert len(cells) == 4
+report = {
+    'schemaVersion': 1, 'complete': True, 'workflowRun': '45642179064', 'workflowAttempt': 1,
+    'scope': 'Independent offline audit of every fixed observation and original raw scan. No new browser acquisition, replacement observation, pooling, threshold change or timing inference.',
+    'auditScriptSha256': digest(__file__),
+    'unchangedAuditorSha256': digest(AUDITOR / 'audit_memory.py'),
+    'unchangedObserverSha256': digest(AUDITOR / 'chromium_memory.py'),
+    'sourceIdentities': expected_identities,
+    'reviewedIntegrationCommitWithSameCandidateTree': '98731a11d81161c929f7822516610e3018aa9dab',
+    'changedPackageEntryAllowlist': expected_differences,
+    'rawScanCount': sum(cell['memoryAudit']['rawScanCount'] for cell in cells),
+    'observationCount': sum(cell['memoryAudit']['observations'] for cell in cells),
+    'all16CorrectnessReceiptsIndependentlyVerified': True,
+    'qualifiedObservationCount': sum(row['qualifiedForWholeTreePss'] for cell in cells for row in cell['observations']),
+    'qualifiedPairCount': sum(pair['qualified'] for cell in cells for pair in cell['pairs']),
+    'fixedFailures': fixed_failures,
+    'qualifiedPairsExceedingIndividualMemoryBound': qualified_pair_limit_excesses,
+    'cells': cells,
+    'conclusion': {
+        'jitendex': 'Both current-source replications pass the frozen memory screen.',
+        'vndb': 'Neither current-source replication qualifies because of fixed sampling coverage failures. Only rep1 pair1 qualifies; remaining pairs and replication aggregates remain null.',
+        'promotion': 'Blocked by unqualified VNDB memory coverage. No current qualified pair exceeds the frozen memory-increase bound.',
+        'historical': 'The original frozen-baseline PR875 memory failure is separate and remains preserved. These results do not replace its observations.',
+    },
+    'limitations': [
+        'Sampled PSS/private maxima are not exact peaks.',
+        'The memory harness uses an external observer and its timing labels are not authoritative.',
+        'Correctness receipts include sampled media; exhaustive media verification belongs to the separate timing/diagnostic cohort.',
+        'Cohort results are bound to candidate7a8b25a44a3fe165107ed816377cc72bb0fac67d, not an unverified subsequent remote head.',
+    ],
+}
+assert report['rawScanCount'] == 1504
+assert report['observationCount'] == 16
+assert report['qualifiedObservationCount'] == 12
+assert report['qualifiedPairCount'] == 5
+assert len(fixed_failures) == 4
+assert not qualified_pair_limit_excesses
+output = EVIDENCE / 'independent-memory-audit.json'
+output.write_text(json.dumps(report, indent=2) + '\n')
+print(json.dumps({'output': str(output), 'sha256': digest(output),
+                  'rawScanCount': report['rawScanCount'], 'fixedFailures': fixed_failures}))

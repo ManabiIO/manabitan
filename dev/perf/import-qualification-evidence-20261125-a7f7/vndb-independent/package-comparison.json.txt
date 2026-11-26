@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "scope": "Locally built Chrome release package entry-content comparison. Matching local dependency topology. Metadata-only archive differences are not entry-content changes.",
+  "baselineCommit": "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+  "candidateCommit": "98731a11d81161c929f7822516610e3018aa9dab",
+  "candidateTree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+  "toolchain": {
+    "node": "v22.22.0",
+    "llvm": "21.1.8"
+  },
+  "buildCommand": "node dev/bin/build.js --target chrome",
+  "packages": {
+    "baseline": {
+      "path": "/workspace/scratch/a7f76505d50d/manabitan/builds/manabitan-chrome.zip",
+      "sizeBytes": 17272721,
+      "sha256": "241358ad80c263a0f130f7ce1e4d645389607c54146d400f720bfa0ec2c054f3",
+      "entryCount": 616,
+      "fileCount": 551,
+      "manifestVersion": "0.0.0.0"
+    },
+    "candidate": {
+      "path": "/workspace/scratch/a7f76505d50d/vndb/builds/manabitan-chrome.zip",
+      "sizeBytes": 17275473,
+      "sha256": "61896cfe3d0bc0f664c530195d4d544435a30c865354d62056f6531323424217",
+      "entryCount": 616,
+      "fileCount": 551,
+      "manifestVersion": "0.0.0.0"
+    }
+  },
+  "changedEntries": [
+    {
+      "path": "js/dictionary/term-bank-wasm-parser-worker.js",
+      "baseline": {
+        "sha256": "99afad5ad98cb1264d1acc8f15ab8f5c51246bbca25722eed6b89f8677301884",
+        "sizeBytes": 16820,
+        "compressedSizeBytes": 4210
+      },
+      "candidate": {
+        "sha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+        "sizeBytes": 16935,
+        "compressedSizeBytes": 4239
+      }
+    },
+    {
+      "path": "js/dictionary/term-bank-wasm-parser.js",
+      "baseline": {
+        "sha256": "0c3f31e164f1dadcecdd0e80c339f5f42d7bb113066543251391726a3f6e8b98",
+        "sizeBytes": 204483,
+        "compressedSizeBytes": 37826
+      },
+      "candidate": {
+        "sha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c",
+        "sizeBytes": 206273,
+        "compressedSizeBytes": 38381
+      }
+    },
+    {
+      "path": "js/dictionary/wasm/term-bank-parser.c",
+      "baseline": {
+        "sha256": "a2ef54fc8f66997097c49f2734e60544890f26f77223bbad0cafa82147e8b67d",
+        "sizeBytes": 150623,
+        "compressedSizeBytes": 27199
+      },
+      "candidate": {
+        "sha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+        "sizeBytes": 156075,
+        "compressedSizeBytes": 28197
+      }
+    },
+    {
+      "path": "lib/term-bank-parser.wasm",
+      "baseline": {
+        "sha256": "913da48a70eebfe8dfe8d96b60064cf0d472db3eccb2c12771686696cb78005c",
+        "sizeBytes": 63004,
+        "compressedSizeBytes": 23872
+      },
+      "candidate": {
+        "sha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+        "sizeBytes": 67550,
+        "compressedSizeBytes": 25042
+      }
+    }
+  ],
+  "addedEntries": [],
+  "removedEntries": [],
+  "changedEntryAllowlist": [
+    "js/dictionary/term-bank-wasm-parser-worker.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/wasm/term-bank-parser.c",
+    "lib/term-bank-parser.wasm"
+  ],
+  "unchangedEntryCount": 612,
+  "sizeDeltaBytes": 2752,
+  "sizeDeltaPercent": 0.01593263736501041,
+  "manifestSha256": "808a74cb7fd69d3704f089b3913606e609eab385e1d1af7e451c89213ad62129",
+  "sourceEntryMatchesVerified": true,
+  "complete": true
+}

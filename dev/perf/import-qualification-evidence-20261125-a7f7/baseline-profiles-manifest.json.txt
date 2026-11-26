@@ -1,0 +1,187 @@
+{
+  "archive": "baseline-profiles.tar.gz",
+  "archiveSha256": "913ab4827eeae5c032ff767522bc3c3e2197ef9c6c428c380a961391bbfbc4f4",
+  "archiveBytes": 3624964,
+  "files": [
+    {
+      "path": "current-profile-jitendex/host.json",
+      "size": 518,
+      "sha256": "e4e4ab43b5c13c9fd3def90d74fe6c8d1c9024df6fab24d339963eb3c7406b6b"
+    },
+    {
+      "path": "current-profile-jitendex/identity.txt",
+      "size": 277,
+      "sha256": "fa3ab6be552ad84d4a19964b73d27e1c9c2d384b4ac51ecde744887094397679"
+    },
+    {
+      "path": "current-profile-jitendex/ordinary/run-1.html",
+      "size": 83442,
+      "sha256": "55bbca39623f776fc0be1d32a8183fff250a8b2886b09e6ac6a84357382e7acc"
+    },
+    {
+      "path": "current-profile-jitendex/ordinary/run-1.json",
+      "size": 150710,
+      "sha256": "67d4b0ecc9a6486f52e261257e5836a78525faf887adb102e1885b4f6b5f5e13"
+    },
+    {
+      "path": "current-profile-jitendex/ordinary/summary.json",
+      "size": 59191,
+      "sha256": "ad858305d547ac43812e54d040b064f35ee5a25211f8e4fa8d585f2fab7d4db8"
+    },
+    {
+      "path": "current-profile-jitendex/ordinary.log",
+      "size": 1639,
+      "sha256": "bbcb046e41a8f8ce74f97d8bc781f7dd4310cbc20d7688bb6d09c65958b0accd"
+    },
+    {
+      "path": "current-profile-jitendex/source.txt",
+      "size": 82,
+      "sha256": "69d70b7153b818028f695342fe3b5b6f25957dc8218d1784b4c1b24faf59c572"
+    },
+    {
+      "path": "current-profile-jitendex/trace/run-1.html",
+      "size": 84691,
+      "sha256": "8b68833cd5fdcd54e773c5a8809ce259f6e68907ee60129f9a57f82b33a21b67"
+    },
+    {
+      "path": "current-profile-jitendex/trace/run-1.json",
+      "size": 151888,
+      "sha256": "e1b234ebee97124910fe500d64c1a266964f8638623521fc0d6b763108e803a9"
+    },
+    {
+      "path": "current-profile-jitendex/trace/run-1.trace.json",
+      "size": 9435490,
+      "sha256": "6628ebb6aec8c7bd8ba45bf1a7b71aa968671cda4aa1670e57fdf80cd8f4e582"
+    },
+    {
+      "path": "current-profile-jitendex/trace/summary.json",
+      "size": 59548,
+      "sha256": "07b85c8dd23cb6482c326acc939882a5acf82b55ea7f70b6d16fcba7609bed74"
+    },
+    {
+      "path": "current-profile-jitendex/trace.log",
+      "size": 1887,
+      "sha256": "8ad0bdd876be7a4e3a8b6c64c7ae3959edeb542b7dee408c155ea2e44e24bf32"
+    },
+    {
+      "path": "current-profile-jmdict/host.json",
+      "size": 497,
+      "sha256": "0d950bf47fff80c0dabc19001cd1ace40bc70e520b772c42c05312c294e14738"
+    },
+    {
+      "path": "current-profile-jmdict/identity.txt",
+      "size": 277,
+      "sha256": "decbd5384d217904913b43cb8b48cb64a934796868aef8cc61de49cde598f83b"
+    },
+    {
+      "path": "current-profile-jmdict/ordinary/run-1.html",
+      "size": 83252,
+      "sha256": "bcffb3cd7521e3804515fc50636e974c434beac63770ecff534074a0bd648648"
+    },
+    {
+      "path": "current-profile-jmdict/ordinary/run-1.json",
+      "size": 150555,
+      "sha256": "69ec12c62861616b8f5c253c55065728c29fc2adb5fb45163ba92699a269a3b5"
+    },
+    {
+      "path": "current-profile-jmdict/ordinary/summary.json",
+      "size": 58730,
+      "sha256": "0136a044a26507b1af8930285ff0c18e8cdc49b9055cb57c6ce88f5c9411b14f"
+    },
+    {
+      "path": "current-profile-jmdict/ordinary.log",
+      "size": 1623,
+      "sha256": "4921f9d6f7b6ace21ddf75923ef56940020c857fb48d1059450101b437544cf5"
+    },
+    {
+      "path": "current-profile-jmdict/source.txt",
+      "size": 82,
+      "sha256": "69d70b7153b818028f695342fe3b5b6f25957dc8218d1784b4c1b24faf59c572"
+    },
+    {
+      "path": "current-profile-jmdict/trace/run-1.html",
+      "size": 83511,
+      "sha256": "975889c8498d4c732baff4c4047cc3cee3f7b42943c0fb77f60f799c62cba958"
+    },
+    {
+      "path": "current-profile-jmdict/trace/run-1.json",
+      "size": 150865,
+      "sha256": "14792e4a7b95bec6478c77f2c35d162a7770ed09a13edd7d08fd68cf3009f989"
+    },
+    {
+      "path": "current-profile-jmdict/trace/run-1.trace.json",
+      "size": 5094535,
+      "sha256": "4e26563d4c633d16a47e4c37eede2c81184b4eda2ef44bf3a7cb8d0749f8a8ef"
+    },
+    {
+      "path": "current-profile-jmdict/trace/summary.json",
+      "size": 58876,
+      "sha256": "e49f0735428905189e512035eb3835b7e17439e8f1c50c5c7b5bf2ba9ce501dc"
+    },
+    {
+      "path": "current-profile-jmdict/trace.log",
+      "size": 1768,
+      "sha256": "bd5ffe571724652ed8138b68c470f53dc86765362fd2ce50c72487890183feb2"
+    },
+    {
+      "path": "current-profile-vndb/host.json",
+      "size": 504,
+      "sha256": "4b1444d347d46727bc59abdad13543d0855449352b731c2eee37ebc92794699d"
+    },
+    {
+      "path": "current-profile-vndb/identity.txt",
+      "size": 277,
+      "sha256": "05151510394af45f7cadd29204e8fe838d09bb54172cd028b3e2b4857ebd6fa8"
+    },
+    {
+      "path": "current-profile-vndb/ordinary/run-1.html",
+      "size": 84253,
+      "sha256": "491c9fcd66f7302b18ba4be980a781ac1a2c3a243f66d04cc72962a4a8034446"
+    },
+    {
+      "path": "current-profile-vndb/ordinary/run-1.json",
+      "size": 153080,
+      "sha256": "e6cb94583ea6feb27562bdb9fcc9dce0be47af7582870c70f1a82ff58943b6a5"
+    },
+    {
+      "path": "current-profile-vndb/ordinary/summary.json",
+      "size": 60137,
+      "sha256": "ef8aee22db69b3d52478877316f914624fc130c48be9e81ec36f084dc1300fe1"
+    },
+    {
+      "path": "current-profile-vndb/ordinary.log",
+      "size": 1619,
+      "sha256": "9363456349b720f94f5c208afd964ff622c9ca9d24bc743d0c804f4d536194a8"
+    },
+    {
+      "path": "current-profile-vndb/source.txt",
+      "size": 82,
+      "sha256": "69d70b7153b818028f695342fe3b5b6f25957dc8218d1784b4c1b24faf59c572"
+    },
+    {
+      "path": "current-profile-vndb/trace/run-1.html",
+      "size": 85222,
+      "sha256": "e55a5e8da44ce2768797dc0f7561650b368b4ae9a35e27bee40d8ea1731afcab"
+    },
+    {
+      "path": "current-profile-vndb/trace/run-1.json",
+      "size": 153652,
+      "sha256": "4d11dfb5c69731b6164094e4cb0612a974a01bf51c02944cd4b8d889f195f98a"
+    },
+    {
+      "path": "current-profile-vndb/trace/run-1.trace.json",
+      "size": 23065654,
+      "sha256": "15622487aa05edab7b66bdd9a98a4b8f958d9166eff4345d1f36be34d4cf77f8"
+    },
+    {
+      "path": "current-profile-vndb/trace/summary.json",
+      "size": 60038,
+      "sha256": "6019a99554c9a00279aaf1489d07928be07ead6bcbc71825ee1a7d73be62d91c"
+    },
+    {
+      "path": "current-profile-vndb/trace.log",
+      "size": 1867,
+      "sha256": "396cdaa872c91d09b3126d1029a3945f529910870e878e28c3f9b990bf6d6b22"
+    }
+  ]
+}

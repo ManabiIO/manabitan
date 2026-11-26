@@ -1,0 +1,31 @@
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:5) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+jitendex: 16000/436555 rows
+jitendex: 34000/436555 rows
+jitendex: 50000/436555 rows
+jitendex: 66000/436555 rows
+jitendex: 82000/436555 rows
+jitendex: 100000/436555 rows
+jitendex: 112000/436555 rows
+jitendex: 128000/436555 rows
+jitendex: 152000/436555 rows
+jitendex: 176000/436555 rows
+jitendex: 198000/436555 rows
+jitendex: 218000/436555 rows
+jitendex: 238000/436555 rows
+jitendex: 260000/436555 rows
+jitendex: 284000/436555 rows
+jitendex: 304000/436555 rows
+jitendex: 326000/436555 rows
+jitendex: 348000/436555 rows
+jitendex: 370000/436555 rows
+jitendex: 392000/436555 rows
+jitendex: 414000/436555 rows
+jitendex: 436555/436555 rows
+{"complete":true,"error":null,"rows":436555,"runs":22,"parentCopyBytes":873110,"candidateCopyBytes":873110,"copyBytesAvoided":0}

@@ -1,0 +1,196 @@
+{
+  "scope": "Independent review and current-develop qualification of existing PR875 integration; no new implementation and no remote mutations by this agent",
+  "commit": "98731a11d81161c929f7822516610e3018aa9dab",
+  "tree": "093a0be94fcf336ab5a0113b80fae7481855935a",
+  "parents": [
+    "7d1643e6147a10cb2165e9744cf0e63b59e46632",
+    "fb71a03f4611bcfa71e135693bebd1fe778153bf"
+  ],
+  "integrationReview": {
+    "issuesFound": [],
+    "changes": [
+      "Preserve prepareLookupRoute as argument four and pass live preloadedSource as argument five",
+      "Preserve current projected-content borrowed lease policy",
+      "Update transport tests to distinguish borrowed content from owned metadata and cover route filters",
+      "Regenerate pinned LLVM21.1.8 artifact for additive original PR875 projector"
+    ],
+    "noNewProjector": true,
+    "noSourceReferenceEscapes": true,
+    "existingMemoryQualificationHoldPreserved": true
+  },
+  "independentMergeAndRebuild": [
+    {
+      "file": "dev/data/dictionary-wasm/manifest.json",
+      "independentBytes": 2588,
+      "independentSha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd",
+      "otherSha256": "534857f4ebe1de73a0f5997dd23c3bcf2571c0d5aba717a1e2236f39ef8208fd",
+      "identical": true
+    },
+    {
+      "file": "dev/data/dictionary-wasm/term-bank-parser.wasm",
+      "independentBytes": 67550,
+      "independentSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+      "otherSha256": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa",
+      "identical": true
+    },
+    {
+      "file": "ext/js/dictionary/term-bank-wasm-parser-worker.js",
+      "independentBytes": 16935,
+      "independentSha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "otherSha256": "47f1d827d94f4c5aac639bf2dceff33f483e969447ca77bd1ae24c1eb014eef1",
+      "identical": true
+    },
+    {
+      "file": "ext/js/dictionary/term-bank-wasm-parser.js",
+      "independentBytes": 206273,
+      "independentSha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c",
+      "otherSha256": "337bbb1d6b7aa7517de0dbcfb6246094149984c176763ac71bc1bc62ff68702c",
+      "identical": true
+    },
+    {
+      "file": "ext/js/dictionary/wasm/term-bank-parser.c",
+      "independentBytes": 156075,
+      "independentSha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+      "otherSha256": "70254ab4ff0a63a1e0a98a6cf466a641611af08ac68cc65eb1cc964a1872c65e",
+      "identical": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "Focused native projection, real worker transport, content ownership and importer media references",
+      "result": "pass",
+      "files": 4,
+      "tests": 256,
+      "log": "vndb875-focused-tests.log"
+    },
+    {
+      "name": "Full pinned VNDB 170-group differential",
+      "result": "pass",
+      "rows": 6648310,
+      "report": "vndb875-independent-corpus.json"
+    },
+    {
+      "name": "Pinned LLVM21.1.8 rebuild --check",
+      "result": "pass",
+      "log": "vndb875-wasm-check.log"
+    },
+    {
+      "name": "Generated library build",
+      "result": "pass",
+      "log": "vndb875-build-libs.log"
+    },
+    {
+      "name": "All-target dry build",
+      "result": "pass",
+      "log": "vndb875-build-dryrun.log"
+    },
+    {
+      "name": "Main TypeScript",
+      "result": "pass",
+      "log": "vndb875-types-main.log"
+    },
+    {
+      "name": "Changed-file typed ESLint",
+      "result": "pass",
+      "nodeMaxOldSpaceSizeMiB": 700,
+      "log": "vndb875-lint-2.log",
+      "retainedEarlierAttempt": {
+        "result": "terminated",
+        "exit": 137,
+        "log": "vndb875-lint.log"
+      }
+    },
+    {
+      "name": "Test TypeScript",
+      "result": "not completed locally due to executor memory",
+      "attempts": [
+        {
+          "exit": 137,
+          "log": "vndb875-types-test.log"
+        },
+        {
+          "exit": 137,
+          "nodeMaxOldSpaceSizeMiB": 1200,
+          "log": "vndb875-types-test-2.log"
+        },
+        {
+          "exit": 134,
+          "nodeMaxOldSpaceSizeMiB": 700,
+          "reason": "V8 heap limit",
+          "log": "vndb875-types-test-3.log"
+        }
+      ],
+      "noTypeDiagnosticObserved": true,
+      "requiredFollowup": "Hosted exact-head type validation"
+    }
+  ],
+  "corpus": {
+    "node": "v22.22.0",
+    "v8": "12.4.254.21-node.33",
+    "fixture": {
+      "label": "VNDB",
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "release": "1.0.0",
+      "url": "https://github.com/bee-san/VNDB-Character-Names-by-Bee/releases/download/1.0.0/vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "expectedTitle": "VNDB Characters by Bee",
+      "revision": "395525135651",
+      "termRows": 6648310,
+      "mediaFiles": 146570,
+      "mediaBytes": 188131284,
+      "mediaRows": 146570,
+      "optional": true,
+      "lockSha256": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+    },
+    "partition": {
+      "workerCount": 3,
+      "groupsPerWorker": 3,
+      "targetGroupBytes": 25165824,
+      "groupCount": 170,
+      "totalBytes": 4267992967
+    },
+    "totals": {
+      "rows": 6648310,
+      "mediaRows": 146725,
+      "projectedRows": 146725,
+      "fallbackRows": 0,
+      "projectedPaths": 146725,
+      "glossaryJsonParseCalls": 0,
+      "glossaryJsonParseUtf8Bytes": 0,
+      "glossaryDecodeCalls": 146725,
+      "glossaryDecodeBytes": 2391178,
+      "sharedGlossarySources": 146725,
+      "sharedGlossarySourceBytes": 84398732
+    },
+    "legacyProjectionTotals": {
+      "glossaryJsonParseCalls": 146725,
+      "glossaryJsonParseUtf8Bytes": 84398732,
+      "glossaryDecodeCalls": 146725,
+      "glossaryDecodeBytes": 84398732
+    },
+    "nativeCounts": {
+      "calls": 146725,
+      "singlePathSpans": 146725,
+      "fallbackSpans": 0
+    },
+    "uniqueImagePaths": 146570,
+    "projectedPathDigest": "178cc8ec07fe43a1b6f66ef201381703f1d570c49979d61fa3e6a6785be56c0a",
+    "runnerSha256": "81a54a109154dcb43258c75be78af8da414022562998b9c3d7875f755c3f9368"
+  },
+  "corpusReportSha256": "62985f33f3ea1a2cb679c39db6b04921192a624b7f5ec8cc0c8379e2e681418a",
+  "sourceHashesRecheckedAfterRun": true,
+  "performanceScope": "Correctness and mechanical work removal only. No current-baseline full-import timing or peak-memory claim from this replay.",
+  "rejectedExperiment": {
+    "decision": "Duplicate media diagnostic filter rejected and tracked files restored before integration",
+    "oldDiagnosticAndSpanBytes": 6579855,
+    "selectedDiagnosticAndSpanBytes": 6546590,
+    "bytesAvoided": 33265,
+    "rowsAvoided": 616,
+    "addedLocalSetMaxEntries": 370,
+    "corpusReport": "vndb-reference-oracle-2.json",
+    "patch": "vndb-rejected-media-filter.patch",
+    "harnessDirectory": "vndb-rejected-media-filter-harness"
+  },
+  "workingTree": "Tracked files clean at98731a11d; only local node_modules symlink untracked"
+}

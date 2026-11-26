@@ -1,0 +1,5 @@
+jitendex pair 1/2 A: 2413.85ms
+jitendex pair 1/2 B: 2305.14ms
+jitendex pair 2/2 B: 1953.07ms
+jitendex pair 2/2 A: 1242.85ms
+{"medianPairedChangePercent":26.320169019917916,"equalWorkTotalChangePercent":16.449207520399355,"fasterPairs":1}
