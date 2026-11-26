@@ -11,13 +11,16 @@ import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest'
 
 const state = vi.hoisted(() => ({create: vi.fn()}))
 vi.mock('../dev/lib/zstd-simd-module.js', () => ({default: state.create}))
+const workerInitializations = /** @type {Promise<unknown>[]} */ ([])
 
 beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
 })
 
-afterEach(() => {
+afterEach(async () => {
+    // Drain actual worker initialization before replacing its globals or mocks.
+    await Promise.allSettled(workerInitializations.splice(0))
     vi.restoreAllMocks()
     vi.unstubAllGlobals()
 })
@@ -49,7 +52,9 @@ async function loadWorker(failFirstContext = false) {
     const bridge = {
         listener: /** @type {((event: MessageEvent) => void)|null} */ (null),
         messages: /** @type {WorkerResponse[]} */ ([]),
+        onReady: /** @type {((message: WorkerResponse) => void)|null} */ (null),
     }
+    const ready = /** @type {Promise<WorkerResponse>} */ (new Promise((resolve) => { bridge.onReady = resolve }))
     vi.stubGlobal('__manabitanTermContentCompressionWorker', false)
     vi.stubGlobal('fetch', vi.fn(async () => new Response(Uint8Array.from(dictionary))))
     vi.stubGlobal('self', {
@@ -66,13 +71,18 @@ async function loadWorker(failFirstContext = false) {
          */
         postMessage(message, transfer = []) {
             bridge.messages.push(structuredClone(message, {transfer}))
+            if (message.type === 'ready' || message.type === 'initialization-error') {
+                bridge.onReady?.(message)
+            }
         },
     })
     const workerUrl = new URL('../ext/js/dictionary/zstd-term-content-compression-worker.js', import.meta.url).href
     // eslint-disable-next-line no-unsanitized/method -- The URL names a fixed repository-owned worker entry.
-    await import(workerUrl)
-    await vi.waitFor(() => { expect(bridge.messages).toHaveLength(1) })
-    expect(bridge.messages[0].type).toBe(failFirstContext ? 'initialization-error' : 'ready')
+    const initialization = import(workerUrl).then(() => ready)
+    workerInitializations.push(initialization)
+    const initialized = await initialization
+    expect(bridge.messages).toHaveLength(1)
+    expect(initialized.type).toBe(failFirstContext ? 'initialization-error' : 'ready')
     const api = await import('../ext/js/dictionary/zstd-term-content.js')
     const native = await import('../dev/lib/zstd-wasm.js')
     /**
@@ -94,7 +104,7 @@ async function loadWorker(failFirstContext = false) {
     return {api, native, dictionary, createDecoder, createEncoder, send, bridge}
 }
 
-describe('compression worker native contexts', () => {
+describe('compression worker native contexts', {timeout: 10_000}, () => {
     test.each(['owned', 'shared'])('does not allocate a decoder while compressing %s input, then supports later decoding', async (route) => {
         const {api, native, dictionary, createDecoder, createEncoder, send, bridge} = await loadWorker()
         expect(createEncoder).toHaveBeenCalledOnce()

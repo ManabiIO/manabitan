@@ -37,7 +37,7 @@ async function setup(compressionWorker = false) {
     vi.doMock('../ext/lib/zstd-wasm.js', async () => await import('../dev/lib/zstd-wasm.js'))
     const dictionary = await readFile(new URL('../dev/data/zstd-dicts/jmdict.zdict', import.meta.url))
     vi.stubGlobal('__manabitanTermContentCompressionWorker', compressionWorker)
-    vi.stubGlobal('Worker', undefined)
+    vi.stubGlobal('Worker', void 0)
     vi.stubGlobal('fetch', vi.fn(async () => new Response(Uint8Array.from(dictionary))))
     const api = await import('../ext/js/dictionary/zstd-term-content.js')
     const native = await import('../dev/lib/zstd-wasm.js')
@@ -105,7 +105,7 @@ describe('generic term-content decoder context', () => {
 
     test('does not inherit a previous raw dictionary when the next decode requests none', async () => {
         const {api, native, dictionary} = await setup()
-        const payload = dictionary.subarray(256, 8192)
+        const payload = Uint8Array.from(dictionary.subarray(256, 8192))
         const frame = api.compressTermContentZstd(payload, 'jmdict')
         expect(() => native.decompress(frame)).toThrow(/Zstd operation/)
         expect(api.decompressTermContentZstd(frame, 'jmdict')).toEqual(payload)
