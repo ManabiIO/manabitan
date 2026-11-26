@@ -1,0 +1,13 @@
+(node:6) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ RUN  v4.1.12 /workspace/scratch/d84a953d7ba4/manabitan-vndb
+
+(node:23) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  1 passed (1)
+      Tests  48 passed (48)
+   Start at  11:48:11
+   Duration  1.20s (transform 122ms, setup 90ms, import 102ms, tests 50ms, environment 0ms)
+

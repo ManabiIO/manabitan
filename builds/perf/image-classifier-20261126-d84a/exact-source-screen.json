@@ -1,0 +1,569 @@
+{
+  "schemaVersion": 1,
+  "scope": "Exact exported classifier modules; excludes archive I/O, parsing, workers, persistence, and browser import. Shared-host timing is exploratory.",
+  "nodeVersion": "v22.22.0",
+  "sourceHashes": {
+    "baseline": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+    "candidate": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4",
+    "names": "0e2d2fa65a211f0af693a0b9861448025b72d1189ab045c04e9297d36b6d8920"
+  },
+  "sourceFiles": {
+    "baseline": "/tmp/manabitan-vndb-d84a/baseline-media-util.mjs",
+    "candidate": "/workspace/scratch/d84a953d7ba4/manabitan-vndb/ext/js/media/media-util.js"
+  },
+  "namesCount": 147237,
+  "namesWebpCount": 146570,
+  "schedule": {
+    "warmupBlocks": 2,
+    "measuredBlocks": 3,
+    "order": [
+      "A-before",
+      "B",
+      "A-after"
+    ]
+  },
+  "parityChecks": 196389,
+  "completed": true,
+  "observations": [
+    {
+      "corpus": "archive",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-before",
+      "calls": 294474,
+      "elapsedMs": 395.2351470000003,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": true,
+      "block": 0,
+      "arm": "B",
+      "calls": 294474,
+      "elapsedMs": 83.04972300000009,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-after",
+      "calls": 294474,
+      "elapsedMs": 112.78198999999995,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-before",
+      "calls": 294474,
+      "elapsedMs": 139.301688,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": true,
+      "block": 1,
+      "arm": "B",
+      "calls": 294474,
+      "elapsedMs": 23.368848999999955,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-after",
+      "calls": 294474,
+      "elapsedMs": 115.92575299999999,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-before",
+      "calls": 294474,
+      "elapsedMs": 182.32421499999964,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 2,
+      "arm": "B",
+      "calls": 294474,
+      "elapsedMs": 324.56473800000003,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-after",
+      "calls": 294474,
+      "elapsedMs": 519.2790219999997,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-before",
+      "calls": 294474,
+      "elapsedMs": 433.0827939999999,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 3,
+      "arm": "B",
+      "calls": 294474,
+      "elapsedMs": 91.01009400000021,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-after",
+      "calls": 294474,
+      "elapsedMs": 198.3713719999996,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-before",
+      "calls": 294474,
+      "elapsedMs": 329.30635600000005,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 4,
+      "arm": "B",
+      "calls": 294474,
+      "elapsedMs": 56.787970000000314,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "archive",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-after",
+      "calls": 294474,
+      "elapsedMs": 96.25871300000017,
+      "resultLengthSum": 2931400
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 164.82621500000005,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": true,
+      "block": 0,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 401.51103500000045,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 89.33904099999927,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 87.00100700000075,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": true,
+      "block": 1,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 83.08256299999994,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 93.99455400000079,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 170.8490180000008,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 2,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 77.56703600000037,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 42.36057900000014,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 55.01111700000001,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 3,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 42.47879000000012,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 67.27732400000059,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 54.06802400000015,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 4,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 53.1286199999995,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "lowercase",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 66.19682900000043,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 94.322314,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": true,
+      "block": 0,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 54.48376399999961,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 66.05220099999951,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 72.06328999999914,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": true,
+      "block": 1,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 63.145942999999534,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 67.24311500000022,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 96.0887130000001,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 2,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 79.84125500000027,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 54.11441600000035,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 86.3701229999997,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 3,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 88.47272900000007,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 59.931696999999986,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 35.08354899999904,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 4,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 44.82989499999894,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "mixed",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 140.16478800000004,
+      "resultLengthSum": 2686976
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 317.2697050000006,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": true,
+      "block": 0,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 84.49101100000007,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": true,
+      "block": 0,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 109.45646300000044,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 280.3294679999999,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": true,
+      "block": 1,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 126.7546739999998,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": true,
+      "block": 1,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 147.80461999999898,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 102.957402,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 2,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 103.10040200000003,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 2,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 104.4005019999986,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 98.91060499999912,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 3,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 108.85803400000077,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 3,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 108.04838999999993,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-before",
+      "calls": 262144,
+      "elapsedMs": 95.21408899999915,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 4,
+      "arm": "B",
+      "calls": 262144,
+      "elapsedMs": 185.00473600000078,
+      "resultLengthSum": 0
+    },
+    {
+      "corpus": "unsupported",
+      "warmup": false,
+      "block": 4,
+      "arm": "A-after",
+      "calls": 262144,
+      "elapsedMs": 86.02842799999962,
+      "resultLengthSum": 0
+    }
+  ]
+}

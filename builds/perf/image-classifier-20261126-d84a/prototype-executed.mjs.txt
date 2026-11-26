@@ -1,0 +1,95 @@
+import {readFileSync, writeFileSync} from 'node:fs'
+import {performance} from 'node:perf_hooks'
+import assert from 'node:assert/strict'
+import {getImageMediaTypeFromFileName as baseline} from '/workspace/scratch/ab9d107b9d5d/manabitan/ext/js/media/media-util.js'
+
+const simple = (path) => path.endsWith('.webp') ? 'image/webp' : baseline(path)
+const guarded = (path) => path.charCodeAt(path.length - 1) === 0x70 && path.endsWith('.webp') ? 'image/webp' : baseline(path)
+const dispatch = (path) => {
+    const length = path.length
+    switch (path.charCodeAt(length - 1)) {
+        case 0x70:
+            if (path.endsWith('.webp')) return 'image/webp'
+            break
+        case 0x67:
+            if (path.endsWith('.png')) return 'image/png'
+            if (path.endsWith('.jpg') || path.endsWith('.jpeg')) return 'image/jpeg'
+            break
+    }
+    return baseline(path)
+}
+const numeric = (path) => {
+    const length = path.length
+    if (path.charCodeAt(length - 5) === 0x2e) {
+        const a = path.charCodeAt(length - 4)
+        const b = path.charCodeAt(length - 3)
+        const c = path.charCodeAt(length - 2)
+        const d = path.charCodeAt(length - 1)
+        if ((a | b | c | d) > 0x7f) return baseline(path)
+        switch ((a | (b << 8) | (c << 16) | (d << 24)) | 0x20202020) {
+            case 0x676e7061: return 'image/apng'
+            case 0x66697661: return 'image/avif'
+            case 0x6765706a: return 'image/jpeg'
+            case 0x6669666a: return 'image/jpeg'
+            case 0x66666974: return 'image/tiff'
+            case 0x70626577: return 'image/webp'
+            default: return null
+        }
+    }
+    if (path.charCodeAt(length - 4) === 0x2e) {
+        const a = path.charCodeAt(length - 3)
+        const b = path.charCodeAt(length - 2)
+        const c = path.charCodeAt(length - 1)
+        if ((a | b | c) > 0x7f) return baseline(path)
+        switch ((a | (b << 8) | (c << 16)) | 0x202020) {
+            case 0x706d62: return 'image/bmp'
+            case 0x666967: return 'image/gif'
+            case 0x6f6369: return 'image/x-icon'
+            case 0x727563: return 'image/x-icon'
+            case 0x67706a: return 'image/jpeg'
+            case 0x706a70: return 'image/jpeg'
+            case 0x676e70: return 'image/png'
+            case 0x677673: return 'image/svg+xml'
+            case 0x666974: return 'image/tiff'
+            default: return null
+        }
+    }
+    return baseline(path)
+}
+const paths = JSON.parse(readFileSync('/tmp/manabitan-vndb-d84a/paths.json'))
+const extensions = ['apng', 'avif', 'bmp', 'gif', 'ico', 'cur', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'svg', 'tif', 'tiff', 'webp']
+const corpora = {
+    vndb: paths,
+    lowercase: Array.from({length: 16384}, (_,i) => `folder.sub/image-${i}.${extensions[i % extensions.length]}`),
+    mixed: Array.from({length: 16384}, (_,i) => `folder.sub/image-${i}.${extensions[i % extensions.length].split('').map((c,j) => (i + j) % 2 ? c.toUpperCase() : c).join('')}`),
+    unsupported: Array.from({length: 16384}, (_,i) => `folder.sub/image-${i}.${['json','text','jpg2','zip','jpen','webt','txt','file.ext','a','jpe','web','jjpeg'][i % 12]}`),
+}
+const candidates = {A: baseline, B: simple, C: baseline}
+const orders = ['ABC', 'BCA', 'CAB', 'ACB', 'BAC', 'CBA']
+let witness = 0
+const reports = {}
+for (const [key, names] of Object.entries(corpora)) {
+    for (const name of names) for (const fn of [simple]) assert.equal(fn(name), baseline(name))
+    function run(fn, rounds = 1) {
+        const start = performance.now()
+        for (let r = 0; r < rounds; r++) for (const name of names) witness += fn(name)?.length ?? 0
+        return performance.now() - start
+    }
+    for (let warm = 0; warm < 3; warm++) for (const fn of Object.values(candidates)) run(fn)
+    console.log('started', key)
+    reports[key] = []
+    for (const order of orders) for (const name of order) {
+        const elapsedMs = run(candidates[name], key === 'vndb' ? 2 : 16)
+        reports[key].push({order, candidate: name, elapsedMs})
+        writeFileSync('/tmp/manabitan-vndb-d84a/screen-v2-partial.json', JSON.stringify({node:process.version,witness,reports},null,2))
+    }
+}
+writeFileSync('/tmp/manabitan-vndb-d84a/screen-v2.json',JSON.stringify({node:process.version,witness,reports},null,2))
+for (const [key, observations] of Object.entries(reports)) {
+    const medians = {}
+    for (const name of Object.keys(candidates)) {
+        const xs=observations.filter(x=>x.candidate === name).map(x=>x.elapsedMs).sort((a,b)=>a-b)
+        medians[name]=(xs[2]+xs[3])/2
+    }
+    console.log(key, medians)
+}

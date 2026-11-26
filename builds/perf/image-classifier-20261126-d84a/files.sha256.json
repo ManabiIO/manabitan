@@ -1,0 +1,19 @@
+{
+  "evidence.json": "5c72acaf9ccca4a52d6bd80bf3a4ffd97f1e0298866abad2162b3f3641e8e248",
+  "exact-source-executed.js.txt": "09a851a1a223cded77f9d393c03f8758f840a6f04a51fabde2cdf51acbbcc487",
+  "exact-source-screen.json": "788ab8c18e64defe801a03dcccd796d5d8d8102bb8177c05e738154ecb87caac",
+  "final-build.log": "8c0f21f59c20c0179e2da27590b2b89e9253f21379bce62fce8db36f6b3a9f68",
+  "final-eslint.log": "e042996f6effd26f45cece8cbfb43de235022ffa3a79ea898f2479cd0e6f6c31",
+  "final-focused-tests.log": "95c55a45bf1acf2d5dba6723d4231690fa71a42795ae848d543c4979835c0723",
+  "final-parser-tests.log": "beb1d2d988cc3ef6a938071ed8e4000a01ea65354a309ad8e574c42bd79c7917",
+  "focused-tests.log": "c667426ef4e7a0feda7ba5707b2815297982913993c9c6c99115f3474cb16be7",
+  "follow-up-validation.json": "0af7ec3fe53362836a3ff44cd7204f777d48b338184fe1f46a0f75b8195a1192",
+  "independent-oracle-final.json": "c9a3056bad774edb87cef7b5ed1332543e57fff2dd500f5032a7e482d936c978",
+  "independent-oracle-initial.json": "ed0509fd7a850c9608ddfade82cb9a87e5335299eb85dbe8646c1054e66f4451",
+  "independent-oracle.mjs.txt": "ed381c7b2f1e08c4e044a29e1ddf7dbbb2e52eed7d60fd8a37ed2a6fc9913760",
+  "lint-heap-limit.log": "b5f9d989d2e8e13f9f3002ead16ef420b526613dbc465d5719e14b3edfdc7c17",
+  "lint-missing-libraries.log": "79e7653add744d0a9c90e38bfafe6da137efdc58d72672ecac4fcc3637860436",
+  "prototype-executed.mjs.txt": "ea1aa2f00e7f2942eb5ac05cd9572b9878af92e49be7d899d422a5f044985a52",
+  "prototype-initial.mjs.txt": "d6f213eda100361b967eba15bb9b7e4765a595132450f5252cdf37477fead1ed",
+  "prototype-screen.json": "e1eeff3b684169ba582ab97a45e02b5bd6907d0bee52dac60e1e6cb6c64ce0df"
+}

@@ -687,3 +687,70 @@ The packager verifies every retained archive member and readable receipt and per
 All prespecified acquisitions in this round are complete or explicitly retained as failed. VNDB media timing replicates, but its memory qualification fails. Prefix timing does not replicate, the three canonical screens do not justify performance promotion, and the cache candidate is closed. None of this round's four source candidates has been merged or promoted.
 
 No further memory acquisition is scheduled for these unchanged candidates. Any new study should preserve the existing failed cohorts and specify its distinct hypothesis and protocol before acquisition.
+
+## November 26, 2026: canonical WebP filename classification
+
+Baseline: `0143e9596cd8f790d5e166d4ba6a2425fbc57f14`. The classifier now returns
+`image/webp` immediately for an exact lowercase `.webp` suffix. This omits the
+bounded suffix scan, substring operation and lowercase conversion for matching
+strings. Every other string retains the existing classifier. The locked VNDB
+archive has 147,237 filenames, including 146,570 matching WebP names. This counts
+avoided operations; it does not establish allocated bytes or peak-memory savings.
+
+The final runtime module has SHA-256
+`e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4`.
+The [evidence receipt](../../builds/perf/image-classifier-20261126-d84a/evidence.json)
+records the complete archive identity, module hashes and retained observations.
+All 48 focused tests pass. The independent actual-module oracle passes 389,680
+comparisons, including all extension case combinations, every UTF-16 code unit in
+each `.webp` suffix position, arbitrary strings and path boundaries. It was rerun
+on the final source with Node 22.22.0 after formatting only the new statements to
+match the existing lint rules.
+
+The [exact-module screen](../../builds/perf/image-classifier-20261126-d84a/exact-source-screen.json)
+retains all 60 observations: 24 excluded warmups and 36 measurements. Each of four
+corpora used two excluded A/B/A blocks followed by three measured A/B/A blocks.
+The actual baseline and candidate exports are imported from separate full modules;
+source and filename-list hashes match before and after acquisition. All 196,389
+input classifications match. **Timing is inconclusive.** The first VNDB triplet
+is 182.3/324.6/519.3 ms, and the next two are 433.1/91.0/198.4 ms and
+329.3/56.8/96.3 ms. Mixed-case and unsupported controls also contain candidate
+slow tails. This shared-host screen establishes neither a reliable classifier
+speedup nor non-regression, and says nothing about complete browser imports.
+No observations were replaced or selected away.
+
+An earlier completed screen used a wrapper around the baseline instead of the
+changed exported module. Its 72 prototype observations are retained with that
+limitation; its live-checkout baseline hash was not captured during acquisition.
+A preceding six-variant prototype exited 137 before observations were emitted.
+The exact executed scripts are retained alongside the reports. Initial lint
+attempts lacked generated dependencies; after those dependencies were supplied,
+the 512 MiB lint process exhausted its V8 heap and exited 134. Lint/type and full
+browser/import qualification remain CI gates; these local attempts are not passes.
+
+The maintained runner subsequently received pre-timing input and corpus lint
+fixes; the archived executed script, timed loop, module hashes and observations
+remain unchanged. Final scoped ESLint passes with a 1536 MiB heap. The final
+classifier/importer checks pass 108 tests, a separate parser check passes 187
+tests, and all seven extension dry-build targets pass. The broader local unit run
+was interrupted after failures in unchanged suites during a contended run; it is
+not a full-suite pass. Persistent Chromium startup fails before import because
+the environment denies its process-singleton socket. No completed browser import
+or full-import timing is claimed. The
+[follow-up validation receipt](../../builds/perf/image-classifier-20261126-d84a/follow-up-validation.json)
+links the retained successful checks and records these limits.
+
+Reproduce the bounded exact-module screen on a quiet host with the pinned VNDB
+ZIP and Node 22.22.0. The filename JSON is temporary input and is not committed:
+
+```sh
+git show 0143e9596cd8f790d5e166d4ba6a2425fbc57f14:ext/js/media/media-util.js > /tmp/manabitan-classifier-baseline.mjs
+python -c 'import json,sys,zipfile; json.dump(zipfile.ZipFile(sys.argv[1]).namelist(), open(sys.argv[2], "w"))' "$VNDB_ZIP" /tmp/manabitan-classifier-names.json
+node --max-old-space-size=128 dev/perf/image-classifier-screen.js /tmp/manabitan-classifier-baseline.mjs ext/js/media/media-util.js /tmp/manabitan-classifier-names.json /tmp/manabitan-classifier-screen.json
+```
+
+The archive must match SHA-256
+`da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792` and
+291,705,969 bytes. The screen excludes archive I/O, parser workers, persistence and
+browser operation. No worker settings, thresholds, native assets, stored formats
+or third-party code change in this candidate.

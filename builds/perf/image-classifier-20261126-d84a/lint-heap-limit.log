@@ -1,0 +1,39 @@
+(node:8) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:8) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+
+<--- Last few GCs --->
+
+[8:0x19e71000]    44677 ms: Scavenge 506.9 (522.1) -> 505.2 (526.3) MB, pooled: 0 MB, 3.87 / 0.00 ms  (average mu = 0.722, current mu = 0.483) allocation failure; 
+[8:0x19e71000]    45381 ms: Mark-Compact (reduce) 509.7 (527.1) -> 507.5 (522.1) MB, pooled: 0 MB, 264.87 / 0.00 ms  (+ 101.0 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 704 ms) (average mu = 0.732, current m
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0xe40d24 node::OOMErrorHandler(char const*, v8::OOMDetails const&) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 2: 0x1216be0 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 3: 0x1216eb7 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 4: 0x1444875  [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 5: 0x145e109 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 6: 0x14327b8 v8::internal::HeapAllocator::AllocateRawWithLightRetrySlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 7: 0x14336e5 v8::internal::HeapAllocator::AllocateRawWithRetryOrFailSlowPath(int, v8::internal::AllocationType, v8::internal::AllocationOrigin, v8::internal::AllocationAlignment) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 8: 0x140c3be v8::internal::Factory::NewFillerObject(int, v8::internal::AllocationAlignment, v8::internal::AllocationType, v8::internal::AllocationOrigin) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+ 9: 0x186da1c v8::internal::Runtime_AllocateInYoungGeneration(int, unsigned long*, v8::internal::Isolate*) [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]
+10: 0x1dcb476  [/tmp/manabitan-21d3-runtimes/node-v22.22.0-linux-x64/bin/node]

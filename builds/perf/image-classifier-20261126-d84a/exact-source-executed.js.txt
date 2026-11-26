@@ -1,0 +1,90 @@
+/*
+ * Copyright (C) 2026 Manabitan authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {readFileSync, writeFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {performance as screenClock} from 'node:perf_hooks';
+import {pathToFileURL} from 'node:url';
+
+const [baselineFile, candidateFile, namesFile, outputFile] = process.argv.slice(2);
+if (!baselineFile || !candidateFile || !namesFile || !outputFile) {
+    throw new Error('Usage: node dev/perf/image-classifier-screen.js BASELINE_MODULE CANDIDATE_MODULE NAMES_JSON OUTPUT_JSON');
+}
+/** @param {string} file @returns {string} */
+function digest(file) { return createHash('sha256').update(readFileSync(file)).digest('hex'); }
+
+const sourceHashes = {baseline: digest(baselineFile), candidate: digest(candidateFile), names: digest(namesFile)};
+const {getImageMediaTypeFromFileName: baseline} = /** @type {{getImageMediaTypeFromFileName: (path: string) => string|null}} */ (await import(pathToFileURL(resolve(baselineFile)).href));
+const {getImageMediaTypeFromFileName: candidate} = /** @type {{getImageMediaTypeFromFileName: (path: string) => string|null}} */ (await import(pathToFileURL(resolve(candidateFile)).href));
+const parsedNames = /** @type {unknown} */ (JSON.parse(readFileSync(namesFile, 'utf8')));
+assert(Array.isArray(parsedNames) && parsedNames.every((name) => typeof name === 'string'));
+const names = /** @type {string[]} */ (parsedNames);
+const extensions = ['apng', 'avif', 'bmp', 'gif', 'ico', 'cur', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'svg', 'tif', 'tiff', 'webp'];
+const corpora = {
+    archive: names,
+    lowercase: Array.from({length: 16384}, (_, i) => `folder.sub/image-${i}.${extensions[i % extensions.length]}`),
+    mixed: Array.from({length: 16384}, (_, i) => `folder.sub/image-${i}.${extensions[i % extensions.length].split('').map((c, j) => (i + j) % 2 ? c.toUpperCase() : c).join('')}`),
+    unsupported: Array.from({length: 16384}, (_, i) => `folder.sub/image-${i}.${['json', 'text', 'jpg2', 'zip', 'jpen', 'webt', 'txt', 'file.ext', 'a', 'jpe', 'web', 'jjpeg'][i % 12]}`),
+};
+/** @type {{label: string, classify: (path: string) => string|null}[]} */
+const arms = [{label: 'A-before', classify: baseline}, {label: 'B', classify: candidate}, {label: 'A-after', classify: baseline}];
+/** @type {Array<{corpus: string, warmup: boolean, block: number, arm: string, calls: number, elapsedMs: number, resultLengthSum: number}>} */
+const observations = [];
+const report = {
+    schemaVersion: 1,
+    scope: 'Exact exported classifier modules; excludes archive I/O, parsing, workers, persistence, and browser import. Shared-host timing is exploratory.',
+    nodeVersion: process.version,
+    sourceHashes,
+    sourceFiles: {baseline: resolve(baselineFile), candidate: resolve(candidateFile)},
+    namesCount: names.length,
+    namesWebpCount: names.filter((name) => name.endsWith('.webp')).length,
+    schedule: {warmupBlocks: 2, measuredBlocks: 3, order: arms.map(({label}) => label)},
+    parityChecks: 0,
+    completed: false,
+    observations,
+};
+
+/** Persist each observation; failed or interrupted acquisitions remain partial. */
+function checkpoint() { writeFileSync(outputFile, JSON.stringify(report, null, 2) + '\n'); }
+
+for (const [corpus, paths] of Object.entries(corpora)) {
+    for (const path of paths) {
+        assert.equal(candidate(path), baseline(path), path);
+        ++report.parityChecks;
+    }
+    const rounds = corpus === 'archive' ? 2 : 16;
+    for (let block = 0; block < 5; ++block) {
+        for (const {label: arm, classify} of arms) {
+            let resultLengthSum = 0;
+            const start = screenClock.now();
+            for (let round = 0; round < rounds; ++round) {
+                for (const path of paths) { resultLengthSum += classify(path)?.length ?? 0; }
+            }
+            const elapsedMs = screenClock.now() - start;
+            observations.push({corpus, warmup: block < 2, block, arm, calls: paths.length * rounds, elapsedMs, resultLengthSum});
+            checkpoint();
+        }
+    }
+}
+assert.equal(digest(baselineFile), sourceHashes.baseline, 'Baseline source changed during screen');
+assert.equal(digest(candidateFile), sourceHashes.candidate, 'Candidate source changed during screen');
+assert.equal(digest(namesFile), sourceHashes.names, 'Filename input changed during screen');
+report.completed = true;
+checkpoint();
+console.log(JSON.stringify({completed: true, parityChecks: report.parityChecks, observations: observations.length, sourceHashes}));

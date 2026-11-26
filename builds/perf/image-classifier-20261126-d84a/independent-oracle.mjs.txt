@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict'
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import {getImageMediaTypeFromFileName as baseline} from '/workspace/scratch/d84a953d7ba4/manabitan/ext/js/media/media-util.js'
+import {getImageMediaTypeFromFileName as candidate} from '/workspace/scratch/d84a953d7ba4/manabitan-vndb/ext/js/media/media-util.js'
+const suffixes = ['.apng','.avif','.bmp','.gif','.ico','.cur','.jpg','.jpeg','.jfif','.pjpeg','.pjp','.png','.svg','.tif','.tiff','.webp']
+let checked = 0
+function compare(path) { assert.equal(candidate(path), baseline(path), JSON.stringify(path)); ++checked }
+for (const ext of suffixes) {
+ for (let mask=0; mask < 2 ** (ext.length-1); ++mask) {
+  const part = [...ext].map((c,i)=> i>0 && (mask & (1<<(i-1))) ? c.toUpperCase() : c).join('')
+  for (const prefix of ['', '.', '/', '\\', 'folder/file', '\0\n\r\u2028\u2029\uD800\uDC00']) {
+   for (const tail of ['', '.', '/', '\\', '?a', '#b', '\n', '\r', '\0', '\uFEFF']) { compare(prefix + part + tail) }
+  }
+ }
+}
+for (let i=0; i<5; ++i) {
+ for (let code=0; code<=0xffff; ++code) {
+  compare('.webp'.slice(0,i) + String.fromCharCode(code) + '.webp'.slice(i+1))
+ }
+}
+let state = 0x5e84a731
+function random() { state ^= state << 13; state ^= state >>> 17; state ^= state << 5; return state >>> 0 }
+for (let i=0; i<50000; ++i) {
+ let value = ''
+ for (let j=0,n=random()%40; j<n; ++j) { value += String.fromCharCode(random() & 0xffff) }
+ if (i % 2 === 0) { value += suffixes[i % suffixes.length] }
+ compare(value)
+}
+const file = '/workspace/scratch/d84a953d7ba4/manabitan-vndb/ext/js/media/media-util.js'
+console.log(JSON.stringify({checks:checked,mismatches:0,sourceSha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),scope:'Independent actual candidate vs develop 0143e95; all case masks and path controls, every UTF16 code unit in each WebP suffix position, 50000 deterministic arbitrary UTF16 strings'}))

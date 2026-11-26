@@ -1,0 +1,374 @@
+{
+  "node": "v24.22.3",
+  "witness": 165710484,
+  "reports": {
+    "vndb": [
+      {
+        "order": "ABC",
+        "candidate": "A",
+        "elapsedMs": 175.40502000000015
+      },
+      {
+        "order": "ABC",
+        "candidate": "B",
+        "elapsedMs": 62.17478899999969
+      },
+      {
+        "order": "ABC",
+        "candidate": "C",
+        "elapsedMs": 121.77438100000018
+      },
+      {
+        "order": "BCA",
+        "candidate": "B",
+        "elapsedMs": 18.42556500000046
+      },
+      {
+        "order": "BCA",
+        "candidate": "C",
+        "elapsedMs": 234.20647000000008
+      },
+      {
+        "order": "BCA",
+        "candidate": "A",
+        "elapsedMs": 196.18714099999943
+      },
+      {
+        "order": "CAB",
+        "candidate": "C",
+        "elapsedMs": 251.07119500000044
+      },
+      {
+        "order": "CAB",
+        "candidate": "A",
+        "elapsedMs": 198.95806400000038
+      },
+      {
+        "order": "CAB",
+        "candidate": "B",
+        "elapsedMs": 35.24239299999954
+      },
+      {
+        "order": "ACB",
+        "candidate": "A",
+        "elapsedMs": 116.14768700000059
+      },
+      {
+        "order": "ACB",
+        "candidate": "C",
+        "elapsedMs": 148.82689299999947
+      },
+      {
+        "order": "ACB",
+        "candidate": "B",
+        "elapsedMs": 20.54309699999976
+      },
+      {
+        "order": "BAC",
+        "candidate": "B",
+        "elapsedMs": 42.14323500000046
+      },
+      {
+        "order": "BAC",
+        "candidate": "A",
+        "elapsedMs": 414.7243839999992
+      },
+      {
+        "order": "BAC",
+        "candidate": "C",
+        "elapsedMs": 239.18067100000007
+      },
+      {
+        "order": "CBA",
+        "candidate": "C",
+        "elapsedMs": 299.26528700000017
+      },
+      {
+        "order": "CBA",
+        "candidate": "B",
+        "elapsedMs": 70.28647200000069
+      },
+      {
+        "order": "CBA",
+        "candidate": "A",
+        "elapsedMs": 304.19139799999994
+      }
+    ],
+    "lowercase": [
+      {
+        "order": "ABC",
+        "candidate": "A",
+        "elapsedMs": 4414.248460999999
+      },
+      {
+        "order": "ABC",
+        "candidate": "B",
+        "elapsedMs": 1202.0575759999992
+      },
+      {
+        "order": "ABC",
+        "candidate": "C",
+        "elapsedMs": 1312.500003000001
+      },
+      {
+        "order": "BCA",
+        "candidate": "B",
+        "elapsedMs": 1141.687539999999
+      },
+      {
+        "order": "BCA",
+        "candidate": "C",
+        "elapsedMs": 1054.6602550000025
+      },
+      {
+        "order": "BCA",
+        "candidate": "A",
+        "elapsedMs": 4592.96126
+      },
+      {
+        "order": "CAB",
+        "candidate": "C",
+        "elapsedMs": 1693.0238559999998
+      },
+      {
+        "order": "CAB",
+        "candidate": "A",
+        "elapsedMs": 994.9580910000004
+      },
+      {
+        "order": "CAB",
+        "candidate": "B",
+        "elapsedMs": 1213.6332619999994
+      },
+      {
+        "order": "ACB",
+        "candidate": "A",
+        "elapsedMs": 506.529641000001
+      },
+      {
+        "order": "ACB",
+        "candidate": "C",
+        "elapsedMs": 174.85777200000302
+      },
+      {
+        "order": "ACB",
+        "candidate": "B",
+        "elapsedMs": 199.3834370000004
+      },
+      {
+        "order": "BAC",
+        "candidate": "B",
+        "elapsedMs": 321.364372
+      },
+      {
+        "order": "BAC",
+        "candidate": "A",
+        "elapsedMs": 488.72763999999734
+      },
+      {
+        "order": "BAC",
+        "candidate": "C",
+        "elapsedMs": 497.86016599999857
+      },
+      {
+        "order": "CBA",
+        "candidate": "C",
+        "elapsedMs": 1295.3478069999983
+      },
+      {
+        "order": "CBA",
+        "candidate": "B",
+        "elapsedMs": 3084.213487000001
+      },
+      {
+        "order": "CBA",
+        "candidate": "A",
+        "elapsedMs": 4004.3641669999997
+      }
+    ],
+    "mixed": [
+      {
+        "order": "ABC",
+        "candidate": "A",
+        "elapsedMs": 1831.2740810000032
+      },
+      {
+        "order": "ABC",
+        "candidate": "B",
+        "elapsedMs": 2680.997070999998
+      },
+      {
+        "order": "ABC",
+        "candidate": "C",
+        "elapsedMs": 836.2976629999976
+      },
+      {
+        "order": "BCA",
+        "candidate": "B",
+        "elapsedMs": 739.4132880000034
+      },
+      {
+        "order": "BCA",
+        "candidate": "C",
+        "elapsedMs": 422.6109129999968
+      },
+      {
+        "order": "BCA",
+        "candidate": "A",
+        "elapsedMs": 448.3569920000009
+      },
+      {
+        "order": "CAB",
+        "candidate": "C",
+        "elapsedMs": 481.6957439999969
+      },
+      {
+        "order": "CAB",
+        "candidate": "A",
+        "elapsedMs": 197.24110099999962
+      },
+      {
+        "order": "CAB",
+        "candidate": "B",
+        "elapsedMs": 476.52471000000514
+      },
+      {
+        "order": "ACB",
+        "candidate": "A",
+        "elapsedMs": 466.9768380000023
+      },
+      {
+        "order": "ACB",
+        "candidate": "C",
+        "elapsedMs": 2012.5558229999951
+      },
+      {
+        "order": "ACB",
+        "candidate": "B",
+        "elapsedMs": 2366.630130000005
+      },
+      {
+        "order": "BAC",
+        "candidate": "B",
+        "elapsedMs": 4427.447799000001
+      },
+      {
+        "order": "BAC",
+        "candidate": "A",
+        "elapsedMs": 3507.384042999998
+      },
+      {
+        "order": "BAC",
+        "candidate": "C",
+        "elapsedMs": 2846.6259839999984
+      },
+      {
+        "order": "CBA",
+        "candidate": "C",
+        "elapsedMs": 5152.007727999997
+      },
+      {
+        "order": "CBA",
+        "candidate": "B",
+        "elapsedMs": 6798.633309000012
+      },
+      {
+        "order": "CBA",
+        "candidate": "A",
+        "elapsedMs": 3888.6690119999985
+      }
+    ],
+    "unsupported": [
+      {
+        "order": "ABC",
+        "candidate": "A",
+        "elapsedMs": 539.2266399999935
+      },
+      {
+        "order": "ABC",
+        "candidate": "B",
+        "elapsedMs": 642.2192159999977
+      },
+      {
+        "order": "ABC",
+        "candidate": "C",
+        "elapsedMs": 615.6696699999884
+      },
+      {
+        "order": "BCA",
+        "candidate": "B",
+        "elapsedMs": 499.50376099999994
+      },
+      {
+        "order": "BCA",
+        "candidate": "C",
+        "elapsedMs": 641.8481339999998
+      },
+      {
+        "order": "BCA",
+        "candidate": "A",
+        "elapsedMs": 346.6276419999922
+      },
+      {
+        "order": "CAB",
+        "candidate": "C",
+        "elapsedMs": 538.1143369999918
+      },
+      {
+        "order": "CAB",
+        "candidate": "A",
+        "elapsedMs": 646.7409269999916
+      },
+      {
+        "order": "CAB",
+        "candidate": "B",
+        "elapsedMs": 900.5594390000042
+      },
+      {
+        "order": "ACB",
+        "candidate": "A",
+        "elapsedMs": 948.5711490000103
+      },
+      {
+        "order": "ACB",
+        "candidate": "C",
+        "elapsedMs": 443.5718599999964
+      },
+      {
+        "order": "ACB",
+        "candidate": "B",
+        "elapsedMs": 436.0596480000095
+      },
+      {
+        "order": "BAC",
+        "candidate": "B",
+        "elapsedMs": 559.442332999999
+      },
+      {
+        "order": "BAC",
+        "candidate": "A",
+        "elapsedMs": 409.5297300000093
+      },
+      {
+        "order": "BAC",
+        "candidate": "C",
+        "elapsedMs": 6585.051139999981
+      },
+      {
+        "order": "CBA",
+        "candidate": "C",
+        "elapsedMs": 329.66575499999453
+      },
+      {
+        "order": "CBA",
+        "candidate": "B",
+        "elapsedMs": 402.4757979999995
+      },
+      {
+        "order": "CBA",
+        "candidate": "A",
+        "elapsedMs": 458.3150790000218
+      }
+    ]
+  }
+}

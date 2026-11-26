@@ -1,0 +1,44 @@
+{
+  "baseline_commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "runtime_module_sha256": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4",
+  "node": "22.22.0",
+  "scoped_eslint": {
+    "status": "passed",
+    "heap_limit_mib": 1536,
+    "log": "final-eslint.log"
+  },
+  "targeted_tests": {
+    "status": "passed",
+    "files": 4,
+    "tests": 108,
+    "log": "final-focused-tests.log"
+  },
+  "parser_tests": {
+    "status": "passed",
+    "files": 1,
+    "tests": 187,
+    "log": "final-parser-tests.log"
+  },
+  "dry_build": {
+    "status": "passed",
+    "targets": [
+      "chrome",
+      "chrome-dev",
+      "chrome-playwright",
+      "firefox",
+      "firefox-dev",
+      "firefox-android",
+      "edge"
+    ],
+    "log": "final-build.log"
+  },
+  "full_local_unit_suite": {
+    "status": "interrupted_not_passed",
+    "details": "Initial attempt lacked generated libraries. Subsequent broader run was interrupted after failures in unchanged suites, including import-index worker timeouts under contention. Focused checks reran with complete generated libraries; no full-suite result is claimed."
+  },
+  "browser_import": {
+    "status": "blocked_before_import",
+    "details": "Initial previously available browser runtime disappeared. With an owned pinned Chrome153.0.8010.12 runtime, persistent-context startup failed with process_singleton_posix.cc socket() failed: Operation not permitted. No import observation was completed."
+  },
+  "benchmark_runner_followup": "Maintained runner received pre-timing lint/type guards and corpus syntax fixes; the archived executed runner and all timed-loop code, product source bytes, and observations are retained unchanged."
+}

@@ -1,0 +1,88 @@
+(node:9) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:9) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✘ [ERROR] Could not resolve "../../../lib/zip.js"
+
+    ext/js/dictionary/mdx/mdx-converter.js:22:7:
+      22 │ } from '../../../lib/zip.js';
+         ╵        ~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../../lib/parse5.js"
+
+    ext/js/dictionary/mdx/mdx-converter.js:23:24:
+      23 │ import * as parse5 from '../../../lib/parse5.js';
+         ╵                         ~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] The CommonJS "module" variable is treated as a global variable in an ECMAScript module and may not work as expected [commonjs-variable-in-esm]
+
+    ext/js/dictionary/mdx/vendor/pako-inflate.js:2:327:
+      2 │ ...typeof module!=="undefined"){module.exports=api}else if(typeof d...
+        ╵                                 ~~~~~~
+
+  This file is considered to be an ECMAScript module because the enclosing "package.json" file sets the type of this file to "module":
+
+    package.json:11:12:
+      11 │     "type": "module",
+         ╵             ~~~~~~~~
+
+  Node's package format requires that CommonJS files in a "type": "module" package use the ".cjs" file extension.
+
+✘ [ERROR] Could not resolve "../../lib/zip.js"
+
+    ext/js/dictionary/dictionary-importer.js:28:7:
+      28 │ } from '../../lib/zip.js';
+         ╵        ~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/zstd-wasm.js"
+
+    ext/js/dictionary/dictionary-importer.js:50:43:
+      50 │ import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
+         ╵                                            ~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/zstd-wasm.js"
+
+    ext/js/dictionary/zstd-term-content.js:32:7:
+      32 │ } from '../../lib/zstd-wasm.js';
+         ╵        ~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/zstd-wasm.js"
+
+    ext/js/dictionary/dictionary-database.js:60:43:
+      60 │ import {decompress as zstdDecompress} from '../../lib/zstd-wasm.js';
+         ╵                                            ~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/resvg-wasm.js"
+
+    ext/js/dictionary/dictionary-media-renderer.js:18:30:
+      18 │ import {initWasm, Resvg} from '../../lib/resvg-wasm.js';
+         ╵                               ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+✘ [ERROR] Could not resolve "../../lib/sqlite/index.mjs"
+
+    ext/js/dictionary/sqlite-wasm.js:18:30:
+      18 │ import sqlite3InitModule from '../../lib/sqlite/index.mjs';
+         ╵                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Oops! Something went wrong! :(
+
+ESLint: 9.39.5
+
+Error: Build failed with 8 errors:
+ext/js/dictionary/dictionary-database.js:60:43: ERROR: Could not resolve "../../lib/zstd-wasm.js"
+ext/js/dictionary/dictionary-importer.js:28:7: ERROR: Could not resolve "../../lib/zip.js"
+ext/js/dictionary/dictionary-importer.js:50:43: ERROR: Could not resolve "../../lib/zstd-wasm.js"
+ext/js/dictionary/dictionary-media-renderer.js:18:30: ERROR: Could not resolve "../../lib/resvg-wasm.js"
+ext/js/dictionary/mdx/mdx-converter.js:22:7: ERROR: Could not resolve "../../../lib/zip.js"
+...
+    at failureErrorWithLog (/workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:1477:15)
+    at /workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:946:25
+    at /workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:898:52
+    at buildResponseToResult (/workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:944:7)
+    at /workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:971:16
+    at responseCallbacks.<computed> (/workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:623:9)
+    at handleIncomingPacket (/workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:678:12)
+    at Socket.readFromStdout (/workspace/scratch/4344255ab4f9/manabitan/node_modules/esbuild/lib/main.js:601:7)
+    at Socket.emit (node:events:519:28)
+    at addChunk (node:internal/streams/readable:561:12)

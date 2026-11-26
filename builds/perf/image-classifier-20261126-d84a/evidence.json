@@ -1,0 +1,143 @@
+{
+  "baseline_commit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "baseline_module_sha256": "a7c5469078fd2e0f8639e9a873cb87b112468a9edc5f93f9033b3317cd56b1fa",
+  "candidate_module_sha256": "e7b672a7026a6bd54a68f6ee2fc58d37417bc762397431d684117cca77272ed4",
+  "fixture": {
+    "file": "vndb_characters_by_bee.zip",
+    "bytes": 291705969,
+    "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+    "filename_count": 147237,
+    "lowercase_webp_count": 146570,
+    "path_list_sha256": "0e2d2fa65a211f0af693a0b9861448025b72d1189ab045c04e9297d36b6d8920",
+    "verification": "Archive SHA256 and exact central-directory filename list rechecked after screen; fixture I/O excluded from all timings."
+  },
+  "runtime_change": "Return image/webp for an exact lowercase .webp suffix before the existing bounded scan, slice and lowercase conversion. Other strings execute the unchanged fallback.",
+  "claims": "Eliminated classifier operations for matching strings only. No heap-allocation, peak-memory, browser or complete-import speed claim.",
+  "validation": {
+    "final_node": "22.22.0",
+    "focused_tests": 48,
+    "independent_oracle_comparisons": 389680,
+    "independent_oracle_mismatches": 0,
+    "screen_parity_checks": 196389,
+    "screen_observations": 60,
+    "screen_timed_observations": 36,
+    "screen_warmups": 24,
+    "lint": "Unqualified locally: generated dependency failures, then exit134 at512MiB V8heap limit. CI remains required."
+  },
+  "screen": {
+    "protocol": "Two excluded ABA warmup blocks then three measured ABA blocks for each of four corpora. Each arm imports its exact full module. Immutable baseline extracted by git show. Source and filename hashes checked before and after. All observations retained.",
+    "summaries": {
+      "archive": {
+        "triplets_ms": [
+          [
+            182.32421499999964,
+            324.56473800000003,
+            519.2790219999997
+          ],
+          [
+            433.0827939999999,
+            91.01009400000021,
+            198.3713719999996
+          ],
+          [
+            329.30635600000005,
+            56.787970000000314,
+            96.25871300000017
+          ]
+        ],
+        "candidate_vs_before_median_percent": -78.98552072239559,
+        "candidate_vs_after_median_percent": -41.004852204911344,
+        "baseline_after_vs_before_median_percent": -54.1955083997173,
+        "qualification": "inconclusive; shared-host controls and tails prevent latency or non-regression claims"
+      },
+      "lowercase": {
+        "triplets_ms": [
+          [
+            170.8490180000008,
+            77.56703600000037,
+            42.36057900000014
+          ],
+          [
+            55.01111700000001,
+            42.47879000000012,
+            67.27732400000059
+          ],
+          [
+            54.06802400000015,
+            53.1286199999995,
+            66.19682900000043
+          ]
+        ],
+        "candidate_vs_before_median_percent": -22.78144433969572,
+        "candidate_vs_after_median_percent": -19.741442599917956,
+        "baseline_after_vs_before_median_percent": 22.297687574678005,
+        "qualification": "inconclusive; shared-host controls and tails prevent latency or non-regression claims"
+      },
+      "mixed": {
+        "triplets_ms": [
+          [
+            96.0887130000001,
+            79.84125500000027,
+            54.11441600000035
+          ],
+          [
+            86.3701229999997,
+            88.47272900000007,
+            59.931696999999986
+          ],
+          [
+            35.08354899999904,
+            44.82989499999894,
+            140.16478800000004
+          ]
+        ],
+        "candidate_vs_before_median_percent": 2.4344135760931973,
+        "candidate_vs_after_median_percent": 47.54156267712426,
+        "baseline_after_vs_before_median_percent": -30.610615200814063,
+        "qualification": "inconclusive; shared-host controls and tails prevent latency or non-regression claims"
+      },
+      "unsupported": {
+        "triplets_ms": [
+          [
+            102.957402,
+            103.10040200000003,
+            104.4005019999986
+          ],
+          [
+            98.91060499999912,
+            108.85803400000077,
+            108.04838999999993
+          ],
+          [
+            95.21408899999915,
+            185.00473600000078,
+            86.02842799999962
+          ]
+        ],
+        "candidate_vs_before_median_percent": 10.05698933901147,
+        "candidate_vs_after_median_percent": 0.7493346268286238,
+        "baseline_after_vs_before_median_percent": 1.4016476445264159,
+        "qualification": "inconclusive; shared-host controls and tails prevent latency or non-regression claims"
+      }
+    }
+  },
+  "prior_attempts": [
+    {
+      "kind": "six-variant exploratory prototype",
+      "result": "Process exited137 before any observations were emitted; cause not established. Exact script retained as prototype-initial.mjs.txt."
+    },
+    {
+      "kind": "completed wrapper prototype",
+      "result": "72 observations retained in prototype-screen.json; candidate was a wrapper around baseline, not the changed module. Node24.22.3. No speed claim or exact-source equivalence claimed for timing. Baseline imported from a read-only live checkout; source hash was not captured at acquisition."
+    },
+    {
+      "kind": "initial lint prerequisites",
+      "result": "Exited2 because handlebars.js and linkedom.js generated files were missing. The next attempt still lacked additional generated libraries; its complete log is lint-missing-libraries.log. Copied the unchanged generated libs from the parent baseline build before final lint."
+    },
+    {
+      "kind": "final scoped lint",
+      "result": "Node22.22.0 with512MiB maximum V8heap aborted134 at heap limit; no source diagnostic. Full log retained as lint-heap-limit.log. No further local lint acquisition."
+    }
+  ],
+  "provenance": "Original repository modifications; no third-party implementation, dependencies, native assets, schema, budgets or thresholds changed."
+}
