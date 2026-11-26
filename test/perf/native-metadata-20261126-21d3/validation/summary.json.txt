@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "scope": "Correctness, pinned native build, and type validation for compact fused parser metadata; no import-speed inference from test durations.",
+  "repository": "ManabiIO/manabitan",
+  "productPullRequest": 961,
+  "identity": {
+    "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "localProductCommit": "6ad7d0112a8dd1078a007952d2f5647162525cd9",
+    "publishedProductCommit": "0e233538e975c7be11b2144974923e2bf6396254",
+    "hostedCiMergeCommit": "865ab81bfcd75e47c343834dfb2466a6c85b2b44",
+    "productTree": "c83e5d77135b1ccf8ab86a4c51065758e3038b5d",
+    "parserWasmSha256": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264",
+    "sourceSha256": {
+      "ext/js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+      "ext/js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+      "ext/js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+      "ext/lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+    },
+    "unchangedContentHashGitBlobs": {
+      "test/term-entry-content-hash.test.js": {
+        "baselineGitBlob": "c8954ec540efcb5396964c7f7a270bf1f0f79fdd",
+        "candidateGitBlob": "c8954ec540efcb5396964c7f7a270bf1f0f79fdd"
+      },
+      "ext/js/dictionary/term-entry-content-hash.js": {
+        "baselineGitBlob": "b9a01b05355b7d2befb18ce8af1323bf2659d327",
+        "candidateGitBlob": "b9a01b05355b7d2befb18ce8af1323bf2659d327"
+      }
+    }
+  },
+  "hosted": {
+    "runId": 45865210236,
+    "runAttempt": 1,
+    "event": "pull_request",
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/45865210236",
+    "conclusion": "success",
+    "node": "22.22.0",
+    "normalJobSuccessCount": 15,
+    "conditionalOrManualSkippedJobCount": 4,
+    "jobs": [
+      {
+        "id": 140066161630,
+        "name": "Anki Deduplication Matrix (Chromium)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162034,
+        "name": "Test Build",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162053,
+        "name": "HTML",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162141,
+        "name": "Full Extension E2E (Firefox)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162186,
+        "name": "Full Extension E2E (Chromium)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162305,
+        "name": "JSON",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162337,
+        "name": "TypeScript (bench)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162347,
+        "name": "TypeScript (test)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162417,
+        "name": "CSS",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162444,
+        "name": "Markdown",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162450,
+        "name": "Unit Tests (options)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162459,
+        "name": "TypeScript (dev)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162469,
+        "name": "JavaScript",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162560,
+        "name": "Unit Tests",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066162671,
+        "name": "TypeScript (main)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140066163444,
+        "name": "Full Extension E2E (Edge)",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 140066164128,
+        "name": "Firefox Android Gecko RDP Capability Probe (manual)",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 140066164467,
+        "name": "Published release upgrade and reimport",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 140066241142,
+        "name": "Firefox Android Installation Smoke (blocking)",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ],
+    "gates": {
+      "unit": {
+        "jobId": 140066162560,
+        "command": "npm run test:unit",
+        "testFiles": {
+          "passed": 651,
+          "failed": 0,
+          "total": 651
+        },
+        "tests": {
+          "passed": 14681,
+          "failed": 0,
+          "skipped": 47,
+          "total": 14728
+        },
+        "focusedPassedCounts": {
+          "compactFusedMetadata": 13,
+          "nativeCrc": 4,
+          "nativeMemoryPage": 17,
+          "unchangedContentHash": 90
+        },
+        "log": "hosted-unit.log",
+        "steps": "hosted-unit-steps.json"
+      },
+      "mainTypes": {
+        "jobId": 140066162671,
+        "command": "npm run test:ts:main",
+        "expandedCommand": "npx tsc --noEmit --project jsconfig.json",
+        "log": "hosted-main-types.log",
+        "steps": "hosted-main-types-steps.json"
+      },
+      "testTypes": {
+        "jobId": 140066162347,
+        "command": "npm run test:ts:test",
+        "expandedCommand": "npx tsc --noEmit --project test/jsconfig.typecheck.json",
+        "log": "hosted-test-types.log",
+        "steps": "hosted-test-types-steps.json"
+      },
+      "build": {
+        "jobId": 140066162034,
+        "nativeRebuildCommand": "npm run build:dictionary-wasm -- --check",
+        "llvmVersion": "21.1.8",
+        "lldVersion": "21.1.8",
+        "targets": [
+          "chrome",
+          "chrome-dev",
+          "chrome-playwright",
+          "firefox",
+          "firefox-dev",
+          "firefox-android",
+          "edge"
+        ],
+        "manifestValidation": "passed",
+        "log": "hosted-build-140066162034.log",
+        "steps": "hosted-build-steps.json"
+      }
+    }
+  },
+  "local": {
+    "shellLogin": false,
+    "attempts": [
+      {
+        "commit": "6ad7d0112a8dd1078a007952d2f5647162525cd9",
+        "tree": "c83e5d77135b1ccf8ab86a4c51065758e3038b5d",
+        "node": "v24.22.3",
+        "sources": {
+          "ext/js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+          "ext/js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+          "ext/js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+          "ext/lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+        },
+        "gates": [
+          {
+            "name": "unit",
+            "command": [
+              "npm",
+              "run",
+              "test:unit",
+              "--",
+              "--maxWorkers=1"
+            ],
+            "exitCode": 1,
+            "startedAt": "2026-11-26T17:14:15.156861+00:00",
+            "finishedAt": "2026-11-26T17:28:56.880489+00:00",
+            "log": "/workspace/scratch/21d3ef023f32/parser-validation/unit.log"
+          }
+        ],
+        "results": {
+          "testFiles": {
+            "passed": 648,
+            "failed": 3,
+            "total": 651
+          },
+          "tests": {
+            "passed": 14659,
+            "failed": 1,
+            "skipped": 68,
+            "total": 14728
+          },
+          "suiteErrors": [
+            {
+              "path": "test/term-bank-crc.test.js",
+              "error": "No supported wasm compiler found; set MANABITAN_CLANG or CLANG"
+            },
+            {
+              "path": "test/term-bank-memory-page.test.js",
+              "error": "No supported wasm compiler found; set MANABITAN_CLANG or CLANG"
+            }
+          ],
+          "testErrors": [
+            {
+              "path": "test/term-entry-content-hash.test.js",
+              "byteOffset": 7,
+              "error": "Test timed out in 5000ms."
+            }
+          ],
+          "subsequentBuildStarted": false
+        }
+      },
+      {
+        "commit": "6ad7d0112a8dd1078a007952d2f5647162525cd9",
+        "tree": "c83e5d77135b1ccf8ab86a4c51065758e3038b5d",
+        "node": "v24.22.3",
+        "environmentSource": "/workspace/scratch/f34c9c9fae89/toolchains/llvm21-env.sh",
+        "compiler": "Debian clang version 21.1.8 (++20251221032947+2078da43e25a-1~exp1~20251221153113.67)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/lib/llvm-21/bin",
+        "linker": "Debian LLD 21.1.8",
+        "previousAttempt": "/workspace/scratch/21d3ef023f32/parser-validation/summary.json",
+        "sources": {
+          "ext/js/dictionary/term-bank-wasm-parser.js": "5305db3bbefec38092e6c02b69e435bf6f6dc2010c1e38b7d0505abccd85304d",
+          "ext/js/dictionary/term-bank-source-crc.js": "e9e1973d4c826dcf1df1d39d9dc666e7445f7792668260457c9f787895eb2167",
+          "ext/js/dictionary/wasm/term-bank-parser.c": "5163749097217498995725950ca2329a2d3701cb5021aac03ab347f8d6198b34",
+          "ext/lib/term-bank-parser.wasm": "90d1d539ecf1e0f5519de9bc9aeab7ca550feb0c54e46bf411e93650d64ce264"
+        },
+        "gates": [
+          {
+            "name": "failed-files-retry",
+            "command": [
+              "node",
+              "node_modules/vitest/vitest.mjs",
+              "run",
+              "test/term-bank-crc.test.js",
+              "test/term-bank-memory-page.test.js",
+              "test/term-entry-content-hash.test.js",
+              "--maxWorkers=1"
+            ],
+            "exitCode": 1,
+            "startedAt": "2026-11-26T17:32:44.881743+00:00",
+            "log": "/workspace/scratch/21d3ef023f32/parser-validation/failed-files-retry.log",
+            "finishedAt": "2026-11-26T17:38:21.321676+00:00"
+          }
+        ],
+        "results": {
+          "testFiles": {
+            "passed": 2,
+            "failed": 1,
+            "total": 3
+          },
+          "tests": {
+            "passed": 106,
+            "failed": 5,
+            "skipped": 0,
+            "total": 111
+          },
+          "nativeCompilerTests": {
+            "passed": 21,
+            "failed": 0,
+            "crc": 4,
+            "memoryPage": 17
+          },
+          "contentHashTests": {
+            "passed": 85,
+            "failed": 5,
+            "total": 90,
+            "failureKind": "timeout",
+            "existingTimeoutMs": 5000,
+            "observations": [
+              {
+                "byteOffset": 1,
+                "durationMs": 128646
+              },
+              {
+                "byteOffset": 2,
+                "durationMs": 57430
+              },
+              {
+                "byteOffset": 3,
+                "durationMs": 50294
+              },
+              {
+                "byteOffset": 7,
+                "durationMs": 50576
+              },
+              {
+                "byteOffset": 15,
+                "durationMs": 15851
+              }
+            ],
+            "reportedHashValueMismatches": 0
+          },
+          "secondFullSuiteStarted": false,
+          "localBuildStarted": false
+        }
+      }
+    ],
+    "compilerProbe": {
+      "command": [
+        "/workspace/scratch/f34c9c9fae89/toolchains/llvm21/usr/bin/clang-21",
+        "--target=wasm32-freestanding",
+        "-matomics",
+        "-mbulk-memory",
+        "-nostdlib",
+        "-Wl,--no-entry",
+        "-Wl,--shared-memory",
+        "-Wl,--max-memory=4294967296",
+        "-Wl,--export=probe",
+        "-Wl,--strip-all",
+        "-o",
+        "/workspace/scratch/21d3ef023f32/parser-validation/compiler-probe/probe.wasm",
+        "/workspace/scratch/21d3ef023f32/parser-validation/compiler-probe/probe.c"
+      ],
+      "startedAt": "2026-11-26T17:39:08.395780+00:00",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "",
+      "finishedAt": "2026-11-26T17:39:08.576640+00:00"
+    },
+    "existingContentHashAssertionOrTimeoutChanges": false,
+    "productSourceChangedDuringAttempts": false,
+    "finalGates": "Hosted exact-source unit/build/types checks; both unsuccessful local attempts retained."
+  },
+  "archive": {
+    "path": "receipts.tar.gz",
+    "bytes": 109995,
+    "sha256": "e23bec4b84391ec80d399c2612f8d069af3b6b0673f1b094c9fe7259f99fc0d7",
+    "format": "tar with gzip mtime 0; member names relative; uid/gid/mtime 0; regular file mode 0644",
+    "members": [
+      {
+        "path": "unit.log",
+        "bytes": 15935,
+        "sha256": "0d4c62f8262146e487148d14cf4a3cb55e06478bcac3402ceb5ace7430e65527"
+      },
+      {
+        "path": "summary.json",
+        "bytes": 987,
+        "sha256": "a36e9c2d09d3377cf033d83cb0e300679a2f4244392f0a6c9cfca060fe78a0b2"
+      },
+      {
+        "path": "failed-files-retry.log",
+        "bytes": 2097,
+        "sha256": "1134664cca5274f56a9527a79b5352d659daf641b2e2e9836fe46696e21b2b7a"
+      },
+      {
+        "path": "retry-summary.json",
+        "bytes": 1595,
+        "sha256": "a38319ce6061f5386372d657dc1b4366212f79ade852813bbe6b254601eb049c"
+      },
+      {
+        "path": "compiler-probe/result.json",
+        "bytes": 645,
+        "sha256": "f8eb8b9543801d583e4186a99673086672507995f4cba3516936ebedfac04fe2"
+      },
+      {
+        "path": "compiler-probe/probe.c",
+        "bytes": 20,
+        "sha256": "560a7695bae5b3e5c00e5b918bcaffa414efb2bd2fb1097424953fce22dae8d8"
+      },
+      {
+        "path": "compiler-probe/probe.wasm",
+        "bytes": 63,
+        "sha256": "927715d9a632200b86cc7117bd76883d01313236a6a64745fdb43a0bde4da697"
+      },
+      {
+        "path": "hosted-unit.log",
+        "bytes": 781079,
+        "sha256": "312fb5aaf125d6ec76877e811a3ef98bea523faa8f2827ef92a7beb3beeb4840"
+      },
+      {
+        "path": "hosted-main-types.log",
+        "bytes": 22176,
+        "sha256": "a0884dfccd41de1d78b56a96286e9912181a528c433d82aea8863a529d774e40"
+      },
+      {
+        "path": "hosted-test-types.log",
+        "bytes": 22111,
+        "sha256": "89e3368c1438748efea6de60ccafd3bea2faccc449e98f4750e4a446a3dae4c3"
+      },
+      {
+        "path": "hosted-build-140066162034.log",
+        "bytes": 29474,
+        "sha256": "da20cea589377e0a2fc702feecb78313002b6b64b0d7974ca566ad44429a8e98"
+      },
+      {
+        "path": "hosted-unit-steps.json",
+        "bytes": 1011,
+        "sha256": "6239875b82a8c91382e52c1b11372adfd7fcba43521a3b4e7f90465747d7d0c5"
+      },
+      {
+        "path": "hosted-main-types-steps.json",
+        "bytes": 1018,
+        "sha256": "7e9f7624eaa17acef82c71b2baa08a309e57f8afe25bac6841889f832d447c7b"
+      },
+      {
+        "path": "hosted-test-types-steps.json",
+        "bytes": 1018,
+        "sha256": "c017154416f846bd4ee5c15b9832876ad1691297f097c82bc94b44807b50c302"
+      },
+      {
+        "path": "hosted-build-steps.json",
+        "bytes": 1584,
+        "sha256": "d1f0b41b83ead4f6222985c74012877832fcf302c0244c025acbc0d35fe10adb"
+      },
+      {
+        "path": "hosted-all-jobs.json",
+        "bytes": 25547,
+        "sha256": "89f4a28f74d9a918dd764251a6468d75e6db25835d23a0ec432c8a72f5d558ae"
+      },
+      {
+        "path": "hosted-head-git.json",
+        "bytes": 1297,
+        "sha256": "6ff67bbd720d7f79f413d4f1ac0721d37136613262294150dad050b1457265fd"
+      },
+      {
+        "path": "hosted-merge-git.json",
+        "bytes": 2812,
+        "sha256": "072961c498491102fff2e76970e5a2a2735286353e97549ca2844d1b2ccfa809"
+      },
+      {
+        "path": "hosted-run-raw.json",
+        "bytes": 14073,
+        "sha256": "c19804280abd1f811855ecbd1d6e71b18ce31409eb7648a9644be90d416fabd2"
+      }
+    ]
+  },
+  "receiptEncoding": {
+    "localLogsAndMetadata": "Original bytes unchanged",
+    "hostedLogs": "Decoded UTF-8 response bytes unchanged, including BOM and ANSI sequences",
+    "hostedMetadata": "GitHub response objects normalized as JSON with two-space indentation"
+  },
+  "relatedCorpusProof": "../summary.json.txt"
+}
