@@ -1,0 +1,9 @@
+
+ RUN  v4.1.12 /workspace/scratch/9175611d1a4c/manabitan-parser
+
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  11:53:30
+   Duration  6.98s (transform 4.09s, setup 683ms, import 4.65s, tests 339ms, environment 2ms)
+

@@ -1,0 +1,131 @@
+{
+  "repository": "ManabiIO/manabitan",
+  "evidencePr": 947,
+  "runtimePr": 942,
+  "originalScreen": {
+    "runId": 45862232094,
+    "workflowCommit": "4741a616d34d2c9faf17cac27d2ce7ddb54149f9",
+    "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+    "parserCandidate": "400d4375a89cdf93805cc9566da2068a741dc059",
+    "mediaAlternativeCandidate": "bdb9c74874e2612fbb8741f4d36ed4397e4eaf57",
+    "mediaPr": 935,
+    "mediaPrDisposition": "Closed duplicate of #934; alternative findings are separate",
+    "jobs": [
+      {
+        "id": 140055922847,
+        "name": "media / vndb",
+        "status": "queued",
+        "conclusion": null
+      },
+      {
+        "id": 140055923316,
+        "name": "scratch / vndb",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140055923337,
+        "name": "scratch / jmdict",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140055923400,
+        "name": "media / jmdict",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 140055923503,
+        "name": "scratch / jitendex",
+        "status": "completed",
+        "conclusion": "failure"
+      },
+      {
+        "id": 140055923592,
+        "name": "media / jitendex",
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    ],
+    "checkedAtUtc": "2026-11-26 17:35:03 UTC"
+  },
+  "correctedJitendex": {
+    "runId": 45865210668,
+    "workflowCommit": "fc2383252718ca37e249620417ef3178edfc4e39",
+    "candidate": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+    "measurementOverlayCommit": "439a1c9b6d40452061cda094b0727005553c1d1d",
+    "jobId": 140066162731,
+    "status": "completed",
+    "checkedAtUtc": "2026-11-26 17:43:48 UTC",
+    "completedObservations": 4,
+    "conclusion": "success",
+    "matchedSemanticReceipts": 4,
+    "artifactId": 15141552176,
+    "artifactName": "allocation-scratch-jitendex-corrected-9175",
+    "artifactBytes": 33660464,
+    "artifactSha256": "abaa92927aa3ab9633732211161ef312e198f7ab4ee9f4ba9e720ce0af35b871",
+    "archiveDirectory": "final-parser-jitendex-corrected"
+  },
+  "vndbCorpus": {
+    "runId": 45864038998,
+    "workflowCommit": "8311ad6b4d7297c6fca4a6d704db30311fb23e30",
+    "candidate": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+    "jobId": 140062131372,
+    "status": "success",
+    "artifactId": 15141027598,
+    "artifactBytes": 12301,
+    "artifactSha256": "d4921d5a6186120faadaf6c9fc998aeecc146d2e299ac51592ac0da9771443d0"
+  },
+  "originalArtifacts": [
+    {
+      "id": 15140627503,
+      "name": "allocation-media-jitendex-9175",
+      "sizeBytes": 33525786,
+      "sha256": "ad288bde481906e0a79cbdbf687350ac961ad526159463569d8ee848b95dd43f"
+    },
+    {
+      "id": 15140502781,
+      "name": "allocation-scratch-vndb-9175",
+      "sizeBytes": 33651135,
+      "sha256": "6a8e694674ec1d2aabc2c931f395a1032a8842cf13843d0bb1323d7002696f85"
+    },
+    {
+      "id": 15140262793,
+      "name": "allocation-media-jmdict-9175",
+      "sizeBytes": 33646185,
+      "sha256": "860210cab965f9f09bd50e9eee140baa96d857644b0efb2c185797e5d085e4d0"
+    },
+    {
+      "id": 15139765802,
+      "name": "allocation-scratch-jitendex-9175",
+      "sizeBytes": 33526491,
+      "sha256": "ddbd8d64794b927f764668618d981f76c89461fd1fdffc4395a855c539dc908f"
+    },
+    {
+      "id": 15139122618,
+      "name": "allocation-scratch-jmdict-9175",
+      "sizeBytes": 33646828,
+      "sha256": "21f4ac5c3fc9718306eb2e9bbf430d8a179d4da6a64b4b82e827e2263aa41c35"
+    }
+  ],
+  "scope": "Four-import regression screens and separate deterministic corpus parity; no whole-import speed or peak-memory qualification",
+  "retention": "Raw JSON, manifests and independent audits retained. Downloaded ZIPs are discarded after checksum/package audits to bound local disk use. No failed observations are replaced.",
+  "assemblyStatus": "Publishable snapshot: final product CI, three-dictionary browser semantic receipts and complete corpus parity audited. Closed media/VNDB supplies no observation and was queued at its recorded historical-matrix check.",
+  "finalProductCI": {
+    "runId": 45863372364,
+    "url": "https://github.com/ManabiIO/manabitan/actions/runs/45863372364",
+    "headSha": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+    "conclusion": "success",
+    "successfulJobs": 15,
+    "conditionalSkips": 4
+  },
+  "snapshotUtc": "2026-11-26 17:43:48 UTC",
+  "localComponentEvidence": {
+    "commit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+    "equivalentLocalCommit": "42256a11e73bb64cf925f118d3e375a223954813",
+    "gitTree": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+    "sourceDirectory": "dev/perf/deferred-resolution-20261126",
+    "archiveDirectory": "local-parser-components"
+  }
+}

@@ -1,0 +1,98 @@
+name: Deferred resolution VNDB corpus 9175
+
+on:
+  push:
+    branches: ['perf/import-allocation-screen-20261126-9175']
+    paths:
+      - '.github/workflows/import-resolution-corpus-9175.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    name: Complete VNDB parser parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PERF_BASELINE: 0143e9596cd8f790d5e166d4ba6a2425fbc57f14
+      PERF_CANDIDATE: 01d0eb7164385828c97efae1b319ccc1c4fe92f9
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '22.22.0'
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Prepare exact source revisions and pinned archive
+        run: |
+          git fetch --no-tags origin "$PERF_BASELINE" "$PERF_CANDIDATE"
+          node dev/perf/prepare-dictionaries.js vndb
+      - name: Replay every VNDB term bank through both native parsers
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import subprocess
+          root = Path.cwd()
+          evidence = root / 'builds/perf/resolution-vndb'
+          evidence.mkdir(parents=True)
+          temporary = Path(os.environ['RUNNER_TEMP']) / 'resolution-vndb-9175'
+          temporary.mkdir()
+          sources = {}
+          provenance = {'node': subprocess.check_output(['node', '--version'], text=True).strip(), 'sources': {}}
+          for label, ref in [('baseline', os.environ['PERF_BASELINE']), ('candidate', os.environ['PERF_CANDIDATE'])]:
+              source = temporary / label
+              subprocess.run(['git', 'worktree', 'add', '--detach', str(source), ref], check=True)
+              sources[label] = source
+              for relative in ['package-lock.json', 'test/perf/dictionaries.lock.json', 'dev/data/dictionary-wasm/manifest.json']:
+                  if (source / relative).read_bytes() != (root / relative).read_bytes():
+                      raise ValueError(f'Lock or native module manifest changed: {relative}')
+              (source / 'node_modules').symlink_to(root / 'node_modules', target_is_directory=True)
+              subprocess.run(['npm', 'run', 'build:libs'], cwd=source, check=True)
+              provenance['sources'][label] = {
+                  'sha': ref,
+                  'files': {
+                      name: hashlib.sha256((source / name).read_bytes()).hexdigest()
+                      for name in [
+                          'ext/js/dictionary/term-bank-wasm-parser.js',
+                          'ext/js/dictionary/dictionary-database.js',
+                          'dev/data/dictionary-wasm/term-bank-parser.wasm',
+                      ]
+                  },
+              }
+          original = sources['candidate'] / 'dev/perf/deferred-resolution-20261126/replay-portable.mjs.txt'
+          runner = temporary / 'replay-resolution.mjs'
+          shutil.copy2(original, runner)
+          shutil.copy2(original, evidence / 'replay-resolution.mjs.txt')
+          provenance['runnerSha256'] = hashlib.sha256(runner.read_bytes()).hexdigest()
+          (evidence / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          with (evidence / 'replay.log').open('w') as log:
+              completed = subprocess.run([
+                  'node', '--max-old-space-size=4096', str(runner),
+                  str(sources['baseline']), str(sources['candidate']),
+                  str(root / 'builds/e2e-dictionary-cache'), str(evidence), 'vndb',
+              ], stdout=log, stderr=subprocess.STDOUT)
+          (evidence / 'execution.json').write_text(json.dumps({'exitCode': completed.returncode}) + '\n')
+          completed.check_returncode()
+          result = json.loads((evidence / 'corpus-parity.json').read_text())
+          if len(result['corpora']) != 1 or result['corpora'][0]['id'] != 'vndb' or result['corpora'][0]['rows'] != 6648310:
+              raise ValueError('Incomplete VNDB corpus receipt')
+          print(json.dumps({key: value for key, value in result['corpora'][0].items() if key != 'groups'}, indent=2))
+          PY
+      - name: Retain completed and failed corpus evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: deferred-resolution-vndb-9175
+          path: builds/perf/resolution-vndb
+          if-no-files-found: error
+          retention-days: 14

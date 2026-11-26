@@ -1,0 +1,54 @@
+{
+  "artifact": "/workspace/scratch/9175611d1a4c/allocation-ci-audit/allocation-media-jmdict-9175.zip",
+  "artifactSha256": "860210cab965f9f09bd50e9eee140baa96d857644b0efb2c185797e5d085e4d0",
+  "kind": "media",
+  "dictionary": "jmdict",
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidate": "bdb9c74874e2612fbb8741f4d36ed4397e4eaf57",
+  "browserVersion": "153.0.8010.12",
+  "matchedSemanticReceipts": 4,
+  "termRows": 528299,
+  "mediaFiles": 0,
+  "mediaBytes": 0,
+  "packageSha256": {
+    "A": "e173051ef01733d67a5a3390416e7f7cfcf2173e875acabf8acd9707084020d2",
+    "B": "7682537b051cfee64cc812fdc89aa91aa5454a0f90f1165ef7dbcf02236da5ed"
+  },
+  "changedEntries": [
+    "js/dictionary/dense-zip-file-map.js",
+    "js/dictionary/dictionary-importer.js"
+  ],
+  "observations": [
+    {
+      "id": "A1",
+      "totalImportMs": 950.6000000000058,
+      "workerImportMs": 917.5,
+      "storageBytes": 43520477
+    },
+    {
+      "id": "B1",
+      "totalImportMs": 961.1999999999971,
+      "workerImportMs": 926,
+      "storageBytes": 43520477
+    },
+    {
+      "id": "B2",
+      "totalImportMs": 988.8999999999942,
+      "workerImportMs": 957.5,
+      "storageBytes": 43520477
+    },
+    {
+      "id": "A2",
+      "totalImportMs": 946.5,
+      "workerImportMs": 911.1999999999971,
+      "storageBytes": 43520477
+    }
+  ],
+  "pairedChangePercent": [
+    1.1150852093405383,
+    4.479661912307886
+  ],
+  "medianPairedChangePercent": 2.7973735608242123,
+  "scope": "One-host four-import screen; no whole-import speed or peak-memory qualification",
+  "classification": "Closed #935 alternative only; not evidence for selected #934/#937"
+}

@@ -1,0 +1,8 @@
+{
+  "artifactId": 15141552176,
+  "artifactName": "allocation-scratch-jitendex-corrected-9175",
+  "runId": 45865210668,
+  "workflowCommit": "fc2383252718ca37e249620417ef3178edfc4e39",
+  "bytes": 33660464,
+  "sha256": "abaa92927aa3ab9633732211161ef312e198f7ab4ee9f4ba9e720ce0af35b871"
+}

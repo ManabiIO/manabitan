@@ -1,0 +1,1353 @@
+{
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "description": "Fixed groups of four compressed banks through actual native inflate/parser/copy functions. Component output parity and cumulative deferred resolution bytes; not whole-import timing or peak memory.",
+  "corpora": [
+    {
+      "id": "vndb",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "rows": 6648310,
+      "uniqueContents": 157852,
+      "deferredResolutionBytes": 2052076,
+      "maxDeferredGroupBytes": 16367,
+      "banks": 665,
+      "groups": [
+        {
+          "firstBank": "term_bank_1.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 822,
+          "deferredResolutionBytes": 10686,
+          "digest": "95a4fa8400c16ed76e44d5c6f48e9698f6f430a6c47416ba6caf8760d6d68d2c"
+        },
+        {
+          "firstBank": "term_bank_5.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 853,
+          "deferredResolutionBytes": 11089,
+          "digest": "38fd2018f4a00578e76e388afa5c53bc5130f3713b07f344551e85557f53f3e5"
+        },
+        {
+          "firstBank": "term_bank_9.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 830,
+          "deferredResolutionBytes": 10790,
+          "digest": "d24c51cf5d707d262273060e512078a22f902178badb915ea5eeda26d4f50d79"
+        },
+        {
+          "firstBank": "term_bank_13.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 803,
+          "deferredResolutionBytes": 10439,
+          "digest": "e1c3d4f8996b66ac4a0143234f93f3bf7a3e7514b34ea02ebae837d80c21bd0d"
+        },
+        {
+          "firstBank": "term_bank_17.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 842,
+          "deferredResolutionBytes": 10946,
+          "digest": "0dd9a192817875194cd68086201ea5885e31688fe88844c525bf8553cd14595e"
+        },
+        {
+          "firstBank": "term_bank_21.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 889,
+          "deferredResolutionBytes": 11557,
+          "digest": "f9ed914ae6e4b52cf2443377702fc4a2bfb90d81284c4971e78f8b30ffefe99d"
+        },
+        {
+          "firstBank": "term_bank_25.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 961,
+          "deferredResolutionBytes": 12493,
+          "digest": "087777b30a433315be8253645c6dc7a60bc6707258821c46025a0147ef3cc6a6"
+        },
+        {
+          "firstBank": "term_bank_29.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 807,
+          "deferredResolutionBytes": 10491,
+          "digest": "93dce02dbe7a59ced571d0c396c477f0c1859ae22253b817e8f5d9b45d25f7b1"
+        },
+        {
+          "firstBank": "term_bank_33.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 835,
+          "deferredResolutionBytes": 10855,
+          "digest": "ed5347e5c6b70059ca8852dbf3a01f4301963359ca70481bb15ce67737c33fb7"
+        },
+        {
+          "firstBank": "term_bank_37.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 849,
+          "deferredResolutionBytes": 11037,
+          "digest": "f54fc3d342df56f3d5466858edc3e116f61ff3c758cfc0a1ef5b03b1414b781e"
+        },
+        {
+          "firstBank": "term_bank_41.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 875,
+          "deferredResolutionBytes": 11375,
+          "digest": "c0c20153ff396be12e2fc42f4a390fc1ac347581401137666d7c0bf5ae3271d2"
+        },
+        {
+          "firstBank": "term_bank_45.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 887,
+          "deferredResolutionBytes": 11531,
+          "digest": "13176c040f06fd637b80e4a352f7221b6723652a385b1e4e782a0b36f2d82dbb"
+        },
+        {
+          "firstBank": "term_bank_49.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 832,
+          "deferredResolutionBytes": 10816,
+          "digest": "2fceafccfa7e1668106f87d33eadffa3ca2954c2e916dbd3af5d6f950ea3e5e9"
+        },
+        {
+          "firstBank": "term_bank_53.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 868,
+          "deferredResolutionBytes": 11284,
+          "digest": "4bd4c547165ef1145381f2d885ba0a159b0b29b986cf4c442acd52d9f452640d"
+        },
+        {
+          "firstBank": "term_bank_57.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 948,
+          "deferredResolutionBytes": 12324,
+          "digest": "95f8ac63e7fa7a2ddbe12080128d2c9a37bbbed0997e0784fe184c8424e05755"
+        },
+        {
+          "firstBank": "term_bank_61.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 900,
+          "deferredResolutionBytes": 11700,
+          "digest": "f528ac1815ca6d43dea26567b0efa924fed56a1f192a030f8a0555e3c3befbcd"
+        },
+        {
+          "firstBank": "term_bank_65.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 829,
+          "deferredResolutionBytes": 10777,
+          "digest": "a50e7284f3dd6f33500bbbfec0199ed53437aa039731fef0a077eb04d34a47b4"
+        },
+        {
+          "firstBank": "term_bank_69.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1068,
+          "deferredResolutionBytes": 13884,
+          "digest": "9c25e029ab6e9d1bf80af3a7e49d406899d0fb0c7af38b5aa3796ed080fdc51a"
+        },
+        {
+          "firstBank": "term_bank_73.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 954,
+          "deferredResolutionBytes": 12402,
+          "digest": "0cf8b80aa68f345d0758319ad2d18e4bd23a61b892446576787f6bc0c9b44e52"
+        },
+        {
+          "firstBank": "term_bank_77.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 917,
+          "deferredResolutionBytes": 11921,
+          "digest": "4818ca842e618c6eb62a9af1d6f7600d9db677714477603bc5908c90cdb5d7c1"
+        },
+        {
+          "firstBank": "term_bank_81.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 905,
+          "deferredResolutionBytes": 11765,
+          "digest": "5e248f3ef8235fa685e0ce0759796a4413a0b2175c06f848ea072062b0aa2ff9"
+        },
+        {
+          "firstBank": "term_bank_85.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 866,
+          "deferredResolutionBytes": 11258,
+          "digest": "97c361745b517ea71eafb21bbe2ffc522c20f2ba83a2aedf8b2385ef8b6c95c9"
+        },
+        {
+          "firstBank": "term_bank_89.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 822,
+          "deferredResolutionBytes": 10686,
+          "digest": "6295eae1e1fc19f3d102254edf1bcc21cbc8d9066e0a55c5109862e08c7083cd"
+        },
+        {
+          "firstBank": "term_bank_93.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 887,
+          "deferredResolutionBytes": 11531,
+          "digest": "4ed342e52a23884262298459bdc528adb2687c818b0414174b1a93ccfe74b5fe"
+        },
+        {
+          "firstBank": "term_bank_97.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 824,
+          "deferredResolutionBytes": 10712,
+          "digest": "d6ae21cea852def23b8e9e1ed23f9eca88a93a862435192dfe588e5695738134"
+        },
+        {
+          "firstBank": "term_bank_101.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 812,
+          "deferredResolutionBytes": 10556,
+          "digest": "8db4caa3f484e02e1143675e6c3a25d1e81ecb597712e713aa0feac94289415d"
+        },
+        {
+          "firstBank": "term_bank_105.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 788,
+          "deferredResolutionBytes": 10244,
+          "digest": "6b23ec6ffe7b5dc2a27fb5d1909f9c78c3fa97d9e83bbfc819ed0da4ac70493c"
+        },
+        {
+          "firstBank": "term_bank_109.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 723,
+          "deferredResolutionBytes": 9399,
+          "digest": "24e9c5088e10447ecdbd39243fad992dfee232877ca7648efc6e1b7d61a06c03"
+        },
+        {
+          "firstBank": "term_bank_113.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 815,
+          "deferredResolutionBytes": 10595,
+          "digest": "a102e88324a825ab325b669fb8a6aaf4940cb5789ee888322aa82345477f8872"
+        },
+        {
+          "firstBank": "term_bank_117.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 960,
+          "deferredResolutionBytes": 12480,
+          "digest": "7fbaf29345741858b3215feee760e9a4c66a115fe910d3ca11592d2110accc8e"
+        },
+        {
+          "firstBank": "term_bank_121.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 901,
+          "deferredResolutionBytes": 11713,
+          "digest": "b120f5f376cb7d0a2362faca15a8c511510772e4de913d44eb8f38d7158c7567"
+        },
+        {
+          "firstBank": "term_bank_125.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 830,
+          "deferredResolutionBytes": 10790,
+          "digest": "9709b659142a666960175a051cd120deafcf07359d1eda8b7173c90a68f6b3b6"
+        },
+        {
+          "firstBank": "term_bank_129.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 868,
+          "deferredResolutionBytes": 11284,
+          "digest": "ec574b8e86345ce521b3128100cf9ecf6ff6b8a37d6f1a1cbb662169e774eecb"
+        },
+        {
+          "firstBank": "term_bank_133.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 843,
+          "deferredResolutionBytes": 10959,
+          "digest": "35850654ffdc6c740dc5aa43513ac835e01869d182904138940cb7040657a040"
+        },
+        {
+          "firstBank": "term_bank_137.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 967,
+          "deferredResolutionBytes": 12571,
+          "digest": "513e4a7c4643d43a7cd482227aaf7667c757d1e881a82682acd36e6c15fff3e0"
+        },
+        {
+          "firstBank": "term_bank_141.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 880,
+          "deferredResolutionBytes": 11440,
+          "digest": "95923afd69161357b5b25f1459c20d90b7ec474eb9d932e1e9944d86f782e1ba"
+        },
+        {
+          "firstBank": "term_bank_145.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 885,
+          "deferredResolutionBytes": 11505,
+          "digest": "484f62c4bdd7580fcb7cdba080ab34ba445a66736666c10d699c69468675f8a7"
+        },
+        {
+          "firstBank": "term_bank_149.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 869,
+          "deferredResolutionBytes": 11297,
+          "digest": "0c022f01e1fe2ad3c0197c4dd1ba1257cebb35e5b1394954a5386060ed9bc878"
+        },
+        {
+          "firstBank": "term_bank_153.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 815,
+          "deferredResolutionBytes": 10595,
+          "digest": "5730a6d333700edb542f57909dd3b684727357813c57cf53ff5e86cb2ec393d2"
+        },
+        {
+          "firstBank": "term_bank_157.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 859,
+          "deferredResolutionBytes": 11167,
+          "digest": "f44c0a4c396cc735da572acddc68c0b2c20f5f49c3788370d037ad9ad6d808b7"
+        },
+        {
+          "firstBank": "term_bank_161.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 862,
+          "deferredResolutionBytes": 11206,
+          "digest": "5069fbb4c696699f7ae781500489a60e470bdd4f1eac5f7bac59e2d9932fb0ce"
+        },
+        {
+          "firstBank": "term_bank_165.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 865,
+          "deferredResolutionBytes": 11245,
+          "digest": "44d6d893a62280d4f0f1aae1feacc91e400ffe5d67530a3f818da077085c5760"
+        },
+        {
+          "firstBank": "term_bank_169.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 857,
+          "deferredResolutionBytes": 11141,
+          "digest": "f82c7c6e2e636a0357b80e7c496a914a73fb0fc8f925f7d87597bdc1dc8abdd5"
+        },
+        {
+          "firstBank": "term_bank_173.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 907,
+          "deferredResolutionBytes": 11791,
+          "digest": "978fd1a500d7967ec8d3500c88f8caa0773575d0884fe5a565ce2c922cd2dd5a"
+        },
+        {
+          "firstBank": "term_bank_177.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 839,
+          "deferredResolutionBytes": 10907,
+          "digest": "78ef8bcc91d0893aafc78f4005b21556008663feb7d3e43908ef11dd987177b3"
+        },
+        {
+          "firstBank": "term_bank_181.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 963,
+          "deferredResolutionBytes": 12519,
+          "digest": "dabf5770c6a2670ebb117f69e0c4acda14dbc6bb7194d3a7004c0ac0ff7a8d38"
+        },
+        {
+          "firstBank": "term_bank_185.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 811,
+          "deferredResolutionBytes": 10543,
+          "digest": "efae2bd323350fbe96f8a59f39cbec064bc34a4ab0e02d9025795a9e25340c5a"
+        },
+        {
+          "firstBank": "term_bank_189.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 875,
+          "deferredResolutionBytes": 11375,
+          "digest": "35035ca0779e0324320420ab2c8dc160c5d784c0e55693dcccfc9fb4377ed55a"
+        },
+        {
+          "firstBank": "term_bank_193.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 850,
+          "deferredResolutionBytes": 11050,
+          "digest": "ff748506704ef4e223f99e3088479a19cc199538fb0c9f2bb05e2d78ae04fcd7"
+        },
+        {
+          "firstBank": "term_bank_197.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 913,
+          "deferredResolutionBytes": 11869,
+          "digest": "effabed9bb37fe3cfda36b9818c2828aea8e2f9b43658627c036ccb7ae7407de"
+        },
+        {
+          "firstBank": "term_bank_201.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 903,
+          "deferredResolutionBytes": 11739,
+          "digest": "9abdd8c6797b06c494a5235371a4801c9360138c02e0a87478d075f90b64f128"
+        },
+        {
+          "firstBank": "term_bank_205.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 924,
+          "deferredResolutionBytes": 12012,
+          "digest": "08993aaa53ca34b704222236a5ea75f8f79503a7015913f347c91fa5356846c5"
+        },
+        {
+          "firstBank": "term_bank_209.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 843,
+          "deferredResolutionBytes": 10959,
+          "digest": "8747f2af58bfed92dca2b509382102309da8e30ce94e09a88d540f2abc1ec2d7"
+        },
+        {
+          "firstBank": "term_bank_213.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 845,
+          "deferredResolutionBytes": 10985,
+          "digest": "7ac0ad2e8b2f80b884734101ea456dd7b82d3e907705c45d90aad5e5c561eb1a"
+        },
+        {
+          "firstBank": "term_bank_217.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 841,
+          "deferredResolutionBytes": 10933,
+          "digest": "6cef13c6322368b4afb53e3e601f0b01cd653aabc751888ec15cdec85e299eab"
+        },
+        {
+          "firstBank": "term_bank_221.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 817,
+          "deferredResolutionBytes": 10621,
+          "digest": "f94cadf7d7475c7c9560511e004b11c9eba0a4feb3b4bcb66428e1f31d8cc555"
+        },
+        {
+          "firstBank": "term_bank_225.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 851,
+          "deferredResolutionBytes": 11063,
+          "digest": "e052cc353c10a0062af97e6696463fc569df0c45161724974ddebfcf9e818be3"
+        },
+        {
+          "firstBank": "term_bank_229.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 861,
+          "deferredResolutionBytes": 11193,
+          "digest": "4ffb51c44ce8d72c85fb3e0eac16848377e8308755b1da38f22d2a951bf1a78c"
+        },
+        {
+          "firstBank": "term_bank_233.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 928,
+          "deferredResolutionBytes": 12064,
+          "digest": "4b897b72c88e9037bccc891755135cbdcd71bd040bf91b72bcbe092cbd21f390"
+        },
+        {
+          "firstBank": "term_bank_237.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 930,
+          "deferredResolutionBytes": 12090,
+          "digest": "8110e6774229d40eb17279466eef71c656ba691fd2cdb580861a235436efc7e2"
+        },
+        {
+          "firstBank": "term_bank_241.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 954,
+          "deferredResolutionBytes": 12402,
+          "digest": "beded3cc5be365281657f0e160160dd71f31a67b96b5ab2475556cd45f130b05"
+        },
+        {
+          "firstBank": "term_bank_245.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 877,
+          "deferredResolutionBytes": 11401,
+          "digest": "aa40a781b19121e09f37b2c3dfaed5ffc9460225f26a71e52520cbc8dfee5133"
+        },
+        {
+          "firstBank": "term_bank_249.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 886,
+          "deferredResolutionBytes": 11518,
+          "digest": "aa6ac38c465aa629d870d303a86b360a2fd486122025f62576a9f35b25fedd83"
+        },
+        {
+          "firstBank": "term_bank_253.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 855,
+          "deferredResolutionBytes": 11115,
+          "digest": "6d06649bfd7baadf777afebc39c31ec9a50d59480b341928a07ace21433329d0"
+        },
+        {
+          "firstBank": "term_bank_257.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 874,
+          "deferredResolutionBytes": 11362,
+          "digest": "256f9c8927c429601aaad3fbda69bdcf640025413a1656badd26b39e7b2f7e77"
+        },
+        {
+          "firstBank": "term_bank_261.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 832,
+          "deferredResolutionBytes": 10816,
+          "digest": "445c47d68095a1c76981b957c632b0eecbde54ea718fa9312d959b67664217c4"
+        },
+        {
+          "firstBank": "term_bank_265.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 843,
+          "deferredResolutionBytes": 10959,
+          "digest": "ff5848b9b3f78aaee5fe6f047dfb04f8c71324a3f97ec091675b8ac54e8cc3ee"
+        },
+        {
+          "firstBank": "term_bank_269.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 859,
+          "deferredResolutionBytes": 11167,
+          "digest": "80b7f54741fd461a6a3097c45eb27055256c324f5a6d145c10200f3a86448a05"
+        },
+        {
+          "firstBank": "term_bank_273.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 921,
+          "deferredResolutionBytes": 11973,
+          "digest": "a9204cc0d9648d755ef198442e7febd25601fc21272d7497645d1327d3da93fb"
+        },
+        {
+          "firstBank": "term_bank_277.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 841,
+          "deferredResolutionBytes": 10933,
+          "digest": "125069d432f49a8e541402b22675b020a4151051b0c8c4d868f1e34c7cf38443"
+        },
+        {
+          "firstBank": "term_bank_281.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 945,
+          "deferredResolutionBytes": 12285,
+          "digest": "d6e7f0c00d97d0931c02ac6cc8881c82845426bb0043b3cb5f68404c7203750b"
+        },
+        {
+          "firstBank": "term_bank_285.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 825,
+          "deferredResolutionBytes": 10725,
+          "digest": "d2f6a5aa2831dc1441ce58a42b51e810a1cbabf970ea937d93ebada78654fbe6"
+        },
+        {
+          "firstBank": "term_bank_289.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 821,
+          "deferredResolutionBytes": 10673,
+          "digest": "11c2c8136abb0f183bd0de1f4a1f15ffb8b7c5db0ed8d0beee71100f3eef95a0"
+        },
+        {
+          "firstBank": "term_bank_293.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 844,
+          "deferredResolutionBytes": 10972,
+          "digest": "51c8089e41649032589473cf619423460c04ab14adf909887433b9df4f56c100"
+        },
+        {
+          "firstBank": "term_bank_297.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 837,
+          "deferredResolutionBytes": 10881,
+          "digest": "45e7f2c2adb372483fc51b0ccfd5e66160016ad79dfb89a13e836d27caaa04c2"
+        },
+        {
+          "firstBank": "term_bank_301.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 821,
+          "deferredResolutionBytes": 10673,
+          "digest": "9c08f77e6b8e7e7c0f2d794790fe1955ce2bcd5ef8ca9d8649a1c46d28f85081"
+        },
+        {
+          "firstBank": "term_bank_305.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 889,
+          "deferredResolutionBytes": 11557,
+          "digest": "8028c0861ff4f873199ceaa98e7cf720d8146e2ae7ff0231c344398773455dbf"
+        },
+        {
+          "firstBank": "term_bank_309.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 808,
+          "deferredResolutionBytes": 10504,
+          "digest": "a283fef15da79473a15a615d453e6f81849ac22252986a3944d63843774ed9f5"
+        },
+        {
+          "firstBank": "term_bank_313.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 935,
+          "deferredResolutionBytes": 12155,
+          "digest": "74e62931263f491edd8c925637ce51574cc80dbb294bd9a7251427820b65647b"
+        },
+        {
+          "firstBank": "term_bank_317.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 888,
+          "deferredResolutionBytes": 11544,
+          "digest": "4fb269a4907622ab7ef61b380596cfb6f3528afd4464d6da8547f8d067590a33"
+        },
+        {
+          "firstBank": "term_bank_321.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 829,
+          "deferredResolutionBytes": 10777,
+          "digest": "293d0416a610a5575ed9a0681f59bd8174d21de52ad380f0a86e0f294a08f7e8"
+        },
+        {
+          "firstBank": "term_bank_325.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 896,
+          "deferredResolutionBytes": 11648,
+          "digest": "539affe7556c8ae0d65e2c3d05865101ce32f057c4b36ce5c3706a67a9494944"
+        },
+        {
+          "firstBank": "term_bank_329.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 886,
+          "deferredResolutionBytes": 11518,
+          "digest": "b57ce05977dddced452afcb45cdf2df40b0f8ff4915ac334a078dfe41a8beabd"
+        },
+        {
+          "firstBank": "term_bank_333.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 981,
+          "deferredResolutionBytes": 12753,
+          "digest": "f47aa36f0d7276cbe40591a0e83b76d4954e8e17b5cc941ba7ab65dc0e5d4dd1"
+        },
+        {
+          "firstBank": "term_bank_337.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 847,
+          "deferredResolutionBytes": 11011,
+          "digest": "7b6c41bbb534229ab35a4bcbb66e2f5c08d989ff23358cfd8d267df47cf574b0"
+        },
+        {
+          "firstBank": "term_bank_341.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 866,
+          "deferredResolutionBytes": 11258,
+          "digest": "9aee4ee718cd0c20091c35c071cdaffb3c460274c2dee5265fe797398ca8f6e8"
+        },
+        {
+          "firstBank": "term_bank_345.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 857,
+          "deferredResolutionBytes": 11141,
+          "digest": "97cc2f440ea1684fec300580df02242e70661671b415436d7239530f618ebb6a"
+        },
+        {
+          "firstBank": "term_bank_349.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 869,
+          "deferredResolutionBytes": 11297,
+          "digest": "7982050163072dcd70f1e215d2635669d27289bbae0e66883b1c3a9004443adc"
+        },
+        {
+          "firstBank": "term_bank_353.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 940,
+          "deferredResolutionBytes": 12220,
+          "digest": "d46f6f2bbe82754ebe5c911ac9042549edce4c09e1d4aff952317d9cc25d4665"
+        },
+        {
+          "firstBank": "term_bank_357.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 975,
+          "deferredResolutionBytes": 12675,
+          "digest": "929ab2337459a4b9bf804434da73d7419a95f0f26863e3b380766620c8fa0368"
+        },
+        {
+          "firstBank": "term_bank_361.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 866,
+          "deferredResolutionBytes": 11258,
+          "digest": "ba38bcdee728dcecefeff14d15b6a768790667e91fa97f0e608d29734cf4c736"
+        },
+        {
+          "firstBank": "term_bank_365.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 979,
+          "deferredResolutionBytes": 12727,
+          "digest": "02e73ffdd960f81d3e10fa486f0b6d66e49a832509de1ffa6b7f82891d455d02"
+        },
+        {
+          "firstBank": "term_bank_369.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 940,
+          "deferredResolutionBytes": 12220,
+          "digest": "8b938f4da48506aec4dd8431820d9434c4f7b95f17172af2832ec3f0294a9f6e"
+        },
+        {
+          "firstBank": "term_bank_373.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1014,
+          "deferredResolutionBytes": 13182,
+          "digest": "6e1fd792a4cd782baa1a915f5dcb19c344a0ca64ffe73ec531ca0fcda7d66b44"
+        },
+        {
+          "firstBank": "term_bank_377.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 927,
+          "deferredResolutionBytes": 12051,
+          "digest": "11ba5fe89e15eed85a6ff5fad8d8bef35477bbe2a9cb218d3a55cca9ccde0c1a"
+        },
+        {
+          "firstBank": "term_bank_381.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 995,
+          "deferredResolutionBytes": 12935,
+          "digest": "042fd74560b4e96b6bc268ff50e4b12edeef4e6c8c56258fda36cb72b368595c"
+        },
+        {
+          "firstBank": "term_bank_385.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 946,
+          "deferredResolutionBytes": 12298,
+          "digest": "11914739ca5e2705ae1fa739be064d25af99820adfe20abd6b03f1a6ff998760"
+        },
+        {
+          "firstBank": "term_bank_389.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 951,
+          "deferredResolutionBytes": 12363,
+          "digest": "b0d59512f7d9c3e834e00680fdb4c2e7cf0d778ec13d91ea7ba0ac0a65b968cf"
+        },
+        {
+          "firstBank": "term_bank_393.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1088,
+          "deferredResolutionBytes": 14144,
+          "digest": "4ad0ba00ef62c5474903f332d101c0b9d23e9f614b5aeda4c67aa64691782d33"
+        },
+        {
+          "firstBank": "term_bank_397.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 987,
+          "deferredResolutionBytes": 12831,
+          "digest": "39f69bfe36e7ff81b9d4769a3ea386d98a71e60279fda29ade8055c4e3a052f8"
+        },
+        {
+          "firstBank": "term_bank_401.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 953,
+          "deferredResolutionBytes": 12389,
+          "digest": "5a866553f72a7f8522a94d9ae3d0977d827d7363e4d50b03606ad3e05547e860"
+        },
+        {
+          "firstBank": "term_bank_405.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 978,
+          "deferredResolutionBytes": 12714,
+          "digest": "ee225e7a42db580b005e66b512776f1de722c7f2cc2fb3e3d842d880d77a847f"
+        },
+        {
+          "firstBank": "term_bank_409.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 923,
+          "deferredResolutionBytes": 11999,
+          "digest": "797d4f26348e943a7d1a97f942e7e371594400d61bcc9caae3fc81a085987261"
+        },
+        {
+          "firstBank": "term_bank_413.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1034,
+          "deferredResolutionBytes": 13442,
+          "digest": "a434704bdace2eeb594450c453e4ee863277efd3fa2b3df8a2313390b6eb8f5e"
+        },
+        {
+          "firstBank": "term_bank_417.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1026,
+          "deferredResolutionBytes": 13338,
+          "digest": "299e1bbfde78e3e2883b4a8275f7f827ce8b47310dd390c3d490daab87155ac7"
+        },
+        {
+          "firstBank": "term_bank_421.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1066,
+          "deferredResolutionBytes": 13858,
+          "digest": "06507d9ee543a417d11a688c63006bb2b5b8a3be5f4fcec2655e493951ed9097"
+        },
+        {
+          "firstBank": "term_bank_425.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1093,
+          "deferredResolutionBytes": 14209,
+          "digest": "3f0829ee045a72617e0f2e308502d993b35ab32fed90aa60dfa2afbcb32e7e53"
+        },
+        {
+          "firstBank": "term_bank_429.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1100,
+          "deferredResolutionBytes": 14300,
+          "digest": "8162739f5cbe291f7fd6253061f39984b4f0af90f39ce2a14b836f55b671bbcd"
+        },
+        {
+          "firstBank": "term_bank_433.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1061,
+          "deferredResolutionBytes": 13793,
+          "digest": "94591182c5633493cfe74669c2656478c690ef7dfc931cba7c8f86e942ee275b"
+        },
+        {
+          "firstBank": "term_bank_437.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 973,
+          "deferredResolutionBytes": 12649,
+          "digest": "aa121a603dbde43224a5859117d84fea65e338859e0fef5b8a822b269aac0c73"
+        },
+        {
+          "firstBank": "term_bank_441.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 988,
+          "deferredResolutionBytes": 12844,
+          "digest": "0ca3eb9ba36e385a3c73e3f82f6ee2a666d2c1b9d25942cf5f8922b50c9686a0"
+        },
+        {
+          "firstBank": "term_bank_445.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1054,
+          "deferredResolutionBytes": 13702,
+          "digest": "1a14ed48809ace3be300dcb97c4343987b8eb16132ec96fc669927b97add50ec"
+        },
+        {
+          "firstBank": "term_bank_449.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 962,
+          "deferredResolutionBytes": 12506,
+          "digest": "0a2f1b353e965b0626364197fecd9c036178d18df881b0120add9f7ca9922aa1"
+        },
+        {
+          "firstBank": "term_bank_453.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1095,
+          "deferredResolutionBytes": 14235,
+          "digest": "c14b1986c6bc0ff3e5858a7bb472d6a0dc48edd04b49ab86fac5f63e3d08850d"
+        },
+        {
+          "firstBank": "term_bank_457.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 971,
+          "deferredResolutionBytes": 12623,
+          "digest": "1227431268948d9e09b2f5c9d4808d50fd01136c2cdef20c9538edf8804d9d00"
+        },
+        {
+          "firstBank": "term_bank_461.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 988,
+          "deferredResolutionBytes": 12844,
+          "digest": "a8fcb5dff76211545b6e5c74b2693199c44db5ec5cd303f2eaf7a8b58ae31ade"
+        },
+        {
+          "firstBank": "term_bank_465.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 915,
+          "deferredResolutionBytes": 11895,
+          "digest": "dcd0e02000e6b478ddb197503ad21ed4b2dafcb48f39e729c734afa43b955fd0"
+        },
+        {
+          "firstBank": "term_bank_469.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 936,
+          "deferredResolutionBytes": 12168,
+          "digest": "8e8d3e3fe3669a04da252f18b0edc17107ba322e29eafd6a0b7199ff8d8ed30c"
+        },
+        {
+          "firstBank": "term_bank_473.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1025,
+          "deferredResolutionBytes": 13325,
+          "digest": "36893631f5a20e8e40361b32006008f9313a7a830454c5a38bad10d6595e979d"
+        },
+        {
+          "firstBank": "term_bank_477.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 995,
+          "deferredResolutionBytes": 12935,
+          "digest": "e3953e3dd05757e3bdf1b558f4491922ca5f0a1ba7d172ccd56885657e6105ef"
+        },
+        {
+          "firstBank": "term_bank_481.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1051,
+          "deferredResolutionBytes": 13663,
+          "digest": "1e7b199650c09033932ee01b4ea74856c0c6f9fde039712b4604a0b3a8b1d56f"
+        },
+        {
+          "firstBank": "term_bank_485.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 972,
+          "deferredResolutionBytes": 12636,
+          "digest": "c971f19986e97fcdc1ce5dd28746d9130554431415f3d4a4d6ae2bd4b13ce9cb"
+        },
+        {
+          "firstBank": "term_bank_489.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1259,
+          "deferredResolutionBytes": 16367,
+          "digest": "a93dfb824567139d9960d486434d4978553622ec9a070c4ce43f846c5fbeb4c5"
+        },
+        {
+          "firstBank": "term_bank_493.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1002,
+          "deferredResolutionBytes": 13026,
+          "digest": "68e7eb0a183e32f25058172163e91efdb680c8367d9a3ad56bbf503bd173d06e"
+        },
+        {
+          "firstBank": "term_bank_497.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 915,
+          "deferredResolutionBytes": 11895,
+          "digest": "8086b0ec56c2256fedd786ac4c7edeae31bb08758e67b53619b73da9a1efae95"
+        },
+        {
+          "firstBank": "term_bank_501.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 926,
+          "deferredResolutionBytes": 12038,
+          "digest": "dd2ae2f89d5e8e1b4ef393591ef7ac993c2881b2bd798ef4fb4b24598b5fbc4d"
+        },
+        {
+          "firstBank": "term_bank_505.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 929,
+          "deferredResolutionBytes": 12077,
+          "digest": "9fd8a598fdd29f2cd365e707968d30e26bf9f4d1db02692b335569471d3240dd"
+        },
+        {
+          "firstBank": "term_bank_509.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 911,
+          "deferredResolutionBytes": 11843,
+          "digest": "1ed7ecc726e2d125ff1b18f428a3866ec1cef28197810afdfdd052f78817bdd6"
+        },
+        {
+          "firstBank": "term_bank_513.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 916,
+          "deferredResolutionBytes": 11908,
+          "digest": "4bbf456881ce26cabaec0f3cc206ae75ce8513784a1acb1c5ef0ab3c640a3189"
+        },
+        {
+          "firstBank": "term_bank_517.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1030,
+          "deferredResolutionBytes": 13390,
+          "digest": "33117f1408aeb10a7500308d6ccdebe01b6f010f6b64822bfdf1aa17c6ff226e"
+        },
+        {
+          "firstBank": "term_bank_521.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 862,
+          "deferredResolutionBytes": 11206,
+          "digest": "d2bea15306817e54bbea4a38efd83bcc9aff570868295bd8fc83c6120fbb434b"
+        },
+        {
+          "firstBank": "term_bank_525.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 961,
+          "deferredResolutionBytes": 12493,
+          "digest": "06739a761dd75cf1d1a23977800b6c0ff3859d44fb454460d4c5f8cd89d93d92"
+        },
+        {
+          "firstBank": "term_bank_529.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 938,
+          "deferredResolutionBytes": 12194,
+          "digest": "fdd4803474b2b5cae8656f91150d4ef18228d8ba3fe4d734787fee80388a8d1f"
+        },
+        {
+          "firstBank": "term_bank_533.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1041,
+          "deferredResolutionBytes": 13533,
+          "digest": "e6bd7fa0e6c527e7d9fb26fe2d0ef9340af118895f1f563c5cce7830c99a7d09"
+        },
+        {
+          "firstBank": "term_bank_537.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1011,
+          "deferredResolutionBytes": 13143,
+          "digest": "d697e02540443d9491461ebcd6b06a20977d02906ccfb5555a65cd9aaf80fa88"
+        },
+        {
+          "firstBank": "term_bank_541.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1033,
+          "deferredResolutionBytes": 13429,
+          "digest": "90891f88987ad160d9b97c6167420d0cfba714b9853f98e9de9c05d4b963fb6d"
+        },
+        {
+          "firstBank": "term_bank_545.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1013,
+          "deferredResolutionBytes": 13169,
+          "digest": "092938b15915edd3384fc606975b013bf0accbf80c4b99388ae7d63e82e35c2d"
+        },
+        {
+          "firstBank": "term_bank_549.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1045,
+          "deferredResolutionBytes": 13585,
+          "digest": "6af06c62a01a55dd16360a161990093d1aa0276299fcc5371e91fee8dbc56a30"
+        },
+        {
+          "firstBank": "term_bank_553.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 961,
+          "deferredResolutionBytes": 12493,
+          "digest": "0798b4e10db3da038d69171244bc84bbcce69e491a528f429aea9e1de864371b"
+        },
+        {
+          "firstBank": "term_bank_557.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1150,
+          "deferredResolutionBytes": 14950,
+          "digest": "4f10362d32cc118ae24fe39bfe7a03319110f6a152c56ba75552fea80c5abcc9"
+        },
+        {
+          "firstBank": "term_bank_561.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 982,
+          "deferredResolutionBytes": 12766,
+          "digest": "d00699698503fc9bb463a121309ec30fa4ea0b5773bd1b7d364a71859f1b4c86"
+        },
+        {
+          "firstBank": "term_bank_565.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1144,
+          "deferredResolutionBytes": 14872,
+          "digest": "7b5e1a0ce319c3ceffec685cec426adef2a54ae060f1955ad6f581661f990a89"
+        },
+        {
+          "firstBank": "term_bank_569.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1176,
+          "deferredResolutionBytes": 15288,
+          "digest": "b852e7be65a7cb8d4c85109a553cc0cc205baa843113be8d6937b457f7bd1031"
+        },
+        {
+          "firstBank": "term_bank_573.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1145,
+          "deferredResolutionBytes": 14885,
+          "digest": "f59cbdd0ea13d6c985f072eb24b2bc902c333e5f2a99765c476e8452afb67ab7"
+        },
+        {
+          "firstBank": "term_bank_577.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1173,
+          "deferredResolutionBytes": 15249,
+          "digest": "7f6770bbdab3435f8da4127625132a271fc3ca7b4c87e1319fb3c2d36eb23851"
+        },
+        {
+          "firstBank": "term_bank_581.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1125,
+          "deferredResolutionBytes": 14625,
+          "digest": "3c6e581038282d9c71a0cf898804e3ffc211f772b8309e5d7a456ae386f02365"
+        },
+        {
+          "firstBank": "term_bank_585.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1183,
+          "deferredResolutionBytes": 15379,
+          "digest": "0b860e8a18da7e4706338bd8e89bcc69e75237afd8344d001a8f7e2aa2d222ff"
+        },
+        {
+          "firstBank": "term_bank_589.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1183,
+          "deferredResolutionBytes": 15379,
+          "digest": "d0bdd6feccc21ede0625aca7088a3edac85b3d00627ae3884950e1f3247e61db"
+        },
+        {
+          "firstBank": "term_bank_593.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1050,
+          "deferredResolutionBytes": 13650,
+          "digest": "87e2502f0e551d6f0b5c436002aef4537d06d04133673000d5357495c33a3d4d"
+        },
+        {
+          "firstBank": "term_bank_597.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1073,
+          "deferredResolutionBytes": 13949,
+          "digest": "dcaa023d53914521d447f49d2fe7cf70b71198ba1e2bba51ca2a270c65a57467"
+        },
+        {
+          "firstBank": "term_bank_601.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 960,
+          "deferredResolutionBytes": 12480,
+          "digest": "a9df9dac703ae3e5e112512637aeabec60e16fc8d2f870735272a2fc617798ec"
+        },
+        {
+          "firstBank": "term_bank_605.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1099,
+          "deferredResolutionBytes": 14287,
+          "digest": "7efb363ea6f21ddcbf0a7cd04726104fb950a59c796dd71d2958162558e23d29"
+        },
+        {
+          "firstBank": "term_bank_609.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1120,
+          "deferredResolutionBytes": 14560,
+          "digest": "1dfd87b3c8fdf18617224db833760d3d1a8282499656a6cb7fb0442939ce03ed"
+        },
+        {
+          "firstBank": "term_bank_613.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1164,
+          "deferredResolutionBytes": 15132,
+          "digest": "3f95e06f4d15da69143b752e7d5cfaab0aca15877b7bd1362eca035b75a2a82a"
+        },
+        {
+          "firstBank": "term_bank_617.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1226,
+          "deferredResolutionBytes": 15938,
+          "digest": "82f539e91b6767eeb5ff1978573063b2277192eb1fffdf129e41cafcc782caf9"
+        },
+        {
+          "firstBank": "term_bank_621.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1115,
+          "deferredResolutionBytes": 14495,
+          "digest": "8ac01934e17927c4cf8638b8b0444d41808efc0571f2d0d9bc6cf9ba25b2e28b"
+        },
+        {
+          "firstBank": "term_bank_625.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1028,
+          "deferredResolutionBytes": 13364,
+          "digest": "131a65567e84c7c81e3066812d92a3cd3bb9e7da416639dfda10c0a6437f59f2"
+        },
+        {
+          "firstBank": "term_bank_629.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1143,
+          "deferredResolutionBytes": 14859,
+          "digest": "516b7a146a4d225022b87d97b80fa38cee56df534458f44b3a1dad6d0f46dd89"
+        },
+        {
+          "firstBank": "term_bank_633.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1253,
+          "deferredResolutionBytes": 16289,
+          "digest": "6090ca5c6f2945527f9ed71afbfd5d48b71997e33ad2af26b7aa987eed92ba04"
+        },
+        {
+          "firstBank": "term_bank_637.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1117,
+          "deferredResolutionBytes": 14521,
+          "digest": "4c73ba19350448f541ef0009136c86b11eb68c091b17488fd546ca1727485d78"
+        },
+        {
+          "firstBank": "term_bank_641.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1133,
+          "deferredResolutionBytes": 14729,
+          "digest": "46a5dfd1a7a90701ae6cc6b1860ec594d7c16aac3284999b9dca7d9c96500332"
+        },
+        {
+          "firstBank": "term_bank_645.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1166,
+          "deferredResolutionBytes": 15158,
+          "digest": "fdf91d394b7ab44c06978ca2f16d2edd2cd99f36d5eab87a20ebcc09d84a12e5"
+        },
+        {
+          "firstBank": "term_bank_649.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1160,
+          "deferredResolutionBytes": 15080,
+          "digest": "0671175d439a31263e6ff591b0c24f8f7b42292344a256f41f4c8b17db040f62"
+        },
+        {
+          "firstBank": "term_bank_653.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1169,
+          "deferredResolutionBytes": 15197,
+          "digest": "9711065e694ce2aba037ce40c86007523abd08bc910c6b61c9cf8864d2b8bfa3"
+        },
+        {
+          "firstBank": "term_bank_657.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1095,
+          "deferredResolutionBytes": 14235,
+          "digest": "d75f4e1b88046e475c34911d0f9e45bfcac593a9540364e7ca8f9fcdd6f365ce"
+        },
+        {
+          "firstBank": "term_bank_661.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 1146,
+          "deferredResolutionBytes": 14898,
+          "digest": "ad983063d83e9fbc19c72ce29c4a0a4b242deb971b1f6aa5e2c0549a25242181"
+        },
+        {
+          "firstBank": "term_bank_665.json",
+          "banks": 1,
+          "rows": 8310,
+          "uniqueContents": 295,
+          "deferredResolutionBytes": 3835,
+          "digest": "971813e202dbe0f8bda9bf2e8904c039d74ac16ecf15780187dc725cdd4005af"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "artifactId": 15140627503,
+  "runId": 45862232094,
+  "jobId": 140055923592,
+  "observation": "A1",
+  "productRevision": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "browserReportStatus": "success",
+  "verifierResult": "failed: Import experiment receipt mismatch: parserExperiments",
+  "candidateExecuted": false,
+  "cause": "Stale 512 MiB verifier expectation; production importer correctly requires 1 GiB.",
+  "rawReportSha256": "027b3adb9b5f73a1aa2f9f43783c5cba80e4bc4d1efaea77c398ac77bde150a0",
+  "completedProductChecks": {
+    "termRows": 436555,
+    "probeCount": 12,
+    "restart": {
+      "title": "Jitendex.org [2026-10-03]",
+      "revision": "2026.10.03.0",
+      "termRows": 436555,
+      "mediaFiles": 236,
+      "contentReadable": true,
+      "probeCount": 12
+    },
+    "media": {
+      "mode": "all",
+      "totalFiles": 236,
+      "totalBytes": 4992155,
+      "files": 236,
+      "bytes": 4992155,
+      "sha256": "74aeb87663f4b89600affca40005fab432058227cd3fcb31c9f74d19a72a0402"
+    },
+    "lookupObservations": 72
+  },
+  "classification": "Closed #935 alternative only; no candidate observation and no comparison timing used"
+}

@@ -1,0 +1,54 @@
+{
+  "artifact": "/workspace/scratch/9175611d1a4c/allocation-ci-audit/allocation-scratch-jmdict-9175.zip",
+  "artifactSha256": "21f4ac5c3fc9718306eb2e9bbf430d8a179d4da6a64b4b82e827e2263aa41c35",
+  "kind": "scratch",
+  "dictionary": "jmdict",
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidate": "400d4375a89cdf93805cc9566da2068a741dc059",
+  "browserVersion": "153.0.8010.12",
+  "matchedSemanticReceipts": 4,
+  "termRows": 528299,
+  "mediaFiles": 0,
+  "mediaBytes": 0,
+  "packageSha256": {
+    "A": "435332d9b866d4a889cff544e666c642e8527ae562817aac2043c5db8ed58a6b",
+    "B": "fa5b8b023114df8f75b9588b0a77c96a69261f25970dacd871d33f748cdaa300"
+  },
+  "changedEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-plan-resolution.js"
+  ],
+  "observations": [
+    {
+      "id": "A1",
+      "totalImportMs": 901.7999999999302,
+      "workerImportMs": 873.0999999999767,
+      "storageBytes": 43520477
+    },
+    {
+      "id": "B1",
+      "totalImportMs": 923.4000000000233,
+      "workerImportMs": 895.3999999999069,
+      "storageBytes": 43520477
+    },
+    {
+      "id": "B2",
+      "totalImportMs": 851.0999999999767,
+      "workerImportMs": 824.5,
+      "storageBytes": 43520477
+    },
+    {
+      "id": "A2",
+      "totalImportMs": 879.5,
+      "workerImportMs": 854,
+      "storageBytes": 43520477
+    }
+  ],
+  "pairedChangePercent": [
+    2.395209580848845,
+    -3.2291074474159465
+  ],
+  "medianPairedChangePercent": -0.41694893328355076,
+  "scope": "One-host four-import screen; no whole-import speed or peak-memory qualification"
+}

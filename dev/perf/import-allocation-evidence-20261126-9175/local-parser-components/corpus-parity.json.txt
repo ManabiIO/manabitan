@@ -1,0 +1,129 @@
+{
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "description": "Fixed groups of four compressed banks through actual native inflate/parser/copy functions. Component output parity and cumulative deferred resolution bytes; not whole-import timing or peak memory.",
+  "corpora": [
+    {
+      "id": "jmdict",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "rows": 528299,
+      "uniqueContents": 366253,
+      "deferredResolutionBytes": 4761289,
+      "maxDeferredGroupBytes": 421772,
+      "banks": 53,
+      "groups": [
+        {
+          "firstBank": "term_bank_1.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 27360,
+          "deferredResolutionBytes": 355680,
+          "digest": "caa79e3de5a97d6673ef60daa84fe595b3ddbcfb8ec576732c5d6c6264e421e3"
+        },
+        {
+          "firstBank": "term_bank_5.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 32233,
+          "deferredResolutionBytes": 419029,
+          "digest": "3387b1e62a3f807edcd55e9b80f22ce468cb45137ed14526950f755163c4d121"
+        },
+        {
+          "firstBank": "term_bank_9.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 32444,
+          "deferredResolutionBytes": 421772,
+          "digest": "b0529e79e9dae8303dc07b018a89834d69f819a309cb297a0c1fa45f16805520"
+        },
+        {
+          "firstBank": "term_bank_13.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 29710,
+          "deferredResolutionBytes": 386230,
+          "digest": "439ba4cc998be05cd477ad79bad06daa04f1be56c55363bb52492606904e5f68"
+        },
+        {
+          "firstBank": "term_bank_17.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 28519,
+          "deferredResolutionBytes": 370747,
+          "digest": "b300e007726023ed70c982ec804e40a04b8061aee6f79a43b2f98e5451847dbc"
+        },
+        {
+          "firstBank": "term_bank_21.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 28179,
+          "deferredResolutionBytes": 366327,
+          "digest": "dcfcccc23fb16f9baadf54dc7a50dfdfff2784949c4fa965d57d8228e93978f6"
+        },
+        {
+          "firstBank": "term_bank_25.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 25783,
+          "deferredResolutionBytes": 335179,
+          "digest": "74e90d15967c86d003a61935955e261c7ef32b8c6c389069eaac4c3967026ed5"
+        },
+        {
+          "firstBank": "term_bank_29.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 23773,
+          "deferredResolutionBytes": 309049,
+          "digest": "0921876e9e06511f4e74184c51339ba874d242c3487abe9d5832ae15721f9b2e"
+        },
+        {
+          "firstBank": "term_bank_33.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 26172,
+          "deferredResolutionBytes": 340236,
+          "digest": "a00b40ac6bbd229a21285353b74155850ba9b6b8870142e926e26603c03deb43"
+        },
+        {
+          "firstBank": "term_bank_37.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 25774,
+          "deferredResolutionBytes": 335062,
+          "digest": "90ab6906d6d15a88e3d0f7b5c17a5ef11c7e70226d3ff43a333854fb10c195b5"
+        },
+        {
+          "firstBank": "term_bank_41.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 25109,
+          "deferredResolutionBytes": 326417,
+          "digest": "8594508c0ba33067de7bb2f76b840f15cdbc4413b8c5fe1d440125ed537e8322"
+        },
+        {
+          "firstBank": "term_bank_45.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 26102,
+          "deferredResolutionBytes": 339326,
+          "digest": "f40f84679ea90b787a783943f92ef77821d61f8c99db3d8701da9145fb746048"
+        },
+        {
+          "firstBank": "term_bank_49.json",
+          "banks": 4,
+          "rows": 40000,
+          "uniqueContents": 27832,
+          "deferredResolutionBytes": 361816,
+          "digest": "d7ef7e1fcd8aa1ba633390e4bb58ba2565692e014e9bf709a027fbe992b9e0a0"
+        },
+        {
+          "firstBank": "term_bank_53.json",
+          "banks": 1,
+          "rows": 8299,
+          "uniqueContents": 7263,
+          "deferredResolutionBytes": 94419,
+          "digest": "b31069c87d40927c37aaed6ab8bbec51915ca89829d033e27be281d96dd6df2c"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,462 @@
+{
+  "title": "JMdict [2026-11-22]",
+  "revision": "JMdict.2026-11-22",
+  "termRows": 528299,
+  "probeTerms": [
+    "ヽ",
+    "タカリ",
+    "アケイシャ",
+    "エープリル・フール",
+    "理にかなう",
+    "インターロック回路",
+    "緊急電話",
+    "若しもの事",
+    "タワレコ",
+    "全国信連協会",
+    "ニルスのふしぎな旅",
+    "アテン"
+  ],
+  "outputDigestSha256": "e88726c0d84ad9f6e9b7cf4455783fee169a41bf0cbfe3252386cec59791117d",
+  "media": {
+    "mode": "all",
+    "totalFiles": 0,
+    "totalBytes": 0,
+    "files": 0,
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "lookup": [
+    {
+      "pass": 0,
+      "term": "アケイシャ",
+      "results": 1,
+      "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08"
+    },
+    {
+      "pass": 0,
+      "term": "アテン",
+      "results": 1,
+      "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf"
+    },
+    {
+      "pass": 0,
+      "term": "インターロック回路",
+      "results": 1,
+      "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94"
+    },
+    {
+      "pass": 0,
+      "term": "エープリル・フール",
+      "results": 1,
+      "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f"
+    },
+    {
+      "pass": 0,
+      "term": "タカリ",
+      "results": 1,
+      "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f"
+    },
+    {
+      "pass": 0,
+      "term": "タワレコ",
+      "results": 1,
+      "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18"
+    },
+    {
+      "pass": 0,
+      "term": "ニルスのふしぎな旅",
+      "results": 1,
+      "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711"
+    },
+    {
+      "pass": 0,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c"
+    },
+    {
+      "pass": 0,
+      "term": "全国信連協会",
+      "results": 1,
+      "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef"
+    },
+    {
+      "pass": 0,
+      "term": "理にかなう",
+      "results": 1,
+      "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d"
+    },
+    {
+      "pass": 0,
+      "term": "緊急電話",
+      "results": 1,
+      "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86"
+    },
+    {
+      "pass": 0,
+      "term": "若しもの事",
+      "results": 1,
+      "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c"
+    },
+    {
+      "pass": 1,
+      "term": "アケイシャ",
+      "results": 1,
+      "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08"
+    },
+    {
+      "pass": 1,
+      "term": "アテン",
+      "results": 1,
+      "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf"
+    },
+    {
+      "pass": 1,
+      "term": "インターロック回路",
+      "results": 1,
+      "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94"
+    },
+    {
+      "pass": 1,
+      "term": "エープリル・フール",
+      "results": 1,
+      "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f"
+    },
+    {
+      "pass": 1,
+      "term": "タカリ",
+      "results": 1,
+      "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f"
+    },
+    {
+      "pass": 1,
+      "term": "タワレコ",
+      "results": 1,
+      "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18"
+    },
+    {
+      "pass": 1,
+      "term": "ニルスのふしぎな旅",
+      "results": 1,
+      "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711"
+    },
+    {
+      "pass": 1,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c"
+    },
+    {
+      "pass": 1,
+      "term": "全国信連協会",
+      "results": 1,
+      "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef"
+    },
+    {
+      "pass": 1,
+      "term": "理にかなう",
+      "results": 1,
+      "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d"
+    },
+    {
+      "pass": 1,
+      "term": "緊急電話",
+      "results": 1,
+      "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86"
+    },
+    {
+      "pass": 1,
+      "term": "若しもの事",
+      "results": 1,
+      "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c"
+    },
+    {
+      "pass": 2,
+      "term": "アケイシャ",
+      "results": 1,
+      "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08"
+    },
+    {
+      "pass": 2,
+      "term": "アテン",
+      "results": 1,
+      "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf"
+    },
+    {
+      "pass": 2,
+      "term": "インターロック回路",
+      "results": 1,
+      "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94"
+    },
+    {
+      "pass": 2,
+      "term": "エープリル・フール",
+      "results": 1,
+      "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f"
+    },
+    {
+      "pass": 2,
+      "term": "タカリ",
+      "results": 1,
+      "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f"
+    },
+    {
+      "pass": 2,
+      "term": "タワレコ",
+      "results": 1,
+      "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18"
+    },
+    {
+      "pass": 2,
+      "term": "ニルスのふしぎな旅",
+      "results": 1,
+      "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711"
+    },
+    {
+      "pass": 2,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c"
+    },
+    {
+      "pass": 2,
+      "term": "全国信連協会",
+      "results": 1,
+      "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef"
+    },
+    {
+      "pass": 2,
+      "term": "理にかなう",
+      "results": 1,
+      "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d"
+    },
+    {
+      "pass": 2,
+      "term": "緊急電話",
+      "results": 1,
+      "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86"
+    },
+    {
+      "pass": 2,
+      "term": "若しもの事",
+      "results": 1,
+      "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c"
+    },
+    {
+      "pass": 3,
+      "term": "アケイシャ",
+      "results": 1,
+      "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08"
+    },
+    {
+      "pass": 3,
+      "term": "アテン",
+      "results": 1,
+      "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf"
+    },
+    {
+      "pass": 3,
+      "term": "インターロック回路",
+      "results": 1,
+      "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94"
+    },
+    {
+      "pass": 3,
+      "term": "エープリル・フール",
+      "results": 1,
+      "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f"
+    },
+    {
+      "pass": 3,
+      "term": "タカリ",
+      "results": 1,
+      "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f"
+    },
+    {
+      "pass": 3,
+      "term": "タワレコ",
+      "results": 1,
+      "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18"
+    },
+    {
+      "pass": 3,
+      "term": "ニルスのふしぎな旅",
+      "results": 1,
+      "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711"
+    },
+    {
+      "pass": 3,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c"
+    },
+    {
+      "pass": 3,
+      "term": "全国信連協会",
+      "results": 1,
+      "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef"
+    },
+    {
+      "pass": 3,
+      "term": "理にかなう",
+      "results": 1,
+      "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d"
+    },
+    {
+      "pass": 3,
+      "term": "緊急電話",
+      "results": 1,
+      "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86"
+    },
+    {
+      "pass": 3,
+      "term": "若しもの事",
+      "results": 1,
+      "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c"
+    },
+    {
+      "pass": 4,
+      "term": "アケイシャ",
+      "results": 1,
+      "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08"
+    },
+    {
+      "pass": 4,
+      "term": "アテン",
+      "results": 1,
+      "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf"
+    },
+    {
+      "pass": 4,
+      "term": "インターロック回路",
+      "results": 1,
+      "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94"
+    },
+    {
+      "pass": 4,
+      "term": "エープリル・フール",
+      "results": 1,
+      "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f"
+    },
+    {
+      "pass": 4,
+      "term": "タカリ",
+      "results": 1,
+      "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f"
+    },
+    {
+      "pass": 4,
+      "term": "タワレコ",
+      "results": 1,
+      "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18"
+    },
+    {
+      "pass": 4,
+      "term": "ニルスのふしぎな旅",
+      "results": 1,
+      "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711"
+    },
+    {
+      "pass": 4,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c"
+    },
+    {
+      "pass": 4,
+      "term": "全国信連協会",
+      "results": 1,
+      "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef"
+    },
+    {
+      "pass": 4,
+      "term": "理にかなう",
+      "results": 1,
+      "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d"
+    },
+    {
+      "pass": 4,
+      "term": "緊急電話",
+      "results": 1,
+      "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86"
+    },
+    {
+      "pass": 4,
+      "term": "若しもの事",
+      "results": 1,
+      "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c"
+    },
+    {
+      "pass": 5,
+      "term": "アケイシャ",
+      "results": 1,
+      "sha256": "b1cf63518ec83092e22d8469a37e8dcf0b267302c539fbb2d2fd0f8ed51d7d08"
+    },
+    {
+      "pass": 5,
+      "term": "アテン",
+      "results": 1,
+      "sha256": "09c48edfc4957c994b69e82ae3d344fd4bc7550c11e5a3d533b248dadfe8eedf"
+    },
+    {
+      "pass": 5,
+      "term": "インターロック回路",
+      "results": 1,
+      "sha256": "fd9e3ab5b9dbf46b817e89359cbaf827f1fe8ed9563e375dd6852c9777db5a94"
+    },
+    {
+      "pass": 5,
+      "term": "エープリル・フール",
+      "results": 1,
+      "sha256": "2c295dc0f4fb42df5fa6f33df50720291d0aad7efc99a7b8d415db0ad806d47f"
+    },
+    {
+      "pass": 5,
+      "term": "タカリ",
+      "results": 1,
+      "sha256": "19183c5345899d69e91b6bde02ab93fe3d85126c7ba3891a7028d5a049941a6f"
+    },
+    {
+      "pass": 5,
+      "term": "タワレコ",
+      "results": 1,
+      "sha256": "c4f7bd542799a6bc281186946420c4383d5c78cb0b9b4a6c90e8f31b96f6de18"
+    },
+    {
+      "pass": 5,
+      "term": "ニルスのふしぎな旅",
+      "results": 1,
+      "sha256": "35a4636564cc34d3e8eee2d1b95c84255ec55d5e32d519d8245ffab25be3a711"
+    },
+    {
+      "pass": 5,
+      "term": "ヽ",
+      "results": 1,
+      "sha256": "c7857e1c333203076931309ebe0de8a00f0f538c317189124ca759637d9a533c"
+    },
+    {
+      "pass": 5,
+      "term": "全国信連協会",
+      "results": 1,
+      "sha256": "c30416bed6af3b6241dad23508aa8efec1ff406317934e3d8e53b30622be81ef"
+    },
+    {
+      "pass": 5,
+      "term": "理にかなう",
+      "results": 1,
+      "sha256": "66ee786b05ddf0d5e0d82ba75c0a75c48d4a346bf983d2772051fc8b91be998d"
+    },
+    {
+      "pass": 5,
+      "term": "緊急電話",
+      "results": 1,
+      "sha256": "95b78dd122f94b321387b945ee67c363db2820f46d4dbd975d636df4dffd5f86"
+    },
+    {
+      "pass": 5,
+      "term": "若しもの事",
+      "results": 1,
+      "sha256": "671d54a90c5cc6c3cc1c2e178bff79ec96d9098b7ac8154b73f94ca89761a42c"
+    }
+  ]
+}

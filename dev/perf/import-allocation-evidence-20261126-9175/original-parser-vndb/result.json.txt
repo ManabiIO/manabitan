@@ -1,0 +1,284 @@
+{
+  "complete": true,
+  "matchedSemanticReceipts": 4,
+  "pairedChangePercent": [
+    -44.909617340950014,
+    12.313556837064276
+  ],
+  "medianPairedChangePercent": -16.29803025194287,
+  "scope": "Four-import screen only; no established whole-import speedup or peak-memory reduction",
+  "observations": [
+    {
+      "id": "A1",
+      "totalImportMs": 8945.300000000003,
+      "workerImportMs": 8917.900000000009,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 609176779,
+        "files": [
+          {
+            "path": "manabitan-dictionary-media-v1/e31f818b-0eb8-4180-b08a-555f2b3477f8.bin",
+            "bytes": 199563210
+          },
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/a4tzo82bhtm",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/bfg421kl7lp",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/h2i38897154",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/q8jtk3j8nd",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/rfgq7vaie5d",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/uapy42clixs",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/wsqoqz3adz",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/zymdv7hrvfm",
+            "bytes": 151552
+          }
+        ]
+      }
+    },
+    {
+      "id": "B1",
+      "totalImportMs": 4928,
+      "workerImportMs": 4902.299999999988,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 609176779,
+        "files": [
+          {
+            "path": "manabitan-dictionary-media-v1/5f870e7e-1030-4806-b0ff-d8f5e9ab0e9b.bin",
+            "bytes": 199563210
+          },
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/18t9w772klr",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/4t3rg6a3y0u",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/70w79jhuup9",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/f3ko8iab9fw",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/lkv5wm3ohe",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/qou3wo0slq7",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/swni2yfzfp",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/xyy7tvh1sm",
+            "bytes": 151552
+          }
+        ]
+      }
+    },
+    {
+      "id": "B2",
+      "totalImportMs": 5745.400000000023,
+      "workerImportMs": 5717.79999999993,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 609176779,
+        "files": [
+          {
+            "path": "manabitan-dictionary-media-v1/9bfa968b-16f3-4ef2-9e96-7c281863a787.bin",
+            "bytes": 199563210
+          },
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/03fs8fhb88wi",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/03t4fp3mttfg",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2519nzulj5x",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/56y3mwus9wr",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/5i6qb1s9cx",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/6zz5vcv4mfe",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/dziba55azcs",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/lfl9dgp6omm",
+            "bytes": 151552
+          }
+        ]
+      }
+    },
+    {
+      "id": "A2",
+      "totalImportMs": 5115.5,
+      "workerImportMs": 5091,
+      "browserVersion": "153.0.8010.12",
+      "storage": {
+        "kind": "OPFS logical file sizes after restart and verification",
+        "bytes": 609176779,
+        "files": [
+          {
+            "path": "manabitan-dictionary-media-v1/b0c98ed0-dc0b-488a-9731-e4b2598f012d.bin",
+            "bytes": 199563210
+          },
+          {
+            "path": "manabitan-term-content.bin",
+            "bytes": 7533449
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr",
+            "bytes": 38
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-block-v2.mbtr.mbti",
+            "bytes": 399513708
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr",
+            "bytes": 26
+          },
+          {
+            "path": "manabitan-term-records/dict-28|VNDB%20Characters%20by%20Beeraw-v6.mbtr.mbti",
+            "bytes": 2386124
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/2gzikai9e8n",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/4w4cfu6hx3a",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/9u1rg8x81fw",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/aahguuzvzvo",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/bwn5goafc",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/fwdylugryam",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/mban0mnue8",
+            "bytes": 4096
+          },
+          {
+            "path": "manabitan/sqlite-sahpool-v1/.opaque/zji9pbg35s8",
+            "bytes": 151552
+          }
+        ]
+      }
+    }
+  ]
+}

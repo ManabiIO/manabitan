@@ -1,0 +1,95 @@
+import hashlib
+import json
+import re
+import subprocess
+from pathlib import Path
+
+repo = Path('/workspace/scratch/9175611d1a4c/manabitan-parser')
+folder = Path('/workspace/scratch/9175611d1a4c/parser-study/vndb-hosted')
+baseline_ref = '0143e9596cd8f790d5e166d4ba6a2425fbc57f14'
+candidate_ref = '42256a11e73bb64cf925f118d3e375a223954813'
+published_ref = '01d0eb7164385828c97efae1b319ccc1c4fe92f9'
+published_tree = '34e19a22eef45ea552bc4696873f1ae50ae398f2'
+
+def source_bytes(ref, name):
+    return subprocess.check_output(['git', 'show', f'{ref}:{name}'], cwd=repo)
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+assert subprocess.check_output(['git', 'rev-parse', f'{candidate_ref}^{{tree}}'], cwd=repo, text=True).strip() == published_tree
+provenance = json.loads((folder / 'provenance.json').read_text())
+assert provenance['node'] == 'v22.22.0'
+assert provenance['sources']['baseline']['sha'] == baseline_ref
+assert provenance['sources']['candidate']['sha'] == published_ref
+for label, ref in [('baseline', baseline_ref), ('candidate', candidate_ref)]:
+    for name, expected_hash in provenance['sources'][label]['files'].items():
+        assert digest(source_bytes(ref, name)) == expected_hash, (label, name)
+for name in ['package-lock.json', 'test/perf/dictionaries.lock.json', 'dev/data/dictionary-wasm/manifest.json']:
+    assert source_bytes(baseline_ref, name) == source_bytes(candidate_ref, name), name
+runner = (folder / 'replay-resolution.mjs.txt').read_bytes()
+assert digest(runner) == provenance['runnerSha256']
+assert runner == source_bytes(candidate_ref, 'dev/perf/deferred-resolution-20261126/replay-portable.mjs.txt')
+assert json.loads((folder / 'execution.json').read_text()) == {'exitCode': 0}
+artifact_zip = folder.parent / 'deferred-resolution-vndb-9175.zip'
+assert artifact_zip.stat().st_size == 12301
+assert digest(artifact_zip.read_bytes()) == 'd4921d5a6186120faadaf6c9fc998aeecc146d2e299ac51592ac0da9771443d0'
+
+fixture = json.loads(source_bytes(baseline_ref, 'test/perf/dictionaries.lock.json'))['dictionaries']['vndb']
+assert fixture['sizeBytes'] == 291705969
+assert fixture['sha256'] == 'da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792'
+assert b'assert.equal(bytes.byteLength, fixture.sizeBytes)' in runner
+assert b"assert.equal(createHash('sha256').update(bytes).digest('hex'),fixture.sha256)" in runner
+assert b'assert.equal(newDigest,oldDigest,' in runner
+assert b'assert.equal(corpus.rows,fixture.termRows)' in runner
+# The exact hosted runner checked the archive and enumerated its banks. This
+# audit checks that recorded controls and success; it does not reread the archive.
+banks = [f'term_bank_{index}.json' for index in range(1, 666)]
+
+receipt = json.loads((folder / 'corpus-parity.json').read_text())
+assert receipt['baseline'] == baseline_ref
+assert len(receipt['corpora']) == 1
+corpus = receipt['corpora'][0]
+assert corpus['id'] == 'vndb'
+assert corpus['sha256'] == fixture['sha256']
+assert corpus['rows'] == fixture['termRows'] == 6648310
+assert corpus['banks'] == len(banks) == 665
+groups = corpus['groups']
+assert len(groups) == (len(banks) + 3) // 4 == 167
+for index, group in enumerate(groups):
+    source_banks = banks[index * 4:index * 4 + 4]
+    assert group['firstBank'] == source_banks[0]
+    assert group['banks'] == len(source_banks)
+    assert 0 < group['uniqueContents'] <= group['rows']
+    assert group['deferredResolutionBytes'] == 13 * group['uniqueContents']
+    assert re.fullmatch('[0-9a-f]{64}', group['digest'])
+for name in ['rows', 'uniqueContents', 'deferredResolutionBytes', 'banks']:
+    assert sum(group[name] for group in groups) == corpus[name], name
+assert max(group['deferredResolutionBytes'] for group in groups) == corpus['maxDeferredGroupBytes']
+summary = json.loads((folder / 'replay.log').read_text())
+assert summary == {**{key: value for key, value in corpus.items() if key != 'groups'}, 'groups': len(groups)}
+
+result = {
+    'runId': 45864038998,
+    'jobId': 140062131372,
+    'artifactId': 15141027598,
+    'artifactZipSha256': 'd4921d5a6186120faadaf6c9fc998aeecc146d2e299ac51592ac0da9771443d0',
+    'publishedCandidateCommit': published_ref,
+    'publishedTreeConfirmedThroughGitHubGitCommitEndpoint': published_tree,
+    'equivalentLocalCommit': candidate_ref,
+    'baselineCommit': baseline_ref,
+    'lockedArchiveSizeBytes': fixture['sizeBytes'],
+    'lockedArchiveSha256': fixture['sha256'],
+    'lockedArchiveChecksVerifiedFromExactExecutedRunnerAndExitZero': True,
+    'archiveReadRepeatedDuringAudit': False,
+    'runnerSha256': provenance['runnerSha256'],
+    'candidateResolutionHelperSha256': digest(source_bytes(candidate_ref, 'ext/js/dictionary/term-content-plan-resolution.js')),
+    'counts': summary,
+    'groupDigestLedgerSha256': digest(('\n'.join(group['digest'] for group in groups) + '\n').encode()),
+    'artifactFileSha256': {file.name: digest(file.read_bytes()) for file in sorted(folder.iterdir()) if file.is_file()},
+    'auditScope': 'Verified artifact ZIP digest, exact source and runner hashes, every recorded bank-group boundary, complete row/count arithmetic, all 167 payload digest records, and the exact executed runner enforcement of locked archive size/SHA256 and paired output equality before successful completion. This audit did not reread the source archive, rerun native parsing, or independently recompute payload digests.',
+    'limitations': 'Fixed four-bank component replay, not browser timing, actual browser grouping, total allocation savings, or simultaneous/peak memory. Candidate columns are allocated later at the storage sink.',
+}
+output = folder.parent / 'vndb-hosted-audit.json'
+output.write_text(json.dumps(result, indent=2) + '\n')
+print(json.dumps(result, indent=2))

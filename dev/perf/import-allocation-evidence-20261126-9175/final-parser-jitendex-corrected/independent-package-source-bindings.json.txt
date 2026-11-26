@@ -1,0 +1,42 @@
+{
+  "publishedFinalCommit": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+  "publishedFinalGitTree": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+  "scope": "Actual packaged parser files compared byte-for-byte with exact published-tree source objects; full changed-member set separately audited.",
+  "bindings": [
+    {
+      "label": "A",
+      "packagePath": "js/dictionary/dictionary-database.js",
+      "sha256": "c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51",
+      "gitTree": "004fa8fde0055379ffbf22f9bbb60ae50f99114a",
+      "resolvedLocalCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14"
+    },
+    {
+      "label": "A",
+      "packagePath": "js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+      "gitTree": "004fa8fde0055379ffbf22f9bbb60ae50f99114a",
+      "resolvedLocalCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14"
+    },
+    {
+      "label": "B",
+      "packagePath": "js/dictionary/dictionary-database.js",
+      "sha256": "649e1b055abc00b9cde6135cbc5d951a658206903a70123792e0e3d3a7a7143f",
+      "gitTree": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+      "resolvedLocalCommit": "42256a11e73bb64cf925f118d3e375a223954813"
+    },
+    {
+      "label": "B",
+      "packagePath": "js/dictionary/term-bank-wasm-parser.js",
+      "sha256": "c294ef89eea4d5216bd8c38914d2a237c9248c898bd0339481d372e3b5405ca3",
+      "gitTree": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+      "resolvedLocalCommit": "42256a11e73bb64cf925f118d3e375a223954813"
+    },
+    {
+      "label": "B",
+      "packagePath": "js/dictionary/term-content-plan-resolution.js",
+      "sha256": "ce1cede594ccdf5b67d25099c0f4ca045b2a5e711a925fa01309ae29a6d936d1",
+      "gitTree": "34e19a22eef45ea552bc4696873f1ae50ae398f2",
+      "resolvedLocalCommit": "42256a11e73bb64cf925f118d3e375a223954813"
+    }
+  ]
+}

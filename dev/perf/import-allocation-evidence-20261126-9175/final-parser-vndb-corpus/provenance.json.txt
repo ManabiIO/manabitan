@@ -1,0 +1,22 @@
+{
+  "node": "v22.22.0",
+  "sources": {
+    "baseline": {
+      "sha": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+      "files": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+        "ext/js/dictionary/dictionary-database.js": "c9a9dfde39348b53067a14c28aa9c5569bd77dd8d0e5288ea598e9ae31027a51",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+      }
+    },
+    "candidate": {
+      "sha": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+      "files": {
+        "ext/js/dictionary/term-bank-wasm-parser.js": "c294ef89eea4d5216bd8c38914d2a237c9248c898bd0339481d372e3b5405ca3",
+        "ext/js/dictionary/dictionary-database.js": "649e1b055abc00b9cde6135cbc5d951a658206903a70123792e0e3d3a7a7143f",
+        "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+      }
+    }
+  },
+  "runnerSha256": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997"
+}

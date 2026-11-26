@@ -1,0 +1,111 @@
+{
+  "baselineCommit": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "localCandidateCommit": "8bf1174ed5dc85455a9bc1032a04753693da5087",
+  "publishedCandidateCommit": "400d4375a89cdf93805cc9566da2068a741dc059",
+  "sourceHashes": {
+    "ext/js/dictionary/term-bank-wasm-parser.js": "c294ef89eea4d5216bd8c38914d2a237c9248c898bd0339481d372e3b5405ca3",
+    "ext/js/dictionary/dictionary-database.js": "649e1b055abc00b9cde6135cbc5d951a658206903a70123792e0e3d3a7a7143f",
+    "ext/js/dictionary/term-content-plan-resolution.js": "e34c255466c49837b3bc757d0375c69bcdd103ba0c8365b0070552579badac90",
+    "test/dictionary-content-plan-resolution.test.js": "626ea6def8371c723994dbd024c875514cc3ba53423f1293692b534ce3786318",
+    "dev/data/dictionary-wasm/term-bank-parser.wasm": "b97009b54ae1056efba84964dc6f20e334cd27f47b793a5028e66d9482cb6cfa"
+  },
+  "baselineParserSha256": "69636a76ca421ff50ae9be86887b55d66717082d8c4de650a853a144ae7b3e64",
+  "fixtureExpectations": {
+    "jmdict": {
+      "cacheFile": "JMdict.zip",
+      "sha256": "3a614c92cfa747946de8422fc408d6d93926ba76541df66e434b24976a10160f",
+      "sizeBytes": 15645766,
+      "termRows": 528299
+    },
+    "jitendex": {
+      "cacheFile": "jitendex-yomitan.zip",
+      "sha256": "e914c76596220dffc6ee0c069cd05992f03adb2988c12c3cebe817a3ac271356",
+      "sizeBytes": 38831822,
+      "termRows": 436555
+    },
+    "vndb": {
+      "cacheFile": "vndb_characters_by_bee.zip",
+      "sha256": "da5baed5332761513dcef8d0b07ad0d9201cdd7f37831dea37e7162994ec3792",
+      "sizeBytes": 291705969,
+      "termRows": 6648310
+    }
+  },
+  "retainedEvidenceSha256": {
+    "README.md": "bce175458aeb47d664663e56e58753dd95185671d4590719c42b74aecbc58322",
+    "corpus-parity.json.txt": "0ab159ed81c32c7054af211131ad6aabfc24403a341d43c45641245dd96c6193",
+    "corpus-parity.log": "cbf94d1f81b88af2aaba63650220430f21db322e67a798c597dc9a96d2eb4c49",
+    "corpus-parity.mjs.txt": "5e0c45d9452446fd9661bab55d644dcae196bf7bc58a9b68f89ff0f2a97fee4e",
+    "jitendex-corpus-parity.json.txt": "1d858eb000d50ec58d29359b721e10b9d9f0e54423eb75db6cf5b96fd370258b",
+    "jitendex-parity.log": "61d4b7c34d072a3604e05d8e15abe119628ed5ec1070b74e0ce1a3cc548567a9",
+    "lint.log": "1c102cf2f2381c1f0ce40237a8d968928c881c1b308d2653bc38332c860d22df",
+    "new-files-lint-before-correction.log": "7b6ac4696ee00d26a2b0c389278e39de75c258e7003611b32cf7ecb9ad0c843a",
+    "new-files-lint-corrected.log": "4f994f036ee2d279b8dbb51b82a0ab7fb6db7f94563bb05d870eff44f3023111",
+    "own-tests-final.log": "0f3f5c5336f55260494353005937b2a138d667534a398f2e223aec665efe0abd",
+    "own-tests-relaxed-timeout.log": "39b7d3dae2b453f5868dbb2c1e2289bc899145f351b130b96f6a36c35e93155d",
+    "own-tests-style-corrected.log": "a3a1286ac107446258b30461c2d5f3b21f95c1cdd56aa06ed575ce27af880af7",
+    "own-tests.log": "40166b5a33d426f66e11128c69e710e0b179963fd2631b6508e7087db5d58f56",
+    "replay-portable.mjs.txt": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997",
+    "vndb-parity.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "result": "JMdict and Jitendex component output parity completed for 964854 rows, deferring 9483942 cumulative resolution bytes in fixed four-bank groups. Standalone VNDB process exited137 before any completed receipt. No full-import speedup or peak-memory claim. Style-corrected scoped ESLint and focused24tests passed. Original oracle, timeout, lint, and resource failures retained.",
+  "styleCorrection": {
+    "localCandidateCommit": "737d0ff990eeb4336e4f31b4f794a4245d9bef8c",
+    "description": "Repository GPL header, equivalent nonzero typed-array length checks, test formatting, and equivalent relative worker URL. Frozen browser source identity is unchanged.",
+    "sourceHashes": {
+      "ext/js/dictionary/term-content-plan-resolution.js": "ce1cede594ccdf5b67d25099c0f4ca045b2a5e711a925fa01309ae29a6d936d1",
+      "test/dictionary-content-plan-resolution.test.js": "3075e50511723e22ba2b94f0310604176833fa0933ad6b07406fb155e5b3dcaa"
+    }
+  },
+  "replayOutcomes": [
+    {
+      "runner": "corpus-parity.mjs.txt",
+      "requestedIds": [
+        "jmdict",
+        "jitendex",
+        "vndb"
+      ],
+      "candidateRuntimeCommit": "8bf1174ed5dc85455a9bc1032a04753693da5087",
+      "exitCode": 137,
+      "completedReceipt": "corpus-parity.json.txt",
+      "completedIds": [
+        "jmdict"
+      ]
+    },
+    {
+      "runner": "replay-portable.mjs.txt",
+      "requestedIds": [
+        "jitendex"
+      ],
+      "candidateRuntimeCommit": "8bf1174ed5dc85455a9bc1032a04753693da5087",
+      "exitCode": 0,
+      "completedReceipt": "jitendex-corpus-parity.json.txt",
+      "completedIds": [
+        "jitendex"
+      ]
+    },
+    {
+      "runner": "replay-portable.mjs.txt",
+      "requestedIds": [
+        "vndb"
+      ],
+      "candidateRuntimeCommit": "737d0ff990eeb4336e4f31b4f794a4245d9bef8c",
+      "exitCode": 137,
+      "completedReceipt": null,
+      "completedIds": []
+    }
+  ],
+  "correctedValidation": {
+    "candidateRuntimeCommit": "737d0ff990eeb4336e4f31b4f794a4245d9bef8c",
+    "scopedLint": {
+      "command": "node node_modules/eslint/bin/eslint.js ext/js/dictionary/term-content-plan-resolution.js test/dictionary-content-plan-resolution.test.js",
+      "exitCode": 0,
+      "log": "new-files-lint-corrected.log"
+    },
+    "focusedTests": {
+      "command": "node node_modules/vitest/vitest.mjs run test/dictionary-content-plan-resolution.test.js --maxWorkers=1 --testTimeout=30000",
+      "exitCode": 0,
+      "testsPassed": 24,
+      "log": "own-tests-style-corrected.log"
+    }
+  }
+}

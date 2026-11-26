@@ -1,0 +1,60 @@
+2026-11-26T17:19:08.2412944Z + node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --build-target chrome --media-check all --output /home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1
+2026-11-26T17:19:08.2755829Z [perf-import] Jitendex run 1/1
+2026-11-26T17:19:12.1777073Z [chromium-e2e] phase: Open settings page (2046.9 ms)
+2026-11-26T17:19:12.1931188Z [chromium-e2e] phase: Anonymous request rules match literal URLs (16.0 ms)
+2026-11-26T17:19:13.0677373Z [chromium-e2e] phase: Anki screenshots retain their source tab (874.1 ms)
+2026-11-26T17:19:13.9596766Z [chromium-e2e] phase: Cancelled navigation preserves import controller (892.5 ms)
+2026-11-26T17:19:14.0546924Z [chromium-e2e] phase: Runtime diagnostics (94.9 ms)
+2026-11-26T17:19:14.0672430Z [chromium-e2e] phase: Backend OPFS probe (12.3 ms)
+2026-11-26T17:19:14.2802957Z [chromium-e2e] phase: Reset dictionary settings (212.6 ms)
+2026-11-26T17:19:14.2893934Z [chromium-e2e] phase: Configure functional import mode (8.7 ms)
+2026-11-26T17:19:14.2896369Z [chromium-e2e] phase: Warmup real dictionary cache (334.5 ms)
+2026-11-26T17:19:14.3670204Z [chromium-e2e] phase: Import Jitendex via file input (50.3 ms)
+2026-11-26T17:19:14.4244479Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 2 of 5: Initializing import... (19.1 ms)
+2026-11-26T17:19:14.4438517Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 3 of 5: Loading dictionary... (18.8 ms)
+2026-11-26T17:19:16.4540397Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 4 of 5: Importing data... (2010.4 ms)
+2026-11-26T17:19:16.7029741Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 5 of 5: Finalizing import... (248.2 ms)
+2026-11-26T17:19:16.7452441Z [chromium-e2e] phase: Jitendex: total import (2384.9 ms)
+2026-11-26T17:19:21.4128762Z [chromium-e2e] PASS: Quick import benchmark mode completed (Jitendex).
+2026-11-26T17:19:21.4175424Z [chromium-e2e] Wrote report: /home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1/run-1.html
+2026-11-26T17:19:21.4176793Z [chromium-e2e] Wrote report json: /home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1/run-1.json
+2026-11-26T17:19:21.4177779Z [chromium-e2e] Wrote combined report: /tmp/import-allocation-9175-6gt0_bbn/A/builds/extension-e2e-report.html
+2026-11-26T17:19:21.6197762Z file:///tmp/import-allocation-9175-6gt0_bbn/A/dev/perf/benchmark-support.js:129
+2026-11-26T17:19:21.6198912Z                 throw new Error(`Import experiment receipt mismatch: ${key}`);
+2026-11-26T17:19:21.6199664Z                       ^
+2026-11-26T17:19:21.6199928Z 
+2026-11-26T17:19:21.6200500Z Error: Import experiment receipt mismatch: parserExperiments
+2026-11-26T17:19:21.6202122Z     at validateExperimentReceipts (file:///tmp/import-allocation-9175-6gt0_bbn/A/dev/perf/benchmark-support.js:129:23)
+2026-11-26T17:19:21.6204163Z     at extractImportResult (file:///tmp/import-allocation-9175-6gt0_bbn/A/dev/perf/benchmark-support.js:191:5)
+2026-11-26T17:19:21.6205712Z     at file:///tmp/import-allocation-9175-6gt0_bbn/A/dev/perf/import-benchmark.js:215:12
+2026-11-26T17:19:21.6206348Z 
+2026-11-26T17:19:21.6206513Z Node.js v22.22.0
+2026-11-26T17:19:21.6837592Z Traceback (most recent call last):
+2026-11-26T17:19:21.6862094Z   File "/home/runner/work/manabitan/manabitan/dev/perf/import-allocation-screen-9175.py", line 187, in <module>
+2026-11-26T17:19:21.6863105Z     main()
+2026-11-26T17:19:21.6863457Z     ~~~~^^
+2026-11-26T17:19:21.6864334Z   File "/home/runner/work/manabitan/manabitan/dev/perf/import-allocation-screen-9175.py", line 134, in main
+2026-11-26T17:19:21.6865293Z     run([
+2026-11-26T17:19:21.6865622Z     ~~~^^
+2026-11-26T17:19:21.6866158Z         "node", "dev/perf/import-benchmark.js", args.dictionary,
+2026-11-26T17:19:21.6866869Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T17:19:21.6867602Z         "--runs", "1", "--no-build", "--build-target", "chrome",
+2026-11-26T17:19:21.6868290Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T17:19:21.6868968Z         "--media-check", "all", "--output", str(destination),
+2026-11-26T17:19:21.6869629Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T17:19:21.6870152Z     ], roots[label])
+2026-11-26T17:19:21.6870540Z     ^^^^^^^^^^^^^^^^
+2026-11-26T17:19:21.6871631Z   File "/home/runner/work/manabitan/manabitan/dev/perf/import-allocation-screen-9175.py", line 26, in run
+2026-11-26T17:19:21.6872754Z     subprocess.run(command, cwd=cwd, env=env, check=True)
+2026-11-26T17:19:21.6873488Z     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T17:19:21.6874286Z   File "/usr/lib/python3.14/subprocess.py", line 578, in run
+2026-11-26T17:19:21.6875051Z     raise CalledProcessError(retcode, process.args,
+2026-11-26T17:19:21.6875769Z                              output=stdout, stderr=stderr)
+2026-11-26T17:19:21.6878352Z subprocess.CalledProcessError: Command '['node', 'dev/perf/import-benchmark.js', 'jitendex', '--runs', '1', '--no-build', '--build-target', 'chrome', '--media-check', 'all', '--output', '/home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1']' returned non-zero exit status 1.
+2026-11-26T17:19:21.7700378Z Traceback (most recent call last):
+2026-11-26T17:19:21.7701357Z   File "<stdin>", line 23, in <module>
+2026-11-26T17:19:21.7702213Z   File "/usr/lib/python3.14/subprocess.py", line 578, in run
+2026-11-26T17:19:21.7703020Z     raise CalledProcessError(retcode, process.args,
+2026-11-26T17:19:21.7703785Z                              output=stdout, stderr=stderr)
+2026-11-26T17:19:21.7707543Z subprocess.CalledProcessError: Command '['python', 'dev/perf/import-allocation-screen-9175.py', '--baseline', '0143e9596cd8f790d5e166d4ba6a2425fbc57f14', '--candidate', 'bdb9c74874e2612fbb8741f4d36ed4397e4eaf57', '--dictionary', 'jitendex', '--output', 'builds/perf/allocation-screen', '--allowed-entry', 'js/dictionary/dense-zip-file-map.js', '--allowed-entry', 'js/dictionary/dictionary-importer.js']' returned non-zero exit status 1.
+2026-11-26T17:19:21.7877207Z ##[error]Process completed with exit code 1.

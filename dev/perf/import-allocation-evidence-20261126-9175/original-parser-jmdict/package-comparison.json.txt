@@ -1,0 +1,11 @@
+{
+  "sha256": {
+    "A": "435332d9b866d4a889cff544e666c642e8527ae562817aac2043c5db8ed58a6b",
+    "B": "fa5b8b023114df8f75b9588b0a77c96a69261f25970dacd871d33f748cdaa300"
+  },
+  "changedEntries": [
+    "js/dictionary/dictionary-database.js",
+    "js/dictionary/term-bank-wasm-parser.js",
+    "js/dictionary/term-content-plan-resolution.js"
+  ]
+}

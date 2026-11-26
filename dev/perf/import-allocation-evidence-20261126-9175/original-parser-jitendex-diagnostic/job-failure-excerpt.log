@@ -1,0 +1,59 @@
+2026-11-26T16:57:18.3259539Z + node dev/perf/import-benchmark.js jitendex --runs 1 --no-build --build-target chrome --media-check all --output /home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1
+2026-11-26T16:57:18.3607501Z [perf-import] Jitendex run 1/1
+2026-11-26T16:57:23.8067298Z [chromium-e2e] phase: Open settings page (1709.4 ms)
+2026-11-26T16:57:23.8807904Z [chromium-e2e] phase: Anonymous request rules match literal URLs (74.7 ms)
+2026-11-26T16:57:24.5787920Z [chromium-e2e] phase: Anki screenshots retain their source tab (696.8 ms)
+2026-11-26T16:57:25.4132813Z [chromium-e2e] phase: Cancelled navigation preserves import controller (835.8 ms)
+2026-11-26T16:57:25.4967659Z [chromium-e2e] phase: Runtime diagnostics (82.1 ms)
+2026-11-26T16:57:25.5056865Z [chromium-e2e] phase: Backend OPFS probe (10.1 ms)
+2026-11-26T16:57:25.6863850Z [chromium-e2e] phase: Reset dictionary settings (180.5 ms)
+2026-11-26T16:57:25.6936361Z [chromium-e2e] phase: Configure functional import mode (7.0 ms)
+2026-11-26T16:57:25.6942443Z [chromium-e2e] phase: Warmup real dictionary cache (342.5 ms)
+2026-11-26T16:57:25.7673543Z [chromium-e2e] phase: Import Jitendex via file input (47.4 ms)
+2026-11-26T16:57:25.8069036Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 3 of 5: Loading dictionary... (18.5 ms)
+2026-11-26T16:57:27.3173203Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 4 of 5: Importing data... (1510.5 ms)
+2026-11-26T16:57:27.3783838Z [chromium-e2e] phase: Import progress: Importing dictionary - Step 5 of 5: Finalizing import... (60.7 ms)
+2026-11-26T16:57:27.4211262Z [chromium-e2e] phase: Jitendex: total import (1658.0 ms)
+2026-11-26T16:57:31.6460489Z [chromium-e2e] PASS: Quick import benchmark mode completed (Jitendex).
+2026-11-26T16:57:31.6500069Z [chromium-e2e] Wrote report: /home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1/run-1.html
+2026-11-26T16:57:31.6501090Z [chromium-e2e] Wrote report json: /home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1/run-1.json
+2026-11-26T16:57:31.6502021Z [chromium-e2e] Wrote combined report: /tmp/import-allocation-9175-l6dab7y8/A/builds/extension-e2e-report.html
+2026-11-26T16:57:31.8214152Z file:///tmp/import-allocation-9175-l6dab7y8/A/dev/perf/benchmark-support.js:129
+2026-11-26T16:57:31.8215122Z                 throw new Error(`Import experiment receipt mismatch: ${key}`);
+2026-11-26T16:57:31.8215914Z                       ^
+2026-11-26T16:57:31.8216364Z 
+2026-11-26T16:57:31.8216686Z Error: Import experiment receipt mismatch: parserExperiments
+2026-11-26T16:57:31.8217600Z     at validateExperimentReceipts (file:///tmp/import-allocation-9175-l6dab7y8/A/dev/perf/benchmark-support.js:129:23)
+2026-11-26T16:57:31.8218537Z     at extractImportResult (file:///tmp/import-allocation-9175-l6dab7y8/A/dev/perf/benchmark-support.js:191:5)
+2026-11-26T16:57:31.8219658Z     at file:///tmp/import-allocation-9175-l6dab7y8/A/dev/perf/import-benchmark.js:215:12
+2026-11-26T16:57:31.8220030Z 
+2026-11-26T16:57:31.8220131Z Node.js v22.22.0
+2026-11-26T16:57:31.8908586Z Traceback (most recent call last):
+2026-11-26T16:57:31.8914009Z   File "/home/runner/work/manabitan/manabitan/dev/perf/import-allocation-screen-9175.py", line 187, in <module>
+2026-11-26T16:57:31.8914879Z     main()
+2026-11-26T16:57:31.8915151Z     ~~~~^^
+2026-11-26T16:57:31.8915922Z   File "/home/runner/work/manabitan/manabitan/dev/perf/import-allocation-screen-9175.py", line 134, in main
+2026-11-26T16:57:31.8916921Z     run([
+2026-11-26T16:57:31.8917192Z     ~~~^^
+2026-11-26T16:57:31.8917638Z         "node", "dev/perf/import-benchmark.js", args.dictionary,
+2026-11-26T16:57:31.8918707Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T16:57:31.8919300Z         "--runs", "1", "--no-build", "--build-target", "chrome",
+2026-11-26T16:57:31.8919847Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T16:57:31.8920411Z         "--media-check", "all", "--output", str(destination),
+2026-11-26T16:57:31.8920967Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T16:57:31.8921397Z     ], roots[label])
+2026-11-26T16:57:31.8921707Z     ^^^^^^^^^^^^^^^^
+2026-11-26T16:57:31.8922442Z   File "/home/runner/work/manabitan/manabitan/dev/perf/import-allocation-screen-9175.py", line 26, in run
+2026-11-26T16:57:31.8923358Z     subprocess.run(command, cwd=cwd, env=env, check=True)
+2026-11-26T16:57:31.8923955Z     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-11-26T16:57:31.8924586Z   File "/usr/lib/python3.14/subprocess.py", line 578, in run
+2026-11-26T16:57:31.8925253Z     raise CalledProcessError(retcode, process.args,
+2026-11-26T16:57:31.8925870Z                              output=stdout, stderr=stderr)
+2026-11-26T16:57:31.8928531Z subprocess.CalledProcessError: Command '['node', 'dev/perf/import-benchmark.js', 'jitendex', '--runs', '1', '--no-build', '--build-target', 'chrome', '--media-check', 'all', '--output', '/home/runner/work/manabitan/manabitan/builds/perf/allocation-screen/A1']' returned non-zero exit status 1.
+2026-11-26T16:57:31.9782780Z Traceback (most recent call last):
+2026-11-26T16:57:31.9783814Z   File "<stdin>", line 23, in <module>
+2026-11-26T16:57:31.9784663Z   File "/usr/lib/python3.14/subprocess.py", line 578, in run
+2026-11-26T16:57:31.9785370Z     raise CalledProcessError(retcode, process.args,
+2026-11-26T16:57:31.9785919Z                              output=stdout, stderr=stderr)
+2026-11-26T16:57:31.9790343Z subprocess.CalledProcessError: Command '['python', 'dev/perf/import-allocation-screen-9175.py', '--baseline', '0143e9596cd8f790d5e166d4ba6a2425fbc57f14', '--candidate', '400d4375a89cdf93805cc9566da2068a741dc059', '--dictionary', 'jitendex', '--output', 'builds/perf/allocation-screen', '--allowed-entry', 'js/dictionary/dictionary-database.js', '--allowed-entry', 'js/dictionary/term-bank-wasm-parser.js', '--allowed-entry', 'js/dictionary/term-content-plan-resolution.js']' returned non-zero exit status 1.
+2026-11-26T16:57:31.9964732Z ##[error]Process completed with exit code 1.

@@ -1,0 +1,22 @@
+{
+  "runId": 45864038998,
+  "jobId": 140062131372,
+  "artifactId": 15141027598,
+  "artifactBytes": 12301,
+  "artifactSha256": "d4921d5a6186120faadaf6c9fc998aeecc146d2e299ac51592ac0da9771443d0",
+  "baseline": "0143e9596cd8f790d5e166d4ba6a2425fbc57f14",
+  "candidate": "01d0eb7164385828c97efae1b319ccc1c4fe92f9",
+  "runnerSha256": "c21eb1c9f9ba9af7a0901bf23d09bedf5da97bbe779013b2d0ee8bc84bb43997",
+  "node": "v22.22.0",
+  "allRawExtractionBytesMatchZip": true,
+  "sourceFilesMatchFrozenGitObjects": true,
+  "nativeParserUnchanged": true,
+  "completedGroups": 167,
+  "banks": 665,
+  "rows": 6648310,
+  "uniqueContents": 157852,
+  "deferredResolutionBytes": 2052076,
+  "maximumDeferredGroupBytes": 16367,
+  "scope": "Full-corpus deterministic output parity in fixed four-bank groups. Deferred bytes are cumulative, not simultaneous memory or timing savings.",
+  "auditLimit": "Checked raw artifact records, exact source/runner and enforced successful runner assertions. No second source archive read, native parser execution or independent payload digest recomputation."
+}

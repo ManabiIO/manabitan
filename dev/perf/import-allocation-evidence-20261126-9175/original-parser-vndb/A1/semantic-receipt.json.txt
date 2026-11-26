@@ -1,0 +1,462 @@
+{
+  "title": "VNDB Characters by Bee",
+  "revision": "395525135651",
+  "termRows": 6648310,
+  "probeTerms": [
+    "フォーニ",
+    "あいこ先生",
+    "鎧衣 美琴たん",
+    "右代宮金蔵社長",
+    "Kamala Copperheart",
+    "榊亜実先輩",
+    "RestaurantOwnerちゃん",
+    "Osamu博士",
+    "Lynrd Skynrdたん",
+    "霧姫・アイスマン坊",
+    "Tyler博士",
+    "クレイグ・ウァジェト部長"
+  ],
+  "outputDigestSha256": "230a48feb02e7586ecff364ae58aac25d63de213cdf5047f24629857f0a08094",
+  "media": {
+    "mode": "all",
+    "totalFiles": 146570,
+    "totalBytes": 188131284,
+    "files": 146570,
+    "bytes": 188131284,
+    "sha256": "ea94d392bc833baf0bee7b3d6becc3d3517eee84ee314a44986438ac6d5217cb"
+  },
+  "lookup": [
+    {
+      "pass": 0,
+      "term": "Kamala Copperheart",
+      "results": 1,
+      "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+    },
+    {
+      "pass": 0,
+      "term": "Lynrd Skynrdたん",
+      "results": 1,
+      "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+    },
+    {
+      "pass": 0,
+      "term": "Osamu博士",
+      "results": 1,
+      "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+    },
+    {
+      "pass": 0,
+      "term": "RestaurantOwnerちゃん",
+      "results": 2,
+      "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+    },
+    {
+      "pass": 0,
+      "term": "Tyler博士",
+      "results": 1,
+      "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+    },
+    {
+      "pass": 0,
+      "term": "あいこ先生",
+      "results": 1,
+      "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+    },
+    {
+      "pass": 0,
+      "term": "クレイグ・ウァジェト部長",
+      "results": 1,
+      "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+    },
+    {
+      "pass": 0,
+      "term": "フォーニ",
+      "results": 1,
+      "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+    },
+    {
+      "pass": 0,
+      "term": "右代宮金蔵社長",
+      "results": 1,
+      "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+    },
+    {
+      "pass": 0,
+      "term": "榊亜実先輩",
+      "results": 1,
+      "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+    },
+    {
+      "pass": 0,
+      "term": "鎧衣 美琴たん",
+      "results": 1,
+      "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+    },
+    {
+      "pass": 0,
+      "term": "霧姫・アイスマン坊",
+      "results": 1,
+      "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+    },
+    {
+      "pass": 1,
+      "term": "Kamala Copperheart",
+      "results": 1,
+      "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+    },
+    {
+      "pass": 1,
+      "term": "Lynrd Skynrdたん",
+      "results": 1,
+      "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+    },
+    {
+      "pass": 1,
+      "term": "Osamu博士",
+      "results": 1,
+      "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+    },
+    {
+      "pass": 1,
+      "term": "RestaurantOwnerちゃん",
+      "results": 2,
+      "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+    },
+    {
+      "pass": 1,
+      "term": "Tyler博士",
+      "results": 1,
+      "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+    },
+    {
+      "pass": 1,
+      "term": "あいこ先生",
+      "results": 1,
+      "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+    },
+    {
+      "pass": 1,
+      "term": "クレイグ・ウァジェト部長",
+      "results": 1,
+      "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+    },
+    {
+      "pass": 1,
+      "term": "フォーニ",
+      "results": 1,
+      "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+    },
+    {
+      "pass": 1,
+      "term": "右代宮金蔵社長",
+      "results": 1,
+      "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+    },
+    {
+      "pass": 1,
+      "term": "榊亜実先輩",
+      "results": 1,
+      "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+    },
+    {
+      "pass": 1,
+      "term": "鎧衣 美琴たん",
+      "results": 1,
+      "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+    },
+    {
+      "pass": 1,
+      "term": "霧姫・アイスマン坊",
+      "results": 1,
+      "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+    },
+    {
+      "pass": 2,
+      "term": "Kamala Copperheart",
+      "results": 1,
+      "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+    },
+    {
+      "pass": 2,
+      "term": "Lynrd Skynrdたん",
+      "results": 1,
+      "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+    },
+    {
+      "pass": 2,
+      "term": "Osamu博士",
+      "results": 1,
+      "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+    },
+    {
+      "pass": 2,
+      "term": "RestaurantOwnerちゃん",
+      "results": 2,
+      "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+    },
+    {
+      "pass": 2,
+      "term": "Tyler博士",
+      "results": 1,
+      "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+    },
+    {
+      "pass": 2,
+      "term": "あいこ先生",
+      "results": 1,
+      "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+    },
+    {
+      "pass": 2,
+      "term": "クレイグ・ウァジェト部長",
+      "results": 1,
+      "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+    },
+    {
+      "pass": 2,
+      "term": "フォーニ",
+      "results": 1,
+      "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+    },
+    {
+      "pass": 2,
+      "term": "右代宮金蔵社長",
+      "results": 1,
+      "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+    },
+    {
+      "pass": 2,
+      "term": "榊亜実先輩",
+      "results": 1,
+      "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+    },
+    {
+      "pass": 2,
+      "term": "鎧衣 美琴たん",
+      "results": 1,
+      "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+    },
+    {
+      "pass": 2,
+      "term": "霧姫・アイスマン坊",
+      "results": 1,
+      "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+    },
+    {
+      "pass": 3,
+      "term": "Kamala Copperheart",
+      "results": 1,
+      "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+    },
+    {
+      "pass": 3,
+      "term": "Lynrd Skynrdたん",
+      "results": 1,
+      "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+    },
+    {
+      "pass": 3,
+      "term": "Osamu博士",
+      "results": 1,
+      "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+    },
+    {
+      "pass": 3,
+      "term": "RestaurantOwnerちゃん",
+      "results": 2,
+      "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+    },
+    {
+      "pass": 3,
+      "term": "Tyler博士",
+      "results": 1,
+      "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+    },
+    {
+      "pass": 3,
+      "term": "あいこ先生",
+      "results": 1,
+      "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+    },
+    {
+      "pass": 3,
+      "term": "クレイグ・ウァジェト部長",
+      "results": 1,
+      "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+    },
+    {
+      "pass": 3,
+      "term": "フォーニ",
+      "results": 1,
+      "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+    },
+    {
+      "pass": 3,
+      "term": "右代宮金蔵社長",
+      "results": 1,
+      "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+    },
+    {
+      "pass": 3,
+      "term": "榊亜実先輩",
+      "results": 1,
+      "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+    },
+    {
+      "pass": 3,
+      "term": "鎧衣 美琴たん",
+      "results": 1,
+      "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+    },
+    {
+      "pass": 3,
+      "term": "霧姫・アイスマン坊",
+      "results": 1,
+      "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+    },
+    {
+      "pass": 4,
+      "term": "Kamala Copperheart",
+      "results": 1,
+      "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+    },
+    {
+      "pass": 4,
+      "term": "Lynrd Skynrdたん",
+      "results": 1,
+      "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+    },
+    {
+      "pass": 4,
+      "term": "Osamu博士",
+      "results": 1,
+      "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+    },
+    {
+      "pass": 4,
+      "term": "RestaurantOwnerちゃん",
+      "results": 2,
+      "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+    },
+    {
+      "pass": 4,
+      "term": "Tyler博士",
+      "results": 1,
+      "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+    },
+    {
+      "pass": 4,
+      "term": "あいこ先生",
+      "results": 1,
+      "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+    },
+    {
+      "pass": 4,
+      "term": "クレイグ・ウァジェト部長",
+      "results": 1,
+      "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+    },
+    {
+      "pass": 4,
+      "term": "フォーニ",
+      "results": 1,
+      "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+    },
+    {
+      "pass": 4,
+      "term": "右代宮金蔵社長",
+      "results": 1,
+      "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+    },
+    {
+      "pass": 4,
+      "term": "榊亜実先輩",
+      "results": 1,
+      "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+    },
+    {
+      "pass": 4,
+      "term": "鎧衣 美琴たん",
+      "results": 1,
+      "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+    },
+    {
+      "pass": 4,
+      "term": "霧姫・アイスマン坊",
+      "results": 1,
+      "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+    },
+    {
+      "pass": 5,
+      "term": "Kamala Copperheart",
+      "results": 1,
+      "sha256": "4634004b933318420a9d38352b36ff8439ea0bfbce133b8de8f5eeec54a5059f"
+    },
+    {
+      "pass": 5,
+      "term": "Lynrd Skynrdたん",
+      "results": 1,
+      "sha256": "365e50cfeba30f0eb4ae695c0c3254f7f56e76cfd03ef816c111166d83aa10b8"
+    },
+    {
+      "pass": 5,
+      "term": "Osamu博士",
+      "results": 1,
+      "sha256": "be31aa98581ef0a45e9cc94c252454063b404ae0a584ead2a8fed5e912510149"
+    },
+    {
+      "pass": 5,
+      "term": "RestaurantOwnerちゃん",
+      "results": 2,
+      "sha256": "b43f38fefd9f3a7e785338fd6acf629eeafba662f2f8385bdd1ddf547bba0c72"
+    },
+    {
+      "pass": 5,
+      "term": "Tyler博士",
+      "results": 1,
+      "sha256": "64f37e0ba86b30ef1eeed78e54d9246fbca8440f05653a8c631d83a2a213c773"
+    },
+    {
+      "pass": 5,
+      "term": "あいこ先生",
+      "results": 1,
+      "sha256": "2ccab1a01cd0348dde5e4bee1ceec580cb10ce5fbf58ee730c96d9f915bd56ef"
+    },
+    {
+      "pass": 5,
+      "term": "クレイグ・ウァジェト部長",
+      "results": 1,
+      "sha256": "1cb1f125532c95033564144e332cd7c34c0a939673e1b8e9f1fd7bc625f51173"
+    },
+    {
+      "pass": 5,
+      "term": "フォーニ",
+      "results": 1,
+      "sha256": "117e1872edf9428a98c4c3f9cf35c0e526748a9315cf08bf2addd8efbfc9c18e"
+    },
+    {
+      "pass": 5,
+      "term": "右代宮金蔵社長",
+      "results": 1,
+      "sha256": "300d743ac40e8f80c6857ce0765cc38e837199859bb768e182542ccefdfdc758"
+    },
+    {
+      "pass": 5,
+      "term": "榊亜実先輩",
+      "results": 1,
+      "sha256": "70120ea73f0e01e4f20dd21ec5e90ebbea8d2d4d4976a235bbdab4f74aad3e14"
+    },
+    {
+      "pass": 5,
+      "term": "鎧衣 美琴たん",
+      "results": 1,
+      "sha256": "59c6908cdfd127f722cd8f2ada77152f30b427b8eb8c01121f5b863a97225e2f"
+    },
+    {
+      "pass": 5,
+      "term": "霧姫・アイスマン坊",
+      "results": 1,
+      "sha256": "ba717f9e720a5d3fca1936e6afc9406acb466376f3b5688daeffece60894ebd2"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "artifactId": 15140262793,
+  "archiveBytes": 33646185,
+  "sha256": "860210cab965f9f09bd50e9eee140baa96d857644b0efb2c185797e5d085e4d0"
+}
