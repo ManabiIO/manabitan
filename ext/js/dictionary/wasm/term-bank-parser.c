@@ -1474,6 +1474,51 @@ static inline int next_format3_field(const uint8_t* src, uint32_t len, uint32_t*
     return 1;
 }
 
+/* Recognize one compact structured-content list. A change in key order, list
+ * structure or styling returns control to the general JSON parser with its
+ * cursor and hints intact. Only leaf text varies; it uses the JSON string
+ * validator, including for escapes. */
+static inline int consume_glossary_literal(
+    const uint8_t* src, uint32_t len, uint32_t* pos, const char* literal, uint32_t size
+) {
+    if (size > len - *pos ||
+        !content_bytes_equal_between(src, *pos, (const uint8_t*)literal, 0u, size)) { return 0; }
+    *pos += size;
+    return 1;
+}
+
+static int parse_compact_glossary_list(
+    const uint8_t* src, uint32_t len, uint32_t start, uint32_t* out_end, int media_hints
+) {
+    static const char opening[] = "[{\"content\":{\"content\":";
+    static const char leaf_open[] = "{\"content\":";
+    static const char leaf_close[] = ",\"tag\":\"li\"}";
+    static const char closing[] =
+        ",\"data\":{\"content\":\"glossary\"},\"lang\":\"en\",\"style\":{\"listStyleType\":\"circle\"},"
+        "\"tag\":\"ul\"},\"type\":\"structured-content\"}]";
+    uint32_t pos = start;
+    if (!consume_glossary_literal(src, len, &pos, opening, sizeof(opening) - 1u)) { return 0; }
+    const int multiple = pos < len && src[pos] == '[';
+    if (multiple) { ++pos; }
+    for (;;) {
+        if (!consume_glossary_literal(src, len, &pos, leaf_open, sizeof(leaf_open) - 1u)) { return 0; }
+        const uint32_t text = pos;
+        if (!parse_string_span(src, len, text, &pos)) { return 0; }
+        // The general scan treats a literal or escaped media name as a hint
+        // even when it appears as leaf text. Let it classify those rare rows.
+        if (media_hints && is_media_marker_at(src, pos, text)) { return 0; }
+        if (!consume_glossary_literal(src, len, &pos, leaf_close, sizeof(leaf_close) - 1u)) { return 0; }
+        if (!multiple) { break; }
+        if (pos >= len) { return 0; }
+        const uint8_t delimiter = src[pos++];
+        if (delimiter == ']') { break; }
+        if (delimiter != ',') { return 0; }
+    }
+    if (!consume_glossary_literal(src, len, &pos, closing, sizeof(closing) - 1u)) { return 0; }
+    *out_end = pos;
+    return 1;
+}
+
 /* Strict source validation has exactly eight fields with known token types.
  * Keep its grammar explicit instead of dispatching each field twice through
  * the permissive row parser and set_field. Every metadata word is assigned
@@ -1543,6 +1588,7 @@ static int parse_format3_row(
         !(glossary_witness != 0 && reuse_validated_glossary(
             src, len, i, prior_rows, prior_count, meta, &end, glossary_witness, glossary_lookback
         )) &&
+        !parse_compact_glossary_list(src, len, i, &end, media_hints) &&
         !parse_value_span_with_glossary_hints(
             src, len, i, &end,
             media_hints ? &meta->glossary_may_contain_media : 0,
