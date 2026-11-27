@@ -109,9 +109,10 @@ function fixture(/** @type {{compact?: boolean, missing?: boolean, failSeal?: bo
             const name = names[index]
             // This archive adapter supplies payloads through getData. Exceed
             // raw-batch admission so fallback keeps using that same adapter.
-            catalog.addDirectoryEntry(index, name, nameOffset, index * 100, 5 * 1024 * 1024, images[index].length, 8, crc32(images[index]))
+            catalog.addDirectoryMetadata(index, nameOffset, index * 100, 5 * 1024 * 1024, images[index].length, 8, crc32(images[index]))
             nameOffset += name.length
         }
+        expect(catalog.finishDirectory()).toBeNull()
         for (const name of ['index.json', 'term_bank_1.json']) {
             catalog.set(name, /** @type {import('dictionary-importer').ImportFileEntry} */ (sourceEntries.get(name)))
         }

@@ -109,9 +109,10 @@ describe('DictionaryImporter built-in bank prefix filtering', () => {
         const map = new DenseZipFileMap(names.length, new TextEncoder().encode(names.join('')), async () => null)
         let position = 0
         for (const [row, name] of names.entries()) {
-            map.addDirectoryEntry(row, name, position, row * 100, 10, 10, 0, row)
+            map.addDirectoryMetadata(row, position, row * 100, 10, 10, 0, row)
             position += name.length
         }
+        expect(map.finishDirectory()).toBeNull()
 
         const result = filenames(importer._getArchiveFiles(map))
         expect(result.termFiles).toEqual(['term_bank_2.json', 'term_bank_10.json'])

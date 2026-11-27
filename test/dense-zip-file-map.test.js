@@ -20,9 +20,10 @@ function fixture() {
     const map = new DenseZipFileMap(filenames.length, encoder.encode(filenames.join('')), getData)
     let position = 0
     for (let i = 0; i < filenames.length; ++i) {
-        expect(map.addDirectoryEntry(i, filenames[i], position, i * 100, i + 10, i + 100, i === 0 ? 0 : 8, 0xffffffff - i)).toBe(true)
+        map.addDirectoryMetadata(i, position, i * 100, i + 10, i + 100, i === 0 ? 0 : 8, 0xffffffff - i)
         position += filenames[i].length
     }
+    expect(map.finishDirectory()).toBeNull()
     return map
 }
 
@@ -168,10 +169,12 @@ describe('compact dense ZIP file map', () => {
         expect(await getData.call(entry)).toBe('first.png')
     })
 
-    test('reports duplicate directory names without replacing the original metadata', () => {
-        const map = fixture()
-        expect(map.addDirectoryEntry(1, 'first.png', 0, 99, 1, 1, 0, 0)).toBe(false)
-        expect(map.get('first.png')).toMatchObject({offset: 0, compressedSize: 10, signature: 0xffffffff})
+    test('reports the first duplicate directory name', () => {
+        const duplicateNames = ['first.png', 'first.png']
+        const map = new DenseZipFileMap(duplicateNames.length, encoder.encode(duplicateNames.join('')), async () => null)
+        map.addDirectoryMetadata(0, 0, 0, 10, 10, 0, 1)
+        map.addDirectoryMetadata(1, duplicateNames[0].length, 99, 1, 1, 0, 0)
+        expect(map.finishDirectory()).toBe('first.png')
     })
 
     test('releases compact metadata when fallback enumerates every entry', () => {
