@@ -1489,7 +1489,9 @@ static int parse_format3_row(
     uint32_t prior_count,
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    uint32_t* score_token_end,
+    uint32_t* sequence_token_end
 ) {
     if (row_start >= len || src[row_start] != '[') { return 0; }
     uint32_t i = skip_ws(src, len, row_start + 1u);
@@ -1529,6 +1531,7 @@ static int parse_format3_row(
 
     if (!scan_scalar_span(src, len, i, &end) || !is_valid_json_number(src, i, end)) { return 0; }
     meta->score_start = i;
+    if (score_token_end != 0) { *score_token_end = end; }
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
 
@@ -1558,6 +1561,7 @@ static int parse_format3_row(
     } else {
         if (!is_valid_json_number(src, i, end)) { return 0; }
         meta->sequence_start = i;
+        if (sequence_token_end != 0) { *sequence_token_end = end; }
     }
     i = end;
     if (!next_format3_field(src, len, &i)) { return 0; }
@@ -1583,12 +1587,15 @@ static int parse_row_single_pass(
     uint32_t* glossary_witness,
     uint32_t glossary_lookback,
     int validate_glossary_types,
-    uint32_t* key_escape_mask
+    uint32_t* key_escape_mask,
+    uint32_t* score_token_end,
+    uint32_t* sequence_token_end
 ) {
     if (validate_glossary_types) {
         return parse_format3_row(
             src, len, row_start, out_meta, media_hints, out_next,
-            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask
+            prior_rows, prior_count, glossary_witness, glossary_lookback, key_escape_mask,
+            score_token_end, sequence_token_end
         );
     }
     if (row_start >= len || src[row_start] != '[') { return 0; }
@@ -1616,6 +1623,8 @@ static int parse_row_single_pass(
             if (has_escape == 0u) { *key_escape_mask &= ~(1u << field_index); }
         } else if (field_index == 4u || field_index == 6u) {
             if (!scan_scalar_span(src, len, i, &value_end)) { return 0; }
+            if (field_index == 4u && score_token_end != 0) { *score_token_end = value_end; }
+            if (field_index == 6u && sequence_token_end != 0) { *sequence_token_end = value_end; }
         } else if (field_index == 5u) {
             if (validate_glossary_types && src[i] != '[') { return 0; }
             uint32_t* media_hint = media_hints ? &out_meta->glossary_may_contain_media : 0;
@@ -2229,7 +2238,7 @@ static int32_t parse_contiguous_term_bank(uint32_t json_ptr, uint32_t json_len, 
             }
         }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, json_len, i, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0, 0)) {
             return -1;
         }
         ++row_count;
@@ -2267,7 +2276,7 @@ static int32_t parse_term_bank_impl(
     while (status > 0) {
         if (row_count >= out_capacity && !grow_term_row_buffer(out_ptr, out_capacity, &out_capacity)) { return -2; }
         uint32_t row_end = 0u;
-        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0)) {
+        if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints, &row_end, 0, 0u, 0, 0u, validate_glossary_types, 0, 0, 0)) {
             return -1;
         }
         ++row_count;
@@ -3378,8 +3387,11 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
             }
         }
         uint32_t key_escape_mask;
+        uint32_t score_token_end = 0u;
+        uint32_t sequence_token_end = 0u;
         if (!parse_row_single_pass(src, source.end, source.position, &rows[row_count], media_hints != 0u, &row_end,
-                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback, validate_glossary_types != 0u, &key_escape_mask)) {
+                rows, row_count, glossary_lookback > 0u ? &glossary_witness : 0, glossary_lookback,
+                validate_glossary_types != 0u, &key_escape_mask, &score_token_end, &sequence_token_end)) {
             return -1;
         }
         if (glossary_witnesses != 0) { glossary_witnesses[row_count] = glossary_witness; }
@@ -3513,11 +3525,9 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         reading_indexes[row_count] = string_indexes[1];
         reading_equals[row_count] = reading_equals_expression ? 1u : 0u;
         // The row parser already validated the JSON grammar of both numbers.
-        uint32_t score_end = 0u;
         int32_t score = 0;
         if (
-            !scan_scalar_span(src, source.end, parsed_row->score_start, &score_end) ||
-            !parse_int32_token(src, parsed_row->score_start, score_end, 0, &score) ||
+            !parse_int32_token(src, parsed_row->score_start, score_token_end, 0, &score) ||
             // Integer storage cannot preserve a negative zero score. Use the
             // ordinary number-preserving path, even in otherwise integer banks.
             (score == 0 && src[parsed_row->score_start] == '-')
@@ -3528,11 +3538,7 @@ int32_t parse_and_encode_term_bank_token_binary_dedup(
         scores[row_count] = score;
         int32_t sequence = -1;
         if (parsed_row->sequence_start != 0xffffffffu) {
-            uint32_t sequence_end = 0u;
-            if (
-                !scan_scalar_span(src, source.end, parsed_row->sequence_start, &sequence_end) ||
-                !parse_int32_token(src, parsed_row->sequence_start, sequence_end, -1, &sequence)
-            ) {
+            if (!parse_int32_token(src, parsed_row->sequence_start, sequence_token_end, -1, &sequence)) {
                 *(uint32_t*)(uintptr_t)row_count_ptr = row_count;
                 return -5;
             }
