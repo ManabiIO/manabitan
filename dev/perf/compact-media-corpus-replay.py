@@ -125,7 +125,7 @@ def main():
     parser.add_argument("--out", type=pathlib.Path, required=True)
     parser.add_argument("--fixtures", default="jmdict,jitendex,vndb")
     parser.add_argument("--node", default="node")
-    parser.add_argument("--heap-mib", type=int, default=512)
+    parser.add_argument("--heap-mib", type=int, default=1024)
     parser.add_argument("--worker", choices=["prepared", "decline"], default="prepared")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
