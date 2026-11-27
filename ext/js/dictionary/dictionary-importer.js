@@ -72,6 +72,8 @@ import {DictionaryZipReadScope} from './dictionary-zip-read-scope.js';
 import {DictionarySourceIntegrityError} from './dictionary-source-integrity-error.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RawZipPayloadReader, TermBankSourcePipeline} from './term-bank-source-pipeline.js';
 import {readDenseZipFileMap} from './dense-zip-directory.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from './dense-zip-file-map.js'
 import {snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {MIN_SOURCE_ZIP_IMAGE_COUNT, preparePackedSourceZipMedia} from './source-zip-media-pack.js';
 import {createGenerationMediaIndex, restrictGenerationMediaIndex} from './dictionary-generation-media-store.js';
@@ -2000,6 +2002,21 @@ export class DictionaryImporter {
                                     deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement));
                                     continue;
                                 }
+                                /* eslint-disable @stylistic/semi */
+                                // Prepared media owns its own checked catalog. Keep
+                                // unopened image entries compact in this owner until
+                                // a real payload fallback needs their metadata.
+                                if (
+                                    deferArchiveImages &&
+                                    (requirement.type === 'image' || requirement.type === 'structured-content-image' || requirement.type === 'image-reference') &&
+                                    fileMap instanceof DenseZipFileMap &&
+                                    fileMap.hasUnmaterializedEntry(requirement.source.path) &&
+                                    getImageMediaTypeFromFileName(requirement.source.path) !== null
+                                ) {
+                                    deferredNoMetadataMediaRequirements.push(this._createDeferredMediaRequirement(requirement))
+                                    continue
+                                }
+                                /* eslint-enable @stylistic/semi */
                                 const file = fileMap.get(requirement.source.path);
                                 if (
                                     deferArchiveImages &&
@@ -2410,6 +2427,7 @@ export class DictionaryImporter {
                             parserEncodeContentMs: parserProfile.encodeContentMs ?? null,
                             parserRecentContentDedupHitCount: parserProfile.recentContentDedupHitCount ?? null,
                             parserRowDecodeMs: parserProfile.rowDecodeMs ?? null,
+                            parserMediaHintRowsSkipped: parserProfile.mediaHintRowsSkipped ?? 0,
                             parserChunkDispatchMs: parserProfile.chunkDispatchMs ?? null,
                             parserSourcePreparationMs: parserProfile.sourcePreparationMs ?? null,
                             parserSourceDeliveryMs: parserProfile.sourceDeliveryMs ?? null,
@@ -2798,6 +2816,7 @@ export class DictionaryImporter {
                 fastPathParserEncodeContentMs: fastPathProfile?.encodeContentMs ?? null,
                 fastPathParserRecentContentDedupHitCount: fastPathProfile?.recentContentDedupHitCount ?? null,
                 fastPathParserRowDecodeMs: fastPathProfile?.rowDecodeMs ?? null,
+                fastPathParserMediaHintRowsSkipped: fastPathProfile?.mediaHintRowsSkipped ?? 0,
                 fastPathParserStringPlanMs: fastPathProfile?.nativeStringPlanMs ?? null,
                 fastPathParserChunkDispatchMs: fastPathProfile?.chunkDispatchMs ?? null,
                 fastPathParserSourcePreparationMs: fastPathProfile?.sourcePreparationMs ?? null,
@@ -4387,10 +4406,10 @@ export class DictionaryImporter {
 
     /**
      * @param {import('dictionary-importer').ArchiveFileMap} fileMap
-     * @param {import('dictionary-importer').QueryDetails} queryDetails
+     * @param {import('dictionary-importer').QueryDetails} [queryDetails]
      * @returns {import('dictionary-importer').QueryResult}
      */
-    _getArchiveFiles(fileMap, queryDetails) {
+    _getArchiveFiles(fileMap, queryDetails = ARCHIVE_BANK_QUERY_DETAILS) {
         /** @type {import('dictionary-importer').QueryResult} */
         const results = new Map();
 
@@ -4398,7 +4417,14 @@ export class DictionaryImporter {
             results.set(fileType, []);
         }
 
+        const standardBankQueries = queryDetails === ARCHIVE_BANK_QUERY_DETAILS;
         for (const fileName of fileMap.keys()) {
+            // Every built-in bank pattern starts with "t" or "k". Most media
+            // names cannot match; keep custom patterns on their original path.
+            if (standardBankQueries) {
+                const firstCharacter = fileName.charCodeAt(0);
+                if (firstCharacter !== 0x74 && firstCharacter !== 0x6b) { continue; }
+            }
             for (const [fileType, fileNameFormat] of queryDetails) {
                 if (!fileNameFormat.test(fileName)) { continue; }
                 const entries = results.get(fileType);

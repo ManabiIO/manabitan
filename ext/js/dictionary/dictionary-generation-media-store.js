@@ -48,23 +48,11 @@ export function createGenerationMediaIndex(records, dataBytes) {
     if (records.length === 0 || records.length > MAX_ROWS || !Number.isSafeInteger(dataBytes) || dataBytes <= 0 || dataBytes > MAX_DATA_BYTES) {
         return null;
     }
-    const match = /^(.*[^0-9])([1-9][0-9]*)(\.[A-Za-z0-9]+)$/.exec(records[0].path);
-    if (match === null) { return null; }
-    const [, prefix, , suffix] = match;
-    if (prefix.length > 128 || !isPrintableAscii(prefix) || suffix.length > 16 || getImageMediaTypeFromFileName(records[0].path) === null) { return null; }
-    const ids = new Uint32Array(records.length);
-    let firstId = Infinity;
-    let lastId = 0;
-    for (let i = 0; i < records.length; ++i) {
-        const id = getPathId(records[i].path, prefix, suffix);
-        if (id === null || id > 0xffffffff) { return null; }
-        ids[i] = id;
-        firstId = Math.min(firstId, id);
-        lastId = Math.max(lastId, id);
-    }
-    const slotCount = lastId - firstId + 1;
-    if (slotCount > Math.min(MAX_ROWS, records.length * 1.25)) { return null; }
-    const index = new Uint8Array(slotCount * ROW_BYTES);
+    /* eslint-disable @stylistic/semi */
+    const layout = createGenerationMediaIndexLayout(records.length, (i) => records[i].path)
+    if (layout === null) { return null }
+    const {prefix, suffix, ids, firstId, slotCount, index} = layout
+    /* eslint-enable @stylistic/semi */
     const view = new DataView(index.buffer);
     for (let i = 0; i < records.length; ++i) {
         const {packedOffset, packedLength, compressionMethod, uncompressedLength, signature} = records[i];
@@ -91,11 +79,100 @@ export function createGenerationMediaIndex(records, dataBytes) {
     return {index, descriptor: {version: 2, prefix, suffix, firstId, slotCount, count: records.length, dataBytes}};
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * Reserve a bounded index before ZIP reads. Canonical paths are identified by
+ * their shared namespace and IDs; the caller's callback is never retained.
+ * The caller supplies each verified payload range exactly once, then seals
+ * the index against the actual immutable source span.
+ * @param {number} count
+ * @param {(index: number) => string} getPath
+ * @returns {{write: (index: number, path: string, offset: number, length: number, outputLength: number, method: number, signature: number) => boolean, finish: (dataBytes: number) => GenerationMediaIndex|null}|null}
+ */
+export function createGenerationMediaIndexWriter(count, getPath) {
+    const layout = createGenerationMediaIndexLayout(count, getPath)
+    if (layout === null) { return null }
+    const {prefix, suffix, ids, firstId, slotCount, index} = layout
+    const view = new DataView(index.buffer)
+    for (const id of ids) {
+        const row = (id - firstId) * ROW_BYTES
+        if (view.getUint32(row, true) !== 0) { return null }
+        // A reservation rejects duplicate paths before any payload is read.
+        view.setUint32(row, 1, true)
+    }
+    let written = 0
+    let end = 0
+    let settled = false
+    return {
+        write(i, path, offset, length, outputLength, method, signature) {
+            if (settled || !Number.isInteger(i) || i < 0 || i >= count ||
+            !isMediaRange(offset, length, outputLength, method, MAX_DATA_BYTES) ||
+            !Number.isInteger(signature) || signature < 0 || signature > 0xffffffff ||
+            typeof path !== 'string' || getPathId(path, prefix, suffix) !== ids[i]) {
+                settled = true
+                return false
+            }
+            const row = (ids[i] - firstId) * ROW_BYTES
+            // CRC slots are private completion markers until finish seals all
+            // occupied and empty rows with their final identity and checksum.
+            if (view.getUint32(row + ROW_CRC_OFFSET, true) !== 0) {
+                settled = true
+                return false
+            }
+            view.setUint32(row, offset + 1, true)
+            view.setUint32(row + 4, length | (method === 8 ? DEFLATE_FLAG : 0), true)
+            view.setUint32(row + 8, outputLength, true)
+            view.setUint32(row + 12, signature, true)
+            view.setUint32(row + ROW_CRC_OFFSET, 1, true)
+            end = Math.max(end, offset + length)
+            ++written
+            return true
+        },
+        finish(dataBytes) {
+            if (settled) { return null }
+            settled = true
+            if (written !== count || !Number.isSafeInteger(dataBytes) || dataBytes < end || dataBytes <= 0 || dataBytes > MAX_DATA_BYTES) { return null }
+            for (let i = 0; i < slotCount; ++i) {
+                const row = i * ROW_BYTES
+                view.setUint32(row + ROW_ID_OFFSET, firstId + i, true)
+                view.setUint32(row + ROW_CRC_OFFSET, computeGenerationMediaCrc(index, row, row + ROW_CRC_OFFSET), true)
+            }
+            return {index, descriptor: {version: 2, prefix, suffix, firstId, slotCount, count, dataBytes}}
+        },
+    }
+}
+
+/**
+ * @param {number} count
+ * @param {(index: number) => string} getPath
+ * @returns {{prefix: string, suffix: string, ids: Uint32Array<ArrayBuffer>, firstId: number, slotCount: number, index: Uint8Array<ArrayBuffer>}|null}
+ */
+function createGenerationMediaIndexLayout(count, getPath) {
+    if (!Number.isInteger(count) || count <= 0 || count > MAX_ROWS) { return null }
+    const match = /^(.*[^0-9])([1-9][0-9]*)(\.[A-Za-z0-9]+)$/.exec(getPath(0))
+    if (match === null) { return null }
+    const [, prefix, , suffix] = match
+    if (prefix.length > 128 || !isPrintableAscii(prefix) || suffix.length > 16 || getImageMediaTypeFromFileName(getPath(0)) === null) { return null }
+    const ids = new Uint32Array(count)
+    let firstId = Infinity
+    let lastId = 0
+    for (let i = 0; i < count; ++i) {
+        const id = getPathId(getPath(i), prefix, suffix)
+        if (id === null || id > 0xffffffff) { return null }
+        ids[i] = id
+        firstId = Math.min(firstId, id)
+        lastId = Math.max(lastId, id)
+    }
+    const slotCount = lastId - firstId + 1
+    if (slotCount > Math.min(MAX_ROWS, count * 1.25)) { return null }
+    return {prefix, suffix, ids, firstId, slotCount, index: new Uint8Array(slotCount * ROW_BYTES)}
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * Restrict a worker's verified index to the actual glossary references. Keep
- * the same slot range and its validated holes. Reuse the immutable index when
- * all occupied slots remain; copy only before dropping the first occupied slot.
- * Only dropped occupied slots need their empty marker checksum recomputed.
+ * the same slot range and its validated holes. Only dropped occupied slots
+ * need their empty marker checksum recomputed.
  * @param {GenerationMediaIndex} plan
  * @param {Iterable<string>} paths
  * @returns {GenerationMediaIndex|null}
@@ -115,6 +192,9 @@ export function restrictGenerationMediaIndex({descriptor, index}, paths) {
         ++count;
     }
     if (count === 0 || count > descriptor.count) { return null; }
+    // Reuse the immutable index when all occupied slots remain. Copy only
+    // before dropping the first occupied slot so the prepared source stays
+    // unchanged while avoiding an unnecessary full-index allocation.
     let selected = index;
     let target = source;
     for (let slot = 0; slot < keep.length; ++slot) {

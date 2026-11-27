@@ -141,6 +141,62 @@ describe('fused parser key escape hints', () => {
         expect(fused.result.readings).toStrictEqual(['reading', '\ufffd', '\ufffd'])
     })
 
+    maybeTest.each([0, 1, 2, 3, 7, 8, 15, 16])('copies complete UTF-8 keys with a %i-byte prefix', async (padding) => {
+        const characters = ['\u007f', '\u0080', '\u07ff', '\u0800', '\ud7ff', '\ue000', '\uffff', '\u{10000}', '\u{10ffff}', '日本語', 'é日本𠮷']
+        const keys = characters.map((value) => `${'x'.repeat(padding)}${value}`)
+        const rows = keys.flatMap((key, index) => [
+            [key, `${key}reading`, '', '', index, ['definition'], index, ''],
+            [key, '', '', '', index, ['definition'], index, ''],
+        ])
+        const sources = [encoder.encode('[]'), encoder.encode(JSON.stringify(rows))]
+        const fused = await snapshot(sources, true)
+        expect(fused.profile?.fusedParseAttempts).toBe(1)
+        expect(fused.profile?.fusedParseFallbacks ?? 0).toBe(0)
+        expect(fused.result).toStrictEqual((await snapshot(sources, false)).result)
+        expect(fused.result.expressions).toStrictEqual(keys.flatMap((key) => [key, key]))
+        expect(fused.result.readings).toStrictEqual(keys.flatMap((key) => [`${key}reading`, key]))
+    })
+
+    maybeTest.each([
+        [0xc2],
+        [0xe0],
+        [0xf0],
+        [0xe1, 0x80],
+        [0xf1, 0x80],
+        [0xf1, 0x80, 0x80],
+        [0xc2, 0x7f],
+        [0xc2, 0xc0],
+        [0xe1, 0x7f, 0x80],
+        [0xe1, 0x80, 0x7f],
+        [0xe1, 0x80, 0xc0],
+        [0xf1, 0x7f, 0x80, 0x80],
+        [0xf1, 0x80, 0x7f, 0x80],
+        [0xf1, 0x80, 0x80, 0x7f],
+        [0xf1, 0x80, 0x80, 0xc0],
+        [0xe0, 0x9f, 0xbf],
+        [0xed, 0xa0, 0x80],
+        [0xf0, 0x8f, 0xbf, 0xbf],
+        [0xf4, 0x90, 0x80, 0x80],
+        [0xc0, 0x80],
+        [0xc1, 0xbf],
+        [0xf5, 0x80, 0x80, 0x80],
+    ].map((bytes) => [bytes]))('preserves replacement decoding after a partially copied key: %j', async (invalidBytes) => {
+        const prefix = encoder.encode('[["日本語","にほんご","","",0,["before"],1,""],["日本語')
+        const suffix = encoder.encode('","","","",1,["invalid"],2,""],["日本語","にほんご","","",2,["after"],3,""]]')
+        const source = new Uint8Array(prefix.length + invalidBytes.length + suffix.length)
+        source.set(prefix)
+        source.set(invalidBytes, prefix.length)
+        source.set(suffix, prefix.length + invalidBytes.length)
+        const sources = [encoder.encode('[]'), source]
+        const fused = await snapshot(sources, true)
+        const expected = await snapshot(sources, false)
+        expect(fused.profile?.fusedParseAttempts).toBe(1)
+        expect(fused.profile?.fusedParseFallbacks).toBe(1)
+        expect(fused.result).toStrictEqual(expected.result)
+        expect(fused.result.expressions).toStrictEqual(['日本語', `日本語${decoder.decode(new Uint8Array(invalidBytes))}`, '日本語'])
+        expect(fused.result.readings[1]).toBe(fused.result.expressions[1])
+    })
+
     maybeTest('still rejects malformed JSON in a repeated key row', async () => {
         const sources = [
             encoder.encode('[["same","reading","","",0,["valid"],1,""]]'),

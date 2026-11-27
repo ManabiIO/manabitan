@@ -30,7 +30,7 @@ import {ZipReader, Uint8ArrayReader, Uint8ArrayWriter} from '@zip.js/zip.js'
 /** @typedef {import('dictionary-importer').ImportExperiments} Flags */
 /** @typedef {Parameters<Parameters<typeof import('../../ext/js/dictionary/term-bank-wasm-parser.js').parseTermBankWithWasmColumnChunks>[2]>[0] & {preparedLookupIndexes?: Map<string, import('../../ext/js/dictionary/term-lookup-index-preparation.js').PreparedTermLookupIndex>}} Chunk */
 /** @typedef {{cacheFile: string, sha256: string, termRows: number}} Lock */
-/** @typedef {{elapsedMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
+/** @typedef {{elapsedMs: number, lookupMs: number, rows: number, scratchReusedBytes: number, scratchReuseMisses: number, nativeSegments: number, indexBytes: number, ownedCompactExpressionRows: number, maxWasmHeapBytes: number, directArenaSegments: number, validationPasses: number, digest: string|null}} Measurement */
 /** @typedef {Measurement & {flags: Flags, validateGlossaryTypes: boolean, dictionary: string, filesPerGroup: number, node: string, sourceRoot: string, sourceHashes: Record<string, string>, wasmSha256: string, lockSha256: string, archiveSha256: string, runnerSha256: string, afterVerificationMemory: {rss: number, heapTotal: number, heapUsed: number, external: number, arrayBuffers: number}, lifetimeMaxRssKiB: number}} ScreenResult */
 /** @typedef {{pair: number, arm: string, result: ScreenResult}} Observation */
 const root = fileURLToPath(new URL('../../', import.meta.url))
@@ -135,6 +135,7 @@ async function measure(dictionary, cache, sourceRoot, flags) {
         let scratchReusedBytes = 0
         let scratchReuseMisses = 0
         let indexBytes = 0
+        let ownedCompactExpressionRows = 0
         let maxWasmHeapBytes = 0
         let directArenaSegments = 0
         let validationPasses = 0
@@ -173,11 +174,17 @@ async function measure(dictionary, cache, sourceRoot, flags) {
                 digest.update(key)
                 digest.update(entry.bytes)
                 indexBytes += entry.bytes.byteLength
+                const expressions = entry.preinternedPlan.expressionIndexes
+                if (expressions instanceof Uint16Array && expressions.buffer === entry.bytes.buffer) {
+                    ownedCompactExpressionRows += expressions.length
+                }
                 for (const view of [entry.preinternedPlan.stringLengths,
                     entry.preinternedPlan.stringOffsets,
                     entry.preinternedPlan.stringHashes,
                     entry.preinternedPlan.stringsBuffer,
-                    entry.preinternedPlan.expressionIndexes,
+                    // Normalize only this in-memory representation outside the
+                    // timed region; persisted index and key bytes stay exact.
+                    Uint32Array.from(expressions),
                     entry.preinternedPlan.readingIndexes]) {
                     if (view) { updateView(digest, view) }
                 }
@@ -201,6 +208,7 @@ async function measure(dictionary, cache, sourceRoot, flags) {
             rows,
             nativeSegments,
             indexBytes,
+            ownedCompactExpressionRows,
             maxWasmHeapBytes,
             directArenaSegments,
             validationPasses,

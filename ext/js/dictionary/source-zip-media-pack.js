@@ -18,6 +18,8 @@
 import {getImageMediaTypeFromFileName} from '../media/media-util.js';
 import {RAW_ZIP_BATCH_MAX_FILES, RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES} from './term-bank-source-pipeline.js';
 import {validateCompressedZipMediaBatchWasm} from './term-bank-wasm-parser.js';
+// eslint-disable-next-line @stylistic/semi
+import {createGenerationMediaIndexWriter} from './dictionary-generation-media-store.js'
 
 export const MIN_SOURCE_ZIP_IMAGE_COUNT = 8192;
 
@@ -25,6 +27,11 @@ const MIN_ARCHIVE_BYTES = 128 * 1024 * 1024;
 const MAX_PACKED_MEDIA_BYTES = 256 * 1024 * 1024;
 const ZIP_LOCAL_HEADER_BYTES = 30;
 const MAX_RELATIVE_RANGE_OVERHEAD = 1 / 8;
+
+/** @typedef {{readMs: number, validationMs: number, rangeReadCount: number, rangeReadBytes: number, compressedBytes: number, uncompressedBytes: number}} SourceMediaMetrics */
+/** @typedef {{blob: Blob, records: import('./dictionary-generation-media-store.js').SourceMediaRange[]} & SourceMediaMetrics} SourceMediaPack */
+/** @typedef {{blob: Blob, plan: import('./dictionary-generation-media-store.js').GenerationMediaIndex} & SourceMediaMetrics} SourceMediaIndexPack */
+/** @typedef {Array<{type: string, source: {path: string}}>|import('@zip.js/zip.js').Entry[]} SourceMediaFiles */
 
 /* eslint-disable @stylistic/semi */
 /**
@@ -56,22 +63,71 @@ export async function preparePackedSourceZipMediaEntries(archive, files, reader,
     return await preparePackedSourceZipMediaFiles(archive, files, null, reader, checkCancellation)
 }
 
+/**
+ * Write verified payload ranges directly into the fixed numeric index instead
+ * of retaining a second object per image until packing finishes. Dense entry
+ * catalogs already have physical order; other inputs sort only references.
+ * Unsupported namespaces leave the ordinary resolver available.
+ * @param {Blob} archive
+ * @param {import('@zip.js/zip.js').Entry[]} files
+ * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
+ * @param {() => void} checkCancellation
+ * @returns {Promise<SourceMediaIndexPack|null>}
+ */
+export async function preparePackedSourceZipMediaIndex(archive, files, reader, checkCancellation) {
+    let orderedFiles = files
+    for (let i = 1; i < files.length; ++i) {
+        if (files[i].offset < files[i - 1].offset) {
+            orderedFiles = [...files].sort((a, b) => a.offset - b.offset)
+            break
+        }
+    }
+    return await preparePackedSourceZipMediaFiles(archive, orderedFiles, null, reader, checkCancellation, true)
+}
+
 /* eslint-enable @stylistic/semi */
 
 /**
+ * @overload
  * @param {Blob} archive
- * @param {Array<{type: string, source: {path: string}}>|import('@zip.js/zip.js').Entry[]} sources
+ * @param {SourceMediaFiles} sources
  * @param {import('dictionary-importer').ArchiveFileMap|null} fileMap
  * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
  * @param {() => void} checkCancellation
- * @returns {Promise<{blob: Blob, records: import('./dictionary-generation-media-store.js').SourceMediaRange[], readMs: number, validationMs: number, rangeReadCount: number, rangeReadBytes: number, compressedBytes: number, uncompressedBytes: number}|null>}
+ * @param {true} indexOutput
+ * @returns {Promise<SourceMediaIndexPack|null>}
  */
-async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reader, checkCancellation) {
+/**
+ * @overload
+ * @param {Blob} archive
+ * @param {SourceMediaFiles} sources
+ * @param {import('dictionary-importer').ArchiveFileMap|null} fileMap
+ * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
+ * @param {() => void} checkCancellation
+ * @param {false} [indexOutput]
+ * @returns {Promise<SourceMediaPack|null>}
+ */
+/**
+ * @param {Blob} archive
+ * @param {SourceMediaFiles} sources
+ * @param {import('dictionary-importer').ArchiveFileMap|null} fileMap
+ * @param {import('./term-bank-source-pipeline.js').RawZipPayloadReader} reader
+ * @param {() => void} checkCancellation
+ * @param {boolean} [indexOutput]
+ * @returns {Promise<SourceMediaPack|SourceMediaIndexPack|null>}
+ */
+async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reader, checkCancellation, indexOutput = false) {
     // eslint-disable-next-line @stylistic/semi
     if (sources.length < MIN_SOURCE_ZIP_IMAGE_COUNT || archive.size <= MIN_ARCHIVE_BYTES || !reader.supportsBatchReads()) { return null }
 
-    const records = [];
-    const paths = new Set();
+    /* eslint-disable @stylistic/semi */
+    const indexFiles = indexOutput ? /** @type {import('@zip.js/zip.js').Entry[]} */ (sources) : null
+    const indexWriter = indexFiles === null ? null : createGenerationMediaIndexWriter(indexFiles.length, (i) => indexFiles[i].filename)
+    if (indexFiles !== null && indexWriter === null) { return null }
+    const records = []
+    const paths = indexFiles === null ? new Set() : null
+    let previousOffset = -1
+    /* eslint-enable @stylistic/semi */
     let rangeStart = Infinity;
     let rangeEndLowerBound = 0;
     let compressedTotal = 0;
@@ -96,7 +152,7 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
             typeof entry === 'undefined' ||
             entry.filename !== path ||
             Reflect.has(entry, 'bytes') ||
-            paths.has(path)
+            paths?.has(path)
         ) {
             return null;
         }
@@ -113,6 +169,10 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
         ) {
             return null;
         }
+        /* eslint-disable @stylistic/semi */
+        if (indexFiles !== null && offset <= previousOffset) { return null }
+        previousOffset = offset
+        /* eslint-enable @stylistic/semi */
         // A normalized UTF-8 alias or Unicode extra field can describe a
         // different logical pathname. Leave either to the general resolver.
         for (let i = 0; i < rawFilename.byteLength; ++i) {
@@ -123,25 +183,32 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
         rangeStart = Math.min(rangeStart, offset);
         rangeEndLowerBound = Math.max(rangeEndLowerBound, firstPossibleEnd);
         compressedTotal += compressedSize;
-        paths.add(path);
-        records.push({
-            path,
-            mediaType,
-            file,
-            offset,
-            compressedSize,
-            uncompressedLength: uncompressedSize,
-            compressionMethod,
-            packedOffset: 0,
-            packedLength: compressedSize,
-            signature: file.signature,
-        });
+        /* eslint-disable @stylistic/semi */
+        paths?.add(path)
+        if (indexFiles === null) {
+            records.push({
+                path,
+                mediaType,
+                file,
+                offset,
+                compressedSize,
+                uncompressedLength: uncompressedSize,
+                compressionMethod,
+                packedOffset: 0,
+                packedLength: compressedSize,
+                signature: file.signature,
+            })
+        }
+        /* eslint-enable @stylistic/semi */
     }
 
     const maxSpan = Math.min(MAX_PACKED_MEDIA_BYTES, compressedTotal * (1 + MAX_RELATIVE_RANGE_OVERHEAD));
     if (rangeEndLowerBound - rangeStart > maxSpan) { return null; }
 
-    const byOffset = [...records].sort((a, b) => a.offset - b.offset);
+    /* eslint-disable @stylistic/semi */
+    const byOffset = indexFiles === null ? [...records].sort((a, b) => a.offset - b.offset) : []
+    const fileCount = indexFiles === null ? byOffset.length : indexFiles.length
+    /* eslint-enable @stylistic/semi */
     let rangeEnd = rangeStart;
     let readMs = 0;
     let validationMs = 0;
@@ -152,26 +219,32 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
         checkCancellation();
         return false;
     };
-    for (let start = 0; start < byOffset.length;) {
+    for (let start = 0; start < fileCount;) {
         checkCancellation();
         let end = start;
         let packedBytes = 0;
         let unpackedBytes = 0;
-        while (end < byOffset.length && end - start < RAW_ZIP_BATCH_MAX_FILES) {
-            const record = byOffset[end];
+        while (end < fileCount && end - start < RAW_ZIP_BATCH_MAX_FILES) {
+            /* eslint-disable @stylistic/semi */
+            const compressedSize = indexFiles === null ? byOffset[end].compressedSize : indexFiles[end].compressedSize
+            const uncompressedLength = indexFiles === null ? byOffset[end].uncompressedLength : indexFiles[end].uncompressedSize
+            /* eslint-enable @stylistic/semi */
             if (
-                packedBytes + record.compressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ||
-                unpackedBytes + record.uncompressedLength > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES
+                packedBytes + compressedSize > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES ||
+                unpackedBytes + uncompressedLength > RAW_ZIP_BATCH_MAX_PAYLOAD_BYTES
             ) {
                 break;
             }
-            packedBytes += record.compressedSize;
-            unpackedBytes += record.uncompressedLength;
+            packedBytes += compressedSize;
+            unpackedBytes += uncompressedLength;
             ++end;
         }
 
         const readStart = Date.now();
-        const files = byOffset.slice(start, end).map(({file}) => file);
+        // eslint-disable-next-line @stylistic/semi
+        const files = indexFiles === null ? byOffset.slice(start, end).map(({file}) => file) : indexFiles.slice(start, end)
+        // eslint-disable-next-line @stylistic/semi
+        const offsets = indexFiles === null ? null : files.map(({offset}) => offset)
         // Large-Blob reads use bounded coalesced ranges. Keep payload subviews
         // into that range through validation instead of allocating one owned
         // byte array per image; the validator copies bytes into its WASM arena.
@@ -187,34 +260,52 @@ async function preparePackedSourceZipMediaFiles(archive, sources, fileMap, reade
         uncompressedBytes += unpackedBytes;
 
         for (let i = 0; i < batch.sources.length; ++i) {
-            const record = byOffset[start + i];
+            /* eslint-disable @stylistic/semi */
+            const record = indexFiles === null ? byOffset[start + i] : null
             const source = batch.sources[i];
-            if (source.file !== record.file || record.offset < rangeEnd) { return null; }
+            if (source.file !== files[i] || (offsets === null ? byOffset[start + i].offset : offsets[i]) < rangeEnd) { return null }
             rangeEnd = source.archiveOffset + source.compressedSize;
             if (rangeEnd - rangeStart > maxSpan) { return null; }
-            record.packedOffset = source.archiveOffset - rangeStart;
+            let packedOffset = source.archiveOffset - rangeStart
+            let packedLength = record === null ? source.compressedSize : record.packedLength
+            let compressionMethod = record === null ? source.compressionMethod : record.compressionMethod
+            const uncompressedLength = record === null ? source.uncompressedSize : record.uncompressedLength
             const bodyOffset = getSingleStoredDeflateBodyOffset(source);
             if (bodyOffset !== 0) {
                 // The validator verified the real decoded bytes and CRC. One
                 // exact stored block is already byte-identical to its output.
-                record.packedOffset += bodyOffset;
-                record.packedLength = record.uncompressedLength;
-                record.compressionMethod = 0;
+                packedOffset += bodyOffset
+                packedLength = uncompressedLength
+                compressionMethod = 0
             }
+            if (record === null) {
+                if (indexWriter === null || !indexWriter.write(start + i, source.filename, packedOffset, packedLength, uncompressedLength, compressionMethod, source.signature)) { return null }
+            } else {
+                record.packedOffset = packedOffset
+                record.packedLength = packedLength
+                record.compressionMethod = compressionMethod
+            }
+            /* eslint-enable @stylistic/semi */
         }
         start = end;
     }
 
-    return {
-        blob: archive.slice(rangeStart, rangeEnd),
-        records,
+    /* eslint-disable @stylistic/semi */
+    const blob = archive.slice(rangeStart, rangeEnd)
+    const metrics = {
         readMs,
         validationMs,
         rangeReadCount,
         rangeReadBytes,
         compressedBytes: compressedTotal,
         uncompressedBytes,
-    };
+    }
+    if (indexWriter !== null) {
+        const plan = indexWriter.finish(blob.size)
+        return plan === null ? null : {blob, plan, ...metrics}
+    }
+    return {blob, records, ...metrics}
+    /* eslint-enable @stylistic/semi */
 }
 
 /**

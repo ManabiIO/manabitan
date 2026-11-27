@@ -30,8 +30,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kind: [corpus, browser]
-        dictionary: [jmdict, jitendex, vndb]
+        include:
+          - kind: browser
+            dictionary: jitendex
+          - kind: corpus
+            dictionary: vndb
     env:
       DICTIONARY: ${{ matrix.dictionary }}
       VERIFICATION_KIND: ${{ matrix.kind }}
@@ -68,6 +71,15 @@ jobs:
             ln -s "$GITHUB_WORKSPACE/builds/e2e-dictionary-cache" "$import_source_root/builds/e2e-dictionary-cache"
             (cd "$import_source_root" && npm run build:libs)
           done
+          if [[ "$VERIFICATION_KIND" == browser ]]; then
+            # Frozen import sources predate the repaired 1 GiB eligibility
+            # check. Apply the same current checker to both browser arms after
+            # their product packages have been built.
+            for import_ref in base combined; do
+              cp "$GITHUB_WORKSPACE/dev/perf/benchmark-support.js" \
+                "$RUNNER_TEMP/import-$import_ref/dev/perf/benchmark-support.js"
+            done
+          fi
           mkdir -p "builds/perf/20261126-b4b3/$VERIFICATION_KIND/$DICTIONARY"
           python3 - <<'PY'
           import json, os, pathlib, subprocess

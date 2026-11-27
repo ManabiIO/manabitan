@@ -6,6 +6,8 @@
 import {crc32} from 'node:zlib';
 import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 import {DictionaryImporter} from '../ext/js/dictionary/dictionary-importer.js';
+// eslint-disable-next-line @stylistic/semi
+import {DenseZipFileMap} from '../ext/js/dictionary/dense-zip-file-map.js'
 import {createGenerationMediaIndex} from '../ext/js/dictionary/dictionary-generation-media-store.js';
 import {startSourceZipMediaPreparation} from '../ext/js/dictionary/source-zip-media-preparation.js';
 import {DictionaryImporterMediaLoader} from './mocks/dictionary-importer-media-loader.js';
@@ -45,9 +47,10 @@ class LargeArchive extends Blob {
     get size() { return 129 * 1024 * 1024; }
 }
 
-function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?: boolean, onTerms?: () => void}} */ {missing = false, failSeal = false, rejectWrite = false, onTerms = () => {}} = {}) {
+function fixture(/** @type {{compact?: boolean, missing?: boolean, failSeal?: boolean, rejectWrite?: boolean, onTerms?: () => void}} */ {compact = false, missing = false, failSeal = false, rejectWrite = false, onTerms = () => {}} = {}) {
     /** @type {import('dictionary-importer').ArchiveFileMap} */
-    const fileMap = new Map();
+    // eslint-disable-next-line @stylistic/semi
+    let fileMap = new Map()
     /** @type {import('../ext/js/dictionary/dictionary-generation-media-store.js').SourceMediaRange[]} */
     const records = [];
     /** @type {Uint8Array<ArrayBuffer>[]} */
@@ -88,6 +91,34 @@ function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?
     ]) {
         fileMap.set(/** @type {string} */ (filename), {filename: /** @type {string} */ (filename), bytes: encoder.encode(JSON.stringify(data))});
     }
+    /* eslint-disable @stylistic/semi */
+    if (compact) {
+        const sourceEntries = fileMap
+        const names = records.map(({path}) => path)
+        /**
+         * @this {import('../ext/js/dictionary/dense-zip-directory.js').DenseZipEntry}
+         * @returns {Promise<Uint8Array<ArrayBuffer>>}
+         */
+        const getData = async function getCompactFixtureImage() {
+            const index = Number(this.filename.slice('img/card'.length, -'.webp'.length)) - 1
+            return readImage(index)
+        }
+        const catalog = new DenseZipFileMap(names.length, encoder.encode(names.join('')), getData)
+        let nameOffset = 0
+        for (let index = 0; index < names.length; ++index) {
+            const name = names[index]
+            // This archive adapter supplies payloads through getData. Exceed
+            // raw-batch admission so fallback keeps using that same adapter.
+            catalog.addDirectoryMetadata(index, nameOffset, index * 100, 5 * 1024 * 1024, images[index].length, 8, crc32(images[index]))
+            nameOffset += name.length
+        }
+        expect(catalog.finishDirectory()).toBeNull()
+        for (const name of ['index.json', 'term_bank_1.json']) {
+            catalog.set(name, /** @type {import('dictionary-importer').ImportFileEntry} */ (sourceEntries.get(name)))
+        }
+        fileMap = catalog
+    }
+    /* eslint-enable @stylistic/semi */
     const blob = new Blob(images);
     const plan = createGenerationMediaIndex(records, blob.size);
     if (plan === null) { throw new Error('Media fixture was not admitted'); }
@@ -144,7 +175,8 @@ function fixture(/** @type {{missing?: boolean, failSeal?: boolean, rejectWrite?
         new LargeArchive([new Uint8Array(30)]),
         {skipImageMetadata: true, enableTermEntryContentDedup: false, zipUseWebWorkers: false},
     );
-    return {run, prepared, database, staged, selectedPlans, storedMedia, images, readImage, close};
+    // eslint-disable-next-line @stylistic/semi
+    return {run, prepared, database, staged, selectedPlans, storedMedia, images, readImage, close, fileMap}
 }
 
 /** @param {ReturnType<typeof fixture>} f */
@@ -171,9 +203,10 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
-describe('speculative packed media import ownership', () => {
+describe.each([false, true])('speculative packed media import ownership (compact catalog: %s)', (compact) => {
     test('publishes every verified reference without duplicate decoding or SQLite media', async () => {
-        const f = fixture({onTerms() { state.settle(f.prepared); }});
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact, onTerms() { state.settle(f.prepared) }})
         const result = await f.run();
         expect(result.errors).toEqual([]);
         expect(result.result?.counts?.media.total).toBe(IMAGE_COUNT);
@@ -187,11 +220,19 @@ describe('speculative packed media import ownership', () => {
         expect(f.database.writeGenerationMedia).not.toHaveBeenCalled();
         expect(f.database.finishBulkImport).toHaveBeenCalledOnce();
         expect(f.close).toHaveBeenCalledOnce();
+        /* eslint-disable @stylistic/semi */
+        if (f.fileMap instanceof DenseZipFileMap) {
+            for (let index = 0; index < IMAGE_COUNT; ++index) {
+                expect(f.fileMap.hasUnmaterializedEntry(`img/card${index + 1}.webp`)).toBe(true)
+            }
+        }
+        /* eslint-enable @stylistic/semi */
     });
 
     test('retains individual prefetch when a speculative worker cannot start', async () => {
         state.available = false;
-        const f = fixture();
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact})
         const result = await f.run();
         expect(result.errors).toEqual([]);
         expect(result.result?.counts?.media.total).toBe(IMAGE_COUNT);
@@ -202,7 +243,8 @@ describe('speculative packed media import ownership', () => {
     });
 
     test('drains every deferred reference when the worker declines its source', async () => {
-        const f = fixture({onTerms() { state.settle(null); }});
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact, onTerms() { state.settle(null) }})
         const result = await f.run();
         expect(result.errors).toEqual([]);
         expect(result.result?.counts?.media.total).toBe(IMAGE_COUNT);
@@ -213,7 +255,8 @@ describe('speculative packed media import ownership', () => {
     });
 
     test('rereads all payloads when retrying after a deferred media write fails', async () => {
-        const f = fixture();
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact})
         state.settle(null);
         const write = f.database.bulkAdd.getMockImplementation();
         if (typeof write === 'undefined') { throw new Error('Missing database fixture'); }
@@ -239,7 +282,8 @@ describe('speculative packed media import ownership', () => {
     });
 
     test('preserves every payload if staged and ordinary packed publication both fail', async () => {
-        const f = fixture({failSeal: true, rejectWrite: true});
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact, failSeal: true, rejectWrite: true})
         state.settle(f.prepared);
         const result = await f.run();
         expect(result.errors).toEqual([]);
@@ -252,7 +296,8 @@ describe('speculative packed media import ownership', () => {
     });
 
     test('does not hide a missing reference behind the speculative index', async () => {
-        const f = fixture({missing: true});
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact, missing: true})
         state.settle(f.prepared);
         const result = await f.run();
         expect(result.result).toBeNull();
@@ -267,7 +312,8 @@ describe('speculative packed media import ownership', () => {
     });
 
     test('cancels pending speculative preparation before aborting a failed term sink', async () => {
-        const f = fixture({onTerms() { throw new Error('Term sink failed'); }});
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact, onTerms() { throw new Error('Term sink failed') }})
         const result = await f.run();
         expect(result.result).toBeNull();
         expect(result.errors.map(({message}) => message)).toEqual(['Term sink failed']);
@@ -281,7 +327,8 @@ describe('speculative packed media import ownership', () => {
     });
 
     test('discards staged media when the user cancels after preparation', async () => {
-        const f = fixture({onTerms() { state.cancelled = true; }});
+        // eslint-disable-next-line @stylistic/semi
+        const f = fixture({compact, onTerms() { state.cancelled = true }})
         state.settle(f.prepared);
         const result = await f.run();
         expect(result.result).toBeNull();
@@ -297,3 +344,49 @@ describe('speculative packed media import ownership', () => {
         expect(f.close).toHaveBeenCalledOnce();
     });
 });
+
+/* eslint-disable @stylistic/semi */
+describe('compact media catalog deferral', () => {
+    test('preserves an obtained entry while leaving other prepared media unopened', async () => {
+        const f = fixture({compact: true})
+        const entry = f.fileMap.get('img/card1.webp')
+        state.settle(f.prepared)
+        const result = await f.run()
+        expect(result.errors).toEqual([])
+        expect(result.result?.generationMedia).toEqual(f.prepared.plan.descriptor)
+        expect(f.readImage).not.toHaveBeenCalled()
+        expect(f.fileMap.get('img/card1.webp')).toBe(entry)
+        const catalog = /** @type {DenseZipFileMap} */ (f.fileMap)
+        expect(catalog.hasUnmaterializedEntry('img/card1.webp')).toBe(false)
+        expect(catalog.hasUnmaterializedEntry('img/card2.webp')).toBe(true)
+    })
+
+    test.each(['replacement', 'mutation'])('reads inline bytes from an entry %s instead of the speculative archive', async (mode) => {
+        const f = fixture({compact: true})
+        const path = 'img/card1.webp'
+        const bytes = Uint8Array.of(19, 23, 29)
+        if (mode === 'replacement') {
+            // Keep the size metadata required by bounded inline prefetch.
+            const replacement = {filename: path, bytes, uncompressedSize: bytes.byteLength}
+            f.fileMap.set(path, replacement)
+        } else {
+            const entry = f.fileMap.get(path)
+            if (typeof entry === 'undefined') { throw new Error('Missing fixture image') }
+            Reflect.set(entry, 'bytes', bytes)
+        }
+        const catalog = /** @type {DenseZipFileMap} */ (f.fileMap)
+        expect(catalog.hasUnmaterializedEntry(path)).toBe(false)
+        state.settle(f.prepared)
+        const result = await f.run()
+        expect(result.errors).toEqual([])
+        expect(result.result?.counts?.media.total).toBe(IMAGE_COUNT)
+        expect(result.result?.generationMedia).toBeUndefined()
+        expect(f.readImage).toHaveBeenCalledTimes(IMAGE_COUNT - 1)
+        expect(f.storedMedia).toHaveLength(IMAGE_COUNT)
+        expect(f.storedMedia.find((row) => row.path === path)?.content).toEqual(bytes.buffer)
+        expect(f.staged.seal).not.toHaveBeenCalled()
+        expect(f.database.writeGenerationMedia).not.toHaveBeenCalled()
+        expect(f.database.finishBulkImport).toHaveBeenCalledOnce()
+    })
+})
+/* eslint-enable @stylistic/semi */

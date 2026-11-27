@@ -16,6 +16,8 @@
  */
 /* eslint @stylistic/semi: ["error", "never"] */
 
+import {createDenseZipFilenameDecoder} from './dense-zip-filenames.js'
+
 const METADATA_WORDS = 6
 
 /**
@@ -49,17 +51,14 @@ export class DenseZipFileMap {
      * Used only while the directory reader validates and fills this catalog.
      * Duplicate names are reported after all directory checks have completed.
      * @param {number} row
-     * @param {string} filename
      * @param {number} filenameOffset
      * @param {number} offset
      * @param {number} compressedSize
      * @param {number} uncompressedSize
      * @param {0|8} compressionMethod
      * @param {number} signature
-     * @returns {boolean}
      */
-    addDirectoryEntry(row, filename, filenameOffset, offset, compressedSize, uncompressedSize, compressionMethod, signature) {
-        if (this._entries.has(filename)) { return false }
+    addDirectoryMetadata(row, filenameOffset, offset, compressedSize, uncompressedSize, compressionMethod, signature) {
         const base = row * METADATA_WORDS
         this._metadata[base] = offset
         this._metadata[base + 1] = compressedSize
@@ -67,8 +66,24 @@ export class DenseZipFileMap {
         this._metadata[base + 3] = compressionMethod
         this._metadata[base + 4] = signature
         this._metadata[base + 5] = filenameOffset
-        this._entries.set(filename, row)
-        return true
+    }
+
+    /**
+     * Decode admitted ASCII names in bounded windows after all directory
+     * geometry has passed validation. ASCII byte and string offsets match.
+     * @returns {string|null} First duplicate filename, if any.
+     */
+    finishDirectory() {
+        const decodeFilename = createDenseZipFilenameDecoder(this._filenames)
+        for (let row = 0; row < this._pendingEntryCount; ++row) {
+            const base = row * METADATA_WORDS
+            const filenameStart = this._metadata[base + 5]
+            const filenameEnd = row + 1 < this._pendingEntryCount ? this._metadata[base + METADATA_WORDS + 5] : this._filenames.length
+            const filename = decodeFilename(filenameStart, filenameEnd)
+            this._entries.set(filename, row)
+            if (this._entries.size !== row + 1) { return filename }
+        }
+        return null
     }
 
     /**
@@ -105,6 +120,14 @@ export class DenseZipFileMap {
      * @returns {boolean}
      */
     has(key) { return this._entries.has(key) }
+
+    /**
+     * Only untouched checked directory slots can skip entry materialization.
+     * Obtained or replaced entries may have acquired inline bytes or mutations.
+     * @param {string} key
+     * @returns {boolean}
+     */
+    hasUnmaterializedEntry(key) { return typeof this._entries.get(key) === 'number' }
 
     /**
      * @param {string} key

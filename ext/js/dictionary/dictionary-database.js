@@ -76,6 +76,7 @@ import {
 } from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
 import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
 const PACKED_MEDIA_DICTIONARY_SCHEMA_VERSION = 11;
@@ -140,6 +141,7 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
  * @property {Uint8Array} resolvedFlags
  * @property {Float64Array} resolvedOffsets
  * @property {Uint32Array} resolvedLengths
+ * @property {boolean} [resolutionDeferred] Empty resolution columns await first storage admission.
  * @property {string[]|null} resolvedDictNames
  * @property {string} [resolvedUniformDictName]
  * @property {Uint32Array|null} pendingEpochs Null together with pendingIndexes until generic deduplication needs scratch.
@@ -623,6 +625,9 @@ export class DictionaryDatabase {
         this._recentTermContentSourceBatches = new Map();
         /** @type {number} */
         this._recentTermContentSourceBatchBytes = 0;
+        /** @type {number} */
+        // eslint-disable-next-line @stylistic/semi
+        this._recentTermContentBoundaryBatchId = 0
         /** @type {number} */
         this._recentTermContentSourceCacheMaxBytes = this._computeRecentTermContentSourceCacheMaxBytes();
         /** @type {number} */
@@ -1397,8 +1402,14 @@ export class DictionaryDatabase {
                 this._applyImportPragmas();
                 this._deferTermsVirtualTableSync = true;
                 this._termsVirtualTableDirty = false;
-                for (const dropIndexSql of this._createDropIndexesSql()) {
-                    db.exec(dropIndexSql);
+                // Schema initialization already removes disabled secondary
+                // indexes before this connection can accept an import. Only
+                // the enabled policy recreates indexes between imports.
+                if (this._enableSqliteSecondaryIndexes) {
+                    for (const dropIndexSql of this._createDropIndexesSql()) {
+                        // eslint-disable-next-line @stylistic/semi
+                        db.exec(dropIndexSql)
+                    }
                 }
                 this._clearTermEntryContentMetaCaches();
                 this._termContentBlockImportSession?.close();
@@ -6331,6 +6342,8 @@ void 0 :
         this._inFlightTermContentSourceBatches.clear();
         this._recentTermContentSourceBatches.clear();
         this._recentTermContentSourceBatchBytes = 0;
+        // eslint-disable-next-line @stylistic/semi
+        this._recentTermContentBoundaryBatchId = 0
         this._nextRecentTermContentSourceBatchId = 1;
     }
 
@@ -6769,6 +6782,7 @@ void 0 :
         return {buffer, offset, length};
     }
 
+    /* eslint-disable @stylistic/semi */
     /**
      * Retains bounded owned bytes so the next parser groups can verify exact
      * duplicates without reading recently written OPFS blocks. Immutable parser
@@ -6787,6 +6801,14 @@ void 0 :
         ) {
             return 0;
         }
+        // The previous boundary has already been available to this group's
+        // resolver. Retire it before considering the newly published boundary.
+        const previousBoundary = this._recentTermContentSourceBatches.get(this._recentTermContentBoundaryBatchId)
+        if (typeof previousBoundary !== 'undefined') {
+            this._recentTermContentSourceBatches.delete(this._recentTermContentBoundaryBatchId)
+            this._recentTermContentSourceBatchBytes -= previousBoundary.buffer.byteLength
+        }
+        this._recentTermContentBoundaryBatchId = 0
         const averageSampleCount = Math.min(
             staged.indexes.length,
             TERM_CONTENT_RECENT_SOURCE_CACHE_AVERAGE_SAMPLE_COUNT,
@@ -6802,17 +6824,31 @@ void 0 :
             ++sampledPublishedCount;
             sampledContentBytes += spans.lengths[sourceIndex];
         }
-        if (
+        let retainBoundaryOnly = (
             sampledPublishedCount >= Math.min(16, averageSampleCount) &&
             sampledContentBytes > sampledPublishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES
-        ) {
-            return 0;
+        )
+        let sourceStart = 0
+        let sourceEnd = staged.indexes.length
+        if (retainBoundaryOnly) {
+            // Aliases of the final definition can continue into the next
+            // parser group even when retaining this whole slab is wasteful.
+            // Keep only its last published indexed span, under the same budget.
+            sourceStart = sourceEnd - 1
+            while (sourceStart >= 0) {
+                const index = staged.indexes[sourceStart]
+                if (index >= 0 && this._termEntryContentMetaStateTable[index] === TERM_CONTENT_META_SLOT_PUBLISHED) { break }
+                --sourceStart
+            }
+            if (sourceStart < 0) { return 0 }
+            sourceEnd = sourceStart + 1
         }
         let minimumOffset = Infinity;
         let maximumEnd = 0;
         let publishedCount = 0;
         let publishedContentBytes = 0;
-        for (let i = 0; i < staged.indexes.length; ++i) {
+        let lastPublishedSource = -1
+        for (let i = sourceStart; i < sourceEnd; ++i) {
             const index = staged.indexes[i];
             if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
             const offset = spans.offsets[i];
@@ -6822,19 +6858,25 @@ void 0 :
             maximumEnd = Math.max(maximumEnd, offset + length);
             ++publishedCount;
             publishedContentBytes += length;
+            lastPublishedSource = i
+        }
+        if (!retainBoundaryOnly && publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
+            retainBoundaryOnly = true
+            sourceStart = lastPublishedSource
+            sourceEnd = sourceStart + 1
+            minimumOffset = spans.offsets[sourceStart]
+            maximumEnd = minimumOffset + spans.lengths[sourceStart]
+            publishedCount = 1
         }
         if (!Number.isFinite(minimumOffset) || maximumEnd <= minimumOffset) { return 0; }
-        if (publishedContentBytes > publishedCount * TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES) {
-            return 0;
-        }
         const source = spans.buffer;
         const sharedSource = !(source.buffer instanceof ArrayBuffer);
         const padding = sharedSource ? (source.byteOffset + minimumOffset) & 7 : 0;
         const copyByteLength = maximumEnd - minimumOffset + padding;
         const cacheMaxBytes = this._recentTermContentSourceCacheMaxBytes;
-        if (copyByteLength > cacheMaxBytes) { return 0; }
+        if (copyByteLength > cacheMaxBytes || (retainBoundaryOnly && copyByteLength > TERM_CONTENT_BLOCK_TARGET_BYTES)) { return 0; }
         const adoptTransferredSource = (
-            source.buffer.byteLength <= cacheMaxBytes && takeOwnedTermContent(source)
+            !retainBoundaryOnly && source.buffer.byteLength <= cacheMaxBytes && takeOwnedTermContent(source)
         );
         // A retained view avoids copying an immutable slab to trim its edges.
         // Charge the complete backing allocation, including those unused edges.
@@ -6851,23 +6893,26 @@ void 0 :
         if (this._nextRecentTermContentSourceBatchId > 0xffffffff) {
             this._recentTermContentSourceBatches.clear();
             this._recentTermContentSourceBatchBytes = 0;
+            this._recentTermContentBoundaryBatchId = 0
             this._termEntryContentMetaRecentSourceBatchIdTable.fill(0);
             this._nextRecentTermContentSourceBatchId = 1;
         }
         const batchId = this._nextRecentTermContentSourceBatchId++;
         // Match the source alignment so the shared bytes need only one copy.
+        const copySource = retainBoundaryOnly || sharedSource
         const owned = adoptTransferredSource ?
             (minimumOffset === 0 && maximumEnd === source.byteLength ?
                 source :
                 source.subarray(minimumOffset, maximumEnd)) :
-            (sharedSource ?
+            (copySource ?
                 new Uint8Array(byteLength).subarray(padding) :
                 source.slice(minimumOffset, maximumEnd));
-        if (sharedSource && !adoptTransferredSource) {
+        if (copySource && !adoptTransferredSource) {
             owned.set(source.subarray(minimumOffset, maximumEnd));
         }
         this._recentTermContentSourceBatches.set(batchId, owned);
         this._recentTermContentSourceBatchBytes += owned.buffer.byteLength;
+        if (retainBoundaryOnly) { this._recentTermContentBoundaryBatchId = batchId }
         if (adoptTransferredSource && importMetrics !== null) {
             importMetrics.dedupRecentSourceAdoptedBytes = (importMetrics.dedupRecentSourceAdoptedBytes ?? 0) + owned.byteLength;
         }
@@ -6892,7 +6937,7 @@ void 0 :
             this._termEntryContentMetaRecentSourceBatchIdTable.fill(batchId, firstIndex, endIndex);
             this._termEntryContentMetaRecentSourceOffsetTable.set(spans.offsets.subarray(0, staged.indexes.length), firstIndex);
         } else {
-            for (let i = 0; i < staged.indexes.length; ++i) {
+            for (let i = sourceStart; i < sourceEnd; ++i) {
                 const index = staged.indexes[i];
                 if (index < 0 || this._termEntryContentMetaStateTable[index] !== TERM_CONTENT_META_SLOT_PUBLISHED) { continue; }
                 this._termEntryContentMetaRecentSourceBatchIdTable[index] = batchId;
@@ -6901,6 +6946,7 @@ void 0 :
         }
         return owned.byteLength;
     }
+    /* eslint-enable @stylistic/semi */
 
     /**
      * Builds diagnostic strings only on a read failure, not for every imported
@@ -7219,26 +7265,33 @@ void 0 :
         let capacity = Math.max(16, oldCapacity);
         while (capacity < requiredCount) { capacity *= 2; }
         const arena = new TermContentMetadataArena(capacity, slotCapacity);
+        /* eslint-disable @stylistic/semi */
+        // The high-water mark includes empty IDs retained for reuse after
+        // rollback. Never truncate to the published/pending entry count.
+        const denseCount = this._termEntryContentMetaDenseCount
+        const rehash = forceRehash || oldSlotTable.length !== slotCapacity
         if (this._termContentMetadataArena !== null) {
-            arena.copyFrom(this._termContentMetadataArena);
+            arena.copyFrom(this._termContentMetadataArena, denseCount, !rehash)
         }
+        /* eslint-enable @stylistic/semi */
         const growDense = capacity !== oldCapacity;
         const idTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaIdTable;
         const offsetTable = growDense ? new Float64Array(capacity) : this._termEntryContentMetaOffsetTable;
         const dictNameIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaDictNameIdTable;
         const recentSourceBatchIdTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceBatchIdTable;
         const recentSourceOffsetTable = growDense ? new Uint32Array(capacity) : this._termEntryContentMetaRecentSourceOffsetTable;
+        /* eslint-disable @stylistic/semi */
         if (growDense) {
-            idTable.set(this._termEntryContentMetaIdTable);
-            offsetTable.set(this._termEntryContentMetaOffsetTable);
-            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable);
-            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable);
-            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable);
+            idTable.set(this._termEntryContentMetaIdTable.subarray(0, denseCount))
+            offsetTable.set(this._termEntryContentMetaOffsetTable.subarray(0, denseCount))
+            dictNameIdTable.set(this._termEntryContentMetaDictNameIdTable.subarray(0, denseCount))
+            recentSourceBatchIdTable.set(this._termEntryContentMetaRecentSourceBatchIdTable.subarray(0, denseCount))
+            recentSourceOffsetTable.set(this._termEntryContentMetaRecentSourceOffsetTable.subarray(0, denseCount))
         }
-        if (forceRehash || oldSlotTable.length !== slotCapacity) {
-            arena.slots.fill(0);
+        /* eslint-enable @stylistic/semi */
+        if (rehash) {
+            // A fresh WASM memory is already zeroed; no old slots were copied.
             const mask = slotCapacity - 1;
-            const denseCount = this._termEntryContentMetaDenseCount;
             const useDense = denseCount <= oldSlotTable.length;
             const scanLength = useDense ? denseCount : oldSlotTable.length;
             for (let i = 0; i < scanLength; ++i) {
@@ -7630,6 +7683,10 @@ this._readTermContentSignature(
             this._termEntryContentMetaFreeIndexes.push(index);
         }
         for (const batchId of recentSourceBatchIds) {
+            if (this._recentTermContentBoundaryBatchId === batchId) {
+                // eslint-disable-next-line @stylistic/semi
+                this._recentTermContentBoundaryBatchId = 0
+            }
             const source = this._recentTermContentSourceBatches.get(batchId);
             if (typeof source === 'undefined') { continue; }
             this._recentTermContentSourceBatches.delete(batchId);
@@ -8699,6 +8756,7 @@ this._readTermContentSignature(
         ) ?
             /** @type {ArtifactTermContentDedupPlan} */ (candidateDedupPlan) :
             null;
+        if (contentDedupPlan !== null) { initializeTermContentPlanResolution(contentDedupPlan); }
         const useResolvedContentReferences = chunk.useResolvedContentReferences === true && contentDedupPlan !== null;
         if (
             useUniqueContentMetadata &&
@@ -9518,6 +9576,16 @@ null :
             return null;
         }
         const compressionDictName = resolveTermContentZstdDictName(dictionary);
+        // Reservation requires shared JMdict content. Ordinary persistence
+        // validates ineligible spans; do not scan them for a rejected attempt.
+        if (
+            compressionDictName !== 'jmdict' ||
+            typeof SharedArrayBuffer !== 'function' ||
+            !(pendingContentSpans.buffer.buffer instanceof SharedArrayBuffer)
+        ) {
+            // eslint-disable-next-line @stylistic/semi
+            return null
+        }
         const operation = this._termContentBlockImportSession.tryBeginAppendSpans(
             dictionary,
             pendingContentSpans.buffer,

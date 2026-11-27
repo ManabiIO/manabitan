@@ -113,9 +113,10 @@ test('classifies dense bank names without materializing unrelated media', () => 
     const map = new DenseZipFileMap(names.length, new TextEncoder().encode(names.join('')), async () => null)
     let position = 0
     for (let row = 0; row < names.length; ++row) {
-        map.addDirectoryEntry(row, names[row], position, row * 100, 10, 10, 0, row)
+        map.addDirectoryMetadata(row, position, row * 100, 10, 10, 0, row)
         position += names[row].length
     }
+    expect(map.finishDirectory()).toBeNull()
     const importer = new DictionaryImporter(new DictionaryImporterMediaLoader())
     expect(importer._findRedundantDirectories(map)).toBe('nested/')
     const entries = /** @type {Map<string, unknown>} */ (Reflect.get(map, '_entries'))

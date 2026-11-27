@@ -29,6 +29,8 @@ SQLITE_FILE_RE = re.compile(re.escape(SQLITE_PREFIX) + r'[a-z0-9]+')
 SHA256_RE = re.compile(r'[a-f0-9]{64}')
 SHA_RE = re.compile(r'[a-f0-9]{40}')
 EMPTY_SHA256 = hashlib.sha256(b'').hexdigest()
+SAH_ALLOCATION_UNIT_BYTES = 4096
+LEGACY_VNDB_SAH_ALLOCATION_UNITS = (129, 131)
 EXPECTED_PRODUCT_PATHS = {
     'jmdict': frozenset({
         'manabitan-term-content.bin',
@@ -99,8 +101,22 @@ def _same(actual, expected, label):
         raise ValueError(f'{label} differs from the required value')
 
 
-def canonicalize_storage(storage, dictionary):
+def validate_vndb_sah_allocation_units(value=None):
+    """Freeze an explicit prospective range, retaining historical replay bounds."""
+    if value is None:
+        return LEGACY_VNDB_SAH_ALLOCATION_UNITS
+    if type(value) not in (list, tuple) or len(value) != 2:
+        raise ValueError('VNDB SAH allocation units must be a minimum/maximum pair')
+    minimum = _integer(value[0], 'minimum VNDB SAH allocation units', 2)
+    maximum = _integer(value[1], 'maximum VNDB SAH allocation units', 2)
+    if maximum < minimum or maximum > (2 ** 53 - 1) // SAH_ALLOCATION_UNIT_BYTES:
+        raise ValueError('VNDB SAH allocation unit range must be ordered and fit safe byte counts')
+    return minimum, maximum
+
+
+def canonicalize_storage(storage, dictionary, *, vndb_sah_allocation_units=None):
     """Keep exact logical sizes, normalizing only two validated random names."""
+    minimum_units, maximum_units = validate_vndb_sah_allocation_units(vndb_sah_allocation_units)
     if dictionary not in EXPECTED_PRODUCT_PATHS:
         raise ValueError('Unsupported frozen dictionary storage policy')
     storage = _record(storage, 'storage')
@@ -145,16 +161,17 @@ def canonicalize_storage(storage, dictionary):
     active = [size for size in sqlite_sizes if size != 4096]
     if len(active) != 1 or active[0] <= 4096 or active[0] % 4096:
         raise ValueError('Expected one aligned active SAH allocation')
-    # Retain the prior prospective VNDB bound and additionally require exact
-    # sizes across observations. Even one allowed page's difference fails the
-    # cross-observation comparison; the range never replaces actual bytes.
-    if dictionary == 'vndb' and not 129 <= active[0] // 4096 <= 131:
-        raise ValueError('VNDB active SAH allocation is outside 129–131 pages')
+    # An explicit range belongs to a prospectively registered source cohort.
+    # Omitted ranges retain historical bounds. Even one allowed unit's change
+    # fails the exact cross-observation comparison; never replace actual bytes.
+    if dictionary == 'vndb' and not minimum_units <= active[0] // SAH_ALLOCATION_UNIT_BYTES <= maximum_units:
+        raise ValueError(f'VNDB active SAH allocation is outside {minimum_units}–{maximum_units} '
+                         f'units of {SAH_ALLOCATION_UNIT_BYTES} bytes')
     return {'kind': storage['kind'], 'bytes': total,
             'files': sorted(normalized, key=lambda item: (item['path'], item['bytes']))}
 
 
-def canonicalize_validation(validation, *, dictionary, fixture, media_check):
+def canonicalize_validation(validation, *, dictionary, fixture, media_check, vndb_sah_allocation_units=None):
     """Validate all semantic coverage and preserve every field except elapsedMs."""
     validation = _record(validation, 'validation')
     fixture = _record(fixture, 'fixture')
@@ -217,14 +234,15 @@ def canonicalize_validation(validation, *, dictionary, fixture, media_check):
     if expected_files == 0 and (media_bytes != 0 or media['sha256'] != EMPTY_SHA256):
         raise ValueError('Empty media receipt differs from the empty digest')
     canonical = deepcopy(validation)
-    canonical['storage'] = canonicalize_storage(validation.get('storage'), dictionary)
+    canonical['storage'] = canonicalize_storage(validation.get('storage'), dictionary,
+                                               vndb_sah_allocation_units=vndb_sah_allocation_units)
     canonical['lookup']['observations'] = sorted(canonical_rows, key=lambda row: (row['pass'], row['term']))
     return canonical
 
 
 def validate_import_summary(summary, report, *, dictionary, fixture, source_sha, package_sha256,
                             browser_version=None, import_flags=None, source_hashes=None,
-                            source_dirty=False, media_check='sample'):
+                            source_dirty=False, media_check='sample', vndb_sah_allocation_units=None):
     """Bind one summary/raw report to frozen identities and return semantic keys.
 
     source_hashes, when supplied, maps report provenance paths to their expected
@@ -285,7 +303,8 @@ def validate_import_summary(summary, report, *, dictionary, fixture, source_sha,
                           ('mediaCheck', media_check)):
         _same(_required(benchmark, key, f'benchmark.{key}'), expected, f'benchmark.{key}')
     _same(run.get('validation'), benchmark.get('validation'), 'summary/raw validation binding')
-    validation = canonicalize_validation(run.get('validation'), dictionary=dictionary, fixture=fixture, media_check=media_check)
+    validation = canonicalize_validation(run.get('validation'), dictionary=dictionary, fixture=fixture, media_check=media_check,
+                                         vndb_sah_allocation_units=vndb_sah_allocation_units)
     phases = report.get('phases')
     if type(phases) is not list or any(type(phase) is not dict for phase in phases):
         raise ValueError('Invalid raw phase list')

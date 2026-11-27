@@ -453,6 +453,37 @@ function sliceResolvedContentReferences(chunk, start, end) {
     };
 }
 
+/* eslint-disable @stylistic/semi */
+/**
+ * Keep the existing origin proof when an internal split creates fresh plain
+ * chunk/reference objects. Recheck the parent after slicing: user-controlled
+ * slice methods or getters may have replaced its columns. Only the exact
+ * private index subview and unchanged content columns can inherit the proof.
+ * No value validation is cached across an awaited append.
+ * @param {{fixedContentLength?: number, resolvedContentReferences?: ResolvedContentReferences}} parent
+ * @param {{rowCount: number, resolvedContentReferences?: ResolvedContentReferences}} child
+ * @param {number} start
+ * @param {number} count
+ */
+function inheritSlicedContentReferenceOrigin(parent, child, start, count) {
+    const source = getSynchronousResolvedContentReferences(parent, count)
+    const references = child.resolvedContentReferences
+    if (source === null || typeof references === 'undefined') { return }
+    const indexes = references.uniqueIndexList
+    const sourceIndexes = source.uniqueIndexList
+    if (
+        references.offsets !== source.offsets || references.lengths !== source.lengths ||
+        !ArrayBuffer.isView(indexes) || Object.getPrototypeOf(indexes) !== Uint32Array.prototype ||
+        Object.hasOwn(indexes, 'buffer') || Object.hasOwn(indexes, 'length') || Object.hasOwn(indexes, 'byteOffset') ||
+        Object.hasOwn(sourceIndexes, 'byteOffset') ||
+        indexes.buffer !== sourceIndexes.buffer ||
+        indexes.byteOffset !== sourceIndexes.byteOffset + start * Uint32Array.BYTES_PER_ELEMENT ||
+        indexes.length !== child.rowCount
+    ) { return }
+    resolvedContentReferenceOrigins.set(child, references)
+}
+/* eslint-enable @stylistic/semi */
+
 /**
  * Reconstructs parser string offsets only for small imports which retain
  * materialized records. Persisted-only imports do not need this metadata.
@@ -2188,7 +2219,7 @@ export class TermRecordOpfsStore {
             stableStringOffsets instanceof Uint32Array &&
             stableStringLengths instanceof Uint16Array &&
             stableStringsBuffer instanceof Uint8Array &&
-            stableExpressionIndexes instanceof Uint32Array &&
+            (stableExpressionIndexes instanceof Uint16Array || stableExpressionIndexes instanceof Uint32Array) &&
             stableReadingIndexes instanceof Uint32Array &&
             stableStringOffsets.length === stableStringLengths.length &&
             stableExpressionIndexes.length >= count &&
@@ -2321,6 +2352,8 @@ export class TermRecordOpfsStore {
                 termRecordPreinternedPlan: sliceTermRecordPreinternedPlan(chunk.termRecordPreinternedPlan ?? null, runStart, runCount),
                 resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
             };
+            // eslint-disable-next-line @stylistic/semi
+            inheritSlicedContentReferenceOrigin(chunk, chunkSlice, runStart, count)
             const metrics = await this._encodeAndAppendArtifactChunkForState(
                 state,
                 chunkSlice,
@@ -2501,6 +2534,8 @@ export class TermRecordOpfsStore {
                     fixedContentLength: chunk.fixedContentLength,
                     resolvedContentReferences: sliceResolvedContentReferences(chunk, runStart, runEnd),
                 };
+            // eslint-disable-next-line @stylistic/semi
+            if (!isWholeChunk) { inheritSlicedContentReferenceOrigin(chunk, runChunk, runStart, count) }
             const runUsesContentReferences = hasResolvedContentReferences(runChunk, runCount);
             const runOffsets = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentOffsets : contentOffsets.slice(runStart, runEnd);
             const runLengths = isWholeChunk || hasFixedContentSpan(runChunk, runCount) || runUsesContentReferences ? contentLengths : contentLengths.slice(runStart, runEnd);
