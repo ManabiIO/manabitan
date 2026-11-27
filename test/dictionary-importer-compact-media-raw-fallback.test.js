@@ -55,13 +55,14 @@ function fixture(/** @type {{corrupt?: boolean, inline?: boolean}} */ {corrupt =
         view.setUint32(22, image.length, true)
         view.setUint16(26, rawName.length, true)
         header.set(rawName, 30)
-        map.addDirectoryEntry(i, path, filenameOffset, offset, image.length, image.length, 0, checksum)
+        map.addDirectoryMetadata(i, filenameOffset, offset, image.length, image.length, 0, checksum)
         images.push(image)
         parts.push(header, corrupt && i === 0 ? Uint8Array.of(0, 0, 0) : image)
         offset += header.length + image.length
         filenameOffset += rawName.length
         rows.push([`term${i + 1}`, `reading${i + 1}`, '', '', 0, [{type: 'image', path}], i, ''])
     }
+    expect(map.finishDirectory()).toBeNull()
     // The raw reader reserves at most this much local extra-field slack.
     // No archive-sized padding is allocated or read.
     parts.push(new Uint8Array(0xffff))

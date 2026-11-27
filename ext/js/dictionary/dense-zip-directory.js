@@ -16,6 +16,7 @@
  */
 
 import {DenseZipFileMap} from './dense-zip-file-map.js';
+import {createDenseZipFilenameDecoder} from './dense-zip-filenames.js';
 
 const SEARCH_BYTES = 98;
 const LOCAL_HEADER_BYTES = 30;
@@ -25,7 +26,6 @@ const MIN_ENTRIES = 8192;
 const MAX_DIRECTORY_BYTES = 24 * 1024 * 1024;
 const MIN_ARCHIVE_BYTES = 128 * 1024 * 1024;
 const UINT32_MAX = 0xffffffff;
-const decoder = new TextDecoder();
 
 /** @typedef {{filename: string, rawFilename: Uint8Array, offset: number, compressedSize: number, uncompressedSize: number, compressionMethod: 0|8, signature: number, encrypted: false, directory: false}} DenseZipEntry */
 /** @typedef {(this: DenseZipEntry, writer: import('@zip.js/zip.js').Writer<unknown>|import('@zip.js/zip.js').WritableWriter, options?: import('@zip.js/zip.js').EntryGetDataOptions) => Promise<unknown>} DenseZipEntryReader */
@@ -163,11 +163,10 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
             if (value < 0x20 || value > 0x7e) { return null; }
             filenameBytes[filenamePosition + i] = value
         }
-        const rawFilename = filenameBytes.subarray(filenamePosition, filenamePosition + filenameLength)
-        const filename = decoder.decode(rawFilename)
         if (fileMap === null) {
+            const rawFilename = filenameBytes.subarray(filenamePosition, filenamePosition + filenameLength)
             entries.push({
-                filename,
+                filename: '',
                 rawFilename,
                 offset: localOffset,
                 compressedSize,
@@ -177,8 +176,8 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
                 encrypted: false,
                 directory: false,
             })
-        } else if (!fileMap.addDirectoryEntry(row, filename, filenamePosition, localOffset, compressedSize, uncompressedSize, compressionMethod, signature)) {
-            duplicateFilename ??= filename
+        } else {
+            fileMap.addDirectoryMetadata(row, filenamePosition, localOffset, compressedSize, uncompressedSize, compressionMethod, signature)
         }
         position = filenameEnd;
         localEnd = localOffset + LOCAL_HEADER_BYTES + filenameLength + compressedSize;
@@ -186,6 +185,15 @@ async function readDenseZipDirectoryInternal(archive, checkCancellation, getData
     }
     /* eslint-enable @stylistic/semi */
     if (position !== length || localEnd !== offset) { return null; }
+    if (fileMap !== null) {
+        duplicateFilename = fileMap.finishDirectory();
+    } else {
+        const decodeFilename = createDenseZipFilenameDecoder(filenameBytes);
+        for (const entry of entries) {
+            const start = entry.rawFilename.byteOffset;
+            entry.filename = decodeFilename(start, start + entry.rawFilename.length);
+        }
+    }
     if (duplicateFilename !== null) { throw new Error(`Duplicate archive filename: '${duplicateFilename}'`); }
     return fileMap ?? entries;
 }

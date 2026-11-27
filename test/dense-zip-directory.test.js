@@ -61,6 +61,7 @@ class SparseZipDirectory extends Blob {
         if (corrupt === 'descriptor') { view.setUint16(8, 8, true); }
         if (corrupt === 'locator') { eocd.setUint32(72, 2, true); }
         this.archiveSize = directoryOffset + this.directory.length + 98 - trailerStart;
+        this.directoryOffset = directoryOffset;
     }
 
     /** @override */
@@ -73,9 +74,41 @@ class SparseZipDirectory extends Blob {
      */
     slice(start, end) {
         if (start === this.size - 98 && typeof end === 'undefined') { return new Blob([this.tail]); }
-        if (start === directoryOffset && end === directoryOffset + this.directory.length) { return new Blob([this.directory]); }
+        if (start === this.directoryOffset && end === this.directoryOffset + this.directory.length) { return new Blob([this.directory]); }
         throw new Error(`Unexpected archive read at ${start}:${end}`);
     }
+}
+
+/**
+ * @param {SparseZipDirectory} archive
+ * @param {(index: number) => string|undefined} getName Name override by entry index.
+ */
+function setSparseZipNames(archive, getName) {
+    const oldDirectory = archive.directory;
+    const oldRecordLength = 46 + filenameLength;
+    const names = Array.from({length: count}, (_, index) => new TextEncoder().encode(getName(index) ?? new TextDecoder().decode(oldDirectory.subarray(index * oldRecordLength + 46, index * oldRecordLength + oldRecordLength))));
+    const directoryLength = names.reduce((total, name) => total + 46 + name.byteLength, 0);
+    const directory = new Uint8Array(directoryLength);
+    let directoryPosition = 0;
+    let localOffset = 0;
+    for (let index = 0; index < count; ++index) {
+        const oldHeader = oldDirectory.subarray(index * oldRecordLength, index * oldRecordLength + 46);
+        const header = directory.subarray(directoryPosition, directoryPosition + 46);
+        header.set(oldHeader);
+        const view = new DataView(header.buffer, header.byteOffset, header.byteLength);
+        view.setUint16(28, names[index].byteLength, true);
+        view.setUint32(42, localOffset, true);
+        directoryPosition += 46;
+        directory.set(names[index], directoryPosition);
+        directoryPosition += names[index].byteLength;
+        localOffset += 30 + names[index].byteLength + packedLength;
+    }
+    archive.directory = directory;
+    archive.directoryOffset = localOffset;
+    archive.archiveSize = localOffset + directory.byteLength + 22;
+    const end = new DataView(archive.tail.buffer);
+    end.setUint32(88, directory.byteLength, true);
+    end.setUint32(92, localOffset, true);
 }
 
 describe('dense ZIP directory', () => {
@@ -185,6 +218,39 @@ describe('compact dense ZIP catalog', () => {
             expect(entry).toEqual({...expected, getData})
             expect(map.get(expected.filename)).toBe(entry)
         }
+    })
+
+    test('decodes maximum-length filenames across bounded ASCII windows', async () => {
+        const archive = new SparseZipDirectory()
+        const longestName = 'a'.repeat(65_535)
+        setSparseZipNames(archive, (index) => {
+            if (index === 0) { return longestName; }
+            if (index === 1) { return 'b'; }
+            if (index === 2) { return 'c'.repeat(65_535); }
+        })
+        const map = await readDenseZipFileMap(archive, getData)
+        if (map === null) { throw new Error('Expected supported dense directory') }
+        expect([...map.keys()].slice(0, 3)).toEqual([longestName, 'b', 'c'.repeat(65_535)])
+        const longestEntry = map.get(longestName)
+        const shortEntry = map.get('b')
+        if (typeof longestEntry === 'undefined' || !('rawFilename' in longestEntry) || typeof shortEntry === 'undefined' || !('rawFilename' in shortEntry)) {
+            throw new Error('Expected dense ZIP entries')
+        }
+        expect(longestEntry.rawFilename).toHaveLength(65_535)
+        expect(shortEntry.rawFilename).toEqual(new TextEncoder().encode('b'))
+        const entries = await readDenseZipDirectory(archive)
+        expect(entries?.slice(0, 3).map(({filename}) => filename)).toEqual([longestName, 'b', 'c'.repeat(65_535)])
+    })
+
+    test('reports the first duplicate after complete directory validation', async () => {
+        const archive = new SparseZipDirectory()
+        setSparseZipNames(archive, (index) => {
+            if (index < 2) { return 'first-duplicate.png'; }
+            if (index < 4) { return 'later-duplicate.png'; }
+        })
+        await expect(readDenseZipFileMap(archive, getData)).rejects.toThrow("Duplicate archive filename: 'first-duplicate.png'")
+        new DataView(archive.directory.buffer).setUint32(archive.directory.length - 54 + 42, 0, true)
+        await expect(readDenseZipFileMap(archive, getData)).resolves.toBeNull()
     })
 
     test('rejects duplicate names only after completing directory validation', async () => {
