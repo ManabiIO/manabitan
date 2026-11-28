@@ -29,6 +29,7 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
+import {registerOwnedTermLookupIndexes} from './term-lookup-index-ownership.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -3738,6 +3739,13 @@ function runParallelParserJob(worker, id, sources, version, options, shouldCance
                     profile.resultDeliveryMs = Math.max(0, Date.now() - /** @type {number} */ (data.resultSentEpochMs));
                 }
                 const chunk = /** @type {TermBankColumnChunk|null} */ (data.chunk ?? null);
+                try {
+                    registerOwnedTermLookupIndexes(chunk);
+                } catch (error) {
+                    worker.terminate();
+                    reject(createParallelParserError(error));
+                    return;
+                }
                 const ownsContentBytes = (
                     data.ownsContentBytes === true && data.borrowsWorkerMemory !== true &&
                     registerOwnedTermContent(chunk?.contentBytesBuffer)

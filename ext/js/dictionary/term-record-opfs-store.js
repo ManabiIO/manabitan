@@ -17,6 +17,7 @@
 
 import {openSyncImportIndexWriter, SyncImportIndexWriter} from './term-record-import-index-writer.js';
 import {createImportIndexWorkerClient, WorkerImportIndexWriter} from './term-record-import-index-worker-client.js';
+import {canTakeOwnedTermLookupIndex, registerOwnedTermRecordFields, takeOwnedTermLookupIndex} from './term-lookup-index-ownership.js';
 import {buildTermLookupFilter, buildTermLookupFilterFromBase, MIN_EXACT_LOOKUP_SOURCE_BYTES, termLookupFilterMayContain} from './term-lookup-route.js';
 import {reportDiagnostics} from '../core/diagnostics-reporter.js';
 import {safePerformance} from '../core/safe-performance.js';
@@ -111,6 +112,7 @@ const STORAGE_READ_RETRY_COUNT = 2;
 const REPAIR_YIELD_BUDGET_MS = 8;
 const MAX_LOOKUP_INDEX_OVERHEAD_BYTES = 64 * 1024 * 1024;
 const MAX_LOOKUP_INDEX_BYTES_PER_RECORD = 512;
+/** @typedef {Uint8Array|{header: Uint8Array, payload: Uint8Array, recordFields: Uint8Array, byteLength: number}} PendingLookupIndexChunk */
 /** @typedef {{uniqueIndexList: Uint32Array, offsets: Float64Array, lengths: Uint32Array}} ResolvedContentReferences */
 /** @type {WeakMap<object, ResolvedContentReferences>} */
 const resolvedContentReferenceOrigins = new WeakMap();
@@ -787,7 +789,7 @@ class DenseIdRecordStore {
  * @property {number} segmentIndex
  * @property {string} logicalKey
  * @property {number} initialFileLength
- * @property {Uint8Array[]} pendingLookupIndexChunks
+ * @property {PendingLookupIndexChunk[]} pendingLookupIndexChunks
  * @property {number} pendingLookupIndexBytes
  * @property {number} pendingLookupIndexRecordCount
  * @property {FileSystemFileHandle|null} lookupIndexFileHandle
@@ -2573,6 +2575,7 @@ export class TermRecordOpfsStore {
                 (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES ?
                     preparedLookupIndex?.routeFilter ?? buildTermLookupFilter(runPlan?.stringHashes) :
                     null,
+                preparedLookupIndex,
             );
             appendWriteMs += safePerformance.now() - tAppendStart;
             runStart = runEnd;
@@ -6007,6 +6010,7 @@ view.chunks :
             contentLengths,
             contentOffsetBase,
         );
+        registerOwnedTermRecordFields(recordFields);
         // Compact fields are strictly smaller than legacy fields; float64 fields
         // have their own fixed width. Infer the format from the emitted bytes
         // so the encoder remains the only owner of score representation.
@@ -6057,6 +6061,7 @@ view.chunks :
      * @param {Uint8Array|null} [recordFields=null]
      * @param {number} [recordFieldsFormat=LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY]
      * @param {Uint32Array|null} [routeFilter=null]
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} [preparedLookupIndex=null]
      * @returns {Promise<void>}
      */
     async _appendEncodedChunk(
@@ -6069,6 +6074,7 @@ view.chunks :
         recordFields = null,
         recordFieldsFormat = LOOKUP_INDEX_RECORD_FIELDS_FORMAT_LEGACY,
         routeFilter = null,
+        preparedLookupIndex = null,
     ) {
         if (count <= 0) { return; }
         await this._validateShardAppendFormat(state);
@@ -6099,19 +6105,27 @@ view.chunks :
             lookupIndexBytes instanceof Uint8Array &&
             lookupIndexBytes.byteLength > 0
         ) {
-            const lookupIndexChunk = this._createLookupIndexChunk(
+            const lookupIndexChunk = this._createPendingLookupIndexChunk(
                 firstId,
                 count,
                 contentOffsetBase,
                 lookupIndexBytes,
                 recordFields,
                 recordFieldsFormat,
+                preparedLookupIndex,
             );
             if (
                 this._importSessionActive && !this._exactLookupRouteAbandoned &&
                 (this._rawTermBankSourceBytes ?? 0) >= MIN_EXACT_LOOKUP_SOURCE_BYTES
             ) {
-                this._recordExactLookupRouteChunk(state, firstId, count, lookupIndexChunk, lookupIndexBytes, routeFilter);
+                this._recordExactLookupRouteChunk(
+                    state,
+                    firstId,
+                    count,
+                    lookupIndexChunk,
+                    lookupIndexChunk instanceof Uint8Array ? lookupIndexBytes : lookupIndexChunk.payload,
+                    routeFilter,
+                );
             }
             state.pendingLookupIndexChunks.push(lookupIndexChunk);
             state.pendingLookupIndexBytes += lookupIndexChunk.byteLength;
@@ -6145,7 +6159,7 @@ view.chunks :
      * @param {TermRecordShardState} state
      * @param {number} firstId
      * @param {number} count
-     * @param {Uint8Array} chunk
+     * @param {PendingLookupIndexChunk} chunk
      * @param {Uint8Array} payload
      * @param {Uint32Array|null} preparedFilter
      */
@@ -6175,7 +6189,8 @@ view.chunks :
         const start = shard.end;
         shard.end += chunk.byteLength;
         shard.recordCount += count;
-        shard.chunks.push({firstId, count, start, end: shard.end, header: chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES), filter});
+        const header = chunk instanceof Uint8Array ? chunk.slice(0, LOOKUP_INDEX_CHUNK_HEADER_BYTES) : chunk.header.slice();
+        shard.chunks.push({firstId, count, start, end: shard.end, header, filter});
         route.bytes += filter.byteLength;
         ++route.chunkCount;
         this._exactLookupRoute = route;
@@ -6229,6 +6244,55 @@ view.chunks :
             generationId[i] = Math.floor(Math.random() * 256);
         }
         return generationId;
+    }
+
+    /**
+     * Snapshot private parser/store buffers for the local writer without copying
+     * their envelope. Validation and checksums precede the same queue boundary;
+     * transferring both buffers prevents old aliases from changing queued bytes.
+     * Other sources retain the established eager snapshot contract.
+     * @param {number} firstId
+     * @param {number} count
+     * @param {number} contentOffsetBase
+     * @param {Uint8Array} payload
+     * @param {Uint8Array|null} recordFields
+     * @param {number} recordFieldsFormat
+     * @param {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex|null} prepared
+     * @returns {PendingLookupIndexChunk}
+     * @throws {Error} If the authoritative fields or lookup framing are invalid.
+     */
+    _createPendingLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat, prepared) {
+        if (
+            !this._importSessionActive || this._rawTermBankSourceBytes === null ||
+            this._rawTermBankSourceBytes >= MIN_INDEX_WORKER_SOURCE_BYTES ||
+            !canTakeOwnedTermLookupIndex(prepared, payload, recordFields)
+        ) {
+            return this._createLookupIndexChunk(firstId, count, contentOffsetBase, payload, recordFields, recordFieldsFormat);
+        }
+        if (!(recordFields instanceof Uint8Array) ||
+        getRecordFieldsByteLength(recordFields, 0, count, recordFieldsFormat) !== recordFields.byteLength) {
+            throw new Error('Invalid authoritative term-record fields');
+        }
+        validateRecordFields(recordFields, count, recordFieldsFormat, contentOffsetBase);
+        const {base, derived} = splitPersistedTermLookupIndex(payload);
+        const byteLength = LOOKUP_INDEX_CHUNK_HEADER_BYTES + payload.byteLength + recordFields.byteLength;
+        const header = new Uint8Array(LOOKUP_INDEX_CHUNK_HEADER_BYTES);
+        const view = new DataView(header.buffer);
+        view.setUint32(0, firstId, true);
+        view.setUint32(4, count, true);
+        writeSafeU64Le(view, 8, contentOffsetBase);
+        view.setUint32(16, payload.byteLength, true);
+        view.setUint32(20, base.byteLength, true);
+        view.setUint32(24, hashLookupIndexBytes(base), true);
+        view.setUint32(28, hashLookupIndexBytes(derived), true);
+        view.setUint32(32, hashLookupIndexBytes(recordFields), true);
+        view.setUint32(36, recordFieldsFormat, true);
+        const owned = takeOwnedTermLookupIndex(
+            /** @type {import('./term-lookup-index-preparation.js').PreparedTermLookupIndex} */ (prepared),
+            payload,
+            recordFields,
+        );
+        return {header, ...owned, byteLength};
     }
 
     /**
@@ -6391,15 +6455,16 @@ view.chunks :
                     state.lookupIndexWritable = await this._createLookupIndexWritable(state);
                     await state.lookupIndexWritable.write(new Uint8Array(LOOKUP_INDEX_FILE_HEADER_BYTES));
                 }
+                const parts = chunks.flatMap((chunk) => chunk instanceof Uint8Array ? [chunk] : [chunk.header, chunk.payload, chunk.recordFields]);
                 if (state.lookupIndexWritable instanceof WorkerImportIndexWriter) {
-                    // _createLookupIndexChunk owns each complete buffer. The
+                    // Each part owns its complete immutable buffer. The
                     // existing queue budget remains charged until this worker
                     // acknowledges the write, including any periodic flush.
-                    await state.lookupIndexWritable.writeOwnedChunks(chunks);
+                    await state.lookupIndexWritable.writeOwnedChunks(parts);
                 } else if (state.lookupIndexWritable instanceof SyncImportIndexWriter) {
-                    await state.lookupIndexWritable.writeChunks(chunks);
+                    await state.lookupIndexWritable.writeChunks(parts);
                 } else {
-                    await state.lookupIndexWritable.write(new Blob(chunks));
+                    await state.lookupIndexWritable.write(new Blob(parts));
                 }
                 ++this._lookupIndexWriteMetrics.writeCallCount;
                 this._lookupIndexWriteMetrics.writeBytes += byteLength;

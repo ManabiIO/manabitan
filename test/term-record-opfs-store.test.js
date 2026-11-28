@@ -21,6 +21,7 @@ import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {encodePersistedTermLookupIndex, hashTermLookupKeyBytes} from '../ext/js/dictionary/term-lookup-index.js';
 import {createTermRecordPreinternedPlanBuilder} from '../ext/js/dictionary/term-record-preinterned-plan.js';
+import {createImportIndexChunkFixture} from './util/import-index-chunk-fixture.js';
 import {
     RAW_TERM_CONTENT_COMPRESSED_SHARED_GLOSSARY_DICT_NAME,
     RAW_TERM_CONTENT_DICT_NAME,
@@ -3286,6 +3287,111 @@ describe('TermRecordOpfsStore', () => {
         expect(indexBytes?.subarray(0, 40)).toEqual(new Uint8Array(40));
         expect(indexBytes?.subarray(40)).toEqual(new Uint8Array([0x11, 0x22]));
         await store._closeAllWritables();
+    });
+
+    test.each(['sync-short-writes', 'async-fallback'])('persists mixed owned parts and eager envelopes with %s', async (backend) => {
+        const fixture = await createImportIndexChunkFixture();
+        const fallback = await createImportIndexChunkFixture(2, -17, false);
+        const {store} = fixture;
+        const fileBytesByName = new Map();
+        let writeCount = 0;
+        const directory = createFakeDirectoryHandle(fileBytesByName, backend === 'sync-short-writes' ? {
+            syncAccessHandleFactory(name) {
+                return {
+                    write(buffer, {at = 0} = {}) {
+                        ++writeCount;
+                        const length = Math.min(173, buffer.byteLength);
+                        const current = fileBytesByName.get(name) ?? new Uint8Array();
+                        const next = new Uint8Array(Math.max(current.byteLength, at + length));
+                        next.set(current);
+                        next.set(buffer.subarray(0, length), at);
+                        fileBytesByName.set(name, next);
+                        return length;
+                    },
+                    truncate(size) { fileBytesByName.set(name, (fileBytesByName.get(name) ?? new Uint8Array()).slice(0, size)); },
+                    flush() {},
+                    close() {},
+                };
+            },
+        } : {});
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        const descriptorName = store._getShardSegmentFileName('Envelope parity', 'raw', 0);
+        const descriptor = await directory.getFileHandle(descriptorName, {create: true});
+        const state = store._createShardState(descriptorName, descriptor, 0);
+        Reflect.get(store, '_shardStateByFileName').set(descriptorName, state);
+        const expectedFallback = store._createLookupIndexChunk(
+            fixture.chunk.rowCount + 1, fallback.chunk.rowCount, fallback.encoded.contentOffsetBase,
+            fallback.prepared.bytes, fallback.encoded.recordFields, fallback.encoded.recordFieldsFormat,
+        );
+        /** @type {[typeof fixture, number][]} */
+        const chunks = [[fixture, 1], [fallback, fixture.chunk.rowCount + 1]];
+        for (const [current, firstId] of chunks) {
+            await store._appendEncodedChunk(
+                state, firstId, current.chunk.rowCount, 'raw', current.encoded.contentOffsetBase,
+                current.prepared.bytes, current.encoded.recordFields, current.encoded.recordFieldsFormat,
+                null, current.prepared,
+            );
+        }
+        expect(state.pendingLookupIndexChunks[0]).not.toBeInstanceOf(Uint8Array);
+        expect(state.pendingLookupIndexChunks[1]).toBeInstanceOf(Uint8Array);
+        expect(fixture.prepared.bytes.byteLength).toBe(0);
+        expect(fallback.prepared.bytes.byteLength).toBeGreaterThan(0);
+        const totalBytes = fixture.expected.byteLength + expectedFallback.byteLength;
+        expect(state.pendingLookupIndexBytes).toBe(totalBytes);
+        const route = Reflect.get(store, '_exactLookupRoute').shards.get(state);
+        expect(route.chunks).toHaveLength(2);
+        expect(route.chunks[0]).toMatchObject({start: 40, end: 40 + fixture.expected.byteLength});
+        expect(route.chunks[0].header).toEqual(fixture.expected.slice(0, 40));
+        expect(route.chunks[1]).toMatchObject({start: 40 + fixture.expected.byteLength, end: 40 + totalBytes});
+        expect(route.chunks[1].header).toEqual(expectedFallback.slice(0, 40));
+        await store._flushPendingLookupIndexChunks(state);
+        expect(state.lookupIndexChunkCount).toBe(2);
+        expect(state.lookupIndexRecordCount).toBe(fixture.chunk.rowCount + fallback.chunk.rowCount);
+        expect(state.lookupIndexQueuedBytes).toBe(0);
+        await store._closeAllWritables();
+        const bytes = fileBytesByName.get(`${descriptorName}.mbti`);
+        assert.ok(bytes instanceof Uint8Array);
+        expect(Buffer.from(bytes.subarray(40))).toEqual(Buffer.concat([fixture.expected, expectedFallback]));
+        const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+        expect(view.getUint32(16, true)).toBe(2);
+        expect(view.getUint32(20, true)).toBe(fixture.chunk.rowCount + fallback.chunk.rowCount);
+        if (backend === 'sync-short-writes') { expect(writeCount).toBeGreaterThan(3); }
+    });
+
+    test('charges owned envelope bytes through a blocked failure and keeps that error sticky', async () => {
+        const fixture = await createImportIndexChunkFixture();
+        const {store} = fixture;
+        let blocked = false;
+        /** @type {() => void} */
+        let release = () => {};
+        /** @type {Promise<void>} */
+        const gate = new Promise((resolve) => { release = resolve; });
+        const failure = new Error('Owned local index write failure');
+        const directory = createFakeDirectoryHandle(new Map(), {
+            async beforeWrite(name, value) {
+                if (!name.endsWith('.mbti') || !(value instanceof Blob)) { return; }
+                blocked = true;
+                await gate;
+                throw failure;
+            },
+        });
+        Reflect.set(store, '_recordsDirectoryHandle', directory);
+        const descriptor = await directory.getFileHandle('owned-failure.mbtr', {create: true});
+        const state = store._createShardState('owned-failure.mbtr', descriptor, 0);
+        state.pendingLookupIndexChunks = [fixture.adopt()];
+        state.pendingLookupIndexBytes = fixture.expected.byteLength;
+        state.pendingLookupIndexRecordCount = fixture.chunk.rowCount;
+        await store._flushPendingLookupIndexChunks(state, false);
+        await vi.waitFor(() => expect(blocked).toBe(true));
+        expect(state.lookupIndexQueuedBytes).toBe(fixture.expected.byteLength);
+        expect(state.lookupIndexChunkCount).toBe(0);
+        expect(state.lookupIndexRecordCount).toBe(0);
+        release();
+        await expect(store._awaitLookupIndexWritesForShard(state)).rejects.toBe(failure);
+        expect(state.lookupIndexQueuedBytes).toBe(0);
+        expect(state.lookupIndexWriteError).toBe(failure);
+        await expect(store._flushLookupIndexFile(state)).rejects.toBe(failure);
+        expect(state.lookupIndexWritable).toBeNull();
     });
 
     test('aborts the asynchronous lookup-index writer when initialization truncation fails', async () => {
