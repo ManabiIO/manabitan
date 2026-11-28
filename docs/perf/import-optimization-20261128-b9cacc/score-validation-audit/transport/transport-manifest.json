@@ -1,0 +1,60 @@
+{
+  "acquiredThrough": "GitHub connector fetch; complete unmodified structuredContent.content snapshots",
+  "artifacts": {
+    "15249531252": {
+      "file": "15249531252.zip",
+      "sha256": "840d85a80ffc33aff6071b68e6029edf468bf1513a45b2dd2e466b6f99f65221"
+    },
+    "15250491210": {
+      "file": "15250491210.zip",
+      "sha256": "399857eddfef0c50db7158a8e543dbcd0e325010432b30caa804d8f1006f4d6f"
+    },
+    "15250561439": {
+      "file": "15250561439.zip",
+      "sha256": "5d1cfef44d5de06515fa3d9376b06272dde258b4abb567eb0302b7c712bf6415"
+    },
+    "15250678695": {
+      "file": "15250678695.zip",
+      "sha256": "fcfc875920925020053cb541e76ba0b9923ec35f16451baea6f346096a7a1a2d"
+    },
+    "15251228128": {
+      "file": "15251228128.zip",
+      "sha256": "f5cc305ee68b888d96f243b7987c4b00c13709d807252748b21f222f6a0ea675"
+    },
+    "15251612813": {
+      "file": "15251612813.zip",
+      "sha256": "5e688e8a96a1bf39ee8442d60c3b290f60c639022e64b32c71835bbeba97a6b9"
+    }
+  },
+  "repository": "ManabiIO/manabitan",
+  "runId": 46103789342,
+  "schemaVersion": 1,
+  "snapshotClockUtc": "2026-11-28 06:23:56 UTC",
+  "snapshots": {
+    "/actions/runs/46103789342": {
+      "file": "run.json",
+      "sha256": "55515c642a88b710a4c3ee2553d8ca75609e420b7078b2117d7271d7d08b6809",
+      "sourceUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46103789342"
+    },
+    "/actions/runs/46103789342/artifacts?per_page=100": {
+      "file": "artifacts.json",
+      "sha256": "31a0b74435333c1d11be9a75b23979dc2f1abeece2a714276b30a0b3c78115f3",
+      "sourceUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46103789342/artifacts?per_page=100"
+    },
+    "/actions/runs/46103789342/jobs?per_page=100": {
+      "file": "jobs.json",
+      "sha256": "180ad5a29cf803609dd5d7700560e3068dd739fd24b854033e37e1bb612f744b",
+      "sourceUrl": "https://api.github.com/repos/ManabiIO/manabitan/actions/runs/46103789342/jobs?per_page=100"
+    },
+    "/git/commits/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2": {
+      "file": "commit-A.json",
+      "sha256": "8093a0567941d3b1961d7f7511a0d769d190e1873082bdb17a2a2735a601e697",
+      "sourceUrl": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/9e10d3b3fcf66d344ab31bc42c9b522fa5215da2"
+    },
+    "/git/commits/f21bda709a5b3374f4d5175f8234c94439936040": {
+      "file": "commit-B.json",
+      "sha256": "b8df7564b9f739099d8c977b2ff3f06f68d4d2d9d44cd1bbf9672709ecfce466",
+      "sourceUrl": "https://api.github.com/repos/ManabiIO/manabitan/git/commits/f21bda709a5b3374f4d5175f8234c94439936040"
+    }
+  }
+}

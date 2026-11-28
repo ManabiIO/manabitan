@@ -1,0 +1,142 @@
+[
+  {
+    "arm": "B",
+    "id": "warmup-1-B",
+    "kind": "warmup",
+    "pair": 1,
+    "totalImportMs": 5082.700000000012
+  },
+  {
+    "arm": "A",
+    "id": "warmup-1-A",
+    "kind": "warmup",
+    "pair": 1,
+    "totalImportMs": 5557.400000000023
+  },
+  {
+    "arm": "A",
+    "id": "warmup-2-A",
+    "kind": "warmup",
+    "pair": 2,
+    "totalImportMs": 5156.600000000006
+  },
+  {
+    "arm": "B",
+    "id": "warmup-2-B",
+    "kind": "warmup",
+    "pair": 2,
+    "totalImportMs": 4931
+  },
+  {
+    "arm": "B",
+    "id": "pair-01-B",
+    "kind": "candidate",
+    "pair": 1,
+    "totalImportMs": 4997.900000000023
+  },
+  {
+    "arm": "A",
+    "id": "pair-01-A",
+    "kind": "candidate",
+    "pair": 1,
+    "totalImportMs": 4821.599999999977
+  },
+  {
+    "arm": "A",
+    "id": "pair-02-A",
+    "kind": "candidate",
+    "pair": 2,
+    "totalImportMs": 4939.900000000023
+  },
+  {
+    "arm": "B",
+    "id": "pair-02-B",
+    "kind": "candidate",
+    "pair": 2,
+    "totalImportMs": 5059.100000000035
+  },
+  {
+    "arm": "B",
+    "id": "pair-03-B",
+    "kind": "candidate",
+    "pair": 3,
+    "totalImportMs": 5063.299999999988
+  },
+  {
+    "arm": "A",
+    "id": "pair-03-A",
+    "kind": "candidate",
+    "pair": 3,
+    "totalImportMs": 5139
+  },
+  {
+    "arm": "C",
+    "id": "control-01-C",
+    "kind": "control",
+    "pair": 1,
+    "totalImportMs": 4924.800000000047
+  },
+  {
+    "arm": "A",
+    "id": "control-01-A",
+    "kind": "control",
+    "pair": 1,
+    "totalImportMs": 4799.5
+  },
+  {
+    "arm": "A",
+    "id": "pair-04-A",
+    "kind": "candidate",
+    "pair": 4,
+    "totalImportMs": 4857.899999999965
+  },
+  {
+    "arm": "B",
+    "id": "pair-04-B",
+    "kind": "candidate",
+    "pair": 4,
+    "totalImportMs": 5165.100000000035
+  },
+  {
+    "arm": "B",
+    "id": "pair-05-B",
+    "kind": "candidate",
+    "pair": 5,
+    "totalImportMs": 4886.799999999988
+  },
+  {
+    "arm": "A",
+    "id": "pair-05-A",
+    "kind": "candidate",
+    "pair": 5,
+    "totalImportMs": 5526
+  },
+  {
+    "arm": "A",
+    "id": "pair-06-A",
+    "kind": "candidate",
+    "pair": 6,
+    "totalImportMs": 4953
+  },
+  {
+    "arm": "B",
+    "id": "pair-06-B",
+    "kind": "candidate",
+    "pair": 6,
+    "totalImportMs": 4864.100000000035
+  },
+  {
+    "arm": "A",
+    "id": "control-02-A",
+    "kind": "control",
+    "pair": 2,
+    "totalImportMs": 5049.099999999977
+  },
+  {
+    "arm": "C",
+    "id": "control-02-C",
+    "kind": "control",
+    "pair": 2,
+    "totalImportMs": 4994.399999999907
+  }
+]

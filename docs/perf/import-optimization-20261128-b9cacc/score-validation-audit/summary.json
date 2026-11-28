@@ -1,0 +1,590 @@
+{
+  "allMemoryScreensPassed": false,
+  "allSixCellsIndependentlyAudited": true,
+  "cells": [
+    {
+      "actualPackageMemberMaps": {
+        "A": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+        "B": "5f0fc4520c0001be8bc760e3a2b28da32b100b75c7554d2b506ffa8ee0d7e781"
+      },
+      "artifactId": 15250491210,
+      "artifactSha256": "399857eddfef0c50db7158a8e543dbcd0e325010432b30caa804d8f1006f4d6f",
+      "auditStatus": "verified",
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -0.67375268841664,
+          2.2595235206197994
+        ],
+        "equalWorkChangePercent": 0.5926690106736299,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 0.21682279582093678,
+        "ratios": [
+          1.0089720098566186,
+          1.0023745547709366,
+          0.998728463347882,
+          1.0019619011454823,
+          0.9877964828837852,
+          1.0362184605557776
+        ],
+        "worstPairChangePercent": 3.62184605557776
+      },
+      "dictionary": "jitendex",
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -2.3199023199008573,
+          -0.39999999999557057
+        ],
+        "equalWorkChangePercent": -1.3541566861456689,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": -1.359951159948214,
+        "ratios": [
+          0.9768009768009914,
+          0.9960000000000443
+        ],
+        "worstPairChangePercent": -0.39999999999557057
+      },
+      "initialOrder": "AB",
+      "memoryQualificationFailures": [],
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -2.0227873593150925,
+            "medianPairedChangePercent": -2.2855690431914155
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -1.6201936453442367,
+            "medianPairedChangePercent": -1.9188959775863434
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 830184,
+              "candidate": 809028,
+              "changePercent": -2.5483507270677386
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1064034,
+              "candidate": 1040438,
+              "changePercent": -2.21759830982845
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 806412,
+              "candidate": 790100,
+              "changePercent": -2.0227873593150925
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1038703,
+              "candidate": 1021874,
+              "changePercent": -1.6201936453442367
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ],
+        "passesProspectiveMemoryScreen": true
+      },
+      "validatedAllMediaReceipts": 2,
+      "validatedMemoryReceipts": 4,
+      "validatedTimedReceipts": 20
+    },
+    {
+      "actualPackageMemberMaps": {
+        "A": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+        "B": "5f0fc4520c0001be8bc760e3a2b28da32b100b75c7554d2b506ffa8ee0d7e781"
+      },
+      "artifactId": 15250678695,
+      "artifactSha256": "fcfc875920925020053cb541e76ba0b9923ec35f16451baea6f346096a7a1a2d",
+      "auditStatus": "verified",
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -0.3870153643351193,
+          3.4795875121833575
+        ],
+        "equalWorkChangePercent": 1.3984507259011902,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 1.1900529902066026,
+        "ratios": [
+          1.040093593878451,
+          1.0294981563652161,
+          1.0003681207436075,
+          1.0004953253668432,
+          0.9918915719696902,
+          1.0233057344372891
+        ],
+        "worstPairChangePercent": 4.009359387845102
+      },
+      "dictionary": "jitendex",
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          1.5590876000942222,
+          3.0041352468964
+        ],
+        "equalWorkChangePercent": 2.2807337220577484,
+        "fasterPairs": 0,
+        "medianPairedChangePercent": 2.281611423495322,
+        "ratios": [
+          1.030041352468964,
+          1.0155908760009422
+        ],
+        "worstPairChangePercent": 3.0041352468964
+      },
+      "initialOrder": "BA",
+      "memoryQualificationFailures": [],
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 5.580154121398095,
+            "medianPairedChangePercent": 2.3889313406245174
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 4.349594719361716,
+            "medianPairedChangePercent": 1.8006750057181664
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 800408,
+              "candidate": 845072,
+              "changePercent": 5.580154121398095
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1030027,
+              "candidate": 1074829,
+              "changePercent": 4.349594719361716
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 835108,
+              "candidate": 828408,
+              "changePercent": -0.8022914401490611
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1068768,
+              "candidate": 1060771,
+              "changePercent": -0.7482447079253829
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ],
+        "passesProspectiveMemoryScreen": true
+      },
+      "validatedAllMediaReceipts": 2,
+      "validatedMemoryReceipts": 4,
+      "validatedTimedReceipts": 20
+    },
+    {
+      "actualPackageMemberMaps": {
+        "A": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+        "B": "5f0fc4520c0001be8bc760e3a2b28da32b100b75c7554d2b506ffa8ee0d7e781"
+      },
+      "artifactId": 15251612813,
+      "artifactSha256": "5e688e8a96a1bf39ee8442d60c3b290f60c639022e64b32c71835bbeba97a6b9",
+      "auditStatus": "verified",
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -2.7615802014440693,
+          2.561236245162979
+        ],
+        "equalWorkChangePercent": -0.4837635630081438,
+        "fasterPairs": 4,
+        "medianPairedChangePercent": -1.174794912669186,
+        "ratios": [
+          0.9913328648395134,
+          0.9632869144896232,
+          0.9814814814814954,
+          1.020628334321239,
+          1.0305963905820203,
+          0.9851712369071028
+        ],
+        "worstPairChangePercent": 3.059639058202035
+      },
+      "dictionary": "jmdict",
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          0.08226583618167194,
+          1.249545068548663
+        ],
+        "equalWorkChangePercent": 0.6566380133784966,
+        "fasterPairs": 0,
+        "medianPairedChangePercent": 0.6659054523651786,
+        "ratios": [
+          1.0124954506854866,
+          1.0008226583618167
+        ],
+        "worstPairChangePercent": 1.249545068548663
+      },
+      "initialOrder": "AB",
+      "memoryQualificationFailures": [],
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 3.781585235649998,
+            "medianPairedChangePercent": 2.7218826917775107
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.9350415554611153,
+            "medianPairedChangePercent": 2.0784133823069206
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 799432,
+              "candidate": 812720,
+              "changePercent": 1.6621801479050236
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1032260,
+              "candidate": 1044872,
+              "changePercent": 1.221785209152726
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 786760,
+              "candidate": 816512,
+              "changePercent": 3.781585235649998
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1018759,
+              "candidate": 1048660,
+              "changePercent": 2.9350415554611153
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ],
+        "passesProspectiveMemoryScreen": true
+      },
+      "validatedAllMediaReceipts": 2,
+      "validatedMemoryReceipts": 4,
+      "validatedTimedReceipts": 20
+    },
+    {
+      "actualPackageMemberMaps": {
+        "A": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+        "B": "5f0fc4520c0001be8bc760e3a2b28da32b100b75c7554d2b506ffa8ee0d7e781"
+      },
+      "artifactId": 15249531252,
+      "artifactSha256": "840d85a80ffc33aff6071b68e6029edf468bf1513a45b2dd2e466b6f99f65221",
+      "auditStatus": "verified",
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -2.76994831800097,
+          0.09488610915771023
+        ],
+        "equalWorkChangePercent": -1.3085792321410383,
+        "fasterPairs": 5,
+        "medianPairedChangePercent": -1.2337075832278943,
+        "ratios": [
+          0.9991732120711158,
+          0.9714431934493108,
+          0.9861501614078455,
+          0.9891756869275966,
+          0.9731578401906699,
+          1.0027245101120386
+        ],
+        "worstPairChangePercent": 0.27245101120385584
+      },
+      "dictionary": "jmdict",
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.9784360933701728,
+          -0.49337033610735714
+        ],
+        "equalWorkChangePercent": -1.2291256093742375,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": -1.235903214738765,
+        "ratios": [
+          0.9802156390662983,
+          0.9950662966389264
+        ],
+        "worstPairChangePercent": -0.49337033610735714
+      },
+      "initialOrder": "BA",
+      "memoryQualificationFailures": [],
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": 2.918596569415488,
+            "medianPairedChangePercent": 2.2261545820622675
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": 2.3170976515172415,
+            "medianPairedChangePercent": 1.8949303370210169
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 783980,
+              "candidate": 796004,
+              "changePercent": 1.5337125947090469
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1017679,
+              "candidate": 1032667,
+              "changePercent": 1.4727630225247923
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 753924,
+              "candidate": 775928,
+              "changePercent": 2.918596569415488
+            },
+            "maxSampledPssKiB": {
+              "baseline": 981357,
+              "candidate": 1004096,
+              "changePercent": 2.3170976515172415
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ],
+        "passesProspectiveMemoryScreen": true
+      },
+      "validatedAllMediaReceipts": 2,
+      "validatedMemoryReceipts": 4,
+      "validatedTimedReceipts": 20
+    },
+    {
+      "actualPackageMemberMaps": {
+        "A": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+        "B": "5f0fc4520c0001be8bc760e3a2b28da32b100b75c7554d2b506ffa8ee0d7e781"
+      },
+      "artifactId": 15250561439,
+      "artifactSha256": "5d1cfef44d5de06515fa3d9376b06272dde258b4abb567eb0302b7c712bf6415",
+      "auditStatus": "verified",
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -2.8742471126018687,
+          3.1422203023454554
+        ],
+        "equalWorkChangePercent": 0.4893462720588104,
+        "fasterPairs": 2,
+        "medianPairedChangePercent": 1.2782641130759886,
+        "ratios": [
+          1.0109054651959868,
+          0.9697025641025617,
+          0.972812493645401,
+          1.014659817065533,
+          1.0282778497138847,
+          1.0345665563330246
+        ],
+        "worstPairChangePercent": 3.4566556333024634
+      },
+      "dictionary": "vndb",
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          0.5710446758496524,
+          1.6337802512859545
+        ],
+        "equalWorkChangePercent": 1.1013169520771582,
+        "fasterPairs": 0,
+        "medianPairedChangePercent": 1.1024124635678145,
+        "ratios": [
+          1.0163378025128595,
+          1.0057104467584965
+        ],
+        "worstPairChangePercent": 1.6337802512859545
+      },
+      "initialOrder": "AB",
+      "memoryQualificationFailures": [
+        {
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 318.961737,
+          "name": "B1",
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        },
+        {
+          "maxSampledPrivateKiB": null,
+          "maxSampledPssKiB": null,
+          "maximumCoveredSampleGapMs": 351.038942,
+          "name": "A2",
+          "qualificationFailures": [
+            "covered-import-scan-gap-over-250ms"
+          ],
+          "qualifiedForWholeTreePss": false
+        }
+      ],
+      "memorySummary": {
+        "everyObservationQualified": false,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": null,
+            "medianPairedChangePercent": null
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 1009304,
+              "candidate": null,
+              "changePercent": null
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1231976,
+              "candidate": null,
+              "changePercent": null
+            },
+            "pair": 1,
+            "qualified": false
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": null,
+              "candidate": 979808,
+              "changePercent": null
+            },
+            "maxSampledPssKiB": {
+              "baseline": null,
+              "candidate": 1207274,
+              "changePercent": null
+            },
+            "pair": 2,
+            "qualified": false
+          }
+        ],
+        "passesProspectiveMemoryScreen": false
+      },
+      "validatedAllMediaReceipts": 2,
+      "validatedMemoryReceipts": 4,
+      "validatedTimedReceipts": 20
+    },
+    {
+      "actualPackageMemberMaps": {
+        "A": "27ae16923b783cd5ccdf25933a297cf59a5ec4e047a61b0b666f90c33d5b9fde",
+        "B": "5f0fc4520c0001be8bc760e3a2b28da32b100b75c7554d2b506ffa8ee0d7e781"
+      },
+      "artifactId": 15251228128,
+      "artifactSha256": "f5cc305ee68b888d96f243b7987c4b00c13709d807252748b21f222f6a0ea675",
+      "auditStatus": "verified",
+      "candidateVsBaseline": {
+        "count": 6,
+        "descriptiveBootstrap95Percent": [
+          -6.6810044823071735,
+          4.990091355508408
+        ],
+        "equalWorkChangePercent": -0.6650704094924187,
+        "fasterPairs": 3,
+        "medianPairedChangePercent": 0.4699775402301043,
+        "ratios": [
+          1.03656462585035,
+          1.024130043118284,
+          0.985269507686318,
+          1.0632372012598184,
+          0.8843286283025675,
+          0.9820512820512891
+        ],
+        "worstPairChangePercent": 6.323720125981835
+      },
+      "dictionary": "vndb",
+      "identicalCodeControl": {
+        "count": 2,
+        "descriptiveBootstrap95Percent": [
+          -1.0833613911404028,
+          2.6106886133981932
+        ],
+        "equalWorkChangePercent": 0.7168531567936176,
+        "fasterPairs": 1,
+        "medianPairedChangePercent": 0.7636636111288952,
+        "ratios": [
+          1.026106886133982,
+          0.989166386088596
+        ],
+        "worstPairChangePercent": 2.6106886133981932
+      },
+      "initialOrder": "BA",
+      "memoryQualificationFailures": [],
+      "memorySummary": {
+        "everyObservationQualified": true,
+        "metrics": {
+          "maxSampledPrivateKiB": {
+            "maximumPairedChangePercent": -4.500852752900508,
+            "medianPairedChangePercent": -5.616207975632104
+          },
+          "maxSampledPssKiB": {
+            "maximumPairedChangePercent": -3.828946040088621,
+            "medianPairedChangePercent": -4.295445871677949
+          }
+        },
+        "pairs": [
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 1056040,
+              "candidate": 984952,
+              "changePercent": -6.731563198363699
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1279414,
+              "candidate": 1218489,
+              "changePercent": -4.761945703267278
+            },
+            "pair": 1,
+            "qualified": true
+          },
+          {
+            "maxSampledPrivateKiB": {
+              "baseline": 1046024,
+              "candidate": 998944,
+              "changePercent": -4.500852752900508
+            },
+            "maxSampledPssKiB": {
+              "baseline": 1277819,
+              "candidate": 1228892,
+              "changePercent": -3.828946040088621
+            },
+            "pair": 2,
+            "qualified": true
+          }
+        ],
+        "passesProspectiveMemoryScreen": true
+      },
+      "validatedAllMediaReceipts": 2,
+      "validatedMemoryReceipts": 4,
+      "validatedTimedReceipts": 20
+    }
+  ],
+  "interpretation": "No replicated complete-import gain established: all six descriptive confidence intervals include zero; the JMdict BA identical-code control is approximately the same size as its candidate comparison. VNDB AB fails memory coverage qualification. No PR promotion or rerun is supported.",
+  "reportSha256": "5362d6d809ea74f14969ad448c0dfb937f7691bd5098d81e8496e4e418dc61fd",
+  "schemaVersion": 1,
+  "scope": "Six distinct hosts/cohorts remain separate; unchanged c7 six-pair statistics, full timing/media semantics, actual nested package maps and raw memory scans audited. Memory timings are not ordinary latency observations.",
+  "sourceRunUrl": "https://github.com/ManabiIO/manabitan/actions/runs/46103789342"
+}

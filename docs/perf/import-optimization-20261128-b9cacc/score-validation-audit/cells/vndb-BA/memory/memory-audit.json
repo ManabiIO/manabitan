@@ -1,0 +1,17 @@
+{
+  "everyObservationQualified": true,
+  "metrics": {
+    "maxSampledPrivateKiB": {
+      "maximumPairedChangePercent": -4.500852752900508,
+      "medianPairedChangePercent": -5.616207975632104
+    },
+    "maxSampledPssKiB": {
+      "maximumPairedChangePercent": -3.828946040088621,
+      "medianPairedChangePercent": -4.295445871677949
+    }
+  },
+  "observations": 4,
+  "passesProspectiveMemoryScreen": true,
+  "rawScanCount": 474,
+  "schemaVersion": 1
+}

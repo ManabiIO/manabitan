@@ -42,5 +42,20 @@
     },
     "repositoryQueuedWorkflowRuns": 257
   },
-  "observations": "Raw records remain unchanged; this receipt documents only packaging review."
+  "observations": "Raw records remain unchanged; this receipt documents only packaging review.",
+  "scoreFinalAudit": {
+    "reviewedAtUtc": "2026-11-28T06:30:07.894087+00:00",
+    "appendixManifestSha256": "9829fff3762524bc27f463b3730310a3c656057f50f366682b7d49ba2a0b9e2e",
+    "reportSha256": "5362d6d809ea74f14969ad448c0dfb937f7691bd5098d81e8496e4e418dc61fd",
+    "all68ManifestEntriesVerified": true,
+    "bytesIncludingManifest": 468111,
+    "allSixMedianRatiosAndWinCountsRecomputed": true,
+    "allSixIntervalsIncludeZero": true,
+    "allSixCellsIndependentlyAudited": true,
+    "allMemoryScreensPassed": false,
+    "memoryFailure": "VNDB AB covered sample gaps318.961737/351.038942ms >250ms; maxima remain null; all semantics pass",
+    "actualPackages": "12 ZIPs,554members each; sole changedentry js/dictionary/term-record-opfs-store.js",
+    "decision": "Reject; no PR or replacement cohort",
+    "transportOrTokenPatternCandidates": 0
+  }
 }

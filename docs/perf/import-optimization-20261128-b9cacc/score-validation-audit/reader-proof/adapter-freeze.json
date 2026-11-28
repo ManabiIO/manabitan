@@ -1,0 +1,12 @@
+{
+  "files": {
+    "dev/perf/import-analysis-b9cacc-experiments.json": "82ab57d37b683eed39e8ddc1dc3a09dd55298deed511f888f5c8aa824d1508cb",
+    "dev/perf/import-analysis-b9cacc-v2.py": "02e55354804c9c44275c8aaacb95a9d3a5949865dd74e707caff54b9c0dec650",
+    "local_snapshot_audit.py": "7e336e45159404b606cc4f995caeea10550ff95604d6b53c17036b550bb0fc35"
+  },
+  "frozenAtEpochSeconds": 1795846785.348899,
+  "parentSourceReview": "No blocker; approved exact adapter for one local artifact audit after completed frozen run plus all six terminal cells and a successful ordinary signed-artifact download. No hosted duplicate, timing, or reader algorithm changes.",
+  "routeChecksSha256": "254d23d5d868f6748660718986ac1a8a6c413cb308a88db6881d5b0f4585e495",
+  "schemaVersion": 1,
+  "state": "prepared-not-executed"
+}

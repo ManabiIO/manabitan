@@ -1,0 +1,41 @@
+{
+  "candidateVsBaseline": {
+    "count": 6,
+    "descriptiveBootstrap95Percent": [
+      -0.67375268841664,
+      2.2595235206197994
+    ],
+    "equalWorkChangePercent": 0.5926690106736299,
+    "fasterPairs": 2,
+    "medianPairedChangePercent": 0.21682279582093678,
+    "ratios": [
+      1.0089720098566186,
+      1.0023745547709366,
+      0.998728463347882,
+      1.0019619011454823,
+      0.9877964828837852,
+      1.0362184605557776
+    ],
+    "worstPairChangePercent": 3.62184605557776
+  },
+  "identicalCodeControl": {
+    "count": 2,
+    "descriptiveBootstrap95Percent": [
+      -2.3199023199008573,
+      -0.39999999999557057
+    ],
+    "equalWorkChangePercent": -1.3541566861456689,
+    "fasterPairs": 2,
+    "medianPairedChangePercent": -1.359951159948214,
+    "ratios": [
+      0.9768009768009914,
+      0.9960000000000443
+    ],
+    "worstPairChangePercent": -0.39999999999557057
+  },
+  "limits": "One host/cohort only; independent opposite-order replication required. Memory observations remain separate.",
+  "memoryPassed": true,
+  "status": "correctness-memory-passed",
+  "timingInterpretation": "Descriptive paired comparison only. A passing correctness/memory status is not a latency or speedup claim.",
+  "timingScope": "File input change through post-UI completion; fresh profile per observation"
+}

@@ -1,0 +1,166 @@
+{
+  "baseline": "9e10d3b3fcf66d344ab31bc42c9b522fa5215da2",
+  "candidate": "f21bda709a5b3374f4d5175f8234c94439936040",
+  "dictionary": "jmdict",
+  "expectedPackageEntries": [
+    "js/dictionary/term-record-opfs-store.js"
+  ],
+  "expectedWorkers": null,
+  "failurePolicy": "Stop on first failed observation; retain all completed and failed evidence",
+  "flags": {},
+  "initialOrder": "AB",
+  "mediaCheck": "sample per timed observation; separate all-media verification after timing",
+  "memoryPolicy": "Separate instrumented A/B observations after all timing and media verification",
+  "memorySchedule": [
+    {
+      "arm": "A",
+      "index": 1,
+      "name": "A1",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "index": 2,
+      "name": "B1",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "index": 3,
+      "name": "B2",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "index": 4,
+      "name": "A2",
+      "pair": 2
+    }
+  ],
+  "pairs": 6,
+  "schedule": [
+    {
+      "arm": "A",
+      "id": "warmup-1-A",
+      "kind": "warmup",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "id": "warmup-1-B",
+      "kind": "warmup",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "id": "warmup-2-B",
+      "kind": "warmup",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "id": "warmup-2-A",
+      "kind": "warmup",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "id": "pair-01-A",
+      "kind": "candidate",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "id": "pair-01-B",
+      "kind": "candidate",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "id": "pair-02-B",
+      "kind": "candidate",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "id": "pair-02-A",
+      "kind": "candidate",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "id": "pair-03-A",
+      "kind": "candidate",
+      "pair": 3
+    },
+    {
+      "arm": "B",
+      "id": "pair-03-B",
+      "kind": "candidate",
+      "pair": 3
+    },
+    {
+      "arm": "A",
+      "id": "control-01-A",
+      "kind": "control",
+      "pair": 1
+    },
+    {
+      "arm": "C",
+      "id": "control-01-C",
+      "kind": "control",
+      "pair": 1
+    },
+    {
+      "arm": "B",
+      "id": "pair-04-B",
+      "kind": "candidate",
+      "pair": 4
+    },
+    {
+      "arm": "A",
+      "id": "pair-04-A",
+      "kind": "candidate",
+      "pair": 4
+    },
+    {
+      "arm": "A",
+      "id": "pair-05-A",
+      "kind": "candidate",
+      "pair": 5
+    },
+    {
+      "arm": "B",
+      "id": "pair-05-B",
+      "kind": "candidate",
+      "pair": 5
+    },
+    {
+      "arm": "B",
+      "id": "pair-06-B",
+      "kind": "candidate",
+      "pair": 6
+    },
+    {
+      "arm": "A",
+      "id": "pair-06-A",
+      "kind": "candidate",
+      "pair": 6
+    },
+    {
+      "arm": "C",
+      "id": "control-02-C",
+      "kind": "control",
+      "pair": 2
+    },
+    {
+      "arm": "A",
+      "id": "control-02-A",
+      "kind": "control",
+      "pair": 2
+    }
+  ],
+  "sourceBoundary": "Each revision built independently before timing; no product or harness overlays",
+  "statistics": "Per-host paired median and equal-work ratios; descriptive percentile bootstrap interval of paired median, 10000 complete-pair resamples, seed 897. No pooling hosts or timing from instrumented runs.",
+  "vndbSahAllocationPolicy": null
+}

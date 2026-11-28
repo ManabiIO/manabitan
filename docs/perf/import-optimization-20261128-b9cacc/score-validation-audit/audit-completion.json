@@ -1,0 +1,76 @@
+{
+  "allSelectedFrozenCohortsAudited": true,
+  "auditError": null,
+  "cells": [
+    {
+      "allMedia": 2,
+      "auditErrors": [],
+      "auditStatus": "verified",
+      "dictionary": "jitendex",
+      "memoryAuditFailure": null,
+      "memoryReceipts": 4,
+      "memorySemanticFailures": [],
+      "order": "AB",
+      "timed": 20
+    },
+    {
+      "allMedia": 2,
+      "auditErrors": [],
+      "auditStatus": "verified",
+      "dictionary": "jitendex",
+      "memoryAuditFailure": null,
+      "memoryReceipts": 4,
+      "memorySemanticFailures": [],
+      "order": "BA",
+      "timed": 20
+    },
+    {
+      "allMedia": 2,
+      "auditErrors": [],
+      "auditStatus": "verified",
+      "dictionary": "jmdict",
+      "memoryAuditFailure": null,
+      "memoryReceipts": 4,
+      "memorySemanticFailures": [],
+      "order": "AB",
+      "timed": 20
+    },
+    {
+      "allMedia": 2,
+      "auditErrors": [],
+      "auditStatus": "verified",
+      "dictionary": "jmdict",
+      "memoryAuditFailure": null,
+      "memoryReceipts": 4,
+      "memorySemanticFailures": [],
+      "order": "BA",
+      "timed": 20
+    },
+    {
+      "allMedia": 2,
+      "auditErrors": [],
+      "auditStatus": "verified",
+      "dictionary": "vndb",
+      "memoryAuditFailure": null,
+      "memoryReceipts": 4,
+      "memorySemanticFailures": [],
+      "order": "AB",
+      "timed": 20
+    },
+    {
+      "allMedia": 2,
+      "auditErrors": [],
+      "auditStatus": "verified",
+      "dictionary": "vndb",
+      "memoryAuditFailure": null,
+      "memoryReceipts": 4,
+      "memorySemanticFailures": [],
+      "order": "BA",
+      "timed": 20
+    }
+  ],
+  "completedAtEpochSeconds": 1795847137.594054,
+  "consoleSha256": "a0d17eb47d4dba3e6f45b6b9f80c03cb9874dc4a045966d333b28959228d81ea",
+  "exitCode": 0,
+  "reportSha256": "5362d6d809ea74f14969ad448c0dfb937f7691bd5098d81e8496e4e418dc61fd"
+}

@@ -1,0 +1,21 @@
+{
+  "adapterSha256": "7e336e45159404b606cc4f995caeea10550ff95604d6b53c17036b550bb0fc35",
+  "artifactReads": "exact six frozen ordinary-download ZIPs; no network from auditor",
+  "command": [
+    "python3",
+    "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/local_snapshot_audit.py",
+    "--reader",
+    "/workspace/scratch/b9cacc3542c2/analysis/reader-cloud-c7a18/dev/perf/import-analysis-b9cacc-v2.py",
+    "--baseline",
+    "/workspace/scratch/b9cacc3542c2/baseline",
+    "--inputs",
+    "/home/agent/.cache/manabitan-b9cacc/score-audit-20261128/inputs",
+    "--output",
+    "/home/agent/.cache/manabitan-b9cacc/score-audit-20261128/output"
+  ],
+  "nativeOrBrowserExecution": false,
+  "schemaVersion": 1,
+  "startedAtEpochSeconds": 1795847132.7549376,
+  "temporaryRoot": "/home/agent/.cache/manabitan-b9cacc/score-audit-20261128/temporary",
+  "transportManifestSha256": "5b6de1efa3b0f32ac4ae9fd298330179bfb09685f3c8d4604226ac9c58c666b1"
+}

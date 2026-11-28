@@ -1,0 +1,51 @@
+{
+  "adapterSha256": "7e336e45159404b606cc4f995caeea10550ff95604d6b53c17036b550bb0fc35",
+  "checks": [
+    {
+      "message": "Unexpected API endpoint access",
+      "name": "reject-unregistered-api-endpoint",
+      "passed": true
+    },
+    {
+      "message": "Unexpected artifact ID access",
+      "name": "reject-unregistered-artifact-id",
+      "passed": true
+    },
+    {
+      "message": "Evidence file escapes input root or is absent",
+      "name": "reject-parent-path-traversal",
+      "passed": true
+    }
+  ],
+  "configSha256": "82ab57d37b683eed39e8ddc1dc3a09dd55298deed511f888f5c8aa824d1508cb",
+  "newReadOnlySourceLinks": [
+    "package-lock.json",
+    "dev/perf/benchmark-support.js",
+    "dev/perf/dictionary-fixtures.js",
+    "dev/perf/import-benchmark.js",
+    "test/chromium/import-flags-ab-benchmark.js",
+    "test/chromium/extension-two-dictionary-import.e2e.js",
+    "test/e2e/import-timing.js",
+    "ext/js/pages/settings/dictionary-import-controller.js"
+  ],
+  "readerSha256": "02e55354804c9c44275c8aaacb95a9d3a5949865dd74e707caff54b9c0dec650",
+  "recordedAtEpochSeconds": 1795846699.5448189,
+  "schemaVersion": 1,
+  "scope": "Adapter-only negative route checks and source binding; no artifact download/audit, core test cohort, native or browser execution.",
+  "sourceBinding": {
+    "dev/perf/benchmark-support.js": "eacc5eeee1aaeb13ea44867f0d2ff168f5e723392652ebfee6dfc717ba3865d0",
+    "dev/perf/dictionary-fixtures.js": "269696425780dbc3428febf8a69c1d5097a660d9daf465f9ab679be14b10b75b",
+    "dev/perf/import-benchmark.js": "aa4d887c2106369c7ec27b3548f2fce58be4dd2b85807435e2eb783b2400ccc6",
+    "dev/perf/import-memory-20261125-a7f7/audit_memory.py": "871f29b9d87c42468714263a0eda05ee9edd2f76bff269ea9cb6d6d1fe51de7c",
+    "dev/perf/import-memory-20261125-a7f7/chromium_memory.py": "8044bf3f4c48a868c7e076dc5f1bef9c2663f6323fe4a4fba5c121161cada4c7",
+    "dev/perf/import-memory-20261125-a7f7/protocol.py": "ea0e7c20bbc1273cbe81891c32ecc72658d70ed1bbf1d57cdcfae5b347d493c7",
+    "dev/perf/import-memory-20261125-a7f7/qualification_receipts.py": "4f7b4eee4f8ff71e821c9162e57524460c48f01f409487f638523a3a27aa8f51",
+    "ext/js/pages/settings/dictionary-import-controller.js": "64a5c3f7bf26f7034fd3debb4c439de775dc77f70b68e7c0fe92e736d09d7307",
+    "package-lock.json": "01e065503317a90b43a5bc60cd9f874238762c75a13c8115a9c484a626960a96",
+    "test/chromium/extension-two-dictionary-import.e2e.js": "d0ae122bd22f7b460cedb11f06d2cb018224674abf9669e0fed567b5f3a870cf",
+    "test/chromium/import-flags-ab-benchmark.js": "da4f623bff42b8618568062725f4942e0dd5b0aac789d3b4560064ae6f804a34",
+    "test/e2e/import-timing.js": "20b885ba6c4b2acf02b946d02087898e92632776169aa82e5df6f6e5b4691c3c",
+    "test/perf/dictionaries.lock.json": "60aa981791f3b60ca17588212aea5bd3536fb8f59288855e5accd019c6e4cf89"
+  },
+  "syntax": "passed"
+}

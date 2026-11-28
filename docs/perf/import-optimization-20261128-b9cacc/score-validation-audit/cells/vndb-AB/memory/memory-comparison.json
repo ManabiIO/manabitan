@@ -1,0 +1,266 @@
+{
+  "authoritativeTiming": false,
+  "dictionary": "vndb",
+  "everyObservationQualified": false,
+  "metrics": {
+    "maxSampledPrivateKiB": {
+      "maximumPairedChangePercent": null,
+      "medianPairedChangePercent": null
+    },
+    "maxSampledPssKiB": {
+      "maximumPairedChangePercent": null,
+      "medianPairedChangePercent": null
+    }
+  },
+  "observations": [
+    {
+      "allObservedSampleCount": 111,
+      "arm": "A",
+      "authoritativeTiming": false,
+      "benchmarkExitCode": 0,
+      "confirmedExitedZombieIdentityCount": 0,
+      "confirmedExitedZombieObservationCount": 0,
+      "fullyContainedImportSampleCount": 40,
+      "index": 1,
+      "limitations": [
+        "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+        "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+        "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+        "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+        "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+      ],
+      "maxSampledPrivateKiB": 1009304,
+      "maxSampledPssKiB": 1231976,
+      "maximumCoveredSampleGapMs": 175.999499,
+      "name": "A1",
+      "observedProcessCountRange": [
+        9,
+        9
+      ],
+      "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+      "overlappingImportSampleCount": 42,
+      "pair": 1,
+      "postImportBracketGapMs": 97.895384,
+      "preImportBracketGapMs": 50.133521,
+      "qualificationFailures": [],
+      "qualifiedForWholeTreePss": true,
+      "sampleCount": 42,
+      "samplesWithUnavailableSmaps": 0,
+      "samplesWithUnreadableAddressSpaces": 0,
+      "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+      "schemaVersion": 3,
+      "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+      "stableFullyReadImportSampleCount": 40,
+      "stableFullyReadTreeSampleCount": 42,
+      "windowDurationMs": 5721.277775,
+      "windowMarkers": [
+        {
+          "epochMs": 1795844034523,
+          "event": "start",
+          "monotonicNs": "1230210794668"
+        },
+        {
+          "epochMs": 1795844040244,
+          "event": "end",
+          "monotonicNs": "1235932072443"
+        }
+      ]
+    },
+    {
+      "allObservedSampleCount": 107,
+      "arm": "B",
+      "authoritativeTiming": false,
+      "benchmarkExitCode": 0,
+      "confirmedExitedZombieIdentityCount": 1,
+      "confirmedExitedZombieObservationCount": 8,
+      "fullyContainedImportSampleCount": 38,
+      "index": 2,
+      "limitations": [
+        "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+        "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+        "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+        "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+        "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+      ],
+      "maxSampledPrivateKiB": null,
+      "maxSampledPssKiB": null,
+      "maximumCoveredSampleGapMs": 318.961737,
+      "name": "B1",
+      "observedProcessCountRange": [
+        9,
+        9
+      ],
+      "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+      "overlappingImportSampleCount": 40,
+      "pair": 1,
+      "postImportBracketGapMs": 56.952022,
+      "preImportBracketGapMs": 67.411137,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "qualifiedForWholeTreePss": false,
+      "sampleCount": 40,
+      "samplesWithUnavailableSmaps": 9,
+      "samplesWithUnreadableAddressSpaces": 1,
+      "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+      "schemaVersion": 3,
+      "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+      "stableFullyReadImportSampleCount": 37,
+      "stableFullyReadTreeSampleCount": 39,
+      "windowDurationMs": 5747.700264,
+      "windowMarkers": [
+        {
+          "epochMs": 1795844057007,
+          "event": "start",
+          "monotonicNs": "1252694675260"
+        },
+        {
+          "epochMs": 1795844062754,
+          "event": "end",
+          "monotonicNs": "1258442375524"
+        }
+      ]
+    },
+    {
+      "allObservedSampleCount": 109,
+      "arm": "B",
+      "authoritativeTiming": false,
+      "benchmarkExitCode": 0,
+      "confirmedExitedZombieIdentityCount": 0,
+      "confirmedExitedZombieObservationCount": 0,
+      "fullyContainedImportSampleCount": 42,
+      "index": 3,
+      "limitations": [
+        "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+        "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+        "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+        "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+        "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+      ],
+      "maxSampledPrivateKiB": 979808,
+      "maxSampledPssKiB": 1207274,
+      "maximumCoveredSampleGapMs": 183.498627,
+      "name": "B2",
+      "observedProcessCountRange": [
+        9,
+        9
+      ],
+      "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+      "overlappingImportSampleCount": 43,
+      "pair": 2,
+      "postImportBracketGapMs": 11.88663,
+      "preImportBracketGapMs": 83.232981,
+      "qualificationFailures": [],
+      "qualifiedForWholeTreePss": true,
+      "sampleCount": 43,
+      "samplesWithUnavailableSmaps": 0,
+      "samplesWithUnreadableAddressSpaces": 0,
+      "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+      "schemaVersion": 3,
+      "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+      "stableFullyReadImportSampleCount": 42,
+      "stableFullyReadTreeSampleCount": 43,
+      "windowDurationMs": 6028.672419,
+      "windowMarkers": [
+        {
+          "epochMs": 1795844079677,
+          "event": "start",
+          "monotonicNs": "1275365204211"
+        },
+        {
+          "epochMs": 1795844085706,
+          "event": "end",
+          "monotonicNs": "1281393876630"
+        }
+      ]
+    },
+    {
+      "allObservedSampleCount": 113,
+      "arm": "A",
+      "authoritativeTiming": false,
+      "benchmarkExitCode": 0,
+      "confirmedExitedZombieIdentityCount": 1,
+      "confirmedExitedZombieObservationCount": 8,
+      "fullyContainedImportSampleCount": 41,
+      "index": 4,
+      "limitations": [
+        "Non-atomic sampled observations; short-lived processes and unsampled memory changes can be missed.",
+        "Only complete scans wholly inside the marked automation import window contribute to maxima.",
+        "Markers bracket dispatch through visible completion and include automation overhead, not readback or restart.",
+        "PSS apportions shared mappings; private bytes are reported separately. Neither is an exact peak measurement.",
+        "All failed and boundary scans are retained; no missing read is assigned a measured zero."
+      ],
+      "maxSampledPrivateKiB": null,
+      "maxSampledPssKiB": null,
+      "maximumCoveredSampleGapMs": 351.038942,
+      "name": "A2",
+      "observedProcessCountRange": [
+        9,
+        9
+      ],
+      "observerRule": "import-window-stable-single-thread-zombie-esrch-v1",
+      "overlappingImportSampleCount": 42,
+      "pair": 2,
+      "postImportBracketGapMs": 7.087367,
+      "preImportBracketGapMs": 87.713054,
+      "qualificationFailures": [
+        "covered-import-scan-gap-over-250ms"
+      ],
+      "qualifiedForWholeTreePss": false,
+      "sampleCount": 42,
+      "samplesWithUnavailableSmaps": 9,
+      "samplesWithUnreadableAddressSpaces": 1,
+      "sampling": "Linux /proc smaps_rollup; 25 ms wait between scans; non-atomic stable identity/metadata checks",
+      "schemaVersion": 3,
+      "scope": "Discovered Chromium process tree from immediately before file-input dispatch through observed UI import completion; startup, media readback and restart excluded from maxima",
+      "stableFullyReadImportSampleCount": 40,
+      "stableFullyReadTreeSampleCount": 41,
+      "windowDurationMs": 5909.875972,
+      "windowMarkers": [
+        {
+          "epochMs": 1795844102869,
+          "event": "start",
+          "monotonicNs": "1298557540338"
+        },
+        {
+          "epochMs": 1795844108779,
+          "event": "end",
+          "monotonicNs": "1304467416310"
+        }
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "maxSampledPrivateKiB": {
+        "baseline": 1009304,
+        "candidate": null,
+        "changePercent": null
+      },
+      "maxSampledPssKiB": {
+        "baseline": 1231976,
+        "candidate": null,
+        "changePercent": null
+      },
+      "pair": 1,
+      "qualified": false
+    },
+    {
+      "maxSampledPrivateKiB": {
+        "baseline": null,
+        "candidate": 979808,
+        "changePercent": null
+      },
+      "maxSampledPssKiB": {
+        "baseline": null,
+        "candidate": 1207274,
+        "changePercent": null
+      },
+      "pair": 2,
+      "qualified": false
+    }
+  ],
+  "passesProspectiveMemoryScreen": false,
+  "replication": 1,
+  "schemaVersion": 1
+}

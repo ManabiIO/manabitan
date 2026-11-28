@@ -1,0 +1,13 @@
+{
+  "artifactId": 15249531252,
+  "bytes": 34923066,
+  "completedAtEpochSeconds": 1795847115.7564292,
+  "file": "15249531252.zip",
+  "metadataDigest": "sha256:840d85a80ffc33aff6071b68e6029edf468bf1513a45b2dd2e466b6f99f65221",
+  "metadataSize": 34923066,
+  "method": "ordinary urllib HTTPS download from GitHub connector reusable file reference",
+  "sha256": "840d85a80ffc33aff6071b68e6029edf468bf1513a45b2dd2e466b6f99f65221",
+  "signedUrlPersisted": false,
+  "startedAtEpochSeconds": 1795847113.775612,
+  "status": "verified"
+}
