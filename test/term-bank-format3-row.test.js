@@ -52,7 +52,7 @@ parseTermBankWithWasmColumnChunks([encoder.encode(source), encoder.encode('[]')]
             sequence: chunk.sequenceList[i],
             content: createHash('sha256').update(content.subarray(offset, offset + metadata[i * 4 + 1])).digest('hex'),
             hashes: [metadata[i * 4 + 2], metadata[i * 4 + 3]],
-            media: chunk.mediaRows.filter((entry) => entry.index === i).map((entry) => entry.row.glossaryJson)})
+            media: chunk.mediaRows.filter((entry) => entry.index === i).map((entry) => ({glossary: entry.row.glossaryJson, mayContainMedia: entry.row.glossaryMayContainMedia}))})
     }
 }, 8192, options) :
 parseTermBankWithWasmChunks(encoder.encode(source), 3, (chunk) => {
@@ -72,6 +72,70 @@ parseTermBankWithWasmChunks(encoder.encode(source), 3, (chunk) => {
 }
 
 describe.each([false, true])('strict format-3 row grammar, columns=%s', (columns) => {
+    test.each(['div', 'span', 'ruby', 'rt', 'ul', 'li', 'a'])('preserves terminal %s tags across object and list boundaries', async (tag) => {
+        const glossaries = [
+            [{type: 'structured-content', content: 'top-level content', tag}],
+            [{type: 'structured-content', content: {content: 'terminal content', tag}}],
+            [{type: 'structured-content', content: [{tag}, {content: [{tag}], tag}]}],
+            [{type: 'structured-content', content: {tag, content: [{tag}]}}],
+            [{type: 'structured-content', content: {content: {tag}, tag}}],
+        ]
+        const source = JSON.stringify(glossaries.map((glossary, index) => [`tag-${index}`, '', '', '', 0, glossary, index, '']))
+        const actual = await parse(source, true, columns)
+        expect(actual.rows).toStrictEqual((await parse(source, false, columns)).rows)
+        expect(actual.rows).toHaveLength(glossaries.length)
+        if (columns) {
+            expect(actual.profile?.fusedParseAttempts).toBe(1)
+            expect(actual.profile?.fusedParseFallbacks).toBe(0)
+        } else {
+            for (let i = 0; i < glossaries.length; ++i) {
+                expect(actual.rows[i]).toMatchObject({glossary: glossaries[i], media: false})
+            }
+        }
+    })
+
+    test.each(['', ' ', '  ', '\r\n\t'])('preserves terminal-tag whitespace and escaped media with %j spacing', async (space) => {
+        const glossary = `[{"type":"structured-content","content":[{"tag":"\\u0069mg","path":"picture.webp"},{"content":{"ta\\u0067":"di\\u0076"},"tag":${space}"span"${space}},{"tag":${space}"li"}]},{"type":"text","text":"text hint"}]`
+        const source = `[["tag","","","",0,${glossary},1,""]]`
+        const actual = await parse(source, true, columns)
+        expect(actual.rows).toStrictEqual((await parse(source, false, columns)).rows)
+        if (columns) {
+            expect(actual.profile?.fusedParseFallbacks).toBe(0)
+            expect(actual.rows[0]).toMatchObject({media: [{mayContainMedia: true}]})
+        } else {
+            expect(actual.rows[0]).toMatchObject({glossary: JSON.parse(glossary), media: true})
+        }
+    })
+
+    test.each([
+        '[{"tag":"div"}]',
+        '[{"type":"structured-content","tag":"span"}]',
+        '[{"type":"text","tag":"ruby"}]',
+        '[{"type":"image","tag":"rt"}]',
+        '[{"type":"structured-content","content":null,"tag":"ul"}]',
+        '[{"type":"structured-content","content":{},"content":null,"tag":"li"}]',
+        '[{"type":"structured-content","content":{},"type":"unknown","tag":"a"}]',
+    ])('keeps required glossary-field checks after a terminal tag: %s', async (glossary) => {
+        await expect(parse(`[["tag","","","",0,${glossary},1,""]]`, true, columns)).rejects.toThrow()
+    })
+
+    test.each([
+        '{"tag":"div",}',
+        '{"tag":"span",,"content":"text"}',
+        '{"tag":"ruby":0}',
+        '{"tag":"rt"]}',
+        '{"tag":"ul"} {"tag":"li"}',
+        '[{"tag":"li"},]',
+        '[{"tag":"a"}}]',
+        '{"tag":"div"x}',
+        '{"tag":"span"',
+        '{"tag":"di\\qv"}',
+    ])('rejects malformed boundaries around a terminal tag: %s', async (content) => {
+        const source = `[["tag","","","",0,[{"type":"structured-content","content":${content}}],1,""]]`
+        await expect(parse(source, true, columns)).rejects.toThrow()
+        await expect(parse(source, false, columns)).rejects.toThrow()
+    })
+
     test.each(['', ' ', '\r\n\t'])('preserves nullable fields, escapes and reused glossary hints with whitespace %j', async (space) => {
         const glossary = [{type: 'structured-content', content: [{tag: 'img', path: 'image.webp'}, 'definition'.repeat(600)]}]
         const rows = [

@@ -1,0 +1,113 @@
+name: Terminal tag import experiment 20261128
+
+on:
+  push:
+    branches: [perf/terminal-structured-tags-20261128-1c413]
+    paths:
+      - 'ext/js/dictionary/wasm/term-bank-parser.c'
+      - 'dev/data/dictionary-wasm/**'
+      - 'test/term-bank-format3-row.test.js'
+      - '.github/workflows/import-terminal-tags-1c413.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terminal-tags-1c413-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  correctness:
+    name: Native rebuild, unit tests, and dry build
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install pinned dictionary WASM toolchain
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends clang-21 lld-21
+      - name: Verify native build and changed tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/terminal-tags-validation
+          npm run build:dictionary-wasm -- --check 2>&1 | tee builds/perf/terminal-tags-validation/native-build.log
+          npx eslint test/term-bank-format3-row.test.js 2>&1 | tee builds/perf/terminal-tags-validation/lint.log
+      - name: Complete unit suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:unit 2>&1 | tee builds/perf/terminal-tags-validation/unit.log
+      - name: All-target dry build
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p builds/perf/terminal-tags-validation
+          npm run test:build 2>&1 | tee builds/perf/terminal-tags-validation/dry-build.log
+      - name: Preserve correctness results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: terminal-tags-validation-${{ github.sha }}
+          path: builds/perf/terminal-tags-validation
+          if-no-files-found: error
+          retention-days: 14
+
+  compare:
+    name: Complete import (${{ matrix.dictionary }}, ${{ matrix.initial_order }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        dictionary: [jmdict, jitendex, vndb]
+        initial_order: [AB, BA]
+    env:
+      PERF_BASELINE: 9e10d3b3fcf66d344ab31bc42c9b522fa5215da2
+      PERF_CANDIDATE: ${{ github.sha }}
+      PERF_DICTIONARY: ${{ matrix.dictionary }}
+      PERF_INITIAL_ORDER: ${{ matrix.initial_order }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - name: Install matching Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Restore pinned dictionary archives
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: builds/e2e-dictionary-cache
+          key: perf-source-dictionaries-${{ runner.os }}-${{ hashFiles('test/perf/dictionaries.lock.json') }}
+      - name: Run frozen comparisons and separate media and memory verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          allocation=()
+          if [[ "$PERF_DICTIONARY" == vndb ]]; then
+            allocation+=(--vndb-sah-allocation-units 37 37)
+          fi
+          python dev/perf/import-qualification-20261125-a7f7.py \
+            --baseline "$PERF_BASELINE" \
+            --candidate "$PERF_CANDIDATE" \
+            --dictionary "$PERF_DICTIONARY" \
+            --initial-order "$PERF_INITIAL_ORDER" \
+            --pairs 12 \
+            --expected-package-entry js/dictionary/wasm/term-bank-parser.c \
+            --expected-package-entry lib/term-bank-parser.wasm \
+            "${allocation[@]}" \
+            --evidence builds/perf/terminal-tags-comparison
+      - name: Preserve every observation, package, and failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: terminal-tags-${{ matrix.dictionary }}-${{ matrix.initial_order }}-${{ github.sha }}
+          path: builds/perf/terminal-tags-comparison
+          if-no-files-found: error
+          retention-days: 14
