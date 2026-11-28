@@ -159,7 +159,7 @@ async function parse(data) {
                 )
                 const shareContentBytes = options.ownContentBytes !== true || borrowProjectedContent
                 /* eslint-enable @stylistic/semi */
-                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource);
+                resultChunk = copyWasmBackedColumnChunk(chunk, shareContentBytes, options.projectImagePaths === true, options.prepareLookupRoute === true, preloadedSource, true);
                 if (
                     ownCacheableContent && resultChunk.contentBytesBuffer instanceof Uint8Array &&
                     resultChunk.contentBytesBuffer.buffer === chunk.contentBytesBuffer?.buffer
@@ -180,7 +180,7 @@ async function parse(data) {
                 resultCopyMs = Math.max(0, safePerformance.now() - tResultCopyStart);
             },
             chunkSize,
-            {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, compactContentMetadata: true, preloadedSource},
+            {...options, ...experiments, maxPendingChunks: 1, singleChunk: true, compactContentMetadata: true, projectNativeMedia: true, preloadedSource},
         );
         const profile = consumeLastTermBankWasmParseProfile();
         // A validated empty group emits no storage chunk. Keep that distinct
@@ -271,6 +271,13 @@ function collectChunkTransferables(chunk) {
         addView(row.readingBytes);
         addView(row.glossaryJsonBytes);
         addView(row.termEntryContentBytes);
+    }
+    if (typeof chunk.projectedMedia !== 'undefined') {
+        const {rowIndexes, pathEnds, diagnosticKeys} = chunk.projectedMedia;
+        addView(rowIndexes);
+        addView(pathEnds);
+        addView(diagnosticKeys.bytes);
+        addView(diagnosticKeys.spans);
     }
     const plan = chunk.termRecordPreinternedPlan;
     addView(plan.stringLengths);
