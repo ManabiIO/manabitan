@@ -75,7 +75,8 @@ import {
     scoreGlossarySearchMatch,
 } from '../search/glossary-search.js';
 import {getTermRecordPreinternedPlan, sliceTermRecordPreinternedPlan} from './term-record-preinterned-plan.js';
-import {takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+import {hasOwnedTermContent, takeOwnedTermContent, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_BYTES, TERM_CONTENT_RECENT_SOURCE_CACHE_MAX_AVERAGE_BYTES} from './term-content-ownership.js';
+import {startTermContentLookahead} from './term-content-lookahead.js';
 import {initializeTermContentPlanResolution} from './term-content-plan-resolution.js';
 
 const CURRENT_DICTIONARY_SCHEMA_VERSION = 10;
@@ -180,6 +181,19 @@ const VALIDATED_TERM_CONTENT_METADATA = Symbol('validatedTermContentMetadata');
 
 /**
  * @typedef {ArtifactTermContentChunk & Parameters<TermRecordOpfsStore['appendBatchFromArtifactChunkResolvedContent']>[0]} ArtifactTermRecordChunk
+ */
+
+/**
+ * @typedef {object} ArtifactTermContentLookahead
+ * @property {ArtifactTermRecordChunk} chunk
+ * @property {Awaited<ReturnType<DictionaryDatabase['_resolveArtifactTermContentDedup']>>|null} dedup
+ * @property {ReturnType<DictionaryDatabase['_tryBeginPersistArtifactTermContent']>} persistence
+ * @property {Promise<void>} preparation
+ * @property {Promise<void>|null} discarding
+ * @property {boolean} claimed
+ * @property {number} startedAt
+ * @property {number} dedupMs
+ * @property {number} contentStoreStartedAt
  */
 
 /**
@@ -621,6 +635,8 @@ export class DictionaryDatabase {
         this._termEntryContentMetaCollisionsByHashPair = new Map();
         /** @type {Set<InFlightTermContentSourceBatch>} */
         this._inFlightTermContentSourceBatches = new Set();
+        /** @type {ArtifactTermContentLookahead|null} */
+        this._preparedArtifactTermContent = null;
         /** @type {Map<number, Uint8Array>} */
         this._recentTermContentSourceBatches = new Map();
         /** @type {number} */
@@ -8369,11 +8385,90 @@ this._readTermContentSignature(
     }
 
     /**
+     * Prepares one unpublished successor after the ordered sink opens its gate.
+     * The parser owns the returned discard operation until the ordinary terminal
+     * bulkAdd call claims this exact payload. No record or metadata publication
+     * is performed here; an abandoned operation is drained before import cleanup.
+     * @param {ArtifactTermRecordChunk} chunk
+     * @returns {Promise<import('./term-content-lookahead.js').PreparedTermContentLookahead|null>}
+     */
+    async prepareArtifactTermContentLookahead(chunk) {
+        if (
+            this._preparedArtifactTermContent !== null ||
+            !this._bulkImportTransactionOpen || !this._enableTermEntryContentDedup ||
+            !this._termContentZstdInitialized || this._termContentBlockImportSession === null ||
+            !hasOwnedTermContent(chunk.contentBytesBuffer) ||
+            typeof SharedArrayBuffer !== 'function' ||
+            !(chunk.contentBytesBuffer?.buffer instanceof SharedArrayBuffer) ||
+            resolveTermContentZstdDictName(chunk.dictionary) !== 'jmdict'
+        ) { return null; }
+        /** @type {ArtifactTermContentLookahead} */
+        const prepared = {
+            chunk,
+            dedup: null,
+            persistence: null,
+            preparation: Promise.resolve(),
+            discarding: null,
+            claimed: false,
+            startedAt: safePerformance.now(),
+            dedupMs: 0,
+            contentStoreStartedAt: 0,
+        };
+        this._preparedArtifactTermContent = prepared;
+        prepared.preparation = (async () => {
+            prepared.dedup = await this._resolveArtifactTermContentDedup(chunk, true);
+            prepared.dedupMs = safePerformance.now() - prepared.startedAt;
+            prepared.contentStoreStartedAt = safePerformance.now();
+            if (prepared.dedup.pendingContentCount > 0) {
+                prepared.persistence = this._tryBeginPersistArtifactTermContent(
+                    chunk.dictionary,
+                    prepared.dedup.pendingContentSpans,
+                );
+            }
+        })();
+        try {
+            await prepared.preparation;
+        } catch (error) {
+            await this._discardArtifactTermContentLookahead(prepared).catch(() => {});
+            throw error;
+        }
+        return {discard: () => this._discardArtifactTermContentLookahead(prepared)};
+    }
+
+    /**
+     * Joins the speculative owner before removing its unpublished native slots.
+     * A claimed operation is already owned by the ordinary bulkAdd drain.
+     * @param {ArtifactTermContentLookahead} prepared
+     * @returns {Promise<void>}
+     */
+    async _discardArtifactTermContentLookahead(prepared) {
+        if (prepared.claimed) { return; }
+        if (prepared.discarding === null) {
+            prepared.discarding = (async () => {
+                try {
+                    await prepared.preparation;
+                    await prepared.persistence?.completion;
+                } finally {
+                    this._rollbackStagedArtifactTermContentMetadata(prepared.dedup?.stagedContentMetadata ?? null);
+                    if (this._preparedArtifactTermContent === prepared) {
+                        this._preparedArtifactTermContent = null;
+                    }
+                }
+            })();
+            void prepared.discarding.catch(() => {});
+        }
+        await prepared.discarding;
+    }
+
+    /**
      * @param {ArtifactTermRecordChunk} chunk
      * @returns {Promise<void>}
      */
     async _bulkAddArtifactTermsChunkWithContentDedup(chunk) {
         const useLocalTransaction = !this._bulkImportTransactionOpen;
+        // Capture provenance before publication consumes the recent-cache
+        // ownership witness. A borrowed parser source must retain its old gate.
+        const ownsContent = hasOwnedTermContent(chunk.contentBytesBuffer);
         const count = chunk.rowCount;
         if (count <= 0) {
             this._lastBulkAddTermsMetrics = createTermImportMetrics();
@@ -8392,13 +8487,28 @@ this._readTermContentSignature(
         let stagedContentMetadata = null;
         /** @type {{plan: ArtifactTermContentDedupPlan, start: number|null, indexes: number[]|Uint32Array, count: number, previousResolvedDictNames: string[]|null, previousResolvedUniformDictName: string|undefined}|null} */
         let dedupPlanRollbackState = null;
+        /** @type {ArtifactTermContentLookahead|null} */
+        let prepared = null;
+        /** @type {import('./term-content-lookahead.js').PreparedTermContentLookahead|null} */
+        let nextContentLookahead = null;
 
         if (useLocalTransaction) {
             await this._beginImmediateTransaction(this._requireDb());
         }
         try {
-            const tContentAppendStart = safePerformance.now();
-            const dedup = await this._resolveArtifactTermContentDedup(chunk, true);
+            prepared = this._preparedArtifactTermContent?.chunk === chunk ?
+                this._preparedArtifactTermContent :
+                null;
+            if (prepared !== null) {
+                if (prepared.discarding !== null) { throw new Error('Term content lookahead was discarded'); }
+                await prepared.preparation;
+                prepared.claimed = true;
+                this._preparedArtifactTermContent = null;
+                importMetrics.contentLookaheadPreparedCount += 1;
+                if (prepared.persistence !== null) { importMetrics.contentLookaheadCompressionCount += 1; }
+            }
+            const tContentAppendStart = prepared?.startedAt ?? safePerformance.now();
+            const dedup = prepared?.dedup ?? await this._resolveArtifactTermContentDedup(chunk, true);
             const {
                 contentOffsets,
                 contentLengths,
@@ -8438,7 +8548,7 @@ this._readTermContentSignature(
             importMetrics.dedupCapacityMs += dedupCapacityMs;
             importMetrics.dedupCanonicalScanMs += dedupCanonicalScanMs;
             importMetrics.dedupExactCompareMs += dedupExactCompareMs;
-            importMetrics.dedupScanMs += safePerformance.now() - tContentAppendStart;
+            importMetrics.dedupScanMs += prepared?.dedupMs ?? (safePerformance.now() - tContentAppendStart);
             if (contentDedupPlan !== null && pendingContentCount > 0) {
                 dedupPlanRollbackState = {
                     plan: contentDedupPlan,
@@ -8451,16 +8561,18 @@ this._readTermContentSignature(
                     previousResolvedUniformDictName: contentDedupPlan.resolvedUniformDictName,
                 };
             }
-            const tContentStoreStart = safePerformance.now();
+            const tContentStoreStart = prepared?.contentStoreStartedAt ?? safePerformance.now();
             let preparedLookupIndexes = null;
             let recordAppended = false;
             if (pendingContentCount > 0) {
                 const earlyContentPersistence = useLocalTransaction ?
                     null :
-                    this._tryBeginPersistArtifactTermContent(
-                        chunk.dictionary,
-                        pendingContentSpans,
-                    );
+                    (prepared === null ?
+                        this._tryBeginPersistArtifactTermContent(
+                            chunk.dictionary,
+                            pendingContentSpans,
+                        ) :
+                        prepared.persistence);
                 if (earlyContentPersistence?.initialSelection === true) {
                     importMetrics.contentInitialReservationCount += 1;
                 }
@@ -8592,6 +8704,7 @@ this._readTermContentSignature(
                             resolvedContentDictNames,
                             importMetrics,
                         );
+                        if (ownsContent) { nextContentLookahead = startTermContentLookahead(chunk); }
                         // Prepare the record append before creating the derived
                         // promise so both operations can be joined immediately.
                         const measuredContentCompletion = earlyContentPersistence.completion
@@ -8670,6 +8783,13 @@ this._readTermContentSignature(
             dedupPlanRollbackState = null;
             this._lastBulkAddTermsMetrics = importMetrics;
         } catch (e) {
+            if (prepared?.claimed === true && prepared.persistence !== null) {
+                await Promise.allSettled([prepared.persistence.completion]);
+            }
+            // The successor can be comparing against this group's published
+            // metadata. Retire its entire unpublished owner before rolling
+            // back indices or resolution columns that it may still observe.
+            await nextContentLookahead?.discard().catch(() => {});
             this._rollbackStagedArtifactTermContentMetadata(stagedContentMetadata);
             this._rollbackArtifactTermContentDedupPlan(dedupPlanRollbackState);
             if (useLocalTransaction) {

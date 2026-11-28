@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {readFile} from 'node:fs/promises';
 import {describe, expect, test, vi} from 'vitest';
 import {DictionaryDatabase} from '../ext/js/dictionary/dictionary-database.js';
 import {
@@ -24,6 +25,8 @@ import {
 import {hashTermEntryContentBytes, hashTermEntryContentBytesPair} from '../ext/js/dictionary/term-entry-content-hash.js';
 import {TermRecordOpfsStore} from '../ext/js/dictionary/term-record-opfs-store.js';
 import {registerOwnedTermContent, takeOwnedTermContent} from '../ext/js/dictionary/term-content-ownership.js';
+import {registerTermContentLookahead} from '../ext/js/dictionary/term-content-lookahead.js';
+import {NativeCanonicalScanner} from '../ext/js/dictionary/term-content-canonical-scan.js';
 
 /**
  * @typedef {object} TermContentMeta
@@ -223,6 +226,241 @@ function createArtifactOverlapHarness(sourceValues = [1, 2, 3], hash1 = 10, hash
         run: async () => await bulkAdd(chunk),
     };
 }
+
+describe('unpublished owned term-content lookahead', () => {
+    test('prepares only parser-owned shared content and admits one successor', async () => {
+        const harness = createArtifactOverlapHarness();
+        const resolve = vi.spyOn(harness.database, '_resolveArtifactTermContentDedup');
+        await expect(harness.database.prepareArtifactTermContentLookahead(harness.chunk)).resolves.toBeNull();
+        expect(resolve).not.toHaveBeenCalled();
+        registerOwnedTermContent(harness.chunk.contentBytesBuffer);
+        Reflect.deleteProperty(harness.chunk, 'releaseBorrowedContent');
+        const prepared = await harness.database.prepareArtifactTermContentLookahead(harness.chunk);
+        expect(prepared).not.toBeNull();
+        expect(resolve).toHaveBeenCalledOnce();
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(harness.appendRecords).not.toHaveBeenCalled();
+        await expect(harness.database.prepareArtifactTermContentLookahead(harness.chunk)).resolves.toBeNull();
+        expect(resolve).toHaveBeenCalledOnce();
+        harness.resolveContent();
+        await prepared?.discard();
+        expect(Reflect.get(harness.database, '_preparedArtifactTermContent')).toBeNull();
+        expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+    });
+
+    test('claims preparation once and keeps bulkAdd terminal until content and records settle', async () => {
+        const harness = createArtifactOverlapHarness();
+        registerOwnedTermContent(harness.chunk.contentBytesBuffer);
+        Reflect.deleteProperty(harness.chunk, 'releaseBorrowedContent');
+        const resolve = vi.spyOn(harness.database, '_resolveArtifactTermContentDedup');
+        const persist = vi.spyOn(harness.database, '_tryBeginPersistArtifactTermContent');
+        const prepared = await harness.database.prepareArtifactTermContentLookahead(harness.chunk);
+        let settled = false;
+        const importing = harness.run().then(() => { settled = true; });
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(resolve).toHaveBeenCalledOnce();
+        expect(persist).toHaveBeenCalledOnce();
+        expect(getMeta(harness.database, 10, 20)).toMatchObject({offset: 100, length: 3});
+        await prepared?.discard(); // The terminal bulkAdd now owns its drain.
+        harness.resolveRecords();
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        harness.resolveContent();
+        await importing;
+        expect(harness.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            contentLookaheadPreparedCount: 1,
+            contentLookaheadCompressionCount: 1,
+        });
+        expect(getMeta(harness.database, 10, 20)).toMatchObject({offset: 100, length: 3});
+    });
+
+    test.each([false, true])('opens the next gate after publication only for owned source=%s', async (owned) => {
+        const harness = createArtifactOverlapHarness();
+        if (owned) { registerOwnedTermContent(harness.chunk.contentBytesBuffer); }
+        const trigger = vi.fn(() => {
+            expect(getMeta(harness.database, 10, 20)).toMatchObject({offset: 100, length: 3});
+            expect(harness.appendRecords).toHaveBeenCalledOnce();
+        });
+        registerTermContentLookahead(harness.chunk, trigger);
+        const importing = harness.run();
+        await vi.waitFor(() => expect(harness.appendRecords).toHaveBeenCalledOnce());
+        expect(trigger).toHaveBeenCalledTimes(owned ? 1 : 0);
+        harness.resolveContent();
+        harness.resolveRecords();
+        await importing;
+    });
+
+    test('resolves the successor against unpublished storage while the predecessor remains terminally pending', async () => {
+        const first = createArtifactOverlapHarness();
+        const second = createArtifactOverlapHarness();
+        registerOwnedTermContent(first.chunk.contentBytesBuffer);
+        registerOwnedTermContent(second.chunk.contentBytesBuffer);
+        Reflect.deleteProperty(first.chunk, 'releaseBorrowedContent');
+        Reflect.deleteProperty(second.chunk, 'releaseBorrowedContent');
+        second.plan.persistedLookupRequired = null;
+        /** @type {ReturnType<DictionaryDatabase['prepareArtifactTermContentLookahead']>[]} */
+        const preparations = [];
+        registerTermContentLookahead(first.chunk, () => {
+            preparations.push(first.database.prepareArtifactTermContentLookahead(second.chunk));
+        });
+        let firstSettled = false;
+        const importing = first.run().then(() => { firstSettled = true; });
+        await vi.waitFor(() => expect(preparations).toHaveLength(1));
+        const prepared = await preparations[0];
+        expect(firstSettled).toBe(false);
+        expect(first.appendRecords).toHaveBeenCalledOnce();
+        const speculative = Reflect.get(first.database, '_preparedArtifactTermContent');
+        if (speculative?.dedup === null || typeof speculative?.dedup === 'undefined') { throw new Error('Expected prepared dedup result'); }
+        expect(speculative.dedup.pendingContentCount).toBe(0);
+        expect(speculative.dedup.persistedHitCount).toBe(1);
+        expect(second.plan.resolvedOffsets[0]).toBe(100);
+        first.resolveContent();
+        first.resolveRecords();
+        await importing;
+        await Reflect.get(first.database, '_bulkAddArtifactTermsChunkWithContentDedup').call(first.database, second.chunk);
+        await prepared?.discard();
+        expect(first.appendRecords).toHaveBeenCalledTimes(2);
+        expect(first.database.getLastBulkAddTermsMetrics()).toMatchObject({
+            contentLookaheadPreparedCount: 1,
+            contentLookaheadCompressionCount: 0,
+            dedupPersistedHitCount: 1,
+        });
+    });
+
+    test.each([false, true])('discard drains speculative storage before retiring native slots; failure=%s', async (failure) => {
+        const harness = createArtifactOverlapHarness();
+        registerOwnedTermContent(harness.chunk.contentBytesBuffer);
+        const prepared = await harness.database.prepareArtifactTermContentLookahead(harness.chunk);
+        if (prepared === null) { throw new Error('Expected prepared content'); }
+        let settled = false;
+        const discarded = prepared.discard().then(() => { settled = true; }, (error) => {
+            settled = true;
+            throw error;
+        });
+        void discarded.catch(() => {});
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        if (failure) {
+            harness.rejectContent(new Error('speculative content failed'));
+            await expect(discarded).rejects.toThrow('speculative content failed');
+            await expect(prepared.discard()).rejects.toThrow('speculative content failed');
+        } else {
+            harness.resolveContent();
+            await discarded;
+            await prepared.discard();
+        }
+        expect(Reflect.get(harness.database, '_preparedArtifactTermContent')).toBeNull();
+        expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+        expect(harness.appendRecords).not.toHaveBeenCalled();
+        expect(harness.plan.resolvedFlags[0]).toBe(0);
+    });
+
+    test('rolls back unpublished metadata if reservation setup throws', async () => {
+        const harness = createArtifactOverlapHarness();
+        registerOwnedTermContent(harness.chunk.contentBytesBuffer);
+        vi.spyOn(harness.database, '_tryBeginPersistArtifactTermContent').mockImplementationOnce(() => {
+            throw new Error('lookahead reservation failed');
+        });
+        await expect(harness.database.prepareArtifactTermContentLookahead(harness.chunk)).rejects.toThrow('lookahead reservation failed');
+        expect(getMeta(harness.database, 10, 20)).toBeUndefined();
+        expect(Reflect.get(harness.database, '_preparedArtifactTermContent')).toBeNull();
+        expect(Reflect.get(harness.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+    });
+
+    test.each([false, true])('drains native successor before predecessor rollback with arena growth=%s', async (growArena) => {
+        const first = createArtifactOverlapHarness();
+        const second = createArtifactOverlapHarness([4, 5, 6], 30, 40);
+        const module = await WebAssembly.compile(new Uint8Array(await readFile(new URL('../ext/lib/term-content-canonical-scan-v1.wasm', import.meta.url))));
+        const scanner = new NativeCanonicalScanner({loadModule: async () => module});
+        Reflect.set(first.database, '_nativeCanonicalScanner', scanner);
+        for (const fixture of [first, second]) {
+            registerOwnedTermContent(fixture.chunk.contentBytesBuffer);
+            Reflect.deleteProperty(fixture.chunk, 'releaseBorrowedContent');
+            fixture.chunk.contentRowStart = 0;
+            fixture.chunk.useResolvedContentReferences = true;
+            fixture.plan.uniqueRowIndexes = new Uint32Array([0]);
+            const bytes = /** @type {Uint8Array} */ (fixture.chunk.contentBytesBuffer);
+            const signature = bytes.reduce((value, byte, i) => value | (byte << (i * 8)), 0) >>> 0;
+            fixture.plan.uniqueSignatures = new Uint32Array([signature, signature, signature]);
+        }
+        vi.spyOn(first.database, '_getArtifactTermContentMetaCapacityHint').mockImplementation((chunk) => (
+            growArena && chunk === second.chunk ? 4096 : 2
+        ));
+        const firstSession = Reflect.get(first.database, '_termContentBlockImportSession');
+        const secondSession = Reflect.get(second.database, '_termContentBlockImportSession');
+        if (firstSession === null || secondSession === null) { throw new Error('Expected block sessions'); }
+        const firstBegin = vi.mocked(firstSession.tryBeginAppendSpans).getMockImplementation();
+        if (typeof firstBegin === 'undefined') { throw new Error('Expected mocked block session'); }
+        vi.mocked(firstSession.tryBeginAppendSpans).mockImplementationOnce(firstBegin).mockImplementation(secondSession.tryBeginAppendSpans);
+        const resolve = /** @type {DictionaryDatabase['_resolveArtifactTermContentDedup']} */ (
+            Reflect.get(first.database, '_resolveArtifactTermContentDedup').bind(first.database)
+        );
+        /** @type {() => void} */
+        let releaseResolution = () => {};
+        const resolutionGate = new Promise((done) => { releaseResolution = () => { done(null); }; });
+        const resolving = vi.spyOn(first.database, '_resolveArtifactTermContentDedup').mockImplementation(async (chunk, reserve) => {
+            if (chunk === second.chunk) { await resolutionGate; }
+            return await resolve(chunk, reserve);
+        });
+        /** @type {ReturnType<DictionaryDatabase['prepareArtifactTermContentLookahead']>[]} */
+        const preparations = [];
+        registerTermContentLookahead(first.chunk, () => {
+            const preparation = first.database.prepareArtifactTermContentLookahead(second.chunk);
+            preparations.push(preparation);
+            return {discard: async () => { await (await preparation)?.discard(); }};
+        });
+        const rollback = vi.spyOn(first.database, '_rollbackStagedArtifactTermContentMetadata');
+        let settled = false;
+        const importing = first.run().finally(() => { settled = true; });
+        void importing.catch(() => {});
+        await vi.waitFor(() => expect(resolving).toHaveBeenCalledTimes(2));
+        const current = await resolving.mock.results[0].value;
+        const arena = Reflect.get(first.database, '_termContentMetadataArena');
+        if (arena === null) { throw new Error('Expected native metadata arena'); }
+        const indexes = current.stagedContentMetadata.indexes.slice();
+        const offsets = first.plan.resolvedOffsets.slice();
+        const lengths = first.plan.resolvedLengths.slice();
+        expect(current.stagedContentMetadata.indexes.buffer).not.toBe(arena.memory.buffer);
+        expect(first.appendRecords).toHaveBeenCalledOnce();
+        expect(scanner.stats.calls).toBe(1);
+
+        first.rejectRecords(new Error('predecessor record failed'));
+        first.resolveContent();
+        await new Promise((done) => { setTimeout(done, 0); });
+        expect(settled).toBe(false);
+        expect(rollback).not.toHaveBeenCalled();
+        expect(getMeta(first.database, 10, 20)).toMatchObject({offset: 100, length: 3});
+
+        releaseResolution();
+        await preparations[0];
+        expect(scanner.stats.calls).toBe(2);
+        expect(scanner.stats.instances).toBe(growArena ? 2 : 1);
+        const nextArena = Reflect.get(first.database, '_termContentMetadataArena');
+        expect(nextArena === arena).toBe(!growArena);
+        expect(arena.memory.buffer.byteLength).toBeGreaterThan(0);
+        expect(current.stagedContentMetadata.indexes).toEqual(indexes);
+        expect(first.plan.resolvedOffsets).toEqual(offsets);
+        expect(first.plan.resolvedLengths).toEqual(lengths);
+        expect(second.plan.resolvedOffsets.buffer).not.toBe(first.plan.resolvedOffsets.buffer);
+        expect(getMeta(first.database, 30, 40)).toBeUndefined();
+        expect(Reflect.get(first.database, '_termEntryContentMetaHashPairPendingCount')).toBe(1);
+        expect(settled).toBe(false);
+        expect(rollback).not.toHaveBeenCalled();
+
+        second.resolveContent();
+        await expect(importing).rejects.toThrow('predecessor record failed');
+        expect(rollback).toHaveBeenCalledTimes(2);
+        expect(rollback.mock.calls[1][0]).toBe(current.stagedContentMetadata);
+        expect(first.appendRecords).toHaveBeenCalledOnce();
+        expect(first.plan.resolvedFlags[0]).toBe(0);
+        expect(getMeta(first.database, 10, 20)).toBeUndefined();
+        expect(getMeta(first.database, 30, 40)).toBeUndefined();
+        expect(Reflect.get(first.database, '_preparedArtifactTermContent')).toBeNull();
+        expect(Reflect.get(first.database, '_termEntryContentMetaHashPairPendingCount')).toBe(0);
+    });
+});
 
 describe('DictionaryDatabase term content hash validation', () => {
     test.each([

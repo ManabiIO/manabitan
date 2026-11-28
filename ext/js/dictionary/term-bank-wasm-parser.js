@@ -29,6 +29,7 @@ import {MAX_PREPARED_TERM_LOOKUP_INDEX_ROWS} from './term-lookup-index-preparati
 import {getTermBankExperimentMask, snapshotTermBankExperiments} from './term-bank-experiments.js';
 import {RAW_ZIP_BATCH_MAX_FILES} from './term-bank-source-pipeline.js';
 import {registerOwnedTermContent} from './term-content-ownership.js';
+import {clearTermContentLookahead, registerTermContentLookahead} from './term-content-lookahead.js';
 
 const META_U32_FIELDS = 17;
 const U8_BACKSLASH = 0x5c;
@@ -106,6 +107,7 @@ const EMPTY_FLOAT64_ARRAY = new Float64Array(0);
  * prepareLookupRoute?: boolean,
  * }} TermBankColumnParserOptions
  */
+/** @typedef {TermBankColumnParserOptions & {prepareTermContentLookahead?: ((chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-content-lookahead.js').PreparedTermContentLookahead|null>)|null}} ParallelTermBankParserOptions */
 /** @typedef {{stringLengths: Uint16Array, stringOffsets: Uint32Array, stringHashes: Uint32Array, stringsBuffer: Uint8Array, expressionIndexes: Uint32Array, readingIndexes: Uint32Array, readingEqualsExpressionList: Uint8Array, scoreList: Int32Array, sequenceList: Int32Array}} FusedTermStringPlan */
 /** @typedef {{experiments?: ReturnType<typeof snapshotTermBankExperiments>, fusedParseAttempts?: number, fusedParseFallbacks?: number, discardedFusedParseMs?: number, discardedFusedRows?: number, bankSpanCount?: number, escapedKeyDecodeCount?: number, validatedGlossaryReuseCount?: number, globalExactContentReuseCount?: number, fastGlossaryNormalizationCount?: number, fastGlossaryNormalizationFallbackCount?: number, fusedSingleBankGroups?: number, maxWasmHeapBytes?: number, compactContentMetadataGroups?: number, compactContentMetadataBytesAvoided?: number, mediaHintRowsSkipped?: number}} TermBankExperimentProfile */
 /** @typedef {TermBankExperimentProfile & {wasm: TermBankWasmExports|null, jsonPtr: number, jsonLength: number, metasPtr: number, contentMetasPtr: number, contentUniqueIndexesPtr: number, contentUniqueSignatures?: Uint32Array, heap: Uint8Array, source: Uint8Array, metas: Uint32Array, contentMetas: Uint32Array, contentOutPtr: number, contentUniqueIndexes: Uint32Array, contentUniqueCount: number, rowCount: number, metaCapacity: number, encodedContentBytes: number, contentCapacity: number, initialContentBytesPerRow: number, allocationMs: number, copyJsonMs: number, parseBankMs: number, encodeContentMs: number, recentContentDedupHitCount?: number, mediaHintPresent?: boolean, fusedStringPlan?: FusedTermStringPlan, retiredLookupScratch?: Array<{pointer: number, byteLength: number}>}} ParsedTermBankWasmBuffers */
@@ -2899,10 +2901,17 @@ class ParallelTermBankPipelineRun {
         this._version = version;
         /** @type {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} */
         this._onChunk = onChunk;
+        const {prepareTermContentLookahead, ...workerOptions} = options;
+        /** @type {((chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<import('./term-content-lookahead.js').PreparedTermContentLookahead|null>)|null} */
+        this._prepareTermContentLookahead = typeof prepareTermContentLookahead === 'function' ?
+            /** @type {NonNullable<ParallelTermBankPipelineRun['_prepareTermContentLookahead']>} */ (prepareTermContentLookahead) :
+            null;
+        /** @type {{groupIndex: number, cancelled: boolean, cancel: () => void, promise: Promise<import('./term-content-lookahead.js').PreparedTermContentLookahead|null>}|null} */
+        this._pendingContentLookahead = null;
         const largeProjectedImport = options.projectImagePaths === true && totalBytes >= OWNED_PROJECTED_CONTENT_MIN_SOURCE_BYTES;
         /** @type {Record<string, unknown>} */
         this._options = {
-            ...options,
+            ...workerOptions,
             ...snapshotTermBankExperiments(options),
             ownContentBytes: largeProjectedImport,
             experimentalNativeEscapedKeys: options.experimentalNativeEscapedKeys === true || largeProjectedImport,
@@ -3013,18 +3022,41 @@ class ParallelTermBankPipelineRun {
                 workersFinishedAt = Math.max(workersFinishedAt, result.finishedAt);
                 processedRows += result.rowCount;
                 exactTotalRows += result.rowCount;
-                if (chunk !== null) {
-                    try {
+                /** @type {import('./term-content-lookahead.js').PreparedTermContentLookahead|null} */
+                let preparedContent = null;
+                let sinkFailed = false;
+                try {
+                    if (this._pendingContentLookahead?.groupIndex === i) {
+                        preparedContent = await this._pendingContentLookahead.promise;
+                        this._pendingContentLookahead = null;
+                    }
+                    this._throwIfStopped();
+                    if (chunk !== null) {
+                        if (this._prepareTermContentLookahead !== null && consume === null) {
+                            registerTermContentLookahead(chunk, () => this._queueTermContentLookahead(i + 1, processedRows, estimatedTotalRows));
+                        }
                         await this._onChunk(chunk, {
                             processedRows,
                             totalRows: i + 1 === this._resultSlots.length ? processedRows : Math.max(processedRows, estimatedTotalRows),
                             chunkIndex: i + 1,
                             chunkCount: this._resultSlots.length,
                         });
-                    } finally {
+                    }
+                } catch (error) {
+                    sinkFailed = true;
+                    throw error;
+                } finally {
+                    if (chunk !== null) {
+                        clearTermContentLookahead(chunk);
                         consume?.();
                         delete chunk.releaseBorrowedContent;
                         this._queuedOwnedContentBytes -= result.ownedContentBytes ?? 0;
+                    }
+                    if (preparedContent !== null) {
+                        // A claimed preparation is already drained by bulkAdd.
+                        // If its callback failed before claiming it, retain the
+                        // first sink failure while still joining this owner.
+                        await (sinkFailed ? preparedContent.discard().catch(() => {}) : preparedContent.discard());
                     }
                 }
                 this._throwIfStopped();
@@ -3055,9 +3087,63 @@ class ParallelTermBankPipelineRun {
             };
         } catch (error) {
             this._fail(error);
-            await Promise.allSettled(this._workerLoops);
+            await Promise.allSettled([...this._workerLoops, this._discardTermContentLookahead()]);
             throw this._error ?? new Error('Parallel term-bank pipeline failed');
         }
+    }
+
+    /**
+     * At most the current sink and one unpublished successor own content work.
+     * The sink opens this gate only after publishing its canonical references;
+     * the normal next callback still waits for the current terminal callback.
+     * @param {number} groupIndex
+     * @param {number} processedRows
+     * @param {number} estimatedTotalRows
+     * @returns {import('./term-content-lookahead.js').PreparedTermContentLookahead|null}
+     */
+    _queueTermContentLookahead(groupIndex, processedRows, estimatedTotalRows) {
+        const prepare = this._prepareTermContentLookahead;
+        if (
+            prepare === null || this._pendingContentLookahead !== null ||
+            groupIndex >= this._resultSlots.length || this._pipelineShouldCancel()
+        ) { return null; }
+        let cancel = () => {};
+        /** @type {Promise<null>} */
+        const cancelled = new Promise((resolve) => { cancel = () => { resolve(null); }; });
+        /** @type {NonNullable<ParallelTermBankPipelineRun['_pendingContentLookahead']>} */
+        const pending = {groupIndex, cancelled: false, cancel, promise: Promise.resolve(null)};
+        pending.promise = (async () => {
+            const result = await Promise.race([this._resultSlots[groupIndex].promise, cancelled]);
+            if (
+                pending.cancelled || this._pipelineShouldCancel() || result === null || result.error !== null ||
+                result.chunk === null || result.consume !== null
+            ) { return null; }
+            const nextProcessedRows = processedRows + result.rowCount;
+            return await prepare(result.chunk, {
+                processedRows: nextProcessedRows,
+                totalRows: groupIndex + 1 === this._resultSlots.length ?
+                    nextProcessedRows :
+                    Math.max(nextProcessedRows, estimatedTotalRows),
+                chunkIndex: groupIndex + 1,
+                chunkCount: this._resultSlots.length,
+            });
+        })();
+        void pending.promise.catch(() => {});
+        this._pendingContentLookahead = pending;
+        return {discard: () => this._discardTermContentLookahead(pending)};
+    }
+
+    /**
+     * Joins speculative storage before rollback, abort, or parser disposal.
+     * Cancelling an unopened gate does not wait for its future parser result.
+     * @param {ParallelTermBankPipelineRun['_pendingContentLookahead']} [pending]
+     */
+    async _discardTermContentLookahead(pending = this._pendingContentLookahead) {
+        if (pending === null) { return; }
+        pending.cancelled = true;
+        pending.cancel();
+        if (this._pendingContentLookahead === pending) { this._pendingContentLookahead = null; }
+        await (await pending.promise)?.discard();
     }
 
     /** Creates one ordered result slot per byte-balanced source group. */
@@ -3241,7 +3327,7 @@ export async function disposeParallelTermBankParser() {
  * @param {Uint8Array[]} contentBytes
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {TermBankColumnParserOptions} [options]
+ * @param {ParallelTermBankParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -3261,7 +3347,7 @@ export async function parseTermBankWithWasmColumnChunksParallel(contentBytes, ve
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {TermBankColumnParserOptions} [options]
+ * @param {ParallelTermBankParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -3285,7 +3371,7 @@ export async function parseTermBankWithWasmColumnChunksParallelDeferred(contentB
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {TermBankColumnParserOptions} [options]
+ * @param {ParallelTermBankParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -3310,7 +3396,7 @@ export async function parseTermBankWithWasmColumnChunksParallelLazy(contentByteL
  * @param {number[]} estimatedByteLengths
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {TermBankColumnParserOptions} [options]
+ * @param {ParallelTermBankParserOptions} [options]
  * @param {() => boolean} [shouldCancel]
  * @returns {Promise<boolean>}
  */
@@ -3331,7 +3417,7 @@ export async function parseTermBankWithWasmColumnChunksParallelCompressedLazy(so
  * @param {ParallelTermBankSource[]} sources
  * @param {number} version
  * @param {(chunk: TermBankColumnChunk, progress: {processedRows: number, totalRows: number, chunkIndex: number, chunkCount: number}) => Promise<void>|void} onChunk
- * @param {TermBankColumnParserOptions} options
+ * @param {ParallelTermBankParserOptions} options
  * @param {() => boolean} shouldCancel
  * @param {boolean} [lazy=false]
  * @returns {Promise<boolean>}

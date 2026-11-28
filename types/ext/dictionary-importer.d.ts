@@ -59,6 +59,8 @@ export type ImportPhaseTiming = {
 
 /** Internal implementation controls; qualified defaults are documented per field. */
 export type ImportExperiments = {
+    /** Diagnostic only: prepare one owned content group while its predecessor persists. */
+    experimentalTermContentLookahead?: boolean;
     /** Qualified automatic middle-CPU policy: true. Explicit false retains two workers for diagnostics. */
     experimentalParserWorkers3?: boolean;
     experimentalGenericSpanCompression?: boolean;

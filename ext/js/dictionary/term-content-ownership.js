@@ -87,6 +87,20 @@ export function registerOwnedTermContent(source) {
 }
 
 /**
+ * Checks the parser's immutable complete-slab witness without consuming the
+ * recent-cache ownership handoff. Borrowed WASM storage is never eligible.
+ * @param {Uint8Array|undefined} source
+ * @returns {boolean}
+ */
+export function hasOwnedTermContent(source) {
+    return (
+        source instanceof Uint8Array && source.byteOffset === 0 &&
+        source.byteLength > 0 && source.byteLength === source.buffer.byteLength &&
+        ownedContentBuffers.has(source.buffer)
+    )
+}
+
+/**
  * Consumes a private one-time witness for a complete immutable backing buffer.
  * A cache may retain a subrange view only while charging the full allocation.
  * @param {Uint8Array} source
